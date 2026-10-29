@@ -1,0 +1,13 @@
+{
+  "launcherExit": 0,
+  "launcherToolSession": "92673",
+  "postprocessNote": "PowerShell summary construction used bare True and failed after launcher success. This record corrects only the summary, without rerunning the prepared root.",
+  "scenarioRowsVerified": 8,
+  "candidateHash": "FB0DF8A084B8BAD58FEBD0D6B30765E35EF85E82678A858D37C226F218B7B121",
+  "scenarioHash": "927A2B2C2B01027EFBE318443A3429965AEEF75F8A408C71E7BADFF8434BF8EB",
+  "ledgerSha256": "17B0A4714EE218FC531164FE45A63B696B51E0B1FF0C3C254E03A21F00C299D2",
+  "graphConstructed": true,
+  "windowShown": false,
+  "nativeDispatches": 0,
+  "interactiveReady": "AWAITING_CURRENT_DESKTOP_ACKNOWLEDGMENT"
+}

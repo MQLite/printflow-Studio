@@ -1,0 +1,1430 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+
+  <data name="App_Title" xml:space="preserve">
+    <value>PrintFlow Studio</value>
+  </data>
+  <data name="Workflow_PrepareAsset" xml:space="preserve">
+    <value>Prepare Design Asset</value>
+  </data>
+  <data name="Workflow_PrepareCustomerDesign" xml:space="preserve">
+    <value>Prepare Customer Design</value>
+  </data>
+  <data name="Workflow_GeneratePrintTiff" xml:space="preserve">
+    <value>Generate Print TIFF</value>
+  </data>
+  <data name="Step_Import" xml:space="preserve"><value>Import</value></data>
+  <data name="Step_OriginalConfirmation" xml:space="preserve"><value>Original Confirmation</value></data>
+  <data name="Step_Enhancement" xml:space="preserve"><value>Enhancement</value></data>
+  <data name="Step_BackgroundRemoval" xml:space="preserve"><value>Background Removal</value></data>
+  <data name="Step_Trim" xml:space="preserve"><value>Trim</value></data>
+  <data name="Step_ApprovedPngExport" xml:space="preserve"><value>Approved PNG Export</value></data>
+  <data name="Step_PrintDimensions" xml:space="preserve"><value>Print Dimensions</value></data>
+  <data name="Step_PhotoshopOutput" xml:space="preserve"><value>Photoshop Output</value></data>
+  <data name="Flag_Skippable" xml:space="preserve"><value>skippable</value></data>
+  <data name="Flag_RequiresReview" xml:space="preserve"><value>review required</value></data>
+  <data name="Startup_AlreadyRunning" xml:space="preserve">
+    <value>PrintFlow Studio is already running.</value>
+  </data>
+  <data name="Startup_Failed" xml:space="preserve">
+    <value>PrintFlow Studio could not start and has stopped safely.</value>
+  </data>
+  <data name="Startup_RecoveryNotRun" xml:space="preserve">
+    <value>Startup recovery did not run.</value>
+  </data>
+  <data name="Startup_RecoveryClean" xml:space="preserve">
+    <value>Startup recovery found nothing to recover.</value>
+  </data>
+  <data name="Startup_RecoverySummary" xml:space="preserve">
+    <value>Startup recovery: {0} interrupted attempt(s), {1} stale lock(s) released, {2} file(s) quarantined.</value>
+  </data>
+  <data name="Preset_Verified" xml:space="preserve">
+    <value>Preset verified</value>
+  </data>
+  <data name="Preset_NotVerified" xml:space="preserve">
+    <value>Preset not verified</value>
+  </data>
+  <data name="Nav_BackToHome" xml:space="preserve">
+    <value>Back to Home</value>
+  </data>
+  <data name="Home_ImportHeading" xml:space="preserve">
+    <value>Start new processing</value>
+  </data>
+  <data name="Home_ImportHint" xml:space="preserve">
+    <value>Choose one file, or drag one file onto this window. One file per session — there is no batch import.</value>
+  </data>
+  <data name="Home_ChooseFile" xml:space="preserve">
+    <value>Choose file…</value>
+  </data>
+  <data name="Home_ImportFilter" xml:space="preserve">
+    <value>Images|*.png;*.jpg;*.jpeg;*.psd;*.pdf|All files|*.*</value>
+  </data>
+  <data name="Home_RecentHeading" xml:space="preserve">
+    <value>Recent processing</value>
+  </data>
+  <data name="Home_Refresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="Home_Resume" xml:space="preserve">
+    <value>Resume</value>
+  </data>
+  <data name="Home_Details" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="Home_Abandon" xml:space="preserve">
+    <value>Abandon</value>
+  </data>
+  <data name="Home_NoRecentSessions" xml:space="preserve">
+    <value>No processing in the last 30 days.</value>
+  </data>
+  <data name="Home_DropNothing" xml:space="preserve">
+    <value>Nothing usable was dropped. Drop one image file.</value>
+  </data>
+  <data name="Home_DropSingleFileOnly" xml:space="preserve">
+    <value>{0} files were dropped. PrintFlow Studio processes one file per session, so nothing was started — drop a single file.</value>
+  </data>
+  <data name="Home_ResumeFailed" xml:space="preserve">
+    <value>That job could not be opened. Opening a job only reads it, so nothing was changed. You can choose {0} again; if it still does not open, open Error details below and ask a colleague or supervisor.</value>
+  </data>
+  <data name="Home_AbandonFailed" xml:space="preserve">
+    <value>That job could not be abandoned. Abandoning never deletes files, so its imported file, approved outputs and history are kept. Check the job's state in the list; if you are not sure, open Error details below and ask a colleague or supervisor.</value>
+  </data>
+  <data name="Home_AbandonDone" xml:space="preserve">
+    <value>“{0}” was abandoned. Its imported file, approved outputs and history are kept.</value>
+  </data>
+  <data name="Home_AbandonConfirmQuestion" xml:space="preserve"><value>Abandon “{0}”? After abandoning, this job cannot be processed further. Its imported file, approved outputs and history are kept; nothing is deleted.</value></data>
+  <data name="Home_AbandonKeep" xml:space="preserve"><value>Keep the job</value></data>
+  <data name="Home_AbandonConfirm" xml:space="preserve"><value>Abandon the job</value></data>
+  <data name="Home_AbandonStale" xml:space="preserve"><value>“{0}” has changed, so it was not abandoned. Check its current state in the list.</value></data>
+  <data name="Home_RecentStepComplete" xml:space="preserve"><value>Complete the job</value></data>
+  <data name="Home_RecentUnavailable" xml:space="preserve">
+    <value>Recent processing could not be read ({0}).</value>
+  </data>
+  <data name="WorkflowSelection_Heading" xml:space="preserve">
+    <value>Choose a workflow</value>
+  </data>
+  <data name="WorkflowSelection_Hint" xml:space="preserve">
+    <value>The workflow can still be changed until this session produces its first processed result.</value>
+  </data>
+  <data name="WorkflowSelection_Select" xml:space="preserve">
+    <value>Choose</value>
+  </data>
+  <data name="WorkflowSelection_Locked" xml:space="preserve">
+    <value>The workflow is locked because this session has already produced a result. To use a different workflow, end this session and import the file again.</value>
+  </data>
+  <data name="WorkflowSelection_Refused" xml:space="preserve">
+    <value>That workflow could not be selected. No processing was started, and the output name shown is kept. You can choose a workflow again; if it is still refused, open Error details below and ask a colleague or supervisor.</value>
+  </data>
+  <data name="WorkflowSelection_SourceFileLabel" xml:space="preserve">
+    <value>Source file</value>
+  </data>
+  <data name="WorkflowSelection_OutputNameLabel" xml:space="preserve">
+    <value>Output name</value>
+  </data>
+  <data name="WorkflowSelection_OutputNameHint" xml:space="preserve">
+    <value>The base name PrintFlow gives the files it produces. The source file is never renamed. Size and ink suffixes, and a numbered suffix if a file of that name already exists, are added automatically.</value>
+  </data>
+  <data name="WorkflowSelection_OutputNameRejected" xml:space="preserve">
+    <value>That output name cannot be used. Enter 1 to {1} characters, without control characters and without any of: {0}</value>
+  </data>
+  <data name="WorkflowSelection_OutputNameRefused" xml:space="preserve">
+    <value>The output name could not be saved ({0}). Nothing was started.</value>
+  </data>
+  <data name="WorkflowSelection_PreviewHeading" xml:space="preserve">
+    <value>Imported file</value>
+  </data>
+  <data name="WorkflowSelection_PreviewNeedsPreparation" xml:space="preserve">
+    <value>This file is prepared for display inside the session. Choose a workflow to continue.</value>
+  </data>
+  <data name="Session_StepsHeading" xml:space="preserve">
+    <value>Steps</value>
+  </data>
+  <data name="Session_PlaceholderNotice" xml:space="preserve">
+    <value>A browsable processing history is not part of this build. Everything shown here is the session exactly as it is stored.</value>
+  </data>
+  <data name="Session_AllStepsFinished" xml:space="preserve">
+    <value>All steps finished</value>
+  </data>
+  <data name="SessionState_Active" xml:space="preserve"><value>Active</value></data>
+  <data name="SessionState_HandedOff" xml:space="preserve"><value>Handed off</value></data>
+  <data name="SessionState_Completed" xml:space="preserve"><value>Completed</value></data>
+  <data name="SessionState_Abandoned" xml:space="preserve"><value>Abandoned</value></data>
+  <data name="StepState_Waiting" xml:space="preserve"><value>Waiting</value></data>
+  <data name="StepState_Processing" xml:space="preserve"><value>Processing</value></data>
+  <data name="StepState_ReviewRequired" xml:space="preserve"><value>Review required</value></data>
+  <data name="StepState_Approved" xml:space="preserve"><value>Approved</value></data>
+  <data name="StepState_RetryRequired" xml:space="preserve"><value>Retry required</value></data>
+  <data name="StepState_Skipped" xml:space="preserve"><value>Skipped</value></data>
+  <data name="StepState_Failed" xml:space="preserve"><value>Failed</value></data>
+  <data name="StepState_Interrupted" xml:space="preserve"><value>Interrupted</value></data>
+  <data name="Session_ConfirmOriginal" xml:space="preserve"><value>Confirm original</value></data>
+  <data name="Session_RunStep" xml:space="preserve"><value>Run step</value></data>
+  <data name="Session_Approve" xml:space="preserve"><value>Approve</value></data>
+  <data name="Session_Reject" xml:space="preserve"><value>Reject</value></data>
+  <data name="Session_Retry" xml:space="preserve"><value>Retry</value></data>
+  <data name="Session_Skip" xml:space="preserve"><value>Skip</value></data>
+  <data name="Session_HandOff" xml:space="preserve"><value>Hand off manually</value></data>
+  <data name="Session_FakeModeNotice" xml:space="preserve">
+    <value>FAKE PROCESSING MODE — results are generated test files, not production output.</value>
+  </data>
+  <data name="Session_HandedOffNotice" xml:space="preserve">
+    <value>Automated processing has ended. Continue manually.</value>
+  </data>
+  <data name="Session_ReviewHeading" xml:space="preserve"><value>Review required</value></data>
+  <data name="Session_TiffReviewHeading" xml:space="preserve"><value>Production TIFF</value></data>
+  <data name="Session_TiffReviewSummary" xml:space="preserve"><value>CMYK + W1 validated · {0}</value></data>
+  <data name="Session_TiffReviewCaveat" xml:space="preserve"><value>The file's structure was checked, not its artistic or print quality.</value></data>
+  <data name="Session_ApproveTiff" xml:space="preserve"><value>Approve this TIFF</value></data>
+  <data name="Session_RejectTiff" xml:space="preserve"><value>Reject this TIFF</value></data>
+  <data name="OutputLocation_Working" xml:space="preserve"><value>awaiting review in Working</value></data>
+  <data name="OutputLocation_Approved" xml:space="preserve"><value>in Approved</value></data>
+  <data name="OutputLocation_Recycled" xml:space="preserve"><value>sent to the Recycle Bin</value></data>
+  <data name="Session_RejectReasonLabel" xml:space="preserve"><value>Reason</value></data>
+  <data name="Session_RejectNotesLabel" xml:space="preserve"><value>Notes (optional)</value></data>
+  <data name="Session_ArtefactHeading" xml:space="preserve"><value>Current file</value></data>
+  <data name="Session_ArtefactNone" xml:space="preserve"><value>No file has been validated yet.</value></data>
+  <data name="Session_ArtefactIsInput" xml:space="preserve"><value>Input for this step</value></data>
+  <data name="Session_LabelFileName" xml:space="preserve"><value>File</value></data>
+  <data name="Session_LabelFormat" xml:space="preserve"><value>Format</value></data>
+  <data name="Session_LabelPixels" xml:space="preserve"><value>Pixels</value></data>
+  <data name="Session_LabelDpi" xml:space="preserve"><value>DPI</value></data>
+  <data name="Session_LabelHash" xml:space="preserve"><value>SHA-256</value></data>
+  <data name="Session_LabelRevision" xml:space="preserve"><value>Revision</value></data>
+  <data name="Session_ValueUnknown" xml:space="preserve"><value>Not determined</value></data>
+  <data name="Session_ActionFailed" xml:space="preserve">
+    <value>That action did not complete. {0}</value>
+  </data>
+  <data name="Failure_OutputMissing" xml:space="preserve">
+    <value>A file PrintFlow expected was not found, so it could not continue. PrintFlow never changes your original file.</value>
+  </data>
+  <data name="Failure_OutputUnreadable" xml:space="preserve">
+    <value>A file PrintFlow needed exists but could not be read completely, so it was not used. PrintFlow never changes your original file.</value>
+  </data>
+  <data name="Failure_OutputValidationFailed" xml:space="preserve">
+    <value>A file did not pass PrintFlow's checks, so it was not accepted. PrintFlow never changes your original file.</value>
+  </data>
+  <data name="Failure_Timeout" xml:space="preserve">
+    <value>Meitu or Photoshop did not finish in time, so PrintFlow stopped waiting. It may still be busy, so check it before you continue. No result from this attempt was accepted, and PrintFlow never changes your original file.</value>
+  </data>
+  <data name="Failure_Cancelled" xml:space="preserve">
+    <value>The operation was stopped before it finished. Part of it may already have been done, and Meitu or Photoshop, if it was in use, may still be busy, so check before you continue. PrintFlow never changes your original file.</value>
+  </data>
+  <data name="Failure_RevisionIntegrityMismatch" xml:space="preserve">
+    <value>The file changed after it was shown, so the decision was not applied. Run the step again.</value>
+  </data>
+  <data name="Failure_EnvironmentNotVerified" xml:space="preserve">
+    <value>This workstation has not been verified for automated processing.</value>
+  </data>
+  <data name="Failure_AdapterUnavailable" xml:space="preserve">
+    <value>A program it needs was unavailable or in use by another job, or the operation stopped unexpectedly. PrintFlow never changes your original file.</value>
+  </data>
+  <data name="Failure_OperationFaulted" xml:space="preserve">
+    <value>The operation ended unexpectedly. Nothing was produced and no result was recorded. PrintFlow changed nothing in the external application; what it is showing now is unknown, so check it before retrying.</value>
+  </data>
+  <data name="Failure_PresetHashMismatch" xml:space="preserve">
+    <value>The workstation preset did not match its expected signature.</value>
+  </data>
+  <data name="Failure_UnknownDialog" xml:space="preserve">
+    <value>A window PrintFlow did not recognise appeared, so automation stopped without clicking in it. The window may still be open, so check Meitu or Photoshop before you continue. PrintFlow never changes your original file.</value>
+  </data>
+  <data name="Failure_WorkspaceError" xml:space="preserve">
+    <value>PrintFlow could not finish a file operation, and part of it may already have been done. PrintFlow never changes your original file.</value>
+  </data>
+  <data name="Failure_PersistenceError" xml:space="preserve">
+    <value>PrintFlow could not read or save the job's record, so the screen may not show its latest state. PrintFlow never changes your original file.</value>
+  </data>
+  <data name="Failure_PreconditionNotMet" xml:space="preserve">
+    <value>This is not possible in the job's current state; the screen may have been out of date. PrintFlow never changes your original file.</value>
+  </data>
+  <data name="Failure_ManualCropRequired" xml:space="preserve">
+    <value>This image has no transparent area to trim to, so it must be cropped by hand.</value>
+  </data>
+  <data name="Failure_MeituNotInstalled" xml:space="preserve">
+    <value>The approved Meitu program was not found on this computer, or it is not the approved version. Please check the workstation setup.</value>
+  </data>
+  <data name="Failure_MeituLaunchFailed" xml:space="preserve">
+    <value>Meitu could not be started or did not become ready.</value>
+  </data>
+  <data name="Failure_MeituWindowNotFound" xml:space="preserve">
+    <value>Meitu is running but its window could not be found, so nothing was sent to it.</value>
+  </data>
+  <data name="Failure_MeituTargetLost" xml:space="preserve">
+    <value>Meitu's verified window or foreground changed, so no further input was sent. Return it to a safe screen and try again.</value>
+  </data>
+  <data name="Failure_MeituUnknownState" xml:space="preserve">
+    <value>Meitu is on a screen this program does not recognise. Nothing was changed. Please return Meitu to its start page or finish what is open, then try again.</value>
+  </data>
+  <data name="Failure_MeituBlockingDialog" xml:space="preserve">
+    <value>A message window is open in Meitu. This program will not close it for you — please deal with it, then try again.</value>
+  </data>
+  <data name="Failure_MeituOpenInputFailed" xml:space="preserve">
+    <value>The prepared file could not be handed to Meitu, so nothing was opened.</value>
+  </data>
+  <data name="Failure_MeituClosed" xml:space="preserve">
+    <value>Meitu closed during processing. The unfinished attempt was stopped and can be retried.</value>
+  </data>
+  <data name="Failure_MeituInterrupted" xml:space="preserve">
+    <value>Meitu processing was interrupted. Meitu may still be running; check its screen before retrying.</value>
+  </data>
+  <data name="Failure_PhotoshopNotInstalled" xml:space="preserve">
+    <value>The approved Photoshop program was not found on this computer, or it is not the approved version. Please check the workstation setup.</value>
+  </data>
+  <data name="Failure_PhotoshopLaunchFailed" xml:space="preserve">
+    <value>Photoshop was started but did not become ready in time. Please open Photoshop yourself and try again.</value>
+  </data>
+  <data name="Failure_PhotoshopWindowNotFound" xml:space="preserve">
+    <value>Photoshop is running but its window could not be found, so nothing was sent to it.</value>
+  </data>
+  <data name="Failure_PhotoshopTargetLost" xml:space="preserve">
+    <value>Photoshop's verified window or foreground changed, so no further input was sent. Bring Photoshop to the front and try again.</value>
+  </data>
+  <data name="Failure_PhotoshopUnknownState" xml:space="preserve">
+    <value>Photoshop is on a screen this program does not recognise. Nothing was changed. Please return Photoshop to its start screen or finish what is open, then try again.</value>
+  </data>
+  <data name="Failure_PhotoshopBlockingDialog" xml:space="preserve">
+    <value>A message window is open in Photoshop. This program will not close it for you — please deal with it, then try again.</value>
+  </data>
+  <data name="Failure_PhotoshopOpenInputFailed" xml:space="preserve">
+    <value>The prepared file could not be handed to Photoshop, so nothing was opened.</value>
+  </data>
+  <data name="Failure_PhotoshopDocumentIdentityUnconfirmed" xml:space="preserve">
+    <value>This program could not confirm that Photoshop is showing the exact prepared file, so it stopped. Nothing was changed and no output was made.</value>
+  </data>
+  <data name="Rejection_InsufficientResult" xml:space="preserve"><value>Result not good enough</value></data>
+  <data name="Rejection_EdgeError" xml:space="preserve"><value>Edge error</value></data>
+  <data name="Rejection_MissingContent" xml:space="preserve"><value>Missing content</value></data>
+  <data name="Rejection_ColourIssue" xml:space="preserve"><value>Colour issue</value></data>
+  <data name="Rejection_DimensionIssue" xml:space="preserve"><value>Dimension issue</value></data>
+  <data name="Rejection_WhiteInkIssue" xml:space="preserve"><value>White-ink issue</value></data>
+  <data name="Rejection_Other" xml:space="preserve"><value>Other</value></data>
+  <data name="Format_Png" xml:space="preserve"><value>PNG</value></data>
+  <data name="Format_Jpeg" xml:space="preserve"><value>JPEG</value></data>
+  <data name="Format_Tiff" xml:space="preserve"><value>TIFF</value></data>
+  <data name="Format_Psd" xml:space="preserve"><value>PSD</value></data>
+  <data name="Format_Pdf" xml:space="preserve"><value>PDF</value></data>
+  <data name="Format_Unknown" xml:space="preserve"><value>Unknown</value></data>
+  <data name="Session_MaxBoundsHeading" xml:space="preserve">
+    <value>Maximum print size</value>
+  </data>
+  <data name="Session_MaxBoundsHint" xml:space="preserve">
+    <value>Enter the maximum width and maximum height the print may reach, in millimetres. The image is fitted proportionally inside those limits — it is never stretched and never enlarged. Fixed production resolution: 300 PPI.</value>
+  </data>
+  <data name="Session_LabelMaxWidthMm" xml:space="preserve"><value>Maximum width (mm)</value></data>
+  <data name="Session_LabelMaxHeightMm" xml:space="preserve"><value>Maximum height (mm)</value></data>
+  <data name="Session_LabelMaxLongEdgeMm" xml:space="preserve"><value>Maximum long edge (mm)</value></data>
+  <data name="Session_MaxBoundsConfirm" xml:space="preserve"><value>Confirm maximum print size</value></data>
+  <data name="Session_MaxBoundsInvalid" xml:space="preserve">
+    <value>Enter a maximum width and a maximum height as positive numbers of millimetres.</value>
+  </data>
+  <data name="Session_MaxBoundsSummary" xml:space="preserve">
+    <value>Maximum {0} × {1} mm</value>
+  </data>
+  <data name="Session_MaxLongEdgeSummary" xml:space="preserve">
+    <value>Maximum long edge: {0} mm</value>
+  </data>
+  <data name="Session_MaxShortEdgeSummary" xml:space="preserve">
+    <value>Maximum short edge: {0} mm</value>
+  </data>
+  <data name="Session_DimensionsSummary" xml:space="preserve">
+    <value>{0} × {1} mm ({2} × {3} px at {4} dpi)</value>
+  </data>
+  <data name="Session_DimensionsNotSet" xml:space="preserve"><value>Not set</value></data>
+  <data name="Session_PresetsLabel" xml:space="preserve"><value>Presets</value></data>
+  <data name="Session_PresetHint" xml:space="preserve">
+    <value>A preset fills in its maximum bounds. You can still change the millimetres before confirming, and PrintFlow works out which edge governs from the image itself.</value>
+  </data>
+  <data name="Session_SizeHeading" xml:space="preserve"><value>Size</value></data>
+  <data name="Session_UsePreset" xml:space="preserve"><value>Use preset</value></data>
+  <data name="Session_CustomSize" xml:space="preserve"><value>Custom size</value></data>
+  <data name="Session_AdjustSize" xml:space="preserve"><value>Adjust size</value></data>
+  <data name="Session_RecommendedMaximum" xml:space="preserve"><value>Recommended maximum: {0} × {1} mm</value></data>
+  <data name="Session_RecommendedLongEdge" xml:space="preserve"><value>Recommended long edge: {0} mm</value></data>
+  <data name="Session_RecommendedShortEdge" xml:space="preserve"><value>Recommended short edge: {0} mm</value></data>
+  <data name="Session_TargetEdge" xml:space="preserve"><value>Target edge</value></data>
+  <data name="Session_TargetSizeMm" xml:space="preserve"><value>Target size (mm)</value></data>
+  <data name="Session_TargetSizeInvalid" xml:space="preserve"><value>Choose Width, Height or Long edge and enter a positive size in millimetres.</value></data>
+  <data name="Session_TargetSizeUnavailable" xml:space="preserve"><value>Could not preview this size. Check the entry and job details, then try again.</value></data>
+  <data name="Session_ConfirmCustomSize" xml:space="preserve"><value>Confirm custom size</value></data>
+  <data name="TargetEdge_Width" xml:space="preserve"><value>Width</value></data>
+  <data name="TargetEdge_Height" xml:space="preserve"><value>Height</value></data>
+  <data name="TargetEdge_LongEdge" xml:space="preserve"><value>Long edge</value></data>
+  <data name="Session_BasedOnPreset" xml:space="preserve"><value>Based on {0}</value></data>
+  <data name="Session_PresetExceeded" xml:space="preserve"><value>This size is larger than the {0} recommended size.</value></data>
+  <data name="Session_CustomResolutionOnly" xml:space="preserve"><value>Selected size is supported without changing pixel dimensions.</value></data>
+  <data name="Session_CustomShrink" xml:space="preserve"><value>The image will be reduced proportionally.</value></data>
+  <data name="Session_EnlargementWarning" xml:space="preserve"><value>This size requires enlarging the image to approximately {0}% at 300 PPI.&#10;Enlargement may reduce image clarity.</value></data>
+  <data name="Session_ChangeSize" xml:space="preserve"><value>Change size</value></data>
+  <data name="Session_ContinueWithSize" xml:space="preserve"><value>Continue with this size</value></data>
+  <data name="Session_EnlargementConfirmed" xml:space="preserve"><value>Enlargement confirmed for this image and size.</value></data>
+  <data name="Session_CurrentPreset" xml:space="preserve"><value>Preset: {0}</value></data>
+  <data name="Session_CurrentCustomTarget" xml:space="preserve"><value>Custom {0}: {1} mm</value></data>
+  <data name="Session_PresetOverrideYes" xml:space="preserve"><value>Preset override: Yes</value></data>
+  <data name="Session_ProjectedResize" xml:space="preserve"><value>Projected resize: {0}</value></data>
+  <data name="ResizeDirection_ResolutionOnly" xml:space="preserve"><value>Resolution only</value></data>
+  <data name="ResizeDirection_Shrink" xml:space="preserve"><value>Shrink</value></data>
+  <data name="ResizeDirection_Enlarge" xml:space="preserve"><value>Enlarge</value></data>
+  <data name="Session_ProportionalFit" xml:space="preserve"><value>Proportional fit</value></data>
+  <data name="Session_EnlargementExplicitlyConfirmed" xml:space="preserve"><value>Enlargement explicitly confirmed</value></data>
+  <data name="Session_ProjectedPlan" xml:space="preserve"><value>Projected plan</value></data>
+  <data name="Session_PhotoshopNotRun" xml:space="preserve"><value>Photoshop was not run.</value></data>
+  <data name="Session_PreparationHeading" xml:space="preserve"><value>Print preparation</value></data>
+  <data name="Session_PreparationResolutionOnly" xml:space="preserve">
+    <value>The image already fits within the maximum size. Pixel dimensions will remain unchanged.</value>
+  </data>
+  <data name="Session_PreparationProportionalShrink" xml:space="preserve">
+    <value>The image will be reduced proportionally to fit the maximum size.</value>
+  </data>
+  <data name="Session_PreparationLimitingEdge" xml:space="preserve"><value>Limiting edge: {0}</value></data>
+  <data name="Session_PreparationProjectedSize" xml:space="preserve">
+    <value>Projected size: {0} × {1} px</value>
+  </data>
+  <data name="Session_PreparationResolution" xml:space="preserve">
+    <value>Fixed production resolution: {0} PPI</value>
+  </data>
+  <data name="Session_PreparationAttemptHeading" xml:space="preserve"><value>Print preparation used</value></data>
+  <data name="Session_PreparationAttemptBounds" xml:space="preserve">
+    <value>Maximum bounds {0} × {1} mm</value>
+  </data>
+  <data name="Session_PreparationAttemptProjected" xml:space="preserve">
+    <value>Projected {0} × {1} px at {2} PPI</value>
+  </data>
+  <data name="Session_PreparationAttemptProjectionNotice" xml:space="preserve">
+    <value>Projected plan — Photoshop was not run.</value>
+  </data>
+  <data name="Session_RunReady" xml:space="preserve">
+    <value>Run Step is available: the print size is confirmed for this image.</value>
+  </data>
+  <data name="Session_RunNotReady" xml:space="preserve">
+    <value>Run Step stays unavailable until the print size and any required enlargement are confirmed for this image.</value>
+  </data>
+  <data name="Session_DimensionReviewRequired" xml:space="preserve">
+    <value>This size was saved under the previous exact-size rule, or the image it was measured against has changed. Review the maximum print bounds before continuing.</value>
+  </data>
+  <data name="Session_ReviewMaximumBounds" xml:space="preserve"><value>Review maximum bounds</value></data>
+  <data name="Session_HistoricalBoundsLabel" xml:space="preserve">
+    <value>Saved earlier, not confirmed as maximum bounds</value>
+  </data>
+  <data name="PreparationMode_ResolutionOnly" xml:space="preserve"><value>Resolution only</value></data>
+  <data name="PreparationMode_ProportionalShrink" xml:space="preserve"><value>Proportional reduction</value></data>
+  <data name="LimitingEdge_None" xml:space="preserve"><value>None</value></data>
+  <data name="LimitingEdge_Width" xml:space="preserve"><value>Width</value></data>
+  <data name="LimitingEdge_Height" xml:space="preserve"><value>Height</value></data>
+  <data name="Preset_A3Landscape" xml:space="preserve"><value>A3 landscape</value></data>
+  <data name="Preset_A3Portrait" xml:space="preserve"><value>A3 portrait</value></data>
+  <data name="Preset_A4" xml:space="preserve"><value>A4</value></data>
+  <data name="Preset_A5" xml:space="preserve"><value>A5</value></data>
+  <data name="Preset_Custom" xml:space="preserve"><value>Custom</value></data>
+  <data name="Session_W1Heading" xml:space="preserve"><value>White underbase (W1)</value></data>
+  <data name="Session_W1Hint" xml:space="preserve">
+    <value>Classify the complete finished design and choose the contraction yourself. There is no default, and PrintFlow never inspects the image to decide for you.</value>
+  </data>
+  <data name="Session_W1Confirm" xml:space="preserve"><value>Confirm W1 branch</value></data>
+  <data name="Session_W1NotChosen" xml:space="preserve"><value>Not chosen</value></data>
+  <data name="W1_0px" xml:space="preserve"><value>0 px — fine details</value></data>
+  <data name="W1_1px" xml:space="preserve"><value>1 px — ordinary artwork</value></data>
+  <data name="W1_2px" xml:space="preserve"><value>2 px — solid / full rectangular artwork</value></data>
+  <data name="Session_FakeTiffNotice" xml:space="preserve">
+    <value>The TIFF produced here is synthetic foundation output and is NOT production-ready. No CMYK conversion, no W1 spot channel, no Photoshop Action and nothing prepared for Maintop has been performed. Do not print from it.</value>
+  </data>
+  <data name="Session_Complete" xml:space="preserve"><value>Complete</value></data>
+  <data name="Session_AddAnotherSize" xml:space="preserve"><value>Add another size</value></data>
+  <data name="Session_OutputsHeading" xml:space="preserve"><value>Outputs produced</value></data>
+  <data name="Session_LabelBranch" xml:space="preserve"><value>W1</value></data>
+  <data name="Session_LabelReview" xml:space="preserve"><value>Review</value></data>
+  <data name="Session_OutputValid" xml:space="preserve"><value>Valid</value></data>
+  <data name="Session_OutputInvalid" xml:space="preserve"><value>No longer valid</value></data>
+  <data name="ReviewState_NotReviewed" xml:space="preserve"><value>Not reviewed</value></data>
+  <data name="ReviewState_Approved" xml:space="preserve"><value>Approved</value></data>
+  <data name="ReviewState_Rejected" xml:space="preserve"><value>Rejected</value></data>
+  <data name="Session_PreviewHeading" xml:space="preserve"><value>Image review</value></data>
+  <data name="Session_PreviewCurrent" xml:space="preserve"><value>Preview</value></data>
+  <data name="Session_PreviewBefore" xml:space="preserve"><value>Before</value></data>
+  <data name="Session_PreviewAfter" xml:space="preserve"><value>After</value></data>
+  <data name="Session_PreviewPixels" xml:space="preserve"><value>{0} × {1} px</value></data>
+  <data name="Session_PreviewReduced" xml:space="preserve">
+    <value>Reduced for display; the file itself is unchanged.</value>
+  </data>
+  <data name="Session_PreviewUnavailable" xml:space="preserve"><value>Preview unavailable</value></data>
+  <data name="Session_PreviewLoadFailed" xml:space="preserve">
+    <value>This file cannot be displayed here. The file itself is unaffected and the review below still applies to it.</value>
+  </data>
+  <data name="Session_ZoomIn" xml:space="preserve"><value>Zoom in</value></data>
+  <data name="Session_ZoomOut" xml:space="preserve"><value>Zoom out</value></data>
+  <data name="Session_ZoomReset" xml:space="preserve"><value>Reset zoom</value></data>
+  <data name="Session_ZoomFit" xml:space="preserve"><value>Fit</value></data>
+  <data name="Session_ZoomPercent" xml:space="preserve"><value>{0}%</value></data>
+  <data name="Session_ManualCropRequiredNotice" xml:space="preserve">
+    <value>Automatic trim cannot determine the crop area. Use Manual Crop to draw it yourself.</value>
+  </data>
+  <data name="Session_ManualCropHeading" xml:space="preserve"><value>Manual crop</value></data>
+  <data name="Session_ManualCropBegin" xml:space="preserve"><value>Manual Crop</value></data>
+  <data name="Session_ManualCropInstructions" xml:space="preserve">
+    <value>Drag inside the image to select the area to keep. Dashed blue shows your selection; solid green shows the final crop with margins. Drag again to redraw. Use scrollbars when zoomed in.</value>
+  </data>
+  <data name="Session_ManualCropApply" xml:space="preserve"><value>Apply Crop</value></data>
+  <data name="Session_ManualCropCancel" xml:space="preserve"><value>Cancel Crop</value></data>
+  <data name="Session_ManualCropInvalid" xml:space="preserve">
+    <value>Invalid crop area. Select at least one pixel and keep the whole selection inside the image.</value>
+  </data>
+  <data name="Session_ManualCropSelection" xml:space="preserve"><value>Selected: {0}, {1} · {2} × {3} px</value></data>
+  <data name="Session_ManualCropNoSelection" xml:space="preserve"><value>No crop area selected yet.</value></data>
+
+  <!-- Return to an earlier step (Epic 11200 Part C3 §3, §5). -->
+  <data name="Session_ReturnHeading" xml:space="preserve"><value>Return to an earlier step</value></data>
+  <data name="Session_ReturnHint" xml:space="preserve">
+    <value>Choose an earlier step to go back to. Only steps you can legally return to are listed.</value>
+  </data>
+  <data name="Session_ReturnTargetLabel" xml:space="preserve"><value>Return to</value></data>
+  <data name="Session_ReturnBegin" xml:space="preserve"><value>Return to Step</value></data>
+  <data name="Session_ReturnConfirmQuestion" xml:space="preserve">
+    <value>Returning to this step will invalidate later derived results. Existing audit history will be retained.</value>
+  </data>
+  <data name="Session_ReturnConfirm" xml:space="preserve"><value>Confirm Return</value></data>
+  <data name="Session_ReturnCancel" xml:space="preserve"><value>Cancel</value></data>
+
+  <!-- Deterministic trim margin (Epic 11200 Part C3 §9–§12, §18). -->
+  <data name="Session_TrimHeading" xml:space="preserve"><value>Trim margin</value></data>
+  <data name="Session_TrimHint" xml:space="preserve">
+    <value>How much canvas the automatic trim keeps around the artwork. Margins only add space; they never crop further in.</value>
+  </data>
+  <data name="Session_TrimModeTight" xml:space="preserve"><value>Tight crop — no margin</value></data>
+  <data name="Session_TrimModeUniform" xml:space="preserve"><value>Uniform margin — the same on all four edges</value></data>
+  <data name="Session_TrimModeEdgeSpecific" xml:space="preserve"><value>Edge-specific margin — one per edge</value></data>
+  <data name="Session_TrimMarginLabel" xml:space="preserve"><value>Margin (px)</value></data>
+  <data name="Session_TrimTopLabel" xml:space="preserve"><value>Top</value></data>
+  <data name="Session_TrimRightLabel" xml:space="preserve"><value>Right</value></data>
+  <data name="Session_TrimBottomLabel" xml:space="preserve"><value>Bottom</value></data>
+  <data name="Session_TrimLeftLabel" xml:space="preserve"><value>Left</value></data>
+  <data name="Session_TrimApply" xml:space="preserve"><value>Apply Margin</value></data>
+  <data name="Session_TrimMarginInvalid" xml:space="preserve">
+    <value>Invalid margin. Enter a whole number of pixels that is zero or greater.</value>
+  </data>
+  <data name="Session_TrimCurrentLabel" xml:space="preserve"><value>Next run</value></data>
+  <data name="Session_TrimSummaryTight" xml:space="preserve"><value>Trim: Tight</value></data>
+  <data name="Session_TrimSummaryUniform" xml:space="preserve"><value>Trim: Uniform {0} px</value></data>
+  <data name="Session_TrimSummaryEdges" xml:space="preserve"><value>Trim: T {0} / R {1} / B {2} / L {3} px</value></data>
+
+  <!--
+    The crop geometry the automatic trim established (SCRUM-11081 §13, §14). Two rectangles in
+    the source image's own pixels: what the alpha scan found, and what was actually cut out.
+    Neutral wording throughout — no resource key, no enum name and no internal type name reaches
+    the operator.
+
+    Right and bottom are the first pixel OUTSIDE the rectangle, which is the convention the
+    product measures and stores in. The four numbers are shown exactly as recorded rather than
+    converted, because converted they stop agreeing with each other: 980 - 120 is the 860 px the
+    size line reports, while an inclusive 979 would leave the operator with numbers that do not
+    add up. The caption says so once, in words, rather than leaving it to be inferred.
+  -->
+  <data name="Session_TrimBoundsDetectedHeading" xml:space="preserve"><value>Detected graphic bounds</value></data>
+  <data name="Session_TrimBoundsAppliedHeading" xml:space="preserve"><value>Applied trim bounds</value></data>
+  <data name="Session_TrimBoundsOrigin" xml:space="preserve"><value>Left {0} px · Top {1} px</value></data>
+  <data name="Session_TrimBoundsExtent" xml:space="preserve"><value>Right {0} px · Bottom {1} px</value></data>
+  <data name="Session_TrimBoundsSize" xml:space="preserve"><value>Size {0} × {1} px</value></data>
+  <data name="Session_TrimBoundsCaption" xml:space="preserve">
+    <value>Measured in the original image. Right and bottom are the first pixel outside the rectangle, so the size is the difference between the edges.</value>
+  </data>
+
+  <!-- Background removal, reviewed-content authority (Epic 11300 Part C2B2 §3, §9, §11, §14). -->
+  <data name="Session_BackgroundRemovalHeading" xml:space="preserve"><value>Background removal</value></data>
+  <data name="Session_BackgroundRemovalHint" xml:space="preserve">
+    <value>Meitu decides the foreground subject automatically for the image shown above. Authorise it for this image before running the step.</value>
+  </data>
+  <data name="Session_BackgroundRemovalAuthorise" xml:space="preserve"><value>Use Automatic Selection for this image</value></data>
+  <data name="Session_BackgroundRemovalConfirmQuestion" xml:space="preserve">
+    <value>Meitu will decide the foreground subject of this image on its own. Check the result before approving it. This applies to the image shown above only, not to later versions of it.</value>
+  </data>
+  <data name="Session_BackgroundRemovalConfirm" xml:space="preserve"><value>Confirm</value></data>
+  <data name="Session_BackgroundRemovalCancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Session_BackgroundRemovalAuthorised" xml:space="preserve">
+    <value>Automatic Selection authorised for this image · Revision {0}</value>
+  </data>
+  <data name="Session_BackgroundRemovalNotAuthorised" xml:space="preserve">
+    <value>Not authorised yet. Run Step becomes available once Automatic Selection is authorised for this image.</value>
+  </data>
+  <data name="Session_BackgroundRemovalRunnable" xml:space="preserve"><value>Ready to run background removal.</value></data>
+  <data name="Session_BackgroundRemovalAttemptAudit" xml:space="preserve">
+    <value>Background removal: Automatic Selection — authorised for reviewed Revision {0}</value>
+  </data>
+  <data name="Session_Stop" xml:space="preserve"><value>Stop</value></data>
+  <data name="Session_StopHint" xml:space="preserve">
+    <value>Stops this automated operation safely. Meitu is not closed.</value>
+  </data>
+  <data name="Session_StoppingNotice" xml:space="preserve">
+    <value>Stopping — PrintFlow is asking Meitu to cancel this operation. Please wait.</value>
+  </data>
+  <data name="Session_TakeOver" xml:space="preserve"><value>Take Over in Meitu</value></data>
+  <data name="Session_TakeOverHint" xml:space="preserve">
+    <value>Stops PrintFlow automation and leaves Meitu as it is, for you to work in. PrintFlow will not force-close Meitu. If Meitu is unresponsive after takeover, close it manually through Meitu or Windows before returning to automation.</value>
+  </data>
+  <data name="Session_TakingOverNotice" xml:space="preserve">
+    <value>Handing over — PrintFlow has stopped controlling Meitu and is sending nothing further.</value>
+  </data>
+  <data name="Session_TakeOverConfirmQuestion" xml:space="preserve">
+    <value>Take over in Meitu? PrintFlow will stop controlling Meitu for this operation and will send it nothing further. Meitu is left exactly as it is — it is not cancelled and not closed, so it may still be working and you may need to finish or close it yourself. This attempt will not produce a Revision, and returning to automation needs an explicit Return to automation.</value>
+  </data>
+  <data name="Session_TakeOverConfirm" xml:space="preserve"><value>Take over</value></data>
+  <data name="Session_TakeOverCancel" xml:space="preserve"><value>Keep automating</value></data>
+  <data name="Session_RetainedOperationRunning" xml:space="preserve">
+    <value>Meitu may still be running this operation. PrintFlow has stopped sending it anything; check Meitu before starting another attempt.</value>
+  </data>
+  <data name="Session_RetainedProcessedResult" xml:space="preserve">
+    <value>Meitu may still be holding the processed result. Nothing was exported and nothing was discarded; check Meitu before starting another attempt.</value>
+  </data>
+  <data name="Session_RetainedUnknown" xml:space="preserve">
+    <value>PrintFlow could not establish what Meitu is doing. Check Meitu before starting another attempt.</value>
+  </data>
+  <data name="Session_ReenterAutomation" xml:space="preserve"><value>Return to automation</value></data>
+  <data name="Session_ReenterAutomationHint" xml:space="preserve">
+    <value>This session was handed over to you. Returning to automation starts a new attempt from a fresh working copy; the handed-over attempt stays in the history.</value>
+  </data>
+  <data name="Failure_AutomationStopped" xml:space="preserve">
+    <value>You stopped this operation. No result was produced and no Revision was created.</value>
+  </data>
+  <data name="Failure_AutomationHandedOff" xml:space="preserve">
+    <value>You took over in Meitu. PrintFlow stopped this attempt and sent Meitu nothing further; no Revision was created.</value>
+  </data>
+  <data name="EnvironmentCheck_PresetIntegrity" xml:space="preserve">
+    <value>The workstation preset does not match its accepted signature.</value>
+  </data>
+  <data name="EnvironmentCheck_EvidenceIntegrity" xml:space="preserve">
+    <value>The accepted workstation records do not match their recorded signatures.</value>
+  </data>
+  <data name="EnvironmentCheck_WorkspaceRoot" xml:space="preserve">
+    <value>The working folder is not the one this workstation was verified with.</value>
+  </data>
+  <data name="EnvironmentCheck_ProductionRevalidation" xml:space="preserve">
+    <value>This installation has not been revalidated. After any PrintFlow, Windows, Meitu or Photoshop upgrade, the environment check and the standard test set must both be rerun and pass before production work may resume.</value>
+  </data>
+  <data name="EnvironmentCheck_OperatingSystem" xml:space="preserve">
+    <value>This computer's Windows version does not match the verified workstation.</value>
+  </data>
+  <data name="EnvironmentCheck_InteractiveSession" xml:space="preserve">
+    <value>A supported interactive desktop session is not available.</value>
+  </data>
+  <data name="EnvironmentCheck_DisplayConfiguration" xml:space="preserve">
+    <value>Display configuration does not match the verified workstation.</value>
+  </data>
+  <data name="EnvironmentCheck_UiCulture" xml:space="preserve">
+    <value>The Windows display language does not match the verified workstation.</value>
+  </data>
+  <data name="EnvironmentCheck_ExternalApplicationUiLanguage" xml:space="preserve">
+    <value>The recorded interface language of Meitu or Photoshop, for reference.</value>
+  </data>
+  <data name="EnvironmentCheck_MeituExecutable" xml:space="preserve">
+    <value>Meitu does not match the accepted production baseline.</value>
+  </data>
+  <data name="EnvironmentCheck_PhotoshopExecutable" xml:space="preserve">
+    <value>Photoshop does not match the accepted production baseline.</value>
+  </data>
+  <data name="EnvironmentCheck_PhotoshopActionArtifact" xml:space="preserve">
+    <value>The Photoshop action file does not match the accepted production baseline.</value>
+  </data>
+  <data name="EnvironmentCheck_FilesystemReadOnlyPolicyAdvisory" xml:space="preserve">
+    <value>Some accepted files are no longer marked read-only. Their signatures still match, so this does not stop production work.</value>
+  </data>
+  <data name="EnvironmentCheck_ExternalApplicationAutomationLock" xml:space="preserve"><value>The shared application-automation lock is unavailable.</value></data>
+  <data name="EnvironmentCheck_MeituLaunchability" xml:space="preserve"><value>Meitu could not be launched or attached to safely.</value></data>
+  <data name="EnvironmentCheck_MeituSafeStartingState" xml:space="preserve"><value>Meitu is not in a recognised safe starting state.</value></data>
+  <data name="EnvironmentCheck_PhotoshopLaunchability" xml:space="preserve"><value>Photoshop could not be launched or attached to safely.</value></data>
+  <data name="EnvironmentCheck_PhotoshopSafeStartingState" xml:space="preserve"><value>Photoshop has unsaved work, an unknown state, or a blocking dialog.</value></data>
+  <data name="EnvironmentCheck_PhotoshopColourSettings" xml:space="preserve"><value>Photoshop colour settings do not match the accepted preset.</value></data>
+  <data name="EnvironmentCheck_PhotoshopTestImageRoundTrip" xml:space="preserve"><value>The last test-image check did not finish. Choose Safe recovery and recheck; PrintFlow will first check Photoshop's current state.</value></data>
+  <data name="Environment_Verified" xml:space="preserve">
+    <value>Workstation verified for production work.</value>
+  </data>
+  <data name="Environment_NotVerified" xml:space="preserve">
+    <value>Production workstation verification failed.</value>
+  </data>
+  <data name="Environment_Advisories" xml:space="preserve">
+    <value>Notes (these do not stop production work)</value>
+  </data>
+  <data name="Environment_ObservedAt" xml:space="preserve">
+    <value>Checked at</value>
+  </data>
+  <data name="EnvironmentCheckName_PresetIntegrity" xml:space="preserve">
+    <value>Workstation preset integrity</value>
+  </data>
+  <data name="EnvironmentCheckName_EvidenceIntegrity" xml:space="preserve">
+    <value>Accepted workstation records</value>
+  </data>
+  <data name="EnvironmentCheckName_WorkspaceRoot" xml:space="preserve">
+    <value>Working folder</value>
+  </data>
+  <data name="EnvironmentCheckName_ProductionRevalidation" xml:space="preserve">
+    <value>Revalidation after upgrade</value>
+  </data>
+  <data name="EnvironmentCheckName_OperatingSystem" xml:space="preserve">
+    <value>Windows version</value>
+  </data>
+  <data name="EnvironmentCheckName_InteractiveSession" xml:space="preserve">
+    <value>Desktop session</value>
+  </data>
+  <data name="EnvironmentCheckName_DisplayConfiguration" xml:space="preserve">
+    <value>Display configuration</value>
+  </data>
+  <data name="EnvironmentCheckName_UiCulture" xml:space="preserve">
+    <value>Windows display language</value>
+  </data>
+  <data name="EnvironmentCheckName_ExternalApplicationUiLanguage" xml:space="preserve">
+    <value>Meitu and Photoshop interface language</value>
+  </data>
+  <data name="EnvironmentCheckName_MeituExecutable" xml:space="preserve">
+    <value>Meitu installation</value>
+  </data>
+  <data name="EnvironmentCheckName_PhotoshopExecutable" xml:space="preserve">
+    <value>Photoshop installation</value>
+  </data>
+  <data name="EnvironmentCheckName_PhotoshopActionArtifact" xml:space="preserve">
+    <value>Photoshop action file</value>
+  </data>
+  <data name="EnvironmentCheckName_FilesystemReadOnlyPolicyAdvisory" xml:space="preserve">
+    <value>Read-only marking of accepted files</value>
+  </data>
+  <data name="EnvironmentCheckName_ExternalApplicationAutomationLock" xml:space="preserve"><value>Application automation availability</value></data>
+  <data name="EnvironmentCheckName_MeituLaunchability" xml:space="preserve"><value>Meitu launchability</value></data>
+  <data name="EnvironmentCheckName_MeituSafeStartingState" xml:space="preserve"><value>Meitu starting state</value></data>
+  <data name="EnvironmentCheckName_PhotoshopLaunchability" xml:space="preserve"><value>Photoshop launchability</value></data>
+  <data name="EnvironmentCheckName_PhotoshopSafeStartingState" xml:space="preserve"><value>Photoshop starting state</value></data>
+  <data name="EnvironmentCheckName_PhotoshopColourSettings" xml:space="preserve"><value>Photoshop colour settings</value></data>
+  <data name="EnvironmentCheckName_PhotoshopTestImageRoundTrip" xml:space="preserve"><value>Photoshop test image</value></data>
+  <data name="Environment_Heading" xml:space="preserve">
+    <value>Production readiness</value>
+  </data>
+  <data name="Environment_Hint" xml:space="preserve">
+    <value>Check whether this workstation is ready for production. Safe recovery handles only PrintFlow test images and leaves your work and application settings unchanged.</value>
+  </data>
+  <data name="Environment_Open" xml:space="preserve">
+    <value>Production readiness</value>
+  </data>
+  <data name="Environment_Refresh" xml:space="preserve">
+    <value>Refresh status</value>
+  </data>
+  <data name="Environment_RunLiveChecks" xml:space="preserve"><value>Safe recovery and recheck</value></data>
+  <data name="Environment_RunLiveChecksHint" xml:space="preserve"><value>Choose Safe recovery and recheck to check Meitu and Photoshop, safely handle any identified PrintFlow test image, and run a fresh check.</value></data>
+  <data name="Environment_Checking" xml:space="preserve"><value>Checking the workstation. Please wait.</value></data>
+  <data name="Environment_CheckingPhotoshop" xml:space="preserve"><value>Checking Photoshop and the current application state. Please wait.</value></data>
+  <data name="Environment_CancelLiveChecks" xml:space="preserve"><value>Cancel check</value></data>
+  <data name="Environment_Cancelling" xml:space="preserve"><value>Cancelling safely. Please wait for the current operation to finish.</value></data>
+  <data name="Environment_Cancelled" xml:space="preserve"><value>The check was cancelled. The last result is retained; use safe recovery and recheck when ready.</value></data>
+  <data name="Environment_RecheckingAfterFailure" xml:space="preserve"><value>The previous check did not finish. Checking the current application state; please wait.</value></data>
+  <data name="Environment_PreviousCheckIncomplete" xml:space="preserve"><value>The previous Photoshop check did not finish. Use safe recovery and recheck to confirm the current state.</value></data>
+  <data name="Environment_RecoveryEvidenceDetail" xml:space="preserve"><value>Recovery: {0}. {1} Previous operation: {2}; previous failure: {3}.</value></data>
+  <data name="ReadinessRecovery_AlreadyAbsentRecheck" xml:space="preserve"><value>The previous PrintFlow test image was no longer open when checked. See the latest check result below.</value></data>
+  <data name="ReadinessRecovery_ClosedExactProbeRecheck" xml:space="preserve"><value>The previous PrintFlow test image was safely closed. See the latest check result below.</value></data>
+  <data name="ReadinessRecovery_BlockedUserWork" xml:space="preserve"><value>Photoshop has other work open. Save and close your files, then choose Safe recovery and recheck.</value></data>
+  <data name="ReadinessRecovery_BlockedUnknownState" xml:space="preserve"><value>The current Photoshop state could not be confirmed safely. Check Photoshop for a dialog that needs your attention, then choose Safe recovery and recheck.</value></data>
+  <data name="Environment_TechnicalDetails" xml:space="preserve"><value>Technical details</value></data>
+  <data name="Environment_RestartHelp" xml:space="preserve"><value>When to restart PrintFlow</value></data>
+  <data name="Environment_AutomaticChecksHeading" xml:space="preserve"><value>Automatic checks</value></data>
+  <data name="Environment_LiveChecksHeading" xml:space="preserve"><value>Live application checks</value></data>
+  <data name="Environment_Expected" xml:space="preserve"><value>Expected</value></data>
+  <data name="Environment_Current" xml:space="preserve"><value>Current</value></data>
+  <data name="Environment_Preset" xml:space="preserve">
+    <value>Verified workstation preset</value>
+  </data>
+  <data name="Environment_PresetUnavailable" xml:space="preserve">
+    <value>None — the workstation preset itself did not pass, so it states nothing.</value>
+  </data>
+  <data name="Environment_ChecksHeading" xml:space="preserve">
+    <value>Checks</value>
+  </data>
+  <data name="Environment_BlockingHeading" xml:space="preserve">
+    <value>Stopping production work</value>
+  </data>
+  <data name="Environment_NoBlockingFailures" xml:space="preserve">
+    <value>Nothing is stopping production work.</value>
+  </data>
+  <data name="Environment_AdvisoriesPresent" xml:space="preserve">
+    <value>Advisories: present</value>
+  </data>
+  <data name="Environment_AdvisoriesNone" xml:space="preserve">
+    <value>Advisories: none</value>
+  </data>
+  <data name="Environment_StatusPassed" xml:space="preserve">
+    <value>Passed</value>
+  </data>
+  <data name="Environment_StatusFailed" xml:space="preserve">
+    <value>Failed</value>
+  </data>
+  <data name="Environment_StatusAdvisory" xml:space="preserve">
+    <value>Note</value>
+  </data>
+  <data name="Environment_StatusBlocked" xml:space="preserve"><value>Not run</value></data>
+  <data name="Environment_LiveCheckNotRun" xml:space="preserve"><value>This check did not run because a prerequisite has not passed. Resolve the failed check first, then recheck.</value></data>
+  <data name="Environment_CheckNotRun" xml:space="preserve"><value>This check did not run, so nothing was observed.</value></data>
+  <data name="Environment_UnlistedCheck" xml:space="preserve"><value>Unlisted check</value></data>
+  <data name="Environment_NotConfirmedNotRun" xml:space="preserve"><value>Production workstation readiness is not confirmed: a required check did not run.</value></data>
+  <data name="Environment_Blocking" xml:space="preserve">
+    <value>Required</value>
+  </data>
+  <data name="Environment_Advisory" xml:space="preserve">
+    <value>Advisory</value>
+  </data>
+  <data name="Environment_RestartRequired" xml:space="preserve">
+    <value>If an accepted PrintFlow workstation record, the Photoshop installation, the Meitu installation or the verified action file is replaced or updated, restart PrintFlow before using production mode.</value>
+  </data>
+  <data name="Environment_RefreshScope" xml:space="preserve">
+    <value>Refresh status only reads current status; it does not recover test images or run a fresh application check. Accepted installation files are not re-read until PrintFlow restarts.</value>
+  </data>
+  <data name="Failure_PsdCompositeMissing" xml:space="preserve"><value>This PSD has no verified compatible composite. Save a copy in Photoshop with Maximize Compatibility enabled, then import that copy.</value></data>
+  <data name="Failure_PsdPreparationFailed" xml:space="preserve"><value>Photoshop could not produce a verified raster from this PSD. The source is preserved; review the failure before retrying.</value></data>
+  <data name="Failure_PsdUnreadable" xml:space="preserve"><value>The PSD is corrupt or unreadable. No prepared image was created.</value></data>
+  <data name="Failure_PsdUnsupported" xml:space="preserve"><value>This PSD cannot be prepared automatically. Use an RGB 8-bit PSD with a Photoshop-compatible composite.</value></data>
+  <data name="Session_PreparePsd" xml:space="preserve"><value>Prepare PSD for review</value></data>
+  <data name="Session_PsdPending" xml:space="preserve"><value>Original source: PSD (preserved unchanged). Prepare its raster preview before review. Supported: RGB, 8-bit, with a Photoshop-compatible composite. PSD files are treated as visual artwork inputs: existing spot-colour or white-ink channels in the source are not preserved as production channels.</value></data>
+  <data name="Session_PsdPrepared" xml:space="preserve"><value>Original source: PSD (preserved unchanged). The displayed PNG is the managed raster representation prepared by Photoshop. Source spot-colour or white-ink channels are not carried forward as production channels. Review this representation before continuing.</value></data>
+  <data name="Failure_PdfUnreadable" xml:space="preserve"><value>This PDF is damaged or unreadable. No prepared image was created. Import a readable single-page PDF.</value></data>
+  <data name="Failure_PdfEncrypted" xml:space="preserve"><value>Password-protected or encrypted PDFs are unsupported. No prepared image was created.</value></data>
+  <data name="Failure_PdfMultiplePages" xml:space="preserve"><value>This PDF contains multiple pages. PrintFlow only accepts a single-page PDF for this workflow.</value></data>
+  <data name="Failure_SourceFormatUnsupported" xml:space="preserve"><value>This kind of file is not one PrintFlow Studio can process. Nothing was processed and your file was not changed.</value></data>
+  <data name="Failure_SourceImageUnreadable" xml:space="preserve"><value>No image could be read from this file — it is incomplete or damaged. Nothing was processed and your file was not changed.</value></data>
+  <data name="Failure_PdfPreparationFailed" xml:space="preserve"><value>PDF preparation failed. No validated raster is available. Check the failure before retrying.</value></data>
+  <data name="Session_PreparePdf" xml:space="preserve"><value>Prepare PDF for review</value></data>
+  <data name="Session_PdfPending" xml:space="preserve"><value>Source: PDF (unchanged). Prepare its single page at 300 PPI, then review the page and physical dimensions before continuing. Multi-page and encrypted PDFs are unsupported. PDF files are treated as visual artwork inputs: existing spot-colour or white-ink separations in the source are not preserved as production channels.</value></data>
+  <data name="Session_PdfPrepared" xml:space="preserve"><value>Single-page PDF prepared for review. Source: PDF (unchanged). The displayed PNG is the managed full-page raster at 300 PPI. Confirm page 1 and its dimensions: {0:0.##} × {1:0.##} mm ({2} × {3} pixels).</value></data>
+  <data name="Session_SubmitManualResult" xml:space="preserve"><value>Submit Manual Result</value></data>
+  <data name="Session_ManualProcessingResult" xml:space="preserve"><value>Manual processing result</value></data>
+  <data name="Session_ManualCutoutFilter" xml:space="preserve"><value>Transparent PNG (*.png)|*.png</value></data>
+  <data name="Session_ManualEnhancementFilter" xml:space="preserve"><value>Raster image (*.png;*.jpg;*.jpeg)|*.png;*.jpg;*.jpeg</value></data>
+  <data name="Failure_ManualResultInvalid" xml:space="preserve"><value>Invalid manual result. Select a complete, readable image in a supported format.</value></data>
+  <data name="Failure_ManualResultImport" xml:space="preserve"><value>The result could not be imported. Check file access and workspace storage, then submit again.</value></data>
+  <data name="Failure_ManualResultTransparency" xml:space="preserve"><value>The background removal result must be a PNG with transparent pixels and visible artwork.</value></data>
+  <data name="Failure_ManualResultCanvas" xml:space="preserve"><value>The background removal result must keep the same pixel dimensions as the approved input.</value></data>
+  <data name="Session_ManualBackgroundRemovalAudit" xml:space="preserve"><value>Background removal: Manual processing result from reviewed Revision {0}</value></data>
+  <data name="Session_ReviewModeSideBySide" xml:space="preserve"><value>Side by side</value></data>
+  <data name="Session_ReviewModeSlider" xml:space="preserve"><value>Slider</value></data>
+  <data name="Session_ReviewBackgroundCheckerboard" xml:space="preserve"><value>Checkerboard</value></data>
+  <data name="Session_ReviewBackgroundWhite" xml:space="preserve"><value>White</value></data>
+  <data name="Session_ReviewBackgroundBlack" xml:space="preserve"><value>Black</value></data>
+  <data name="Session_ReviewComparisonSlider" xml:space="preserve"><value>Comparison slider</value></data>
+  <data name="Session_KeepOriginalExtent" xml:space="preserve"><value>Keep original extent</value></data>
+  <data name="Session_KeepOriginalExtentHint" xml:space="preserve"><value>Continue without trimming</value></data>
+  <data name="Session_OriginalExtentRetained" xml:space="preserve"><value>Original extent retained</value></data>
+  <data name="Session_ManualCropAdjustment" xml:space="preserve"><value>Crop adjustment</value></data>
+  <data name="Session_ManualCropTight" xml:space="preserve"><value>Tight</value></data>
+  <data name="Session_ManualCropUniform" xml:space="preserve"><value>Uniform margin</value></data>
+  <data name="Session_ManualCropPerEdge" xml:space="preserve"><value>Per-edge margin</value></data>
+  <data name="Session_ManualCropSelected" xml:space="preserve"><value>Selected bounds</value></data>
+  <data name="Session_ManualCropApplied" xml:space="preserve"><value>Applied crop bounds</value></data>
+  <data name="Session_ManualCropMarginInvalid" xml:space="preserve"><value>Enter whole numbers of zero or more pixels.</value></data>
+  <data name="Session_TiffModeHeading" xml:space="preserve"><value>Preview mode</value></data>
+  <data name="Session_TiffModeColour" xml:space="preserve"><value>Colour</value></data>
+  <data name="Session_TiffModeWhiteInk" xml:space="preserve"><value>White ink</value></data>
+  <data name="Session_TiffModeOverlay" xml:space="preserve"><value>Colour + white overlay</value></data>
+  <data name="Session_TiffColourPreviewName" xml:space="preserve"><value>Colour preview</value></data>
+  <data name="Session_TiffWhiteInkPreviewName" xml:space="preserve"><value>White ink preview</value></data>
+  <data name="Session_TiffOverlayPreviewName" xml:space="preserve"><value>Colour and white ink overlay</value></data>
+  <data name="Session_TiffColourLegend" xml:space="preserve"><value>An uncalibrated screen approximation of the CMYK content. It is not proof of printed colour.</value></data>
+  <data name="Session_TiffWhiteInkLegend" xml:space="preserve"><value>Bright = white ink present · Black = no white ink.</value></data>
+  <data name="Session_TiffOverlayLegend" xml:space="preserve"><value>White overlay = white ink coverage. Not how the print will look.</value></data>
+  <data name="Session_TiffProductionHeading" xml:space="preserve"><value>Production details</value></data>
+  <data name="Session_TiffLabelOutputFile" xml:space="preserve"><value>Output file</value></data>
+  <data name="Session_TiffLabelOutputPath" xml:space="preserve"><value>Output path</value></data>
+  <data name="Session_TiffLabelPixelDimensions" xml:space="preserve"><value>Pixel dimensions</value></data>
+  <data name="Session_TiffLabelPhysicalSize" xml:space="preserve"><value>Physical size</value></data>
+  <data name="Session_TiffLabelResolution" xml:space="preserve"><value>TIFF resolution</value></data>
+  <data name="Session_TiffLabelEffectiveDpi" xml:space="preserve"><value>Effective source resolution</value></data>
+  <data name="Session_TiffLabelColourMode" xml:space="preserve"><value>Colour</value></data>
+  <data name="Session_TiffLabelWhiteInk" xml:space="preserve"><value>White ink</value></data>
+  <data name="Session_TiffLabelEnlargement" xml:space="preserve"><value>Enlargement</value></data>
+  <data name="Session_TiffLabelHash" xml:space="preserve"><value>SHA-256</value></data>
+  <data name="Session_TiffValuePixels" xml:space="preserve"><value>{0} × {1} px</value></data>
+  <data name="Session_TiffValuePhysical" xml:space="preserve"><value>{0:0.0} × {1:0.0} mm</value></data>
+  <data name="Session_TiffValueResolution" xml:space="preserve"><value>{0:0.##} × {1:0.##} PPI</value></data>
+  <data name="Session_TiffValueEffectiveDpi" xml:space="preserve"><value>{0:0} × {1:0} PPI, from {2} × {3} source px</value></data>
+  <data name="Session_TiffValueBelowProduction" xml:space="preserve"><value> · below the {0} PPI production resolution</value></data>
+  <data name="Session_TiffValueColourMode" xml:space="preserve"><value>{0} · {1}-bit · {2} ink channels</value></data>
+  <data name="Session_TiffValueWhiteInk" xml:space="preserve"><value>{0} validated · {1} · {2:N0} px of ink</value></data>
+  <data name="Session_TiffValueEnlargementAuthorised" xml:space="preserve"><value>required and authorised by the operator</value></data>
+  <data name="Session_TiffValueEnlargementUnauthorised" xml:space="preserve"><value>required; no operator authority is recorded</value></data>
+  <data name="Session_TiffPreviewUnavailable" xml:space="preserve"><value>The Colour, White ink and Colour + white previews are unavailable for this file. The TIFF itself is unaffected and the decision below is unchanged.</value></data>
+  <data name="Session_TiffLabelPreset" xml:space="preserve"><value>Production preset</value></data>
+  <data name="Session_TiffValuePreset" xml:space="preserve"><value>{0} ({1})</value></data>
+  <data name="Session_CompletionCleanupPending" xml:space="preserve"><value>Session completed. File cleanup is pending and will be retried when PrintFlow starts again. Approved outputs are retained.</value></data>
+  <data name="Home_RecoveryDescription" xml:space="preserve"><value>{0} · Interrupted at {1} · {2} · Last activity: {3}</value></data>
+  <data name="Home_RecoveryFailed" xml:space="preserve"><value>The recovery action could not be completed. Part of it may already have been recorded (for example, the job may now be handed off), so do not repeat it straight away. Open the job from the list to check its current state; if you are not sure, open Error details below and ask a colleague or supervisor.</value></data>
+  <data name="Home_RecoveryHeading" xml:space="preserve"><value>Recovery needed</value></data>
+  <data name="Home_RecoveryManualResult" xml:space="preserve"><value>Import manual result</value></data>
+  <data name="Home_RecoveryNoActions" xml:space="preserve"><value>No recovery action available.</value></data>
+  <data name="Home_RecoveryRestart" xml:space="preserve"><value>Restart step</value></data>
+  <data name="Home_RecoveryUnavailable" xml:space="preserve"><value>Recovery entries could not be loaded ({0}). Refresh to try again.</value></data>
+  <data name="Home_RecoveryPending" xml:space="preserve"><value>Interrupted jobs needing a recovery decision: {0}.</value></data>
+  <data name="Home_RecoveryUnfinishedImport" xml:space="preserve"><value>Import completion is not recorded. If the import failed, restart PrintFlow to recover its unfinished attempt.</value></data>
+  <data name="Settings_Open" xml:space="preserve"><value>Settings</value></data>
+  <data name="Settings_Heading" xml:space="preserve"><value>Settings</value></data>
+  <data name="Settings_GeneralHeading" xml:space="preserve"><value>General</value></data>
+  <data name="Settings_ProductionHeading" xml:space="preserve"><value>Production</value></data>
+  <data name="Settings_ProductionHint" xml:space="preserve"><value>These come from the approved production setup for this workstation. They are shown here so you can check them; they are not changed here.</value></data>
+  <data name="Settings_DiagnosticsHeading" xml:space="preserve"><value>Local records</value></data>
+  <data name="Settings_Language" xml:space="preserve"><value>Language</value></data>
+  <data name="Settings_OutputRoot" xml:space="preserve"><value>Output location</value></data>
+  <data name="Settings_OutputRootHint" xml:space="preserve"><value>Where finished files are kept. It is fixed by the approved production setup, and no existing job is ever moved.</value></data>
+  <data name="Settings_OutputRootUnavailable" xml:space="preserve"><value>The approved production setup has not been confirmed, so no output location is stated.</value></data>
+  <data name="Settings_TrimMargin" xml:space="preserve"><value>Default safety edge (pixels)</value></data>
+  <data name="Settings_TrimMarginHint" xml:space="preserve"><value>Extra space kept around the artwork when trimming. Applies to jobs started from now on; jobs already open keep the value they were given. Zero trims exactly to the artwork.</value></data>
+  <data name="Settings_TrimMarginInvalid" xml:space="preserve"><value>Enter the default safety edge as a whole number of pixels, zero or more. Nothing was saved.</value></data>
+  <data name="Settings_ProductionDpi" xml:space="preserve"><value>Print resolution</value></data>
+  <data name="Settings_ProductionDpiValue" xml:space="preserve"><value>{0} PPI (fixed)</value></data>
+  <data name="Settings_Preset" xml:space="preserve"><value>Approved production setup</value></data>
+  <data name="Settings_ColourSetup" xml:space="preserve"><value>Photoshop colour setup</value></data>
+  <data name="Settings_ColourSetupHint" xml:space="preserve"><value>Checked on the production readiness screen. PrintFlow never changes Photoshop colour settings for you.</value></data>
+  <data name="Settings_ColourConfirmed" xml:space="preserve"><value>Confirmed</value></data>
+  <data name="Settings_ColourMismatch" xml:space="preserve"><value>Does not match the approved colour setup</value></data>
+  <data name="Settings_ColourNotVerified" xml:space="preserve"><value>Not checked yet — run the check on the production readiness screen</value></data>
+  <data name="Settings_LogRetention" xml:space="preserve"><value>Keep local records for (days)</value></data>
+  <data name="Settings_LogRetentionHint" xml:space="preserve"><value>Diagnostic records and failure screenshots stay on this workstation and are never uploaded. At safe application startup, after recovery, bounded cleanup uses the configured days to remove eligible expired records and screenshots. Diagnostics still needed for current work are kept. Changes apply at the next startup.</value></data>
+  <data name="Settings_LocalLogLocation" xml:space="preserve"><value>Local diagnostic records location</value></data>
+  <data name="Settings_LocalLogLocationHint" xml:space="preserve"><value>The local database containing diagnostic records. Select the path to copy it.</value></data>
+  <data name="Settings_ScreenshotLocation" xml:space="preserve"><value>Failure screenshots location</value></data>
+  <data name="Settings_ScreenshotLocationHint" xml:space="preserve"><value>The local folder for failure screenshots. Select the path to copy it.</value></data>
+  <data name="Startup_DiagnosticRetentionWarning" xml:space="preserve"><value>Automatic cleanup of local diagnostic records and screenshots could not finish safely. You can continue working; cleanup will be tried again at the next startup.</value></data>
+  <data name="Settings_LogRetentionInvalid" xml:space="preserve"><value>Enter the number of days to keep local records, from 1 to {0}. Nothing was saved.</value></data>
+  <data name="Settings_Apply" xml:space="preserve"><value>Apply</value></data>
+  <data name="Settings_Saved" xml:space="preserve"><value>Settings saved.</value></data>
+  <data name="Settings_SaveFailed" xml:space="preserve"><value>The settings could not be saved. Nothing was changed: the previous settings still apply and your entries are still shown. You can choose {0} again; if it fails again, open Error details below and ask a colleague or supervisor.</value></data>
+  <data name="Settings_LoadFailed" xml:space="preserve"><value>The saved settings could not be read ({0}). The values shown are the defaults.</value></data>
+  <data name="ErrorDetails_Heading" xml:space="preserve"><value>Error details</value></data>
+  <data name="ErrorDetails_WhatHappened" xml:space="preserve"><value>What happened</value></data>
+  <data name="ErrorDetails_Processing" xml:space="preserve"><value>Processing information</value></data>
+  <data name="ErrorDetails_Workflow" xml:space="preserve"><value>Workflow</value></data>
+  <data name="ErrorDetails_Step" xml:space="preserve"><value>Step</value></data>
+  <data name="ErrorDetails_Code" xml:space="preserve"><value>Code</value></data>
+  <data name="ErrorDetails_RetryInformation" xml:space="preserve"><value>Attempt: {0}   Previous retries: {1}</value></data>
+  <data name="ErrorDetails_InputPath" xml:space="preserve"><value>Managed input file</value></data>
+  <data name="ErrorDetails_ExpectedOutputPath" xml:space="preserve"><value>Expected output file</value></data>
+  <data name="ErrorDetails_Evidence" xml:space="preserve"><value>Evidence</value></data>
+  <data name="ErrorDetails_ScreenshotPath" xml:space="preserve"><value>Screenshot path</value></data>
+  <data name="ErrorDetails_TechnicalDetail" xml:space="preserve"><value>Technical details</value></data>
+  <data name="ErrorDetails_Back" xml:space="preserve"><value>Back to processing</value></data>
+  <data name="ErrorDetails_NotEstablished" xml:space="preserve"><value>Not established</value></data>
+  <data name="ErrorDetails_NotRecorded" xml:space="preserve"><value>Not recorded</value></data>
+  <data name="ErrorDetails_PathUnavailable" xml:space="preserve"><value>Path unavailable</value></data>
+  <data name="ErrorDetails_NotCaptured" xml:space="preserve"><value>No screenshot captured</value></data>
+  <data name="ErrorDetails_ImageUnavailable" xml:space="preserve"><value>Evidence image unavailable</value></data>
+  <data name="ErrorDetails_Historical" xml:space="preserve"><value>This is a previous failure. Recovery actions are no longer available for this attempt.</value></data>
+  <data name="ErrorDetails_Interrupted" xml:space="preserve"><value>Processing was interrupted before a result was confirmed. Review the available recovery actions.</value></data>
+  <data name="ErrorDetails_Cancelled" xml:space="preserve"><value>Processing was cancelled before a result was confirmed. Review the available recovery actions.</value></data>
+  <data name="ErrorDetails_ManualProcessing" xml:space="preserve"><value>Manual processing</value></data>
+  <data name="Home_ImportRefused" xml:space="preserve"><value>{0} ({1})</value></data>
+  <data name="Home_ImportFormatSeparator" xml:space="preserve"><value>, </value></data>
+  <data name="Home_ImportUnsupportedFormat" xml:space="preserve"><value>This is a {0} file, which PrintFlow Studio cannot process. Choose one {1} file instead — a PDF must have a single page. Nothing was processed and your file was not changed.</value></data>
+  <data name="Home_ImportUnrecognisedFile" xml:space="preserve"><value>“{0}” is not an image PrintFlow Studio recognises. Choose one {1} file — a PDF must have a single page. Nothing was processed and your file was not changed.</value></data>
+  <data name="Home_ImportUnreadableImage" xml:space="preserve"><value>“{0}” is a {1} file, but no image could be read from it — the file is incomplete or damaged. This is not a format problem. Nothing was processed and your file was not changed.</value></data>
+  <data name="Home_RemoveRecord" xml:space="preserve"><value>Remove from list</value></data>
+  <data name="Home_RemoveDone" xml:space="preserve"><value>“{0}” was removed from Recent processing. Its imported file, approved outputs and processing history are kept.</value></data>
+  <data name="Home_RemoveFailed" xml:space="preserve"><value>That record could not be removed from Recent processing ({0}). It stays on the list and nothing was changed.</value></data>
+  <data name="Home_RecentNoThumbnail" xml:space="preserve"><value>No preview</value></data>
+  <data name="Home_RecentThumbnailOf" xml:space="preserve"><value>Preview of {0}</value></data>
+  <data name="ErrorDetails_ExportDiagnosticPackage" xml:space="preserve"><value>Export diagnostic package</value></data>
+  <data name="DiagnosticPackage_Heading" xml:space="preserve"><value>Diagnostic package</value></data>
+  <data name="DiagnosticPackage_LocalOnlyNotice" xml:space="preserve"><value>The package is saved locally. Nothing is uploaded automatically.</value></data>
+  <data name="DiagnosticPackage_Subject" xml:space="preserve"><value>Package subject</value></data>
+  <data name="DiagnosticPackage_ProcessingName" xml:space="preserve"><value>Processing name</value></data>
+  <data name="DiagnosticPackage_FailureReference" xml:space="preserve"><value>Failure reference</value></data>
+  <data name="DiagnosticPackage_Included" xml:space="preserve"><value>Included</value></data>
+  <data name="DiagnosticPackage_Unavailable" xml:space="preserve"><value>Unavailable</value></data>
+  <data name="DiagnosticPackage_ExcludedByPolicy" xml:space="preserve"><value>Excluded by privacy policy</value></data>
+  <data name="DiagnosticPackage_LocalPaths" xml:space="preserve"><value>Local paths recorded in the manifest</value></data>
+  <data name="DiagnosticPackage_Destination" xml:space="preserve"><value>Destination</value></data>
+  <data name="DiagnosticPackage_DestinationHint" xml:space="preserve"><value>Choose a local ZIP file after reviewing these contents. Creating the package does not change the processing record or its diagnostic evidence.</value></data>
+  <data name="DiagnosticPackage_NoOverwrite" xml:space="preserve"><value>An existing file is never replaced; PrintFlow uses a numbered name instead.</value></data>
+  <data name="DiagnosticPackage_Save" xml:space="preserve"><value>Save package</value></data>
+  <data name="DiagnosticPackage_Back" xml:space="preserve"><value>Back to error details</value></data>
+  <data name="DiagnosticPackage_SaveDialogTitle" xml:space="preserve"><value>Save diagnostic package</value></data>
+  <data name="DiagnosticPackage_SaveDialogFilter" xml:space="preserve"><value>Diagnostic package (*.zip)|*.zip</value></data>
+  <data name="DiagnosticPackage_PreviewFailed" xml:space="preserve"><value>The diagnostic package contents could not be prepared ({0}). No package was created.</value></data>
+  <data name="DiagnosticPackage_SaveFailed" xml:space="preserve"><value>The diagnostic package could not be saved ({0}). No partial package was kept.</value></data>
+  <data name="DiagnosticPackage_Saved" xml:space="preserve"><value>Diagnostic package saved locally to {0}. Nothing was uploaded automatically.</value></data>
+  <data name="DiagnosticPackage_EnvironmentReady" xml:space="preserve"><value>ready</value></data>
+  <data name="DiagnosticPackage_EnvironmentNotReady" xml:space="preserve"><value>not ready</value></data>
+  <data name="DiagnosticPackage_ItemManifest" xml:space="preserve"><value>Human-readable manifest (manifest.txt)</value></data>
+  <data name="DiagnosticPackage_ItemFailureSummary" xml:space="preserve"><value>Error details, retry facts and stable failure code (in manifest.txt)</value></data>
+  <data name="DiagnosticPackage_ItemAutomationLog" xml:space="preserve"><value>Structured local error record {0}, recorded {1} (in manifest.txt)</value></data>
+  <data name="DiagnosticPackage_ItemLogUnavailable" xml:space="preserve"><value>The structured local error record has expired or is unavailable. The saved processing failure facts will still be included.</value></data>
+  <data name="DiagnosticPackage_ItemLogNotRecorded" xml:space="preserve"><value>No structured local error record was recorded for this attempt. The saved processing failure facts will still be included.</value></data>
+  <data name="DiagnosticPackage_ItemEnvironment" xml:space="preserve"><value>Workstation readiness: {0}; production preset: {1}; {2} checks (in manifest.txt)</value></data>
+  <data name="DiagnosticPackage_ItemApplication" xml:space="preserve"><value>{0} version {1} (in manifest.txt)</value></data>
+  <data name="DiagnosticPackage_ItemLocalPaths" xml:space="preserve"><value>The five local paths shown below (in manifest.txt; file contents are not implied)</value></data>
+  <data name="DiagnosticPackage_ItemFailureScreenshot" xml:space="preserve"><value>Failure screenshot (failure-screenshot.png) — contains what was visible in the application window at failure time</value></data>
+  <data name="DiagnosticPackage_ItemScreenshotUnavailable" xml:space="preserve"><value>The failure screenshot was not captured, has expired, or is unavailable. The manifest will say so.</value></data>
+  <data name="DiagnosticPackage_ItemScreenshotExcluded" xml:space="preserve"><value>The referenced screenshot is outside PrintFlow's owned failure-capture policy and will not be included.</value></data>
+  <data name="DiagnosticPackage_ItemCustomerSource" xml:space="preserve"><value>Original customer source image</value></data>
+  <data name="DiagnosticPackage_ItemInputSnapshot" xml:space="preserve"><value>Managed input image bytes</value></data>
+  <data name="DiagnosticPackage_ItemRevisionArtwork" xml:space="preserve"><value>Working or historical processed artwork</value></data>
+  <data name="DiagnosticPackage_ItemApprovedOutput" xml:space="preserve"><value>Approved PNG files</value></data>
+  <data name="DiagnosticPackage_ItemProductionOutput" xml:space="preserve"><value>Production TIFF files</value></data>
+  <data name="DiagnosticPackage_ItemManualArtwork" xml:space="preserve"><value>Manually imported artwork</value></data>
+  <data name="DiagnosticPackage_ItemRecoveryEvidence" xml:space="preserve"><value>Recovery or quarantine files</value></data>
+  <data name="DiagnosticPackage_ItemUnknownEvidence" xml:space="preserve"><value>Unknown or unrelated files from the diagnostic folder</value></data>
+  <data name="DiagnosticPackage_ItemDiagnosticDatabase" xml:space="preserve"><value>Diagnostic database file contents</value></data>
+  <data name="DiagnosticPackage_PathManagedInput" xml:space="preserve"><value>Managed input: {0}</value></data>
+  <data name="DiagnosticPackage_PathExpectedOutput" xml:space="preserve"><value>Expected output: {0}</value></data>
+  <data name="DiagnosticPackage_PathScreenshot" xml:space="preserve"><value>Failure screenshot: {0}</value></data>
+  <data name="DiagnosticPackage_PathLocalLog" xml:space="preserve"><value>Local diagnostic database: {0}</value></data>
+  <data name="DiagnosticPackage_PathScreenshotFolder" xml:space="preserve"><value>Failure screenshot folder: {0}</value></data>
+  <data name="Session_PreflightHeading" xml:space="preserve"><value>Print size check</value></data>
+  <data name="Session_PreflightSourcePixels" xml:space="preserve"><value>Source pixels</value></data>
+  <data name="Session_PreflightArtworkContent" xml:space="preserve"><value>Artwork content</value></data>
+  <data name="Session_PreflightSelectedArtwork" xml:space="preserve"><value>Selected artwork</value></data>
+  <data name="Session_PreflightFinalCanvas" xml:space="preserve"><value>Final canvas</value></data>
+  <data name="Session_PreflightGraphicBounds" xml:space="preserve"><value>Artwork extent</value></data>
+  <data name="Session_PreflightFullOriginalCanvas" xml:space="preserve"><value>Full original canvas</value></data>
+  <data name="Session_PreflightNoCrop" xml:space="preserve"><value>No crop or trim applied</value></data>
+  <data name="Session_PreflightGeometryUnavailable" xml:space="preserve"><value>Crop details unavailable</value></data>
+  <data name="Session_PreflightPrintSize" xml:space="preserve"><value>Print size</value></data>
+  <data name="Session_PreflightOutputPixels" xml:space="preserve"><value>Projected output pixels</value></data>
+  <data name="Session_PreflightOutputDpi" xml:space="preserve"><value>Production output resolution</value></data>
+  <data name="Session_PreflightStatus" xml:space="preserve"><value>Status</value></data>
+  <data name="Session_PreflightNoEnlargement" xml:space="preserve"><value>No enlargement required</value></data>
+  <data name="Session_PreflightEnlargementRequired" xml:space="preserve"><value>Enlargement required</value></data>
+  <data name="Session_PreflightEnlargementAuthorised" xml:space="preserve"><value>Enlargement authorised</value></data>
+  <data name="Session_PreflightDraftHint" xml:space="preserve"><value>Size proposal · confirm the size to continue</value></data>
+  <data name="Session_PreflightPpi" xml:space="preserve"><value>{0:0} × {1:0} PPI</value></data>
+  <data name="Session_PreflightOutputPpi" xml:space="preserve"><value>{0} PPI</value></data>
+  <data name="Environment_ProbeNotRecorded" xml:space="preserve"><value>Not recorded</value></data>
+  <data name="Environment_LiveEvidenceDetail" xml:space="preserve"><value>Last complete live verification: {0}; retained evidence: {1}; current runtime observation deferred: {2}. Historical observations do not authorize production.</value></data>
+  <data name="Environment_ProbeProgressDetail" xml:space="preserve"><value>Latest diagnostic attempt: {0}; probe: {1}. Recorded stages (unlisted stages are not confirmed): {2}. Last attempted: {3}; last confirmed: {4}; cleanup outcome: {5}. Primary failure: {6}; secondary failures: {7}.</value></data>
+  <data name="Session_PhotoshopTakeOver" xml:space="preserve"><value>Take Over in Photoshop</value></data>
+  <data name="Session_PhotoshopStopHint" xml:space="preserve"><value>Stops this automated operation. Take over stops PrintFlow control and leaves Photoshop as it is; it may still be working. PrintFlow will not force-close Photoshop. Check Photoshop before returning to automation.</value></data>
+  <data name="Session_PhotoshopTakeOverConfirmQuestion" xml:space="preserve"><value>Take over in Photoshop? PrintFlow will stop controlling Photoshop and leave it as it is. It may still be working; check it yourself before returning to automation. A manually made result, including a TIFF, cannot be imported back for this step.</value></data>
+  <data name="Session_PhotoshopStoppingNotice" xml:space="preserve"><value>Stopping — PrintFlow has requested that the Photoshop operation stop. Please wait.</value></data>
+  <data name="Session_PhotoshopTakingOverNotice" xml:space="preserve"><value>Handing over — PrintFlow is ending its control of Photoshop.</value></data>
+  <data name="Session_PhotoshopHandedOffNotice" xml:space="preserve"><value>PrintFlow has stopped controlling Photoshop. Manual result import, including a hand-made TIFF, is not supported for this step.</value></data>
+  <data name="Session_PhotoshopReturnGuidance" xml:space="preserve"><value>To make a new attempt, choose {0}, then start the step again.</value></data>
+  <data name="Session_PhotoshopRetainedNotice" xml:space="preserve"><value>Photoshop may still be working or holding a result. Check Photoshop before starting another attempt.</value></data>
+  <data name="Session_StatusHandedOff" xml:space="preserve"><value>Handed off</value></data>
+  <data name="Session_StatusCompleted" xml:space="preserve"><value>Completed</value></data>
+  <data name="Session_StatusStopped" xml:space="preserve"><value>Stopped or failed</value></data>
+  <data name="Session_StatusProcessing" xml:space="preserve"><value>Processing automatically</value></data>
+  <data name="Session_StatusReview" xml:space="preserve"><value>Waiting for your review</value></data>
+  <data name="Session_StatusInput" xml:space="preserve"><value>Needs your input</value></data>
+  <data name="Home_RecentStatusUnknown" xml:space="preserve"><value>Status unavailable</value></data>
+  <data name="Home_RecentSaveHistoryUnavailable" xml:space="preserve"><value>Save history unavailable; check job details</value></data>
+  <data name="Home_RecentPngSavedPreviously" xml:space="preserve"><value>Saved previously (approved PNG); check job details</value></data>
+  <data name="Home_RecentTiffSavedPreviously" xml:space="preserve"><value>{0} approved TIFF size(s) saved previously; check job details</value></data>
+  <data name="Session_NextCompleted" xml:space="preserve"><value>The workflow is complete.</value></data>
+  <data name="Session_NextAbandoned" xml:space="preserve"><value>This job was abandoned; return to Home to choose another job.</value></data>
+  <data name="Session_NextProcessing" xml:space="preserve"><value>Please wait while PrintFlow processes: {0}.</value></data>
+  <data name="Session_NextReview" xml:space="preserve"><value>Inspect this result, then choose {0} or {1}.</value></data>
+  <data name="Session_NextRetry" xml:space="preserve"><value>This step needs another attempt; choose {0} when ready.</value></data>
+  <data name="Session_NextAction" xml:space="preserve"><value>When ready, choose {0}.</value></data>
+  <data name="Session_NextStopped" xml:space="preserve"><value>This step did not finish; check the notices and available actions below.</value></data>
+  <data name="Session_NextOriginal" xml:space="preserve"><value>Check the original image, then choose {0}.</value></data>
+  <data name="Session_NextWhiteInk" xml:space="preserve"><value>Choose the white-ink option below and confirm it.</value></data>
+  <data name="Session_NextDimensions" xml:space="preserve"><value>Set and confirm the print size below.</value></data>
+  <data name="Session_NextBackground" xml:space="preserve"><value>Choose how to remove the background in the controls below.</value></data>
+  <data name="Session_NextInput" xml:space="preserve"><value>Check the current step and complete the required input below.</value></data>
+  <data name="Session_NextCrop" xml:space="preserve"><value>Draw or adjust the crop boundary, then choose {0}.</value></data>
+  <data name="WorkflowPurpose_Asset" xml:space="preserve"><value>Use this for a picture or logo you will use in a design. Enhance or remove the background if needed.</value></data>
+  <data name="WorkflowPurpose_Customer" xml:space="preserve"><value>Use this for a customer's finished design that needs preparation for print. Enhance or remove the background if needed.</value></data>
+  <data name="WorkflowPurpose_Print" xml:space="preserve"><value>Use this for a finished design that is ready to make into a print file.</value></data>
+  <data name="WorkflowResult_Png" xml:space="preserve"><value>You get an approved transparent PNG.</value></data>
+  <data name="WorkflowResult_Tiff" xml:space="preserve"><value>You get an approved print TIFF (CMYK + white ink).</value></data>
+  <data name="WorkflowDimensions_None" xml:space="preserve"><value>No print size needed. No TIFF.</value></data>
+  <data name="WorkflowDimensions_Required" xml:space="preserve"><value>Print size needed.</value></data>
+  <data name="FinalSave_Heading" xml:space="preserve"><value>Save the final result</value></data>
+  <data name="FinalSave_TargetLabel" xml:space="preserve"><value>Result to save</value></data>
+  <data name="FinalSave_TargetPending" xml:space="preserve"><value>{0} (waiting for your review)</value></data>
+  <data name="FinalSave_TargetApproved" xml:space="preserve"><value>{0} (approved)</value></data>
+  <data name="FinalSave_FileNameLabel" xml:space="preserve"><value>File name</value></data>
+  <data name="FinalSave_FolderLabel" xml:space="preserve"><value>Folder</value></data>
+  <data name="FinalSave_NoFolderValue" xml:space="preserve"><value>No folder chosen yet</value></data>
+  <data name="FinalSave_ChangeLocation" xml:space="preserve"><value>Change location</value></data>
+  <data name="FinalSave_PickerTitle" xml:space="preserve"><value>Choose the folder for the final result</value></data>
+  <data name="FinalSave_NoFolder" xml:space="preserve"><value>Choose a folder before saving.</value></data>
+  <data name="FinalSave_RememberedFolder" xml:space="preserve"><value>This is the last folder a save succeeded in. Change it if this job belongs somewhere else.</value></data>
+  <data name="FinalSave_PreferenceUnavailable" xml:space="preserve"><value>The last used folder could not be read. Choose a folder before saving.</value></data>
+  <data name="FinalSave_SaveAs" xml:space="preserve"><value>Save as: {0}</value></data>
+  <data name="FinalSave_TypePng" xml:space="preserve"><value>PNG</value></data>
+  <data name="FinalSave_TypeTiff" xml:space="preserve"><value>Print TIFF · {0:0.#} × {1:0.#} mm</value></data>
+  <data name="FinalSave_TypeTiffSizePending" xml:space="preserve"><value>Print TIFF · actual size not shown yet</value></data>
+  <data name="FinalSave_FolderValue" xml:space="preserve"><value>Folder: {0}</value></data>
+  <data name="FinalSave_NameExtensionAdded" xml:space="preserve"><value>The extension will be added: the file is saved as {0}.</value></data>
+  <data name="FinalSave_NameInvalid" xml:space="preserve"><value>Enter a plain file name without \ / : * ? " &lt; &gt; | and without a trailing dot or space.</value></data>
+  <data name="FinalSave_NameWrongType" xml:space="preserve"><value>This result is a {0} file, so the name must end in {1}.</value></data>
+  <data name="FinalSave_ConfirmAndSave" xml:space="preserve"><value>Confirm result and save</value></data>
+  <data name="FinalSave_SaveApproved" xml:space="preserve"><value>Save approved result</value></data>
+  <data name="FinalSave_RetrySave" xml:space="preserve"><value>Retry save</value></data>
+  <data name="FinalSave_CheckAgain" xml:space="preserve"><value>Check this save again</value></data>
+  <data name="FinalSave_CheckSaved" xml:space="preserve"><value>Check saved file</value></data>
+  <data name="FinalSave_OpenFolder" xml:space="preserve"><value>Open containing folder</value></data>
+  <data name="FinalSave_SaveAnotherCopy" xml:space="preserve"><value>Save another copy</value></data>
+  <data name="FinalSave_UseSuggestion" xml:space="preserve"><value>Use {0}</value></data>
+  <data name="FinalSave_CancelSave" xml:space="preserve"><value>Cancel save</value></data>
+  <data name="FinalSave_AwaitingConfirmation" xml:space="preserve"><value>Waiting for your review. Check the result, file name and folder, then choose {0}.</value></data>
+  <data name="FinalSave_ApproveOnlyHint" xml:space="preserve"><value>{0} only records your review; it does not save a file.</value></data>
+  <data name="FinalSave_StageChecking" xml:space="preserve"><value>Checking the file name and folder…</value></data>
+  <data name="FinalSave_StageApproving" xml:space="preserve"><value>Confirming this result…</value></data>
+  <data name="FinalSave_StagePreparingPng" xml:space="preserve"><value>Approved. Preparing the approved PNG…</value></data>
+  <data name="FinalSave_StageSaving" xml:space="preserve"><value>Approved. Saving to {0}…</value></data>
+  <data name="FinalSave_StageFinishing" xml:space="preserve"><value>Approved. Finishing the save… This can no longer be cancelled.</value></data>
+  <data name="FinalSave_ApprovedNotSaved" xml:space="preserve"><value>Approved, but not saved to your folder yet.</value></data>
+  <data name="FinalSave_ApprovedNotSavedReason" xml:space="preserve"><value>Approved, but not saved: {0} Nothing needs to be processed again.</value></data>
+  <data name="FinalSave_Saved" xml:space="preserve"><value>Saved: {0} in {1}.</value></data>
+  <data name="FinalSave_SavedPreviously" xml:space="preserve"><value>Saved previously: {0} in {1}. Location not checked.</value></data>
+  <data name="FinalSave_Uncertain" xml:space="preserve"><value>A file may have been saved to {0}, but completion is not verified. Check this save again.</value></data>
+  <data name="FinalSave_Collision" xml:space="preserve"><value>{0} already exists in this folder and will not be overwritten. Use {1} or choose another folder.</value></data>
+  <data name="FinalSave_CollisionNoSuggestion" xml:space="preserve"><value>{0} already exists in this folder and will not be overwritten. Enter another name or choose another folder.</value></data>
+  <data name="FinalSave_Missing" xml:space="preserve"><value>Saved previously, but the file is now missing: {0}</value></data>
+  <data name="FinalSave_Changed" xml:space="preserve"><value>Saved previously, but the file at {0} has changed. It will not be overwritten; choose another name or folder to save again.</value></data>
+  <data name="FinalSave_Unavailable" xml:space="preserve"><value>Saved previously, but {0} cannot be reached now. Reconnect the drive, then check again.</value></data>
+  <data name="FinalSave_HistoryUnavailable" xml:space="preserve"><value>Save history could not be read, so earlier saves may exist.</value></data>
+  <data name="FinalSave_PngPreparationPending" xml:space="preserve"><value>Approved; the approved PNG is not prepared yet. Use the step action below to prepare it, then save. The image does not need processing again.</value></data>
+  <data name="FinalSave_ApprovalRefused" xml:space="preserve"><value>Result not approved: the result on screen changed or could not be approved. Nothing was saved.</value></data>
+  <data name="FinalSave_ApprovalUnknown" xml:space="preserve"><value>PrintFlow could not confirm whether the approval was recorded. Nothing was saved. Return to Home and reopen this job to see its current state.</value></data>
+  <data name="FinalSave_DraftRefused" xml:space="preserve"><value>Nothing was approved or saved: {0}</value></data>
+  <data name="FinalSave_Ineligible" xml:space="preserve"><value>This result cannot be saved: {0}</value></data>
+  <data name="FinalSave_UncertainElsewhere" xml:space="preserve"><value>An earlier save to {0} is not verified yet. Saving with a different name or folder makes a separate copy.</value></data>
+  <data name="FinalSave_ReasonApprovalEvidenceMissing" xml:space="preserve"><value>there is no human review record for this image, so it cannot be treated as approved.</value></data>
+  <data name="FinalSave_ReasonPending" xml:space="preserve"><value>it is still waiting for review.</value></data>
+  <data name="FinalSave_ReasonRejected" xml:space="preserve"><value>it was rejected.</value></data>
+  <data name="FinalSave_ReasonInvalidated" xml:space="preserve"><value>it is no longer valid because an earlier step changed.</value></data>
+  <data name="FinalSave_ReasonRecycled" xml:space="preserve"><value>its file was sent to the Recycle Bin.</value></data>
+  <data name="FinalSave_ReasonObsolete" xml:space="preserve"><value>a newer result replaced it.</value></data>
+  <data name="FinalSave_ReasonInconsistent" xml:space="preserve"><value>its approval record does not match its file.</value></data>
+  <data name="FinalSave_ReasonMissing" xml:space="preserve"><value>it could not be found.</value></data>
+  <data name="FinalSave_ReasonSourceChanged" xml:space="preserve"><value>the approved file in PrintFlow's storage changed or is missing.</value></data>
+  <data name="FinalSave_FailCancelled" xml:space="preserve"><value>the save was cancelled.</value></data>
+  <data name="FinalSave_FailNotWritable" xml:space="preserve"><value>the folder cannot be written.</value></data>
+  <data name="FinalSave_FailUnavailable" xml:space="preserve"><value>the folder is not available (the drive may be disconnected).</value></data>
+  <data name="FinalSave_FailUnsupported" xml:space="preserve"><value>this location is not supported. Choose a folder on a local NTFS drive of this computer (a USB drive only if it is formatted NTFS); network, cloud and other drive types are not supported.</value></data>
+  <data name="FinalSave_FailProtected" xml:space="preserve"><value>that folder belongs to PrintFlow's own storage, or the name is the original imported file. Choose another folder or name.</value></data>
+  <data name="FinalSave_FailCopy" xml:space="preserve"><value>the copy could not be completed.</value></data>
+  <data name="FinalSave_FailVerify" xml:space="preserve"><value>the copied file could not be verified.</value></data>
+  <data name="FinalSave_FailPersistence" xml:space="preserve"><value>the save record could not be written.</value></data>
+  <data name="FinalSave_FailInvalidName" xml:space="preserve"><value>the file name is not valid.</value></data>
+  <data name="FinalSave_FailConflict" xml:space="preserve"><value>the selection changed. Check the result and try again.</value></data>
+  <data name="FinalSave_FailOther" xml:space="preserve"><value>the save did not complete.</value></data>
+  <data name="FinalSave_OpenDispatched" xml:space="preserve"><value>Asked Windows to show {0} in its folder.</value></data>
+  <data name="FinalSave_OpenMissing" xml:space="preserve"><value>The folder was not opened: the saved file is missing.</value></data>
+  <data name="FinalSave_OpenChanged" xml:space="preserve"><value>The folder was not opened: the saved file has changed.</value></data>
+  <data name="FinalSave_OpenUnavailable" xml:space="preserve"><value>The folder was not opened: the location cannot be reached now.</value></data>
+  <data name="FinalSave_OpenIneligible" xml:space="preserve"><value>The folder was not opened: this result can no longer be saved or opened.</value></data>
+  <data name="FinalSave_OpenUncertain" xml:space="preserve"><value>The folder was not opened: this save is not verified.</value></data>
+  <data name="FinalSave_OpenShellFailed" xml:space="preserve"><value>Windows did not open the folder. The file is still saved at {0}.</value></data>
+  <data name="FinalSave_FullPathLabel" xml:space="preserve"><value>Full path (select to copy)</value></data>
+  <data name="FinalSave_DetailsLabel" xml:space="preserve"><value>Technical details</value></data>
+  <data name="Session_NextFinalReview" xml:space="preserve"><value>Inspect this result and check the file name and folder, then choose {0}. {1} only records the review.</value></data>
+  <data name="Session_NextCompletedNotSaved" xml:space="preserve"><value>The workflow is complete, but the approved result is not saved to your folder yet.</value></data>
+  <data name="FinalSave_StageVerifyingSaved" xml:space="preserve"><value>Checking the saved file…</value></data>
+  <data name="FinalSave_StageApproved" xml:space="preserve"><value>Approved. Preparing the save…</value></data>
+  <data name="FinalSave_ActionIncomplete" xml:space="preserve"><value>This action did not finish, so nothing more is known about this save yet. Try again.</value></data>
+  <data name="FinalSave_HistoryLoading" xml:space="preserve"><value>Reading earlier saves…</value></data>
+  <data name="FinalSave_HistoryNotRefreshed" xml:space="preserve"><value>Save history could not be refreshed. What is shown was read earlier and may be out of date.</value></data>
+  <data name="FinalSave_RecordsLabel" xml:space="preserve"><value>Recorded saves of this result</value></data>
+  <data name="FinalSave_RecordSaved" xml:space="preserve"><value>Saved {2}: {0} in {1}</value></data>
+  <data name="FinalSave_RecordUnverified" xml:space="preserve"><value>Not verified: {0} in {1}</value></data>
+  <data name="FinalSave_RecordNotSaved" xml:space="preserve"><value>Not saved: {0} in {1}</value></data>
+  <data name="Session_NextFinalReviewNeedsDraft" xml:space="preserve"><value>Inspect this result, then choose a folder and check the file name to save it. {0} only records the review.</value></data>
+  <data name="Session_TrimAdjustBegin" xml:space="preserve"><value>Adjust trim edges</value></data>
+  <data name="Session_TrimAdjustHeading" xml:space="preserve"><value>Adjust trim edges</value></data>
+  <data name="Session_TrimAdjustInstructions" xml:space="preserve"><value>Drag the edges or corners to change what is kept. Trimming only changes the picture's edges.</value></data>
+  <data name="Session_TrimAdjustPrintSizeLater" xml:space="preserve"><value>The print size is set in a later step.</value></data>
+  <data name="Session_TrimAdjustKeyboard" xml:space="preserve"><value>Keyboard: Tab to a handle, then use the arrow keys (Shift moves 10 pixels; Ctrl moves to the picture's border).</value></data>
+  <data name="Session_TrimAdjustUse" xml:space="preserve"><value>Use this trim</value></data>
+  <data name="Session_TrimAdjustRestore" xml:space="preserve"><value>Restore automatic suggestion</value></data>
+  <data name="Session_TrimAdjustNoSuggestion" xml:space="preserve"><value>There is no automatic suggestion for this picture.</value></data>
+  <data name="Session_TrimAdjustCancel" xml:space="preserve"><value>Cancel adjustment</value></data>
+  <data name="Session_TrimAdjustAdjustView" xml:space="preserve"><value>Adjust</value></data>
+  <data name="Session_TrimAdjustCompareView" xml:space="preserve"><value>Compare</value></data>
+  <data name="Session_TrimAdjustCurrent" xml:space="preserve"><value>Current result (waiting for review)</value></data>
+  <data name="Session_TrimAdjustProposed" xml:space="preserve"><value>Proposed trim (not used yet)</value></data>
+  <data name="Session_TrimAdjustKept" xml:space="preserve"><value>Kept area: {0}</value></data>
+  <data name="Session_TrimAdjustSuggestion" xml:space="preserve"><value>Automatic suggestion: {0}</value></data>
+  <data name="Session_TrimAdjustInvalid" xml:space="preserve"><value>That boundary can't be used: it must stay inside the picture and keep at least one pixel. The previous boundary is kept. To place an edge exactly on the picture's border, zoom in or press Ctrl+arrow on its handle.</value></data>
+  <data name="Session_TrimAdjustUnchanged" xml:space="preserve"><value>The boundary is unchanged. Using it still makes a new result that needs review.</value></data>
+  <data name="Session_TrimAdjustBusy" xml:space="preserve"><value>Making the new trim…</value></data>
+  <data name="Session_TrimAdjustReady" xml:space="preserve"><value>The new trim is ready. Check it, then approve it.</value></data>
+  <data name="Session_TrimAdjustSourceUnavailable" xml:space="preserve"><value>The picture this trim was made from can't be opened, so the edges can't be adjusted here. The current result is unchanged.</value></data>
+  <data name="Session_NextTrimAdjust" xml:space="preserve"><value>Drag the edges or corners, then choose {0}.</value></data>
+  <data name="FinalSave_TrimAdjustOpen" xml:space="preserve"><value>Finish or cancel the trim adjustment before approving or saving.</value></data>
+  <data name="Session_TrimHandleLeft" xml:space="preserve"><value>Left edge</value></data>
+  <data name="Session_TrimHandleTop" xml:space="preserve"><value>Top edge</value></data>
+  <data name="Session_TrimHandleRight" xml:space="preserve"><value>Right edge</value></data>
+  <data name="Session_TrimHandleBottom" xml:space="preserve"><value>Bottom edge</value></data>
+  <data name="Session_TrimHandleTopLeft" xml:space="preserve"><value>Top-left corner</value></data>
+  <data name="Session_TrimHandleTopRight" xml:space="preserve"><value>Top-right corner</value></data>
+  <data name="Session_TrimHandleBottomLeft" xml:space="preserve"><value>Bottom-left corner</value></data>
+  <data name="Session_TrimHandleBottomRight" xml:space="preserve"><value>Bottom-right corner</value></data>
+  <data name="Session_TrimAdjustClosed" xml:space="preserve"><value>This trim can no longer be adjusted here, so the adjustment was closed. The current result is unchanged.</value></data>
+  <data name="Session_AskColleague" xml:space="preserve"><value>Ask a colleague to correct this image</value></data>
+  <data name="Session_AskColleagueHint" xml:space="preserve"><value>Not sure this looks right? A colleague can correct it.</value></data>
+  <data name="Session_CorrectionNoteLabel" xml:space="preserve"><value>What to fix (optional)</value></data>
+  <data name="Session_CorrectionPrepare" xml:space="preserve"><value>Prepare files for my colleague</value></data>
+  <data name="Session_CorrectionTryAgain" xml:space="preserve"><value>Try again</value></data>
+  <data name="Session_CorrectionCancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Session_CorrectionPreparing" xml:space="preserve"><value>Preparing files…</value></data>
+  <data name="Session_CorrectionPrepareFailed" xml:space="preserve"><value>The files for your colleague could not be prepared. Nothing was handed off. {0}</value></data>
+  <data name="Session_CorrectionStatus" xml:space="preserve"><value>Handed off — waiting for your colleague's corrected picture</value></data>
+  <data name="Session_CorrectionStep1" xml:space="preserve"><value>1. Give your colleague these two files:</value></data>
+  <data name="Session_CorrectionReference" xml:space="preserve"><value>Reference (do not edit): {0}</value></data>
+  <data name="Session_CorrectionWorking" xml:space="preserve"><value>Correct this file: {0}</value></data>
+  <data name="Session_CorrectionFolder" xml:space="preserve"><value>Folder: {0}</value></data>
+  <data name="Session_CorrectionOpenFolder" xml:space="preserve"><value>Open folder</value></data>
+  <data name="Session_CorrectionStep2" xml:space="preserve"><value>2. What to fix: {0}</value></data>
+  <data name="Session_CorrectionNoNote" xml:space="preserve"><value>No note — check hair, edges and leftover background.</value></data>
+  <data name="Session_CorrectionStep3" xml:space="preserve"><value>3. Save the corrected picture as a PNG with a transparent background, {0} × {1} pixels, in the same folder (for example "{2}").</value></data>
+  <data name="Session_CorrectionStep4" xml:space="preserve"><value>4. Back in PrintFlow, open this job and choose Import corrected image. PrintFlow will not repeat background removal on the imported picture.</value></data>
+  <data name="Session_CorrectionImport" xml:space="preserve"><value>Import corrected image</value></data>
+  <data name="Session_CorrectionPickerTitle" xml:space="preserve"><value>Choose the corrected picture</value></data>
+  <data name="Session_CorrectionChecking" xml:space="preserve"><value>Checking the picture…</value></data>
+  <data name="Session_CorrectionRefused" xml:space="preserve"><value>Import refused: {0} The job is still handed off.</value></data>
+  <data name="Session_CorrectionIsReference" xml:space="preserve"><value>This is the reference copy. Choose the corrected picture.</value></data>
+  <data name="Session_CorrectionChanged" xml:space="preserve"><value>The picture changed while it was being checked. Save it again, then choose Import corrected image.</value></data>
+  <data name="Session_CorrectionMissingFiles" xml:space="preserve"><value>Some files for your colleague are missing.</value></data>
+  <data name="Session_CorrectionRepair" xml:space="preserve"><value>Prepare files again</value></data>
+  <data name="Session_CorrectionLastImportFailed" xml:space="preserve"><value>The last import did not finish. Choose Import corrected image again.</value></data>
+  <data name="Session_CorrectionReview" xml:space="preserve"><value>Check the corrected picture, then choose Approve or Reject. After you approve it, PrintFlow continues with {0}. Background removal will not run again.</value></data>
+  <data name="Session_CorrectionIdentical" xml:space="preserve"><value>This picture is identical to the one you sent.</value></data>
+  <data name="Session_CorrectionOtherComputer" xml:space="preserve"><value>If your colleague uses another computer, copy these files to them yourself.</value></data>
+  <data name="Session_CorrectionObsolete" xml:space="preserve"><value>This correction request is no longer current. Its files remain in {0}.</value></data>
+  <data name="Session_CorrectionUseImport" xml:space="preserve"><value>This job is waiting for a colleague's corrected picture. Use Import corrected image in this job.</value></data>
+  <data name="Session_CorrectionNotAvailable" xml:space="preserve"><value>This correction request is no longer available. Nothing was changed.</value></data>
+  <data name="Session_CorrectionResultChanged" xml:space="preserve"><value>This result is no longer the one under review. Nothing was changed.</value></data>
+  <data name="Session_CorrectionAlreadyImported" xml:space="preserve"><value>This correction has already been imported.</value></data>
+  <data name="Session_CorrectionNameTaken" xml:space="preserve"><value>A different file with the same name is already in the correction folder. It was left untouched; move it away, then try again.</value></data>
+  <data name="Session_CorrectionOpenFolderFailed" xml:space="preserve"><value>The folder could not be opened. Its path is shown in the panel.</value></data>
+  <data name="Session_CorrectionOtherOptions" xml:space="preserve"><value>Other options</value></data>
+  <data name="Session_CorrectionFileReference" xml:space="preserve"><value>{0} - REFERENCE (do not edit)</value></data>
+  <data name="Session_CorrectionFileWorking" xml:space="preserve"><value>{0} - CORRECT THIS</value></data>
+  <data name="Session_CorrectionFileReturn" xml:space="preserve"><value>{0} - CORRECTED</value></data>
+  <data name="Session_CorrectionInstructionsTitle" xml:space="preserve"><value>PrintFlow — colleague correction</value></data>
+  <data name="Home_RecentWaitingForCorrection" xml:space="preserve"><value>Waiting for a colleague's corrected picture</value></data>
+  <data name="Home_RecoveryOpenCorrection" xml:space="preserve"><value>Open job to import corrected image</value></data>
+  <data name="Session_NextCorrectionWait" xml:space="preserve"><value>Waiting for your colleague's corrected picture. When it is ready, choose {0}.</value></data>
+  <data name="Session_GuidanceHeading" xml:space="preserve"><value>What to check</value></data>
+  <data name="Session_GuidanceEnhancementCompare" xml:space="preserve"><value>Compare {0} and {1} with {2} or {3}.</value></data>
+  <data name="Session_GuidanceEnhancementDetail" xml:space="preserve"><value>Zoom in on faces, fine detail and lettering: they should look clearer, not changed in shape or smudged.</value></data>
+  <data name="Session_GuidanceEnhancementArtefacts" xml:space="preserve"><value>Look for blotches, halos or odd colours that were not in the original.</value></data>
+  <data name="Session_GuidanceBackgroundColours" xml:space="preserve"><value>Switch the background to {0}, then {1}: leftover old background and missing parts stand out.</value></data>
+  <data name="Session_GuidanceBackgroundEdges" xml:space="preserve"><value>Zoom in on hair, fur and edges: they should be clean, not cut into or fringed.</value></data>
+  <data name="Session_GuidanceBackgroundKept" xml:space="preserve"><value>Compare with {0}: every part of the design, including lettering and thin lines, is still there.</value></data>
+  <data name="Session_GuidanceTrimCompare" xml:space="preserve"><value>Compare {0} and {1}: nothing that belongs to the design is cut off at any edge.</value></data>
+  <data name="Session_GuidanceTrimEmpty" xml:space="preserve"><value>Check that the empty space around the design has gone, apart from any margin that was chosen.</value></data>
+  <data name="Session_GuidanceTrimEdges" xml:space="preserve"><value>Zoom in on each edge and corner, especially thin or pale parts.</value></data>
+  <data name="Session_GuidanceTiffWhiteInk" xml:space="preserve"><value>In {0}, check the white covers the design as intended: no missing areas and no stray marks.</value></data>
+  <data name="Session_GuidanceTiffOverlay" xml:space="preserve"><value>In {0}, zoom in to compare the white with the design's edges.</value></data>
+  <data name="Session_GuidanceTiffColour" xml:space="preserve"><value>In {0}, check the whole design is there and nothing is cut off. Screen colour is only an approximation.</value></data>
+  <data name="Session_GuidanceTiffSize" xml:space="preserve"><value>Under {0}, check that {1} is the print size you need.</value></data>
+  <data name="Session_GuidanceApprove" xml:space="preserve"><value>{0} accepts this exact result and ends this review. It does not save a file to your folder.</value></data>
+  <data name="Session_GuidanceApproveTiff" xml:space="preserve"><value>{0} records that this exact TIFF passed your check. It does not check print quality and does not save it to your folder.</value></data>
+  <data name="Session_GuidanceReject" xml:space="preserve"><value>{0} records the reason you choose below and sets this result aside. Nothing runs again by itself; you then choose how to try again.</value></data>
+  <data name="Session_GuidanceRejectTiff" xml:space="preserve"><value>{0} does not make the new TIFF straight away. It first moves this TIFF to the Recycle Bin, then records the reason you choose below. The new TIFF is made only when you choose {2}; {1} alone does not make one. If the TIFF cannot be moved to the Recycle Bin, nothing is rejected and it stays where it is.</value></data>
+  <data name="Session_GuidanceHelpEnhancement" xml:space="preserve"><value>Not sure? Ask a skilled colleague to look at it with you before you choose.</value></data>
+  <data name="Session_GuidanceHelpAskColleague" xml:space="preserve"><value>Something wrong, or not sure? Use the button below to ask a colleague to correct this picture. You can add a note before anything is sent.</value></data>
+  <data name="Session_GuidanceHelpNoColleague" xml:space="preserve"><value>Asking a colleague is not available for this result. If something is wrong, choose {0}.</value></data>
+  <data name="Session_GuidanceHelpAdjustTrim" xml:space="preserve"><value>An edge not right? Use {0} below to move the edges on the picture before trimming. The new trim still waits for your review.</value></data>
+  <data name="Session_GuidanceHelpNoAdjustTrim" xml:space="preserve"><value>Adjusting the edges is not available for this result. If something is cut off, choose {0}; you can then try again.</value></data>
+  <data name="Session_GuidanceHelpTiff" xml:space="preserve"><value>Not sure? Ask a skilled colleague to look before you choose. A TIFF changed outside PrintFlow cannot be imported.</value></data>
+  <data name="Session_GuidanceHelpTiffReturn" xml:space="preserve"><value> To change the print size first, use {0} below.</value></data>
+  <data name="Session_SizeHelpPreset" xml:space="preserve"><value>Choose a preset when a standard size is fine. A preset is a maximum, not the exact print size: a bigger picture is reduced to fit within it, a smaller one is never enlarged, and the proportions stay the same.</value></data>
+  <data name="Session_SizeHelpCustom" xml:space="preserve"><value>Choose {0} when one side must be an exact size. Pick that side ({1}, {2}, or {3} for the longer side of this picture) and enter it in millimetres. The other side follows the picture's proportions. If this needs the picture enlarged, you are asked first.</value></data>
+  <data name="Session_SizeSummaryDraft" xml:space="preserve"><value>With these settings, the whole picture (including any see-through edges) would print at about {0:0.0} × {1:0.0} mm.</value></data>
+  <data name="Session_SizeSummaryCurrent" xml:space="preserve"><value>With the chosen size, the whole picture (including any see-through edges) is set to print at about {0:0.0} × {1:0.0} mm.</value></data>
+  <data name="Session_SizeGovernorWithinLimits" xml:space="preserve"><value>The picture is already within the maximum, so it is not reduced, and it is not enlarged to fill the maximum.</value></data>
+  <data name="Session_SizeGovernorLimitWidth" xml:space="preserve"><value>The width reaches the maximum, so the width decides the size.</value></data>
+  <data name="Session_SizeGovernorLimitHeight" xml:space="preserve"><value>The height reaches the maximum, so the height decides the size.</value></data>
+  <data name="Session_SizeGovernorEdgeWidth" xml:space="preserve"><value>The width you entered decides the size.</value></data>
+  <data name="Session_SizeGovernorEdgeHeight" xml:space="preserve"><value>The height you entered decides the size.</value></data>
+  <data name="Session_SizeGovernorLongEdgeWidth" xml:space="preserve"><value>The long edge you entered is this picture's width, so the width decides the size.</value></data>
+  <data name="Session_SizeGovernorLongEdgeHeight" xml:space="preserve"><value>The long edge you entered is this picture's height, so the height decides the size.</value></data>
+  <data name="Session_SizeSummaryProportions" xml:space="preserve"><value>The picture keeps its proportions.</value></data>
+  <data name="Session_SizeDraftEnlargement" xml:space="preserve"><value>At this size the picture would have to be enlarged, so the print may look soft or blurry. If you confirm this size, you will be asked whether to accept that.</value></data>
+  <data name="Session_SizeEnlargementPlain" xml:space="preserve"><value>At this size the picture has to be enlarged, so the print may look soft or blurry. Choose {0} to pick a smaller size, which needs less enlarging, or {1} to accept this. While this size needs enlarging, {2} stays unavailable until you accept.</value></data>
+  <data name="Session_SizeTechnicalDetails" xml:space="preserve"><value>Technical details (pixels and PPI)</value></data>
+  <data name="Session_ActionUnconfirmed" xml:space="preserve"><value>PrintFlow could not confirm whether that action completed. {0}</value></data>
+  <data name="Session_ActionFailedNext" xml:space="preserve"><value>The status at the top of the screen shows what you can do now. If you are not sure, open Error details below and ask a colleague or supervisor.</value></data>
+  <data name="Session_ActionFailedNextStale" xml:space="preserve"><value>The screen could not be updated afterwards. Before doing anything else, open Error details below and ask a colleague or supervisor.</value></data>
+  <data name="ErrorDetails_CodeHint" xml:space="preserve"><value>Quote this code when you ask for help.</value></data>
+  <data name="FailureNotice_RevisionIntegrityMismatch" xml:space="preserve"><value>PrintFlow could not confirm that the file still matches the recorded result, so the decision was not applied.</value></data>
+  <data name="FailureNotice_OperationFaulted" xml:space="preserve"><value>The operation ended unexpectedly. No validated result was recorded. PrintFlow left the external application untouched when the operation stopped; its current state is unknown.</value></data>
+  <data name="FailureNotice_MeituLaunchFailed" xml:space="preserve"><value>Meitu could not be started or did not become ready.</value></data>
+  <data name="FailureNotice_MeituTargetLost" xml:space="preserve"><value>Meitu's verified window or foreground changed, so no further input was sent.</value></data>
+  <data name="FailureNotice_MeituUnknownState" xml:space="preserve"><value>PrintFlow could not confirm Meitu's state. Some work may already have been done.</value></data>
+  <data name="FailureNotice_MeituBlockingDialog" xml:space="preserve"><value>A message window is open in Meitu. PrintFlow will not close it for you.</value></data>
+  <data name="FailureNotice_MeituInterrupted" xml:space="preserve"><value>Meitu processing was interrupted. Meitu may still be running; check its screen.</value></data>
+  <data name="FailureNotice_PhotoshopLaunchFailed" xml:space="preserve"><value>Photoshop could not be started or did not become ready.</value></data>
+  <data name="FailureNotice_PhotoshopTargetLost" xml:space="preserve"><value>Photoshop's verified window or foreground changed, so no further input was sent.</value></data>
+  <data name="FailureNotice_PhotoshopUnknownState" xml:space="preserve"><value>PrintFlow could not confirm Photoshop's state. Some work may already have been done.</value></data>
+  <data name="FailureNotice_PhotoshopBlockingDialog" xml:space="preserve"><value>A message window is open in Photoshop. PrintFlow will not close it for you.</value></data>
+  <data name="FailureNotice_PsdPreparationFailed" xml:space="preserve"><value>Photoshop could not produce a verified raster from this PSD. The source is preserved.</value></data>
+  <data name="FailureNotice_PdfPreparationFailed" xml:space="preserve"><value>PDF preparation failed. No validated raster is available.</value></data>
+  <!-- SCRUM-11152: Home readiness summary and startup details. -->
+  <data name="Home_ReadinessHeading" xml:space="preserve"><value>Workstation check</value></data>
+  <data name="Home_ReadinessNotChecked" xml:space="preserve"><value>Not checked in this run.</value></data>
+  <data name="Home_ReadinessNotCheckedHint" xml:space="preserve"><value>Choose “View workstation checks” to check this workstation. A result from an earlier run is not used.</value></data>
+  <data name="Home_ReadinessChecking" xml:space="preserve"><value>Checking the workstation…</value></data>
+  <data name="Home_ReadinessCheckingHint" xml:space="preserve"><value>Choose “View workstation checks” to see the check.</value></data>
+  <data name="Home_ReadinessReady" xml:space="preserve"><value>Passed at last check.</value></data>
+  <data name="Home_ReadinessReadyHint" xml:space="preserve"><value>This is a recorded observation. Each automatic step still uses its own workstation check.</value></data>
+  <data name="Home_ReadinessBlocked" xml:space="preserve"><value>Automatic processing is blocked.</value></data>
+  <data name="Home_ReadinessFirstReason" xml:space="preserve"><value>Reason: {0}. {1}</value></data>
+  <data name="Home_ReadinessLiveCheckPending" xml:space="preserve"><value>Reason: the Meitu and Photoshop check has no current result. Choose “View workstation checks”, then “{0}”.</value></data>
+  <data name="Home_ReadinessBlockedHint" xml:space="preserve"><value>Choose “View workstation checks” to see every check. Ask an experienced colleague or supervisor for help.</value></data>
+  <data name="Home_ReadinessNotConfirmed" xml:space="preserve"><value>Readiness needs to be checked again.</value></data>
+  <data name="Home_ReadinessUnfinishedReason" xml:space="preserve"><value>The last check did not finish, so no earlier result is shown as current.</value></data>
+  <data name="Home_ReadinessNoReason" xml:space="preserve"><value>The last check did not name a reason. Choose “View workstation checks” for details.</value></data>
+  <data name="Home_ReadinessNotConfirmedHint" xml:space="preserve"><value>Choose “View workstation checks” to check again. Ask an experienced colleague or supervisor for help.</value></data>
+  <data name="Home_ReadinessCheckedAt" xml:space="preserve"><value>Checked at {0}</value></data>
+  <data name="Home_ReadinessTechnicalCheck" xml:space="preserve"><value>Check identifier: {0} · {1}</value></data>
+  <data name="Home_StartupDetails" xml:space="preserve"><value>Startup details</value></data>
+  <data name="Home_StartupPresetVerified" xml:space="preserve"><value>The production setup file was verified at startup. This does not confirm that the workstation is ready now.</value></data>
+  <data name="Home_StartupPresetNotVerified" xml:space="preserve"><value>Startup could not verify the production setup file. Choose “View workstation checks” for details.</value></data>
+  <data name="Home_ViewWorkstationChecks" xml:space="preserve">
+    <value>View workstation checks</value>
+  </data>
+  <data name="Home_DiagnosticRetentionWarning" xml:space="preserve">
+    <value>Automatic cleanup of diagnostic records did not finish; it will be retried at the next startup. This notice does not mean the workstation passed its checks.</value>
+  </data>
+<data name="Session_GuidedTechnicalDetails" xml:space="preserve"><value>Technical details</value></data><data name="Session_GuidedPreflight" xml:space="preserve"><value>Confirm before generation</value></data><data name="Session_GuidedCurrent" xml:space="preserve"><value>Current step</value></data><data name="Session_GuidedFuture" xml:space="preserve"><value>Continue after the current step</value></data><data name="Session_GuidedChangeWhiteInk" xml:space="preserve"><value>Change white ink choice</value></data><data name="Session_GuidedHistoryAvailable" xml:space="preserve"><value>History available</value></data>  <data name="Session_HistoryHeading" xml:space="preserve"><value>Step history</value></data>
+  <data name="Session_HistoryNotice" xml:space="preserve"><value>Read only. Historical results cannot be approved or used as the current result.</value></data>
+  <data name="Session_HistoryOpen" xml:space="preserve"><value>View history</value></data>
+  <data name="Session_HistoryClose" xml:space="preserve"><value>Back to current step</value></data>
+  <data name="Session_HistoryValid" xml:space="preserve"><value>Valid record</value></data>
+  <data name="Session_HistoryInvalid" xml:space="preserve"><value>Superseded record</value></data>
+  <data name="Session_HistoryBytesReleased" xml:space="preserve"><value>Preview bytes released</value></data>
+  <data name="Session_DraftLeaveHeading" xml:space="preserve"><value>Keep this unfinished input?</value></data>
+  <data name="Session_DraftLeaveNotice" xml:space="preserve"><value>This page has unfinished input. Keep editing, or discard this page draft and leave. Nothing has been confirmed or saved.</value></data>
+  <data name="Session_KeepDraft" xml:space="preserve"><value>Keep editing</value></data>
+  <data name="Session_DiscardDraft" xml:space="preserve"><value>Discard input and leave</value></data>
+  <data name="Session_ReturnImpact" xml:space="preserve"><value>Return to {0}. Steps to redo: {1}. Dependent dimensions, output results and approvals must be redone. Existing history is retained.</value></data>
+  <data name="Home_GuidedAiUnavailable" xml:space="preserve"><value>AI design is not available yet. Choose a local image to use any of the three routes.</value></data>
+  <data name="Home_GuidedCancelImport" xml:space="preserve"><value>Stop waiting for import</value></data>
+  <data name="Home_GuidedContinue" xml:space="preserve"><value>Continue a task</value></data>
+  <data name="Home_GuidedEnvironmentDetails" xml:space="preserve"><value>Workstation details and checks</value></data>
+  <data name="Home_GuidedImportCancelled" xml:space="preserve"><value>Import waiting cancelled. If a task was already created, find it in recent tasks; your original file is unchanged.</value></data>
+  <data name="Home_GuidedImporting" xml:space="preserve"><value>Importing one image. Your original file is kept unchanged.</value></data>
+  <data name="WorkflowSelection_GuidedCancelled" xml:space="preserve"><value>Selection waiting cancelled. Reopen the task to read its current saved state.</value></data>
+  <data name="WorkflowSelection_GuidedChangeAllowed" xml:space="preserve"><value>No processing has started. You can change route until the first processed result exists. Back keeps this task in recent tasks.</value></data>
+  <data name="WorkflowSelection_GuidedChangeLocked" xml:space="preserve"><value>A processed result already exists, so this route is locked. Back keeps the task and its results.</value></data>
+  <data name="WorkflowSelection_GuidedProgress" xml:space="preserve"><value>Saving your choice…</value></data>
+  <data name="Session_GuidedOriginalFile" xml:space="preserve"><value>Original file for this task: {0} (kept unchanged)</value></data>
+  <data name="Session_GuidedChangeRoute" xml:space="preserve"><value>Change route (no processed result yet)</value></data>
+  <data name="Session_GuidedMeitu" xml:space="preserve"><value>Meitu</value></data>
+  <data name="Session_GuidedPhaseBusy" xml:space="preserve"><value>The application reports that it is processing.</value></data>
+  <data name="Session_GuidedPhaseExportPrepared" xml:space="preserve"><value>The export destination is being prepared.</value></data>
+  <data name="Session_GuidedPhaseProcessed" xml:space="preserve"><value>Processing has finished; export has not started.</value></data>
+  <data name="Session_GuidedPhaseRequested" xml:space="preserve"><value>The operation was requested. Waiting for the application to report its state.</value></data>
+  <data name="Session_GuidedPhaseStarting" xml:space="preserve"><value>Preparing this step. No processing progress has been reported yet.</value></data>
+  <data name="Session_GuidedPhaseUnknown" xml:space="preserve"><value>The application state is unknown or blocked. PrintFlow is waiting for a safe outcome.</value></data>
+  <data name="Session_GuidedPhaseValidated" xml:space="preserve"><value>The output has been validated. Preparing the result for your review.</value></data>
+  <data name="Session_GuidedPhaseWriting" xml:space="preserve"><value>Export was confirmed; the output may still be writing.</value></data>
+  <data name="Session_GuidedProcessingWait" xml:space="preserve"><value>No reliable percentage is available. Please wait; a successful result still needs your review.</value></data>
+  <data name="Session_GuidedStopping" xml:space="preserve"><value>Stopping this operation</value></data>
+  <data name="Session_GuidedTakingOver" xml:space="preserve"><value>Handing control to you</value></data>
+  <data name="Session_GuidedPrintActual" xml:space="preserve"><value>Projected actual image: {0:0.##} × {1:0.##} mm</value></data>
+  <data name="Session_GuidedPrintContract" xml:space="preserve"><value>Production requirement: {0} PPI · CMYK + W1. Validation and review still follow generation.</value></data>
+  <data name="Session_GuidedPrintPixels" xml:space="preserve"><value>Output: {0} × {1} pixels · proportions preserved</value></data>
+  <data name="Session_GuidedPrintRequested" xml:space="preserve"><value>Requested: {0}</value></data>
+  <data name="Session_GuidedPrintRisk" xml:space="preserve"><value>This size requires enlargement. Separate permission is still required after confirming the size; review remains mandatory.</value></data>
+  <data name="Session_GuidedPrintWhiteInk" xml:space="preserve"><value>White ink: {0}</value></data>
+  <data name="Session_GuidedWhiteInkReasonHint" xml:space="preserve"><value>Your selection also records the stated artwork classification as the reason. Choose it for this finished design.</value></data>
+  <data name="Session_GuidedWhiteInkSourceHint" xml:space="preserve"><value>Source PSD/PDF spot or white-ink channels are not reused. This choice generates the production W1 channel.</value></data>
+  <data name="Session_CompletionSaveHeading" xml:space="preserve"><value>Save the approved result</value></data>
+  <data name="Session_CompletionFinishedHeading" xml:space="preserve"><value>Task completed · delivery record</value></data>
+  <data name="Session_CompletionNotice" xml:space="preserve"><value>Approval, saving to your folder and completing the task are separate. An internal approved file is not a delivered file.</value></data>
+  <data name="Session_CompletionApproved" xml:space="preserve"><value>Result approved</value></data>
+  <data name="Session_CompletionNotApproved" xml:space="preserve"><value>Not approved yet</value></data>
+  <data name="Session_CompletionPngPreparing" xml:space="preserve"><value>Approved · PNG preparation required</value></data>
+  <data name="Session_CompletionUnavailable" xml:space="preserve"><value>This result is not available for saving</value></data>
+  <data name="Session_CompletionNotSaved" xml:space="preserve"><value>Not saved to a delivery folder</value></data>
+  <data name="Session_CompletionWorking" xml:space="preserve"><value>Saving or verifying · please wait</value></data>
+  <data name="Session_CompletionSaved" xml:space="preserve"><value>Save verified</value></data>
+  <data name="Session_CompletionSavedPreviously" xml:space="preserve"><value>Save recorded · current file not checked</value></data>
+  <data name="Session_CompletionSaveFailed" xml:space="preserve"><value>Save failed · not delivered</value></data>
+  <data name="Session_CompletionCollision" xml:space="preserve"><value>Name conflict · not saved</value></data>
+  <data name="Session_CompletionUncertain" xml:space="preserve"><value>Save outcome needs verification</value></data>
+  <data name="Session_CompletionMissing" xml:space="preserve"><value>Saved previously · file now missing</value></data>
+  <data name="Session_CompletionChanged" xml:space="preserve"><value>Saved previously · file has changed</value></data>
+  <data name="Session_CompletionUnknown" xml:space="preserve"><value>Current save status unavailable</value></data>
+  <data name="Session_CompletionFinished" xml:space="preserve"><value>Task completed</value></data>
+  <data name="Session_CompletionAbandoned" xml:space="preserve"><value>Task abandoned</value></data>
+  <data name="Session_CompletionNotFinished" xml:space="preserve"><value>Task not completed yet</value></data>
+  <data name="Session_RecoveryCorrectionStages" xml:space="preserve"><value>Prepare files → give them to a colleague → explicitly import the correction → review again</value></data>
+  <data name="Session_RecoveryCorrectionReview" xml:space="preserve"><value>The correction has been imported. Review this image again before approving it; importing does not approve it.</value></data>
+  <data name="Session_RecoveryPrepare" xml:space="preserve"><value>Prepare a colleague correction</value></data>
+  <data name="Session_RecoveryWaiting" xml:space="preserve"><value>Waiting for the corrected image</value></data>
+  <data name="Session_RecoveryHandedOff" xml:space="preserve"><value>Handed off — choose how to continue</value></data>
+  <data name="Session_RecoveryStopped" xml:space="preserve"><value>Processing stopped</value></data>
+  <data name="Session_RecoveryPreparePreserved" xml:space="preserve"><value>The original and existing review remain. Preparing files creates copies for the colleague; you send them yourself.</value></data>
+  <data name="Session_RecoveryWaitingPreserved" xml:space="preserve"><value>The original and existing results remain. Give the prepared files to your colleague yourself. PrintFlow waits for your explicit import; it does not watch the folder.</value></data>
+  <data name="Session_RecoveryPhotoshopPreserved" xml:space="preserve"><value>The original and recorded results remain. Manual TIFF import is not supported.</value></data>
+  <data name="Session_RecoveryPreserved" xml:space="preserve"><value>The original and recorded results remain. No new result has been approved by reopening this task. Follow any external-application notice before continuing.</value></data>
+  <data name="Session_RecoveryBusy" xml:space="preserve"><value>Wait for the current action to finish.</value></data>
+  <data name="Session_RecoveryNoAction" xml:space="preserve"><value>Read the reason and error details. This page currently offers no automatic recovery action.</value></data>
+  <data name="Session_RecoveryNext" xml:space="preserve"><value>Available next actions: {0}. None starts automatically.</value></data>
+  <data name="Home_RecentUnknownWorkflow" xml:space="preserve"><value>Unrecognized workflow</value></data>
+  <data name="Home_RecentUnknownStep" xml:space="preserve"><value>Unrecognized step</value></data>
+  <data name="Home_RecentNextCorrection" xml:space="preserve"><value>Open details to import the correction, then review it.</value></data>
+  <data name="Home_RecentNextSaved" xml:space="preserve"><value>Continue to the actual step and check the current file. Saved history does not confirm it still exists.</value></data>
+  <data name="Home_RecentNextContinue" xml:space="preserve"><value>Continue opens the actual current step. Processing will not start automatically.</value></data>
+  <data name="Home_RecentNextHandedOff" xml:space="preserve"><value>Open handoff details to see the currently supported ways to continue.</value></data>
+  <data name="Home_RecentNextHistory" xml:space="preserve"><value>View the processing record. Open details to check the current file; saved history alone cannot confirm it.</value></data>
+  <data name="Environment_Unchecked" xml:space="preserve"><value>Not checked yet</value></data>
+  <data name="Environment_ObservationUnchecked" xml:space="preserve"><value>Not checked yet. No report has been read; this does not confirm production readiness.</value></data>
+  <data name="Environment_ObservationBlocked" xml:space="preserve"><value>Some required checks did not run. Read the blockers below; historical results do not grant production permission.</value></data>
+  <data name="Environment_ObservationCurrent" xml:space="preserve"><value>This report describes the observation shown below. Every production request is checked again.</value></data>
+  <data name="Environment_EvidenceNever" xml:space="preserve"><value>No successful live-check history is recorded.</value></data>
+  <data name="Environment_EvidenceExpired" xml:space="preserve"><value>Historical check evidence is no longer available. Last success: {0}. It cannot confirm current readiness.</value></data>
+  <data name="Environment_EvidenceDeferred" xml:space="preserve"><value>Current state was not observed again. Historical success: {0}; this is not current production permission.</value></data>
+  <data name="Environment_EvidenceRecorded" xml:space="preserve"><value>Last successful live check: {0}. Read the current report result separately.</value></data>
+  <data name="Settings_AdvancedHeading" xml:space="preserve"><value>Technical details and local diagnostic locations</value></data>
+  <data name="Nav_BackToTask" xml:space="preserve"><value>Return to current task</value></data>
+  <data name="Nav_TaskReloadFailed" xml:space="preserve"><value>The task could not be reloaded. It has not been resumed; try returning again.</value></data>
+  <data name="Session_FailurePreservedCurrent" xml:space="preserve"><value>Originals, input snapshots and existing results remain subject to their retention rules. Availability follows the current task and file checks.</value></data>
+  <data name="Session_FailurePreservedUnknown" xml:space="preserve"><value>The last displayed task remains available to inspect; its current records and files have not been rechecked.</value></data>
+  <data name="Home_SampleTitle" xml:space="preserve"><value>Start with one image</value></data>
+  <data name="Home_SampleSubtitle" xml:space="preserve"><value>Import an image. PrintFlow will guide you through each step.</value></data>
+  <data name="Home_SampleDropLabel" xml:space="preserve"><value>Drop your image here</value></data>
+</root>

@@ -1,0 +1,300 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="f0beff6c-c26e-4147-950b-1e39e6a0c213" name="admin@DESKTOP-0BG8884 2026-10-22 16:06:46" runUser="DESKTOP-0BG8884\admin" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-22T16:06:46.3595291+13:00" queuing="2026-10-22T16:06:46.3595294+13:00" start="2026-10-22T16:06:40.7579150+13:00" finish="2026-10-22T16:06:48.9053497+13:00" />
+  <TestSettings name="default" id="cf4e9dc7-129f-4597-a76a-a35095e04a2b">
+    <Deployment runDeploymentRoot="admin_DESKTOP-0BG8884_2026-10-22_16_06_46" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="7631cf8a-a3e5-4bfe-b43c-c02e3b2f01c5" testId="4943f970-95cb-ef09-614e-d7ebdf2dea5c" testName="PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Home_import_is_prominent_without_losing_resume_or_environment(width: 1280, height: 720)" computerName="DESKTOP-0BG8884" duration="00:00:00.3248956" startTime="2026-10-22T16:06:48.1166078+13:00" endTime="2026-10-22T16:06:48.4414130+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7631cf8a-a3e5-4bfe-b43c-c02e3b2f01c5">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- Shouldly.ShouldAssertException : box.Width&#xD;
+    should be greater than or equal to&#xD;
+170d&#xD;
+    but was&#xD;
+95.48d</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Home_import_is_prominent_without_losing_resume_or_environment(Int32 width, Int32 height) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\WpfUiSamplePageTests.cs:line 31&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.&lt;&gt;c__DisplayClass0_0.&lt;Home_import_is_prominent_without_losing_resume_or_environment&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\WpfUiSamplePageTests.cs:line 35&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="13d6246d-f083-4693-947b-83f5bc36bb79" testId="00761881-bba7-087f-2ac1-0ba9ebad6743" testName="PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Save_keeps_guarded_primary_action_at_right_and_destination_readable(width: 1000, height: 700)" computerName="DESKTOP-0BG8884" duration="00:00:01.8758412" startTime="2026-10-22T16:06:44.4459324+13:00" endTime="2026-10-22T16:06:46.3286559+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="13d6246d-f083-4693-947b-83f5bc36bb79">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- Shouldly.ShouldAssertException : Bounds(action, tree.Root).Left&#xD;
+    should be greater than&#xD;
+700d&#xD;
+    but was&#xD;
+318d</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Save_keeps_guarded_primary_action_at_right_and_destination_readable(Int32 width, Int32 height) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\WpfUiSamplePageTests.cs:line 59&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.&lt;&gt;c__DisplayClass1_0.&lt;Save_keeps_guarded_primary_action_at_right_and_destination_readable&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\WpfUiSamplePageTests.cs:line 68&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="2fe890a7-cb2c-4542-8f99-007a011d4de4" testId="afdfc2d5-e4b6-a02a-2f12-785f03a2c0bc" testName="PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Home_import_is_prominent_without_losing_resume_or_environment(width: 1000, height: 700)" computerName="DESKTOP-0BG8884" duration="00:00:00.3222540" startTime="2026-10-22T16:06:47.7935916+13:00" endTime="2026-10-22T16:06:48.1157082+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2fe890a7-cb2c-4542-8f99-007a011d4de4">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- Shouldly.ShouldAssertException : box.Width&#xD;
+    should be greater than or equal to&#xD;
+170d&#xD;
+    but was&#xD;
+95.48d</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Home_import_is_prominent_without_losing_resume_or_environment(Int32 width, Int32 height) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\WpfUiSamplePageTests.cs:line 31&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.&lt;&gt;c__DisplayClass0_0.&lt;Home_import_is_prominent_without_losing_resume_or_environment&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\WpfUiSamplePageTests.cs:line 35&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="3cc4146d-6694-44c2-988f-d4fd2cb9b703" testId="b56fba20-1c2a-8994-b85d-621735a4b2ad" testName="PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Home_import_is_prominent_without_losing_resume_or_environment(width: 1920, height: 1080)" computerName="DESKTOP-0BG8884" duration="00:00:00.3105718" startTime="2026-10-22T16:06:48.4425586+13:00" endTime="2026-10-22T16:06:48.7527415+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3cc4146d-6694-44c2-988f-d4fd2cb9b703">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- Shouldly.ShouldAssertException : box.Width&#xD;
+    should be greater than or equal to&#xD;
+170d&#xD;
+    but was&#xD;
+95.48d</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Home_import_is_prominent_without_losing_resume_or_environment(Int32 width, Int32 height) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\WpfUiSamplePageTests.cs:line 31&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.&lt;&gt;c__DisplayClass0_0.&lt;Home_import_is_prominent_without_losing_resume_or_environment&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\WpfUiSamplePageTests.cs:line 35&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="1a607bed-cd4c-4072-9166-22d8e5134fb0" testId="66979b48-abb6-8d6c-f8d4-84570ec07d5b" testName="PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Save_keeps_guarded_primary_action_at_right_and_destination_readable(width: 1280, height: 720)" computerName="DESKTOP-0BG8884" duration="00:00:00.7026684" startTime="2026-10-22T16:06:47.0899997+13:00" endTime="2026-10-22T16:06:47.7915136+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="1a607bed-cd4c-4072-9166-22d8e5134fb0">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- Shouldly.ShouldAssertException : Bounds(action, tree.Root).Left&#xD;
+    should be greater than&#xD;
+896d&#xD;
+    but was&#xD;
+318d</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Save_keeps_guarded_primary_action_at_right_and_destination_readable(Int32 width, Int32 height) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\WpfUiSamplePageTests.cs:line 59&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.&lt;&gt;c__DisplayClass1_0.&lt;Save_keeps_guarded_primary_action_at_right_and_destination_readable&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\WpfUiSamplePageTests.cs:line 68&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="314e03d4-6d0e-408f-aa11-bfb388a7b040" testId="d59ddf19-1535-70a3-6d6c-e6a3d05e500d" testName="PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Save_keeps_guarded_primary_action_at_right_and_destination_readable(width: 1920, height: 1080)" computerName="DESKTOP-0BG8884" duration="00:00:00.7577867" startTime="2026-10-22T16:06:46.3469289+13:00" endTime="2026-10-22T16:06:47.0879997+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="314e03d4-6d0e-408f-aa11-bfb388a7b040">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- Shouldly.ShouldAssertException : Bounds(action, tree.Root).Left&#xD;
+    should be greater than&#xD;
+1344d&#xD;
+    but was&#xD;
+318d</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Save_keeps_guarded_primary_action_at_right_and_destination_readable(Int32 width, Int32 height) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\WpfUiSamplePageTests.cs:line 59&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.&lt;&gt;c__DisplayClass1_0.&lt;Save_keeps_guarded_primary_action_at_right_and_destination_readable&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\WpfUiSamplePageTests.cs:line 68&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Save_keeps_guarded_primary_action_at_right_and_destination_readable(width: 1000, height: 700)" storage="c:\users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="00761881-bba7-087f-2ac1-0ba9ebad6743">
+      <Execution id="13d6246d-f083-4693-947b-83f5bc36bb79" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests" name="Save_keeps_guarded_primary_action_at_right_and_destination_readable" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Save_keeps_guarded_primary_action_at_right_and_destination_readable(width: 1280, height: 720)" storage="c:\users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="66979b48-abb6-8d6c-f8d4-84570ec07d5b">
+      <Execution id="1a607bed-cd4c-4072-9166-22d8e5134fb0" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests" name="Save_keeps_guarded_primary_action_at_right_and_destination_readable" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Home_import_is_prominent_without_losing_resume_or_environment(width: 1280, height: 720)" storage="c:\users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="4943f970-95cb-ef09-614e-d7ebdf2dea5c">
+      <Execution id="7631cf8a-a3e5-4bfe-b43c-c02e3b2f01c5" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests" name="Home_import_is_prominent_without_losing_resume_or_environment" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Home_import_is_prominent_without_losing_resume_or_environment(width: 1000, height: 700)" storage="c:\users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="afdfc2d5-e4b6-a02a-2f12-785f03a2c0bc">
+      <Execution id="2fe890a7-cb2c-4542-8f99-007a011d4de4" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests" name="Home_import_is_prominent_without_losing_resume_or_environment" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Home_import_is_prominent_without_losing_resume_or_environment(width: 1920, height: 1080)" storage="c:\users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="b56fba20-1c2a-8994-b85d-621735a4b2ad">
+      <Execution id="3cc4146d-6694-44c2-988f-d4fd2cb9b703" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests" name="Home_import_is_prominent_without_losing_resume_or_environment" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Save_keeps_guarded_primary_action_at_right_and_destination_readable(width: 1920, height: 1080)" storage="c:\users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="d59ddf19-1535-70a3-6d6c-e6a3d05e500d">
+      <Execution id="314e03d4-6d0e-408f-aa11-bfb388a7b040" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests" name="Save_keeps_guarded_primary_action_at_right_and_destination_readable" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="4943f970-95cb-ef09-614e-d7ebdf2dea5c" executionId="7631cf8a-a3e5-4bfe-b43c-c02e3b2f01c5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="00761881-bba7-087f-2ac1-0ba9ebad6743" executionId="13d6246d-f083-4693-947b-83f5bc36bb79" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="afdfc2d5-e4b6-a02a-2f12-785f03a2c0bc" executionId="2fe890a7-cb2c-4542-8f99-007a011d4de4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b56fba20-1c2a-8994-b85d-621735a4b2ad" executionId="3cc4146d-6694-44c2-988f-d4fd2cb9b703" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="66979b48-abb6-8d6c-f8d4-84570ec07d5b" executionId="1a607bed-cd4c-4072-9166-22d8e5134fb0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d59ddf19-1535-70a3-6d6c-e6a3d05e500d" executionId="314e03d4-6d0e-408f-aa11-bfb388a7b040" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="6" executed="6" passed="0" failed="6" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.11)&#xD;
+[xUnit.net 00:00:00.25]   Discovering: PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.20]   Discovered:  PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.31]   Starting:    PrintFlow.Tests&#xD;
+[xUnit.net 00:00:05.22]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:05.22]       ---- Shouldly.ShouldAssertException : Bounds(action, tree.Root).Left&#xD;
+[xUnit.net 00:00:05.22]           should be greater than&#xD;
+[xUnit.net 00:00:05.22]       700d&#xD;
+[xUnit.net 00:00:05.22]           but was&#xD;
+[xUnit.net 00:00:05.22]       318d&#xD;
+[xUnit.net 00:00:05.22]       Stack Trace:&#xD;
+[xUnit.net 00:00:05.22]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:05.22]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:05.22]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:05.23]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\WpfUiSamplePageTests.cs(59,0): at PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Save_keeps_guarded_primary_action_at_right_and_destination_readable(Int32 width, Int32 height)&#xD;
+[xUnit.net 00:00:05.23]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.23]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:05.23]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\WpfUiSamplePageTests.cs(68,0): at PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.&lt;&gt;c__DisplayClass1_0.&lt;Save_keeps_guarded_primary_action_at_right_and_destination_readable&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:05.23]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:05.23]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:05.98]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:05.98]       ---- Shouldly.ShouldAssertException : Bounds(action, tree.Root).Left&#xD;
+[xUnit.net 00:00:05.98]           should be greater than&#xD;
+[xUnit.net 00:00:05.98]       1344d&#xD;
+[xUnit.net 00:00:05.98]           but was&#xD;
+[xUnit.net 00:00:05.98]       318d&#xD;
+[xUnit.net 00:00:05.98]       Stack Trace:&#xD;
+[xUnit.net 00:00:05.98]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:05.98]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:05.98]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:05.98]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\WpfUiSamplePageTests.cs(59,0): at PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Save_keeps_guarded_primary_action_at_right_and_destination_readable(Int32 width, Int32 height)&#xD;
+[xUnit.net 00:00:05.98]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.98]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:05.98]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\WpfUiSamplePageTests.cs(68,0): at PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.&lt;&gt;c__DisplayClass1_0.&lt;Save_keeps_guarded_primary_action_at_right_and_destination_readable&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:05.98]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:05.98]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:06.68]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:06.68]       ---- Shouldly.ShouldAssertException : Bounds(action, tree.Root).Left&#xD;
+[xUnit.net 00:00:06.68]           should be greater than&#xD;
+[xUnit.net 00:00:06.68]       896d&#xD;
+[xUnit.net 00:00:06.68]           but was&#xD;
+[xUnit.net 00:00:06.68]       318d&#xD;
+[xUnit.net 00:00:06.68]       Stack Trace:&#xD;
+[xUnit.net 00:00:06.68]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:06.68]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:06.68]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:06.68]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\WpfUiSamplePageTests.cs(59,0): at PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Save_keeps_guarded_primary_action_at_right_and_destination_readable(Int32 width, Int32 height)&#xD;
+[xUnit.net 00:00:06.68]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:06.68]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:06.68]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\WpfUiSamplePageTests.cs(68,0): at PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.&lt;&gt;c__DisplayClass1_0.&lt;Save_keeps_guarded_primary_action_at_right_and_destination_readable&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:06.68]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:06.68]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:07.01]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:07.01]       ---- Shouldly.ShouldAssertException : box.Width&#xD;
+[xUnit.net 00:00:07.01]           should be greater than or equal to&#xD;
+[xUnit.net 00:00:07.01]       170d&#xD;
+[xUnit.net 00:00:07.01]           but was&#xD;
+[xUnit.net 00:00:07.01]       95.48d&#xD;
+[xUnit.net 00:00:07.01]       Stack Trace:&#xD;
+[xUnit.net 00:00:07.01]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:07.01]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:07.01]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:07.01]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\WpfUiSamplePageTests.cs(31,0): at PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Home_import_is_prominent_without_losing_resume_or_environment(Int32 width, Int32 height)&#xD;
+[xUnit.net 00:00:07.01]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:07.01]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:07.01]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\WpfUiSamplePageTests.cs(35,0): at PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.&lt;&gt;c__DisplayClass0_0.&lt;Home_import_is_prominent_without_losing_resume_or_environment&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:07.01]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:07.01]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:07.33]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:07.33]       ---- Shouldly.ShouldAssertException : box.Width&#xD;
+[xUnit.net 00:00:07.33]           should be greater than or equal to&#xD;
+[xUnit.net 00:00:07.33]       170d&#xD;
+[xUnit.net 00:00:07.33]           but was&#xD;
+[xUnit.net 00:00:07.33]       95.48d&#xD;
+[xUnit.net 00:00:07.33]       Stack Trace:&#xD;
+[xUnit.net 00:00:07.33]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:07.33]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:07.33]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:07.33]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\WpfUiSamplePageTests.cs(31,0): at PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Home_import_is_prominent_without_losing_resume_or_environment(Int32 width, Int32 height)&#xD;
+[xUnit.net 00:00:07.33]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:07.33]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:07.33]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\WpfUiSamplePageTests.cs(35,0): at PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.&lt;&gt;c__DisplayClass0_0.&lt;Home_import_is_prominent_without_losing_resume_or_environment&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:07.33]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:07.33]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:07.64]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:07.64]       ---- Shouldly.ShouldAssertException : box.Width&#xD;
+[xUnit.net 00:00:07.64]           should be greater than or equal to&#xD;
+[xUnit.net 00:00:07.64]       170d&#xD;
+[xUnit.net 00:00:07.64]           but was&#xD;
+[xUnit.net 00:00:07.64]       95.48d&#xD;
+[xUnit.net 00:00:07.64]       Stack Trace:&#xD;
+[xUnit.net 00:00:07.64]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:07.64]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:07.64]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:07.64]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\WpfUiSamplePageTests.cs(31,0): at PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Home_import_is_prominent_without_losing_resume_or_environment(Int32 width, Int32 height)&#xD;
+[xUnit.net 00:00:07.64]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:07.64]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:07.64]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\WpfUiSamplePageTests.cs(35,0): at PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.&lt;&gt;c__DisplayClass0_0.&lt;Home_import_is_prominent_without_losing_resume_or_environment&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:07.64]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:07.64]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:07.65]   Finished:    PrintFlow.Tests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-22T16:06:46.3315268+13:00">
+        <Text>[xUnit.net 00:00:05.22]     PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Save_keeps_guarded_primary_action_at_right_and_destination_readable(width: 1000, height: 700) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-22T16:06:47.0883828+13:00">
+        <Text>[xUnit.net 00:00:05.98]     PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Save_keeps_guarded_primary_action_at_right_and_destination_readable(width: 1920, height: 1080) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-22T16:06:47.7920303+13:00">
+        <Text>[xUnit.net 00:00:06.68]     PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Save_keeps_guarded_primary_action_at_right_and_destination_readable(width: 1280, height: 720) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-22T16:06:48.1159460+13:00">
+        <Text>[xUnit.net 00:00:07.01]     PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Home_import_is_prominent_without_losing_resume_or_environment(width: 1000, height: 700) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-22T16:06:48.4416908+13:00">
+        <Text>[xUnit.net 00:00:07.33]     PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Home_import_is_prominent_without_losing_resume_or_environment(width: 1280, height: 720) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-22T16:06:48.7529803+13:00">
+        <Text>[xUnit.net 00:00:07.64]     PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Home_import_is_prominent_without_losing_resume_or_environment(width: 1920, height: 1080) [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

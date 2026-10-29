@@ -1,0 +1,1082 @@
+[
+  {
+    "path": "src/PrintFlow.App/MainWindow.xaml",
+    "line": 18,
+    "source": "AutomationProperties.Name=\"{Binding Title}\">"
+  },
+  {
+    "path": "src/PrintFlow.App/Themes/GuidedComponents.xaml",
+    "line": 20,
+    "source": "<Setter Property=\"AutomationProperties.Name\" Value=\"{Binding Header, RelativeSource={RelativeSource Self}, TargetNullValue=''}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Themes/GuidedComponents.xaml",
+    "line": 52,
+    "source": "<Setter Property=\"AutomationProperties.Name\" Value=\"{Binding Header, RelativeSource={RelativeSource Self}, TargetNullValue=''}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/EnvironmentReadinessView.xaml",
+    "line": 24,
+    "source": "<Setter Property=\"AutomationProperties.Name\" Value=\"{Binding Name}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/EnvironmentReadinessView.xaml",
+    "line": 158,
+    "source": "AutomationProperties.Name=\"{Binding BlockingHeading}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/EnvironmentReadinessView.xaml",
+    "line": 171,
+    "source": "AutomationProperties.Name=\"{Binding AdvisoriesHeading}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/EnvironmentReadinessView.xaml",
+    "line": 185,
+    "source": "AutomationProperties.Name=\"{Binding AutomaticChecksHeading}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/EnvironmentReadinessView.xaml",
+    "line": 197,
+    "source": "AutomationProperties.Name=\"{Binding LiveChecksHeading}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/EnvironmentReadinessView.xaml",
+    "line": 217,
+    "source": "AutomationProperties.AutomationId=\"Environment.BackToHome\" AutomationProperties.Name=\"{Binding BackLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/EnvironmentReadinessView.xaml",
+    "line": 222,
+    "source": "AutomationProperties.AutomationId=\"Environment.RunLiveChecks\" AutomationProperties.Name=\"{Binding RunLiveChecksLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/EnvironmentReadinessView.xaml",
+    "line": 228,
+    "source": "AutomationProperties.AutomationId=\"Environment.CancelLiveChecks\" AutomationProperties.Name=\"{Binding CancelLiveChecksLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/EnvironmentReadinessView.xaml",
+    "line": 234,
+    "source": "AutomationProperties.AutomationId=\"Environment.Refresh\" AutomationProperties.Name=\"{Binding RefreshLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/ErrorDetailsView.xaml",
+    "line": 9,
+    "source": "AutomationProperties.Name=\"{Binding Heading}\">"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/ErrorDetailsView.xaml",
+    "line": 58,
+    "source": "AutomationProperties.Name=\"{Binding WhatHappenedHeading}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/ErrorDetailsView.xaml",
+    "line": 61,
+    "source": "AutomationProperties.AutomationId=\"ErrorDetails.Code\" AutomationProperties.Name=\"{Binding CodeLabel}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/ErrorDetailsView.xaml",
+    "line": 78,
+    "source": "AutomationProperties.AutomationId=\"ErrorDetails.InputPath\" AutomationProperties.Name=\"{Binding InputLabel}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/ErrorDetailsView.xaml",
+    "line": 81,
+    "source": "AutomationProperties.AutomationId=\"ErrorDetails.ExpectedOutputPath\" AutomationProperties.Name=\"{Binding ExpectedOutputLabel}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/ErrorDetailsView.xaml",
+    "line": 87,
+    "source": "AutomationProperties.AutomationId=\"ErrorDetails.Screenshot\" AutomationProperties.Name=\"{Binding EvidenceHeading}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/ErrorDetailsView.xaml",
+    "line": 92,
+    "source": "AutomationProperties.AutomationId=\"ErrorDetails.ScreenshotPath\" AutomationProperties.Name=\"{Binding ScreenshotPathLabel}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/ErrorDetailsView.xaml",
+    "line": 97,
+    "source": "AutomationProperties.AutomationId=\"ErrorDetails.TechnicalDetail\" AutomationProperties.Name=\"{Binding TechnicalHeading}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/ErrorDetailsView.xaml",
+    "line": 103,
+    "source": "AutomationProperties.AutomationId=\"ErrorDetails.Back\" AutomationProperties.Name=\"{Binding BackLabel}\" /><WrapPanel HorizontalAlignment=\"Right\">"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/ErrorDetailsView.xaml",
+    "line": 106,
+    "source": "AutomationProperties.AutomationId=\"ErrorDetails.Retry\" AutomationProperties.Name=\"{Binding RetryLabel}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/ErrorDetailsView.xaml",
+    "line": 109,
+    "source": "AutomationProperties.AutomationId=\"ErrorDetails.ManualProcessing\" AutomationProperties.Name=\"{Binding ManualProcessingLabel}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/ErrorDetailsView.xaml",
+    "line": 112,
+    "source": "AutomationProperties.AutomationId=\"ErrorDetails.ReenterAutomation\" AutomationProperties.Name=\"{Binding ReenterAutomationLabel}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/ErrorDetailsView.xaml",
+    "line": 116,
+    "source": "AutomationProperties.Name=\"{Binding ExportDiagnosticPackageLabel}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/ErrorDetailsView.xaml",
+    "line": 123,
+    "source": "AutomationProperties.Name=\"{Binding PackageHeading}\">"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/ErrorDetailsView.xaml",
+    "line": 168,
+    "source": "AutomationProperties.Name=\"{Binding PackageReferenceLabel}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/ErrorDetailsView.xaml",
+    "line": 185,
+    "source": "AutomationProperties.Name=\"{Binding PackagePathsHeading}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/ErrorDetailsView.xaml",
+    "line": 222,
+    "source": "AutomationProperties.Name=\"{Binding BackToDetailsLabel}\" /><WrapPanel HorizontalAlignment=\"Right\">"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/ErrorDetailsView.xaml",
+    "line": 225,
+    "source": "AutomationProperties.Name=\"{Binding SavePackageLabel}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/HomeView.xaml",
+    "line": 18,
+    "source": "AutomationProperties.Name=\"{Binding Title}\">"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/HomeView.xaml",
+    "line": 34,
+    "source": "<Setter Property=\"AutomationProperties.Name\" Value=\"{Binding DisplayName}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/HomeView.xaml",
+    "line": 72,
+    "source": "AutomationProperties.Name=\"{Binding ThumbnailName}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/HomeView.xaml",
+    "line": 82,
+    "source": "AutomationProperties.Name=\"{Binding ThumbnailName}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/HomeView.xaml",
+    "line": 93,
+    "source": "AutomationProperties.Name=\"{Binding State}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/HomeView.xaml",
+    "line": 97,
+    "source": "AutomationProperties.Name=\"{Binding SaveHistoryText}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/HomeView.xaml",
+    "line": 120,
+    "source": "AutomationProperties.Name=\"{Binding OpenActionLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/HomeView.xaml",
+    "line": 129,
+    "source": "AutomationProperties.Name=\"{Binding DataContext.AbandonLabel,"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/HomeView.xaml",
+    "line": 145,
+    "source": "AutomationProperties.Name=\"{Binding DataContext.RemoveLabel,"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/HomeView.xaml",
+    "line": 173,
+    "source": "AutomationProperties.Name=\"{Binding SettingsLabel}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/HomeView.xaml",
+    "line": 221,
+    "source": "AutomationProperties.Name=\"{Binding ChooseFileLabel}\" HorizontalAlignment=\"Center\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/HomeView.xaml",
+    "line": 258,
+    "source": "AutomationProperties.Name=\"{Binding StartupDetailsLabel}\">"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/HomeView.xaml",
+    "line": 293,
+    "source": "AutomationProperties.Name=\"{Binding Readiness.DetailsLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/HomeView.xaml",
+    "line": 305,
+    "source": "AutomationProperties.Name=\"{Binding EnvironmentLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/HomeView.xaml",
+    "line": 316,
+    "source": "AutomationProperties.Name=\"{Binding RefreshLabel}\" /><TextBlock Text=\"{Binding ContinueHeading}\" FontSize=\"18\" FontWeight=\"SemiBold\" VerticalAlignment=\"Center\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/HomeView.xaml",
+    "line": 340,
+    "source": "AutomationProperties.Name=\"{Binding AbandonKeepLabel}\" Margin=\"0,0,8,0\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/HomeView.xaml",
+    "line": 346,
+    "source": "AutomationProperties.Name=\"{Binding AbandonConfirmLabel}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/HomeView.xaml",
+    "line": 366,
+    "source": "AutomationProperties.Name=\"{Binding ContinueHeading}\" ItemContainerStyle=\"{StaticResource HomeTaskContainer}\" ItemTemplate=\"{StaticResource HomeTaskRow}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/HomeView.xaml",
+    "line": 372,
+    "source": "AutomationProperties.Name=\"{Binding RecentHeading}\" ItemContainerStyle=\"{StaticResource HomeTaskContainer}\" ItemTemplate=\"{StaticResource HomeTaskRow}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/HomeView.xaml",
+    "line": 379,
+    "source": "AutomationProperties.Name=\"{Binding RecoveryHeading}\">"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/HomeView.xaml",
+    "line": 383,
+    "source": "<Setter Property=\"AutomationProperties.Name\" Value=\"{Binding DisplayName}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/HomeView.xaml",
+    "line": 402,
+    "source": "AutomationProperties.AutomationId=\"Home.Recovery.OpenCorrection\" AutomationProperties.Name=\"{Binding OpenCorrectionLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/HomeView.xaml",
+    "line": 405,
+    "source": "AutomationProperties.AutomationId=\"Home.Recovery.Restart\" AutomationProperties.Name=\"{Binding RestartLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/HomeView.xaml",
+    "line": 408,
+    "source": "AutomationProperties.AutomationId=\"Home.Recovery.ManualResult\" AutomationProperties.Name=\"{Binding ManualResultLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/HomeView.xaml",
+    "line": 411,
+    "source": "AutomationProperties.AutomationId=\"Home.Recovery.Open\" AutomationProperties.Name=\"{Binding OpenLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/HomeView.xaml",
+    "line": 414,
+    "source": "AutomationProperties.AutomationId=\"Home.Recovery.Abandon\" AutomationProperties.Name=\"{Binding AbandonLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/NoticeErrorDetails.xaml",
+    "line": 20,
+    "source": "AutomationProperties.Name=\"{Binding NoticeErrorDetailsLabel}\">"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/NoticeErrorDetails.xaml",
+    "line": 41,
+    "source": "AutomationProperties.Name=\"{Binding NoticeErrorCodeLabel}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 13,
+    "source": "AutomationProperties.Name=\"{Binding SessionName}\">"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 110,
+    "source": "AutomationProperties.Name=\"{Binding FinalSaveHeading}\">"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 135,
+    "source": "AutomationProperties.Name=\"{Binding FinalSaveTargetLabel}\">"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 151,
+    "source": "AutomationProperties.Name=\"{Binding FinalSaveStatus}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 165,
+    "source": "AutomationProperties.Name=\"{Binding FinalSaveRecordsLabel}\">"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 180,
+    "source": "AutomationProperties.Name=\"{Binding SaveFileNameLabel}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 185,
+    "source": "AutomationProperties.Name=\"{Binding SaveFolderLabel}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 189,
+    "source": "AutomationProperties.Name=\"{Binding ChangeLocationLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 212,
+    "source": "AutomationProperties.Name=\"{Binding SavedPathLabel}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 228,
+    "source": "AutomationProperties.Name=\"{Binding OpenFolderLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 232,
+    "source": "AutomationProperties.Name=\"{Binding CheckSavedLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 237,
+    "source": "AutomationProperties.Name=\"{Binding SaveAnotherCopyLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 242,
+    "source": "AutomationProperties.Name=\"{Binding CancelSaveLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 252,
+    "source": "AutomationProperties.Name=\"{Binding FinalSaveDetailsLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 255,
+    "source": "AutomationProperties.Name=\"{Binding FinalSaveDetailsLabel}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 286,
+    "source": "AutomationProperties.Name=\"{Binding FinalSaveTargetLabel}\">"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 304,
+    "source": "AutomationProperties.Name=\"{Binding FinalSaveStatus}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 318,
+    "source": "AutomationProperties.Name=\"{Binding FinalSaveRecordsLabel}\">"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 336,
+    "source": "AutomationProperties.Name=\"{Binding SaveFileNameLabel}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 341,
+    "source": "AutomationProperties.Name=\"{Binding SaveFolderLabel}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 345,
+    "source": "AutomationProperties.Name=\"{Binding ChangeLocationLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 371,
+    "source": "AutomationProperties.Name=\"{Binding SavedPathLabel}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 387,
+    "source": "AutomationProperties.Name=\"{Binding OpenFolderLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 391,
+    "source": "AutomationProperties.Name=\"{Binding CheckSavedLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 396,
+    "source": "AutomationProperties.Name=\"{Binding SaveAnotherCopyLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 401,
+    "source": "AutomationProperties.Name=\"{Binding CancelSaveLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 411,
+    "source": "AutomationProperties.Name=\"{Binding FinalSaveDetailsLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 414,
+    "source": "AutomationProperties.Name=\"{Binding FinalSaveDetailsLabel}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 419,
+    "source": "<Border AutomationProperties.AutomationId=\"Session.FinalSave\" AutomationProperties.Name=\"{Binding FinalSaveHeading}\">"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 443,
+    "source": "<Border AutomationProperties.AutomationId=\"Session.FinalSave\" AutomationProperties.Name=\"{Binding FinalSaveHeading}\">"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 494,
+    "source": "AutomationProperties.Name=\"{Binding OutputsHeading}\">"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 497,
+    "source": "<Setter Property=\"AutomationProperties.Name\" Value=\"{Binding FileName}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 573,
+    "source": "AutomationProperties.AutomationId=\"Session.OutputList\" AutomationProperties.Name=\"{Binding OutputsHeading}\">"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 575,
+    "source": "<Setter Property=\"AutomationProperties.Name\" Value=\"{Binding FileName}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 617,
+    "source": "AutomationProperties.AutomationId=\"Session.CurrentStepTitle\" AutomationProperties.Name=\"{Binding GuidedCurrentTitle}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 621,
+    "source": "AutomationProperties.AutomationId=\"Session.TaskSummary\" AutomationProperties.Name=\"{Binding SessionName}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 632,
+    "source": "AutomationProperties.Name=\"{Binding StatusHeading}\">"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 733,
+    "source": "AutomationProperties.Name=\"{Binding StopLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 739,
+    "source": "AutomationProperties.Name=\"{Binding TakeOverLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 783,
+    "source": "AutomationProperties.Name=\"{Binding TakeOverConfirmLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 789,
+    "source": "AutomationProperties.Name=\"{Binding TakeOverCancelLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 821,
+    "source": "AutomationProperties.Name=\"{Binding ReenterAutomationLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 849,
+    "source": "AutomationProperties.Name=\"{Binding BeginManualCropLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 877,
+    "source": "AutomationProperties.AutomationId=\"Session.StepList\" AutomationProperties.Name=\"{Binding StepsHeading}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 885,
+    "source": "AutomationProperties.Name=\"{Binding HistoryHeading}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 892,
+    "source": "AutomationProperties.AutomationId=\"Session.Settings\" AutomationProperties.Name=\"{Binding OpenSettingsLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 894,
+    "source": "AutomationProperties.AutomationId=\"Session.Environment\" AutomationProperties.Name=\"{Binding OpenEnvironmentLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 921,
+    "source": "AutomationProperties.Name=\"{Binding GuidedProcessingState}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 1068,
+    "source": "<local:SessionActionButton Content=\"{Binding ZoomOutLabel}\" Command=\"{Binding ZoomOutCommand}\" IsEnabled=\"{Binding CanZoomOut}\" Padding=\"10,4\" Margin=\"0,0,6,0\" AutomationProperties.Name=\"{Binding ZoomOutLabel}\"/>"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 1069,
+    "source": "<local:SessionActionButton Content=\"{Binding ZoomInLabel}\" Command=\"{Binding ZoomInCommand}\" IsEnabled=\"{Binding CanZoomIn}\" Padding=\"10,4\" Margin=\"0,0,6,0\" AutomationProperties.Name=\"{Binding ZoomInLabel}\"/>"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 1070,
+    "source": "<local:SessionActionButton Content=\"{Binding ResetZoomLabel}\" Command=\"{Binding ResetZoomCommand}\" Padding=\"10,4\" AutomationProperties.Name=\"{Binding ResetZoomLabel}\"/>"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 1177,
+    "source": "<Expander Header=\"{Binding NoticeErrorDetailsLabel}\" IsExpanded=\"False\" AutomationProperties.AutomationId=\"Session.Crop.ErrorDetails\" AutomationProperties.Name=\"{Binding NoticeErrorDetailsLabel}\">"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 1180,
+    "source": "<TextBox DockPanel.Dock=\"Left\" Text=\"{Binding NoticeErrorCode, Mode=OneWay}\" IsReadOnly=\"True\" IsReadOnlyCaretVisible=\"True\" BorderThickness=\"0\" Background=\"Transparent\" Padding=\"0,3\" AutomationProperties.AutomationId=\"Session.Crop.ErrorCode\" AutomationProperties.Name=\"{Binding NoticeErrorCodeLabel}\"/>"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 1195,
+    "source": "<local:SessionRadioButton Content=\"{Binding ManualCropTightLabel}\" IsChecked=\"{Binding IsManualCropTight}\" GroupName=\"ManualCropMode\" Margin=\"0,0,14,0\" AutomationProperties.AutomationId=\"Session.ManualCropModeTight\" AutomationProperties.Name=\"{Binding ManualCropTightLabel}\"/>"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 1196,
+    "source": "<local:SessionRadioButton Content=\"{Binding ManualCropUniformLabel}\" IsChecked=\"{Binding IsManualCropUniform}\" GroupName=\"ManualCropMode\" Margin=\"0,0,14,0\" AutomationProperties.AutomationId=\"Session.ManualCropModeUniform\" AutomationProperties.Name=\"{Binding ManualCropUniformLabel}\"/>"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 1197,
+    "source": "<local:SessionRadioButton Content=\"{Binding ManualCropPerEdgeLabel}\" IsChecked=\"{Binding IsManualCropPerEdge}\" GroupName=\"ManualCropMode\" AutomationProperties.AutomationId=\"Session.ManualCropModePerEdge\" AutomationProperties.Name=\"{Binding ManualCropPerEdgeLabel}\"/>"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 1200,
+    "source": "<local:SessionTextBox Text=\"{Binding ManualCropUniformMargin, UpdateSourceTrigger=PropertyChanged}\" Width=\"64\" Padding=\"5,3\" AutomationProperties.AutomationId=\"Session.ManualCropUniformMargin\" AutomationProperties.Name=\"{Binding ManualCropUniformLabel}\"/>"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 1206,
+    "source": "<local:SessionTextBox Text=\"{Binding ManualCropMarginLeft, UpdateSourceTrigger=PropertyChanged}\" Width=\"72\" Padding=\"5,3\" AutomationProperties.AutomationId=\"Session.ManualCropMarginLeft\" AutomationProperties.Name=\"{Binding TrimLeftLabel}\"/>"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 1210,
+    "source": "<local:SessionTextBox Text=\"{Binding ManualCropMarginTop, UpdateSourceTrigger=PropertyChanged}\" Width=\"72\" Padding=\"5,3\" AutomationProperties.AutomationId=\"Session.ManualCropMarginTop\" AutomationProperties.Name=\"{Binding TrimTopLabel}\"/>"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 1214,
+    "source": "<local:SessionTextBox Text=\"{Binding ManualCropMarginRight, UpdateSourceTrigger=PropertyChanged}\" Width=\"72\" Padding=\"5,3\" AutomationProperties.AutomationId=\"Session.ManualCropMarginRight\" AutomationProperties.Name=\"{Binding TrimRightLabel}\"/>"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 1218,
+    "source": "<local:SessionTextBox Text=\"{Binding ManualCropMarginBottom, UpdateSourceTrigger=PropertyChanged}\" Width=\"72\" Padding=\"5,3\" AutomationProperties.AutomationId=\"Session.ManualCropMarginBottom\" AutomationProperties.Name=\"{Binding TrimBottomLabel}\"/>"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 1226,
+    "source": "<local:SessionExpander Header=\"{Binding CropDetailsLabel}\" Margin=\"0,8,0,0\" AutomationProperties.AutomationId=\"Session.Crop.CoordinatesAndKeyboard\" AutomationProperties.Name=\"{Binding CropDetailsLabel}\">"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 1250,
+    "source": "<local:SessionActionButton Content=\"{Binding RestoreSuggestionLabel}\" Command=\"{Binding RestoreAutomaticSuggestionCommand}\" IsEnabled=\"{Binding CanRestoreAutomaticSuggestion}\" AutomationProperties.AutomationId=\"Session.TrimAdjust.Restore\" AutomationProperties.Name=\"{Binding RestoreSuggestionLabel}\" Padding=\"14,6\" Margin=\"0,0,8,4\"/>"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 1251,
+    "source": "<local:SessionActionButton Content=\"{Binding CancelTrimAdjustLabel}\" Command=\"{Binding CancelTrimAdjustCommand}\" AutomationProperties.AutomationId=\"Session.TrimAdjust.Cancel\" AutomationProperties.Name=\"{Binding CancelTrimAdjustLabel}\" Padding=\"14,6\" Margin=\"0,0,16,4\"/>"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 1253,
+    "source": "<local:SessionActionButton Content=\"{Binding TrimCompareToggleLabel}\" Command=\"{Binding ToggleTrimCompareCommand}\" AutomationProperties.AutomationId=\"Session.TrimAdjust.CompareToggle\" AutomationProperties.Name=\"{Binding TrimCompareToggleLabel}\" Padding=\"10,6\" Margin=\"0,0,0,4\"/>"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 1260,
+    "source": "<local:SessionActionButton Content=\"{Binding CancelManualCropLabel}\" AutomationProperties.AutomationId=\"Session.CancelManualCrop\" AutomationProperties.Name=\"{Binding CancelManualCropLabel}\" Command=\"{Binding CancelManualCropCommand}\" Padding=\"14,6\"/>"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 1364,
+    "source": "AutomationProperties.Name=\"{Binding CorrectionNoteLabel}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 1379,
+    "source": "AutomationProperties.Name=\"{Binding CorrectionCancelLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 1401,
+    "source": "AutomationProperties.Name=\"{Binding CorrectionStatusText}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 1412,
+    "source": "AutomationProperties.Name=\"{Binding CorrectionFolderText}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 1418,
+    "source": "AutomationProperties.Name=\"{Binding CorrectionOpenFolderLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 1431,
+    "source": "AutomationProperties.Name=\"{Binding CorrectionRepairLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 1445,
+    "source": "AutomationProperties.Name=\"{Binding CorrectionOtherOptionsLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 1452,
+    "source": "AutomationProperties.Name=\"{Binding ReenterAutomationLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 1477,
+    "source": "AutomationProperties.Name=\"{Binding ReviewGuidanceHeading}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 1483,
+    "source": "AutomationProperties.Name=\"{Binding ReviewGuidanceHeading}\">"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 1486,
+    "source": "<Setter Property=\"AutomationProperties.Name\" Value=\"{Binding}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 1512,
+    "source": "AutomationProperties.Name=\"{Binding AskColleagueLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 1519,
+    "source": "AutomationProperties.Name=\"{Binding TrimAdjustBeginLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 1771,
+    "source": "AutomationProperties.Name=\"{Binding TrimHeading}\">"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 1779,
+    "source": "<Setter Property=\"AutomationProperties.Name\" Value=\"{Binding Label}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 1905,
+    "source": "AutomationProperties.Name=\"{Binding TargetEdgeLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 1909,
+    "source": "AutomationProperties.Name=\"{Binding TargetSizeMmLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 1950,
+    "source": "AutomationProperties.Name=\"{Binding PrintSizeSummary}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 1961,
+    "source": "AutomationProperties.Name=\"{Binding SizeTechnicalDetailsLabel}\">"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 1974,
+    "source": "AutomationProperties.Name=\"{Binding AccessibleName}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 2068,
+    "source": "AutomationProperties.Name=\"{Binding SizeTechnicalDetailsLabel}\">"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 2168,
+    "source": "AutomationProperties.Name=\"{Binding WhiteUnderbaseHeading}\">"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 2178,
+    "source": "<Setter Property=\"AutomationProperties.Name\" Value=\"{Binding Label}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 2265,
+    "source": "AutomationProperties.Name=\"{Binding TiffProductionHeading}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 2270,
+    "source": "<Setter Property=\"AutomationProperties.Name\" Value=\"{Binding Label}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 2286,
+    "source": "AutomationProperties.Name=\"{Binding Label}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 2310,
+    "source": "AutomationProperties.Name=\"{Binding TiffOutputPathLabel}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 2457,
+    "source": "AutomationProperties.Name=\"{Binding RejectReasonLabel}\">"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 2460,
+    "source": "<Setter Property=\"AutomationProperties.Name\" Value=\"{Binding Label}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 2468,
+    "source": "AutomationProperties.Name=\"{Binding RejectNotesLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 2502,
+    "source": "AutomationProperties.Name=\"{Binding ReturnTargetLabel}\">"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 2505,
+    "source": "<Setter Property=\"AutomationProperties.Name\" Value=\"{Binding DisplayName}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 2564,
+    "source": "Content=\"{Binding BackLabel}\" Command=\"{Binding BackToHomeCommand}\" AutomationProperties.AutomationId=\"Session.BackToHome\" AutomationProperties.Name=\"{Binding BackLabel}\">"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 2599,
+    "source": "AutomationProperties.Name=\"{Binding UseThisTrimLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 2602,
+    "source": "AutomationProperties.AutomationId=\"Session.ApplyManualCrop\" AutomationProperties.Name=\"{Binding ApplyManualCropLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 2613,
+    "source": "AutomationProperties.Name=\"{Binding CorrectionPrepareLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 2622,
+    "source": "AutomationProperties.Name=\"{Binding CorrectionImportLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 2629,
+    "source": "AutomationProperties.Name=\"{Binding ConfirmAndSaveLabel}\"  Visibility=\"{Binding CanConfirmAndSave, Converter={StaticResource BoolToVisibility}}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 2632,
+    "source": "AutomationProperties.Name=\"{Binding UseSuggestionLabel}\"  Visibility=\"{Binding CanUseSuggestedName, Converter={StaticResource BoolToVisibility}}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 2650,
+    "source": "AutomationProperties.Name=\"{Binding ConfirmOriginalLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 2655,
+    "source": "AutomationProperties.Name=\"{Binding RunStepLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 2662,
+    "source": "AutomationProperties.Name=\"{Binding ApproveLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 2670,
+    "source": "AutomationProperties.Name=\"{Binding RejectLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 2677,
+    "source": "AutomationProperties.Name=\"{Binding AskColleagueLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 2684,
+    "source": "AutomationProperties.Name=\"{Binding TrimAdjustBeginLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 2689,
+    "source": "AutomationProperties.Name=\"{Binding RetryLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 2694,
+    "source": "AutomationProperties.Name=\"{Binding ErrorDetailsLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 2699,
+    "source": "AutomationProperties.Name=\"{Binding SkipLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 2705,
+    "source": "AutomationProperties.Name=\"{Binding KeepOriginalExtentLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 2710,
+    "source": "AutomationProperties.Name=\"{Binding SubmitManualResultLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 2715,
+    "source": "AutomationProperties.Name=\"{Binding HandOffLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 2720,
+    "source": "AutomationProperties.Name=\"{Binding CompleteLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 2725,
+    "source": "AutomationProperties.Name=\"{Binding AddAnotherSizeLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 2730,
+    "source": "AutomationProperties.Name=\"{Binding ChangeRouteLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 2737,
+    "source": "AutomationProperties.Name=\"{Binding SaveApprovedLabel}\"  Visibility=\"{Binding CanSaveApproved, Converter={StaticResource BoolToVisibility}}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 2741,
+    "source": "AutomationProperties.Name=\"{Binding RetryRecordedLabel}\"  Visibility=\"{Binding CanRetryRecordedSave, Converter={StaticResource BoolToVisibility}}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "line": 2745,
+    "source": "AutomationProperties.Name=\"{Binding CheckAgainLabel}\"  Visibility=\"{Binding CanCheckSaveAgain, Converter={StaticResource BoolToVisibility}}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SessionScreenView.xaml.cs",
+    "line": 306,
+    "source": "AutomationProperties.SetName(thumb, SessionViewModel.TrimHandleName(handle));"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SettingsView.xaml",
+    "line": 13,
+    "source": "AutomationProperties.Name=\"{Binding Heading}\">"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SettingsView.xaml",
+    "line": 77,
+    "source": "AutomationProperties.Name=\"{Binding LanguageLabel}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SettingsView.xaml",
+    "line": 85,
+    "source": "AutomationProperties.Name=\"{Binding TrimMarginLabel}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SettingsView.xaml",
+    "line": 97,
+    "source": "AutomationProperties.Name=\"{Binding LogRetentionLabel}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SettingsView.xaml",
+    "line": 113,
+    "source": "AutomationProperties.Name=\"{Binding OutputRootLabel}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SettingsView.xaml",
+    "line": 120,
+    "source": "AutomationProperties.Name=\"{Binding ProductionDpiLabel}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SettingsView.xaml",
+    "line": 126,
+    "source": "AutomationProperties.Name=\"{Binding PresetLabel}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SettingsView.xaml",
+    "line": 132,
+    "source": "AutomationProperties.Name=\"{Binding ColourSetupLabel}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SettingsView.xaml",
+    "line": 140,
+    "source": "AutomationProperties.Name=\"{Binding OpenEnvironmentLabel}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SettingsView.xaml",
+    "line": 150,
+    "source": "AutomationProperties.Name=\"{Binding LocalLogLocationLabel}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SettingsView.xaml",
+    "line": 157,
+    "source": "AutomationProperties.Name=\"{Binding ScreenshotLocationLabel}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SettingsView.xaml",
+    "line": 178,
+    "source": "AutomationProperties.Name=\"{Binding ApplyLabel}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SettingsView.xaml",
+    "line": 184,
+    "source": "AutomationProperties.Name=\"{Binding BackLabel}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SharedReviewSurface.cs",
+    "line": 82,
+    "source": "AutomationProperties.SetName(this, Strings.Session_PreviewHeading);"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SharedReviewSurface.cs",
+    "line": 114,
+    "source": "AutomationProperties.SetName(_slider, Strings.Session_ReviewComparisonSlider);"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SharedReviewSurface.cs",
+    "line": 119,
+    "source": "AutomationProperties.SetName(actual, \"100%\");"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SharedReviewSurface.cs",
+    "line": 124,
+    "source": "AutomationProperties.SetName(_inspectionToggle, Strings.Resolve(\"Session_ReviewToolsLabel\"));"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SharedReviewSurface.cs",
+    "line": 151,
+    "source": "button.SetBinding(AutomationProperties.NameProperty, new Binding(label));"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SharedReviewSurface.cs",
+    "line": 163,
+    "source": "AutomationProperties.SetName(button, label);"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SharedReviewSurface.cs",
+    "line": 240,
+    "source": "AutomationProperties.SetName(image, pane.Heading);"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SharedReviewSurface.cs",
+    "line": 297,
+    "source": "AutomationProperties.SetName(scroll, pane.Heading);"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/SharedReviewSurface.cs",
+    "line": 314,
+    "source": "AutomationProperties.SetName(_reviewToggle, (string)_reviewToggle.Content);"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/TiffReviewSurface.cs",
+    "line": 101,
+    "source": "AutomationProperties.SetName(this, Strings.Session_TiffModeHeading);"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/TiffReviewSurface.cs",
+    "line": 153,
+    "source": "button.SetBinding(AutomationProperties.NameProperty, new Binding(label));"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/TiffReviewSurface.cs",
+    "line": 182,
+    "source": "AutomationProperties.SetName(button, label);"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/TiffReviewSurface.cs",
+    "line": 292,
+    "source": "AutomationProperties.SetName(_image, _model.TiffPreviewAccessibleName);"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/TiffReviewSurface.cs",
+    "line": 293,
+    "source": "AutomationProperties.SetName(_scroll, _model.TiffPreviewAccessibleName);"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/WorkflowSelectionView.xaml",
+    "line": 15,
+    "source": "AutomationProperties.Name=\"{Binding Heading}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/WorkflowSelectionView.xaml",
+    "line": 70,
+    "source": "AutomationProperties.Name=\"{Binding PreviewHeading}\">"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/WorkflowSelectionView.xaml",
+    "line": 79,
+    "source": "AutomationProperties.Name=\"{Binding PreviewHeading}\" />"
+  },
+  {
+    "path": "src/PrintFlow.App/Views/WorkflowSelectionView.xaml",
+    "line": 89,
+    "source": "AutomationProperties.Name=\"{Binding SourceFileName}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/WorkflowSelectionView.xaml",
+    "line": 112,
+    "source": "AutomationProperties.Name=\"{Binding OutputNameLabel}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/WorkflowSelectionView.xaml",
+    "line": 160,
+    "source": "AutomationProperties.Name=\"{Binding Title}\""
+  },
+  {
+    "path": "src/PrintFlow.App/Views/WorkflowSelectionView.xaml",
+    "line": 188,
+    "source": "AutomationProperties.Name=\"{Binding BackLabel}\""
+  }
+]

@@ -1,0 +1,5 @@
+{
+  "RunsParentExists": false,
+  "RunRootExists": false,
+  "Cause": "OwnedRun.Claim opens the runs parent identity before creating the run; a fresh worktree has no runs parent yet."
+}

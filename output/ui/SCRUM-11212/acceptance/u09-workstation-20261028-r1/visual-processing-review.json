@@ -1,0 +1,448 @@
+{
+  "schemaVersion": 1,
+  "review": "U09 assigned green-scope-fixed and processing immutable screenshot review",
+  "reviewer": "u09_processing_visual_review",
+  "date": "2026-10-28",
+  "candidateRoot": "C:/Users/admin/.codex/worktrees/scrum-11201-shared-theme/printflow-Studio/output/ui/SCRUM-11212/candidates/u09-visual-20261028-r1",
+  "screenshotManifestPath": "C:/Users/admin/.codex/worktrees/scrum-11201-shared-theme/printflow-Studio/output/ui/SCRUM-11212/candidates/u09-visual-20261028-r1/screenshot-manifest.json",
+  "screenshotManifestSha256": "0feb2f84299c37594e9d5cbbaeb09802619583a5512ea19bd64dfbd9987c404c",
+  "sourceManifestPath": "C:/Users/admin/.codex/worktrees/scrum-11201-shared-theme/printflow-Studio/output/ui/SCRUM-11212/candidates/u09-visual-20261028-r1/source-final.json",
+  "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+  "reviewedCount": 36,
+  "method": "Each of the 36 PNGs was actually opened using tools.view_image. Actual SHA-256 was separately calculated for every file and matched the immutable screenshot manifest. No build, test, desktop interaction, source/Git mutation or historical-artifact edit was performed.",
+  "evidenceLimit": "Synthetic 96-DPI offscreen UserControl renders. This is limited visible-layout review of these 36 captures, not full U09 acceptance or a 140-state pass.",
+  "overallDisposition": "No material visible-layout defect observed in assigned captures; interaction and real-workstation acceptance remain unverified.",
+  "materialFindings": [],
+  "nonblockingObservations": [
+    {
+      "id": "O1",
+      "paths": [
+        "screenshots/green-scope-fixed/sidebar-en-US-1000x700.png",
+        "screenshots/green-scope-fixed/sidebar-en-US-1280x720.png",
+        "screenshots/green-scope-fixed/sidebar-en-US-984x661.png",
+        "screenshots/green-scope-fixed/sidebar-zh-CN-1000x700.png",
+        "screenshots/green-scope-fixed/sidebar-zh-CN-1280x720.png",
+        "screenshots/green-scope-fixed/sidebar-zh-CN-984x661.png",
+        "screenshots/processing/crop-1280x720.png",
+        "screenshots/processing/dimensions-1000x700.png",
+        "screenshots/processing/dimensions-1280x720.png",
+        "screenshots/processing/dimensions-1920x1080.png",
+        "screenshots/processing/preflight-1000x700.png",
+        "screenshots/processing/preflight-1280x720.png",
+        "screenshots/processing/preflight-1920x1080.png",
+        "screenshots/processing/review-background-1000x700.png",
+        "screenshots/processing/review-enhancement-1000x700.png",
+        "screenshots/processing/review-enhancement-1280x720.png",
+        "screenshots/processing/review-enhancement-1920x1080.png",
+        "screenshots/processing/review-tiff-1000x700.png",
+        "screenshots/processing/review-trim-1000x700.png",
+        "screenshots/processing/takeover-confirmation-1000x700.png",
+        "screenshots/processing/white-ink-1000x700.png",
+        "screenshots/processing/white-ink-1280x720.png",
+        "screenshots/processing/white-ink-1920x1080.png"
+      ],
+      "region": "Sidebar and/or right-hand content pane lower viewport",
+      "observation": "Some content is intentionally below the visible viewport and scrollbars signal continuation. Partial step/status or lower guidance is not by itself evidence of unreachable controls. Scrolling and full reachability were not exercised."
+    },
+    {
+      "id": "O2",
+      "paths": [
+        "screenshots/processing/dimensions-1000x700.png",
+        "screenshots/processing/dimensions-1280x720.png",
+        "screenshots/processing/enlargement-blocked-1000x700.png",
+        "screenshots/processing/handed-off-1000x700.png",
+        "screenshots/processing/invalid-size-1000x700.png",
+        "screenshots/processing/preflight-1000x700.png",
+        "screenshots/processing/preflight-1280x720.png",
+        "screenshots/processing/review-background-1000x700.png",
+        "screenshots/processing/stopped-failure-1000x700.png",
+        "screenshots/processing/white-ink-1000x700.png",
+        "screenshots/processing/white-ink-1280x720.png"
+      ],
+      "region": "Preview caption above image",
+      "observation": "Some secondary filename/dimension/explanation captions are ellipsized. These captures do not establish loss of an essential action or warning; print-size/output values are shown separately where relevant. Full filename access through a tooltip/details UI was not exercised and is not claimed."
+    },
+    {
+      "id": "O3",
+      "paths": [
+        "screenshots/processing/white-ink-1000x700.png",
+        "screenshots/processing/white-ink-1280x720.png",
+        "screenshots/processing/white-ink-1920x1080.png"
+      ],
+      "region": "Right-hand white-ink alternatives",
+      "observation": "The alternatives are visible as plain text choice rows, with no selected alternative and a disabled confirmation. Choice interaction, selected-state styling, focus, and keyboard semantics cannot be established from these frames."
+    }
+  ],
+  "unverifiedScopes": [
+    "Actual desktop window chrome/client size, Windows DPI scaling beyond synthetic96DPI, real fonts/rendering on deployed workstation.",
+    "Mouse, keyboard/tab order/focus, screen reader semantics, contrast measurement, touch, hover/tooltips and activation.",
+    "Actual scrolling and reachability of rejection forms, lower print-preparation summaries, later sidebar steps and other offscreen controls.",
+    "Crop dragging, keyboard coordinate editing, comparison-slider movement, zoom/reset and image fidelity on representative real artwork.",
+    "White-ink choice activation and selected state; invalid-size correction and enlargement authorization behavior.",
+    "Stop/takeover/retry transitions, external Meitu/Photoshop integration, production CMYK/W1 outputs, printing and file saves.",
+    "Full filename access via details or tooltip in frames whose secondary captions are ellipsized.",
+    "Unassigned screenshot groups and any other U09 states; genuine novice acceptance remains deferred."
+  ],
+  "images": [
+    {
+      "path": "screenshots/green-scope-fixed/sidebar-en-US-1000x700.png",
+      "absolutePath": "C:/Users/admin/.codex/worktrees/scrum-11201-shared-theme/printflow-Studio/output/ui/SCRUM-11212/candidates/u09-visual-20261028-r1/screenshots/green-scope-fixed/sidebar-en-US-1000x700.png",
+      "sha256": "7b6e83ca341dd379e18917e3b9e97b6497733cf371e8531b722ed6929de9c8d0",
+      "hashMatchesManifest": true,
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "actuallyViewed": true,
+      "disposition": "limited-visual-pass",
+      "verdict": "Original confirmation, fake-output warning, source line, preview controls, full guidance and Confirm original are visible. Later steps fall below sidebar viewport; scrollbar visible."
+    },
+    {
+      "path": "screenshots/green-scope-fixed/sidebar-en-US-1280x720.png",
+      "absolutePath": "C:/Users/admin/.codex/worktrees/scrum-11201-shared-theme/printflow-Studio/output/ui/SCRUM-11212/candidates/u09-visual-20261028-r1/screenshots/green-scope-fixed/sidebar-en-US-1280x720.png",
+      "sha256": "c1e7f685039514c442312b9155983a24490cb883addd5afc8ed4cd4ef3748c2c",
+      "hashMatchesManifest": true,
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "actuallyViewed": true,
+      "disposition": "limited-visual-pass",
+      "verdict": "Original confirmation guidance, preview and footer actions fit. Sidebar scrollbar signals further steps."
+    },
+    {
+      "path": "screenshots/green-scope-fixed/sidebar-en-US-1920x1080.png",
+      "absolutePath": "C:/Users/admin/.codex/worktrees/scrum-11201-shared-theme/printflow-Studio/output/ui/SCRUM-11212/candidates/u09-visual-20261028-r1/screenshots/green-scope-fixed/sidebar-en-US-1920x1080.png",
+      "sha256": "4c76e75c7dbc37aee69a13cc1d80431a639f22b4b6d4c9b5f2fa18ba3e956b77",
+      "hashMatchesManifest": true,
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "actuallyViewed": true,
+      "disposition": "limited-visual-pass",
+      "verdict": "All six step labels and step history visible; original preview, guidance, and footer actions fit."
+    },
+    {
+      "path": "screenshots/green-scope-fixed/sidebar-en-US-984x661.png",
+      "absolutePath": "C:/Users/admin/.codex/worktrees/scrum-11201-shared-theme/printflow-Studio/output/ui/SCRUM-11212/candidates/u09-visual-20261028-r1/screenshots/green-scope-fixed/sidebar-en-US-984x661.png",
+      "sha256": "aedfb3fe8227c5c266733aac12604e99ed0a0e189270dedc6dc0ec9ff1d8c015",
+      "hashMatchesManifest": true,
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "actuallyViewed": true,
+      "disposition": "limited-visual-pass",
+      "verdict": "Full Confirm original and route/home actions fit at 984x661; guidance wraps fully; sidebar scroll cue visible with a partial later step."
+    },
+    {
+      "path": "screenshots/green-scope-fixed/sidebar-zh-CN-1000x700.png",
+      "absolutePath": "C:/Users/admin/.codex/worktrees/scrum-11201-shared-theme/printflow-Studio/output/ui/SCRUM-11212/candidates/u09-visual-20261028-r1/screenshots/green-scope-fixed/sidebar-zh-CN-1000x700.png",
+      "sha256": "e963bddf6c6190ddf386e8dc72a4171397b31d0f1e5d48697a5bc8e2fd7eafc7",
+      "hashMatchesManifest": true,
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "actuallyViewed": true,
+      "disposition": "limited-visual-pass",
+      "verdict": "Chinese original guidance, fake-output warning, preview and confirm action fit. Sidebar shows later partial step plus scrollbar."
+    },
+    {
+      "path": "screenshots/green-scope-fixed/sidebar-zh-CN-1280x720.png",
+      "absolutePath": "C:/Users/admin/.codex/worktrees/scrum-11201-shared-theme/printflow-Studio/output/ui/SCRUM-11212/candidates/u09-visual-20261028-r1/screenshots/green-scope-fixed/sidebar-zh-CN-1280x720.png",
+      "sha256": "4ae616a77127c0ae174de9b563525a0d5b5c0c4f9ec1a46663506f14f7cd1869",
+      "hashMatchesManifest": true,
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "actuallyViewed": true,
+      "disposition": "limited-visual-pass",
+      "verdict": "Chinese labels, source line, preview and confirm footer fit; scrollbar signals more sidebar content."
+    },
+    {
+      "path": "screenshots/green-scope-fixed/sidebar-zh-CN-1920x1080.png",
+      "absolutePath": "C:/Users/admin/.codex/worktrees/scrum-11201-shared-theme/printflow-Studio/output/ui/SCRUM-11212/candidates/u09-visual-20261028-r1/screenshots/green-scope-fixed/sidebar-zh-CN-1920x1080.png",
+      "sha256": "affea804dc80c4119802321e76879f252169a95e1553f7e4ef2ebb553895f3fd",
+      "hashMatchesManifest": true,
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "actuallyViewed": true,
+      "disposition": "limited-visual-pass",
+      "verdict": "All six Chinese step labels, step history, guidance, warning, preview and confirmation action visible."
+    },
+    {
+      "path": "screenshots/green-scope-fixed/sidebar-zh-CN-984x661.png",
+      "absolutePath": "C:/Users/admin/.codex/worktrees/scrum-11201-shared-theme/printflow-Studio/output/ui/SCRUM-11212/candidates/u09-visual-20261028-r1/screenshots/green-scope-fixed/sidebar-zh-CN-984x661.png",
+      "sha256": "51615a04551282d1a27a1cb4c6772c5ba94788ce2c5d40f46edc5d124941e28f",
+      "hashMatchesManifest": true,
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "actuallyViewed": true,
+      "disposition": "limited-visual-pass",
+      "verdict": "Chinese guidance and confirm footer fit at 984x661; later sidebar steps are below viewport with a visible scrollbar."
+    },
+    {
+      "path": "screenshots/processing/crop-1000x700.png",
+      "absolutePath": "C:/Users/admin/.codex/worktrees/scrum-11201-shared-theme/printflow-Studio/output/ui/SCRUM-11212/candidates/u09-visual-20261028-r1/screenshots/processing/crop-1000x700.png",
+      "sha256": "db2320a3d26bc280bc879f179451fb6e1e44af2bbddb9aacaeb9a4240d6feeff",
+      "hashMatchesManifest": true,
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "actuallyViewed": true,
+      "disposition": "limited-visual-pass",
+      "verdict": "Crop rectangle and eight handles visible inside preview. Reset suggestion, cancel, comparison, keyboard/coordinates expander and Use crop action fit."
+    },
+    {
+      "path": "screenshots/processing/crop-1280x720.png",
+      "absolutePath": "C:/Users/admin/.codex/worktrees/scrum-11201-shared-theme/printflow-Studio/output/ui/SCRUM-11212/candidates/u09-visual-20261028-r1/screenshots/processing/crop-1280x720.png",
+      "sha256": "f7aa4909bd281ed2230a8982522b932fd3bb26e45e2b3ef796241cbc2abf9297",
+      "hashMatchesManifest": true,
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "actuallyViewed": true,
+      "disposition": "limited-visual-pass",
+      "verdict": "Crop preview and eight handles fit; instructions and adjustment/confirmation actions visible. Sidebar lower step partially visible with scrollbar."
+    },
+    {
+      "path": "screenshots/processing/crop-1920x1080.png",
+      "absolutePath": "C:/Users/admin/.codex/worktrees/scrum-11201-shared-theme/printflow-Studio/output/ui/SCRUM-11212/candidates/u09-visual-20261028-r1/screenshots/processing/crop-1920x1080.png",
+      "sha256": "b0eb0171c5799aa6e73953955a2be59220dfbe2758381c94134bc2f99b639b9c",
+      "hashMatchesManifest": true,
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "actuallyViewed": true,
+      "disposition": "limited-visual-pass",
+      "verdict": "Large crop preview and eight handles, complete sidebar, instructions and confirmation/adjustment actions visible."
+    },
+    {
+      "path": "screenshots/processing/crop-comparison-1000x700.png",
+      "absolutePath": "C:/Users/admin/.codex/worktrees/scrum-11201-shared-theme/printflow-Studio/output/ui/SCRUM-11212/candidates/u09-visual-20261028-r1/screenshots/processing/crop-comparison-1000x700.png",
+      "sha256": "3a4acd3b3d08ceb0965154ba72854ddb838af4d742775fb7156a9d4eb0bb67d2",
+      "hashMatchesManifest": true,
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "actuallyViewed": true,
+      "disposition": "limited-visual-pass",
+      "verdict": "Before/current and suggested-crop panels have full headings and separate previews. Adjust, reset, cancel and Use crop remain visible."
+    },
+    {
+      "path": "screenshots/processing/dimensions-1000x700.png",
+      "absolutePath": "C:/Users/admin/.codex/worktrees/scrum-11201-shared-theme/printflow-Studio/output/ui/SCRUM-11212/candidates/u09-visual-20261028-r1/screenshots/processing/dimensions-1000x700.png",
+      "sha256": "7071773977d6ece22195e199910a5e7e412033af1ffdb376262ecd0044c06673",
+      "hashMatchesManifest": true,
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "actuallyViewed": true,
+      "disposition": "limited-visual-pass",
+      "verdict": "Width selector and 250 mm input, estimated size/output, fake-TIFF production warning and confirmation footer visible. Lower guidance is in a visibly scrollable right pane. Secondary preview caption is ellipsized."
+    },
+    {
+      "path": "screenshots/processing/dimensions-1280x720.png",
+      "absolutePath": "C:/Users/admin/.codex/worktrees/scrum-11201-shared-theme/printflow-Studio/output/ui/SCRUM-11212/candidates/u09-visual-20261028-r1/screenshots/processing/dimensions-1280x720.png",
+      "sha256": "482c2dd6c85e02d2937047725598f9c5896056d3dfce58b89703f9b5cfe970f2",
+      "hashMatchesManifest": true,
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "actuallyViewed": true,
+      "disposition": "limited-visual-pass",
+      "verdict": "Width/input, full estimated size/output, warning and confirmation footer fit. Right-pane lower content needs scrolling; preview caption ellipsizes its secondary explanatory suffix."
+    },
+    {
+      "path": "screenshots/processing/dimensions-1920x1080.png",
+      "absolutePath": "C:/Users/admin/.codex/worktrees/scrum-11201-shared-theme/printflow-Studio/output/ui/SCRUM-11212/candidates/u09-visual-20261028-r1/screenshots/processing/dimensions-1920x1080.png",
+      "sha256": "48d3f1fc11c97e53cd154d769118f7466915257718b264d89d13ab434c8df0a5",
+      "hashMatchesManifest": true,
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "actuallyViewed": true,
+      "disposition": "limited-visual-pass",
+      "verdict": "Width/input, size check explanation, estimated size/output, warning and footer fit. Lowest right-pane summary continues below visible scroll viewport."
+    },
+    {
+      "path": "screenshots/processing/enlargement-blocked-1000x700.png",
+      "absolutePath": "C:/Users/admin/.codex/worktrees/scrum-11201-shared-theme/printflow-Studio/output/ui/SCRUM-11212/candidates/u09-visual-20261028-r1/screenshots/processing/enlargement-blocked-1000x700.png",
+      "sha256": "bb30c9041b7ce3573bb8200ab32700f98d2a7591b1cf3df78ae810af09bfb7f8",
+      "hashMatchesManifest": true,
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "actuallyViewed": true,
+      "disposition": "limited-visual-pass",
+      "verdict": "Enlargement warning is prominent next to the output size; acceptance/authorization footer visible. Print preparation details continue within a pane with visible scrollbar."
+    },
+    {
+      "path": "screenshots/processing/handed-off-1000x700.png",
+      "absolutePath": "C:/Users/admin/.codex/worktrees/scrum-11201-shared-theme/printflow-Studio/output/ui/SCRUM-11212/candidates/u09-visual-20261028-r1/screenshots/processing/handed-off-1000x700.png",
+      "sha256": "18a584aa8c6e38728fa5d0c3484ded1f5212f77e6192f4511eb4811d2062d833",
+      "hashMatchesManifest": true,
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "actuallyViewed": true,
+      "disposition": "limited-visual-pass",
+      "verdict": "Handoff explanation states external app may continue, task is manual and resuming creates a new attempt. Resume automatic and submit manual result actions fit; tiny 12x10 fixture preview visible."
+    },
+    {
+      "path": "screenshots/processing/invalid-size-1000x700.png",
+      "absolutePath": "C:/Users/admin/.codex/worktrees/scrum-11201-shared-theme/printflow-Studio/output/ui/SCRUM-11212/candidates/u09-visual-20261028-r1/screenshots/processing/invalid-size-1000x700.png",
+      "sha256": "9dc7b26d610ab64ace5ca537c0ff9d4aa162e555c980e37ecb2469198c1eef86",
+      "hashMatchesManifest": true,
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "actuallyViewed": true,
+      "disposition": "limited-visual-pass",
+      "verdict": "Invalid abc size input and inline correction message fully visible; confirmation appears disabled. Lower guidance is within right-pane scroll viewport."
+    },
+    {
+      "path": "screenshots/processing/preflight-1000x700.png",
+      "absolutePath": "C:/Users/admin/.codex/worktrees/scrum-11201-shared-theme/printflow-Studio/output/ui/SCRUM-11212/candidates/u09-visual-20261028-r1/screenshots/processing/preflight-1000x700.png",
+      "sha256": "623b1800434f9762df76b533de4ca8ff1bc722e15df5e78d686132c5be795a1c",
+      "hashMatchesManifest": true,
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "actuallyViewed": true,
+      "disposition": "limited-visual-pass",
+      "verdict": "Print size check and white-ink preparation/change action visible; fake-TIFF warning and Execute footer fit. Additional preparation guidance extends below right-pane scroll viewport."
+    },
+    {
+      "path": "screenshots/processing/preflight-1280x720.png",
+      "absolutePath": "C:/Users/admin/.codex/worktrees/scrum-11201-shared-theme/printflow-Studio/output/ui/SCRUM-11212/candidates/u09-visual-20261028-r1/screenshots/processing/preflight-1280x720.png",
+      "sha256": "a51c0f4f5b562dc6b393f07c0bb7f8effe1640c17869b9057614852a162260e7",
+      "hashMatchesManifest": true,
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "actuallyViewed": true,
+      "disposition": "limited-visual-pass",
+      "verdict": "Size check, preparation choice/change action, fake-output warning and Execute footer fit; lower guidance extends into scroll viewport."
+    },
+    {
+      "path": "screenshots/processing/preflight-1920x1080.png",
+      "absolutePath": "C:/Users/admin/.codex/worktrees/scrum-11201-shared-theme/printflow-Studio/output/ui/SCRUM-11212/candidates/u09-visual-20261028-r1/screenshots/processing/preflight-1920x1080.png",
+      "sha256": "44891281cbbbe9ff52e7a0d70ca563ba6ef7474aa9a7ce262cc2e42860ca646a",
+      "hashMatchesManifest": true,
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "actuallyViewed": true,
+      "disposition": "limited-visual-pass",
+      "verdict": "Size check, preparation choice, full summary and return-step expander visible beside large preview; Execute footer and warning fit."
+    },
+    {
+      "path": "screenshots/processing/processing-1000x700.png",
+      "absolutePath": "C:/Users/admin/.codex/worktrees/scrum-11201-shared-theme/printflow-Studio/output/ui/SCRUM-11212/candidates/u09-visual-20261028-r1/screenshots/processing/processing-1000x700.png",
+      "sha256": "9a3bfde6303c2b865d5a4ad52361079e7e05168bad08bf8464a7c4f4ddd63826",
+      "hashMatchesManifest": true,
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "actuallyViewed": true,
+      "disposition": "limited-visual-pass",
+      "verdict": "Stop and manual takeover controls, automatic-processing message, no reliable percentage explanation and Home visible. Sidebar scroll cue visible."
+    },
+    {
+      "path": "screenshots/processing/processing-1280x720.png",
+      "absolutePath": "C:/Users/admin/.codex/worktrees/scrum-11201-shared-theme/printflow-Studio/output/ui/SCRUM-11212/candidates/u09-visual-20261028-r1/screenshots/processing/processing-1280x720.png",
+      "sha256": "0e88433092f5ee61450ee1725fb36e715f90e0fa156b2d9e0177cf5980dcb1f2",
+      "hashMatchesManifest": true,
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "actuallyViewed": true,
+      "disposition": "limited-visual-pass",
+      "verdict": "Stop/takeover actions and complete processing card fit. No reliable percentage is claimed; sidebar lower content has scroll cue."
+    },
+    {
+      "path": "screenshots/processing/processing-1920x1080.png",
+      "absolutePath": "C:/Users/admin/.codex/worktrees/scrum-11201-shared-theme/printflow-Studio/output/ui/SCRUM-11212/candidates/u09-visual-20261028-r1/screenshots/processing/processing-1920x1080.png",
+      "sha256": "1bc5a617ab3a68e31831aa4e350ed01bd04f28e177b52096a7cf4454d326488c",
+      "hashMatchesManifest": true,
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "actuallyViewed": true,
+      "disposition": "limited-visual-pass",
+      "verdict": "Processing card, Stop/takeover, complete step list and Home fit. No reliable percentage is claimed."
+    },
+    {
+      "path": "screenshots/processing/review-background-1000x700.png",
+      "absolutePath": "C:/Users/admin/.codex/worktrees/scrum-11201-shared-theme/printflow-Studio/output/ui/SCRUM-11212/candidates/u09-visual-20261028-r1/screenshots/processing/review-background-1000x700.png",
+      "sha256": "4864d38cef67b1f885d350cbc6dc9f0b0679bc46f944a37bd260eb8ff48d6c96",
+      "hashMatchesManifest": true,
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "actuallyViewed": true,
+      "disposition": "limited-visual-pass",
+      "verdict": "Before/after previews, comparison/background options, checklist, correction handoff and confirm/reject footer fit. After filename caption is ellipsized; secondary identity only."
+    },
+    {
+      "path": "screenshots/processing/review-enhancement-1000x700.png",
+      "absolutePath": "C:/Users/admin/.codex/worktrees/scrum-11201-shared-theme/printflow-Studio/output/ui/SCRUM-11212/candidates/u09-visual-20261028-r1/screenshots/processing/review-enhancement-1000x700.png",
+      "sha256": "1f7227c88c85dc9c787252a8e6f5cc29464c344f0c140d150a8e2fd25b2a7a68",
+      "hashMatchesManifest": true,
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "actuallyViewed": true,
+      "disposition": "limited-visual-pass",
+      "verdict": "Before/after headings and preview captions, comparison/background options, checklist and confirm/reject/manual footer fit. Rejection details begin below visible right-pane scroll viewport."
+    },
+    {
+      "path": "screenshots/processing/review-enhancement-1280x720.png",
+      "absolutePath": "C:/Users/admin/.codex/worktrees/scrum-11201-shared-theme/printflow-Studio/output/ui/SCRUM-11212/candidates/u09-visual-20261028-r1/screenshots/processing/review-enhancement-1280x720.png",
+      "sha256": "6bdc6ff376351495fddfe19c400715b5f219785ec1139445e09417e0fb171c4e",
+      "hashMatchesManifest": true,
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "actuallyViewed": true,
+      "disposition": "limited-visual-pass",
+      "verdict": "Comparison previews and labels, full checklist and confirm/reject/manual footer fit. Rejection reason form is below visible scroll viewport."
+    },
+    {
+      "path": "screenshots/processing/review-enhancement-1920x1080.png",
+      "absolutePath": "C:/Users/admin/.codex/worktrees/scrum-11201-shared-theme/printflow-Studio/output/ui/SCRUM-11212/candidates/u09-visual-20261028-r1/screenshots/processing/review-enhancement-1920x1080.png",
+      "sha256": "49df00ef1669c7f07eb0dbbc320490b61d91dca4a41ac76efeec52be9d485c4d",
+      "hashMatchesManifest": true,
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "actuallyViewed": true,
+      "disposition": "limited-visual-pass",
+      "verdict": "Comparison previews, full checklist, rejection reason selector/notes, return step and confirm/reject/manual footer visible."
+    },
+    {
+      "path": "screenshots/processing/review-tiff-1000x700.png",
+      "absolutePath": "C:/Users/admin/.codex/worktrees/scrum-11201-shared-theme/printflow-Studio/output/ui/SCRUM-11212/candidates/u09-visual-20261028-r1/screenshots/processing/review-tiff-1000x700.png",
+      "sha256": "c1205409de33eb72668c048636fd3914950fe5274ad67ed1094844f540e2fb8a",
+      "hashMatchesManifest": true,
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "actuallyViewed": true,
+      "disposition": "limited-visual-pass",
+      "verdict": "TIFF color/white/overlay controls, preview, color approximation warning and confirm/reject/manual footer fit. Long TIFF checklist continues in visible right-pane scroll viewport."
+    },
+    {
+      "path": "screenshots/processing/review-trim-1000x700.png",
+      "absolutePath": "C:/Users/admin/.codex/worktrees/scrum-11201-shared-theme/printflow-Studio/output/ui/SCRUM-11212/candidates/u09-visual-20261028-r1/screenshots/processing/review-trim-1000x700.png",
+      "sha256": "c7c920eff19f54213236cb1c5f6f4440216eda1f153f01a1add866c4dccd4228",
+      "hashMatchesManifest": true,
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "actuallyViewed": true,
+      "disposition": "limited-visual-pass",
+      "verdict": "Before/after trim previews and dimensions, crop-adjust guidance and adjust/keep-original/manual/confirm/reject footer fit. Additional lower right-pane content is scrollable."
+    },
+    {
+      "path": "screenshots/processing/stopped-failure-1000x700.png",
+      "absolutePath": "C:/Users/admin/.codex/worktrees/scrum-11201-shared-theme/printflow-Studio/output/ui/SCRUM-11212/candidates/u09-visual-20261028-r1/screenshots/processing/stopped-failure-1000x700.png",
+      "sha256": "782cefcdac3066f1ddce571a7d4d037b9fd17d5ad5c81559a167bf89b93efab2",
+      "hashMatchesManifest": true,
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "actuallyViewed": true,
+      "disposition": "limited-visual-pass",
+      "verdict": "Stopped/no-result status, external-app caution, Retry explanation and full recovery-action footer visible. Secondary preview caption is ellipsized; image is visible."
+    },
+    {
+      "path": "screenshots/processing/stopping-1000x700.png",
+      "absolutePath": "C:/Users/admin/.codex/worktrees/scrum-11201-shared-theme/printflow-Studio/output/ui/SCRUM-11212/candidates/u09-visual-20261028-r1/screenshots/processing/stopping-1000x700.png",
+      "sha256": "2411b94cdef5817a36476a2365f7eeeb538ff0cd46e1ec9805ba6f69fa8960b2",
+      "hashMatchesManifest": true,
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "actuallyViewed": true,
+      "disposition": "limited-visual-pass",
+      "verdict": "Stopping request and unconfirmed-stop message repeated clearly above and within processing card. Home visible; other navigation shown disabled."
+    },
+    {
+      "path": "screenshots/processing/takeover-confirmation-1000x700.png",
+      "absolutePath": "C:/Users/admin/.codex/worktrees/scrum-11201-shared-theme/printflow-Studio/output/ui/SCRUM-11212/candidates/u09-visual-20261028-r1/screenshots/processing/takeover-confirmation-1000x700.png",
+      "sha256": "4e7f395f87bc58bb4087e83b6365c12d08a4e9d14633431fc61e7dab843d56e5",
+      "hashMatchesManifest": true,
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "actuallyViewed": true,
+      "disposition": "limited-visual-pass",
+      "verdict": "Manual takeover confirmation message and both Manual takeover/Continue automatic actions fully visible. Processing card lower explanatory content is in a visibly scrollable card."
+    },
+    {
+      "path": "screenshots/processing/white-ink-1000x700.png",
+      "absolutePath": "C:/Users/admin/.codex/worktrees/scrum-11201-shared-theme/printflow-Studio/output/ui/SCRUM-11212/candidates/u09-visual-20261028-r1/screenshots/processing/white-ink-1000x700.png",
+      "sha256": "bd3ef3f337eb33cf002b2ed5440750b23782c4890854e4bc7d1d6c9776ad3803",
+      "hashMatchesManifest": true,
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "actuallyViewed": true,
+      "disposition": "limited-visual-pass",
+      "verdict": "Three white-ink alternatives, explanation, estimated size, fake-output warning and disabled-until-choice confirmation visible. Lower explanatory text continues in right-pane scroll viewport."
+    },
+    {
+      "path": "screenshots/processing/white-ink-1280x720.png",
+      "absolutePath": "C:/Users/admin/.codex/worktrees/scrum-11201-shared-theme/printflow-Studio/output/ui/SCRUM-11212/candidates/u09-visual-20261028-r1/screenshots/processing/white-ink-1280x720.png",
+      "sha256": "36b0c83c1f9b18b76c29e530ce23b1cd9f87590a57050c16a9982ee2ae8fd06e",
+      "hashMatchesManifest": true,
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "actuallyViewed": true,
+      "disposition": "limited-visual-pass",
+      "verdict": "All three white-ink alternatives and choice explanation visible; estimated size and warning fit; disabled confirmation footer visible. Lower text extends within scroll pane."
+    },
+    {
+      "path": "screenshots/processing/white-ink-1920x1080.png",
+      "absolutePath": "C:/Users/admin/.codex/worktrees/scrum-11201-shared-theme/printflow-Studio/output/ui/SCRUM-11212/candidates/u09-visual-20261028-r1/screenshots/processing/white-ink-1920x1080.png",
+      "sha256": "78cdcf69ea63b2f74459c6dd35d72d68f7024fcd63c3cc5d45ba9e7d61871bc6",
+      "hashMatchesManifest": true,
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "actuallyViewed": true,
+      "disposition": "limited-visual-pass",
+      "verdict": "All three white-ink alternatives, full explanation/current awaiting-choice summary, estimated size and disabled confirmation footer visible. Lowest technical summary continues in scroll viewport."
+    }
+  ]
+}

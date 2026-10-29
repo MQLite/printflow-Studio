@@ -1,0 +1,296 @@
+{
+  "status": "STYLE_APPROVED_EXPANDING_VISUAL_AND_FLOW_PROTOTYPES",
+  "epic": "SCRUM-11168",
+  "approval": "用户认可首版视觉方向，并授权补齐其余页面和异常流程；未授权产品实现。",
+  "date": "2026-10-19",
+  "jobs": [
+    {
+      "id": "original",
+      "group": "主流程",
+      "title": "确认原图",
+      "file": "07-original.png",
+      "intent": "确认当前导入图与处理路线。",
+      "primary": "确认原图",
+      "brief": "One large cream-background fox source preview. Route PrepareCustomerDesign. Stage 2 original confirmation active. Title \"确认这张原图\"; subtitle \"请检查图片内容和方向，原图不会被修改。\". Side info filename \"山野狐狸.png\", \"处理客户设计\", source kept local, not processed. Footer primary \"确认原图\", secondary \"重新选择图片\". No enhancement auto-start, no approval/save/size forms."
+    },
+    {
+      "id": "enhance-ready",
+      "group": "主流程",
+      "title": "开始增强",
+      "file": "08-enhance-ready.png",
+      "intent": "可选增强前由用户明确选择开始或跳过。",
+      "primary": "开始增强",
+      "brief": "Stage 3 图片增强 active, before processing. Title \"让图案更清晰\". Large original fox preview; small explanation \"可改善清晰度；处理后仍需你审核。\". Primary footer \"开始增强\", outlined secondary \"跳过增强\", tertiary \"查看原图\". No preselected skip, no auto-run, no save. One recommended primary."
+    },
+    {
+      "id": "enhance-running",
+      "group": "主流程",
+      "title": "增强处理中",
+      "file": "09-enhance-running.png",
+      "intent": "真实不定进度、停止和美图接管始终可达。",
+      "primary": "等待处理",
+      "brief": "Stage 3 图片增强 active amber running. Title \"正在增强图片\". A modest indeterminate progress bar, never percent; phrase \"PrintFlow 正在操作美图秀秀，请稍候。\". Fox preview subdued at left with clear status region. Actions \"停止\" outlined and \"在美图秀秀中手动接管\" secondary, both available; no next/approve. Footer \"结果准备好后，需要你检查。\". No invented ETA."
+    },
+    {
+      "id": "enhance-review",
+      "group": "主流程",
+      "title": "增强结果审核",
+      "file": "10-enhance-review.png",
+      "intent": "处理前后对比，批准不等于保存。",
+      "primary": "通过增强结果",
+      "brief": "Stage 3 图片增强 active review. Title \"检查增强结果\". Before LEFT and After RIGHT same fox on cream source background, after subtly sharper not different artwork. Noninteractive bullet check guidance \"细节是否清晰\" / \"颜色是否自然\" / \"是否有多余纹理\". Primary \"通过增强结果\", secondary \"驳回增强结果\". NO colleague correction offered here, it belongs only to background-removal review. No save. Footer \"通过后选择是否去除背景。\"."
+    },
+    {
+      "id": "background-ready",
+      "group": "主流程",
+      "title": "选择去背景",
+      "file": "11-background-ready.png",
+      "intent": "保留背景与启动去背景均由用户明确选择。",
+      "primary": "开始去背景",
+      "brief": "Stage 4 去除背景 active needs input. Title \"是否需要去除背景？\". Show original enhanced fox on cream. Explain \"需要透明素材时去除背景；完整设计可以保留背景。\". Primary \"开始去背景\", outlined \"保留背景并跳过\", neutral note \"不会自动替你判断。\". No approve controls, crop settings or save forms."
+    },
+    {
+      "id": "white-ink",
+      "group": "主流程",
+      "title": "白墨选择",
+      "file": "12-white-ink.png",
+      "intent": "两条 TIFF 路线都需明确选择0/1/2像素分支及理由。",
+      "primary": "确认白墨选择",
+      "brief": "Stage 7 生成与审核 active substep \"白墨选择\". Title \"选择白墨类型\". Three radio cards with NONE SELECTED: \"精细图案 · 内缩 0 px\" / \"普通图案 · 内缩 1 px\" / \"大块实底 · 内缩 2 px\". Small suitable fox preview; explanation \"根据完整图案选择，系统不会自动判断。\"; text area label \"选择理由\" empty placeholder \"说明本次选择的依据\". Disabled primary \"确认白墨选择\" until both selection and reason exist. Collapsed technical disclosure \"生产通道说明\" with visible small note \"源 PSD/PDF 的专色不会直接沿用。\". No \"use existing white ink\" option."
+    },
+    {
+      "id": "preflight",
+      "group": "主流程",
+      "title": "生成前确认",
+      "file": "13-preflight.png",
+      "intent": "确认尺寸和已明确选择的白墨，再显式生成TIFF。",
+      "primary": "开始生成 TIFF",
+      "brief": "Stage 7 substep \"生成前确认\". Title \"确认后，开始生成 TIFF\". Large transparent fox preview and focused summary: \"实际尺寸 150 × 200 mm\", \"输出像素 1772 × 2362 px\", \"生产分辨率 300 PPI\", \"白墨 精细图案 · 0 px\", \"选择理由 保留细小花叶边缘\". No auto-selected white ink, this snapshot follows explicit user choice. Environment neutral line \"本次开始仍需通过环境校验\" not false ready. Footer primary \"开始生成 TIFF\", secondary \"修改设置\". No final approval/save yet."
+    },
+    {
+      "id": "tiff-running",
+      "group": "主流程",
+      "title": "TIFF生成中",
+      "file": "14-tiff-running.png",
+      "intent": "Photoshop处理中保留停止和接管，不虚构百分比。",
+      "primary": "等待生成",
+      "brief": "Stage7 生成与审核 processing. Title \"正在生成打印 TIFF\". Stage timeline \"准备工作副本\" completed, \"Photoshop 正在处理\" current, \"校验输出\" upcoming, \"等待你审核\" upcoming; no percentages. Small fox preview, neutral warning \"请勿切换或编辑 Photoshop 当前工作文件。\". Explicit secondary \"停止\" and \"在 Photoshop 中接管\". Footer note \"接管后不支持导回手工 TIFF。\". No approve, no save."
+    },
+    {
+      "id": "tiff-review",
+      "group": "主流程",
+      "title": "最终TIFF审核",
+      "file": "15-tiff-review.png",
+      "intent": "颜色/白墨/透明预览与实际尺寸，审批绑定此TIFF。",
+      "primary": "批准此 TIFF",
+      "brief": "Stage7 waiting final review. Header output \"山野狐狸_200mm.tif\". Title \"检查最终打印文件\". Huge fox composite preview; toolbar tabs \"颜色\" ACTIVE, \"白墨\", \"透明\"; right guidance simple bullets \"颜色是否符合预期\" / \"白墨覆盖是否完整\" / \"实际尺寸是否正确\". Metadata \"150 × 200 mm · 300 PPI · CMYK · W1\" illustrative, no fake production certificates. Primary \"批准此 TIFF\", outlined \"驳回此 TIFF\". Footer note \"批准不等于保存；驳回后先移入回收站。\". No automatic regeneration."
+    },
+    {
+      "id": "png-final",
+      "group": "主流程",
+      "title": "素材PNG收尾",
+      "file": "16-png-final.png",
+      "intent": "素材路线仅包含PNG，无印刷尺寸和TIFF。",
+      "primary": "确认结果并保存",
+      "brief": "Route \"准备设计素材\"; left rail only six user stages \"导入与路线\",\"确认原图\",\"图片增强\",\"去除背景\",\"裁切画布\",\"保存 PNG\"; crop review current awaiting final approval, no print stages. Title \"确认透明素材并保存\". Large fox on checkerboard, checklist \"主体完整\" / \"裁切边缘合适\"; filename field \"山野狐狸_素材.png\", example folder \"D:\\示例输出\"; neutral states \"待审核\" / \"尚未保存\". Footer primary \"确认结果并保存\", secondary \"仅通过此结果\". Note \"先批准当前结果，再保存；两项分别记录。\" No DPI/white ink/TIFF controls."
+    },
+    {
+      "id": "multi-size",
+      "group": "主流程",
+      "title": "多尺寸结果",
+      "file": "17-multi-size.png",
+      "intent": "每个尺寸拥有独立审核与保存状态。",
+      "primary": "添加另一尺寸",
+      "brief": "Stage8 output overview. Title \"管理这张图的多个尺寸\". Two result cards/rows with thumbnails: \"150 × 200 mm\" approval \"已批准\" delivery \"有保存记录\"; \"180 × 240 mm\" approval \"待审核\" delivery \"尚未保存\". Selected first. One primary \"添加另一尺寸\"; clear row action on second \"审核此尺寸\"; first secondary \"检查保存文件\". Disabled \"完成任务\" because second pending review. Note \"每个尺寸都需要独立审核和保存；保存记录不代表文件仍在原位置。\" No bulk approve."
+    },
+    {
+      "id": "saved",
+      "group": "主流程",
+      "title": "保存成功",
+      "file": "18-saved.png",
+      "intent": "保存成功已核实，但业务任务还未完成。",
+      "primary": "完成任务",
+      "brief": "Stage8 save current. Title \"结果已保存\" with quiet teal check. Large fox thumbnail, exact filename \"山野狐狸_200mm.tif\", folder \"D:\\示例输出\". Two separate facts \"文件保存：已核实\" and \"处理任务：待完成\". Primary \"完成任务\", outlined \"打开所在文件夹\", tertiary \"添加另一尺寸\". No claim that clicking open visibly opened Explorer. This is a fictional success-state prototype, no real file receipt."
+    },
+    {
+      "id": "completed",
+      "group": "主流程",
+      "title": "任务完成",
+      "file": "19-completed.png",
+      "intent": "完成事实、保存记录和当前文件核实状态分开。",
+      "primary": "开始新任务",
+      "brief": "A clean completed task page, header file and local job. All required stage checks, title \"这项处理已完成\". Summary \"处理客户设计\", \"已批准的 TIFF\", \"保存记录：1 份\", \"当前位置尚未再次检查\". Small fox preview. Primary \"开始新任务\", secondary \"查看保存记录\" and \"返回主页\". No automatic printing, no fake file-present badge; no editing controls."
+    },
+    {
+      "id": "correction-prepare",
+      "group": "协作与恢复",
+      "title": "准备同事修正",
+      "file": "20-correction-prepare.png",
+      "intent": "从去背景审核准备参考副本、工作副本和说明。",
+      "primary": "准备修正文件",
+      "brief": "Stage4 background review, title \"请同事修正这张图片\". Large current fox preview, optional multiline label \"需要修正的地方\" with text \"请检查尾巴与花叶边缘。\". Three file-type rows \"原图参考副本\", \"修正工作副本\", \"操作说明\". Note \"准备后任务将移交；原图保持不变。\". Primary \"准备修正文件\", secondary \"取消，返回审核\". No people directory, assignment accounts, messages, cloud or automatic file watching."
+    },
+    {
+      "id": "correction-wait",
+      "group": "协作与恢复",
+      "title": "等待修正与回导",
+      "file": "21-correction-wait.png",
+      "intent": "明确已移交；由用户选择修正图片回导，再重新审核。",
+      "primary": "导入修正后的图片",
+      "brief": "Stage4 badge \"已移交\". Title \"等待修正后的图片\". A gentle three-step instruction \"打开修正文件夹\" / \"请同事修正工作副本\" / \"导入返回的 PNG\". A compact file-package area and small fox reference, no editable brush. Primary \"导入修正后的图片\"; secondary \"打开修正文件夹\"; collapsed \"其他选项\" containing \"恢复自动处理\". Text \"不会自动监控或导入保存文件；导入后仍需审核。\" No waiting percent or auto-approval."
+    },
+    {
+      "id": "failure",
+      "group": "异常流程",
+      "title": "处理失败与重试",
+      "file": "22-failure.png",
+      "intent": "输入保留、原因明确，重试不自动开始。",
+      "primary": "重试此步骤",
+      "brief": "Stage3 enhancement failed. Title \"增强步骤未完成\". Calm amber status panel \"美图未产生可确认的结果。\"; preservation note \"原图和上一步结果仍保留。\"; next sentence \"检查美图状态后，可重试此步骤。\". Primary \"重试此步骤\" in teal, secondary \"查看错误详情\", tertiary \"返回主页\". Current fox original preview smaller. No stack trace, no false output, no automatically firing retry. Show code as secondary \"错误代码：示例\" rather than invented real code."
+    },
+    {
+      "id": "takeover",
+      "group": "异常流程",
+      "title": "Photoshop接管确认",
+      "file": "23-takeover.png",
+      "intent": "接管不等于停止外部应用，也不支持手工TIFF回导。",
+      "primary": "确认接管",
+      "brief": "Show stage7 Photoshop processing dimmed under a central accessible modal. Title \"在 Photoshop 中接管？\". Exact clear copy \"PrintFlow 将停止控制 Photoshop，并保持其现状。它可能仍在运行，请先自行检查。\" and emphasized \"此步骤不支持导回手工制作的结果，包括 TIFF。\". Modal footer neutral focus on \"继续自动处理\" cancel and teal primary \"确认接管\". No force-close action, no save or approval."
+    },
+    {
+      "id": "handed-off",
+      "group": "协作与恢复",
+      "title": "Photoshop已接管",
+      "file": "24-handed-off.png",
+      "intent": "外部应用现状保留；恢复自动处理仅回到可重试状态。",
+      "primary": "恢复自动处理",
+      "brief": "Stage7 badge \"已移交\". Title \"现在由你在 Photoshop 中处理\". Small output-reference preview, copy \"PrintFlow 已结束本次控制。请自行检查 Photoshop 当前状态。\" and \"本步骤不能导回手工 TIFF。\". Primary \"恢复自动处理\", secondary \"返回主页\". Footer explains \"恢复后仍需另行开始新尝试，不会接着执行旧尝试。\". No manual TIFF import, no silent resumption, no approved/saved badge."
+    },
+    {
+      "id": "recovery",
+      "group": "协作与恢复",
+      "title": "中断后恢复",
+      "file": "25-recovery.png",
+      "intent": "逐任务说明中断位置和合法恢复动作；不自动重启。",
+      "primary": "打开任务",
+      "brief": "Global Home family left rail \"开始任务\",\"最近任务\",\"需要恢复\" ACTIVE,\"环境检查\", bottom settings/help. Title \"有任务需要你处理\". Two compact recovery rows. First fox \"山野狐狸.png\", \"中断于图片增强\", note \"可重新开始此步骤\", controls \"重新开始步骤\", \"打开任务\". Second \"花卉徽章.png\", \"修正结果导入未完成\", note \"先打开任务查看当前状态\", only \"打开任务\"; no generic manual import for correction. Banner \"恢复不会自动继续外部应用中的旧操作。\" No blanket resume-all or false green."
+    },
+    {
+      "id": "save-failed",
+      "group": "异常流程",
+      "title": "保存失败",
+      "file": "26-save-failed.png",
+      "intent": "批准仍有效，当前未保存；允许修正位置再合法重试。",
+      "primary": "重试保存",
+      "brief": "Stage8 save focused form and fox preview. Title \"保存未完成\". Separate badges \"此结果已批准\" and amber \"未保存\". Reason \"无法写入所选文件夹。\". Existing filename \"山野狐狸_200mm.tif\", folder \"D:\\示例输出\" retained, secondary \"更改文件夹\". Primary \"重试保存\"; secondary \"查看错误详情\"; disabled \"打开所在文件夹\". Note \"批准结果已保留；不会重新生成 TIFF。\" No success or completed badge."
+    },
+    {
+      "id": "save-uncertain",
+      "group": "异常流程",
+      "title": "保存结果待核实",
+      "file": "27-save-uncertain.png",
+      "intent": "可能已写入，先核实同一次保存，不直接重复另存。",
+      "primary": "再次核实此次保存",
+      "brief": "Stage8 same save form. Title \"这次保存尚未核实\". Amber informative banner \"文件可能已经保存，但系统还没有确认完成。\". Separate approval \"已批准\", delivery \"待核实\". Requested filename and folder visible read-only summary. Primary \"再次核实此次保存\"; no primary retry-save or success. Secondary disclosure \"另存一份\" with note \"选择其他名称或文件夹会另存一份。\"; disabled open-folder. No automatic duplicate write."
+    },
+    {
+      "id": "collision",
+      "group": "异常流程",
+      "title": "同名文件冲突",
+      "file": "28-collision.png",
+      "intent": "不会覆盖原文件，提供显式新名称或更换目录。",
+      "primary": "使用建议名称",
+      "brief": "Stage8 save form inline conflict. Title \"文件名已被使用\". Amber copy \"目标文件夹已有同名文件，不会覆盖它。\". Current \"山野狐狸_200mm.tif\" with amber outline. Suggested field \"山野狐狸_200mm_2.tif\". Primary \"使用建议名称\", secondary \"更改文件夹\", tertiary \"返回修改名称\". Note \"采用新名称后，仍需确认保存。\" No overwrite button, no claim suggestion is already saved."
+    },
+    {
+      "id": "return-confirm",
+      "group": "异常流程",
+      "title": "返回重做确认",
+      "file": "29-return-confirm.png",
+      "intent": "返回重做与只读历史分开，说明下游失效。",
+      "primary": "确认返回",
+      "brief": "Dimmed current size page under centered modal. Title \"返回裁切并重新处理？\". Bound job \"山野狐狸.png\". Copy \"后续生成结果将失效，已有审核记录会保留。\". Three impact rows \"当前印刷设置：需重新确认\", \"后续 TIFF：需重新生成\", \"已有审核记录：保留为历史\". Buttons \"取消\" neutral default focus, teal \"确认返回\". Quiet alternate outside modal \"仅查看历史\". No false file deletion or erasure of history."
+    },
+    {
+      "id": "abandon",
+      "group": "异常流程",
+      "title": "离开与放弃确认",
+      "file": "30-abandon.png",
+      "intent": "未提交草稿与放弃整个任务有明确区别。",
+      "primary": "放弃此任务",
+      "brief": "Dimmed task page with centered modal. Title \"放弃这项处理？\". Bound filename \"山野狐狸.png\". Clear copy \"本任务将停止继续处理。原图保持不变，已有保存记录仍保留。\". Explain \"未提交的界面输入不会被确认。\". Neutral cancel \"继续当前任务\" with visible initial focus, outlined warning action \"放弃此任务\" (not teal approve). No automatic deletion, no discard disguised as back, no approving with Enter by default. This image is full task-abandon confirmation; small note draft-only navigation uses a separate keep/discard prompt in flow gallery."
+    },
+    {
+      "id": "enlargement",
+      "group": "异常流程",
+      "title": "放大风险确认",
+      "file": "31-enlargement.png",
+      "intent": "放大授权绑定本尺寸，不替代审核。",
+      "primary": "允许此次放大",
+      "brief": "Stage6 size setting, title \"这个尺寸需要放大图片\". Fox preview, coherent source \"1200 × 1600 px\", target \"150 × 200 mm\", output \"1772 × 2362 px\", production \"300 PPI\", effective source \"203 PPI\" approximate. Amber note \"放大可能使细节变模糊，请先确认是否接受。\". UNCHECKED checkbox \"我了解此尺寸的放大风险\"; primary \"允许此次放大\" DISABLED until checked; secondary \"返回调整尺寸\". Do not say approved, no auto consent, no degrading production300PPI."
+    },
+    {
+      "id": "readiness",
+      "group": "辅助页面",
+      "title": "环境检查",
+      "file": "32-readiness.png",
+      "intent": "历史观察与当前许可分开，必要项未运行不显示通过。",
+      "primary": "安全恢复并重新检查",
+      "brief": "Global rail environment selected. Title \"检查工作站是否就绪\". Summary amber \"尚未确认可以开始生产\". Rows \"工作站预设\" observed checked, \"美图秀秀\" not-run gray, \"Photoshop 当前状态\" amber \"需要检查\", \"颜色设置\" gray \"尚未确认\". Do not blanket green. Clear note \"上次检查结果不能代替本次开始时的环境门禁。\". Primary \"安全恢复并重新检查\", secondary \"刷新状态\"; collapsed \"技术详情\". Explain refresh only reads status, not live check. No auto repair button."
+    },
+    {
+      "id": "settings",
+      "group": "辅助页面",
+      "title": "设置",
+      "file": "33-settings.png",
+      "intent": "常用项先行，生产配置只读，修改范围说明明确。",
+      "primary": "应用设置",
+      "brief": "Global rail Settings selected. Title \"设置\". Left main grouped form \"常规\": language \"简体中文\", \"默认安全边（像素）\" input \"8\", hint \"仅用于此后新建的任务\". \"本机记录\": retention days \"30\", hint \"下次安全启动后生效\". Collapsed technical locations. Right quieter read-only \"生产配置\" with \"300 PPI · 固定\", \"输出位置由认可配置确定\", \"颜色设置请到环境检查核对\". Primary \"应用设置\", secondary \"返回原任务\". No editable DPI or auto Photoshop config, no save setting while typing."
+    },
+    {
+      "id": "recent",
+      "group": "辅助页面",
+      "title": "最近任务",
+      "file": "34-recent.png",
+      "intent": "状态真实分列；保存历史不等于当前文件仍存在。",
+      "primary": "继续处理",
+      "brief": "Global recent selected, title \"最近任务\". Elegant calm list of four jobs with small fox/flower thumbnails; columns \"任务\",\"当前状态\",\"保存情况\",\"操作\". Examples \"山野狐狸.png\" state \"待审核\" save \"尚未保存\" action \"继续审核\"; \"花卉徽章.png\" state \"已移交\" save \"尚未保存\" action \"查看修正任务\"; \"图案素材.png\" state \"已完成\" save \"有保存记录·尚未检查\" action \"查看记录\"; \"线稿图案.png\" state \"已中断\" save \"尚未保存\" action \"查看恢复\". No fabricated timestamps/private names. No bulk delete files. Remove-from-list disclosure clearly \"仅移出列表，不删除文件\"."
+    },
+    {
+      "id": "error-details",
+      "group": "辅助页面",
+      "title": "错误详情与诊断",
+      "file": "35-error-details.png",
+      "intent": "技术信息收纳；导出诊断包仅显式触发。",
+      "primary": "导出诊断包",
+      "brief": "Global detail page with back link \"返回处理\". Title \"错误详情\". Plain sections \"发生了什么\" with \"增强未产生可确认的输出，原图仍保留。\"; \"处理信息\" rows route/step/job; \"错误代码\" value \"示例代码\"; screenshot placeholder \"未捕获诊断截图\"; disclosure \"技术详情\" closed. Primary \"导出诊断包\"; secondary \"返回处理\". Note \"诊断包保存在本地，由你选择是否另行提供给他人。\" No cloud-send action, no raw stacktrace in main layout."
+    },
+    {
+      "id": "input-error",
+      "group": "异常流程",
+      "title": "导入校验失败",
+      "file": "36-input-error.png",
+      "intent": "多页PDF等不支持输入明确拒绝；原件保持不变。",
+      "primary": "重新选择文件",
+      "brief": "Home import family. Title \"这份文件暂时不能处理\". Amber inline panel \"当前只支持单页 PDF。\". Synthetic filename \"多页示例.pdf\"; note \"文件未被修改，也没有启动处理。\". Clear instruction \"请先准备单页文件，再重新选择。\". Primary \"重新选择文件\", secondary \"返回主页\". No unsupported page chooser, no pretending multi-page extraction is supported. Minimal file icon, no fox preview pretending decoded file."
+    },
+    {
+      "id": "pdf-psd",
+      "group": "主流程",
+      "title": "PDF与PSD源准备",
+      "file": "37-source-preparation.png",
+      "intent": "只准备受管栅格副本，源文件不变、生产通道不沿用。",
+      "primary": "准备单页预览",
+      "brief": "Route \"生成打印 TIFF\", filename \"图案示例.pdf\". Direct-TIFF rail only \"导入与路线\",\"检查设计\" ACTIVE,\"印刷设置\",\"生成与审核\",\"保存结果\". Title \"先准备单页预览\". File illustration at left, required facts at right \"PDF · 单页\", \"300 PPI\", \"原始文件保持不变\"; note \"准备后检查第 1 页及实际尺寸，再设置印刷尺寸。\". Primary \"准备单页预览\"; secondary \"重新选择文件\". No fake rendered preview before prepare. Small compact supporting note \"PSD 使用受管栅格副本；源专色不会直接成为生产通道。\" No multi-page selector or keep-source-white."
+    },
+    {
+      "id": "ai-planned",
+      "group": "条件接入",
+      "title": "AI设计分步接入",
+      "file": "38-ai-planned.png",
+      "intent": "只呈现待接入设计，不承诺已有自动生图能力。",
+      "primary": "复制 Prompt",
+      "brief": "Separate clearly labeled planned AI interface, top amber badge \"规划预览 · 尚未接入\". Sidebar stages \"描述需求\",\"参考附件\",\"确认 Prompt\" ACTIVE,\"生成与接收\",\"导入素材\". Title \"确认你的设计描述\". Editor text \"绘制一只橙色狐狸，周围有花叶，适合独立印花图案。\". Prompt source/template controls minimal; selected attachments list \"参考图.png · 手动上传清单\", \"需求说明.txt\". Primary enabled design action \"复制 Prompt\". Disabled \"开始生成\" with explanation \"等待 AI 业务能力接入\". Secondary \"手动回收图片\" shown as conceptual fallback, not fake background monitoring. Small sentence \"自动上传与结果接收由原 AI Epic 实现。\" No browser brand claims, no generated progress or false success."
+    }
+  ]
+}

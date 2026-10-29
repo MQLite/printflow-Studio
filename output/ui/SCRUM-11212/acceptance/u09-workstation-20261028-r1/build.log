@@ -1,0 +1,17 @@
+  正在确定要还原的项目…
+  已还原 C:\Users\admin\.codex\worktrees\u09\printflow-Studio\src\PrintFlow.Domain\PrintFlow.Domain.csproj (用时 1.34 秒)。
+  已还原 C:\Users\admin\.codex\worktrees\u09\printflow-Studio\src\PrintFlow.Workflow\PrintFlow.Workflow.csproj (用时 1.35 秒)。
+  已还原 C:\Users\admin\.codex\worktrees\u09\printflow-Studio\src\PrintFlow.Infrastructure\PrintFlow.Infrastructure.csproj (用时 1.42 秒)。
+  已还原 C:\Users\admin\.codex\worktrees\u09\printflow-Studio\tests\PrintFlow.WorkstationEntry\PrintFlow.WorkstationEntry.csproj (用时 1.45 秒)。
+  已还原 C:\Users\admin\.codex\worktrees\u09\printflow-Studio\src\PrintFlow.App\PrintFlow.App.csproj (用时 1.45 秒)。
+  PrintFlow.Domain -> C:\Users\admin\.codex\worktrees\u09\printflow-Studio\artifacts\pf-opux-scrum11154-workstation-entry\build\u09-acceptance-20261028-a\PrintFlow.Domain.dll
+  PrintFlow.Workflow -> C:\Users\admin\.codex\worktrees\u09\printflow-Studio\artifacts\pf-opux-scrum11154-workstation-entry\build\u09-acceptance-20261028-a\PrintFlow.Workflow.dll
+  PrintFlow.Infrastructure -> C:\Users\admin\.codex\worktrees\u09\printflow-Studio\artifacts\pf-opux-scrum11154-workstation-entry\build\u09-acceptance-20261028-a\PrintFlow.Infrastructure.dll
+  PrintFlow.App -> C:\Users\admin\.codex\worktrees\u09\printflow-Studio\artifacts\pf-opux-scrum11154-workstation-entry\build\u09-acceptance-20261028-a\PrintFlow.App.dll
+  PrintFlow.WorkstationEntry -> C:\Users\admin\.codex\worktrees\u09\printflow-Studio\artifacts\pf-opux-scrum11154-workstation-entry\build\u09-acceptance-20261028-a\PrintFlow.WorkstationEntry.dll
+
+已成功生成。
+    0 个警告
+    0 个错误
+
+已用时间 00:00:38.91

@@ -1,0 +1,438 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="76e03f7c-9148-4825-b133-9fd1de5c6140" name="admin@DESKTOP-0BG8884 2026-10-22 16:13:16" runUser="DESKTOP-0BG8884\admin" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-22T16:13:16.0475098+13:00" queuing="2026-10-22T16:13:16.0475101+13:00" start="2026-10-22T16:13:10.1861382+13:00" finish="2026-10-22T16:13:32.3223318+13:00" />
+  <TestSettings name="default" id="102b36b9-a408-4dae-b634-1124dff60941">
+    <Deployment runDeploymentRoot="admin_DESKTOP-0BG8884_2026-10-22_16_13_16" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="8fd12475-c34c-49b8-b61a-9c3a24594d5e" testId="364da959-b780-4d41-6c4c-798d7199a98f" testName="PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Uncertain_collision_and_picker_cancel_keep_their_real_save_state(uncertain: True)" computerName="DESKTOP-0BG8884" duration="00:00:00.7462312" startTime="2026-10-22T16:13:24.0015628+13:00" endTime="2026-10-22T16:13:24.7482379+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8fd12475-c34c-49b8-b61a-9c3a24594d5e" />
+    <UnitTestResult executionId="87591177-fdb5-4222-bd6b-7ff3bc1f2d75" testId="0ecc20ac-374c-8d50-42c5-2591e74dbce6" testName="PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Save_destination_and_name_are_visible_in_the_current_step_at_minimum_size" computerName="DESKTOP-0BG8884" duration="00:00:00.7796939" startTime="2026-10-22T16:13:22.4613909+13:00" endTime="2026-10-22T16:13:23.2416918+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="87591177-fdb5-4222-bd6b-7ff3bc1f2d75">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : result.Facts&#xD;
+    should satisfy the condition&#xD;
+(f.Item2 &amp;&amp; f.Item3)&#xD;
+    but&#xD;
+[(Session.FinalSave.ChangeLocation, True, False)]&#xD;
+    do not&#xD;
+&#xD;
+Additional Info:&#xD;
+    the save step must expose the filename and destination without first scrolling past explanation</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Save_destination_and_name_are_visible_in_the_current_step_at_minimum_size() in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionSaveTests.cs:line 73&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="befb3915-cc87-496b-ad93-87e87458fbe7" testId="dd030278-329f-9ad1-7664-f1b3434109a2" testName="PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Saving_is_a_transient_state_and_does_not_claim_delivery_before_acknowledgment" computerName="DESKTOP-0BG8884" duration="00:00:00.3657757" startTime="2026-10-22T16:13:25.4215493+13:00" endTime="2026-10-22T16:13:25.7876316+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="befb3915-cc87-496b-ad93-87e87458fbe7" />
+    <UnitTestResult executionId="63e4116a-39cc-434b-a6cf-734e44274836" testId="84cfddc7-fbb8-9c8c-8210-70d448e28069" testName="PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Multiple_sizes_and_long_Chinese_filename_keep_current_save_target_reachable(width: 1280, height: 720)" computerName="DESKTOP-0BG8884" duration="00:00:00.8513854" startTime="2026-10-22T16:13:30.0961608+13:00" endTime="2026-10-22T16:13:30.9471990+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="63e4116a-39cc-434b-a6cf-734e44274836">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- Shouldly.ShouldAssertException : Inside(item.Bounds, viewport); item.WithinScroll&#xD;
+    should be&#xD;
+True&#xD;
+    but was&#xD;
+False&#xD;
+&#xD;
+Additional Info:&#xD;
+    multisize-long-name: Session.FinalSave.Folder</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Capture(SessionViewModel model, Size viewport, String state, String[] essential, Boolean requireImage) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedAcceptanceTests.cs:line 129&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Multiple_sizes_and_long_Chinese_filename_keep_current_save_target_reachable(Int32 width, Int32 height) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedAcceptanceTests.cs:line 117&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.&lt;&gt;c__DisplayClass3_0.&lt;Capture&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedAcceptanceTests.cs:line 142&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="74485588-a567-4957-a16f-ad99b4696c6c" testId="73fba874-0ff3-f112-441d-ef21bb693424" testName="PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Current_actions_and_inputs_expose_names_and_hidden_steps_stay_out_of_candidate_tab_set(state: &quot;source&quot;, action: &quot;Session.ConfirmOriginal&quot;)" computerName="DESKTOP-0BG8884" duration="00:00:00.5601294" startTime="2026-10-22T16:13:27.5167063+13:00" endTime="2026-10-22T16:13:28.0767966+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="74485588-a567-4957-a16f-ad99b4696c6c" />
+    <UnitTestResult executionId="f13a25d1-7fe7-4414-9555-170cb5649d18" testId="058ca17d-56ce-e5fe-b630-1b02841da171" testName="PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Current_actions_and_inputs_expose_names_and_hidden_steps_stay_out_of_candidate_tab_set(state: &quot;review&quot;, action: &quot;Session.Approve&quot;)" computerName="DESKTOP-0BG8884" duration="00:00:00.5787761" startTime="2026-10-22T16:13:28.6556227+13:00" endTime="2026-10-22T16:13:29.2347002+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f13a25d1-7fe7-4414-9555-170cb5649d18" />
+    <UnitTestResult executionId="99362fbf-e10f-4c88-b3c9-3275d8d40c7b" testId="6492963a-b5f0-6417-9925-8c3f1f05d996" testName="PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Long_Chinese_source_keeps_image_and_primary_action_visible(width: 1920, height: 1080)" computerName="DESKTOP-0BG8884" duration="00:00:00.5517657" startTime="2026-10-22T16:13:25.7878531+13:00" endTime="2026-10-22T16:13:26.3411382+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="99362fbf-e10f-4c88-b3c9-3275d8d40c7b" />
+    <UnitTestResult executionId="5d86aee3-bde3-402b-80b1-09538dc43cae" testId="756b2e66-e6df-3ae0-f8b7-36da6f6f4d8d" testName="PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Each_size_retains_its_own_review_and_delivery_summary" computerName="DESKTOP-0BG8884" duration="00:00:00.4408336" startTime="2026-10-22T16:13:22.0200495+13:00" endTime="2026-10-22T16:13:22.4612476+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5d86aee3-bde3-402b-80b1-09538dc43cae" />
+    <UnitTestResult executionId="db5d1d10-b043-4907-8010-d87b647aeadf" testId="f6ab544d-7413-c8ef-4efa-ebd960fdfcf9" testName="PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Approved_result_enters_save_without_claiming_delivery(saved: True, completed: False)" computerName="DESKTOP-0BG8884" duration="00:00:00.8091083" startTime="2026-10-22T16:13:21.2104769+13:00" endTime="2026-10-22T16:13:22.0198765+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="db5d1d10-b043-4907-8010-d87b647aeadf" />
+    <UnitTestResult executionId="fbe098dd-7996-4544-8e3e-c6f8c676d3d7" testId="00761881-bba7-087f-2ac1-0ba9ebad6743" testName="PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Save_keeps_guarded_primary_action_at_right_and_destination_readable(width: 1000, height: 700)" computerName="DESKTOP-0BG8884" duration="00:00:01.8549999" startTime="2026-10-22T16:13:14.1581684+13:00" endTime="2026-10-22T16:13:16.0189103+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="fbe098dd-7996-4544-8e3e-c6f8c676d3d7">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- Shouldly.ShouldAssertException : within.Bottom&#xD;
+    should be less than or equal to&#xD;
+352.8433333333333d&#xD;
+    but was&#xD;
+373.21d</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Save_keeps_guarded_primary_action_at_right_and_destination_readable(Int32 width, Int32 height) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\WpfUiSamplePageTests.cs:line 64&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.VisibleInside(FrameworkElement e, Visual root, Int32 width, Int32 height) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\WpfUiSamplePageTests.cs:line 105&#xD;
+   at PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.&lt;&gt;c__DisplayClass1_1.&lt;Save_keeps_guarded_primary_action_at_right_and_destination_readable&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\WpfUiSamplePageTests.cs:line 79&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="b70146f8-b5e8-48b8-b4c2-6917ce864cbb" testId="72724c2d-ea28-e208-d2d1-7181c3841e61" testName="PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Approved_result_enters_save_without_claiming_delivery(saved: True, completed: True)" computerName="DESKTOP-0BG8884" duration="00:00:00.8643032" startTime="2026-10-22T16:13:19.5964944+13:00" endTime="2026-10-22T16:13:20.4611767+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b70146f8-b5e8-48b8-b4c2-6917ce864cbb" />
+    <UnitTestResult executionId="50e20ec0-bb5b-460d-87a2-b58c04d92b07" testId="d59ddf19-1535-70a3-6d6c-e6a3d05e500d" testName="PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Save_keeps_guarded_primary_action_at_right_and_destination_readable(width: 1920, height: 1080)" computerName="DESKTOP-0BG8884" duration="00:00:00.8908205" startTime="2026-10-22T16:13:16.0341885+13:00" endTime="2026-10-22T16:13:16.9112269+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="50e20ec0-bb5b-460d-87a2-b58c04d92b07">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- Shouldly.ShouldAssertException : model.CanComplete&#xD;
+    should be&#xD;
+False&#xD;
+    but was&#xD;
+True</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Save_keeps_guarded_primary_action_at_right_and_destination_readable(Int32 width, Int32 height) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\WpfUiSamplePageTests.cs:line 64&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.&lt;&gt;c__DisplayClass1_1.&lt;Save_keeps_guarded_primary_action_at_right_and_destination_readable&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\WpfUiSamplePageTests.cs:line 82&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="f0facdc2-235d-4fc1-8d86-302fd98fb682" testId="7a46d5c6-a226-1230-b244-47641f04cd7d" testName="PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Long_Chinese_source_keeps_image_and_primary_action_visible(width: 1000, height: 700)" computerName="DESKTOP-0BG8884" duration="00:00:00.6065207" startTime="2026-10-22T16:13:26.3415990+13:00" endTime="2026-10-22T16:13:26.9481929+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f0facdc2-235d-4fc1-8d86-302fd98fb682" />
+    <UnitTestResult executionId="c59b5811-07a5-4c4b-9010-e0fedc33c67a" testId="6b677354-b11c-fe83-db74-68494ff5247b" testName="PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Approved_result_enters_save_without_claiming_delivery(saved: False, completed: False)" computerName="DESKTOP-0BG8884" duration="00:00:00.7484002" startTime="2026-10-22T16:13:18.8477564+13:00" endTime="2026-10-22T16:13:19.5963733+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c59b5811-07a5-4c4b-9010-e0fedc33c67a" />
+    <UnitTestResult executionId="93f43cbf-f53e-46ad-9442-5226b94b360e" testId="2a3d974a-d6c2-7b1d-5c9f-ddd3684bcfc5" testName="PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Approved_result_enters_save_without_claiming_delivery(saved: False, completed: True)" computerName="DESKTOP-0BG8884" duration="00:00:00.7486388" startTime="2026-10-22T16:13:20.4613048+13:00" endTime="2026-10-22T16:13:21.2103629+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="93f43cbf-f53e-46ad-9442-5226b94b360e" />
+    <UnitTestResult executionId="cfb5554b-8509-4077-93d6-e15118b37ace" testId="d0a89e96-733a-18b6-539c-cb2718cfdeae" testName="PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Multiple_sizes_and_long_Chinese_filename_keep_current_save_target_reachable(width: 1920, height: 1080)" computerName="DESKTOP-0BG8884" duration="00:00:01.2256984" startTime="2026-10-22T16:13:30.9482543+13:00" endTime="2026-10-22T16:13:32.1733166+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="cfb5554b-8509-4077-93d6-e15118b37ace" />
+    <UnitTestResult executionId="acd6b7cd-63fe-494e-a119-4bfa9e3eff89" testId="08d97ce5-d0e1-1e50-e7f0-38993af97d0d" testName="PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Current_actions_and_inputs_expose_names_and_hidden_steps_stay_out_of_candidate_tab_set(state: &quot;dimensions&quot;, action: &quot;Session.PrintDimensions.ConfirmSize&quot;)" computerName="DESKTOP-0BG8884" duration="00:00:00.5782159" startTime="2026-10-22T16:13:28.0770951+13:00" endTime="2026-10-22T16:13:28.6554720+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="acd6b7cd-63fe-494e-a119-4bfa9e3eff89" />
+    <UnitTestResult executionId="980000ff-f4e6-4230-91eb-a93ae195599b" testId="adce905c-6d59-461e-2665-d32ec767b85a" testName="PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Approved_png_preparation_is_part_of_the_save_step_without_becoming_a_delivery" computerName="DESKTOP-0BG8884" duration="00:00:00.6724999" startTime="2026-10-22T16:13:24.7483973+13:00" endTime="2026-10-22T16:13:25.4213890+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="980000ff-f4e6-4230-91eb-a93ae195599b" />
+    <UnitTestResult executionId="f2c74e5d-a47a-4b3f-99a9-455c2d7a1330" testId="b56fba20-1c2a-8994-b85d-621735a4b2ad" testName="PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Home_import_is_prominent_without_losing_resume_or_environment(width: 1920, height: 1080)" computerName="DESKTOP-0BG8884" duration="00:00:00.3601331" startTime="2026-10-22T16:13:18.4852325+13:00" endTime="2026-10-22T16:13:18.8457240+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f2c74e5d-a47a-4b3f-99a9-455c2d7a1330" />
+    <UnitTestResult executionId="9d2f6c2b-65bc-4e02-af26-fc258417ccaa" testId="942e3521-21da-2c28-ef77-7f18a36d1d70" testName="PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Multiple_sizes_and_long_Chinese_filename_keep_current_save_target_reachable(width: 1000, height: 700)" computerName="DESKTOP-0BG8884" duration="00:00:00.8595610" startTime="2026-10-22T16:13:29.2348315+13:00" endTime="2026-10-22T16:13:30.0950482+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9d2f6c2b-65bc-4e02-af26-fc258417ccaa">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- Shouldly.ShouldAssertException : r.Right&#xD;
+    should be less than or equal to&#xD;
+700.5d&#xD;
+    but was&#xD;
+716.8200000000002d</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Capture(SessionViewModel model, Size viewport, String state, String[] essential, Boolean requireImage) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedAcceptanceTests.cs:line 129&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Multiple_sizes_and_long_Chinese_filename_keep_current_save_target_reachable(Int32 width, Int32 height) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedAcceptanceTests.cs:line 117&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Inside(Rect r, Size viewport) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedAcceptanceTests.cs:line 188&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.&lt;&gt;c__DisplayClass3_0.&lt;Capture&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedAcceptanceTests.cs:line 142&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="40b888fa-c66c-4234-b22c-ee1a159fa80c" testId="3341511a-cc43-7a38-1a2b-b27adb46bf39" testName="PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Uncertain_collision_and_picker_cancel_keep_their_real_save_state(uncertain: False)" computerName="DESKTOP-0BG8884" duration="00:00:00.7592126" startTime="2026-10-22T16:13:23.2428308+13:00" endTime="2026-10-22T16:13:24.0014478+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="40b888fa-c66c-4234-b22c-ee1a159fa80c" />
+    <UnitTestResult executionId="f449745f-8edd-4c15-83d0-4ddd5ffcad34" testId="4943f970-95cb-ef09-614e-d7ebdf2dea5c" testName="PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Home_import_is_prominent_without_losing_resume_or_environment(width: 1280, height: 720)" computerName="DESKTOP-0BG8884" duration="00:00:00.4006869" startTime="2026-10-22T16:13:18.0850551+13:00" endTime="2026-10-22T16:13:18.4850638+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f449745f-8edd-4c15-83d0-4ddd5ffcad34" />
+    <UnitTestResult executionId="a23e950e-7ba7-4933-81d2-605668a512c4" testId="96188e9a-0931-4c52-5170-10b671104a0c" testName="PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Long_Chinese_source_keeps_image_and_primary_action_visible(width: 1280, height: 720)" computerName="DESKTOP-0BG8884" duration="00:00:00.5664704" startTime="2026-10-22T16:13:26.9483277+13:00" endTime="2026-10-22T16:13:27.5161322+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a23e950e-7ba7-4933-81d2-605668a512c4" />
+    <UnitTestResult executionId="484ab451-0f42-41e4-919b-42681574af2e" testId="afdfc2d5-e4b6-a02a-2f12-785f03a2c0bc" testName="PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Home_import_is_prominent_without_losing_resume_or_environment(width: 1000, height: 700)" computerName="DESKTOP-0BG8884" duration="00:00:00.4139080" startTime="2026-10-22T16:13:17.6701701+13:00" endTime="2026-10-22T16:13:18.0841556+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="484ab451-0f42-41e4-919b-42681574af2e" />
+    <UnitTestResult executionId="70c7a7d1-8f0a-49a5-a57c-8c1c167bfb3d" testId="66979b48-abb6-8d6c-f8d4-84570ec07d5b" testName="PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Save_keeps_guarded_primary_action_at_right_and_destination_readable(width: 1280, height: 720)" computerName="DESKTOP-0BG8884" duration="00:00:00.7563463" startTime="2026-10-22T16:13:16.9131448+13:00" endTime="2026-10-22T16:13:17.6682684+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="70c7a7d1-8f0a-49a5-a57c-8c1c167bfb3d">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- Shouldly.ShouldAssertException : model.CanComplete&#xD;
+    should be&#xD;
+False&#xD;
+    but was&#xD;
+True</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Save_keeps_guarded_primary_action_at_right_and_destination_readable(Int32 width, Int32 height) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\WpfUiSamplePageTests.cs:line 64&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.&lt;&gt;c__DisplayClass1_1.&lt;Save_keeps_guarded_primary_action_at_right_and_destination_readable&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\WpfUiSamplePageTests.cs:line 82&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Current_actions_and_inputs_expose_names_and_hidden_steps_stay_out_of_candidate_tab_set(state: &quot;review&quot;, action: &quot;Session.Approve&quot;)" storage="c:\users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="058ca17d-56ce-e5fe-b630-1b02841da171">
+      <Execution id="f13a25d1-7fe7-4414-9555-170cb5649d18" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests" name="Current_actions_and_inputs_expose_names_and_hidden_steps_stay_out_of_candidate_tab_set" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Long_Chinese_source_keeps_image_and_primary_action_visible(width: 1280, height: 720)" storage="c:\users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="96188e9a-0931-4c52-5170-10b671104a0c">
+      <Execution id="a23e950e-7ba7-4933-81d2-605668a512c4" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests" name="Long_Chinese_source_keeps_image_and_primary_action_visible" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Approved_result_enters_save_without_claiming_delivery(saved: False, completed: False)" storage="c:\users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="6b677354-b11c-fe83-db74-68494ff5247b">
+      <Execution id="c59b5811-07a5-4c4b-9010-e0fedc33c67a" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests" name="Approved_result_enters_save_without_claiming_delivery" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Uncertain_collision_and_picker_cancel_keep_their_real_save_state(uncertain: False)" storage="c:\users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="3341511a-cc43-7a38-1a2b-b27adb46bf39">
+      <Execution id="40b888fa-c66c-4234-b22c-ee1a159fa80c" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests" name="Uncertain_collision_and_picker_cancel_keep_their_real_save_state" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Current_actions_and_inputs_expose_names_and_hidden_steps_stay_out_of_candidate_tab_set(state: &quot;dimensions&quot;, action: &quot;Session.PrintDimensions.ConfirmSize&quot;)" storage="c:\users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="08d97ce5-d0e1-1e50-e7f0-38993af97d0d">
+      <Execution id="acd6b7cd-63fe-494e-a119-4bfa9e3eff89" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests" name="Current_actions_and_inputs_expose_names_and_hidden_steps_stay_out_of_candidate_tab_set" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Home_import_is_prominent_without_losing_resume_or_environment(width: 1920, height: 1080)" storage="c:\users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="b56fba20-1c2a-8994-b85d-621735a4b2ad">
+      <Execution id="f2c74e5d-a47a-4b3f-99a9-455c2d7a1330" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests" name="Home_import_is_prominent_without_losing_resume_or_environment" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Current_actions_and_inputs_expose_names_and_hidden_steps_stay_out_of_candidate_tab_set(state: &quot;source&quot;, action: &quot;Session.ConfirmOriginal&quot;)" storage="c:\users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="73fba874-0ff3-f112-441d-ef21bb693424">
+      <Execution id="74485588-a567-4957-a16f-ad99b4696c6c" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests" name="Current_actions_and_inputs_expose_names_and_hidden_steps_stay_out_of_candidate_tab_set" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Save_keeps_guarded_primary_action_at_right_and_destination_readable(width: 1920, height: 1080)" storage="c:\users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="d59ddf19-1535-70a3-6d6c-e6a3d05e500d">
+      <Execution id="50e20ec0-bb5b-460d-87a2-b58c04d92b07" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests" name="Save_keeps_guarded_primary_action_at_right_and_destination_readable" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Approved_png_preparation_is_part_of_the_save_step_without_becoming_a_delivery" storage="c:\users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="adce905c-6d59-461e-2665-d32ec767b85a">
+      <Execution id="980000ff-f4e6-4230-91eb-a93ae195599b" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests" name="Approved_png_preparation_is_part_of_the_save_step_without_becoming_a_delivery" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Save_keeps_guarded_primary_action_at_right_and_destination_readable(width: 1000, height: 700)" storage="c:\users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="00761881-bba7-087f-2ac1-0ba9ebad6743">
+      <Execution id="fbe098dd-7996-4544-8e3e-c6f8c676d3d7" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests" name="Save_keeps_guarded_primary_action_at_right_and_destination_readable" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Multiple_sizes_and_long_Chinese_filename_keep_current_save_target_reachable(width: 1280, height: 720)" storage="c:\users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="84cfddc7-fbb8-9c8c-8210-70d448e28069">
+      <Execution id="63e4116a-39cc-434b-a6cf-734e44274836" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests" name="Multiple_sizes_and_long_Chinese_filename_keep_current_save_target_reachable" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Multiple_sizes_and_long_Chinese_filename_keep_current_save_target_reachable(width: 1000, height: 700)" storage="c:\users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="942e3521-21da-2c28-ef77-7f18a36d1d70">
+      <Execution id="9d2f6c2b-65bc-4e02-af26-fc258417ccaa" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests" name="Multiple_sizes_and_long_Chinese_filename_keep_current_save_target_reachable" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Approved_result_enters_save_without_claiming_delivery(saved: True, completed: False)" storage="c:\users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="f6ab544d-7413-c8ef-4efa-ebd960fdfcf9">
+      <Execution id="db5d1d10-b043-4907-8010-d87b647aeadf" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests" name="Approved_result_enters_save_without_claiming_delivery" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Home_import_is_prominent_without_losing_resume_or_environment(width: 1000, height: 700)" storage="c:\users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="afdfc2d5-e4b6-a02a-2f12-785f03a2c0bc">
+      <Execution id="484ab451-0f42-41e4-919b-42681574af2e" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests" name="Home_import_is_prominent_without_losing_resume_or_environment" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Uncertain_collision_and_picker_cancel_keep_their_real_save_state(uncertain: True)" storage="c:\users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="364da959-b780-4d41-6c4c-798d7199a98f">
+      <Execution id="8fd12475-c34c-49b8-b61a-9c3a24594d5e" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests" name="Uncertain_collision_and_picker_cancel_keep_their_real_save_state" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Saving_is_a_transient_state_and_does_not_claim_delivery_before_acknowledgment" storage="c:\users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="dd030278-329f-9ad1-7664-f1b3434109a2">
+      <Execution id="befb3915-cc87-496b-ad93-87e87458fbe7" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests" name="Saving_is_a_transient_state_and_does_not_claim_delivery_before_acknowledgment" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Save_keeps_guarded_primary_action_at_right_and_destination_readable(width: 1280, height: 720)" storage="c:\users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="66979b48-abb6-8d6c-f8d4-84570ec07d5b">
+      <Execution id="70c7a7d1-8f0a-49a5-a57c-8c1c167bfb3d" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests" name="Save_keeps_guarded_primary_action_at_right_and_destination_readable" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Home_import_is_prominent_without_losing_resume_or_environment(width: 1280, height: 720)" storage="c:\users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="4943f970-95cb-ef09-614e-d7ebdf2dea5c">
+      <Execution id="f449745f-8edd-4c15-83d0-4ddd5ffcad34" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests" name="Home_import_is_prominent_without_losing_resume_or_environment" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Long_Chinese_source_keeps_image_and_primary_action_visible(width: 1000, height: 700)" storage="c:\users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="7a46d5c6-a226-1230-b244-47641f04cd7d">
+      <Execution id="f0facdc2-235d-4fc1-8d86-302fd98fb682" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests" name="Long_Chinese_source_keeps_image_and_primary_action_visible" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Approved_result_enters_save_without_claiming_delivery(saved: True, completed: True)" storage="c:\users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="72724c2d-ea28-e208-d2d1-7181c3841e61">
+      <Execution id="b70146f8-b5e8-48b8-b4c2-6917ce864cbb" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests" name="Approved_result_enters_save_without_claiming_delivery" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Approved_result_enters_save_without_claiming_delivery(saved: False, completed: True)" storage="c:\users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="2a3d974a-d6c2-7b1d-5c9f-ddd3684bcfc5">
+      <Execution id="93f43cbf-f53e-46ad-9442-5226b94b360e" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests" name="Approved_result_enters_save_without_claiming_delivery" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Long_Chinese_source_keeps_image_and_primary_action_visible(width: 1920, height: 1080)" storage="c:\users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="6492963a-b5f0-6417-9925-8c3f1f05d996">
+      <Execution id="99362fbf-e10f-4c88-b3c9-3275d8d40c7b" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests" name="Long_Chinese_source_keeps_image_and_primary_action_visible" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Save_destination_and_name_are_visible_in_the_current_step_at_minimum_size" storage="c:\users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="0ecc20ac-374c-8d50-42c5-2591e74dbce6">
+      <Execution id="87591177-fdb5-4222-bd6b-7ff3bc1f2d75" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests" name="Save_destination_and_name_are_visible_in_the_current_step_at_minimum_size" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Each_size_retains_its_own_review_and_delivery_summary" storage="c:\users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="756b2e66-e6df-3ae0-f8b7-36da6f6f4d8d">
+      <Execution id="5d86aee3-bde3-402b-80b1-09538dc43cae" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests" name="Each_size_retains_its_own_review_and_delivery_summary" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Multiple_sizes_and_long_Chinese_filename_keep_current_save_target_reachable(width: 1920, height: 1080)" storage="c:\users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="d0a89e96-733a-18b6-539c-cb2718cfdeae">
+      <Execution id="cfb5554b-8509-4077-93d6-e15118b37ace" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests" name="Multiple_sizes_and_long_Chinese_filename_keep_current_save_target_reachable" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="364da959-b780-4d41-6c4c-798d7199a98f" executionId="8fd12475-c34c-49b8-b61a-9c3a24594d5e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0ecc20ac-374c-8d50-42c5-2591e74dbce6" executionId="87591177-fdb5-4222-bd6b-7ff3bc1f2d75" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="dd030278-329f-9ad1-7664-f1b3434109a2" executionId="befb3915-cc87-496b-ad93-87e87458fbe7" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="84cfddc7-fbb8-9c8c-8210-70d448e28069" executionId="63e4116a-39cc-434b-a6cf-734e44274836" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="73fba874-0ff3-f112-441d-ef21bb693424" executionId="74485588-a567-4957-a16f-ad99b4696c6c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="058ca17d-56ce-e5fe-b630-1b02841da171" executionId="f13a25d1-7fe7-4414-9555-170cb5649d18" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6492963a-b5f0-6417-9925-8c3f1f05d996" executionId="99362fbf-e10f-4c88-b3c9-3275d8d40c7b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="756b2e66-e6df-3ae0-f8b7-36da6f6f4d8d" executionId="5d86aee3-bde3-402b-80b1-09538dc43cae" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f6ab544d-7413-c8ef-4efa-ebd960fdfcf9" executionId="db5d1d10-b043-4907-8010-d87b647aeadf" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="00761881-bba7-087f-2ac1-0ba9ebad6743" executionId="fbe098dd-7996-4544-8e3e-c6f8c676d3d7" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="72724c2d-ea28-e208-d2d1-7181c3841e61" executionId="b70146f8-b5e8-48b8-b4c2-6917ce864cbb" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d59ddf19-1535-70a3-6d6c-e6a3d05e500d" executionId="50e20ec0-bb5b-460d-87a2-b58c04d92b07" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7a46d5c6-a226-1230-b244-47641f04cd7d" executionId="f0facdc2-235d-4fc1-8d86-302fd98fb682" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6b677354-b11c-fe83-db74-68494ff5247b" executionId="c59b5811-07a5-4c4b-9010-e0fedc33c67a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="2a3d974a-d6c2-7b1d-5c9f-ddd3684bcfc5" executionId="93f43cbf-f53e-46ad-9442-5226b94b360e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d0a89e96-733a-18b6-539c-cb2718cfdeae" executionId="cfb5554b-8509-4077-93d6-e15118b37ace" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="08d97ce5-d0e1-1e50-e7f0-38993af97d0d" executionId="acd6b7cd-63fe-494e-a119-4bfa9e3eff89" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="adce905c-6d59-461e-2665-d32ec767b85a" executionId="980000ff-f4e6-4230-91eb-a93ae195599b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b56fba20-1c2a-8994-b85d-621735a4b2ad" executionId="f2c74e5d-a47a-4b3f-99a9-455c2d7a1330" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="942e3521-21da-2c28-ef77-7f18a36d1d70" executionId="9d2f6c2b-65bc-4e02-af26-fc258417ccaa" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3341511a-cc43-7a38-1a2b-b27adb46bf39" executionId="40b888fa-c66c-4234-b22c-ee1a159fa80c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4943f970-95cb-ef09-614e-d7ebdf2dea5c" executionId="f449745f-8edd-4c15-83d0-4ddd5ffcad34" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="96188e9a-0931-4c52-5170-10b671104a0c" executionId="a23e950e-7ba7-4933-81d2-605668a512c4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="afdfc2d5-e4b6-a02a-2f12-785f03a2c0bc" executionId="484ab451-0f42-41e4-919b-42681574af2e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="66979b48-abb6-8d6c-f8d4-84570ec07d5b" executionId="70c7a7d1-8f0a-49a5-a57c-8c1c167bfb3d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="25" executed="25" passed="19" failed="6" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.11)&#xD;
+[xUnit.net 00:00:00.40]   Discovering: PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.51]   Discovered:  PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.61]   Starting:    PrintFlow.Tests&#xD;
+[xUnit.net 00:00:05.50]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:05.50]       ---- Shouldly.ShouldAssertException : within.Bottom&#xD;
+[xUnit.net 00:00:05.50]           should be less than or equal to&#xD;
+[xUnit.net 00:00:05.50]       352.8433333333333d&#xD;
+[xUnit.net 00:00:05.50]           but was&#xD;
+[xUnit.net 00:00:05.50]       373.21d&#xD;
+[xUnit.net 00:00:05.50]       Stack Trace:&#xD;
+[xUnit.net 00:00:05.50]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:05.50]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:05.50]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:05.50]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\WpfUiSamplePageTests.cs(64,0): at PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Save_keeps_guarded_primary_action_at_right_and_destination_readable(Int32 width, Int32 height)&#xD;
+[xUnit.net 00:00:05.50]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.50]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:05.50]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\WpfUiSamplePageTests.cs(105,0): at PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.VisibleInside(FrameworkElement e, Visual root, Int32 width, Int32 height)&#xD;
+[xUnit.net 00:00:05.50]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\WpfUiSamplePageTests.cs(79,0): at PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.&lt;&gt;c__DisplayClass1_1.&lt;Save_keeps_guarded_primary_action_at_right_and_destination_readable&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:05.50]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:05.50]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:06.39]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:06.39]       ---- Shouldly.ShouldAssertException : model.CanComplete&#xD;
+[xUnit.net 00:00:06.39]           should be&#xD;
+[xUnit.net 00:00:06.39]       False&#xD;
+[xUnit.net 00:00:06.39]           but was&#xD;
+[xUnit.net 00:00:06.39]       True&#xD;
+[xUnit.net 00:00:06.39]       Stack Trace:&#xD;
+[xUnit.net 00:00:06.39]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:06.39]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:06.39]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:06.39]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\WpfUiSamplePageTests.cs(64,0): at PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Save_keeps_guarded_primary_action_at_right_and_destination_readable(Int32 width, Int32 height)&#xD;
+[xUnit.net 00:00:06.39]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:06.39]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:06.39]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\WpfUiSamplePageTests.cs(82,0): at PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.&lt;&gt;c__DisplayClass1_1.&lt;Save_keeps_guarded_primary_action_at_right_and_destination_readable&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:06.39]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:06.39]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:07.14]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:07.14]       ---- Shouldly.ShouldAssertException : model.CanComplete&#xD;
+[xUnit.net 00:00:07.14]           should be&#xD;
+[xUnit.net 00:00:07.14]       False&#xD;
+[xUnit.net 00:00:07.14]           but was&#xD;
+[xUnit.net 00:00:07.14]       True&#xD;
+[xUnit.net 00:00:07.14]       Stack Trace:&#xD;
+[xUnit.net 00:00:07.14]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:07.14]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:07.14]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:07.15]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\WpfUiSamplePageTests.cs(64,0): at PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Save_keeps_guarded_primary_action_at_right_and_destination_readable(Int32 width, Int32 height)&#xD;
+[xUnit.net 00:00:07.15]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:07.15]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:07.15]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\WpfUiSamplePageTests.cs(82,0): at PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.&lt;&gt;c__DisplayClass1_1.&lt;Save_keeps_guarded_primary_action_at_right_and_destination_readable&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:07.15]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:07.15]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:12.72]       Shouldly.ShouldAssertException : result.Facts&#xD;
+[xUnit.net 00:00:12.72]           should satisfy the condition&#xD;
+[xUnit.net 00:00:12.72]       (f.Item2 &amp;&amp; f.Item3)&#xD;
+[xUnit.net 00:00:12.72]           but&#xD;
+[xUnit.net 00:00:12.72]       [(Session.FinalSave.ChangeLocation, True, False)]&#xD;
+[xUnit.net 00:00:12.72]           do not&#xD;
+[xUnit.net 00:00:12.72]       &#xD;
+[xUnit.net 00:00:12.72]       Additional Info:&#xD;
+[xUnit.net 00:00:12.72]           the save step must expose the filename and destination without first scrolling past explanation&#xD;
+[xUnit.net 00:00:12.72]       Stack Trace:&#xD;
+[xUnit.net 00:00:12.72]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionSaveTests.cs(73,0): at PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Save_destination_and_name_are_visible_in_the_current_step_at_minimum_size()&#xD;
+[xUnit.net 00:00:12.72]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:12.72]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:12.72]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:12.72]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:12.72]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:12.72]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:12.72]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:12.72]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:12.72]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:12.72]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:19.57]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:19.57]       ---- Shouldly.ShouldAssertException : r.Right&#xD;
+[xUnit.net 00:00:19.57]           should be less than or equal to&#xD;
+[xUnit.net 00:00:19.57]       700.5d&#xD;
+[xUnit.net 00:00:19.57]           but was&#xD;
+[xUnit.net 00:00:19.57]       716.8200000000002d&#xD;
+[xUnit.net 00:00:19.57]       Stack Trace:&#xD;
+[xUnit.net 00:00:19.57]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:19.57]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:19.57]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:19.57]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedAcceptanceTests.cs(129,0): at PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Capture(SessionViewModel model, Size viewport, String state, String[] essential, Boolean requireImage)&#xD;
+[xUnit.net 00:00:19.57]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedAcceptanceTests.cs(117,0): at PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Multiple_sizes_and_long_Chinese_filename_keep_current_save_target_reachable(Int32 width, Int32 height)&#xD;
+[xUnit.net 00:00:19.57]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:19.57]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:19.57]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedAcceptanceTests.cs(188,0): at PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Inside(Rect r, Size viewport)&#xD;
+[xUnit.net 00:00:19.57]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedAcceptanceTests.cs(142,0): at PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.&lt;&gt;c__DisplayClass3_0.&lt;Capture&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:19.57]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:19.57]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:20.42]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:20.42]       ---- Shouldly.ShouldAssertException : Inside(item.Bounds, viewport); item.WithinScroll&#xD;
+[xUnit.net 00:00:20.42]           should be&#xD;
+[xUnit.net 00:00:20.42]       True&#xD;
+[xUnit.net 00:00:20.42]           but was&#xD;
+[xUnit.net 00:00:20.42]       False&#xD;
+[xUnit.net 00:00:20.42]       &#xD;
+[xUnit.net 00:00:20.42]       Additional Info:&#xD;
+[xUnit.net 00:00:20.42]           multisize-long-name: Session.FinalSave.Folder&#xD;
+[xUnit.net 00:00:20.42]       Stack Trace:&#xD;
+[xUnit.net 00:00:20.42]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:20.42]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:20.42]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:20.42]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedAcceptanceTests.cs(129,0): at PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Capture(SessionViewModel model, Size viewport, String state, String[] essential, Boolean requireImage)&#xD;
+[xUnit.net 00:00:20.42]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedAcceptanceTests.cs(117,0): at PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Multiple_sizes_and_long_Chinese_filename_keep_current_save_target_reachable(Int32 width, Int32 height)&#xD;
+[xUnit.net 00:00:20.42]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:20.42]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:20.42]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedAcceptanceTests.cs(142,0): at PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.&lt;&gt;c__DisplayClass3_0.&lt;Capture&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:20.42]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:20.42]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:21.65]   Finished:    PrintFlow.Tests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-22T16:13:16.0214787+13:00">
+        <Text>[xUnit.net 00:00:05.50]     PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Save_keeps_guarded_primary_action_at_right_and_destination_readable(width: 1000, height: 700) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-22T16:13:16.9116213+13:00">
+        <Text>[xUnit.net 00:00:06.39]     PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Save_keeps_guarded_primary_action_at_right_and_destination_readable(width: 1920, height: 1080) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-22T16:13:17.6685544+13:00">
+        <Text>[xUnit.net 00:00:07.14]     PrintFlow.Tests.Integration.Ui.WpfUiSamplePageTests.Save_keeps_guarded_primary_action_at_right_and_destination_readable(width: 1280, height: 720) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-22T16:13:23.2419564+13:00">
+        <Text>[xUnit.net 00:00:12.72]     PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Save_destination_and_name_are_visible_in_the_current_step_at_minimum_size [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-22T16:13:30.0953314+13:00">
+        <Text>[xUnit.net 00:00:19.57]     PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Multiple_sizes_and_long_Chinese_filename_keep_current_save_target_reachable(width: 1000, height: 700) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-22T16:13:30.9474336+13:00">
+        <Text>[xUnit.net 00:00:20.42]     PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Multiple_sizes_and_long_Chinese_filename_keep_current_save_target_reachable(width: 1280, height: 720) [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

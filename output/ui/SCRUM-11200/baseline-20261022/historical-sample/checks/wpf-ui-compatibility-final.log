@@ -1,0 +1,421 @@
+  正在确定要还原的项目…
+  所有项目均是最新的，无法还原。
+  PrintFlow.Domain -> C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\src\PrintFlow.Domain\bin\Debug\net10.0\PrintFlow.Domain.dll
+  PrintFlow.Workflow -> C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\src\PrintFlow.Workflow\bin\Debug\net10.0\PrintFlow.Workflow.dll
+  PrintFlow.Infrastructure -> C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\src\PrintFlow.Infrastructure\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Infrastructure.dll
+  PrintFlow.App -> C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\src\PrintFlow.App\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.App.dll
+  PrintFlow.WorkstationEntry -> C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.WorkstationEntry\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.WorkstationEntry.dll
+  PrintFlow.Tests -> C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll
+C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll (.NETCoreApp,Version=v10.0)的测试运行
+总共 1 个测试文件与指定模式相匹配。
+[xUnit.net 00:00:24.03]     PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.The_summary_wraps_its_button_is_keyboard_reachable_and_recovery_stays_reachable(language: "zh-CN", width: 1000, height: 700) [FAIL]
+[xUnit.net 00:00:24.80]     PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.The_summary_wraps_its_button_is_keyboard_reachable_and_recovery_stays_reachable(language: "en", width: 1000, height: 700) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.The_summary_wraps_its_button_is_keyboard_reachable_and_recovery_stays_reachable(language: "zh-CN", width: 1000, height: 700) [457 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : rendered.Facts.RecoveryReachable
+    should be
+True
+    but was
+False
+
+Additional Info:
+    the last recovery action is reachable after scrolling
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.The_summary_wraps_its_button_is_keyboard_reachable_and_recovery_stays_reachable(String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\HomeReadinessSummaryTests.cs:line 586
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+  失败 PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.The_summary_wraps_its_button_is_keyboard_reachable_and_recovery_stays_reachable(language: "en", width: 1000, height: 700) [412 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : rendered.Facts.RecoveryReachable
+    should be
+True
+    but was
+False
+
+Additional Info:
+    the last recovery action is reachable after scrolling
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.The_summary_wraps_its_button_is_keyboard_reachable_and_recovery_stays_reachable(String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\HomeReadinessSummaryTests.cs:line 586
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+[xUnit.net 00:00:25.87]     PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.With_everything_expanded_the_notice_and_the_last_recovery_action_stay_reachable(language: "en") [FAIL]
+[xUnit.net 00:00:26.27]     PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.With_everything_expanded_the_notice_and_the_last_recovery_action_stay_reachable(language: "zh-CN") [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.With_everything_expanded_the_notice_and_the_last_recovery_action_stay_reachable(language: "en") [407 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : rendered.Facts.RecoveryReachable
+    should be
+True
+    but was
+False
+
+Additional Info:
+    list viewport 141px
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.With_everything_expanded_the_notice_and_the_last_recovery_action_stay_reachable(String language) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\HomeReadinessSummaryTests.cs:line 646
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+  失败 PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.With_everything_expanded_the_notice_and_the_last_recovery_action_stay_reachable(language: "zh-CN") [395 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : rendered.Facts.RecoveryReachable
+    should be
+True
+    but was
+False
+
+Additional Info:
+    list viewport 141px
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.With_everything_expanded_the_notice_and_the_last_recovery_action_stay_reachable(String language) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\HomeReadinessSummaryTests.cs:line 646
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+[xUnit.net 00:00:56.99]     PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "collision", language: "zh-CN", width: 1000, height: 700) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "collision", language: "zh-CN", width: 1000, height: 700) [815 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : baselineFacts.Facts.Panels
+    should be
+0
+    but was
+1
+
+Additional Info:
+    without the coordinator nothing is instantiated
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(String state, String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 981
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+[xUnit.net 00:00:57.83]     PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "records", language: "zh-CN", width: 1920, height: 1040) [FAIL]
+[xUnit.net 00:00:58.69]     PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "records", language: "zh-CN", width: 1000, height: 700) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "records", language: "zh-CN", width: 1920, height: 1040) [842 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : baselineFacts.Facts.Panels
+    should be
+0
+    but was
+1
+
+Additional Info:
+    without the coordinator nothing is instantiated
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(String state, String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 981
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+  失败 PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "records", language: "zh-CN", width: 1000, height: 700) [850 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : baselineFacts.Facts.Panels
+    should be
+0
+    but was
+1
+
+Additional Info:
+    without the coordinator nothing is instantiated
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(String state, String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 981
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+[xUnit.net 00:00:59.40]     PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "saved-tiff", language: "en", width: 1920, height: 1040) [FAIL]
+[xUnit.net 00:01:00.08]     PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "history", language: "en", width: 1920, height: 1040) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "saved-tiff", language: "en", width: 1920, height: 1040) [712 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : baselineFacts.Facts.Panels
+    should be
+0
+    but was
+1
+
+Additional Info:
+    without the coordinator nothing is instantiated
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(String state, String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 981
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+  失败 PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "history", language: "en", width: 1920, height: 1040) [675 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : baselineFacts.Facts.Panels
+    should be
+0
+    but was
+1
+
+Additional Info:
+    without the coordinator nothing is instantiated
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(String state, String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 981
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+[xUnit.net 00:01:00.83]     PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "history", language: "zh-CN", width: 1000, height: 700) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "history", language: "zh-CN", width: 1000, height: 700) [752 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : baselineFacts.Facts.Panels
+    should be
+0
+    but was
+1
+
+Additional Info:
+    without the coordinator nothing is instantiated
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(String state, String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 981
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+[xUnit.net 00:01:02.81]     PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "saved-tiff", language: "zh-CN", width: 1920, height: 1040) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "saved-tiff", language: "zh-CN", width: 1920, height: 1040) [764 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : baselineFacts.Facts.Panels
+    should be
+0
+    but was
+1
+
+Additional Info:
+    without the coordinator nothing is instantiated
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(String state, String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 981
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+[xUnit.net 00:01:04.16]     PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "saved-tiff", language: "zh-CN", width: 1000, height: 700) [FAIL]
+[xUnit.net 00:01:04.92]     PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "records", language: "en", width: 1000, height: 700) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "saved-tiff", language: "zh-CN", width: 1000, height: 700) [776 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : baselineFacts.Facts.Panels
+    should be
+0
+    but was
+1
+
+Additional Info:
+    without the coordinator nothing is instantiated
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(String state, String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 981
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+  失败 PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "records", language: "en", width: 1000, height: 700) [759 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : baselineFacts.Facts.Panels
+    should be
+0
+    but was
+1
+
+Additional Info:
+    without the coordinator nothing is instantiated
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(String state, String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 981
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+[xUnit.net 00:01:05.59]     PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "save-failed", language: "en", width: 1000, height: 700) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "save-failed", language: "en", width: 1000, height: 700) [675 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : baselineFacts.Facts.Panels
+    should be
+0
+    but was
+1
+
+Additional Info:
+    without the coordinator nothing is instantiated
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(String state, String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 981
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+[xUnit.net 00:01:07.12]     PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "collision", language: "en", width: 1000, height: 700) [FAIL]
+[xUnit.net 00:01:07.98]     PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "blocked", language: "zh-CN", width: 1000, height: 700) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "collision", language: "en", width: 1000, height: 700) [802 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : baselineFacts.Facts.Panels
+    should be
+0
+    but was
+1
+
+Additional Info:
+    without the coordinator nothing is instantiated
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(String state, String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 981
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+  失败 PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "blocked", language: "zh-CN", width: 1000, height: 700) [855 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : baselineFacts.Facts.Panels
+    should be
+0
+    but was
+1
+
+Additional Info:
+    without the coordinator nothing is instantiated
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(String state, String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 981
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+[xUnit.net 00:01:08.73]     PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "save-failed", language: "zh-CN", width: 1000, height: 700) [FAIL]
+[xUnit.net 00:01:09.40]     PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "blocked", language: "en", width: 1000, height: 700) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "save-failed", language: "zh-CN", width: 1000, height: 700) [752 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : baselineFacts.Facts.Panels
+    should be
+0
+    but was
+1
+
+Additional Info:
+    without the coordinator nothing is instantiated
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(String state, String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 981
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+  失败 PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "blocked", language: "en", width: 1000, height: 700) [670 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : baselineFacts.Facts.Panels
+    should be
+0
+    but was
+1
+
+Additional Info:
+    without the coordinator nothing is instantiated
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(String state, String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 981
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+结果文件: C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\output\ui\SCRUM-11173\checks\wpf-ui-compatibility-final.trx
+
+失败!  - 失败:    18，通过:   153，已跳过:     0，总计:   171，持续时间: 1 m 13 s - PrintFlow.Tests.dll (net10.0)

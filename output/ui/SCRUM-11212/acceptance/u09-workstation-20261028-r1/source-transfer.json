@@ -1,0 +1,190 @@
+{
+  "sourceRoot": "C:\\Users\\admin\\.codex\\worktrees\\scrum-11201-shared-theme\\printflow-Studio",
+  "destinationRoot": "C:\\Users\\admin\\.codex\\worktrees\\u09\\printflow-Studio",
+  "sourceFilesMatched": 831,
+  "head": "a0bdcf74e29f6fccf74cf983d117712dbf4eae0e",
+  "overlayOnly": [
+    {
+      "path": "src/PrintFlow.App/Controls/GuidedActionPanel.cs",
+      "previousSha256": "F21985C81C99BEBA1D39D4AFC79C21C617FD86C42005A34F08B836110BC8CD3E",
+      "candidateSha256": "B5EEBA999230485D95D513DA1A18247FA5B573C7D76153C0F3AC1F24BC0ACAC4"
+    },
+    {
+      "path": "src/PrintFlow.App/Controls/GuidedStepList.cs",
+      "previousSha256": "E82C11A7F4B76E7BC486348BFA76035A8067F6618CD27CDAF14925DB11E2B563",
+      "candidateSha256": "DF1F908889A160AE0FCCAA118030EF46F7D6D93F94EC1FD8AEDC9B1A2A17E098"
+    },
+    {
+      "path": "src/PrintFlow.App/Resources/Strings.resx",
+      "previousSha256": "9278B66F765BBF3E4C13B3650D6EA27E752A546E5EC1AC31081AB59C6EF10DCB",
+      "candidateSha256": "EF5EA38DC900EE38731D2D0D08A13F62648AFD75D3F30513A1090CC6EB50C439"
+    },
+    {
+      "path": "src/PrintFlow.App/Resources/Strings.zh-CN.resx",
+      "previousSha256": "EE1AD91684FB2CBC77CD038A7EFE4FBD7755BE968375A1971CBBB60F3A113811",
+      "candidateSha256": "023ABB0A02B2630072693C2A6C4B6A3BBE38C2F9511385C1B4038C2B278C9ED7"
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/SessionViewModel.Guided.cs",
+      "previousSha256": "6A599E218232E8671C51B2F8D4C481A0C3A738DA1F8E3D4BBA4F144B12663F89",
+      "candidateSha256": "94CF82128C506705A5C6034D12CBCAA280C4D0719CBCA980FE1738AD0B27359A"
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/SessionViewModel.SavePreview.cs",
+      "previousSha256": "B0C46B60D1AF0391DA18E2C4759865034E92EC8EF11095F5B6867C50402E57C2",
+      "candidateSha256": "9471B2790602EB393ADA71FF809B1FE0CE562339BD48A1B45C17DF1C62C3FC9B"
+    },
+    {
+      "path": "src/PrintFlow.App/Views/ErrorDetailsView.xaml",
+      "previousSha256": "800969D163059D539CC378D84B125BACB6B8B3ABDE3F19B65A282FD99E3CF06F",
+      "candidateSha256": "DF6E5896B3387DEA01628719419421834ABEA2F610255F6A5AFB1768208FB2C3"
+    },
+    {
+      "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+      "previousSha256": "1F5D06797C293311180B8312CD455B06959806744742D4AF23D9885F1D769CDE",
+      "candidateSha256": "299B45F603E5B57DAF4D321920585989B04A43E9C8621EC2459F49777FF345DB"
+    },
+    {
+      "path": "src/PrintFlow.App/Views/SharedReviewSurface.cs",
+      "previousSha256": "2F57E338124A219A42413E49D5FCF840734D82B11678644C0EF6B16DB45F24A4",
+      "candidateSha256": "4A8307BDCB6B98E14BCFEF2F5D02FEC9A2D306ADBCC93953E200F611025335EE"
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Services/SessionView.cs",
+      "previousSha256": "AC394BA1EDCD102B081A92E4AA2490BE015C2227068CBDFB47CA1848BEDFE1D6",
+      "candidateSha256": "3598A3F11ABDE3AE9A6CA6FE99C1B122DD337F31151B56FC4A5A9D81261DA598"
+    },
+    {
+      "path": "tests/PrintFlow.Tests/Architecture/LocalisationResourceTests.cs",
+      "previousSha256": "2AA75C761E2AEDF22AD7E5FA733D9C80FFAB617A8CD7C3766FBCFCFB4DAADC10",
+      "candidateSha256": "5E560F2FCED3353D6AD5DE446BDFC2B2766186A168B31D96E1DCE581233F9EAA"
+    },
+    {
+      "path": "tests/PrintFlow.Tests/Integration/Ui/ColleagueCorrectionUiTests.cs",
+      "previousSha256": "543799E3ACF79B8EF6EA3C29482CBD4B1B6A9147C2B7EAEC5FD5A109B9270D4A",
+      "candidateSha256": "3626AAA92500AAE4DEBE82C0C543F347CBCDFD1F52391AAA543470F2342A4B7D"
+    },
+    {
+      "path": "tests/PrintFlow.Tests/Integration/Ui/EntryPageRolloutTests.cs",
+      "previousSha256": "C6BF99E53DEDC1D78488053B1AB32EC536C9F41144E1CFA9418F46EBB35ED206",
+      "candidateSha256": "82EDD77FFC97683D2595A3ED3B2F56D8A5559D638DEAA5328C7EB7885860CC2C"
+    },
+    {
+      "path": "tests/PrintFlow.Tests/Integration/Ui/FailureGuidanceLayoutTests.cs",
+      "previousSha256": "AA2C112BE9064247295CA325479F7D0E2AF16FBC65B608B63EBBD45CBBFF288E",
+      "candidateSha256": "380E2FFB43D2E0807A2E377D62CEFFCB0C194548B47803CAFB3B6535C48D40B8"
+    },
+    {
+      "path": "tests/PrintFlow.Tests/Integration/Ui/GuidedAcceptanceTests.cs",
+      "previousSha256": "C4E30A53536DC06BC351BE0D9A9F03154CBEC5E7E18EDDFBDBE83E9A30E5BF48",
+      "candidateSha256": "35083B2289A1B0E0F3D6AEF3922EDEE15C4DB3D1E4C218C3BB4434A0C0BD2B15"
+    },
+    {
+      "path": "tests/PrintFlow.Tests/Integration/Ui/GuidedProcessingVisualEvidenceTests.cs",
+      "previousSha256": "918484C1E7F76275B50CE1FB6473E73FC2DAC3EAF0E7060289FC03A561219576",
+      "candidateSha256": "FC2D6668B6E31DD6DC4284B38F56954031B825A9E764A2C9AA8BA23095715358"
+    },
+    {
+      "path": "tests/PrintFlow.Tests/Integration/Ui/GuidedShellLayoutTests.cs",
+      "previousSha256": "C3FC6A236D95E440AA8DDAB35BA5EC04D11659A5E98F9A4AD9DDAD4BF70F8C9D",
+      "candidateSha256": "F7B238CB6BCBC88B2A2FC2607A9E31DD1BEAD63DB6FE843F4BB3040A8BC7AAB2"
+    },
+    {
+      "path": "tests/PrintFlow.Tests/Integration/Ui/HomeRecentAccessibilityTests.cs",
+      "previousSha256": "697A60AE3FB2192F8D79BB18E1E94A04B4BE41B9A5F6249F87E7D5239ADD5237",
+      "candidateSha256": "C6321A80C6250CA7D1AD3FB863EFA0C8FF5E37104985FE60E5AE528FC06CB363"
+    },
+    {
+      "path": "tests/PrintFlow.Tests/Integration/Ui/OperatorWave1AHostTests.cs",
+      "previousSha256": "A77D8B6468C9FE794329203D566BBB6DC6165EC8F2B5C8DDC6B3C31EE90CF9CD",
+      "candidateSha256": "739D5D1C266DA4D2B02DFFAAF254E23F5D6EA9B96BEEB566E5B1FE69B8BA48CF"
+    },
+    {
+      "path": "tests/PrintFlow.Tests/Integration/Ui/PlainChinesePrintCopyTests.cs",
+      "previousSha256": "1A0FDF0744C716AFCBFE68E4C38CC16B2BA37496A2370FB876AA6ED5B438A77D",
+      "candidateSha256": "B2344F61D265EC65BCD8189CB62992698E34FF3977715C1FC15A7BF79D4D10B7"
+    },
+    {
+      "path": "tests/PrintFlow.Tests/Integration/Ui/PlainChineseReviewCopyTests.cs",
+      "previousSha256": "916FC7CAAD24F79C8A8EB3F9A8A50E6658B89A8748247B1A2440937434E4BC80",
+      "candidateSha256": "50CAE6D1ADB74725C7FB721ABB20B59057FA6BBC1AC7C48C1BE83E4351FF0E48"
+    },
+    {
+      "path": "tests/PrintFlow.Tests/Integration/Ui/PlainChineseSaveRecoveryCopyTests.cs",
+      "previousSha256": "D245228B46C1A45F1AC77D291CC1E676B6E48B24F43F4C3B1912149B47F483D5",
+      "candidateSha256": "EA5345907BFAF9C716BBB20D33C6497BD4E8A0CAE2EC9D4BF4FC875A2F1FA1BB"
+    },
+    {
+      "path": "tests/PrintFlow.Tests/Integration/Ui/PrintDimensionsPreflightUiTests.cs",
+      "previousSha256": "3E5219DA3E72C8AC7029B92A5545D0043324E09572EFB877BF4CBE8AFC035D68",
+      "candidateSha256": "11363C6EF3CF46F9236FD044D112F1005B761E400CB96DA59AF298CA0FFACAF5"
+    },
+    {
+      "path": "tests/PrintFlow.Tests/Integration/Ui/PrintWorkspaceRolloutTests.cs",
+      "previousSha256": "E964BE6705062F9EFB2812525E95AAEC4AD7909BEBC3F1D86F1C99F17919ECAC",
+      "candidateSha256": "5E201FA293D6E38C882C86F7387FA4B7F56B119BB10538E48050355B2794EC43"
+    },
+    {
+      "path": "tests/PrintFlow.Tests/Integration/Ui/ProcessingWorkspaceRolloutTests.cs",
+      "previousSha256": "F5FF8EF8068FB7714BAB6D4A8012347F65C394D80CBE28EF492EFA4190E6FF4C",
+      "candidateSha256": "94B354AEDE672EBCDE16D852460030BEB88954179BF5F45C655D03FE1B88E473"
+    },
+    {
+      "path": "tests/PrintFlow.Tests/Integration/Ui/RecentProcessingRecordTests.cs",
+      "previousSha256": "E566E965CEFC7C5277A609E83726F9EFFD7FF5CC9E7385966F9B7D1DCEAE718F",
+      "candidateSha256": "2217FDEE076BDDB12654D6D421F246D654ECC5135D1073FCBFDA3593DABE7364"
+    },
+    {
+      "path": "tests/PrintFlow.Tests/Integration/Ui/RecoveryUtilityRolloutTests.cs",
+      "previousSha256": "F5CC5FA4307982630C716EB55B5B0E47D3E11B5DC11B331A7300935D25CE3F56",
+      "candidateSha256": "494339C2B96CABB4464BD738C09C63F650789235EE0F06ED1669D9BAC2CE1142"
+    },
+    {
+      "path": "tests/PrintFlow.Tests/Integration/Ui/SaveReviewProjectionTests.cs",
+      "previousSha256": null,
+      "candidateSha256": "AD35B42D17F7399521DA636303B8F505DB769ECE2CCD2AA4BEDB7AC555EE89EB"
+    },
+    {
+      "path": "tests/PrintFlow.Tests/Integration/Ui/SaveWorkspaceRolloutTests.cs",
+      "previousSha256": "BA4E262842335B75FDD7FF9BB91B195395F88817918349F6F511601CC48D85FD",
+      "candidateSha256": "DED52FF9290B33F981DEF5E1940F7BF1EA089C03322F8E71DDB5320B7C12A318"
+    },
+    {
+      "path": "tests/PrintFlow.Tests/Integration/Ui/SessionAccessibilityTests.cs",
+      "previousSha256": "C18DE2C63473F0B0E4B7146773F69946CEBC46618BABE6EF95E4C92161AAB408",
+      "candidateSha256": "F66997CF591E74F94419513B20FFF0A340A5D4FC711BFBDA1D975C20467A920C"
+    },
+    {
+      "path": "tests/PrintFlow.Tests/Integration/Ui/SharedReviewSurfaceTests.cs",
+      "previousSha256": "4E43DAAC284597AF9A26569ED15BAD2BA5F97DCA186B904FAF79B584ACE87CAE",
+      "candidateSha256": "CC19DE60EC0D688D530452D6FF1A0D4AFEE8B8DB2AAF844FF645EBC81E5F34A9"
+    },
+    {
+      "path": "tests/PrintFlow.Tests/Integration/Ui/SidebarUtilityLayoutTests.cs",
+      "previousSha256": null,
+      "candidateSha256": "DEE8E67C4BCF9B15C51373DF610CA6515E9ABCD786D0FAB915E00293BCD18B2D"
+    },
+    {
+      "path": "tests/PrintFlow.Tests/Integration/Ui/WorkflowPurposeCardTests.cs",
+      "previousSha256": "D9D7881896AD72664A6956EA0E69D4CAB7126FD29F40B150C80596089EE8D2DB",
+      "candidateSha256": "B59D8183710DD802E092DC19DA7DAFA721ACAA068215662364563FFAAAEAE900"
+    },
+    {
+      "path": "tests/PrintFlow.Tests/Integration/Ui/WpfUiSamplePageTests.cs",
+      "previousSha256": "3A110B25CC30490571FF291C0D10E10B805022C9EB6DC035D35D7C4BA1EB25EC",
+      "candidateSha256": "8BBF53B8A0641A4468F372AA3B5E40A554ADD729E645C92172865941F935AB06"
+    },
+    {
+      "path": "tests/PrintFlow.Tests/Integration/Ui/WpfUiSampleVisualEvidenceTests.cs",
+      "previousSha256": "6EB37796FA66E35C7E3107E941CBAA64C30ACEC9C6E3856E718B8117F45E31D6",
+      "candidateSha256": "67CA020B54572C67066A140808625576687917C97063D7612C59905AC9BA9CC8"
+    },
+    {
+      "path": "tests/PrintFlow.Tests/Integration/Ui/WpfUiSharedThemeTests.cs",
+      "previousSha256": "142374BF0AAABF53DBA1C27B0FDB3C050E4575136B08772203683A80218B3FC4",
+      "candidateSha256": "F359395ED6296ECA2C1C164F0144024DCC7B43E416276558EE482A2C1E0D692A"
+    }
+  ],
+  "originalSourceUnchanged": true,
+  "reason": "Existing linked checkout path cannot satisfy unchanged 240-character guard even with one-character run leaf."
+}

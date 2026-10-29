@@ -1,0 +1,81 @@
+{
+  "exitCode": 0,
+  "verified": true,
+  "runRoot": "C:\\Users\\admin\\.codex\\worktrees\\u09\\printflow-Studio\\artifacts\\pf-opux-scrum11154-workstation-entry\\runs\\r",
+  "boundarySha256": "091d89dc930d23b5e2806f14eb3d4b0a7fe9fe77ce9aea2d41a49df0a17492b6",
+  "recoverySha256": "e001b62fd82d1b4b1436d91063f9b29f78e357642104d2f46548e56238f71bf8",
+  "facts": {
+    "Verified": true,
+    "Evidence": "SYNTHETIC_PROCESS_INTERRUPTION_NOT_POWER_LOSS",
+    "RunToken": "b7dbb84f444342caaf1dc9c461280f08",
+    "ControlToken": "d7af157dab634522a9784130428998aa",
+    "SessionId": "01a180a1-0e8f-758b-a3c3-5516fd710129",
+    "AttemptId": "01a180a1-0fe3-7d01-82a2-d59ae4ebf8da",
+    "NewOwnerToken": "82be19f806c54870b786161862e90764",
+    "Recovered": {
+      "Entries": [
+        {
+          "Action": 0,
+          "AtUtc": "2026-10-28T03:50:03.6366238+00:00",
+          "SessionId": {
+            "Value": "01a180a1-0e8f-758b-a3c3-5516fd710129"
+          },
+          "AttemptId": {
+            "Value": "01a180a1-0fe3-7d01-82a2-d59ae4ebf8da"
+          },
+          "FailureCode": null,
+          "Detail": "Attempt for step Enhancement was still Running at startup and produced no Revision."
+        },
+        {
+          "Action": 1,
+          "AtUtc": "2026-10-28T03:50:03.6366238+00:00",
+          "SessionId": {
+            "Value": "01a180a1-0e8f-758b-a3c3-5516fd710129"
+          },
+          "AttemptId": {
+            "Value": "01a180a1-0fe3-7d01-82a2-d59ae4ebf8da"
+          },
+          "FailureCode": null,
+          "Detail": "Step Enhancement was moved to Interrupted; it holds no result."
+        },
+        {
+          "Action": 3,
+          "AtUtc": "2026-10-28T03:50:03.6366238+00:00",
+          "SessionId": {
+            "Value": "01a180a1-0e8f-758b-a3c3-5516fd710129"
+          },
+          "AttemptId": null,
+          "FailureCode": null,
+          "Detail": "The automation lock's owning process is gone; the lock was released."
+        },
+        {
+          "Action": 5,
+          "AtUtc": "2026-10-28T03:50:03.6366238+00:00",
+          "SessionId": {
+            "Value": "01a180a1-0e8f-758b-a3c3-5516fd710129"
+          },
+          "AttemptId": {
+            "Value": "01a180a1-0fe3-7d01-82a2-d59ae4ebf8da"
+          },
+          "FailureCode": null,
+          "Detail": "'Sessions/S_20261028T035001Z_fd710129/Working/01a180a1-0fe3-7d01-82a2-d59ae4ebf8da/owned-restart.png' was moved to Quarantine."
+        }
+      ],
+      "InterruptedAttemptCount": 1,
+      "QuarantinedFileCount": 1,
+      "ReleasedAutomationLock": true,
+      "IsNoOp": false
+    },
+    "NewResults": false,
+    "Screens": [
+      "Home",
+      "Recovery.Open",
+      "Session",
+      "ErrorDetails",
+      "Session",
+      "Home"
+    ]
+  },
+  "physicalPowerLoss": false,
+  "visibleRecoveryAcceptance": "NOT RUN"
+}

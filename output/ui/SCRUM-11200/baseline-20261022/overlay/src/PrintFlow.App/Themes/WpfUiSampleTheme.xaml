@@ -1,0 +1,46 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
+  <!-- Deliberately local to the two sample pages, never merged into Application. -->
+  <ResourceDictionary.MergedDictionaries>
+    <ui:ThemesDictionary Theme="Light" />
+    <ui:ControlsDictionary />
+  </ResourceDictionary.MergedDictionaries>
+  <Color x:Key="SystemAccentColorPrimary">#16765D</Color>
+  <SolidColorBrush x:Key="SystemAccentColorPrimaryBrush" Color="#16765D" />
+  <Style x:Key="PF.Sample.Secondary" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+    <Setter Property="MinHeight" Value="42" />
+    <Setter Property="Padding" Value="16,8" />
+    <Setter Property="FontFamily" Value="{DynamicResource PF.Font.Family}" />
+    <Setter Property="FontSize" Value="14" />
+    <Setter Property="Foreground" Value="{DynamicResource PF.Brush.Ink}" />
+    <Setter Property="Background" Value="White" />
+    <Setter Property="FocusVisualStyle" Value="{StaticResource PF.Focus}" />
+  </Style>
+  <Style x:Key="PF.Sample.Primary" TargetType="Button" BasedOn="{StaticResource PF.Sample.Secondary}">
+    <Setter Property="Background" Value="#16765D" />
+    <Setter Property="Foreground" Value="White" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="BorderBrush" Value="#16765D" />
+  </Style>
+  <Style x:Key="PF.Sample.Input" TargetType="TextBox" BasedOn="{StaticResource DefaultTextBoxStyle}">
+    <Setter Property="MinHeight" Value="42" />
+    <Setter Property="Padding" Value="12,8" />
+    <Setter Property="FontFamily" Value="{DynamicResource PF.Font.Family}" />
+    <Setter Property="FontSize" Value="14" />
+    <Setter Property="Foreground" Value="{DynamicResource PF.Brush.Ink}" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="FocusVisualStyle" Value="{StaticResource PF.Focus}" />
+  </Style>
+  <Style x:Key="PF.Sample.Card" TargetType="ui:Card" BasedOn="{StaticResource {x:Type ui:Card}}">
+    <Setter Property="Background" Value="White" />
+    <Setter Property="BorderBrush" Value="{DynamicResource PF.Brush.Border}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="Padding" Value="20" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="VerticalContentAlignment" Value="Stretch" />
+    <Setter Property="Focusable" Value="False" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="FontFamily" Value="{DynamicResource PF.Font.Family}" />
+  </Style>
+</ResourceDictionary>

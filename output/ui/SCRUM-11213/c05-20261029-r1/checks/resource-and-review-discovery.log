@@ -1,0 +1,107 @@
+C:\Users\admin\.codex\worktrees\scrum-11201-shared-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll (.NETCoreApp,Version=v10.0)的测试运行
+以下测试可用:
+    PrintFlow.Tests.Integration.Ui.PlainChineseReviewCopyTests.Returned_correction_guidance_names_the_actual_review_action
+    PrintFlow.Tests.Integration.Ui.PlainChineseReviewCopyTests.Review_action_names_its_object_fits_and_keeps_exact_target(step: "enhancement", width: 984, height: 661)
+    PrintFlow.Tests.Integration.Ui.PlainChineseReviewCopyTests.Review_action_names_its_object_fits_and_keeps_exact_target(step: "enhancement", width: 1280, height: 720)
+    PrintFlow.Tests.Integration.Ui.PlainChineseReviewCopyTests.Review_action_names_its_object_fits_and_keeps_exact_target(step: "enhancement", width: 1920, height: 1080)
+    PrintFlow.Tests.Integration.Ui.PlainChineseReviewCopyTests.Review_action_names_its_object_fits_and_keeps_exact_target(step: "background", width: 984, height: 661)
+    PrintFlow.Tests.Integration.Ui.PlainChineseReviewCopyTests.Review_action_names_its_object_fits_and_keeps_exact_target(step: "background", width: 1280, height: 720)
+    PrintFlow.Tests.Integration.Ui.PlainChineseReviewCopyTests.Review_action_names_its_object_fits_and_keeps_exact_target(step: "background", width: 1920, height: 1080)
+    PrintFlow.Tests.Integration.Ui.PlainChineseReviewCopyTests.Review_action_names_its_object_fits_and_keeps_exact_target(step: "trim", width: 984, height: 661)
+    PrintFlow.Tests.Integration.Ui.PlainChineseReviewCopyTests.Review_action_names_its_object_fits_and_keeps_exact_target(step: "trim", width: 1280, height: 720)
+    PrintFlow.Tests.Integration.Ui.PlainChineseReviewCopyTests.Review_action_names_its_object_fits_and_keeps_exact_target(step: "trim", width: 1920, height: 1080)
+    PrintFlow.Tests.Integration.Ui.PlainChineseReviewCopyTests.Review_action_names_its_object_fits_and_keeps_exact_target(step: "tiff", width: 984, height: 661)
+    PrintFlow.Tests.Integration.Ui.PlainChineseReviewCopyTests.Review_action_names_its_object_fits_and_keeps_exact_target(step: "tiff", width: 1280, height: 720)
+    PrintFlow.Tests.Integration.Ui.PlainChineseReviewCopyTests.Review_action_names_its_object_fits_and_keeps_exact_target(step: "tiff", width: 1920, height: 1080)
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.The_current_print_size_step_and_guidance_use_one_Chinese_term
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.Shared_source_preparation_copy_does_not_promise_a_print_route
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.Every_English_string_has_a_zh_CN_translation
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.The_zh_CN_file_carries_no_string_the_English_file_has_dropped
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.Every_typed_accessor_resolves_to_a_real_resource
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.No_resource_value_is_left_empty
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.The_background_removal_authority_strings_exist_in_both_languages
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.The_confirmation_claims_nothing_about_cutout_quality(forbidden: "guarantee")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.The_confirmation_claims_nothing_about_cutout_quality(forbidden: "guaranteed")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.The_confirmation_claims_nothing_about_cutout_quality(forbidden: "perfect")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.The_confirmation_claims_nothing_about_cutout_quality(forbidden: "always correct")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.The_confirmation_claims_nothing_about_cutout_quality(forbidden: "no need to check")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.The_stop_and_take_over_strings_exist_in_both_languages
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.The_maximum_bound_strings_exist_in_both_languages
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.The_flexible_size_operator_strings_exist_in_both_languages
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.Enlargement_wording_requires_a_second_choice_without_promising_clarity
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.No_operator_string_offers_a_resampling_method(forbidden: "Bicubic")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.No_operator_string_offers_a_resampling_method(forbidden: "双三次")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.No_operator_string_offers_a_resampling_method(forbidden: "Resample")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.No_operator_string_offers_a_resampling_method(forbidden: "重新取样")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.No_operator_string_offers_a_resampling_method(forbidden: "Interpolation")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.No_operator_string_offers_a_resampling_method(forbidden: "插值")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.The_maximum_bound_wording_describes_limits_rather_than_an_exact_size
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.The_projected_figures_are_never_described_as_an_actual_photoshop_result(key: "Session_PreparationAttemptProjected")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.The_projected_figures_are_never_described_as_an_actual_photoshop_result(key: "Session_PreparationProjectedSize")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.The_dimension_review_warning_reports_no_failure_and_no_deletion
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.Take_over_guidance_has_force_close_and_manual_recovery_parity
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.Operator_action_labels_offer_no_force_termination(forbidden: "kill")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.Operator_action_labels_offer_no_force_termination(forbidden: "terminate")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.Operator_action_labels_offer_no_force_termination(forbidden: "force close")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.Operator_action_labels_offer_no_force_termination(forbidden: "force-close")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.The_take_over_confirmation_states_each_consequence(required: "stop controlling Meitu")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.The_take_over_confirmation_states_each_consequence(required: "left exactly as it is")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.The_take_over_confirmation_states_each_consequence(required: "will not produce a Revision")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.The_take_over_confirmation_states_each_consequence(required: "Return to automation")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.No_stop_message_claims_the_external_application_is_finished(forbidden: "safely closed")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.No_stop_message_claims_the_external_application_is_finished(forbidden: "has finished")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.No_stop_message_claims_the_external_application_is_finished(forbidden: "is finished")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.No_stop_message_claims_the_external_application_is_finished(forbidden: "no longer running")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.No_stop_message_claims_the_external_application_is_finished(forbidden: "nothing further to do")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.Stop_and_take_over_are_not_worded_as_the_same_action
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.No_operator_label_offers_to_terminate_the_external_application(forbidden: "kill")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.No_operator_label_offers_to_terminate_the_external_application(forbidden: "terminate")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.No_operator_label_offers_to_terminate_the_external_application(forbidden: "force quit")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.No_operator_label_offers_to_terminate_the_external_application(forbidden: "end task")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.Every_workstation_check_has_operator_wording_in_both_languages
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.Every_workstation_check_has_a_neutral_subject_in_both_languages
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.The_readiness_screen_has_wording_in_both_languages
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.The_restart_requirement_names_what_it_is_about
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.The_refresh_wording_distinguishes_re_observing_from_re_reading
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.No_environment_string_offers_a_way_past_the_gate(forbidden: "Enable production")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.No_environment_string_offers_a_way_past_the_gate(forbidden: "Continue anyway")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.No_environment_string_offers_a_way_past_the_gate(forbidden: "Ignore verification")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.No_environment_string_offers_a_way_past_the_gate(forbidden: "Override")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.No_environment_string_offers_a_way_past_the_gate(forbidden: "忽略校验")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.No_environment_string_offers_a_way_past_the_gate(forbidden: "仍然继续")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.No_environment_string_offers_a_way_past_the_gate(forbidden: "强制启用")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.The_read_only_advisory_says_it_does_not_block
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.The_trim_bounds_strings_exist_in_both_languages
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.The_trim_bounds_wording_names_no_internal_type(forbidden: "TrimBounds")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.The_trim_bounds_wording_names_no_internal_type(forbidden: "TrimGeometry")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.The_trim_bounds_wording_names_no_internal_type(forbidden: "ContentBounds")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.The_trim_bounds_wording_names_no_internal_type(forbidden: "AppliedBounds")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.The_trim_bounds_wording_names_no_internal_type(forbidden: "RightExclusive")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.The_trim_bounds_wording_names_no_internal_type(forbidden: "BottomExclusive")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.The_trim_bounds_wording_names_no_internal_type(forbidden: "Int32Rect")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.The_trim_bounds_wording_names_no_internal_type(forbidden: "half-open")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.A_specialized_refusal_does_not_turn_an_unconfirmed_event_into_a_fact(key: "FailureNotice_RevisionIntegrityMismatch", language: "en", unsupportedClaim: "The file changed")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.A_specialized_refusal_does_not_turn_an_unconfirmed_event_into_a_fact(key: "FailureNotice_RevisionIntegrityMismatch", language: "zh-CN", unsupportedClaim: "文件在显示后发生了变化")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.A_specialized_refusal_does_not_turn_an_unconfirmed_event_into_a_fact(key: "FailureNotice_MeituLaunchFailed", language: "en", unsupportedClaim: "was started")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.A_specialized_refusal_does_not_turn_an_unconfirmed_event_into_a_fact(key: "FailureNotice_MeituLaunchFailed", language: "zh-CN", unsupportedClaim: "已启动")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.A_specialized_refusal_does_not_turn_an_unconfirmed_event_into_a_fact(key: "FailureNotice_PhotoshopLaunchFailed", language: "en", unsupportedClaim: "was started")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.A_specialized_refusal_does_not_turn_an_unconfirmed_event_into_a_fact(key: "FailureNotice_PhotoshopLaunchFailed", language: "zh-CN", unsupportedClaim: "已启动")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.Meitu_launch_failure_sentence_claims_neither_a_start_nor_a_retry(language: "en", fact: "could not be started or did not become ready", unsupported: ["was started", "in time", "try again", "retry"])
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.Meitu_launch_failure_sentence_claims_neither_a_start_nor_a_retry(language: "zh-CN", fact: "美图未能启动或未能就绪", unsupported: ["已启动", "规定时间", "重试", "再试"])
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.Specialized_action_notices_leave_recovery_advice_to_the_current_screen
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.The_failure_guidance_strings_exist_in_both_languages_with_the_same_placeholders
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.No_failure_guidance_sentence_carries_a_bare_code
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.A_shared_failure_sentence_suggests_no_retry_and_claims_only_what_every_path_supports(key: "Failure_Timeout")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.A_shared_failure_sentence_suggests_no_retry_and_claims_only_what_every_path_supports(key: "Failure_OutputMissing")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.A_shared_failure_sentence_suggests_no_retry_and_claims_only_what_every_path_supports(key: "Failure_OutputUnreadable")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.A_shared_failure_sentence_suggests_no_retry_and_claims_only_what_every_path_supports(key: "Failure_OutputValidationFailed")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.A_shared_failure_sentence_suggests_no_retry_and_claims_only_what_every_path_supports(key: "Failure_WorkspaceError")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.A_shared_failure_sentence_suggests_no_retry_and_claims_only_what_every_path_supports(key: "Failure_PersistenceError")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.A_shared_failure_sentence_suggests_no_retry_and_claims_only_what_every_path_supports(key: "Failure_PreconditionNotMet")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.A_shared_failure_sentence_suggests_no_retry_and_claims_only_what_every_path_supports(key: "Failure_AdapterUnavailable")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.A_shared_failure_sentence_suggests_no_retry_and_claims_only_what_every_path_supports(key: "Failure_Cancelled")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.A_shared_failure_sentence_suggests_no_retry_and_claims_only_what_every_path_supports(key: "Failure_UnknownDialog")
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.No_failure_wrapper_or_help_line_suggests_retrying
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.Every_failure_help_line_names_Error_details_and_a_colleague_or_supervisor
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.The_production_TIFF_review_strings_exist_in_both_languages
+    PrintFlow.Tests.Architecture.LocalisationResourceTests.The_colour_preview_legend_disclaims_printed_colour_accuracy

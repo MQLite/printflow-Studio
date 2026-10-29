@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "staticRows": 140,
+  "csvRows": 140,
+  "conditionalAi": 7,
+  "lockedWpfUi": "4.3.0",
+  "lockFiles": 3,
+  "safeRunnerExactExclusions": 11,
+  "smokeExcluded": true,
+  "markdownLinks": "PASS",
+  "jsonParsing": "PASS",
+  "productTests": "NOT RUN"
+}

@@ -1,0 +1,33 @@
+{
+  "status": "PASS",
+  "verifiedUtc": "2026-10-22T04:22:26.736267+00:00",
+  "frozenFilesVerified": 132,
+  "trackedFilesReconstructed": 2298,
+  "overlayFilesVerified": 16,
+  "preservation": [
+    {
+      "root": "D:\\Repositories\\printflow-Studio",
+      "existingFilesUnchanged": 116,
+      "headBranchIndexUnchanged": true
+    },
+    {
+      "root": "C:\\Users\\admin\\.codex\\worktrees\\scrum-11173-guided-acceptance\\printflow-Studio",
+      "existingFilesUnchanged": 66,
+      "headBranchIndexUnchanged": true
+    }
+  ],
+  "checkoutByteOverlayFiles": 50,
+  "overlayComparison": "byte-exact including full tracked tree; mixed CRLF/LF bytes preserved separately",
+  "preservationExcludesOwnCaptureHelper": true,
+  "checks": [
+    "frozen byte hashes",
+    "original source/asset manifest hashes",
+    "base archive + binary patch + untracked overlay reconstruction",
+    "existing dirty/untracked files unchanged"
+  ],
+  "notRun": [
+    "product build/tests",
+    "new screenshots",
+    "real window/DPI/keyboard/screen reader/user acceptance"
+  ]
+}

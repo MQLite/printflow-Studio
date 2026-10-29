@@ -1,0 +1,52 @@
+[
+  {
+    "Path": "home-comparison.png",
+    "Sha256": "5CA2F7A1180242D2A6945298EB626810F63685E415294C8BA6246FFF061417DC",
+    "Bytes": 807355
+  },
+  {
+    "Path": "references\\home.png",
+    "Sha256": "3D3A3F8BC620ABB66E0573FBC2B00B74A4C393083248ADC879FAB74F96F687B4",
+    "Bytes": 1341593
+  },
+  {
+    "Path": "references\\save-png.png",
+    "Sha256": "873449987EFE2FC0F61D9608513B6E75DE15B59675C85483BBF2C9CFB653989E",
+    "Bytes": 1734670
+  },
+  {
+    "Path": "save-png-comparison.png",
+    "Sha256": "4F41A6795D2E0C314AC3186B52A24F36F9192D93552328CC7380DF9B6B2606F9",
+    "Bytes": 1126691
+  },
+  {
+    "Path": "screenshots\\home-1000x700.png",
+    "Sha256": "5B843BD96BC2ABD8D60724A15F46B89AC58CAD973935D579A51DD1637D01E100",
+    "Bytes": 55400
+  },
+  {
+    "Path": "screenshots\\home-1280x720.png",
+    "Sha256": "6812E96C4C461E1B53B6FC935D15B7678C9210F697B00A8C0879D9B9BE886274",
+    "Bytes": 58738
+  },
+  {
+    "Path": "screenshots\\home-1920x1080.png",
+    "Sha256": "5C3C68A51BC0F9B67157EB3F2E723D9168EA87C708A044E5B835160F4B123635",
+    "Bytes": 67577
+  },
+  {
+    "Path": "screenshots\\save-png-1000x700.png",
+    "Sha256": "3EDECB1BDE61B823F7B16EA577B7D0061F138DCAA5165CFD92C1E4B4E9EAA08D",
+    "Bytes": 90003
+  },
+  {
+    "Path": "screenshots\\save-png-1280x720.png",
+    "Sha256": "5B1F29FA051F95544244AE3FF067B2C082D65886913C9EBFABEBE694BDAFE70B",
+    "Bytes": 95194
+  },
+  {
+    "Path": "screenshots\\save-png-1920x1080.png",
+    "Sha256": "5F6011D0F51604DE59FA5370C0466A54D5D156BC0DBDF57C4DD6B06B07C99A86",
+    "Bytes": 146805
+  }
+]

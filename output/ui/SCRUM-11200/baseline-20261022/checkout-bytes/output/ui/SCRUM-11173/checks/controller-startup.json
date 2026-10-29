@@ -1,0 +1,101 @@
+{
+  "head": "de7bca6e0a8462584b4d6bf4d16307d1335e2fb3",
+  "branch": "master",
+  "status": [
+    " M docs/codex/printflow-operator-ux-backlog/HANDOFF.md",
+    " M docs/codex/printflow-operator-ux-backlog/SCRUM-11149_PUBLICATION_STATUS_AUDIT.json",
+    " M docs/codex/printflow-operator-ux-backlog/SCRUM-11150_PUBLICATION_STATUS_AUDIT.json",
+    " M docs/codex/printflow-operator-ux-backlog/SCRUM-11151_PUBLICATION_STATUS_AUDIT.json",
+    " M docs/codex/printflow-operator-ux-backlog/SCRUM-11152_CLOSEOUT_PUBLICATION_STATUS_AUDIT.json",
+    " M docs/codex/printflow-operator-ux-backlog/SCRUM-11152_PUBLICATION_STATUS_AUDIT.json",
+    " M docs/codex/printflow-operator-ux-backlog/SCRUM-11153_PUBLICATION_STATUS_AUDIT.json",
+    " M docs/codex/printflow-operator-ux-backlog/SCRUM-11154_PUBLICATION_STATUS_AUDIT.json",
+    " M docs/codex/printflow-operator-ux-backlog/SCRUM-11154_WORKSTATION_ENTRY_AUDIT.json",
+    " M docs/codex/printflow-operator-ux-backlog/SCRUM-11154_WORKSTATION_ENTRY_IMPL_PUBLICATION_STATUS_AUDIT.json",
+    " M docs/codex/printflow-operator-ux-backlog/SCRUM-11154_WORKSTATION_OBSERVATIONS_PUBLICATION_STATUS_AUDIT.json",
+    " M docs/codex/printflow-operator-ux-backlog/SCRUM-11154_ZH_FINDINGS_PUBLICATION_STATUS_AUDIT.json",
+    " M docs/codex/printflow-operator-ux-backlog/SCRUM-11154_ZH_RECHECK_PUBLICATION_STATUS_AUDIT.json",
+    "?? docs/codex/printflow-operator-ux-backlog/SCRUM-11155_PLAN.md",
+    "?? docs/codex/printflow-operator-ux-backlog/SCRUM-11155_PREPARATION_REVIEW.md",
+    "?? docs/codex/printflow-operator-ux-backlog/SCRUM-11155_RESULTS.md",
+    "?? docs/printflow/operator-ux-acceptance-walkthrough.md",
+    "?? docs/superpowers/",
+    "?? output/"
+  ],
+  "trackedHashes": [
+    {
+      "path": "docs/codex/printflow-operator-ux-backlog/HANDOFF.md",
+      "sha256": "71A96309DCA37F0FC69DFCFF4AF4D63F040F96823609CF10CFD5934213942F06"
+    },
+    {
+      "path": "docs/codex/printflow-operator-ux-backlog/SCRUM-11149_PUBLICATION_STATUS_AUDIT.json",
+      "sha256": "CAB968DD00195C3BC23917B782F5D35A31A2A74F8BD34552CCAED5F9A6E430B6"
+    },
+    {
+      "path": "docs/codex/printflow-operator-ux-backlog/SCRUM-11150_PUBLICATION_STATUS_AUDIT.json",
+      "sha256": "9651FBE9226A75DDF678C8658A7C42DB82DB86CF8F167D490DB343B9B6D53DFD"
+    },
+    {
+      "path": "docs/codex/printflow-operator-ux-backlog/SCRUM-11151_PUBLICATION_STATUS_AUDIT.json",
+      "sha256": "9E698BAE3AE1D3B452EDC3354E4535E3130197F111067432408E3DAE9AF30228"
+    },
+    {
+      "path": "docs/codex/printflow-operator-ux-backlog/SCRUM-11152_CLOSEOUT_PUBLICATION_STATUS_AUDIT.json",
+      "sha256": "81BE7F65AEF11A5C4476164B33E7BFFEDA804A94B8037C81882B94B4D966E86F"
+    },
+    {
+      "path": "docs/codex/printflow-operator-ux-backlog/SCRUM-11152_PUBLICATION_STATUS_AUDIT.json",
+      "sha256": "42B5906E96AAF2F8E316C49E5AE852E89C57165F0C4CA1AFBD9BB047E2774938"
+    },
+    {
+      "path": "docs/codex/printflow-operator-ux-backlog/SCRUM-11153_PUBLICATION_STATUS_AUDIT.json",
+      "sha256": "3C9FE2FB2C215A6D789CE29A02F8292841D3632215E7684F712AD8EFA4D072B8"
+    },
+    {
+      "path": "docs/codex/printflow-operator-ux-backlog/SCRUM-11154_PUBLICATION_STATUS_AUDIT.json",
+      "sha256": "9DF4F1F237A53BD0BF087819DCA5CF7C326880EBC8660281E92C0AA874AD9F00"
+    },
+    {
+      "path": "docs/codex/printflow-operator-ux-backlog/SCRUM-11154_WORKSTATION_ENTRY_AUDIT.json",
+      "sha256": "D26C77BBD3F6573B8844493A1232441F5BB416BC45AD3202CC09E9F8245C9AC6"
+    },
+    {
+      "path": "docs/codex/printflow-operator-ux-backlog/SCRUM-11154_WORKSTATION_ENTRY_IMPL_PUBLICATION_STATUS_AUDIT.json",
+      "sha256": "D363AB8FFCEAB6726B67AD05A8A518946A1FA525538C04E39F76F08131326CFF"
+    },
+    {
+      "path": "docs/codex/printflow-operator-ux-backlog/SCRUM-11154_WORKSTATION_OBSERVATIONS_PUBLICATION_STATUS_AUDIT.json",
+      "sha256": "917BB7E06CA1A20688496D6F9C4DDBC8ABC3F4E81CCC5F7EF1EF336F256C9B41"
+    },
+    {
+      "path": "docs/codex/printflow-operator-ux-backlog/SCRUM-11154_ZH_FINDINGS_PUBLICATION_STATUS_AUDIT.json",
+      "sha256": "1D44DA5A6138E4EE101EF996BA94BACBEE66BF6B7F674F6BB0BDD44DBBF7D107"
+    },
+    {
+      "path": "docs/codex/printflow-operator-ux-backlog/SCRUM-11154_ZH_RECHECK_PUBLICATION_STATUS_AUDIT.json",
+      "sha256": "1D2EEDBCF8A068CE994011DA5DEF71BD18F073DA34742914359FE53D31A0EC65"
+    }
+  ],
+  "untrackedDocs": [
+    {
+      "path": "docs/codex/printflow-operator-ux-backlog/SCRUM-11155_PLAN.md",
+      "sha256": "F9478F1A6F5D80335476A2880E735ACCC71B3571DCE5BE037420E4EBEF0C4D04"
+    },
+    {
+      "path": "docs/codex/printflow-operator-ux-backlog/SCRUM-11155_PREPARATION_REVIEW.md",
+      "sha256": "B9DC42B3872035DB3387A4898A0687540130FA20467EC2790432BC764EC5E971"
+    },
+    {
+      "path": "docs/codex/printflow-operator-ux-backlog/SCRUM-11155_RESULTS.md",
+      "sha256": "D18D5157FDFCFD3E6A2E9EEB832C459E5227B5B439B538294D192E0A08C387D8"
+    },
+    {
+      "path": "docs/printflow/operator-ux-acceptance-walkthrough.md",
+      "sha256": "AFB60E9695B2E1D154B783F19D4A114E1650CF33AE1FFD3B82D74C1EE26DCC51"
+    },
+    {
+      "path": "docs/superpowers/plans/2026-10-19-scrum-11177-guided-theme.md",
+      "sha256": "FCDB16BB64EF9934D0A6752ABC454EBAA2DDB3CC6DF20D725B7949E1ABD5B345"
+    }
+  ]
+}

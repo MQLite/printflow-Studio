@@ -1,0 +1,296 @@
+{
+  "planned": [
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11200",
+      "outwardIssue": "SCRUM-11201"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11201",
+      "outwardIssue": "SCRUM-11202"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11200",
+      "outwardIssue": "SCRUM-11203"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11203",
+      "outwardIssue": "SCRUM-11204"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11203",
+      "outwardIssue": "SCRUM-11205"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11203",
+      "outwardIssue": "SCRUM-11206"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11202",
+      "outwardIssue": "SCRUM-11207"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11203",
+      "outwardIssue": "SCRUM-11207"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11202",
+      "outwardIssue": "SCRUM-11208"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11203",
+      "outwardIssue": "SCRUM-11208"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11202",
+      "outwardIssue": "SCRUM-11209"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11203",
+      "outwardIssue": "SCRUM-11209"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11202",
+      "outwardIssue": "SCRUM-11210"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11203",
+      "outwardIssue": "SCRUM-11210"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11202",
+      "outwardIssue": "SCRUM-11211"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11203",
+      "outwardIssue": "SCRUM-11211"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11207",
+      "outwardIssue": "SCRUM-11212"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11208",
+      "outwardIssue": "SCRUM-11212"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11209",
+      "outwardIssue": "SCRUM-11212"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11210",
+      "outwardIssue": "SCRUM-11212"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11211",
+      "outwardIssue": "SCRUM-11212"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11204",
+      "outwardIssue": "SCRUM-11212"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11205",
+      "outwardIssue": "SCRUM-11212"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11206",
+      "outwardIssue": "SCRUM-11212"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11204",
+      "outwardIssue": "SCRUM-11213"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11205",
+      "outwardIssue": "SCRUM-11213"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11206",
+      "outwardIssue": "SCRUM-11213"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11212",
+      "outwardIssue": "SCRUM-11213"
+    },
+    {
+      "linkType": "Relates",
+      "inwardIssue": "SCRUM-11198",
+      "outwardIssue": "SCRUM-11199"
+    }
+  ],
+  "created": [
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11200",
+      "outwardIssue": "SCRUM-11201"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11201",
+      "outwardIssue": "SCRUM-11202"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11200",
+      "outwardIssue": "SCRUM-11203"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11203",
+      "outwardIssue": "SCRUM-11204"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11203",
+      "outwardIssue": "SCRUM-11205"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11203",
+      "outwardIssue": "SCRUM-11206"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11202",
+      "outwardIssue": "SCRUM-11207"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11203",
+      "outwardIssue": "SCRUM-11207"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11202",
+      "outwardIssue": "SCRUM-11208"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11203",
+      "outwardIssue": "SCRUM-11208"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11202",
+      "outwardIssue": "SCRUM-11209"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11203",
+      "outwardIssue": "SCRUM-11209"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11202",
+      "outwardIssue": "SCRUM-11210"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11203",
+      "outwardIssue": "SCRUM-11210"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11202",
+      "outwardIssue": "SCRUM-11211"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11203",
+      "outwardIssue": "SCRUM-11211"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11207",
+      "outwardIssue": "SCRUM-11212"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11208",
+      "outwardIssue": "SCRUM-11212"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11209",
+      "outwardIssue": "SCRUM-11212"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11210",
+      "outwardIssue": "SCRUM-11212"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11211",
+      "outwardIssue": "SCRUM-11212"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11204",
+      "outwardIssue": "SCRUM-11212"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11205",
+      "outwardIssue": "SCRUM-11212"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11206",
+      "outwardIssue": "SCRUM-11212"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11204",
+      "outwardIssue": "SCRUM-11213"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11205",
+      "outwardIssue": "SCRUM-11213"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11206",
+      "outwardIssue": "SCRUM-11213"
+    },
+    {
+      "linkType": "Blocks",
+      "inwardIssue": "SCRUM-11212",
+      "outwardIssue": "SCRUM-11213"
+    },
+    {
+      "linkType": "Relates",
+      "inwardIssue": "SCRUM-11198",
+      "outwardIssue": "SCRUM-11199"
+    }
+  ]
+}

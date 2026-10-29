@@ -1,0 +1,86 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SCRUM-11168 · 引导体验与视觉规范 v2</title><style>body{max-width:1120px;margin:35px auto;padding:0 24px;color:#202e2a;background:#f6f7f4;font:14px/1.8 "Microsoft YaHei",sans-serif}h1{font-size:30px}h2{font-size:21px;margin-top:35px}a{color:#16765d}table{border-collapse:collapse;width:100%;background:#fff}td,th{border-bottom:1px solid #dce3de;padding:10px;text-align:left;vertical-align:top}th{background:#e8f4ef}.note{background:#e8f4ef;padding:15px 20px;border-radius:8px}.warning{background:#fff1c8;padding:15px}li{margin:5px 0}.table{overflow:auto}code{background:#fff;padding:2px 5px}</style></head><body>
+<p><a href="index.html">← 返回原型图库</a> · <a href="prototype-manifest.json">完整提示词与来源</a></p><h1>引导体验与统一视觉体系 v2</h1><p>SCRUM-11168 · 2026-10-19 · 中文优先</p>
+<p class="note">用户于2026-10-19回复“通过。请继续。”，批准本扩展版视觉与流程设计。窗口/缩放矩阵作为验证目标；真实产品交互、工作站与新手验收尚未进行。<a href="design-approval.json">批准记录</a> · <a href="../../../../docs/superpowers/plans/2026-10-19-scrum-11177-guided-theme.md">SCRUM-11177实施计划</a>已准备，尚未启动WPF产品代码。</p>
+<h2>1. 用户目标与结构取舍</h2><p>让只有基本鼠标和文件操作经验的操作者清楚知道当前任务、检查内容、下一步、遇到问题如何处理，以及结果是否已保存。每步聚焦相关内容，必需审核、阻塞原因、停止和接管保持可达。</p>
+<table><tr><th>方案</th><th>取舍</th></tr><tr><td>纯线性向导</td><td>步骤简单，但多次审核、历史、多尺寸与重入容易失去上下文。</td></tr><tr><td>美化集中工作区</td><td>迁移较小，信息过密问题仍然保留。</td></tr><tr><td>已选方向：步骤导航＋当前工作区＋固定操作栏</td><td>保留进度感并让每步聚焦。导航是业务状态投影，不创建第二套业务授权。</td></tr></table>
+<h2>2. 三条路线及输入分支</h2>
+<table><tr><th>路线</th><th>阶段与必要审核</th><th>排除</th></tr>
+<tr><td>准备设计素材</td><td>导入/选路线 → 原图确认 → 增强/审核（处理可跳过）→ 去背景/审核（处理可跳过）→ 裁切/审核 → 批准PNG准备 → 保存 → 依据既有资格完成。</td><td>印刷尺寸、白墨、TIFF与多印刷尺寸。</td></tr>
+<tr><td>处理客户设计</td><td>导入/选路线 → 原图确认 → 增强/审核 → 去背景/审核 → 裁切/审核 → 尺寸 → 明确白墨分支及理由 → 生成前确认 → Photoshop生成/校验 → 最终TIFF审核 → 保存 → 可选另一尺寸或完成。</td><td>自动判断路线、跳过必要审核、手工TIFF回导。</td></tr>
+<tr><td>生成打印TIFF</td><td>导入/选路线 → 设计确认或源准备/审核 → 尺寸 → 白墨分支及理由 → 生成/校验 → 最终审核 → 保存/另一尺寸 → 完成。</td><td>美图增强、去背景与默认裁切。</td></tr>
+<tr><td>PDF / PSD</td><td>单页PDF先以300PPI准备受管整页图，检查第1页和实际尺寸；PSD先准备受管栅格副本。源文件保持不变，源专色/白墨不沿用。多页或加密PDF明确拒绝。</td><td>未生成就展示栅格预览；源白墨直接作为生产通道。</td></tr></table>
+<p>两条TIFF路线均由用户明确选择0/1/2像素内缩白墨分支及理由；没有默认选择。首版“适用白墨分支”的含糊描述在此澄清。通用组件截图以客户路线示意，实施时侧栏按路线投影；PNG专属收尾/保存/成功和直接TIFF源准备已有专属图片。源准备完成后的检查复用原图确认布局，须显示真实页和尺寸。</p>
+<h2>3. 状态与信息显隐矩阵</h2><table><tr><th>状态</th><th>当前显示</th><th>收起或禁止</th></tr>
+<tr><td>首页/导入</td><td>单文件入口、环境摘要、继续任务。</td><td>未来表单、批量/订单或账号。</td></tr>
+<tr><td>处理前</td><td>当前源图、步骤作用、合法开始或跳过。</td><td>虚构处理后效果、未来审核。</td></tr>
+<tr><td>处理/停止中</td><td>真实阶段和不定进度、合法停止/接管；停止请求未完成时仅等待。</td><td>虚构百分比、自动批准、重复命令、强制关闭应用。</td></tr>
+<tr><td>待审核</td><td>当前精确结果、对比/缩放、检查问题、通过/驳回；去背景可求助，裁切可调整。</td><td>无资格求助、默认技术哈希、无关尺寸和保存表单。</td></tr>
+<tr><td>裁切调整</td><td>边界/手柄、比较、恢复建议、取消和使用。</td><td>把使用裁切当作审批。新裁切之后仍须审核。</td></tr>
+<tr><td>尺寸/白墨</td><td>实际尺寸、像素、放大风险；白墨类型与理由；生成前摘要。</td><td>自动接受风险、默认白墨选择、无关输入分支。</td></tr>
+<tr><td>同事修正/接管</td><td>副本/说明、已移交事实、合法显式回导或重入。</td><td>自动发给同事、监控保存、Photoshop手工TIFF回导。</td></tr>
+<tr><td>失败/恢复</td><td>原因、保留内容、错误代码、可用恢复动作。</td><td>自动重启、无资格重试、历史故障伪装为当前。</td></tr>
+<tr><td>保存/完成</td><td>批准、交付、完成各自状态；目标文件名/目录；历史记录与当前存在核实。</td><td>同名覆盖、未经核实的成功、批准等于保存、保存等于完成。</td></tr>
+<tr><td>辅助页面</td><td>设置、环境检查、任务列表或诊断；生产设置只读。</td><td>无关审核大图、自动修复、静默更改外部应用。</td></tr></table>
+<h2>4. 视觉变量与控件状态</h2><table><tr><th>变量</th><th>建议值</th></tr><tr><td>canvas</td><td>#F6F7F4</td></tr>
+<tr><td>surface</td><td>#FFFFFF</td></tr>
+<tr><td>ink</td><td>#202E2A</td></tr>
+<tr><td>muted</td><td>#65706B</td></tr>
+<tr><td>primary</td><td>#16765D</td></tr>
+<tr><td>selection</td><td>#E8F4EF</td></tr>
+<tr><td>border</td><td>#DCE3DE</td></tr>
+<tr><td>warning</td><td>#FFF1C8</td></tr>
+<tr><td>font</td><td>Microsoft YaHei / Noto Sans SC</td></tr></table>
+<p>标题24–30 DIP、正文14–16、辅助12–14；间距4/8/12/16/24/32，圆角约10，主要控件高度至少42。生成图中像素、字形与纹理差异不作为组件实现参数。</p>
+<table><tr><th>状态</th><th>规则</th></tr><tr><td>正常/悬停</td><td>一个推荐实色主操作，次级描边；悬停轻微加深。危险动作使用明确动词。</td></tr><tr><td>焦点/选择</td><td>焦点外轮廓与选中填充分离；审核入口中性落焦，不自动聚焦批准；确认初始焦点优先取消。</td></tr><tr><td>禁用/隐藏</td><td>解释缺失前提；隐藏控件退出Tab/UIA与默认按键触发面。</td></tr><tr><td>执行中</td><td>防止重复提交；未知进度只用不定指示；合法停止/接管不被折叠。</td></tr><tr><td>错误/警告</td><td>文字与图标并用，就地解释；关键结果不能只靠短暂提示。</td></tr><tr><td>确认/模态</td><td>绑定当前任务与结果；说明影响；取消无业务副作用；旧确认不能作用于新结果。</td></tr></table>
+<h2>5. 返回、身份与交付规则</h2><ul>
+<li>历史查看只读，返回重做使用已有ReturnToStep资格；下游按原规则失效，旧审核作为历史保留。</li><li>草稿不等于业务确认；离开本页输入与放弃整个任务分别确认。本原型不承诺新增数据库草稿持久化。</li><li>审批绑定当前有效的任务/步骤/结果/文件内容；查看白墨仅改变视图，不产生白墨单独审批。</li><li>每个尺寸独立生成、审核和保存；不能沿用其他尺寸审批或跨结果绑定确认。</li><li>保存待核实先核实本次操作；明确另存才新写入；同名不覆盖。打开文件夹前核实当前文件，调用成功不证明Explorer已可见选中。</li><li>Photoshop接管保留现状，不强制结束应用；重入后仍需显式启动新尝试，手工TIFF不能回导。</li></ul>
+<h2>6. 复用与旧缺陷责任</h2><table><tr><th>来源</th><th>复用/差异</th></tr><tr><td>SCRUM-11140/11143/11146</td><td>术语、当前状态/推荐动作、路线说明；本轮重组布局和显隐。</td></tr><tr><td>11147/11148/11149/11150</td><td>裁切、同事修正、审核提示和尺寸解释；拆为聚焦页面，不重建底层能力。</td></tr><tr><td>11144/11145/11151</td><td>精确导出、保存和错误机制；身份、资格、事务合同保持原样。</td></tr><tr><td>11152/11153/11154/11155</td><td>环境、最近任务、集成及新手验收；旧状态与证据保留，不由原型自动关闭。</td></tr><tr><td>SCRUM-11156/11166</td><td>AI业务能力仍由原Epic实现；此处仅条件接入布局，生成按钮禁用。</td></tr><tr><td>N1–N4、F6、PNG审批/绑定、generic recovery</td><td>图中表达不代表底层修复；实施前逐项核实并关联原任务，由原任务负责人/产品负责人处置。</td></tr></table>
+<h2>7. 窗口、缩放与后续评审</h2><p>已批准的验证目标矩阵：现有1000×700 DIP窗口基线、1280×720和1920×1080代表性环境，100%/125%/150%缩放。实施时区分显示器物理像素与窗口DIP；实际支持情况仍待工作站核实，图片不能证明真实窗口响应式或高DPI可用。需检查实际可用区域、主操作可达、图片大小、中文换行、滚动和焦点。</p>
+<p>扩展页面、三路线显隐、异常取消/返回和验证目标已获设计批准。保持中文人工验收及英文资源结构，不增加英文人工走查；具体WPF实施范围与执行方式见待审阅计划。</p>
+<h2>8. 全部页面</h2><div class="table"><table><tr><th>序号</th><th>页面</th><th>分组</th><th>当前目标</th><th>主操作</th></tr><tr><td>1</td><td><a href="index.html#home">开始任务</a></td><td>主流程</td><td>突出单张图片导入；环境未检查时明确告知；继续任务为次级入口。</td><td>选择图片</td></tr>
+<tr><td>2</td><td><a href="index.html#route">选择路线</a></td><td>主流程</td><td>原图导入后，按用途选择三条固定路线；当前选择尚未启动处理。</td><td>确认路线</td></tr>
+<tr><td>3</td><td><a href="index.html#original">确认原图</a></td><td>主流程</td><td>确认当前导入图与处理路线。</td><td>确认原图</td></tr>
+<tr><td>4</td><td><a href="index.html#pdf-psd">PDF与PSD源准备</a></td><td>主流程</td><td>只准备受管栅格副本，源文件不变、生产通道不沿用。</td><td>准备单页预览</td></tr>
+<tr><td>5</td><td><a href="index.html#enhance-ready">开始增强</a></td><td>主流程</td><td>可选增强前由用户明确选择开始或跳过。</td><td>开始增强</td></tr>
+<tr><td>6</td><td><a href="index.html#enhance-running">增强处理中</a></td><td>主流程</td><td>真实不定进度、停止和美图接管始终可达。</td><td>等待处理</td></tr>
+<tr><td>7</td><td><a href="index.html#enhance-review">增强结果审核</a></td><td>主流程</td><td>处理前后对比，批准不等于保存。</td><td>通过增强结果</td></tr>
+<tr><td>8</td><td><a href="index.html#background-ready">选择去背景</a></td><td>主流程</td><td>保留背景与启动去背景均由用户明确选择。</td><td>开始去背景</td></tr>
+<tr><td>9</td><td><a href="index.html#background-running">去背景处理中</a></td><td>主流程</td><td>去背景独立处理状态，无假进度。</td><td>等待处理</td></tr>
+<tr><td>10</td><td><a href="index.html#review">审核图片</a></td><td>主流程</td><td>去背景审核示例：处理前在左，处理后在右；大图、检查要点和当前决策聚焦。</td><td>通过此结果</td></tr>
+<tr><td>11</td><td><a href="index.html#crop-review">裁切结果审核</a></td><td>主流程</td><td>新裁切产生后独立审核，不把使用裁切当作审批。</td><td>通过裁切结果</td></tr>
+<tr><td>12</td><td><a href="index.html#crop">调整裁切</a></td><td>主流程</td><td>独立调整模式，突出边界、手柄、恢复自动建议和取消；使用新裁切后仍需审核。</td><td>使用此裁切</td></tr>
+<tr><td>13</td><td><a href="index.html#dimensions">印刷尺寸</a></td><td>主流程</td><td>指定高度、按比例计算宽度；区分实际输出尺寸和技术详情。透明背景修订版。</td><td>确认尺寸</td></tr>
+<tr><td>14</td><td><a href="index.html#white-ink">白墨选择</a></td><td>主流程</td><td>两条 TIFF 路线都需明确选择0/1/2像素分支及理由。</td><td>确认白墨选择</td></tr>
+<tr><td>15</td><td><a href="index.html#preflight">生成前确认</a></td><td>主流程</td><td>确认尺寸和已明确选择的白墨，再显式生成TIFF。</td><td>开始生成 TIFF</td></tr>
+<tr><td>16</td><td><a href="index.html#tiff-running">TIFF生成中</a></td><td>主流程</td><td>Photoshop处理中保留停止和接管，不虚构百分比。</td><td>等待生成</td></tr>
+<tr><td>17</td><td><a href="index.html#tiff-review">最终TIFF审核</a></td><td>主流程</td><td>颜色/白墨/透明预览与实际尺寸，审批绑定此TIFF。</td><td>批准此 TIFF</td></tr>
+<tr><td>18</td><td><a href="index.html#white-preview">TIFF白墨预览</a></td><td>主流程</td><td>最终审核中的白墨查看状态，图例明确。</td><td>批准此 TIFF</td></tr>
+<tr><td>19</td><td><a href="index.html#png-final">素材PNG收尾</a></td><td>主流程</td><td>素材路线仅包含PNG，无印刷尺寸和TIFF。</td><td>确认结果并保存</td></tr>
+<tr><td>20</td><td><a href="index.html#png-save">保存已批准PNG</a></td><td>主流程</td><td>PNG专属保存状态，无印刷尺寸、白墨或TIFF。</td><td>保存到所选文件夹</td></tr>
+<tr><td>21</td><td><a href="index.html#save">保存结果</a></td><td>主流程</td><td>已批准与尚未保存分别显示；保存位置和文件名清晰；打开文件夹在保存后可用。</td><td>保存到所选文件夹</td></tr>
+<tr><td>22</td><td><a href="index.html#multi-size">多尺寸结果</a></td><td>主流程</td><td>每个尺寸拥有独立审核与保存状态。</td><td>添加另一尺寸</td></tr>
+<tr><td>23</td><td><a href="index.html#saved">保存成功</a></td><td>主流程</td><td>保存成功已核实，但业务任务还未完成。</td><td>完成任务</td></tr>
+<tr><td>24</td><td><a href="index.html#png-saved">PNG保存成功</a></td><td>主流程</td><td>素材已保存，但任务仍待完成；可核实文件位置。</td><td>完成任务</td></tr>
+<tr><td>25</td><td><a href="index.html#completed">任务完成</a></td><td>主流程</td><td>完成事实、保存记录和当前文件核实状态分开。</td><td>开始新任务</td></tr>
+<tr><td>26</td><td><a href="index.html#correction-prepare">准备同事修正</a></td><td>协作与恢复</td><td>从去背景审核准备参考副本、工作副本和说明。</td><td>准备修正文件</td></tr>
+<tr><td>27</td><td><a href="index.html#correction-wait">等待修正与回导</a></td><td>协作与恢复</td><td>明确已移交；由用户选择修正图片回导，再重新审核。</td><td>导入修正后的图片</td></tr>
+<tr><td>28</td><td><a href="index.html#handed-off">Photoshop已接管</a></td><td>协作与恢复</td><td>外部应用现状保留；恢复自动处理仅回到可重试状态。</td><td>恢复自动处理</td></tr>
+<tr><td>29</td><td><a href="index.html#recovery">中断后恢复</a></td><td>协作与恢复</td><td>逐任务说明中断位置和合法恢复动作；不自动重启。</td><td>打开任务</td></tr>
+<tr><td>30</td><td><a href="index.html#failure">处理失败与重试</a></td><td>异常流程</td><td>输入保留、原因明确，重试不自动开始。</td><td>重试此步骤</td></tr>
+<tr><td>31</td><td><a href="index.html#stopping">正在安全停止</a></td><td>异常流程</td><td>停止请求尚未完成时不宣称已停止。</td><td>等待停止确认</td></tr>
+<tr><td>32</td><td><a href="index.html#takeover">Photoshop接管确认</a></td><td>异常流程</td><td>接管不等于停止外部应用，也不支持手工TIFF回导。</td><td>确认接管</td></tr>
+<tr><td>33</td><td><a href="index.html#save-failed">保存失败</a></td><td>异常流程</td><td>批准仍有效，当前未保存；允许修正位置再合法重试。</td><td>重试保存</td></tr>
+<tr><td>34</td><td><a href="index.html#save-uncertain">保存结果待核实</a></td><td>异常流程</td><td>可能已写入，先核实同一次保存，不直接重复另存。</td><td>再次核实此次保存</td></tr>
+<tr><td>35</td><td><a href="index.html#collision">同名文件冲突</a></td><td>异常流程</td><td>不会覆盖原文件，提供显式新名称或更换目录。</td><td>使用建议名称</td></tr>
+<tr><td>36</td><td><a href="index.html#return-confirm">返回重做确认</a></td><td>异常流程</td><td>返回重做与只读历史分开，说明下游失效。</td><td>确认返回</td></tr>
+<tr><td>37</td><td><a href="index.html#draft-leave">离开未提交输入</a></td><td>异常流程</td><td>放弃当前草稿与放弃整个任务分别确认。</td><td>继续编辑</td></tr>
+<tr><td>38</td><td><a href="index.html#abandon">离开与放弃确认</a></td><td>异常流程</td><td>未提交草稿与放弃整个任务有明确区别。</td><td>放弃此任务</td></tr>
+<tr><td>39</td><td><a href="index.html#enlargement">放大风险确认</a></td><td>异常流程</td><td>放大授权绑定本尺寸，不替代审核。</td><td>允许此次放大</td></tr>
+<tr><td>40</td><td><a href="index.html#input-error">导入校验失败</a></td><td>异常流程</td><td>多页PDF等不支持输入明确拒绝；原件保持不变。</td><td>重新选择文件</td></tr>
+<tr><td>41</td><td><a href="index.html#readiness">环境检查</a></td><td>辅助页面</td><td>历史观察与当前许可分开，必要项未运行不显示通过。</td><td>安全恢复并重新检查</td></tr>
+<tr><td>42</td><td><a href="index.html#settings">设置</a></td><td>辅助页面</td><td>常用项先行，生产配置只读，修改范围说明明确。</td><td>应用设置</td></tr>
+<tr><td>43</td><td><a href="index.html#recent">最近任务</a></td><td>辅助页面</td><td>状态真实分列；保存历史不等于当前文件仍存在。</td><td>继续处理</td></tr>
+<tr><td>44</td><td><a href="index.html#error-details">错误详情与诊断</a></td><td>辅助页面</td><td>技术信息收纳；导出诊断包仅显式触发。</td><td>导出诊断包</td></tr>
+<tr><td>45</td><td><a href="index.html#ai-planned">AI设计分步接入</a></td><td>条件接入</td><td>只呈现待接入设计，不承诺已有自动生图能力。</td><td>复制 Prompt</td></tr></table></div>
+<h2>9. 验收映射</h2><table><tr><th>条目</th><th>本轮交付</th><th>剩余</th></tr><tr><td>SCRUM-11174</td><td>页面索引、三路线、状态显隐与旧能力映射。</td><td>设计评审通过，Jira Done；不代表底层缺陷修复。</td></tr><tr><td>SCRUM-11175</td><td>认可风格的颜色、字体、间距、组件与状态规范。</td><td>规范评审通过，Jira Done；真实窗口核对属于后续实现验证。</td></tr><tr><td>SCRUM-11176</td><td>45页面状态、18组流程及107条演示连接。</td><td>完整设计及验证目标批准，Jira Done；不代替实际产品验收。</td></tr><tr><td>SCRUM-11177</td><td>实施计划已准备，代码未开始。</td><td>审阅具体计划并选择执行方式后，实现WPF主题和组件。</td></tr></table>
+<p class="warning">本包是视觉与流程评审材料。未运行Meitu/Photoshop、未实际审批/保存客户文件、未提交推送或部署。白墨图是示意，不是TIFF解码证据。仅SCRUM-11174～11176设计任务已完成；Epic与旧任务未被关闭。</p><p><a href="index.html">返回图库</a> · <a href="flow-map.json">流程清单</a> · <a href="verification.json">验证记录</a></p></body></html>

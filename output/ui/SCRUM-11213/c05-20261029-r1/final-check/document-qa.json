@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "scenarioCount": 18,
+  "emptyTemplateVerified": true,
+  "reviewFinding": "T11/T12 now use the identical neutral prompt; author checked after independent review",
+  "localLinksChecked": 31,
+  "missingLinks": [],
+  "productRetest": "Not repeated; product/test source and runtime unchanged"
+}

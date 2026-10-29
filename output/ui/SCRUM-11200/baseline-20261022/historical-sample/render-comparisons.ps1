@@ -1,0 +1,50 @@
+param([string]$PrototypeDirectory = 'D:\Repositories\printflow-Studio\output\imagegen\SCRUM-11168\2026-10-19-v2')
+$ErrorActionPreference = 'Stop'
+Add-Type -AssemblyName System.Drawing
+$reportRoot = $PSScriptRoot
+$referenceRoot = Join-Path $reportRoot 'references'
+[IO.Directory]::CreateDirectory($referenceRoot) | Out-Null
+Copy-Item -LiteralPath (Join-Path $PrototypeDirectory '01-home.png') -Destination (Join-Path $referenceRoot 'home.png')
+Copy-Item -LiteralPath (Join-Path $PrototypeDirectory '44-png-save.png') -Destination (Join-Path $referenceRoot 'save-png.png')
+function Comparison([string]$name, [string]$title) {
+    $canvas = [Drawing.Bitmap]::new(2100, 810)
+    $g = [Drawing.Graphics]::FromImage($canvas)
+    $g.Clear([Drawing.ColorTranslator]::FromHtml('#F6F7F4'))
+    $g.InterpolationMode = [Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
+    $g.TextRenderingHint = [Drawing.Text.TextRenderingHint]::AntiAliasGridFit
+    $font = [Drawing.Font]::new('Microsoft YaHei', 24, [Drawing.FontStyle]::Bold, [Drawing.GraphicsUnit]::Pixel)
+    $small = [Drawing.Font]::new('Microsoft YaHei', 17, [Drawing.FontStyle]::Regular, [Drawing.GraphicsUnit]::Pixel)
+    $ink = [Drawing.SolidBrush]::new([Drawing.ColorTranslator]::FromHtml('#202E2A'))
+    $muted = [Drawing.SolidBrush]::new([Drawing.ColorTranslator]::FromHtml('#65706B'))
+    $g.DrawString($title, $font, $ink, 24, 16)
+    $g.DrawString('批准原型', $small, $muted, 24, 59)
+    $g.DrawString('WPF UI 实现截图 · 1280 × 720', $small, $muted, 1074, 59)
+    $paths = @((Join-Path $referenceRoot "$name.png"), (Join-Path $reportRoot "screenshots/$name-1280x720.png"))
+    for ($i = 0; $i -lt 2; $i++) {
+        $source = [Drawing.Image]::FromFile($paths[$i])
+        try {
+            $scale = [Math]::Min(1002.0/$source.Width, 640.0/$source.Height)
+            $rect = [Drawing.RectangleF]::new((24 + $i*1050), 98, [single]($source.Width*$scale), [single]($source.Height*$scale))
+            $g.FillRectangle([Drawing.Brushes]::White, (24+$i*1050), 98, 1002, 640)
+            $g.DrawImage($source,$rect)
+        } finally { $source.Dispose() }
+    }
+    $g.DrawString('截图按原比例缩放排版，未修饰界面；实现使用合成测试素材。96 DPI 离屏渲染，不代表真实工作站 DPI 验收。', $small, $muted, 24, 764)
+    $canvas.Save((Join-Path $reportRoot "$name-comparison.png"), [Drawing.Imaging.ImageFormat]::Png)
+    $font.Dispose(); $small.Dispose(); $ink.Dispose(); $muted.Dispose(); $g.Dispose(); $canvas.Dispose()
+}
+Comparison 'home' '首页：原型与 WPF UI 样板'
+Comparison 'save-png' '保存页：原型与 WPF UI 样板'
+$html = @'
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PrintFlow · WPF UI 两页样板</title>
+<style>body{margin:0;background:#f6f7f4;color:#202e2a;font:15px/1.65 'Microsoft YaHei',sans-serif}main{max-width:1600px;margin:auto;padding:28px}h1{font-size:28px;margin:0}p{color:#65706b}button,a{font:inherit;color:#16765d}button{padding:8px 16px;background:white;border:1px solid #dce3de;border-radius:8px;cursor:pointer}button[aria-pressed=true]{background:#16765d;color:white}nav{display:flex;gap:10px;margin:22px 0}.pair{display:grid;grid-template-columns:1fr 1fr;gap:20px}figure{margin:0;background:white;border:1px solid #dce3de;border-radius:12px;overflow:hidden}figcaption{padding:12px 16px;font-weight:600;border-bottom:1px solid #dce3de}img{display:block;width:100%;height:auto}section{margin:28px 0}h2{font-size:22px}.note{background:#e8f4ef;border-radius:10px;padding:14px 18px}li{margin:5px 0}@media(max-width:900px){.pair{grid-template-columns:1fr}}</style>
+<main><h1>PrintFlow · WPF UI 首页与保存页样板</h1><p>2026-10-22 · WPF-UI 4.3.0 · 浅色青绿色 · 本地样板</p>
+<div class="note">右侧均为实际 WPF 控件离屏截图，绑定现有 ViewModel，使用真实合成导入／裁切／审批／PNG 准备流程。花朵为确定性测试素材，保留模拟模式提示。控件视口为 96 DPI，不代表外部窗口或真实 DPI 验收。</div>
+<nav aria-label="截图尺寸"><button data-size="1000x700" aria-pressed="false">1000 × 700</button><button data-size="1280x720" aria-pressed="true">1280 × 720</button><button data-size="1920x1080" aria-pressed="false">1920 × 1080</button></nav>
+<section><h2>首页</h2><div class="pair"><figure><figcaption>批准原型</figcaption><a href="references/home.png"><img src="references/home.png" alt="首页批准原型"></a></figure><figure><figcaption>WPF UI 实现截图</figcaption><a class="sample" href="screenshots/home-1280x720.png"><img data-page="home" src="screenshots/home-1280x720.png" alt="首页实际实现截图"></a></figure></div><p>集中导入入口、独立环境摘要、继续任务和左侧设置入口；原文件选择、拖放、取消、恢复与放弃确认命令保持。</p></section>
+<section><h2>保存已批准的结果 · PNG 路线</h2><div class="pair"><figure><figcaption>批准原型</figcaption><a href="references/save-png.png"><img src="references/save-png.png" alt="保存 PNG 批准原型"></a></figure><figure><figcaption>WPF UI 实现截图</figcaption><a class="sample" href="screenshots/save-png-1280x720.png"><img data-page="save-png" src="screenshots/save-png-1280x720.png" alt="保存页实际实现截图"></a></figure></div><p>只显示当前结果大预览；使用 Fluent 输入框和紧凑步骤栏；保留审核、保存、完成的独立状态，原审核按钮和精确身份绑定保持。长路径可通过悬停、键盘横向浏览及复制完整查看。</p></section>
+<section><h2>保留的差异与验证边界</h2><ul><li>原型是视觉目标，样板没有照搬虚构功能入口或状态。</li><li>模拟模式提示、合法完成入口及异常恢复动作继续由现有业务资格决定。</li><li>PNG 保存截图不代表 Photoshop、TIFF 或生产输出验收。</li><li>真实窗口、125%／150% DPI、物理键盘和读屏尚未验证。</li></ul></section></main>
+<script>document.querySelectorAll('button[data-size]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('button[data-size]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));document.querySelectorAll('img[data-page]').forEach(img=>{const path='screenshots/'+img.dataset.page+'-'+b.dataset.size+'.png';img.src=path;img.parentElement.href=path;});}));</script></html>
+'@
+[IO.File]::WriteAllText((Join-Path $reportRoot 'index.html'), $html, [Text.UTF8Encoding]::new($false))
+Get-ChildItem $reportRoot -Filter '*comparison.png' | Select-Object Name,Length

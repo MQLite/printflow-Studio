@@ -1,0 +1,200 @@
+{
+  "source": {
+    "initiative": "PF-WPFUI-20261022",
+    "date": "2026-10-22",
+    "projectKey": "SCRUM",
+    "reviewChat": "01a16189-cc3d-7bd3-9347-622c0975416e",
+    "sampleWorktree": "C:/Users/admin/.codex/worktrees/scrum-11173-guided-acceptance/printflow-Studio",
+    "sampleBranch": "codex/wpf-ui-sample-pages",
+    "sampleBase": "2561dfd127e3336ec57b37fb3fe47709c1d81fcb",
+    "sampleStatus": "本地未提交样板差异；不是 master，尚未合并/推送",
+    "prototype": "output/imagegen/SCRUM-11168/2026-10-19-v2/design-spec.html",
+    "sampleReport": "output/ui/WPF-UI-SAMPLES/README.md",
+    "authorization": "用户于 2026-10-22 确认“先完成方案并建立 Jira（推荐）”；仅规划与建立 Jira，本轮不实施产品代码。"
+  },
+  "created": [
+    {
+      "planningId": "E1",
+      "key": "SCRUM-11198",
+      "issueType": "Epic",
+      "summary": "WPF UI 全页面推广与审核差异整改",
+      "parent": null,
+      "description": "Planning-ID: PF-WPFUI-20261022-E1\n\n## 目标\n\n将已验证的 WPF UI 4.3.0 首页与保存页样板推广到全部现有页面和关键状态，落实批准的浅色青绿色设计及上一轮审核提出的布局整改，同时保留现有业务逻辑和审核机制。\n\n## Epic 验收条件\n\n1. 全部页面/状态在覆盖矩阵中对应迁移任务、样板/原型来源及验证证据；不存在未说明的旧主题页面或混合控件状态。\n2. 页面突出中文当前步骤标题、紧凑路线步骤栏和唯一推荐主操作；常规主操作固定右下，返回/取消在左，合法停止/接管持续可达。\n3. 三条路线、保存与完成、失败恢复及辅助页面均采用一致视觉规范；必要审核、精确身份和保存核实合同保持。\n4. 自动化与视觉检查有记录；真实窗口、DPI、键鼠、读屏及真人体验按实际执行记录，未执行不得写通过。\n\n## 子任务范围\n\n- U01：建立全部页面与状态清单并冻结 WPF UI 样板基线\n- U02：将 WPF UI 样板整理为统一主题与可复用页面组件\n- U03：统一当前步骤标题、紧凑步骤栏与固定操作栏\n- U04：推广首页样板并统一导入、路线选择和原图确认\n- U05：统一处理进度、图片审核和裁切工作区\n- U06：统一印刷尺寸、白墨选择与 TIFF 生成确认页面\n- U07：推广保存页样板并重做独立完成摘要\n- U08：统一恢复分支、最近任务、辅助页面和对话框\n- U09：完成全页面视觉、业务安全与无障碍回归并归档证据\n\n## 依据与边界\n\nInitiative: PF-WPFUI-20261022；规划日期：2026-10-22（Pacific/Auckland）。用户于 2026-10-22 确认“先完成方案并建立 Jira（推荐）”；仅规划与建立 Jira，本轮不实施产品代码。\n\n原型：output/imagegen/SCRUM-11168/2026-10-19-v2/design-spec.html。样板报告：output/ui/WPF-UI-SAMPLES/README.md。样板工作树：C:/Users/admin/.codex/worktrees/scrum-11173-guided-acceptance/printflow-Studio；分支 codex/wpf-ui-sample-pages，基于 2561dfd127e3336ec57b37fb3fe47709c1d81fcb，其上仍有未提交样板改动，尚未合并/推送。不得从 master 直接假定已有 WPF UI 样板；先由 U01 核对并冻结来源。\n\n采用已验证 WPF-UI 4.3.0、浅色青绿色样式及步骤导航＋当前工作区＋固定操作栏。保持三条路线、原件/InputSnapshot、现有命令/资格、必要审核、精确结果身份、手势保护、AutomationId、下游失效、300 PPI/CMYK/W1、环境门禁、自动化锁及不覆盖保存。两条 TIFF 路线必须显式选择白墨分支和理由；素材路线无印刷尺寸/白墨/TIFF。已审核、已保存、已完成分别呈现。\n\n本轮建单不等于实现或验收；不指派人员、故事点、工期或 Sprint，不改旧任务状态。不包含发布/部署/生产变更、新收费服务、自动审批、自动向同事发送或新 AI 业务。条件 AI 页面复用 SCRUM-11184/11166，不阻塞现有核心路线。\n\n样板历史 171 项定向通过及构建零警告/错误不作为本轮新验证；历史广泛运行 1503 项/35 失败（14 基线、21 后续定向复测通过），修正后未重跑完整广泛套件。96 DPI 离屏截图不代表真实窗口、125%/150% 缩放、物理输入、读屏或真人验收。SCRUM-11173/11195/11196/11197 未完成项保持原状态。\n\n本地完整计划：docs/codex/printflow-wpfui-rollout/PLAN.md；本轮按用户确认仅规划并建立 Jira，不修改产品代码。"
+    },
+    {
+      "planningId": "E2",
+      "key": "SCRUM-11199",
+      "issueType": "Epic",
+      "summary": "中文文案简化与老年用户易用性改进",
+      "parent": null,
+      "description": "Planning-ID: PF-WPFUI-20261022-E2\n\n## 目标\n\n建立并落实面向中文老年及低电脑熟练度用户的简明文案计划，让用户知道当前要做什么、下一步和结果；保持业务含义、审核责任及风险提示准确。\n\n## Epic 验收条件\n\n1. 可见文字按资源键/动态来源/页面状态建立完整清单和前后对照，覆盖标题、按钮、帮助、禁用原因、错误、确认及辅助功能名称。\n2. 采用日常用语、短句、明确动作和渐进说明；术语一致，白墨、TIFF、像素等必要概念提供首次解释。\n3. 已审核/已保存/已完成、历史记录/当前文件存在、停止请求/已停止等差异准确；核心确认和恢复提示不因缩短而失真。\n4. zh-CN/en 资源键、占位符、格式和辅助功能语义保持一致；实际老年/低熟练度用户的理解度验证有记录，未招募/未执行保持待验收。\n\n## 子任务范围\n\n- C01：盘点全部用户文案并制定简明中文术语与改写规范\n- C02：改写首页、路线选择、处理、审核与裁切引导文案\n- C03：简化尺寸、白墨和 TIFF 的说明并保留必要印刷信息\n- C04：简化保存、完成、失败恢复与辅助页面的状态和提示\n- C05：制定并执行老年用户文案理解度与操作走查验收\n\n## 依据与边界\n\nInitiative: PF-WPFUI-20261022；规划日期：2026-10-22（Pacific/Auckland）。用户于 2026-10-22 确认“先完成方案并建立 Jira（推荐）”；仅规划与建立 Jira，本轮不实施产品代码。\n\n原型：output/imagegen/SCRUM-11168/2026-10-19-v2/design-spec.html。样板报告：output/ui/WPF-UI-SAMPLES/README.md。样板工作树：C:/Users/admin/.codex/worktrees/scrum-11173-guided-acceptance/printflow-Studio；分支 codex/wpf-ui-sample-pages，基于 2561dfd127e3336ec57b37fb3fe47709c1d81fcb，其上仍有未提交样板改动，尚未合并/推送。不得从 master 直接假定已有 WPF UI 样板；先由 U01 核对并冻结来源。\n\n采用已验证 WPF-UI 4.3.0、浅色青绿色样式及步骤导航＋当前工作区＋固定操作栏。保持三条路线、原件/InputSnapshot、现有命令/资格、必要审核、精确结果身份、手势保护、AutomationId、下游失效、300 PPI/CMYK/W1、环境门禁、自动化锁及不覆盖保存。两条 TIFF 路线必须显式选择白墨分支和理由；素材路线无印刷尺寸/白墨/TIFF。已审核、已保存、已完成分别呈现。\n\n本轮建单不等于实现或验收；不指派人员、故事点、工期或 Sprint，不改旧任务状态。不包含发布/部署/生产变更、新收费服务、自动审批、自动向同事发送或新 AI 业务。条件 AI 页面复用 SCRUM-11184/11166，不阻塞现有核心路线。\n\n样板历史 171 项定向通过及构建零警告/错误不作为本轮新验证；历史广泛运行 1503 项/35 失败（14 基线、21 后续定向复测通过），修正后未重跑完整广泛套件。96 DPI 离屏截图不代表真实窗口、125%/150% 缩放、物理输入、读屏或真人验收。SCRUM-11173/11195/11196/11197 未完成项保持原状态。\n\n本地完整计划：docs/codex/printflow-wpfui-rollout/PLAN.md；本轮按用户确认仅规划并建立 Jira，不修改产品代码。"
+    },
+    {
+      "planningId": "U01",
+      "key": "SCRUM-11200",
+      "issueType": "Task",
+      "summary": "建立全部页面与状态清单并冻结 WPF UI 样板基线",
+      "parent": "SCRUM-11198",
+      "dependencies": [],
+      "description": "Planning-ID: PF-WPFUI-20261022-U01\n\n## 任务范围\n\n核对 master 与 codex/wpf-ui-sample-pages 工作树，记录样板未提交差异、依赖锁文件、截图和来源哈希。复用 SCRUM-11174 页面矩阵，补齐三条路线、PNG/TIFF、正常/空/加载/禁用/错误/确认/恢复/历史状态，逐项标记迁移归属。\n\n## 主要改动位置\n\nDirectory.Packages.props；PrintFlow.App.csproj；packages.lock.json；output/ui/WPF-UI-SAMPLES/{README.md,manifest.json,source-manifest.json,validation.json}；现有视图/GuidedSessionPage。\n\n## 前置依赖\n\n无；本任务建立后续工作的基线。\n\n## 验收条件\n\n- [ ] 覆盖首页、路线/原图、处理/审核/裁切、尺寸/白墨/生成、保存/完成、恢复/同事修正、最近任务、设置/环境/错误详情及对话框；无页面用笼统“其他”替代。\n- [ ] 记录基线提交 2561dfd 与其上未提交样板文件身份，形成可重建候选；不丢弃、覆盖或混入无关工作。\n- [ ] AI 入口按 SCRUM-11184/11166 的实际可用性标为条件接入，不计作现有已实现页面、不新建 AI 业务。\n- [ ] 每项有对应任务、优先级、原型/样板及证据栏；未执行标未执行。\n\n## 复用与关联\n\n- [SCRUM-11174](https://yituoxx.atlassian.net/browse/SCRUM-11174)\n- [SCRUM-11177](https://yituoxx.atlassian.net/browse/SCRUM-11177)\n- [SCRUM-11184](https://yituoxx.atlassian.net/browse/SCRUM-11184)\n- 父 Epic：[SCRUM-11198](https://yituoxx.atlassian.net/browse/SCRUM-11198)\n\n## 依据与边界\n\nInitiative: PF-WPFUI-20261022；规划日期：2026-10-22（Pacific/Auckland）。用户于 2026-10-22 确认“先完成方案并建立 Jira（推荐）”；仅规划与建立 Jira，本轮不实施产品代码。\n\n原型：output/imagegen/SCRUM-11168/2026-10-19-v2/design-spec.html。样板报告：output/ui/WPF-UI-SAMPLES/README.md。样板工作树：C:/Users/admin/.codex/worktrees/scrum-11173-guided-acceptance/printflow-Studio；分支 codex/wpf-ui-sample-pages，基于 2561dfd127e3336ec57b37fb3fe47709c1d81fcb，其上仍有未提交样板改动，尚未合并/推送。不得从 master 直接假定已有 WPF UI 样板；先由 U01 核对并冻结来源。\n\n采用已验证 WPF-UI 4.3.0、浅色青绿色样式及步骤导航＋当前工作区＋固定操作栏。保持三条路线、原件/InputSnapshot、现有命令/资格、必要审核、精确结果身份、手势保护、AutomationId、下游失效、300 PPI/CMYK/W1、环境门禁、自动化锁及不覆盖保存。两条 TIFF 路线必须显式选择白墨分支和理由；素材路线无印刷尺寸/白墨/TIFF。已审核、已保存、已完成分别呈现。\n\n本轮建单不等于实现或验收；不指派人员、故事点、工期或 Sprint，不改旧任务状态。不包含发布/部署/生产变更、新收费服务、自动审批、自动向同事发送或新 AI 业务。条件 AI 页面复用 SCRUM-11184/11166，不阻塞现有核心路线。\n\n样板历史 171 项定向通过及构建零警告/错误不作为本轮新验证；历史广泛运行 1503 项/35 失败（14 基线、21 后续定向复测通过），修正后未重跑完整广泛套件。96 DPI 离屏截图不代表真实窗口、125%/150% 缩放、物理输入、读屏或真人验收。SCRUM-11173/11195/11196/11197 未完成项保持原状态。\n\n本地完整计划：docs/codex/printflow-wpfui-rollout/PLAN.md；本轮按用户确认仅规划并建立 Jira，不修改产品代码。"
+    },
+    {
+      "planningId": "U02",
+      "key": "SCRUM-11201",
+      "issueType": "Task",
+      "summary": "将 WPF UI 样板整理为统一主题与可复用页面组件",
+      "parent": "SCRUM-11198",
+      "dependencies": [
+        "SCRUM-11200"
+      ],
+      "description": "Planning-ID: PF-WPFUI-20261022-U02\n\n## 任务范围\n\n从 WpfUiSampleTheme.xaml 提取共享视觉资源与组件，统一按钮、输入/选择、卡片、图标、持久提示、进度、对话框和焦点/禁用状态。版本沿用已验证 4.3.0；不混用其他主题库，资源作用域先验证后渐进扩大。\n\n## 主要改动位置\n\nThemes/WpfUiSampleTheme.xaml；Themes/Guided*.xaml；App.xaml；专用 ReviewApprovalButton、SessionActionButton；中央包版本及锁文件。\n\n## 前置依赖\n\n- [SCRUM-11200](https://yituoxx.atlassian.net/browse/SCRUM-11200)（U01，建立全部页面与状态清单并冻结 WPF UI 样板基线）\n\n## 验收条件\n\n- [ ] 颜色、字号、间距、圆角、焦点与交互状态来自共享资源；主要交互控件高度至少 42 DIP，正文目标 16 DIP，关键标题 24–30 DIP，实际布局经验证。\n- [ ] 保留 PF.Button.Primary/PF.PageHeader 等已有资源合同，独立 STA/无生产 Application 场景可解析，无绑定/资源错误。\n- [ ] ReviewApprovalButton 运行类型、TargetIdentity、IsGestureGuarded、原 ICommand/参数和 AutomationId 保留；旧按键释放/连击不能批准新结果。\n- [ ] 扩展资源作用域前检查隐式样式、焦点、可访问名称和性能影响；锁文件可重复还原。\n\n## 复用与关联\n\n- [SCRUM-11177](https://yituoxx.atlassian.net/browse/SCRUM-11177)\n- 父 Epic：[SCRUM-11198](https://yituoxx.atlassian.net/browse/SCRUM-11198)\n\n## 依据与边界\n\nInitiative: PF-WPFUI-20261022；规划日期：2026-10-22（Pacific/Auckland）。用户于 2026-10-22 确认“先完成方案并建立 Jira（推荐）”；仅规划与建立 Jira，本轮不实施产品代码。\n\n原型：output/imagegen/SCRUM-11168/2026-10-19-v2/design-spec.html。样板报告：output/ui/WPF-UI-SAMPLES/README.md。样板工作树：C:/Users/admin/.codex/worktrees/scrum-11173-guided-acceptance/printflow-Studio；分支 codex/wpf-ui-sample-pages，基于 2561dfd127e3336ec57b37fb3fe47709c1d81fcb，其上仍有未提交样板改动，尚未合并/推送。不得从 master 直接假定已有 WPF UI 样板；先由 U01 核对并冻结来源。\n\n采用已验证 WPF-UI 4.3.0、浅色青绿色样式及步骤导航＋当前工作区＋固定操作栏。保持三条路线、原件/InputSnapshot、现有命令/资格、必要审核、精确结果身份、手势保护、AutomationId、下游失效、300 PPI/CMYK/W1、环境门禁、自动化锁及不覆盖保存。两条 TIFF 路线必须显式选择白墨分支和理由；素材路线无印刷尺寸/白墨/TIFF。已审核、已保存、已完成分别呈现。\n\n本轮建单不等于实现或验收；不指派人员、故事点、工期或 Sprint，不改旧任务状态。不包含发布/部署/生产变更、新收费服务、自动审批、自动向同事发送或新 AI 业务。条件 AI 页面复用 SCRUM-11184/11166，不阻塞现有核心路线。\n\n样板历史 171 项定向通过及构建零警告/错误不作为本轮新验证；历史广泛运行 1503 项/35 失败（14 基线、21 后续定向复测通过），修正后未重跑完整广泛套件。96 DPI 离屏截图不代表真实窗口、125%/150% 缩放、物理输入、读屏或真人验收。SCRUM-11173/11195/11196/11197 未完成项保持原状态。\n\n本地完整计划：docs/codex/printflow-wpfui-rollout/PLAN.md；本轮按用户确认仅规划并建立 Jira，不修改产品代码。"
+    },
+    {
+      "planningId": "U03",
+      "key": "SCRUM-11202",
+      "issueType": "Task",
+      "summary": "统一当前步骤标题、紧凑步骤栏与固定操作栏",
+      "parent": "SCRUM-11198",
+      "dependencies": [
+        "SCRUM-11201"
+      ],
+      "description": "Planning-ID: PF-WPFUI-20261022-U03\n\n## 任务范围\n\n整改审核最高优先级的跨页编排：任务名降为摘要，工作区突出当前中文步骤与一句说明；步骤显示编号/名称/状态，重复解释折叠；固定操作栏将常规下一步置右、返回取消置左，设置/环境移入稳定辅助入口。\n\n## 主要改动位置\n\nMainWindow.xaml；SessionScreenView.xaml；GuidedSession*；GuidedStepItem；共享标题、步骤和操作栏组件。\n\n## 前置依赖\n\n- [SCRUM-11201](https://yituoxx.atlassian.net/browse/SCRUM-11201)（U02，将 WPF UI 样板整理为统一主题与可复用页面组件）\n\n## 验收条件\n\n- [ ] 长任务名不抢占步骤标题；仅按实际路线显示步骤，当前步骤在小窗口可定位。\n- [ ] 正常可继续状态仅一个视觉主操作；停止/接管、阻塞原因和必要确认不被挤走或折叠。\n- [ ] 未来/隐藏步骤不进入 Tab/UIA 可执行面；步骤状态更新不触发命令，不新增业务授权。\n- [ ] 1000×700、1280×720、1920×1080 目标尺寸下检查长中文、长路径和操作栏，明确窗口与内容区 DIP 差异。\n\n## 复用与关联\n\n- [SCRUM-11178](https://yituoxx.atlassian.net/browse/SCRUM-11178)\n- [SCRUM-11179](https://yituoxx.atlassian.net/browse/SCRUM-11179)\n- [SCRUM-11180](https://yituoxx.atlassian.net/browse/SCRUM-11180)\n- [SCRUM-11181](https://yituoxx.atlassian.net/browse/SCRUM-11181)\n- 父 Epic：[SCRUM-11198](https://yituoxx.atlassian.net/browse/SCRUM-11198)\n\n## 依据与边界\n\nInitiative: PF-WPFUI-20261022；规划日期：2026-10-22（Pacific/Auckland）。用户于 2026-10-22 确认“先完成方案并建立 Jira（推荐）”；仅规划与建立 Jira，本轮不实施产品代码。\n\n原型：output/imagegen/SCRUM-11168/2026-10-19-v2/design-spec.html。样板报告：output/ui/WPF-UI-SAMPLES/README.md。样板工作树：C:/Users/admin/.codex/worktrees/scrum-11173-guided-acceptance/printflow-Studio；分支 codex/wpf-ui-sample-pages，基于 2561dfd127e3336ec57b37fb3fe47709c1d81fcb，其上仍有未提交样板改动，尚未合并/推送。不得从 master 直接假定已有 WPF UI 样板；先由 U01 核对并冻结来源。\n\n采用已验证 WPF-UI 4.3.0、浅色青绿色样式及步骤导航＋当前工作区＋固定操作栏。保持三条路线、原件/InputSnapshot、现有命令/资格、必要审核、精确结果身份、手势保护、AutomationId、下游失效、300 PPI/CMYK/W1、环境门禁、自动化锁及不覆盖保存。两条 TIFF 路线必须显式选择白墨分支和理由；素材路线无印刷尺寸/白墨/TIFF。已审核、已保存、已完成分别呈现。\n\n本轮建单不等于实现或验收；不指派人员、故事点、工期或 Sprint，不改旧任务状态。不包含发布/部署/生产变更、新收费服务、自动审批、自动向同事发送或新 AI 业务。条件 AI 页面复用 SCRUM-11184/11166，不阻塞现有核心路线。\n\n样板历史 171 项定向通过及构建零警告/错误不作为本轮新验证；历史广泛运行 1503 项/35 失败（14 基线、21 后续定向复测通过），修正后未重跑完整广泛套件。96 DPI 离屏截图不代表真实窗口、125%/150% 缩放、物理输入、读屏或真人验收。SCRUM-11173/11195/11196/11197 未完成项保持原状态。\n\n本地完整计划：docs/codex/printflow-wpfui-rollout/PLAN.md；本轮按用户确认仅规划并建立 Jira，不修改产品代码。"
+    },
+    {
+      "planningId": "C01",
+      "key": "SCRUM-11203",
+      "issueType": "Task",
+      "summary": "盘点全部用户文案并制定简明中文术语与改写规范",
+      "parent": "SCRUM-11199",
+      "dependencies": [
+        "SCRUM-11200"
+      ],
+      "description": "Planning-ID: PF-WPFUI-20261022-C01\n\n## 任务范围\n\n收集静态资源、动态状态/错误、校验、确认、提示、辅助功能名称及条件 AI 入口；建立资源键/来源、页面状态、现文案、拟文案、业务含义、风险和验证方式对照。\n\n## 主要改动位置\n\nResources/Strings.zh-CN.resx；Strings.resx；Strings.cs；XAML 与动态 ViewModel 文案来源；文案对照表。\n\n## 前置依赖\n\n- [SCRUM-11200](https://yituoxx.atlassian.net/browse/SCRUM-11200)（U01，建立全部页面与状态清单并冻结 WPF UI 样板基线）\n\n## 验收条件\n\n- [ ] 覆盖全部页面/状态和动态来源，复用 SCRUM-11139/11153/11154 已有术语，不改变底层状态枚举。\n- [ ] 规范采用一个标题一个任务、主说明一句话、按钮动词＋对象；避免“通过/完成”等脱离上下文的泛词；必要术语保留并首次解释。\n- [ ] 安全含义清单明确审核/保存/完成、历史/当前、停止中/已停止、重试/核实/另存、取消页面/放弃任务的区别。\n- [ ] 逐项保存占位符、格式/单位及辅助名称要求；候选字数是编辑目标，不强行删除关键风险信息。\n\n## 复用与关联\n\n- [SCRUM-11139](https://yituoxx.atlassian.net/browse/SCRUM-11139)\n- [SCRUM-11153](https://yituoxx.atlassian.net/browse/SCRUM-11153)\n- [SCRUM-11154](https://yituoxx.atlassian.net/browse/SCRUM-11154)\n- 父 Epic：[SCRUM-11199](https://yituoxx.atlassian.net/browse/SCRUM-11199)\n\n## 依据与边界\n\nInitiative: PF-WPFUI-20261022；规划日期：2026-10-22（Pacific/Auckland）。用户于 2026-10-22 确认“先完成方案并建立 Jira（推荐）”；仅规划与建立 Jira，本轮不实施产品代码。\n\n原型：output/imagegen/SCRUM-11168/2026-10-19-v2/design-spec.html。样板报告：output/ui/WPF-UI-SAMPLES/README.md。样板工作树：C:/Users/admin/.codex/worktrees/scrum-11173-guided-acceptance/printflow-Studio；分支 codex/wpf-ui-sample-pages，基于 2561dfd127e3336ec57b37fb3fe47709c1d81fcb，其上仍有未提交样板改动，尚未合并/推送。不得从 master 直接假定已有 WPF UI 样板；先由 U01 核对并冻结来源。\n\n采用已验证 WPF-UI 4.3.0、浅色青绿色样式及步骤导航＋当前工作区＋固定操作栏。保持三条路线、原件/InputSnapshot、现有命令/资格、必要审核、精确结果身份、手势保护、AutomationId、下游失效、300 PPI/CMYK/W1、环境门禁、自动化锁及不覆盖保存。两条 TIFF 路线必须显式选择白墨分支和理由；素材路线无印刷尺寸/白墨/TIFF。已审核、已保存、已完成分别呈现。\n\n本轮建单不等于实现或验收；不指派人员、故事点、工期或 Sprint，不改旧任务状态。不包含发布/部署/生产变更、新收费服务、自动审批、自动向同事发送或新 AI 业务。条件 AI 页面复用 SCRUM-11184/11166，不阻塞现有核心路线。\n\n样板历史 171 项定向通过及构建零警告/错误不作为本轮新验证；历史广泛运行 1503 项/35 失败（14 基线、21 后续定向复测通过），修正后未重跑完整广泛套件。96 DPI 离屏截图不代表真实窗口、125%/150% 缩放、物理输入、读屏或真人验收。SCRUM-11173/11195/11196/11197 未完成项保持原状态。\n\n本地完整计划：docs/codex/printflow-wpfui-rollout/PLAN.md；本轮按用户确认仅规划并建立 Jira，不修改产品代码。"
+    },
+    {
+      "planningId": "C02",
+      "key": "SCRUM-11204",
+      "issueType": "Task",
+      "summary": "改写首页、路线选择、处理、审核与裁切引导文案",
+      "parent": "SCRUM-11199",
+      "dependencies": [
+        "SCRUM-11203"
+      ],
+      "description": "Planning-ID: PF-WPFUI-20261022-C02\n\n## 任务范围\n\n优先简化开始/继续任务、路线用途、检查原图、处理作用、审核要点及裁切操作，明确当前动作和后果；短说明放首层，操作细节按需展开。\n\n## 主要改动位置\n\n对应 Strings 资源键、动态文案和 AutomationProperties.Name；与 U04/U05 页面同步。\n\n## 前置依赖\n\n- [SCRUM-11203](https://yituoxx.atlassian.net/browse/SCRUM-11203)（C01，盘点全部用户文案并制定简明中文术语与改写规范）\n\n## 验收条件\n\n- [ ] 逐项前后对照可定位资源键与状态，拟稿经产品语义核对后才作为实施定稿。\n- [ ] 审核动作明确“确认这张图/确认此结果”的适用对象，保留只记录检查、不自动保存的必要说明。\n- [ ] 裁切调整、使用裁切、审核通过区分清楚；处理可跳过与审核必需区分。\n- [ ] 长中文、按钮宽度、键盘名称和读屏用语检查；提示不要求读技术日志才能继续。\n\n## 复用与关联\n\n- [SCRUM-11182](https://yituoxx.atlassian.net/browse/SCRUM-11182)\n- [SCRUM-11183](https://yituoxx.atlassian.net/browse/SCRUM-11183)\n- [SCRUM-11185](https://yituoxx.atlassian.net/browse/SCRUM-11185)\n- [SCRUM-11186](https://yituoxx.atlassian.net/browse/SCRUM-11186)\n- [SCRUM-11187](https://yituoxx.atlassian.net/browse/SCRUM-11187)\n- 父 Epic：[SCRUM-11199](https://yituoxx.atlassian.net/browse/SCRUM-11199)\n\n## 依据与边界\n\nInitiative: PF-WPFUI-20261022；规划日期：2026-10-22（Pacific/Auckland）。用户于 2026-10-22 确认“先完成方案并建立 Jira（推荐）”；仅规划与建立 Jira，本轮不实施产品代码。\n\n原型：output/imagegen/SCRUM-11168/2026-10-19-v2/design-spec.html。样板报告：output/ui/WPF-UI-SAMPLES/README.md。样板工作树：C:/Users/admin/.codex/worktrees/scrum-11173-guided-acceptance/printflow-Studio；分支 codex/wpf-ui-sample-pages，基于 2561dfd127e3336ec57b37fb3fe47709c1d81fcb，其上仍有未提交样板改动，尚未合并/推送。不得从 master 直接假定已有 WPF UI 样板；先由 U01 核对并冻结来源。\n\n采用已验证 WPF-UI 4.3.0、浅色青绿色样式及步骤导航＋当前工作区＋固定操作栏。保持三条路线、原件/InputSnapshot、现有命令/资格、必要审核、精确结果身份、手势保护、AutomationId、下游失效、300 PPI/CMYK/W1、环境门禁、自动化锁及不覆盖保存。两条 TIFF 路线必须显式选择白墨分支和理由；素材路线无印刷尺寸/白墨/TIFF。已审核、已保存、已完成分别呈现。\n\n本轮建单不等于实现或验收；不指派人员、故事点、工期或 Sprint，不改旧任务状态。不包含发布/部署/生产变更、新收费服务、自动审批、自动向同事发送或新 AI 业务。条件 AI 页面复用 SCRUM-11184/11166，不阻塞现有核心路线。\n\n样板历史 171 项定向通过及构建零警告/错误不作为本轮新验证；历史广泛运行 1503 项/35 失败（14 基线、21 后续定向复测通过），修正后未重跑完整广泛套件。96 DPI 离屏截图不代表真实窗口、125%/150% 缩放、物理输入、读屏或真人验收。SCRUM-11173/11195/11196/11197 未完成项保持原状态。\n\n本地完整计划：docs/codex/printflow-wpfui-rollout/PLAN.md；本轮按用户确认仅规划并建立 Jira，不修改产品代码。"
+    },
+    {
+      "planningId": "C03",
+      "key": "SCRUM-11205",
+      "issueType": "Task",
+      "summary": "简化尺寸、白墨和 TIFF 的说明并保留必要印刷信息",
+      "parent": "SCRUM-11199",
+      "dependencies": [
+        "SCRUM-11203"
+      ],
+      "description": "Planning-ID: PF-WPFUI-20261022-C03\n\n## 任务范围\n\n用日常用语解释设置印刷大小、白墨用途、像素内缩及生成/审核顺序；专业参数归入明确说明，风险和必须选择仍首层可见。\n\n## 主要改动位置\n\n尺寸/白墨/生成/TIFF 审核 Strings 资源与动态状态；与 U06 同步。\n\n## 前置依赖\n\n- [SCRUM-11203](https://yituoxx.atlassian.net/browse/SCRUM-11203)（C01，盘点全部用户文案并制定简明中文术语与改写规范）\n\n## 验收条件\n\n- [ ] 首次出现 TIFF/白墨/像素等概念有短解释；格式名、单位和数值准确，中文不能暗示系统替用户选择。\n- [ ] 0/1/2 像素白墨分支及分类理由一一对应；源文件专色不沿用的事实保留。\n- [ ] 放大风险、300 PPI/CMYK/W1 等技术合同保留，必要说明可展开且风险不只在悬停中。\n- [ ] 两条 TIFF 路线及素材路线的提示不会串用，生成成功不表述成打印质量已保证或任务已保存。\n\n## 复用与关联\n\n- [SCRUM-11188](https://yituoxx.atlassian.net/browse/SCRUM-11188)\n- [SCRUM-11189](https://yituoxx.atlassian.net/browse/SCRUM-11189)\n- 父 Epic：[SCRUM-11199](https://yituoxx.atlassian.net/browse/SCRUM-11199)\n\n## 依据与边界\n\nInitiative: PF-WPFUI-20261022；规划日期：2026-10-22（Pacific/Auckland）。用户于 2026-10-22 确认“先完成方案并建立 Jira（推荐）”；仅规划与建立 Jira，本轮不实施产品代码。\n\n原型：output/imagegen/SCRUM-11168/2026-10-19-v2/design-spec.html。样板报告：output/ui/WPF-UI-SAMPLES/README.md。样板工作树：C:/Users/admin/.codex/worktrees/scrum-11173-guided-acceptance/printflow-Studio；分支 codex/wpf-ui-sample-pages，基于 2561dfd127e3336ec57b37fb3fe47709c1d81fcb，其上仍有未提交样板改动，尚未合并/推送。不得从 master 直接假定已有 WPF UI 样板；先由 U01 核对并冻结来源。\n\n采用已验证 WPF-UI 4.3.0、浅色青绿色样式及步骤导航＋当前工作区＋固定操作栏。保持三条路线、原件/InputSnapshot、现有命令/资格、必要审核、精确结果身份、手势保护、AutomationId、下游失效、300 PPI/CMYK/W1、环境门禁、自动化锁及不覆盖保存。两条 TIFF 路线必须显式选择白墨分支和理由；素材路线无印刷尺寸/白墨/TIFF。已审核、已保存、已完成分别呈现。\n\n本轮建单不等于实现或验收；不指派人员、故事点、工期或 Sprint，不改旧任务状态。不包含发布/部署/生产变更、新收费服务、自动审批、自动向同事发送或新 AI 业务。条件 AI 页面复用 SCRUM-11184/11166，不阻塞现有核心路线。\n\n样板历史 171 项定向通过及构建零警告/错误不作为本轮新验证；历史广泛运行 1503 项/35 失败（14 基线、21 后续定向复测通过），修正后未重跑完整广泛套件。96 DPI 离屏截图不代表真实窗口、125%/150% 缩放、物理输入、读屏或真人验收。SCRUM-11173/11195/11196/11197 未完成项保持原状态。\n\n本地完整计划：docs/codex/printflow-wpfui-rollout/PLAN.md；本轮按用户确认仅规划并建立 Jira，不修改产品代码。"
+    },
+    {
+      "planningId": "C04",
+      "key": "SCRUM-11206",
+      "issueType": "Task",
+      "summary": "简化保存、完成、失败恢复与辅助页面的状态和提示",
+      "parent": "SCRUM-11199",
+      "dependencies": [
+        "SCRUM-11203"
+      ],
+      "description": "Planning-ID: PF-WPFUI-20261022-C04\n\n## 任务范围\n\n改写保存文件/核实保存/另存、任务完成、最近任务、环境检查、设置、同事修正、接管、错误与确认文本；使用“发生什么—保留了什么—下一步”结构。\n\n## 主要改动位置\n\n保存/恢复/环境/最近任务 Strings 资源、动态异常摘要和对话框；与 U07/U08 同步。\n\n## 前置依赖\n\n- [SCRUM-11203](https://yituoxx.atlassian.net/browse/SCRUM-11203)（C01，盘点全部用户文案并制定简明中文术语与改写规范）\n\n## 验收条件\n\n- [ ] “已审核，尚未保存”“已保存，任务尚未结束”“有保存记录，当前文件待核实”含义保留且清晰。\n- [ ] 保存失败与待核实给出不同合法动作；核实同次保存不写成重试；另存与覆盖区别明确。\n- [ ] 停止中/已停止、取消本页/放弃任务、准备副本/已交同事、已回导/待审核均不混淆。\n- [ ] 错误有原因、可操作下一步和可展开错误代码；不承诺自动修复、不隐藏环境阻塞、不暗示静默发送给同事。\n\n## 复用与关联\n\n- [SCRUM-11190](https://yituoxx.atlassian.net/browse/SCRUM-11190)\n- [SCRUM-11191](https://yituoxx.atlassian.net/browse/SCRUM-11191)\n- [SCRUM-11192](https://yituoxx.atlassian.net/browse/SCRUM-11192)\n- [SCRUM-11193](https://yituoxx.atlassian.net/browse/SCRUM-11193)\n- [SCRUM-11194](https://yituoxx.atlassian.net/browse/SCRUM-11194)\n- 父 Epic：[SCRUM-11199](https://yituoxx.atlassian.net/browse/SCRUM-11199)\n\n## 依据与边界\n\nInitiative: PF-WPFUI-20261022；规划日期：2026-10-22（Pacific/Auckland）。用户于 2026-10-22 确认“先完成方案并建立 Jira（推荐）”；仅规划与建立 Jira，本轮不实施产品代码。\n\n原型：output/imagegen/SCRUM-11168/2026-10-19-v2/design-spec.html。样板报告：output/ui/WPF-UI-SAMPLES/README.md。样板工作树：C:/Users/admin/.codex/worktrees/scrum-11173-guided-acceptance/printflow-Studio；分支 codex/wpf-ui-sample-pages，基于 2561dfd127e3336ec57b37fb3fe47709c1d81fcb，其上仍有未提交样板改动，尚未合并/推送。不得从 master 直接假定已有 WPF UI 样板；先由 U01 核对并冻结来源。\n\n采用已验证 WPF-UI 4.3.0、浅色青绿色样式及步骤导航＋当前工作区＋固定操作栏。保持三条路线、原件/InputSnapshot、现有命令/资格、必要审核、精确结果身份、手势保护、AutomationId、下游失效、300 PPI/CMYK/W1、环境门禁、自动化锁及不覆盖保存。两条 TIFF 路线必须显式选择白墨分支和理由；素材路线无印刷尺寸/白墨/TIFF。已审核、已保存、已完成分别呈现。\n\n本轮建单不等于实现或验收；不指派人员、故事点、工期或 Sprint，不改旧任务状态。不包含发布/部署/生产变更、新收费服务、自动审批、自动向同事发送或新 AI 业务。条件 AI 页面复用 SCRUM-11184/11166，不阻塞现有核心路线。\n\n样板历史 171 项定向通过及构建零警告/错误不作为本轮新验证；历史广泛运行 1503 项/35 失败（14 基线、21 后续定向复测通过），修正后未重跑完整广泛套件。96 DPI 离屏截图不代表真实窗口、125%/150% 缩放、物理输入、读屏或真人验收。SCRUM-11173/11195/11196/11197 未完成项保持原状态。\n\n本地完整计划：docs/codex/printflow-wpfui-rollout/PLAN.md；本轮按用户确认仅规划并建立 Jira，不修改产品代码。"
+    },
+    {
+      "planningId": "U04",
+      "key": "SCRUM-11207",
+      "issueType": "Task",
+      "summary": "推广首页样板并统一导入、路线选择和原图确认",
+      "parent": "SCRUM-11198",
+      "dependencies": [
+        "SCRUM-11202",
+        "SCRUM-11203"
+      ],
+      "description": "Planning-ID: PF-WPFUI-20261022-U04\n\n## 任务范围\n\n复用首页样板，统一开始/继续任务、拖放区域与紧凑环境摘要；路线卡突出适用图片/输出格式/是否需尺寸，使用具体动作；原图确认突出源图、检查要点和下一步。\n\n## 主要改动位置\n\nHomeView.xaml/.cs；WorkflowSelectionView.xaml；SessionScreenView 原图页；入口 ViewModels 与 Strings 资源。\n\n## 前置依赖\n\n- [SCRUM-11202](https://yituoxx.atlassian.net/browse/SCRUM-11202)（U03，统一当前步骤标题、紧凑步骤栏与固定操作栏）\n- [SCRUM-11203](https://yituoxx.atlassian.net/browse/SCRUM-11203)（C01，盘点全部用户文案并制定简明中文术语与改写规范）\n\n## 验收条件\n\n- [ ] 三条路线差异一眼可扫读；输入资格、单文件/拖放/取消/恢复/放弃确认沿用现有命令。\n- [ ] 导入区与继续任务在小窗口可达；环境阻塞不被摘要隐藏。\n- [ ] PDF/PSD 仅展示真实准备结果；原件和 InputSnapshot 保留，未准备不虚构预览。\n- [ ] 对照样板/原型提供三种尺寸截图并核对焦点和辅助名称；文案依赖 C02。\n\n## 复用与关联\n\n- [SCRUM-11182](https://yituoxx.atlassian.net/browse/SCRUM-11182)\n- [SCRUM-11183](https://yituoxx.atlassian.net/browse/SCRUM-11183)\n- 父 Epic：[SCRUM-11198](https://yituoxx.atlassian.net/browse/SCRUM-11198)\n\n## 依据与边界\n\nInitiative: PF-WPFUI-20261022；规划日期：2026-10-22（Pacific/Auckland）。用户于 2026-10-22 确认“先完成方案并建立 Jira（推荐）”；仅规划与建立 Jira，本轮不实施产品代码。\n\n原型：output/imagegen/SCRUM-11168/2026-10-19-v2/design-spec.html。样板报告：output/ui/WPF-UI-SAMPLES/README.md。样板工作树：C:/Users/admin/.codex/worktrees/scrum-11173-guided-acceptance/printflow-Studio；分支 codex/wpf-ui-sample-pages，基于 2561dfd127e3336ec57b37fb3fe47709c1d81fcb，其上仍有未提交样板改动，尚未合并/推送。不得从 master 直接假定已有 WPF UI 样板；先由 U01 核对并冻结来源。\n\n采用已验证 WPF-UI 4.3.0、浅色青绿色样式及步骤导航＋当前工作区＋固定操作栏。保持三条路线、原件/InputSnapshot、现有命令/资格、必要审核、精确结果身份、手势保护、AutomationId、下游失效、300 PPI/CMYK/W1、环境门禁、自动化锁及不覆盖保存。两条 TIFF 路线必须显式选择白墨分支和理由；素材路线无印刷尺寸/白墨/TIFF。已审核、已保存、已完成分别呈现。\n\n本轮建单不等于实现或验收；不指派人员、故事点、工期或 Sprint，不改旧任务状态。不包含发布/部署/生产变更、新收费服务、自动审批、自动向同事发送或新 AI 业务。条件 AI 页面复用 SCRUM-11184/11166，不阻塞现有核心路线。\n\n样板历史 171 项定向通过及构建零警告/错误不作为本轮新验证；历史广泛运行 1503 项/35 失败（14 基线、21 后续定向复测通过），修正后未重跑完整广泛套件。96 DPI 离屏截图不代表真实窗口、125%/150% 缩放、物理输入、读屏或真人验收。SCRUM-11173/11195/11196/11197 未完成项保持原状态。\n\n本地完整计划：docs/codex/printflow-wpfui-rollout/PLAN.md；本轮按用户确认仅规划并建立 Jira，不修改产品代码。"
+    },
+    {
+      "planningId": "U05",
+      "key": "SCRUM-11208",
+      "issueType": "Task",
+      "summary": "统一处理进度、图片审核和裁切工作区",
+      "parent": "SCRUM-11198",
+      "dependencies": [
+        "SCRUM-11202",
+        "SCRUM-11203"
+      ],
+      "description": "Planning-ID: PF-WPFUI-20261022-U05\n\n## 任务范围\n\n推广处理/增强/去背景、处理后审核和裁切页面。保障画布高度，集中缩放/比较工具；坐标及键盘说明按需展开；保留当前结果身份、审核要点和合法停止/求助/接管。\n\n## 主要改动位置\n\nSessionScreenView.xaml；SharedReviewSurface.cs；TiffReviewSurface.cs；SessionEditorControls.cs；裁切相关视图。\n\n## 前置依赖\n\n- [SCRUM-11202](https://yituoxx.atlassian.net/browse/SCRUM-11202)（U03，统一当前步骤标题、紧凑步骤栏与固定操作栏）\n- [SCRUM-11203](https://yituoxx.atlassian.net/browse/SCRUM-11203)（C01，盘点全部用户文案并制定简明中文术语与改写规范）\n\n## 验收条件\n\n- [ ] 运行中显示真实阶段；未知进度用不定指示，不伪造百分比；重复提交被阻止。\n- [ ] 审核显示精确当前结果，处理前后比较与状态保留，按钮及身份防误触回归通过。\n- [ ] 裁切工具不挤压画布；使用裁切之后仍回到必要审核，不视为通过。\n- [ ] 不同窗口/长说明/警告状态下预览和合法停止、拒绝、求助入口均可达；文案与 C02 对齐。\n\n## 复用与关联\n\n- [SCRUM-11185](https://yituoxx.atlassian.net/browse/SCRUM-11185)\n- [SCRUM-11186](https://yituoxx.atlassian.net/browse/SCRUM-11186)\n- [SCRUM-11187](https://yituoxx.atlassian.net/browse/SCRUM-11187)\n- 父 Epic：[SCRUM-11198](https://yituoxx.atlassian.net/browse/SCRUM-11198)\n\n## 依据与边界\n\nInitiative: PF-WPFUI-20261022；规划日期：2026-10-22（Pacific/Auckland）。用户于 2026-10-22 确认“先完成方案并建立 Jira（推荐）”；仅规划与建立 Jira，本轮不实施产品代码。\n\n原型：output/imagegen/SCRUM-11168/2026-10-19-v2/design-spec.html。样板报告：output/ui/WPF-UI-SAMPLES/README.md。样板工作树：C:/Users/admin/.codex/worktrees/scrum-11173-guided-acceptance/printflow-Studio；分支 codex/wpf-ui-sample-pages，基于 2561dfd127e3336ec57b37fb3fe47709c1d81fcb，其上仍有未提交样板改动，尚未合并/推送。不得从 master 直接假定已有 WPF UI 样板；先由 U01 核对并冻结来源。\n\n采用已验证 WPF-UI 4.3.0、浅色青绿色样式及步骤导航＋当前工作区＋固定操作栏。保持三条路线、原件/InputSnapshot、现有命令/资格、必要审核、精确结果身份、手势保护、AutomationId、下游失效、300 PPI/CMYK/W1、环境门禁、自动化锁及不覆盖保存。两条 TIFF 路线必须显式选择白墨分支和理由；素材路线无印刷尺寸/白墨/TIFF。已审核、已保存、已完成分别呈现。\n\n本轮建单不等于实现或验收；不指派人员、故事点、工期或 Sprint，不改旧任务状态。不包含发布/部署/生产变更、新收费服务、自动审批、自动向同事发送或新 AI 业务。条件 AI 页面复用 SCRUM-11184/11166，不阻塞现有核心路线。\n\n样板历史 171 项定向通过及构建零警告/错误不作为本轮新验证；历史广泛运行 1503 项/35 失败（14 基线、21 后续定向复测通过），修正后未重跑完整广泛套件。96 DPI 离屏截图不代表真实窗口、125%/150% 缩放、物理输入、读屏或真人验收。SCRUM-11173/11195/11196/11197 未完成项保持原状态。\n\n本地完整计划：docs/codex/printflow-wpfui-rollout/PLAN.md；本轮按用户确认仅规划并建立 Jira，不修改产品代码。"
+    },
+    {
+      "planningId": "U06",
+      "key": "SCRUM-11209",
+      "issueType": "Task",
+      "summary": "统一印刷尺寸、白墨选择与 TIFF 生成确认页面",
+      "parent": "SCRUM-11198",
+      "dependencies": [
+        "SCRUM-11202",
+        "SCRUM-11203"
+      ],
+      "description": "Planning-ID: PF-WPFUI-20261022-U06\n\n## 任务范围\n\n统一尺寸表单、实际尺寸/像素/放大风险、白墨选择及理由、生成前摘要、生成进度和最终 TIFF 审核的视觉层级，复用现有服务资格。\n\n## 主要改动位置\n\nSessionScreenView 印刷参数/白墨/生成模板；TiffReviewSurface；相应 ViewModel 投影与资源。\n\n## 前置依赖\n\n- [SCRUM-11202](https://yituoxx.atlassian.net/browse/SCRUM-11202)（U03，统一当前步骤标题、紧凑步骤栏与固定操作栏）\n- [SCRUM-11203](https://yituoxx.atlassian.net/browse/SCRUM-11203)（C01，盘点全部用户文案并制定简明中文术语与改写规范）\n\n## 验收条件\n\n- [ ] 两条 TIFF 路线保留明确 0/1/2 像素白墨内缩选择及理由，无默认勾选；素材路线不出现尺寸/白墨/TIFF。\n- [ ] 尺寸、单位、风险与生成摘要对应真实当前结果；不会自动接受风险。\n- [ ] 300 PPI/CMYK/W1 和源 PSD/PDF 不沿用专色的合同保留；最终 TIFF 仍须审核。\n- [ ] 就地说明按 C03 改写；无资格的按钮说明缺失条件，长中文及缩放不遮挡输入或确认。\n\n## 复用与关联\n\n- [SCRUM-11188](https://yituoxx.atlassian.net/browse/SCRUM-11188)\n- [SCRUM-11189](https://yituoxx.atlassian.net/browse/SCRUM-11189)\n- 父 Epic：[SCRUM-11198](https://yituoxx.atlassian.net/browse/SCRUM-11198)\n\n## 依据与边界\n\nInitiative: PF-WPFUI-20261022；规划日期：2026-10-22（Pacific/Auckland）。用户于 2026-10-22 确认“先完成方案并建立 Jira（推荐）”；仅规划与建立 Jira，本轮不实施产品代码。\n\n原型：output/imagegen/SCRUM-11168/2026-10-19-v2/design-spec.html。样板报告：output/ui/WPF-UI-SAMPLES/README.md。样板工作树：C:/Users/admin/.codex/worktrees/scrum-11173-guided-acceptance/printflow-Studio；分支 codex/wpf-ui-sample-pages，基于 2561dfd127e3336ec57b37fb3fe47709c1d81fcb，其上仍有未提交样板改动，尚未合并/推送。不得从 master 直接假定已有 WPF UI 样板；先由 U01 核对并冻结来源。\n\n采用已验证 WPF-UI 4.3.0、浅色青绿色样式及步骤导航＋当前工作区＋固定操作栏。保持三条路线、原件/InputSnapshot、现有命令/资格、必要审核、精确结果身份、手势保护、AutomationId、下游失效、300 PPI/CMYK/W1、环境门禁、自动化锁及不覆盖保存。两条 TIFF 路线必须显式选择白墨分支和理由；素材路线无印刷尺寸/白墨/TIFF。已审核、已保存、已完成分别呈现。\n\n本轮建单不等于实现或验收；不指派人员、故事点、工期或 Sprint，不改旧任务状态。不包含发布/部署/生产变更、新收费服务、自动审批、自动向同事发送或新 AI 业务。条件 AI 页面复用 SCRUM-11184/11166，不阻塞现有核心路线。\n\n样板历史 171 项定向通过及构建零警告/错误不作为本轮新验证；历史广泛运行 1503 项/35 失败（14 基线、21 后续定向复测通过），修正后未重跑完整广泛套件。96 DPI 离屏截图不代表真实窗口、125%/150% 缩放、物理输入、读屏或真人验收。SCRUM-11173/11195/11196/11197 未完成项保持原状态。\n\n本地完整计划：docs/codex/printflow-wpfui-rollout/PLAN.md；本轮按用户确认仅规划并建立 Jira，不修改产品代码。"
+    },
+    {
+      "planningId": "U07",
+      "key": "SCRUM-11210",
+      "issueType": "Task",
+      "summary": "推广保存页样板并重做独立完成摘要",
+      "parent": "SCRUM-11198",
+      "dependencies": [
+        "SCRUM-11202",
+        "SCRUM-11203"
+      ],
+      "description": "Planning-ID: PF-WPFUI-20261022-U07\n\n## 任务范围\n\n将 PNG 保存样板扩展至 PNG/TIFF、多尺寸和异常状态；保存默认大预览当前已批准结果，比较收进查看审核结果；完成页独立展示真实结果、保存份数、记录及有资格的后续操作。\n\n## 主要改动位置\n\nSessionScreenView 保存/完成模板；SharedReviewSurface.ResultOnly；保存、核实及多尺寸状态投影。\n\n## 前置依赖\n\n- [SCRUM-11202](https://yituoxx.atlassian.net/browse/SCRUM-11202)（U03，统一当前步骤标题、紧凑步骤栏与固定操作栏）\n- [SCRUM-11203](https://yituoxx.atlassian.net/browse/SCRUM-11203)（C01，盘点全部用户文案并制定简明中文术语与改写规范）\n\n## 验收条件\n\n- [ ] 仅在现有 HasFinalSave/GuidedPage 及协调器资格下实例化保存表单；审核中的联合确认保存不被搬到错误作用域。\n- [ ] 已审核/保存状态/任务完成独立显示；历史保存记录不等于当前文件存在。\n- [ ] 保存待核实显著警告并核实同一次保存；另存明确独立，同名不覆盖。\n- [ ] 完整路径可查看/复制；多尺寸记录不挤掉预览；三种尺寸及失败、碰撞、待核实、已保存/未完成均有证据，文案与 C04 对齐。\n\n## 复用与关联\n\n- [SCRUM-11190](https://yituoxx.atlassian.net/browse/SCRUM-11190)\n- 父 Epic：[SCRUM-11198](https://yituoxx.atlassian.net/browse/SCRUM-11198)\n\n## 依据与边界\n\nInitiative: PF-WPFUI-20261022；规划日期：2026-10-22（Pacific/Auckland）。用户于 2026-10-22 确认“先完成方案并建立 Jira（推荐）”；仅规划与建立 Jira，本轮不实施产品代码。\n\n原型：output/imagegen/SCRUM-11168/2026-10-19-v2/design-spec.html。样板报告：output/ui/WPF-UI-SAMPLES/README.md。样板工作树：C:/Users/admin/.codex/worktrees/scrum-11173-guided-acceptance/printflow-Studio；分支 codex/wpf-ui-sample-pages，基于 2561dfd127e3336ec57b37fb3fe47709c1d81fcb，其上仍有未提交样板改动，尚未合并/推送。不得从 master 直接假定已有 WPF UI 样板；先由 U01 核对并冻结来源。\n\n采用已验证 WPF-UI 4.3.0、浅色青绿色样式及步骤导航＋当前工作区＋固定操作栏。保持三条路线、原件/InputSnapshot、现有命令/资格、必要审核、精确结果身份、手势保护、AutomationId、下游失效、300 PPI/CMYK/W1、环境门禁、自动化锁及不覆盖保存。两条 TIFF 路线必须显式选择白墨分支和理由；素材路线无印刷尺寸/白墨/TIFF。已审核、已保存、已完成分别呈现。\n\n本轮建单不等于实现或验收；不指派人员、故事点、工期或 Sprint，不改旧任务状态。不包含发布/部署/生产变更、新收费服务、自动审批、自动向同事发送或新 AI 业务。条件 AI 页面复用 SCRUM-11184/11166，不阻塞现有核心路线。\n\n样板历史 171 项定向通过及构建零警告/错误不作为本轮新验证；历史广泛运行 1503 项/35 失败（14 基线、21 后续定向复测通过），修正后未重跑完整广泛套件。96 DPI 离屏截图不代表真实窗口、125%/150% 缩放、物理输入、读屏或真人验收。SCRUM-11173/11195/11196/11197 未完成项保持原状态。\n\n本地完整计划：docs/codex/printflow-wpfui-rollout/PLAN.md；本轮按用户确认仅规划并建立 Jira，不修改产品代码。"
+    },
+    {
+      "planningId": "U08",
+      "key": "SCRUM-11211",
+      "issueType": "Task",
+      "summary": "统一恢复分支、最近任务、辅助页面和对话框",
+      "parent": "SCRUM-11198",
+      "dependencies": [
+        "SCRUM-11202",
+        "SCRUM-11203"
+      ],
+      "description": "Planning-ID: PF-WPFUI-20261022-U08\n\n## 任务范围\n\n覆盖同事修正/人工接管/错误恢复/重入、最近任务及待处理、设置、环境检查、错误详情、空状态和确认对话框，统一图标、状态层级、输入和提示。\n\n## 主要改动位置\n\nHomeView 最近/恢复区；SettingsView；EnvironmentReadinessView；ErrorDetailsView；NoticeErrorDetails；SessionScreenView 恢复模板。\n\n## 前置依赖\n\n- [SCRUM-11202](https://yituoxx.atlassian.net/browse/SCRUM-11202)（U03，统一当前步骤标题、紧凑步骤栏与固定操作栏）\n- [SCRUM-11203](https://yituoxx.atlassian.net/browse/SCRUM-11203)（C01，盘点全部用户文案并制定简明中文术语与改写规范）\n\n## 验收条件\n\n- [ ] 恢复入口定位真实业务步骤；停止请求不显示成已停止，不自动重启或强制关闭外部应用。\n- [ ] 同事修正保留合法审核资格、人工交接副本和显式回导；不增加自动发送、监控保存或手工 TIFF 回导。\n- [ ] 生产设置保持只读；环境检查与历史故障不混为当前；技术详情可展开，错误原因/下一步始终可见。\n- [ ] 确认绑定当前任务和结果，中性焦点/取消可达，取消无业务副作用；现有 AI 页面若可用按同样外观接入，否则登记待原 Epic，不阻塞核心路线。\n\n## 复用与关联\n\n- [SCRUM-11191](https://yituoxx.atlassian.net/browse/SCRUM-11191)\n- [SCRUM-11192](https://yituoxx.atlassian.net/browse/SCRUM-11192)\n- [SCRUM-11193](https://yituoxx.atlassian.net/browse/SCRUM-11193)\n- [SCRUM-11194](https://yituoxx.atlassian.net/browse/SCRUM-11194)\n- [SCRUM-11184](https://yituoxx.atlassian.net/browse/SCRUM-11184)\n- 父 Epic：[SCRUM-11198](https://yituoxx.atlassian.net/browse/SCRUM-11198)\n\n## 依据与边界\n\nInitiative: PF-WPFUI-20261022；规划日期：2026-10-22（Pacific/Auckland）。用户于 2026-10-22 确认“先完成方案并建立 Jira（推荐）”；仅规划与建立 Jira，本轮不实施产品代码。\n\n原型：output/imagegen/SCRUM-11168/2026-10-19-v2/design-spec.html。样板报告：output/ui/WPF-UI-SAMPLES/README.md。样板工作树：C:/Users/admin/.codex/worktrees/scrum-11173-guided-acceptance/printflow-Studio；分支 codex/wpf-ui-sample-pages，基于 2561dfd127e3336ec57b37fb3fe47709c1d81fcb，其上仍有未提交样板改动，尚未合并/推送。不得从 master 直接假定已有 WPF UI 样板；先由 U01 核对并冻结来源。\n\n采用已验证 WPF-UI 4.3.0、浅色青绿色样式及步骤导航＋当前工作区＋固定操作栏。保持三条路线、原件/InputSnapshot、现有命令/资格、必要审核、精确结果身份、手势保护、AutomationId、下游失效、300 PPI/CMYK/W1、环境门禁、自动化锁及不覆盖保存。两条 TIFF 路线必须显式选择白墨分支和理由；素材路线无印刷尺寸/白墨/TIFF。已审核、已保存、已完成分别呈现。\n\n本轮建单不等于实现或验收；不指派人员、故事点、工期或 Sprint，不改旧任务状态。不包含发布/部署/生产变更、新收费服务、自动审批、自动向同事发送或新 AI 业务。条件 AI 页面复用 SCRUM-11184/11166，不阻塞现有核心路线。\n\n样板历史 171 项定向通过及构建零警告/错误不作为本轮新验证；历史广泛运行 1503 项/35 失败（14 基线、21 后续定向复测通过），修正后未重跑完整广泛套件。96 DPI 离屏截图不代表真实窗口、125%/150% 缩放、物理输入、读屏或真人验收。SCRUM-11173/11195/11196/11197 未完成项保持原状态。\n\n本地完整计划：docs/codex/printflow-wpfui-rollout/PLAN.md；本轮按用户确认仅规划并建立 Jira，不修改产品代码。"
+    },
+    {
+      "planningId": "U09",
+      "key": "SCRUM-11212",
+      "issueType": "Task",
+      "summary": "完成全页面视觉、业务安全与无障碍回归并归档证据",
+      "parent": "SCRUM-11198",
+      "dependencies": [
+        "SCRUM-11207",
+        "SCRUM-11208",
+        "SCRUM-11209",
+        "SCRUM-11210",
+        "SCRUM-11211",
+        "SCRUM-11204",
+        "SCRUM-11205",
+        "SCRUM-11206"
+      ],
+      "description": "Planning-ID: PF-WPFUI-20261022-U09\n\n## 任务范围\n\n按覆盖矩阵执行三路线/关键异常的自动化行为检查、原型对比和布局检查，准备并记录真实窗口与系统缩放/键鼠/读屏结果。复用 11173 已有安全入口和证据隔离。\n\n## 主要改动位置\n\ntests/PrintFlow.Tests/Integration/Ui；既有安全测试包装器；新候选独立 output 证据目录；页面矩阵和验收报告。\n\n## 前置依赖\n\n- [SCRUM-11207](https://yituoxx.atlassian.net/browse/SCRUM-11207)（U04，推广首页样板并统一导入、路线选择和原图确认）\n- [SCRUM-11208](https://yituoxx.atlassian.net/browse/SCRUM-11208)（U05，统一处理进度、图片审核和裁切工作区）\n- [SCRUM-11209](https://yituoxx.atlassian.net/browse/SCRUM-11209)（U06，统一印刷尺寸、白墨选择与 TIFF 生成确认页面）\n- [SCRUM-11210](https://yituoxx.atlassian.net/browse/SCRUM-11210)（U07，推广保存页样板并重做独立完成摘要）\n- [SCRUM-11211](https://yituoxx.atlassian.net/browse/SCRUM-11211)（U08，统一恢复分支、最近任务、辅助页面和对话框）\n- [SCRUM-11204](https://yituoxx.atlassian.net/browse/SCRUM-11204)（C02，改写首页、路线选择、处理、审核与裁切引导文案）\n- [SCRUM-11205](https://yituoxx.atlassian.net/browse/SCRUM-11205)（C03，简化尺寸、白墨和 TIFF 的说明并保留必要印刷信息）\n- [SCRUM-11206](https://yituoxx.atlassian.net/browse/SCRUM-11206)（C04，简化保存、完成、失败恢复与辅助页面的状态和提示）\n\n## 验收条件\n\n- [ ] 审批身份/防连击、命令资格、比较状态、返回失效、恢复、多尺寸和保存核实有针对性回归；每个覆盖项可定位日志/截图。\n- [ ] 样板历史广泛运行 1503 项中的 14 基线失败和 21 已定向复测问题单独列出；迁移后的最终运行重新统计，不沿用历史 PASS。\n- [ ] 按 1000×700/1280×720/1920×1080 窗口目标与 100%/125%/150% 缩放核对实际内容区；离屏 96 DPI 不代替真实 DPI/物理输入/读屏。\n- [ ] 新候选有唯一目录和来源身份，旧证据不覆盖；未执行真人部分保留待验收，与 SCRUM-11195/11196/11197 协同且不自动关旧项。\n\n## 复用与关联\n\n- [SCRUM-11173](https://yituoxx.atlassian.net/browse/SCRUM-11173)\n- [SCRUM-11195](https://yituoxx.atlassian.net/browse/SCRUM-11195)\n- [SCRUM-11196](https://yituoxx.atlassian.net/browse/SCRUM-11196)\n- [SCRUM-11197](https://yituoxx.atlassian.net/browse/SCRUM-11197)\n- 父 Epic：[SCRUM-11198](https://yituoxx.atlassian.net/browse/SCRUM-11198)\n\n## 依据与边界\n\nInitiative: PF-WPFUI-20261022；规划日期：2026-10-22（Pacific/Auckland）。用户于 2026-10-22 确认“先完成方案并建立 Jira（推荐）”；仅规划与建立 Jira，本轮不实施产品代码。\n\n原型：output/imagegen/SCRUM-11168/2026-10-19-v2/design-spec.html。样板报告：output/ui/WPF-UI-SAMPLES/README.md。样板工作树：C:/Users/admin/.codex/worktrees/scrum-11173-guided-acceptance/printflow-Studio；分支 codex/wpf-ui-sample-pages，基于 2561dfd127e3336ec57b37fb3fe47709c1d81fcb，其上仍有未提交样板改动，尚未合并/推送。不得从 master 直接假定已有 WPF UI 样板；先由 U01 核对并冻结来源。\n\n采用已验证 WPF-UI 4.3.0、浅色青绿色样式及步骤导航＋当前工作区＋固定操作栏。保持三条路线、原件/InputSnapshot、现有命令/资格、必要审核、精确结果身份、手势保护、AutomationId、下游失效、300 PPI/CMYK/W1、环境门禁、自动化锁及不覆盖保存。两条 TIFF 路线必须显式选择白墨分支和理由；素材路线无印刷尺寸/白墨/TIFF。已审核、已保存、已完成分别呈现。\n\n本轮建单不等于实现或验收；不指派人员、故事点、工期或 Sprint，不改旧任务状态。不包含发布/部署/生产变更、新收费服务、自动审批、自动向同事发送或新 AI 业务。条件 AI 页面复用 SCRUM-11184/11166，不阻塞现有核心路线。\n\n样板历史 171 项定向通过及构建零警告/错误不作为本轮新验证；历史广泛运行 1503 项/35 失败（14 基线、21 后续定向复测通过），修正后未重跑完整广泛套件。96 DPI 离屏截图不代表真实窗口、125%/150% 缩放、物理输入、读屏或真人验收。SCRUM-11173/11195/11196/11197 未完成项保持原状态。\n\n本地完整计划：docs/codex/printflow-wpfui-rollout/PLAN.md；本轮按用户确认仅规划并建立 Jira，不修改产品代码。"
+    },
+    {
+      "planningId": "C05",
+      "key": "SCRUM-11213",
+      "issueType": "Task",
+      "summary": "制定并执行老年用户文案理解度与操作走查验收",
+      "parent": "SCRUM-11199",
+      "dependencies": [
+        "SCRUM-11204",
+        "SCRUM-11205",
+        "SCRUM-11206",
+        "SCRUM-11212"
+      ],
+      "description": "Planning-ID: PF-WPFUI-20261022-C05\n\n## 任务范围\n\n基于 SCRUM-11197 新手走查扩展实际中文老年/低电脑熟练度用户验证，记录能否解释当前步骤、下一步和结果，识别误解及求助点；同步资源结构与辅助功能校验。\n\n## 主要改动位置\n\n中文文案前后对照；实际用户走查脚本与匿名记录；资源键/占位符检查；问题回流记录。\n\n## 前置依赖\n\n- [SCRUM-11204](https://yituoxx.atlassian.net/browse/SCRUM-11204)（C02，改写首页、路线选择、处理、审核与裁切引导文案）\n- [SCRUM-11205](https://yituoxx.atlassian.net/browse/SCRUM-11205)（C03，简化尺寸、白墨和 TIFF 的说明并保留必要印刷信息）\n- [SCRUM-11206](https://yituoxx.atlassian.net/browse/SCRUM-11206)（C04，简化保存、完成、失败恢复与辅助页面的状态和提示）\n- [SCRUM-11212](https://yituoxx.atlassian.net/browse/SCRUM-11212)（U09，完成全页面视觉、业务安全与无障碍回归并归档证据）\n\n## 验收条件\n\n- [ ] 先固定候选版本、场景、招募条件及评价规则；建议至少 3 名目标用户、至少 80% 任务无需提示完成，作为待确认的项目门槛而非外部标准。\n- [ ] 核心场景包含选路线、审核、裁切、尺寸/白墨、保存失败/待核实、完成/恢复；审核≠保存≠完成等关键状态零误判，否则整改复测。\n- [ ] 记录年龄段/熟练度、独立完成/求助/误操作、原话及任务结果，个人信息最小化；开发者演示/合成测试不计真人通过。\n- [ ] zh-CN/en 资源键与占位符保持兼容，无新增硬编码散落文案；仅中文真人验收；未安排参与者保留待验收并关联 SCRUM-11197。\n\n## 复用与关联\n\n- [SCRUM-11195](https://yituoxx.atlassian.net/browse/SCRUM-11195)\n- [SCRUM-11197](https://yituoxx.atlassian.net/browse/SCRUM-11197)\n- 父 Epic：[SCRUM-11199](https://yituoxx.atlassian.net/browse/SCRUM-11199)\n\n## 依据与边界\n\nInitiative: PF-WPFUI-20261022；规划日期：2026-10-22（Pacific/Auckland）。用户于 2026-10-22 确认“先完成方案并建立 Jira（推荐）”；仅规划与建立 Jira，本轮不实施产品代码。\n\n原型：output/imagegen/SCRUM-11168/2026-10-19-v2/design-spec.html。样板报告：output/ui/WPF-UI-SAMPLES/README.md。样板工作树：C:/Users/admin/.codex/worktrees/scrum-11173-guided-acceptance/printflow-Studio；分支 codex/wpf-ui-sample-pages，基于 2561dfd127e3336ec57b37fb3fe47709c1d81fcb，其上仍有未提交样板改动，尚未合并/推送。不得从 master 直接假定已有 WPF UI 样板；先由 U01 核对并冻结来源。\n\n采用已验证 WPF-UI 4.3.0、浅色青绿色样式及步骤导航＋当前工作区＋固定操作栏。保持三条路线、原件/InputSnapshot、现有命令/资格、必要审核、精确结果身份、手势保护、AutomationId、下游失效、300 PPI/CMYK/W1、环境门禁、自动化锁及不覆盖保存。两条 TIFF 路线必须显式选择白墨分支和理由；素材路线无印刷尺寸/白墨/TIFF。已审核、已保存、已完成分别呈现。\n\n本轮建单不等于实现或验收；不指派人员、故事点、工期或 Sprint，不改旧任务状态。不包含发布/部署/生产变更、新收费服务、自动审批、自动向同事发送或新 AI 业务。条件 AI 页面复用 SCRUM-11184/11166，不阻塞现有核心路线。\n\n样板历史 171 项定向通过及构建零警告/错误不作为本轮新验证；历史广泛运行 1503 项/35 失败（14 基线、21 后续定向复测通过），修正后未重跑完整广泛套件。96 DPI 离屏截图不代表真实窗口、125%/150% 缩放、物理输入、读屏或真人验收。SCRUM-11173/11195/11196/11197 未完成项保持原状态。\n\n本地完整计划：docs/codex/printflow-wpfui-rollout/PLAN.md；本轮按用户确认仅规划并建立 Jira，不修改产品代码。"
+    }
+  ]
+}

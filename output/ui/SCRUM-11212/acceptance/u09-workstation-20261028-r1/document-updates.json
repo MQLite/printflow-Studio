@@ -1,0 +1,14 @@
+[
+  {
+    "path": "C:\\Users\\admin\\.codex\\worktrees\\scrum-11201-shared-theme\\printflow-Studio\\docs\\codex\\printflow-wpfui-rollout\\SCRUM-11212\\README.md",
+    "beforeSha256": "df8a2069f690c2909a30897b9afc8aae42597642986eb35c9f32527daa5738db",
+    "afterSha256": "9412a6d75e84a115e971896e3526e3316acc47d3b7d325a63e8a97554152c37b",
+    "exactBeforePreserved": "C:\\Users\\admin\\.codex\\worktrees\\u09\\printflow-Studio\\output\\ui\\SCRUM-11212\\acceptance\\u09-workstation-20261028-r1\\documents-before\\shared-readme.md"
+  },
+  {
+    "path": "D:\\Repositories\\printflow-Studio\\docs\\codex\\printflow-wpfui-rollout\\SCRUM-11212\\WORKTREE.md",
+    "beforeSha256": "b4833ecdb1c5b91680580dc6ea66b6f7761ce7f1f6c88bd176610b20dcb6cb70",
+    "afterSha256": "b93ad9fa7e40d0c288d602dc23ae09249600737119d6e05d15c9c343ba2a31a1",
+    "exactBeforePreserved": "C:\\Users\\admin\\.codex\\worktrees\\u09\\printflow-Studio\\output\\ui\\SCRUM-11212\\acceptance\\u09-workstation-20261028-r1\\documents-before\\main-worktree.md"
+  }
+]

@@ -1,0 +1,45 @@
+{
+  "task": "SCRUM-11200",
+  "issues": [
+    {
+      "key": "SCRUM-11200",
+      "summary": "建立全部页面与状态清单并冻结 WPF UI 样板基线",
+      "status": "To Do",
+      "description": "Planning-ID: PF-WPFUI-20261022-U01\n\n## 任务范围\n\n核对 master 与 codex/wpf-ui-sample-pages 工作树，记录样板未提交差异、依赖锁文件、截图和来源哈希。复用 SCRUM-11174 页面矩阵，补齐三条路线、PNG/TIFF、正常/空/加载/禁用/错误/确认/恢复/历史状态，逐项标记迁移归属。\n\n## 主要改动位置\n\nDirectory.Packages.props；PrintFlow.App.csproj；packages.lock.json；output/ui/WPF-UI-SAMPLES/{README.md,manifest.json,source-manifest.json,validation.json}；现有视图/GuidedSessionPage。\n\n## 前置依赖\n\n无；本任务建立后续工作的基线。\n\n## 验收条件\n\n- [ ] 覆盖首页、路线/原图、处理/审核/裁切、尺寸/白墨/生成、保存/完成、恢复/同事修正、最近任务、设置/环境/错误详情及对话框；无页面用笼统“其他”替代。\n- [ ] 记录基线提交 2561dfd 与其上未提交样板文件身份，形成可重建候选；不丢弃、覆盖或混入无关工作。\n- [ ] AI 入口按 SCRUM-11184/11166 的实际可用性标为条件接入，不计作现有已实现页面、不新建 AI 业务。\n- [ ] 每项有对应任务、优先级、原型/样板及证据栏；未执行标未执行。\n\n## 复用与关联\n\n* [SCRUM-11174](https://yituoxx.atlassian.net/browse/SCRUM-11174)\n* [SCRUM-11177](https://yituoxx.atlassian.net/browse/SCRUM-11177)\n* [SCRUM-11184](https://yituoxx.atlassian.net/browse/SCRUM-11184)\n* 父 Epic：[SCRUM-11198](https://yituoxx.atlassian.net/browse/SCRUM-11198)\n\n## 依据与边界\n\nInitiative: PF-WPFUI-20261022；规划日期：2026-10-22（Pacific/Auckland）。用户于 2026-10-22 确认“先完成方案并建立 Jira（推荐）”；仅规划与建立 Jira，本轮不实施产品代码。\n\n原型：output/imagegen/SCRUM-11168/2026-10-19-v2/design-spec.html。样板报告：output/ui/WPF-UI-SAMPLES/README.md。样板工作树：C:/Users/admin/.codex/worktrees/scrum-11173-guided-acceptance/printflow-Studio；分支 codex/wpf-ui-sample-pages，基于 2561dfd127e3336ec57b37fb3fe47709c1d81fcb，其上仍有未提交样板改动，尚未合并/推送。不得从 master 直接假定已有 WPF UI 样板；先由 U01 核对并冻结来源。\n\n采用已验证 WPF-UI 4.3.0、浅色青绿色样式及步骤导航＋当前工作区＋固定操作栏。保持三条路线、原件/InputSnapshot、现有命令/资格、必要审核、精确结果身份、手势保护、AutomationId、下游失效、300 PPI/CMYK/W1、环境门禁、自动化锁及不覆盖保存。两条 TIFF 路线必须显式选择白墨分支和理由；素材路线无印刷尺寸/白墨/TIFF。已审核、已保存、已完成分别呈现。\n\n本轮建单不等于实现或验收；不指派人员、故事点、工期或 Sprint，不改旧任务状态。不包含发布/部署/生产变更、新收费服务、自动审批、自动向同事发送或新 AI 业务。条件 AI 页面复用 SCRUM-11184/11166，不阻塞现有核心路线。\n\n样板历史 171 项定向通过及构建零警告/错误不作为本轮新验证；历史广泛运行 1503 项/35 失败（14 基线、21 后续定向复测通过），修正后未重跑完整广泛套件。96 DPI 离屏截图不代表真实窗口、125%/150% 缩放、物理输入、读屏或真人验收。SCRUM-11173/11195/11196/11197 未完成项保持原状态。\n\n本地完整计划：docs/codex/printflow-wpfui-rollout/PLAN.md；本轮按用户确认仅规划并建立 Jira，不修改产品代码。",
+      "observedDate": "2026-10-22",
+      "timezone": "Pacific/Auckland",
+      "source": "Atlassian getJiraIssue",
+      "url": "https://yituoxx.atlassian.net/browse/SCRUM-11200"
+    },
+    {
+      "key": "SCRUM-11174",
+      "summary": "梳理三条路线与全部页面的步骤、信息显隐和旧待办映射",
+      "status": "Done",
+      "description": "Planning-ID：PF-GUX-v2-D01  \nInitiative：PF-GUX-v2；计划日期：2026-10-19（Pacific/Auckland）\n\n## 用户价值 / 目标\n\n建立可评审的信息架构，明确每一步回答什么问题。\n\n## 验收条件\n\n1. 盘点 Home、路线选择、Session、Recovery、Recent、环境、设置、错误详情，以及 AI 规划入口；标注当前实现和未来功能。\n2. 为三条路线列出用户目标、前置状态、当前输入/图片/动作、后续内容及分支；素材路线排除印刷尺寸和 TIFF。\n3. 定义正常、忙碌、待审、失败、接管、修正等待、完成和保存失败的显隐矩阵；关键阻塞与停止入口不可被隐藏。\n4. 建立与 SCRUM-11139/11140–11155、SCRUM-11156/11166 的复用和差异表；旧缺陷记录出处及处置责任，不视为已修复。\n\n## 前置依赖\n\n无；作为需求/设计发现起点。\n\n## Scrum 分组\n\n建议 Sprint 0（候选分组，非时间或容量承诺）；正式 Sprint、负责人和故事点在评审后确定，本次保持待办状态。所属 Epic：[SCRUM-11168](https://yituoxx.atlassian.net/browse/SCRUM-11168)。\n\n## 实现与验收边界\n\n本项是用户要求“先生成 Scrum & Epics”的规划结果，不代表已批准产品实现、已完成或已运行测试。实现前按所属 Epic 完成设计评审与依赖核实；复用已有业务服务、审核、导出和恢复能力，UI 不能创造命令资格。保留原件/InputSnapshot、精确审批、下游失效、单任务单图、三条路线及生产安全契约。关键提示、停止和接管不能因减少内容而不可达。保持 zh-CN/en 资源，中文人工验收，不新增英文人工走查。\n\n## 验证要求与来源\n\n按本项风险执行适当的行为/组件/集成验证，并对变化页面保留可审阅视觉证据；单纯规范或原型项采用设计检查。真实键盘、工作站、新手和生产验证分别记录，未运行不能标 PASS。旧缺陷与新回归分列，发现超出界面范围的底层缺陷另行关联处置，不扩展本项修复。\n\n范围和全局 Done 标准见所属 Epic；现有能力来源 SCRUM-11139，AI 条件接入来源 SCRUM-11156/11166。依据本地 master de7bca6 与本轮 Jira 读取；本次没有产品代码、桌面操作、发布或生产变更。",
+      "observedDate": "2026-10-22",
+      "timezone": "Pacific/Auckland",
+      "source": "Atlassian getJiraIssue",
+      "url": "https://yituoxx.atlassian.net/browse/SCRUM-11174"
+    },
+    {
+      "key": "SCRUM-11184",
+      "summary": "为 AI 设计提供统一的分步界面接入与手动交接布局",
+      "status": "To Do",
+      "description": "Planning-ID：PF-GUX-v2-I03  \nInitiative：PF-GUX-v2；计划日期：2026-10-19（Pacific/Auckland）\n\n## 用户价值 / 目标\n\n作为使用 AI 设计的操作者，我希望需求、附件、Prompt、生成和导入按步骤展开。\n\n## 验收条件\n\n1. 与 SCRUM-11166 明确界面所有权：原 Epic 实现业务能力，本项仅负责统一引导壳与视觉适配，不重复实现上传、生成或回收。\n2. 按当前可用能力呈现需求/模板、附件、Prompt 确认、生成状态、候选确认和导入准备设计素材；每步只显示相关输入。\n3. 桥接失败或不可用时保留现有 Prompt 和手动交接，不伪造生成进度、完成或候选导入成功。\n4. 依赖 SCRUM-11166 对应能力可集成后验收；未完成时 AI 入口明确不可用或隐藏，不阻塞三条本地图像路线。\n\n## 前置依赖\n\n* [SCRUM-11179](https://yituoxx.atlassian.net/browse/SCRUM-11179)：按业务状态生成步骤进度与当前步骤专属内容\n* [SCRUM-11166](https://yituoxx.atlassian.net/browse/SCRUM-11166)：既有 AI 业务能力（仅阻塞 AI 界面接入）\n\n## Scrum 分组\n\n建议 Sprint 3（候选分组，非时间或容量承诺）；正式 Sprint、负责人和故事点在评审后确定，本次保持待办状态。所属 Epic：[SCRUM-11170](https://yituoxx.atlassian.net/browse/SCRUM-11170)。\n\n## 实现与验收边界\n\n本项是用户要求“先生成 Scrum & Epics”的规划结果，不代表已批准产品实现、已完成或已运行测试。实现前按所属 Epic 完成设计评审与依赖核实；复用已有业务服务、审核、导出和恢复能力，UI 不能创造命令资格。保留原件/InputSnapshot、精确审批、下游失效、单任务单图、三条路线及生产安全契约。关键提示、停止和接管不能因减少内容而不可达。保持 zh-CN/en 资源，中文人工验收，不新增英文人工走查。\n\n## 验证要求与来源\n\n按本项风险执行适当的行为/组件/集成验证，并对变化页面保留可审阅视觉证据；单纯规范或原型项采用设计检查。真实键盘、工作站、新手和生产验证分别记录，未运行不能标 PASS。旧缺陷与新回归分列，发现超出界面范围的底层缺陷另行关联处置，不扩展本项修复。\n\n范围和全局 Done 标准见所属 Epic；现有能力来源 SCRUM-11139，AI 条件接入来源 SCRUM-11156/11166。依据本地 master de7bca6 与本轮 Jira 读取；本次没有产品代码、桌面操作、发布或生产变更。",
+      "observedDate": "2026-10-22",
+      "timezone": "Pacific/Auckland",
+      "source": "Atlassian getJiraIssue",
+      "url": "https://yituoxx.atlassian.net/browse/SCRUM-11184"
+    },
+    {
+      "key": "SCRUM-11166",
+      "summary": "实现 WPF AI设计页面、进度及完整手动交接",
+      "status": "To Do",
+      "description": "## 上下文\n\n提供导入前的独立 AI 设计入口，自动通道和 Prompt-only／手动回收共用一份明确的需求记录。\n\n## 要求\n\n* 首页入口和页面：模板字段、附件选择／移除／用途，显示原文件名／上传名／类型／大小／状态，提交前明确实际上传清单，预览编辑复制 Prompt。\n* ViewModel 只依赖协调器视图合同，不直接操作网页、SQL 或任意文件。运行中禁止第二提交与修改附件，保留已启动的快照。\n* 展示上传、生图、接收、校验、导入阶段与具体失败原因；Queued至Validating含Uploading可停止，Importing临时禁用停止。\n* 只有扩展／宿主版本／来源／下载根目录／网页适配检查通过才启用自动；未配置仍可生成复制 Prompt。有附件降级提供实际快照选择／打开入口和文件用途说明。\n* 提供用户明确重试、选择手动生成图片和返回首页；手动图片走同一校验／幂等导入，不自动重新提交。通过现有 zh/en 资源实现提示、状态、错误、设置。\n\n## 验收条件\n\n- [ ] 有无附件、混合类型及同名文件的展示与操作在中英文均清楚可用。\n- [ ] 不可用桥接时 Prompt 功能正常；复制指令和已上传状态严格区分。\n- [ ] 停止竞态／重启中断／ImportFailed 展示真实状态，迟到结果不自动导航。\n- [ ] 手动选择有效图片导入同一请求成功；重复点击不产生第二 Session。\n- [ ] 成功进入现有 Workflow Selection 预选准备设计素材，保留后续审阅和生产流程。\n\n## 依赖与来源\n\n* Planning-ID: PF-AIDESIGN-v1-T10\n* Epic: [SCRUM-11156](https://yituoxx.atlassian.net/browse/SCRUM-11156)\n* 前置依赖：SCRUM-11165\n* 规格：2026-10-05 修订0.2，用户已批准；C:/Users/admin/.codex/worktrees/prompt-work-images/printflow-Studio/docs/superpowers/specs/2026-10-05-prompt-work-images-design.md\n* 分支：codex/prompt-work-images；范围仅本Epic第一版，Linux／Google／MCP输出中转留到后续。\n\n",
+      "observedDate": "2026-10-22",
+      "timezone": "Pacific/Auckland",
+      "source": "Atlassian getJiraIssue",
+      "url": "https://yituoxx.atlassian.net/browse/SCRUM-11166"
+    }
+  ]
+}

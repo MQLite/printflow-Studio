@@ -1,0 +1,112 @@
+{
+  "date": "2026-10-28 Pacific/Auckland",
+  "scope": "Noninteractive acceptance only, per current owner instructions",
+  "sourceRoot": "C:\\Users\\admin\\.codex\\worktrees\\scrum-11201-shared-theme\\printflow-Studio",
+  "executionRoot": "C:\\Users\\admin\\.codex\\worktrees\\u09\\printflow-Studio",
+  "sourceFilesByteIdentical": 831,
+  "originalSourceUnchanged": true,
+  "newProductOrTestSourceChangesThisTurn": false,
+  "candidateFilesVerified": 887,
+  "candidateHash": "FB0DF8A084B8BAD58FEBD0D6B30765E35EF85E82678A858D37C226F218B7B121",
+  "scenarioHash": "927A2B2C2B01027EFBE318443A3429965AEEF75F8A408C71E7BADFF8434BF8EB",
+  "preparationExit": 0,
+  "scenarioLedgerSha256": "17B0A4714EE218FC531164FE45A63B696B51E0B1FF0C3C254E03A21F00C299D2",
+  "verifiedScenarioRows": 8,
+  "negativeCasesPreserved": [
+    "F1K KeepOriginalExtent promotion refused",
+    "F6 legacy maximum-box versus decoded-size mismatch"
+  ],
+  "isolatedDeliveredFilesRehashed": [
+    {
+      "scenario": "F1",
+      "path": "C:\\Users\\admin\\.codex\\worktrees\\u09\\printflow-Studio\\artifacts\\pf-opux-scrum11154-workstation-entry\\runs\\a\\delivery\\asset-reviewed.png",
+      "sha256": "304f62ab275e30670086ebd35ce2aec8ec9f50ef6e65f1729ca85c0b783c3967",
+      "delivered": true
+    },
+    {
+      "scenario": "F2D",
+      "path": "C:\\Users\\admin\\.codex\\worktrees\\u09\\printflow-Studio\\artifacts\\pf-opux-scrum11154-workstation-entry\\runs\\a\\delivery\\direct-reviewed.tif",
+      "sha256": "e76d67cdca45a11f508d7027cddc1332c9ad75aa25ac39620947c6645d993a6c",
+      "delivered": true
+    },
+    {
+      "scenario": "F2C",
+      "path": "C:\\Users\\admin\\.codex\\worktrees\\u09\\printflow-Studio\\artifacts\\pf-opux-scrum11154-workstation-entry\\runs\\a\\delivery\\customer-reviewed.tif",
+      "sha256": "e76d67cdca45a11f508d7027cddc1332c9ad75aa25ac39620947c6645d993a6c",
+      "delivered": true
+    }
+  ],
+  "ownedRestart": "VERIFIED, exact owned child only; no new result; not physical power loss",
+  "screenshotsActuallyReviewed": 100,
+  "snapshotReviewOnly": true,
+  "openVisualFindings": [
+    {
+      "id": "VIS-COMP-01",
+      "title": "Compact recent-task startup warning is cropped to icon/border in initial viewport",
+      "severity": "Visibility concern; current production-blocking effect not established",
+      "frames": [
+        {
+          "path": "screenshots/completion/recent-1000x700.png",
+          "region": {
+            "x": 208,
+            "y": 344,
+            "width": 768,
+            "height": 22
+          }
+        },
+        {
+          "path": "screenshots/completion/recent-1280x720.png",
+          "region": {
+            "x": 208,
+            "y": 346,
+            "width": 1048,
+            "height": 30
+          }
+        }
+      ],
+      "observation": "The warning area initially shows a yellow strip and icon without a readable message. This is partial content at the bottom of Home.Upper's scroll viewport. The visible workstation section still says this startup has not been checked; continue/abandon controls and no-auto-processing caveat remain readable.",
+      "sourceContext": "HomeView.xaml:207 defines Home.Upper with automatic vertical scrolling; lines236-252 place preset/recovery warnings outside the StartupDetails expander. HomeViewModel.cs:186-196 describes these as startup preset/recovery warnings; Strings.zh-CN.resx:1313 asks the operator to view workstation checks when startup preset validation failed. They are not simply hidden informational counts, but this review does not establish them as current live production blockers.",
+      "expected": "When a startup warning exists, expose at least its meaningful warning summary in the compact initial view, or provide an equally clear visible indication directing the operator to its details.",
+      "notEstablished": "Scrolling was not operated. No claim that the warning is inaccessible or that current production is permitted/blocked is made."
+    }
+  ],
+  "knownFixtureObservations": [
+    {
+      "id": "FIXTURE-COMP-01",
+      "title": "Synthetic save fixture has conflicting dimension labels",
+      "path": "screenshots/completion/save-1920x1080.png",
+      "regions": [
+        {
+          "x": 968,
+          "y": 525,
+          "width": 900,
+          "height": 36
+        },
+        {
+          "x": 947,
+          "y": 798,
+          "width": 910,
+          "height": 24
+        }
+      ],
+      "observation": "Save-as summary says 0.5 x 0.4 mm while Outputs produced says 200 x 150 mm (2362 x 1772 px at 300 dpi). Preview metadata is 6 x 5 px. Static synthetic evidence cannot establish whether this is only fixture metadata or a real product-path inconsistency.",
+      "disposition": "Known legacy MaxBounds/F6 negative evidence, as identified by controller; not a newly fixed or acceptance-passed size path.",
+      "controllerContext": "Controller reports fresh separate F2D/F2C TargetEdgeV1 TIFFs were verified coherent (1800 x 1350 px; 152.4 x 114.3 mm), while F6 deliberately preserves the 6 x 5 MaxBounds disagreement. This sub-review did not inspect or validate those fresh TIFFs."
+    }
+  ],
+  "reviewReportsSha256": {
+    "visual-processing-review.json": "9b71b1fd900793e7efc55795e6896734c915e0409f6757f6ecc1ff92ef5fe702",
+    "visual-completion-review.json": "058bbabb2ccf07e5c58615ddbfaa277c0d33073aa6ecc3a36f9336a89f47671a"
+  },
+  "desktopDecision": "OWNER_DEFERRED: 现在不方便，请先做不占桌面的检查",
+  "noviceDecision": "NO_PARTICIPANT: 暂时无人参与，请先完成代理可执行的验收",
+  "windowShown": false,
+  "nativeDispatches": 0,
+  "systemScalingChanges": false,
+  "realWindowDpiNativeDialogsInputReader": "NOT RUN — OWNER DEFERRED",
+  "noviceAcceptance": "NOT RUN — NO PARTICIPANT",
+  "all140StatesAccepted": false,
+  "wholeU09": "PARTIAL — DESKTOP/HUMAN DEFERRED, VIS-COMP-01 OPEN",
+  "headUnchanged": true,
+  "commitPushMergePublishJiraC05": "NOT RUN"
+}

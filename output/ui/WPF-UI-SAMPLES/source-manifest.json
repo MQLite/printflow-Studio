@@ -1,0 +1,66 @@
+[
+  {
+    "Path": "Directory.Packages.props",
+    "Sha256": "B55AF5E78BE539C96C48B46E348BB2F9201AC8A425586A021A3E6913F413FCB8"
+  },
+  {
+    "Path": "src/PrintFlow.App/packages.lock.json",
+    "Sha256": "B90D5B7064060626F13F0EBB6AF2D980DB74E27D3603CF9123189251AE0B3654"
+  },
+  {
+    "Path": "src/PrintFlow.App/PrintFlow.App.csproj",
+    "Sha256": "DF6B4C4E43E1DE152CA6C6F80AB9E79B3905348809CB414A91189BEA3EF0EDE1"
+  },
+  {
+    "Path": "src/PrintFlow.App/Resources/Strings.resx",
+    "Sha256": "95D12C62FFF19486898CE6BBB12E097F91E4AFE8E45B158E15E8576882C80DD4"
+  },
+  {
+    "Path": "src/PrintFlow.App/Resources/Strings.zh-CN.resx",
+    "Sha256": "DE8F078AE81F35FA7915BD324F45A5EA4C947B61600FB44948B8D8947AF84CC7"
+  },
+  {
+    "Path": "src/PrintFlow.App/Themes/WpfUiSampleTheme.xaml",
+    "Sha256": "A20ECF2FC613C5C7159BCBB8E9A917ED2C268C75FA8A8603D41FE7D34BB21A63"
+  },
+  {
+    "Path": "src/PrintFlow.App/ViewModels/HomeViewModel.cs",
+    "Sha256": "966C7C3E60E2205FE73B3EA9576C8FD81CBB7BC88A61163D2E87775B8E12AEC0"
+  },
+  {
+    "Path": "src/PrintFlow.App/Views/HomeView.xaml",
+    "Sha256": "15B55C39BE604A717A9C1EFD10CD251F38FC7139AF0CAEB8BA9B5F23C44B7325"
+  },
+  {
+    "Path": "src/PrintFlow.App/Views/HomeView.xaml.cs",
+    "Sha256": "7F9B8EBE385945C1A3B669CAF025B9CCE4C34AB32DD856F11F6D5CED85DFF871"
+  },
+  {
+    "Path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "Sha256": "78BCCBFF3059300EF1D373D15CE4B583D8728A1C099F4E12B2E5E1B4CDA75175"
+  },
+  {
+    "Path": "src/PrintFlow.App/Views/SharedReviewSurface.cs",
+    "Sha256": "2C16606FEE4A893DABF9310EEEB4850E593E99BDF7C10F4C4BB54318BFAB0273"
+  },
+  {
+    "Path": "tests/PrintFlow.Tests/Integration/Ui/GuidedAcceptanceTests.cs",
+    "Sha256": "35083B2289A1B0E0F3D6AEF3922EDEE15C4DB3D1E4C218C3BB4434A0C0BD2B15"
+  },
+  {
+    "Path": "tests/PrintFlow.Tests/Integration/Ui/WpfUiSamplePageTests.cs",
+    "Sha256": "8BBF53B8A0641A4468F372AA3B5E40A554ADD729E645C92172865941F935AB06"
+  },
+  {
+    "Path": "tests/PrintFlow.Tests/Integration/Ui/WpfUiSampleVisualEvidenceTests.cs",
+    "Sha256": "67CA020B54572C67066A140808625576687917C97063D7612C59905AC9BA9CC8"
+  },
+  {
+    "Path": "tests/PrintFlow.Tests/packages.lock.json",
+    "Sha256": "FDECB0EC823BCDE7AEF7F7DD90534FD201AFC98230B501D6C45FC7FDF85BAC88"
+  },
+  {
+    "Path": "tests/PrintFlow.WorkstationEntry/packages.lock.json",
+    "Sha256": "7396DD55F66215BDFAD6AB7BE701F655EF1C65A1D49BB0FB95CB068846AB0842"
+  }
+]

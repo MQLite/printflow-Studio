@@ -1,0 +1,53 @@
+{
+  "groups": [
+    {
+      "group": "resource-and-review",
+      "exitCode": 0,
+      "discovered": 105,
+      "complete": true,
+      "exactInstances": true,
+      "counts": {
+        "Passed": 105
+      },
+      "trx": "D:\\Repositories\\printflow-Studio\\output\\ui\\SCRUM-11213\\c05-20261029-r1\\checks\\resource-and-review.trx",
+      "sha256": "a776bd799637206162a87521ea315530f7231bd2cbe9714c795c875b9bc201de",
+      "runErrors": []
+    },
+    {
+      "group": "accessibility",
+      "exitCode": 0,
+      "discovered": 22,
+      "complete": true,
+      "exactInstances": true,
+      "counts": {
+        "Passed": 22
+      },
+      "trx": "D:\\Repositories\\printflow-Studio\\output\\ui\\SCRUM-11213\\c05-20261029-r1\\checks\\accessibility.trx",
+      "sha256": "a9ce39361d7e7f8acf1442c6d7730de96e1119147425716db99233751d333536",
+      "runErrors": []
+    },
+    {
+      "group": "print-copy",
+      "status": "NOT RUN",
+      "reason": "Existing U09 5 GiB free-memory render prerequisite not met",
+      "freePhysicalMemoryKiB": 4582460,
+      "discovered": 29
+    },
+    {
+      "group": "save-recovery-copy",
+      "status": "NOT RUN",
+      "reason": "Existing U09 5 GiB free-memory render prerequisite not met",
+      "freePhysicalMemoryKiB": 4621136,
+      "discovered": 38
+    }
+  ],
+  "counts": {
+    "Passed": 127
+  },
+  "excludedSmokeAndExact11": true,
+  "noBuild": true,
+  "humanAcceptance": "NOT RUN",
+  "realScreenReader": "NOT RUN",
+  "physicalInput": "NOT RUN",
+  "overallC05": "PENDING_HUMAN_ACCEPTANCE"
+}

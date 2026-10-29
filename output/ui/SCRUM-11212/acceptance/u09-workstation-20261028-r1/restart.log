@@ -1,0 +1,6 @@
+OWNED_CHILD_INTERRUPTED pid=12060 start=639287561985937523; not power-loss evidence.
+
+
+
+
+OWNED_RESTART_VERIFIED: interrupted attempt/recovery navigation only; visible readiness remains separate.

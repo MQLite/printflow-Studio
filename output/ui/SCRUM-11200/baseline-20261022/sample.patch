@@ -1,0 +1,815 @@
+diff --git a/Directory.Packages.props b/Directory.Packages.props
+index e6f1d6f815761ba75b23705bbe8855633365d69a..93946460a3d227a5368f60a1c580721a28a0b95d 100644
+--- a/Directory.Packages.props
++++ b/Directory.Packages.props
+@@ -17,6 +17,7 @@
+   </PropertyGroup>
+ 
+   <ItemGroup Label="Application shell">
++    <PackageVersion Include="WPF-UI" Version="4.3.0" />
+     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.11" />
+     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.11" />
+diff --git a/src/PrintFlow.App/PrintFlow.App.csproj b/src/PrintFlow.App/PrintFlow.App.csproj
+index 07869a86b8632c9e53018273735480b12c575467..004d347ea915e032804962811a3d0305bd7d8b77 100644
+--- a/src/PrintFlow.App/PrintFlow.App.csproj
++++ b/src/PrintFlow.App/PrintFlow.App.csproj
+@@ -41,6 +41,7 @@
+ 
+   <ItemGroup>
+     <PackageReference Include="CommunityToolkit.Mvvm" />
++    <PackageReference Include="WPF-UI" />
+     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+   </ItemGroup>
+diff --git a/src/PrintFlow.App/Resources/Strings.resx b/src/PrintFlow.App/Resources/Strings.resx
+index 7170558352bc07d45d2e86db6fc41818f9acef32..ebce0718e8efce91bf170f646de48e53a81f2017 100644
+--- a/src/PrintFlow.App/Resources/Strings.resx
++++ b/src/PrintFlow.App/Resources/Strings.resx
+@@ -1424,4 +1424,7 @@
+   <data name="Nav_TaskReloadFailed" xml:space="preserve"><value>The task could not be reloaded. It has not been resumed; try returning again.</value></data>
+   <data name="Session_FailurePreservedCurrent" xml:space="preserve"><value>Originals, input snapshots and existing results remain subject to their retention rules. Availability follows the current task and file checks.</value></data>
+   <data name="Session_FailurePreservedUnknown" xml:space="preserve"><value>The last displayed task remains available to inspect; its current records and files have not been rechecked.</value></data>
++  <data name="Home_SampleTitle" xml:space="preserve"><value>Start with one image</value></data>
++  <data name="Home_SampleSubtitle" xml:space="preserve"><value>Import an image. PrintFlow will guide you through each step.</value></data>
++  <data name="Home_SampleDropLabel" xml:space="preserve"><value>Drop your image here</value></data>
+ </root>
+diff --git a/src/PrintFlow.App/Resources/Strings.zh-CN.resx b/src/PrintFlow.App/Resources/Strings.zh-CN.resx
+index e3269e7b5fea0b98485802b37732afeafaa46974..a80a41ad9a98c91b0804919f966c75ee4e5c833e 100644
+--- a/src/PrintFlow.App/Resources/Strings.zh-CN.resx
++++ b/src/PrintFlow.App/Resources/Strings.zh-CN.resx
+@@ -1413,4 +1413,7 @@
+   <data name="Nav_TaskReloadFailed" xml:space="preserve"><value>无法重新读取任务。当前任务尚未恢复；请再次尝试返回。</value></data>
+   <data name="Session_FailurePreservedCurrent" xml:space="preserve"><value>原件、输入快照和已有结果仍按既有保留规则管理；可用内容以当前任务和文件核实结果为准。</value></data>
+   <data name="Session_FailurePreservedUnknown" xml:space="preserve"><value>上次显示的任务内容仍可查看；当前记录与文件状态尚未重新核实。</value></data>
++  <data name="Home_SampleTitle" xml:space="preserve"><value>从一张图片开始</value></data>
++  <data name="Home_SampleSubtitle" xml:space="preserve"><value>导入图片，PrintFlow 会一步一步引导你完成。</value></data>
++  <data name="Home_SampleDropLabel" xml:space="preserve"><value>将图片拖到这里</value></data>
+ </root>
+diff --git a/src/PrintFlow.App/ViewModels/HomeViewModel.cs b/src/PrintFlow.App/ViewModels/HomeViewModel.cs
+index 5f09b5b9f35d73ff47ae82aa310c6371f5979efb..44b7e7d8b12e30e22c3eaa071794f87745db816f 100644
+--- a/src/PrintFlow.App/ViewModels/HomeViewModel.cs
++++ b/src/PrintFlow.App/ViewModels/HomeViewModel.cs
+@@ -31,6 +31,9 @@ public sealed partial class HomeViewModel : ObservableObject, IEntryScreenLifeti
+     public bool IsImporting => _import is not null;
+     public bool CanStartImport => _active && !IsBusy && !IsConfirmingAbandon;
+     public string ImportProgress => Strings.Resolve("Home_GuidedImporting");
++    public string SampleTitle => Strings.Resolve("Home_SampleTitle");
++    public string SampleSubtitle => Strings.Resolve("Home_SampleSubtitle");
++    public string SampleDropLabel => Strings.Resolve("Home_SampleDropLabel");
+     public string CancelImportLabel => Strings.Resolve("Home_GuidedCancelImport");
+     public string AiUnavailable => Strings.Resolve("Home_GuidedAiUnavailable");
+     public string ContinueHeading => Strings.Resolve("Home_GuidedContinue");
+diff --git a/src/PrintFlow.App/Views/HomeView.xaml b/src/PrintFlow.App/Views/HomeView.xaml
+index fda02136d1879e04b319c56afda5ea599f64b82a..e6684af278b103c0b973a3767253a5c2e4ff2f2c 100644
+--- a/src/PrintFlow.App/Views/HomeView.xaml
++++ b/src/PrintFlow.App/Views/HomeView.xaml
+@@ -4,7 +4,7 @@
+              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+              xmlns:vm="clr-namespace:PrintFlow.App.ViewModels"
+-             xmlns:views="clr-namespace:PrintFlow.App.Views"
++             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml" xmlns:views="clr-namespace:PrintFlow.App.Views"
+              mc:Ignorable="d"
+              Background="{DynamicResource PF.Brush.Canvas}"
+              Foreground="{DynamicResource PF.Brush.Ink}"
+@@ -20,9 +20,11 @@
+     <UserControl.Resources>
+       <ResourceDictionary>
+         <ResourceDictionary.MergedDictionaries>
+-          <ResourceDictionary Source="/PrintFlow.App;component/Themes/GuidedTheme.xaml" />
++          <ResourceDictionary Source="/PrintFlow.App;component/Themes/GuidedTheme.xaml" /><ResourceDictionary Source="/PrintFlow.App;component/Themes/WpfUiSampleTheme.xaml" />
+         </ResourceDictionary.MergedDictionaries>
+         <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
++        <!-- Preserve the page's existing public theme key while adapting its visual template. -->
++        <Style x:Key="PF.Button.Primary" TargetType="Button" BasedOn="{StaticResource PF.Sample.Primary}" />
+         <!--
+             The same converter the review surface uses, for the same reason: the one stream in
+             the preview path belongs to the view layer, so no view model ever opens one
+@@ -152,55 +154,74 @@
+           </ResourceDictionary>
+     </UserControl.Resources>
+ 
+-    <Grid Background="{DynamicResource PF.Brush.Canvas}">
+-    <Grid x:Name="LayoutRoot" Margin="{DynamicResource PF.Padding.Card}" SizeChanged="OnLayoutSizeChanged">
+-        <Grid.RowDefinitions>
+-            <RowDefinition Height="Auto" />
+-            <RowDefinition Height="3*" />
+-            <RowDefinition Height="2*" />
+-        </Grid.RowDefinitions>
+-
+-        <DockPanel Grid.Row="0" LastChildFill="True">
+-            <views:SessionActionButton Style="{StaticResource PF.Button.Secondary}" DockPanel.Dock="Right"
++    <Grid Background="{DynamicResource PF.Brush.Canvas}">    <Grid.ColumnDefinitions><ColumnDefinition Width="184" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
++    <Border Background="White" BorderBrush="{DynamicResource PF.Brush.Border}" BorderThickness="0,0,1,0" Padding="16,24">
++      <DockPanel>
++        <StackPanel DockPanel.Dock="Top">
++          <StackPanel Orientation="Horizontal" Margin="6,0,0,32">
++            <ui:SymbolIcon Symbol="Print24" FontSize="28" Foreground="{DynamicResource PF.Brush.Primary}" VerticalAlignment="Center" Margin="0,0,10,0" />
++            <TextBlock Text="PrintFlow&#10;Studio" FontSize="18" FontWeight="SemiBold" />
++          </StackPanel>
++          <Border Background="{DynamicResource PF.Brush.Selection}" CornerRadius="8" Padding="12,14">
++            <StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="Home24" FontSize="20" Foreground="{DynamicResource PF.Brush.Primary}" Margin="0,0,10,0" /><TextBlock Text="{Binding ImportHeading}" Foreground="{DynamicResource PF.Brush.Primary}" FontWeight="SemiBold" VerticalAlignment="Center" FontSize="13" /></StackPanel>
++          </Border>
++        </StackPanel>
++        <StackPanel DockPanel.Dock="Bottom" VerticalAlignment="Bottom">
++<views:SessionActionButton Style="{StaticResource PF.Sample.Secondary}"
+                     VerticalAlignment="Center"
+                     Content="{Binding SettingsLabel}"
+                     Command="{Binding ShowSettingsCommand}"
+                     AutomationProperties.AutomationId="Home.ShowSettings"
+                     AutomationProperties.Name="{Binding SettingsLabel}" />
+-            <HeaderedContentControl Style="{StaticResource PF.PageHeader}" Header="{Binding Title}" />
++        </StackPanel>
++        <Border />
++      </DockPanel>
++    </Border>
++    <Grid Grid.Column="1" x:Name="LayoutRoot" Margin="{DynamicResource PF.Padding.Card}" SizeChanged="OnLayoutSizeChanged">
++        <Grid.RowDefinitions>
++            <RowDefinition Height="Auto" />
++            <RowDefinition Height="Auto" />
++            <RowDefinition Height="*" />
++        </Grid.RowDefinitions>
++
++        <DockPanel Grid.Row="0" LastChildFill="True">
++
++            <HeaderedContentControl Style="{StaticResource PF.PageHeader}" Header="{Binding SampleTitle}" Margin="0,0,0,16">
++              <TextBlock Text="{Binding SampleSubtitle}" TextWrapping="Wrap" />
++            </HeaderedContentControl>
+         </DockPanel>
+ 
+         <!-- SCRUM-11152: what Production Readiness last observed in this run, in words, with its
+              one way to that screen. The button only navigates; nothing here starts a check. -->
+-        <!-- Reserve both scroll areas after the title. The 3:2 allocation leaves room for the
+-             42-DIP actions in Recovery/Recent even with every upper disclosure expanded.
+-             The existing code-behind maximum remains an additional upper bound. -->
++        <!-- The upper section takes its content height up to the code-behind cap.
++             The remaining space belongs to Recovery/Recent, including when disclosures expand. -->
+         <ScrollViewer x:Name="Upper" Grid.Row="1" VerticalScrollBarVisibility="Auto" IsTabStop="False"
+                       AutomationProperties.AutomationId="Home.Upper">
+         <StackPanel>
+         <!-- The one way in. Dropping is handled on the whole screen, so the operator can
+              drop anywhere rather than hunt for a target. -->
+-        <HeaderedContentControl Style="{StaticResource PF.TaskCard}" Header="{Binding ImportHeading}">
++        <ui:Card Style="{StaticResource PF.Sample.Card}" Padding="16" Background="#FAFCFB" BorderBrush="#B6D4C8">
+             <StackPanel>
+-                <TextBlock Text="{Binding ImportHint}" TextWrapping="Wrap" Opacity="0.7" Margin="0,4,0,10" />
+-                <views:SessionActionButton Style="{StaticResource PF.Button.Primary}" Content="{Binding ChooseFileLabel}"
++                                <ui:SymbolIcon Symbol="Image24" FontSize="34" Foreground="#6D8A7D" HorizontalAlignment="Center" Margin="0,0,0,8" />
++                <TextBlock Text="{Binding SampleDropLabel}" FontSize="22" FontWeight="SemiBold" HorizontalAlignment="Center" />
++                <TextBlock Text="{Binding ImportHint}" TextWrapping="Wrap" TextAlignment="Center" Foreground="{DynamicResource PF.Brush.Muted}" FontSize="12" Margin="12,6,12,12" />
++                <views:SessionActionButton Style="{StaticResource PF.Button.Primary}" MinWidth="180" Content="{Binding ChooseFileLabel}"
+                         Command="{Binding ChooseFileCommand}" IsEnabled="{Binding CanStartImport}"
+                         AutomationProperties.AutomationId="Home.ChooseFile"
+-                        AutomationProperties.Name="{Binding ChooseFileLabel}"
+-                        HorizontalAlignment="Left" />
++                        AutomationProperties.Name="{Binding ChooseFileLabel}" HorizontalAlignment="Center" />
+                 <StackPanel Visibility="{Binding IsImporting, Converter={StaticResource BoolToVisibility}}" Margin="0,12,0,0">
+                     <TextBlock Text="{Binding ImportProgress}" TextWrapping="Wrap" AutomationProperties.AutomationId="Home.ImportProgress" />
+                     <views:SessionActionButton Style="{StaticResource PF.Button.Secondary}" Content="{Binding CancelImportLabel}" Command="{Binding CancelImportCommand}" HorizontalAlignment="Left" Margin="0,8,0,0" AutomationProperties.AutomationId="Home.CancelImport" />
+                 </StackPanel>
+                 <TextBlock Text="{Binding Notice}" TextWrapping="Wrap" Margin="0,12,0,0" FontWeight="SemiBold" />
+                 <views:NoticeErrorDetails Margin="0,4,0,0" />
+-                <TextBlock Text="{Binding AiUnavailable}" TextWrapping="Wrap" Foreground="{DynamicResource PF.Brush.Muted}" Margin="0,12,0,0" AutomationProperties.AutomationId="Home.AiUnavailable" />
++                <TextBlock Text="{Binding AiUnavailable}" TextWrapping="Wrap" Foreground="{DynamicResource PF.Brush.Muted}" FontSize="12" TextAlignment="Center" Margin="0,8,0,0" AutomationProperties.AutomationId="Home.AiUnavailable" />
+             </StackPanel>
+-        </HeaderedContentControl>
++        </ui:Card>
+ 
+ 
+         <StackPanel Margin="0,8,0,14">
+-            <Border Style="{StaticResource PF.Card}">
++            <ui:Card Style="{StaticResource PF.Sample.Card}" Padding="14"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                 <StackPanel>
+                     <TextBlock Text="{Binding Readiness.Heading}" Opacity="0.75" TextWrapping="Wrap"
+                                AutomationProperties.AutomationId="Home.Readiness.Heading" />
+@@ -226,14 +247,13 @@
+                     </Expander>
+ 
+                     </StackPanel></Expander>
+-                    <views:SessionActionButton Style="{StaticResource PF.Button.Secondary}" Content="{Binding EnvironmentLabel}"
++
++                </StackPanel><views:SessionActionButton Style="{StaticResource PF.Sample.Secondary}" Content="{Binding EnvironmentLabel}"
+                             Command="{Binding ShowEnvironmentCommand}"
+                             AutomationProperties.AutomationId="Home.ShowEnvironment"
+                             AutomationProperties.Name="{Binding EnvironmentLabel}"
+-                            Margin="0,8,0,0"
+-                            HorizontalAlignment="Left" />
+-                </StackPanel>
+-            </Border>
++                            Margin="16,0,0,0"
++                            Grid.Column="1" VerticalAlignment="Center" /></Grid></ui:Card>
+ 
+             <!-- Startup warnings stay visible; only the counts that need no action fold away. -->
+             <HeaderedContentControl Style="{StaticResource PF.Notice.Warning}" Margin="0,8,0,0"
+@@ -273,12 +293,12 @@
+         </ScrollViewer>
+ 
+         <DockPanel Grid.Row="2" Margin="0,16,0,0">
+-            <DockPanel DockPanel.Dock="Top" LastChildFill="False" Margin="0,0,0,8">
++            <DockPanel DockPanel.Dock="Top" LastChildFill="True" Margin="0,0,0,8">
+                 <views:SessionActionButton Style="{StaticResource PF.Button.Secondary}" DockPanel.Dock="Right"
+                         Content="{Binding RefreshLabel}"
+                         Command="{Binding RefreshCommand}"
+                         AutomationProperties.AutomationId="Home.Refresh"
+-                        AutomationProperties.Name="{Binding RefreshLabel}" />
++                        AutomationProperties.Name="{Binding RefreshLabel}" /><TextBlock Text="{Binding ContinueHeading}" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center" />
+             </DockPanel>
+ 
+             <!--
+@@ -324,7 +344,22 @@
+             <ScrollViewer VerticalScrollBarVisibility="Auto" AutomationProperties.AutomationId="Home.Lists">
+                 <!-- Inert while an Abandon confirmation is open (SCRUM-11154 F-V4); scrolling still works. -->
+                 <StackPanel IsEnabled="{Binding AreListsInteractive}">
+-                    <StackPanel Visibility="{Binding HasRecoverySessions, Converter={StaticResource BoolToVisibility}}" Margin="0,0,0,18">
++
++                <StackPanel Visibility="{Binding HasContinueSessions, Converter={StaticResource BoolToVisibility}}">
++
++                <ItemsControl ItemsSource="{Binding ContinueSessions}"
++                              IsTabStop="False"
++                              AutomationProperties.AutomationId="Home.ContinueList"
++                              AutomationProperties.Name="{Binding ContinueHeading}" ItemContainerStyle="{StaticResource HomeTaskContainer}" ItemTemplate="{StaticResource HomeTaskRow}" />
++                </StackPanel>
++                <Expander Style="{StaticResource PF.Disclosure}" Header="{Binding RecentHeading}" IsExpanded="{Binding HasNoContinueSessions, Mode=OneWay}" x:Name="HistoryDisclosure" AutomationProperties.AutomationId="Home.HistoryDetails">
++                <ItemsControl ItemsSource="{Binding HistorySessions}"
++                              IsTabStop="False"
++                              AutomationProperties.AutomationId="Home.RecentSessionList"
++                              AutomationProperties.Name="{Binding RecentHeading}" ItemContainerStyle="{StaticResource HomeTaskContainer}" ItemTemplate="{StaticResource HomeTaskRow}" />
++                </Expander>
++<!-- Keep recovery actions at the end of this scroll region, so Scroll to end reaches the final recovery action. -->
++<StackPanel Visibility="{Binding HasRecoverySessions, Converter={StaticResource BoolToVisibility}}" Margin="0,0,0,18">
+                         <TextBlock Text="{Binding RecoveryHeading}" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,8" />
+                         <ItemsControl ItemsSource="{Binding RecoverySessions}" IsTabStop="False"
+                                       AutomationProperties.AutomationId="Home.RecoveryList"
+@@ -372,19 +407,6 @@
+                             </ItemsControl.ItemTemplate>
+                         </ItemsControl>
+                     </StackPanel>
+-                <StackPanel Visibility="{Binding HasContinueSessions, Converter={StaticResource BoolToVisibility}}">
+-                    <TextBlock Text="{Binding ContinueHeading}" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,8" />
+-                <ItemsControl ItemsSource="{Binding ContinueSessions}"
+-                              IsTabStop="False"
+-                              AutomationProperties.AutomationId="Home.ContinueList"
+-                              AutomationProperties.Name="{Binding ContinueHeading}" ItemContainerStyle="{StaticResource HomeTaskContainer}" ItemTemplate="{StaticResource HomeTaskRow}" />
+-                </StackPanel>
+-                <Expander Style="{StaticResource PF.Disclosure}" Header="{Binding RecentHeading}" IsExpanded="{Binding HasNoContinueSessions, Mode=OneWay}" x:Name="HistoryDisclosure" AutomationProperties.AutomationId="Home.HistoryDetails">
+-                <ItemsControl ItemsSource="{Binding HistorySessions}"
+-                              IsTabStop="False"
+-                              AutomationProperties.AutomationId="Home.RecentSessionList"
+-                              AutomationProperties.Name="{Binding RecentHeading}" ItemContainerStyle="{StaticResource HomeTaskContainer}" ItemTemplate="{StaticResource HomeTaskRow}" />
+-                </Expander>
+                 </StackPanel>
+             </ScrollViewer>
+         </DockPanel>
+diff --git a/src/PrintFlow.App/Views/HomeView.xaml.cs b/src/PrintFlow.App/Views/HomeView.xaml.cs
+index a24d0b6a3f2f953fff8aab19d4d9b23cedef2caa..42840710eabd835071b36852aa1d9b2ca37fd85f 100644
+--- a/src/PrintFlow.App/Views/HomeView.xaml.cs
++++ b/src/PrintFlow.App/Views/HomeView.xaml.cs
+@@ -28,7 +28,9 @@ public partial class HomeView : UserControl
+     /// squeezed to nothing. Capping the upper part keeps both halves reachable by scrolling.
+     /// Layout only: it decides nothing and binds nothing.
+     /// </remarks>
+-    private const double UpperShare = 0.65;
++    // The sample's two-line page heading also needs room; reserve enough height for
++    // recovery rows even when every upper disclosure is expanded.
++    private const double UpperShare = 0.56;
+ 
+     private HomeViewModel? _subscribedHome;
+     private EventHandler? _observationChanged;
+diff --git a/src/PrintFlow.App/Views/SessionScreenView.xaml b/src/PrintFlow.App/Views/SessionScreenView.xaml
+index d67ac3b052b27005f14df06c5c44e15ba3668e06..622652d50f85f63126577c3690dfdb8778546d54 100644
+--- a/src/PrintFlow.App/Views/SessionScreenView.xaml
++++ b/src/PrintFlow.App/Views/SessionScreenView.xaml
+@@ -4,7 +4,7 @@
+              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+              xmlns:vm="clr-namespace:PrintFlow.App.ViewModels"
+-             xmlns:local="clr-namespace:PrintFlow.App.Views"
++             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml" xmlns:local="clr-namespace:PrintFlow.App.Views"
+              xmlns:primitives="clr-namespace:System.Windows.Controls.Primitives;assembly=PresentationFramework"
+              mc:Ignorable="d"
+              d:DataContext="{d:DesignInstance Type=vm:SessionViewModel}"
+@@ -256,7 +256,178 @@
+                 </StackPanel>
+             </Border>
+         </DataTemplate>
+-        <DataTemplate x:Key="OutputHistoryTemplate">
++        <DataTemplate x:Key="WpfUiSaveTemplate"><Border AutomationProperties.AutomationId="Session.FinalSave" AutomationProperties.Name="{Binding FinalSaveHeading}">
++            <ui:Card BorderBrush="{DynamicResource PF.Brush.Border}" Background="White" BorderThickness="1" Padding="16" Margin="0,0,0,14" HorizontalContentAlignment="Stretch" Focusable="False" IsTabStop="False"
++                    >
++                <ui:Card.Resources>
++                    <ResourceDictionary>
++                        <ResourceDictionary.MergedDictionaries><ResourceDictionary Source="/PrintFlow.App;component/Themes/WpfUiSampleTheme.xaml" /></ResourceDictionary.MergedDictionaries>
++                        <Style TargetType="{x:Type local:SessionTextBox}" BasedOn="{StaticResource PF.Sample.Input}" />
++                        <Style TargetType="{x:Type local:SessionActionButton}" BasedOn="{StaticResource PF.Sample.Secondary}" />
++                        <Style TargetType="{x:Type local:SessionComboBox}" BasedOn="{StaticResource DefaultComboBoxStyle}"><Setter Property="MinHeight" Value="42" /><Setter Property="FontSize" Value="14" /></Style>
++                    </ResourceDictionary>
++                </ui:Card.Resources>
++                <StackPanel>
++                    <TextBlock Text="{Binding FinalSaveHeading}" FontSize="20" FontWeight="SemiBold" />
++
++                    <StackPanel Margin="0,10,0,4" Visibility="{Binding ShowsGuidedCompletion, Converter={StaticResource BoolToVisibility}}">
++  <Border Background="{DynamicResource PF.Brush.Selection}" CornerRadius="6" Padding="10,8">
++    <WrapPanel>
++      <ui:SymbolIcon Symbol="CheckmarkCircle24" FontSize="18" Foreground="{DynamicResource PF.Brush.Primary}" Margin="0,0,8,0" />
++      <TextBlock Text="{Binding GuidedApprovalState}" FontWeight="SemiBold" FontSize="12" Margin="0,0,16,0" AutomationProperties.AutomationId="Session.Completion.Approval" />
++      <TextBlock Text="{Binding GuidedDeliveryState}" FontWeight="SemiBold" FontSize="12" AutomationProperties.AutomationId="Session.Completion.Delivery" />
++    </WrapPanel>
++  </Border>
++  <TextBlock Text="{Binding GuidedCompletionState}" FontSize="12" Foreground="{DynamicResource PF.Brush.Muted}" Margin="0,4,0,0" AutomationProperties.AutomationId="Session.Completion.Workflow" />
++</StackPanel>
++
++                    <StackPanel Margin="0,8,0,0"
++                                Visibility="{Binding HasMultipleFinalSaveTargets, Converter={StaticResource BoolToVisibility}}">
++                        <TextBlock Text="{Binding FinalSaveTargetLabel}" Style="{StaticResource MetadataLabel}" />
++                        <local:SessionComboBox ItemsSource="{Binding FinalSaveTargets}"
++                                  SelectedItem="{Binding SelectedFinalSaveTarget, Mode=TwoWay}"
++                                  TextSearch.TextPath="Label" HorizontalContentAlignment="Stretch"
++                                  IsEnabled="{Binding IsSaveDraftEditable}"
++                                  AutomationProperties.AutomationId="Session.FinalSave.Target"
++                                  AutomationProperties.Name="{Binding FinalSaveTargetLabel}">
++                            <local:SessionComboBox.ItemTemplate>
++                                <DataTemplate>
++                                    <StackPanel>
++                                        <TextBlock Text="{Binding Label}" TextWrapping="Wrap" />
++                                        <TextBlock Text="{Binding DeliveryStatus}" TextWrapping="Wrap" Foreground="{DynamicResource PF.Brush.Muted}" Margin="0,3,0,0" />
++                                    </StackPanel>
++                                </DataTemplate>
++                            </local:SessionComboBox.ItemTemplate>
++                        </local:SessionComboBox>
++                    </StackPanel>
++
++                    <TextBlock Text="{Binding FinalSaveAlert}" TextWrapping="Wrap" Margin="0,6,0,0" Foreground="#8A1F11"
++                               AutomationProperties.AutomationId="Session.FinalSave.Alert"
++                               Visibility="{Binding HasFinalSaveAlert, Converter={StaticResource BoolToVisibility}}" />
++                    <ProgressBar Height="6" Margin="0,6,0,0" Minimum="0" Maximum="1" Value="{Binding FinalSaveProgress, Mode=OneWay}"
++                                 AutomationProperties.Name="{Binding FinalSaveStatus}"
++                                 Visibility="{Binding HasFinalSaveProgress, Converter={StaticResource BoolToVisibility}}" />
++
++                    <!-- Older and unresolved saves stay reachable with their own destination. -->
++                    <StackPanel Margin="0,8,0,0"
++                                Visibility="{Binding HasFinalSaveRecords, Converter={StaticResource BoolToVisibility}}">
++                        <TextBlock Text="{Binding FinalSaveRecordsLabel}" Style="{StaticResource MetadataLabel}" />
++                        <!-- Labels carry full folders, so they wrap rather than clip. -->
++                        <local:SessionComboBox ItemsSource="{Binding FinalSaveRecords}"
++                                  SelectedItem="{Binding SelectedFinalSaveRecord, Mode=TwoWay}"
++                                  HorizontalContentAlignment="Stretch"
++                                  TextSearch.TextPath="Label"
++                                  IsEnabled="{Binding IsSaveDraftEditable}"
++                                  AutomationProperties.AutomationId="Session.FinalSave.Record"
++                                  AutomationProperties.Name="{Binding FinalSaveRecordsLabel}">
++                            <local:SessionComboBox.ItemTemplate>
++                                <DataTemplate>
++                                    <TextBlock Text="{Binding Label}" TextWrapping="Wrap" />
++                                </DataTemplate>
++                            </local:SessionComboBox.ItemTemplate>
++                        </local:SessionComboBox>
++                    </StackPanel>
++
++                    <!-- The draft is shown only while a save of this result is possible. -->
++                    <StackPanel Visibility="{Binding ShowsSaveDraft, Converter={StaticResource BoolToVisibility}}">
++                        <TextBlock Text="{Binding SaveFileNameLabel}" Style="{StaticResource MetadataLabel}" Margin="0,8,8,4" />
++                        <local:SessionTextBox Text="{Binding SaveFileNameText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
++                                 IsEnabled="{Binding IsSaveDraftEditable}"
++                                 AutomationProperties.AutomationId="Session.FinalSave.FileName"
++                                 AutomationProperties.Name="{Binding SaveFileNameLabel}" />
++
++                        <TextBlock Text="{Binding SaveFolderLabel}" Style="{StaticResource MetadataLabel}" Margin="0,8,8,4" />
++                        <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions><local:SessionTextBox Text="{Binding SaveFolderText, Mode=OneWay}" IsReadOnly="True" TextWrapping="NoWrap" HorizontalScrollBarVisibility="Hidden" ToolTip="{Binding SaveFolderText}"
++                                 AutomationProperties.AutomationId="Session.FinalSave.Folder"
++                                 AutomationProperties.Name="{Binding SaveFolderLabel}" />
++                        <local:SessionActionButton Grid.Column="1" Content="{Binding ChangeLocationLabel}" Command="{Binding ChangeLocationCommand}"
++                                VerticalAlignment="Center" Padding="12,8" Margin="8,0,0,0"
++                                AutomationProperties.AutomationId="Session.FinalSave.ChangeLocation"
++                                AutomationProperties.Name="{Binding ChangeLocationLabel}"
++                                Visibility="{Binding CanChangeLocation, Converter={StaticResource BoolToVisibility}}" /></Grid>
++
++                        <TextBlock Text="{Binding SaveDraftNotice}" TextWrapping="Wrap" Margin="0,6,0,0" Opacity="0.85"
++                                   AutomationProperties.AutomationId="Session.FinalSave.DraftNotice"
++                                   Visibility="{Binding HasSaveDraftNotice, Converter={StaticResource BoolToVisibility}}" />
++                        <TextBlock Text="{Binding SaveSummary}" TextWrapping="Wrap" Margin="0,8,0,0"
++                                   AutomationProperties.AutomationId="Session.FinalSave.Summary" />
++                    </StackPanel>
++                    <TextBlock Text="{Binding FinalSaveStatus}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,8,0,0"
++                               AutomationProperties.AutomationId="Session.FinalSave.Status" />
++                    <TextBlock Text="{Binding GuidedCompletionNotice}" TextWrapping="Wrap" Margin="0,8,0,0" Foreground="{DynamicResource PF.Brush.Muted}"
++                               AutomationProperties.AutomationId="Session.Completion.Notice"
++                               Visibility="{Binding ShowsGuidedCompletion, Converter={StaticResource BoolToVisibility}}" />
++                    <TextBlock Text="{Binding FinalSaveSecondary}" TextWrapping="Wrap" Margin="0,6,0,0" Opacity="0.85"
++                               AutomationProperties.AutomationId="Session.FinalSave.Secondary"
++                               Visibility="{Binding HasFinalSaveSecondary, Converter={StaticResource BoolToVisibility}}" />
++
++                    <StackPanel Margin="0,8,0,0"
++                                Visibility="{Binding HasFinalSaveSavedPath, Converter={StaticResource BoolToVisibility}}">
++                        <TextBlock Text="{Binding SavedPathLabel}" Style="{StaticResource MetadataLabel}" />
++                        <local:SessionTextBox Text="{Binding FinalSaveSavedPath, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap"
++                                 AutomationProperties.AutomationId="Session.FinalSave.SavedPath"
++                                 AutomationProperties.Name="{Binding SavedPathLabel}" />
++                    </StackPanel>
++
++                    <WrapPanel Margin="0,10,0,0">
++                        <WrapPanel.Resources>
++                            <Style TargetType="Button" BasedOn="{StaticResource RecommendedAction}">
++                                <Setter Property="Padding" Value="12,5" />
++                                <Setter Property="Margin" Value="0,0,8,6" />
++                            </Style>
++                        </WrapPanel.Resources>
++
++
++
++
++                        <local:SessionActionButton Content="{Binding OpenFolderLabel}" Command="{Binding OpenContainingFolderCommand}"
++                                AutomationProperties.AutomationId="Session.FinalSave.OpenFolder"
++                                AutomationProperties.Name="{Binding OpenFolderLabel}"
++                                Visibility="{Binding CanOpenContainingFolder, Converter={StaticResource BoolToVisibility}}" />
++                        <local:SessionActionButton Content="{Binding CheckSavedLabel}" Command="{Binding CheckSavedFileCommand}"
++                                AutomationProperties.AutomationId="Session.FinalSave.CheckSaved"
++                                AutomationProperties.Name="{Binding CheckSavedLabel}"
++                                Visibility="{Binding CanCheckSavedFile, Converter={StaticResource BoolToVisibility}}" />
++                        <local:ReviewApprovalButton Content="{Binding SaveAnotherCopyLabel}" Command="{Binding SaveAnotherCopyCommand}"
++                                Style="{StaticResource {x:Type Button}}" TargetIdentity="{Binding RecordedActionIdentity}"
++                                AutomationProperties.AutomationId="Session.FinalSave.SaveAnotherCopy"
++                                AutomationProperties.Name="{Binding SaveAnotherCopyLabel}"
++                                Visibility="{Binding CanSaveAnotherCopy, Converter={StaticResource BoolToVisibility}}" />
++
++                        <local:SessionActionButton Content="{Binding CancelSaveLabel}" Command="{Binding CancelSaveCommand}"
++                                AutomationProperties.AutomationId="Session.FinalSave.Cancel"
++                                AutomationProperties.Name="{Binding CancelSaveLabel}"
++                                Visibility="{Binding CanCancelSave, Converter={StaticResource BoolToVisibility}}" />
++                    </WrapPanel>
++
++                    <TextBlock Text="{Binding FinalSaveOpenNotice}" TextWrapping="Wrap" Margin="0,4,0,0"
++                               AutomationProperties.AutomationId="Session.FinalSave.OpenNotice"
++                               Visibility="{Binding HasFinalSaveOpenNotice, Converter={StaticResource BoolToVisibility}}" />
++
++                    <local:SessionExpander Header="{Binding FinalSaveDetailsLabel}" Margin="0,6,0,0"
++                              AutomationProperties.AutomationId="Session.FinalSave.Details"
++                              AutomationProperties.Name="{Binding FinalSaveDetailsLabel}"
++                              Visibility="{Binding HasFinalSaveDetails, Converter={StaticResource BoolToVisibility}}">
++                        <local:SessionTextBox Text="{Binding FinalSaveDetails, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap"
++                                 AutomationProperties.Name="{Binding FinalSaveDetailsLabel}" />
++                    </local:SessionExpander>
++                </StackPanel>
++            </ui:Card></Border>
++        </DataTemplate>
++                <Style x:Key="PF.Sample.Steps" TargetType="ItemsControl" BasedOn="{StaticResource PF.StepNavigation}">
++          <Style.Triggers>
++            <DataTrigger Binding="{Binding GuidedPage}" Value="Save">
++              <Setter Property="ItemTemplate">
++                <Setter.Value><DataTemplate>
++                  <Border x:Name="Step" Padding="12,14" Margin="0,0,0,6" CornerRadius="8" Background="White">
++                    <DockPanel><TextBlock Text="{Binding StatusText}" DockPanel.Dock="Right" FontSize="11" Foreground="{DynamicResource PF.Brush.Muted}" Margin="8,0,0,0" VerticalAlignment="Center" /><TextBlock Text="{Binding Title}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap" /></DockPanel>
++                  </Border>
++                  <DataTemplate.Triggers><DataTrigger Binding="{Binding State}" Value="Current"><Setter TargetName="Step" Property="Background" Value="{DynamicResource PF.Brush.Selection}" /></DataTrigger></DataTemplate.Triggers>
++                </DataTemplate></Setter.Value>
++              </Setter>
++            </DataTrigger>
++          </Style.Triggers>
++        </Style><DataTemplate x:Key="OutputHistoryTemplate">
+             <!--
+                 Outputs already produced (§15). Present so an operator adding size B can see
+                 size A is still there, still approved and still valid. Concise metadata only,
+@@ -359,7 +530,7 @@
+         <DockPanel Grid.Row="0" Grid.ColumnSpan="2">
+             <TextBlock DockPanel.Dock="Right" Text="{Binding Workflow}" VerticalAlignment="Center"
+                        Margin="12,0,0,0" Opacity="0.85" />
+-            <TextBlock Text="{Binding SessionName}" FontSize="24" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
++            <TextBlock FontWeight="SemiBold" TextTrimming="CharacterEllipsis"><TextBlock.Style><Style TargetType="TextBlock"><Setter Property="FontSize" Value="24" /><Setter Property="Text" Value="{Binding SessionName}" /><Style.Triggers><DataTrigger Binding="{Binding GuidedPage}" Value="Save"><Setter Property="FontSize" Value="28" /><Setter Property="Text" Value="{Binding GuidedCurrentTitle}" /></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock>
+         </DockPanel>
+ 
+         <Border Grid.Row="1" Grid.ColumnSpan="2" x:Name="OperatorStatusPanel" Margin="0,6,0,0" Padding="10,4"
+@@ -589,7 +760,7 @@
+                 <ScrollViewer Grid.Row="4" Grid.Column="0" Margin="0,14,16,0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+             <StackPanel>
+                 <TextBlock Text="{Binding StepsHeading}" FontWeight="SemiBold" Margin="0,0,0,12" />
+-                <ItemsControl ItemsSource="{Binding GuidedSteps}" Style="{StaticResource PF.StepNavigation}"
++                <ItemsControl ItemsSource="{Binding GuidedSteps}" Style="{DynamicResource PF.Sample.Steps}"
+                               AutomationProperties.AutomationId="Session.StepList" AutomationProperties.Name="{Binding StepsHeading}" />
+                 <local:SessionExpander Header="{Binding HistoryHeading}" Margin="0,16,0,0" AutomationProperties.AutomationId="Session.HistorySelector">
+                     <local:SessionExpander.Style><Style TargetType="Expander"><Style.Triggers>
+@@ -697,7 +868,8 @@
+                     </Style>
+                 </DockPanel.Style>
+ 
+-                <StackPanel DockPanel.Dock="Top" Margin="0,0,0,8" Visibility="{Binding ShowsGuidedPreviewTools, Converter={StaticResource BoolToVisibility}}">
++                <StackPanel DockPanel.Dock="Top" Margin="0,0,0,8">
++    <StackPanel.Style><Style TargetType="StackPanel"><Setter Property="Visibility" Value="{Binding ShowsGuidedPreviewTools, Converter={StaticResource BoolToVisibility}}" /><Style.Triggers><DataTrigger Binding="{Binding GuidedPage}" Value="Save"><Setter Property="Visibility" Value="Collapsed" /></DataTrigger></Style.Triggers></Style></StackPanel.Style>
+                     <TextBlock DockPanel.Dock="Left"
+                                Text="{Binding PreviewHeading}"
+                                FontSize="16"
+@@ -734,7 +906,7 @@
+                     </WrapPanel>
+                 </StackPanel>
+ 
+-                <local:SharedReviewSurface />
++                                <local:SharedReviewSurface><local:SharedReviewSurface.Style><Style TargetType="local:SharedReviewSurface"><Style.Triggers><DataTrigger Binding="{Binding GuidedPage}" Value="Save"><Setter Property="ResultOnly" Value="True" /><Setter Property="Background" Value="White" /><Setter Property="Padding" Value="12" /><Setter Property="BorderBrush" Value="{DynamicResource PF.Brush.Border}" /><Setter Property="BorderThickness" Value="1" /></DataTrigger></Style.Triggers></Style></local:SharedReviewSurface.Style></local:SharedReviewSurface>
+             </DockPanel>
+ 
+             <!--
+@@ -1392,6 +1564,7 @@
+                                         <Setter Property="Content" Value="{Binding}" />
+                                         <Setter Property="ContentTemplate" Value="{StaticResource FinalSaveTemplate}" />
+                                     </DataTrigger>
++                                    <MultiDataTrigger><MultiDataTrigger.Conditions><Condition Binding="{Binding HasFinalSave}" Value="True" /><Condition Binding="{Binding GuidedPage}" Value="Save" /></MultiDataTrigger.Conditions><Setter Property="ContentTemplate" Value="{StaticResource WpfUiSaveTemplate}" /></MultiDataTrigger>
+                                 </Style.Triggers>
+                             </Style>
+                         </ContentControl.Style>
+@@ -2350,9 +2523,9 @@
+             engine's own answer — the screen states no workflow rule of its own.
+         -->
+         <Grid Grid.Row="5" Grid.ColumnSpan="2" Margin="0,14,0,0" AutomationProperties.AutomationId="Session.ActionBar"
+-              IsEnabled="{Binding CanInteractWithLivePage}" Visibility="{Binding ShowsLiveWorkspace, Converter={StaticResource BoolToVisibility}}"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
++              IsEnabled="{Binding CanInteractWithLivePage}" Visibility="{Binding ShowsLiveWorkspace, Converter={StaticResource BoolToVisibility}}"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+ 
+-            <WrapPanel Orientation="Horizontal">
++            <WrapPanel Orientation="Horizontal"><WrapPanel.Style><Style TargetType="WrapPanel"><Style.Triggers><DataTrigger Binding="{Binding GuidedPage}" Value="Save"><Setter Property="Margin" Value="130,0,0,0" /></DataTrigger></Style.Triggers></Style></WrapPanel.Style>
+                 <WrapPanel.Resources>
+                     <Style TargetType="Button" BasedOn="{StaticResource RecommendedAction}">
+                         <Setter Property="Padding" Value="14,6" />
+@@ -2416,25 +2589,11 @@
+                                     AutomationProperties.Name="{Binding CorrectionImportLabel}"
+                                     HorizontalAlignment="Left" Padding="14,6" FontWeight="SemiBold"  Visibility="{Binding CanImportCorrectedImage, Converter={StaticResource BoolToVisibility}}" />
+ <local:ReviewApprovalButton Content="{Binding ConfirmAndSaveLabel}"
+-                                Style="{StaticResource {x:Type Button}}"
++                                Style="{StaticResource RecommendedAction}"
+                                 TargetIdentity="{Binding ConfirmAndSaveIdentity}"
+                                 Command="{Binding ConfirmAndSaveCommand}"
+                                 AutomationProperties.AutomationId="Session.FinalSave.ConfirmAndSave"
+                                 AutomationProperties.Name="{Binding ConfirmAndSaveLabel}"  Visibility="{Binding CanConfirmAndSave, Converter={StaticResource BoolToVisibility}}" />
+-<local:ReviewApprovalButton Content="{Binding SaveApprovedLabel}"
+-                                Style="{StaticResource {x:Type Button}}"
+-                                TargetIdentity="{Binding SaveApprovedIdentity}"
+-                                Command="{Binding SaveApprovedCommand}"
+-                                AutomationProperties.AutomationId="Session.FinalSave.SaveApproved"
+-                                AutomationProperties.Name="{Binding SaveApprovedLabel}"  Visibility="{Binding CanSaveApproved, Converter={StaticResource BoolToVisibility}}" />
+-<local:ReviewApprovalButton Content="{Binding RetryRecordedLabel}" Command="{Binding RetryRecordedSaveCommand}"
+-                                Style="{StaticResource {x:Type Button}}" TargetIdentity="{Binding RecordedActionIdentity}"
+-                                AutomationProperties.AutomationId="Session.FinalSave.RetryRecorded"
+-                                AutomationProperties.Name="{Binding RetryRecordedLabel}"  Visibility="{Binding CanRetryRecordedSave, Converter={StaticResource BoolToVisibility}}" />
+-<local:ReviewApprovalButton Content="{Binding CheckAgainLabel}" Command="{Binding CheckSaveAgainCommand}"
+-                                Style="{StaticResource {x:Type Button}}" TargetIdentity="{Binding RecordedActionIdentity}"
+-                                AutomationProperties.AutomationId="Session.FinalSave.CheckAgain"
+-                                AutomationProperties.Name="{Binding CheckAgainLabel}"  Visibility="{Binding CanCheckSaveAgain, Converter={StaticResource BoolToVisibility}}" />
+ <local:SessionActionButton Content="{Binding UseSuggestionLabel}" Command="{Binding UseSuggestedNameCommand}"
+                                 AutomationProperties.AutomationId="Session.FinalSave.UseSuggestion"
+                                 AutomationProperties.Name="{Binding UseSuggestionLabel}"  Visibility="{Binding CanUseSuggestedName, Converter={StaticResource BoolToVisibility}}" />
+@@ -2569,12 +2728,29 @@
+             </WrapPanel>
+ 
+ 
+-                    <local:SessionActionButton Grid.Column="1"
+-                    Content="{Binding BackLabel}"
+-                    Command="{Binding BackToHomeCommand}"
+-                    AutomationProperties.AutomationId="Session.BackToHome"
+-                    AutomationProperties.Name="{Binding BackLabel}"
+-                    Padding="14,6" /></Grid>
++                    <WrapPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="12,0,0,0">
++
++
++<local:ReviewApprovalButton Content="{Binding SaveApprovedLabel}"
++                                Style="{StaticResource RecommendedAction}"
++                                TargetIdentity="{Binding SaveApprovedIdentity}"
++                                Command="{Binding SaveApprovedCommand}"
++                                AutomationProperties.AutomationId="Session.FinalSave.SaveApproved"
++                                AutomationProperties.Name="{Binding SaveApprovedLabel}"  Visibility="{Binding CanSaveApproved, Converter={StaticResource BoolToVisibility}}" />
++<local:ReviewApprovalButton Content="{Binding RetryRecordedLabel}" Command="{Binding RetryRecordedSaveCommand}"
++                                Style="{StaticResource RecommendedAction}" TargetIdentity="{Binding RecordedActionIdentity}"
++                                AutomationProperties.AutomationId="Session.FinalSave.RetryRecorded"
++                                AutomationProperties.Name="{Binding RetryRecordedLabel}"  Visibility="{Binding CanRetryRecordedSave, Converter={StaticResource BoolToVisibility}}" />
++<local:ReviewApprovalButton Content="{Binding CheckAgainLabel}" Command="{Binding CheckSaveAgainCommand}"
++                                Style="{StaticResource RecommendedAction}" TargetIdentity="{Binding RecordedActionIdentity}"
++                                AutomationProperties.AutomationId="Session.FinalSave.CheckAgain"
++                                AutomationProperties.Name="{Binding CheckAgainLabel}"  Visibility="{Binding CanCheckSaveAgain, Converter={StaticResource BoolToVisibility}}" />
++
++</WrapPanel>
++<local:SessionActionButton
++                    Content="{Binding BackLabel}" Command="{Binding BackToHomeCommand}" AutomationProperties.AutomationId="Session.BackToHome" AutomationProperties.Name="{Binding BackLabel}">
++                    <local:SessionActionButton.Style><Style TargetType="Button" BasedOn="{StaticResource PF.Button.Secondary}"><Setter Property="Grid.Column" Value="2" /><Style.Triggers><DataTrigger Binding="{Binding GuidedPage}" Value="Save"><Setter Property="Grid.Column" Value="0" /><Setter Property="HorizontalAlignment" Value="Left" /></DataTrigger></Style.Triggers></Style></local:SessionActionButton.Style>
++                </local:SessionActionButton></Grid>
+         <Border Grid.Row="4" Grid.Column="1" Margin="0,14,0,0" Padding="20" Background="{DynamicResource PF.Brush.Surface}"
+                 AutomationProperties.AutomationId="Session.HistoryWorkspace"
+                 Visibility="{Binding IsViewingHistory, Converter={StaticResource BoolToVisibility}}">
+diff --git a/src/PrintFlow.App/Views/SharedReviewSurface.cs b/src/PrintFlow.App/Views/SharedReviewSurface.cs
+index ac088f78aed7084a5f25b8062aeff383cdb079a5..24d636366057208d2716bd2b25a565b552e048a4 100644
+--- a/src/PrintFlow.App/Views/SharedReviewSurface.cs
++++ b/src/PrintFlow.App/Views/SharedReviewSurface.cs
+@@ -14,6 +14,18 @@ namespace PrintFlow.App.Views;
+ /// <summary>One display-only comparison surface for all general review workflows.</summary>
+ public sealed class SharedReviewSurface : UserControl
+ {
++    /// <summary>Save-page presentation only; never changes the review viewport or its approval.</summary>
++    public static readonly DependencyProperty ResultOnlyProperty = DependencyProperty.Register(
++        nameof(ResultOnly), typeof(bool), typeof(SharedReviewSurface),
++        new PropertyMetadata(false, (d, _) => ((SharedReviewSurface)d).ReloadImages()));
++
++    public bool ResultOnly
++    {
++        get => (bool)GetValue(ResultOnlyProperty);
++        set => SetValue(ResultOnlyProperty, value);
++    }
++
++    private IReadOnlyList<ArtefactPreviewPane> _panes = [];
+     private readonly DockPanel _root = new();
+     private readonly WrapPanel _toolbar = new() { Margin = new Thickness(0, 0, 0, 6) };
+     private readonly Grid _host = new();
+@@ -123,10 +135,12 @@ private void ViewportChanged(object? sender, PropertyChangedEventArgs e)
+     private void ReloadImages()
+     {
+         _images.Clear();
++        _panes = _model is null ? [] : ResultOnly
++            ? _model.PreviewPanes.TakeLast(1).ToArray() : _model.PreviewPanes.ToArray();
+         if (_model is not null)
+         {
+             PreviewPayloadConverter converter = new();
+-            foreach (ArtefactPreviewPane pane in _model.PreviewPanes)
++            foreach (ArtefactPreviewPane pane in _panes)
+             {
+                 Image image = new()
+                 {
+@@ -143,7 +157,7 @@ private void ReloadImages()
+         Rebuild();
+     }
+ 
+-    private bool IsSlider => _model?.ReviewViewport.Mode == ReviewComparisonMode.Slider && _images.Count == 2 && _model.PreviewPanes.All(p => p.HasImage);
++    private bool IsSlider => !ResultOnly && _model?.ReviewViewport.Mode == ReviewComparisonMode.Slider && _images.Count == 2 && _panes.All(p => p.HasImage);
+ 
+     private void Rebuild()
+     {
+@@ -160,7 +174,7 @@ private void Rebuild()
+         if (_model is null) return;
+         for (int i = 0; i < _images.Count; i++)
+         {
+-            ArtefactPreviewPane pane = _model.PreviewPanes[i];
++            ArtefactPreviewPane pane = _panes[i];
+             Grid canvas = new() { HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
+             canvas.Children.Add(_images[i]);
+             _canvases.Add(canvas);
+@@ -183,7 +197,7 @@ private void Rebuild()
+             DockPanel.SetDock(heading, Dock.Top);
+             panel.Children.Add(heading);
+             ScrollViewer scroll = new() { HorizontalScrollBarVisibility = ScrollBarVisibility.Auto, VerticalScrollBarVisibility = ScrollBarVisibility.Auto, Content = canvas };
+-            AutomationProperties.SetAutomationId(scroll, IsSlider ? "Session.ReviewOverlay" : i == 0 ? "Session.ReviewBefore" : "Session.ReviewAfter");
++            AutomationProperties.SetAutomationId(scroll, IsSlider ? "Session.ReviewOverlay" : ResultOnly ? "Session.ReviewAfter" : i == 0 ? "Session.ReviewBefore" : "Session.ReviewAfter");
+             AutomationProperties.SetName(scroll, pane.Heading);
+             scroll.ScrollChanged += Scrolled;
+             _scrolls.Add(scroll);
+@@ -199,7 +213,7 @@ private void UpdatePresentation()
+     {
+         if (_model is null) return;
+         _updating = true;
+-        _toolbar.Visibility = _model.ShowsGuidedPreviewTools ? Visibility.Visible : Visibility.Collapsed;
++        _toolbar.Visibility = !ResultOnly && _model.ShowsGuidedPreviewTools ? Visibility.Visible : Visibility.Collapsed;
+         foreach (var (button, mode) in _modes)
+         {
+             button.IsChecked = _model.ReviewViewport.Mode == mode;
+@@ -224,15 +238,15 @@ private void UpdatePresentation()
+     private void UpdateSizes()
+     {
+         if (_model is null || _images.Count == 0 || _host.ActualWidth <= 0 || _host.ActualHeight <= 0) return;
+-        double width = _model.PreviewPanes.Max(p => (double)Math.Max(1, p.PayloadPixelWidth));
+-        double height = _model.PreviewPanes.Max(p => (double)Math.Max(1, p.PayloadPixelHeight));
+-        bool fit = _model.IsFitToViewport || !_model.ShowsGuidedPreviewTools;
++        double width = _panes.Max(p => (double)Math.Max(1, p.PayloadPixelWidth));
++        double height = _panes.Max(p => (double)Math.Max(1, p.PayloadPixelHeight));
++        bool fit = ResultOnly || _model.IsFitToViewport || !_model.ShowsGuidedPreviewTools;
+         double scale = fit
+             ? Math.Max(0.001, Math.Min(Math.Max(1, _host.ActualWidth / (IsSlider ? 1 : _images.Count) - 28) / width, Math.Max(1, _host.ActualHeight - 76) / height))
+             : _model.ZoomScale;
+         for (int i = 0; i < _images.Count; i++)
+         {
+-            ArtefactPreviewPane pane = _model.PreviewPanes[i];
++            ArtefactPreviewPane pane = _panes[i];
+             _images[i].LayoutTransform = new ScaleTransform(fit ? 1 : scale, fit ? 1 : scale);
+             _images[i].Width = Math.Max(1, pane.PayloadPixelWidth) * (fit ? scale : 1);
+             _images[i].Height = Math.Max(1, pane.PayloadPixelHeight) * (fit ? scale : 1);
+diff --git a/src/PrintFlow.App/packages.lock.json b/src/PrintFlow.App/packages.lock.json
+index b79b76aefdfae85a7bfde021463610683c9c4c9b..bceaf4cb909aef169d1444cdc9ae76be0af85bc6 100644
+--- a/src/PrintFlow.App/packages.lock.json
++++ b/src/PrintFlow.App/packages.lock.json
+@@ -26,6 +26,15 @@
+           "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.11"
+         }
+       },
++      "WPF-UI": {
++        "type": "Direct",
++        "requested": "[4.3.0, )",
++        "resolved": "4.3.0",
++        "contentHash": "SIHhc8lIrhEQ/1cLFZN6Dtf8cqsLm4myBULj9obnacd9TyDs2vizhKYzRzTlcPEcnzb3L4EstvPN3M6kcXbJCA==",
++        "dependencies": {
++          "WPF-UI.Abstractions": "4.3.0"
++        }
++      },
+       "Microsoft.Data.Sqlite.Core": {
+         "type": "Transitive",
+         "resolved": "10.0.11",
+@@ -66,6 +75,11 @@
+           "SQLitePCLRaw.core": "2.1.12"
+         }
+       },
++      "WPF-UI.Abstractions": {
++        "type": "Transitive",
++        "resolved": "4.3.0",
++        "contentHash": "7Kj9DmCCo4SOCd1jAiw4+EcMFP2nR8rLLvitAYzVtzbWToTsodkbie24+8x9C4LDLxkopWEUGX62szqqNy7oeg=="
++      },
+       "printflow.domain": {
+         "type": "Project"
+       },
+diff --git a/tests/PrintFlow.Tests/Integration/Ui/GuidedAcceptanceTests.cs b/tests/PrintFlow.Tests/Integration/Ui/GuidedAcceptanceTests.cs
+index 5b5159218655a9947568cf22b697ce32fb01fa43..d28ddef8db76e92df17f840c81776188528e53cf 100644
+--- a/tests/PrintFlow.Tests/Integration/Ui/GuidedAcceptanceTests.cs
++++ b/tests/PrintFlow.Tests/Integration/Ui/GuidedAcceptanceTests.cs
+@@ -139,7 +139,9 @@ private static void Capture(SessionViewModel model, Size viewport, string state,
+                 {
+                     var item = facts.Single(f => f.Id == id);
+                     item.IsEnabled.ShouldBeTrue(state + ": " + id);
+-                    Inside(item.Bounds, viewport); item.WithinScroll.ShouldBeTrue(state + ": " + id);
++                    Inside(item.Bounds, viewport); item.WithinScroll.ShouldBeTrue(state + ": " + id + " " +
++                        string.Join("; ", all.OfType<ScrollViewer>().Where(s => s.IsAncestorOf(all.Single(e => AutomationProperties.GetAutomationId(e) == id)))
++                            .Select(s => $"{s.Name}: viewport={s.ViewportHeight:0.##}, field={Bounds(all.Single(e => AutomationProperties.GetAutomationId(e) == id), s)}")));
+                 }
+                 var images = all.OfType<Image>().Where(i => i.Source is not null && GuidedSessionProjectionTests.Shown(i)).ToArray();
+                 if (requireImage)
+diff --git a/tests/PrintFlow.Tests/packages.lock.json b/tests/PrintFlow.Tests/packages.lock.json
+index 96303b81fa0bd7b163006fe2126e7536f9fae2cf..c8b38e21ebbd64dc70a7411bfa9fe0b8c26c12cd 100644
+--- a/tests/PrintFlow.Tests/packages.lock.json
++++ b/tests/PrintFlow.Tests/packages.lock.json
+@@ -122,6 +122,11 @@
+         "resolved": "6.0.1",
+         "contentHash": "10J1D0h/lioojphfJ4Fuh5ZUThT/xOVHdV9roGBittKKNP2PMjrvibEdbVTGZcPra1399Ja3tqIJLyQrc5Wmhg=="
+       },
++      "WPF-UI.Abstractions": {
++        "type": "Transitive",
++        "resolved": "4.3.0",
++        "contentHash": "7Kj9DmCCo4SOCd1jAiw4+EcMFP2nR8rLLvitAYzVtzbWToTsodkbie24+8x9C4LDLxkopWEUGX62szqqNy7oeg=="
++      },
+       "xunit.abstractions": {
+         "type": "Transitive",
+         "resolved": "2.0.3",
+@@ -170,7 +175,8 @@
+           "Microsoft.Extensions.Logging.Abstractions": "[10.0.11, )",
+           "PrintFlow.Domain": "[0.1.0, )",
+           "PrintFlow.Infrastructure": "[0.1.0, )",
+-          "PrintFlow.Workflow": "[0.1.0, )"
++          "PrintFlow.Workflow": "[0.1.0, )",
++          "WPF-UI": "[4.3.0, )"
+         }
+       },
+       "printflow.domain": {
+@@ -237,6 +243,15 @@
+         "dependencies": {
+           "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.11"
+         }
++      },
++      "WPF-UI": {
++        "type": "CentralTransitive",
++        "requested": "[4.3.0, )",
++        "resolved": "4.3.0",
++        "contentHash": "SIHhc8lIrhEQ/1cLFZN6Dtf8cqsLm4myBULj9obnacd9TyDs2vizhKYzRzTlcPEcnzb3L4EstvPN3M6kcXbJCA==",
++        "dependencies": {
++          "WPF-UI.Abstractions": "4.3.0"
++        }
+       }
+     }
+   }
+diff --git a/tests/PrintFlow.WorkstationEntry/packages.lock.json b/tests/PrintFlow.WorkstationEntry/packages.lock.json
+index 019874d025f18da8a6de349a380d237f117a543a..b8a3a828a501a813afa3f90a24c2f33d8d9f3a1b 100644
+--- a/tests/PrintFlow.WorkstationEntry/packages.lock.json
++++ b/tests/PrintFlow.WorkstationEntry/packages.lock.json
+@@ -42,6 +42,11 @@
+           "SQLitePCLRaw.core": "2.1.12"
+         }
+       },
++      "WPF-UI.Abstractions": {
++        "type": "Transitive",
++        "resolved": "4.3.0",
++        "contentHash": "7Kj9DmCCo4SOCd1jAiw4+EcMFP2nR8rLLvitAYzVtzbWToTsodkbie24+8x9C4LDLxkopWEUGX62szqqNy7oeg=="
++      },
+       "printflow.app": {
+         "type": "Project",
+         "dependencies": {
+@@ -50,7 +55,8 @@
+           "Microsoft.Extensions.Logging.Abstractions": "[10.0.11, )",
+           "PrintFlow.Domain": "[0.1.0, )",
+           "PrintFlow.Infrastructure": "[0.1.0, )",
+-          "PrintFlow.Workflow": "[0.1.0, )"
++          "PrintFlow.Workflow": "[0.1.0, )",
++          "WPF-UI": "[4.3.0, )"
+         }
+       },
+       "printflow.domain": {
+@@ -111,6 +117,15 @@
+         "dependencies": {
+           "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.11"
+         }
++      },
++      "WPF-UI": {
++        "type": "CentralTransitive",
++        "requested": "[4.3.0, )",
++        "resolved": "4.3.0",
++        "contentHash": "SIHhc8lIrhEQ/1cLFZN6Dtf8cqsLm4myBULj9obnacd9TyDs2vizhKYzRzTlcPEcnzb3L4EstvPN3M6kcXbJCA==",
++        "dependencies": {
++          "WPF-UI.Abstractions": "4.3.0"
++        }
+       }
+     }
+   }

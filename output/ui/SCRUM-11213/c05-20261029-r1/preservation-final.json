@@ -1,0 +1,34 @@
+{
+  "status": "PASS",
+  "roots": [
+    {
+      "root": "D:\\Repositories\\printflow-Studio",
+      "existingFilesUnchanged": 1066,
+      "newFiles": [
+        "docs/codex/printflow-wpfui-rollout/SCRUM-11213/CANDIDATE.json",
+        "docs/codex/printflow-wpfui-rollout/SCRUM-11213/COPY_COMPARISON.json",
+        "docs/codex/printflow-wpfui-rollout/SCRUM-11213/COPY_COMPARISON.md",
+        "docs/codex/printflow-wpfui-rollout/SCRUM-11213/FINDINGS.md",
+        "docs/codex/printflow-wpfui-rollout/SCRUM-11213/PROGRESS.md",
+        "docs/codex/printflow-wpfui-rollout/SCRUM-11213/README.md",
+        "docs/codex/printflow-wpfui-rollout/SCRUM-11213/RESULTS.md",
+        "docs/codex/printflow-wpfui-rollout/SCRUM-11213/SCENARIOS.md",
+        "docs/codex/printflow-wpfui-rollout/SCRUM-11213/SESSION_TEMPLATE.json",
+        "docs/codex/printflow-wpfui-rollout/SCRUM-11213/WALKTHROUGH.md"
+      ]
+    },
+    {
+      "root": "C:\\Users\\admin\\.codex\\worktrees\\scrum-11201-shared-theme\\printflow-Studio",
+      "existingFilesUnchanged": 1249,
+      "newFiles": []
+    },
+    {
+      "root": "C:\\Users\\admin\\.codex\\worktrees\\u09\\printflow-Studio",
+      "existingFilesUnchanged": 1127,
+      "newFiles": []
+    }
+  ],
+  "sourceAndRuntimeUnchanged": true,
+  "oldU09EvidenceReadOnly": true,
+  "scope": "Git-visible source/docs/config; output/artifacts excluded, candidate manifest and test runtime separately checked"
+}

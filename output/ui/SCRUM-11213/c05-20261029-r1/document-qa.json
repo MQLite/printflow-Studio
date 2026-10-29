@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "scenarioCount": 18,
+  "emptyTemplateVerified": true,
+  "executedTestInstances": 127,
+  "deferredTestInstances": 67,
+  "localLinksChecked": 26,
+  "missingLinks": [],
+  "scope": "packet structure and existing evidence; no human observations created"
+}

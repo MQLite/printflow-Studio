@@ -1,0 +1,1475 @@
+{
+  "schemaVersion": 2,
+  "epic": "SCRUM-11168",
+  "date": "2026-10-19",
+  "timezone": "Pacific/Auckland",
+  "status": "DESIGN_AND_THEME_ACCEPTED_E2_IN_REVIEW",
+  "styleApproval": {
+    "approved": true,
+    "source": "用户：这个视觉方向可以，请按这套风格补齐其余页面和异常流程原型，继续推进 SCRUM-11168。",
+    "covers": "首版视觉方向及本次扩展原型工作",
+    "fullPrototypeApproved": true,
+    "productImplementationApproved": true,
+    "fullPrototypeSource": "用户：通过。请继续。",
+    "implementationNextStep": "SCRUM-11177实现与独立审查修复已交付InReview；后续Epic未开始"
+  },
+  "generator": "built-in image_gen.imagegen",
+  "screens": [
+    {
+      "id": "home",
+      "title": "开始任务",
+      "file": "01-home.png",
+      "source": "D:/Repositories/printflow-Studio/output/imagegen/SCRUM-11168/2026-10-19-v1/01-home.png",
+      "prompt": "Use case: ui-mockup\nAsset type: PrintFlow Studio / SCRUM-11168 / home-screen high-fidelity raster prototype.\nReference image role: the attached existing review-screen prototype is a DESIGN SYSTEM reference only. Create a NEW different screen in precisely the same visual system, not a collage or picture of that screen.\nPrimary request: ONE complete, front-on, edge-to-edge Windows desktop app screenshot, wide landscape 16:10. A calm premium modern professional creative tool for an inexperienced print-shop operator. Accurate, crisp Simplified Chinese, meticulous alignment, generous efficient spacing, CJK sans serif, matte off-white canvas, white surfaces, graphite text, forest-teal primary, thin dividers, 10-12px corners, very restrained shadows. The reference titlebar and \"PrintFlow Studio\" wordmark remain consistent, small \"视觉原型 v1\" label, neutral window controls. No browser, no physical device, no perspective, no outer presentation frame.\nScreen: clean task-focused home. A slim left navigation rail labeled simply with \"开始任务\" selected, \"最近任务\", \"环境检查\"; bottom links \"设置\" and \"帮助\". Main content starts with a small overline \"开始任务\", large heading \"从一张图片开始\", subtitle \"导入图片，PrintFlow 会一步一步引导你完成。\". Main central import area is a large beautifully restrained dashed-outline drop zone, small elegant file/image outline icon, exact headline \"将图片拖到这里\", short \"一次处理一张图片\", ONE solid teal main button \"选择图片\". Make this hero surface central and inviting with negative space, no giant decorative abstract artwork, no chart or promotional content.\nBelow or beside the main drop zone, a low-emphasis neutral environment summary strip with a hollow circle icon, exact title \"环境尚未检查\", short text \"开始自动处理前，需要检查工作站。\", outlined secondary action \"检查环境\". Do not show false green-ready status or pretend anything has been checked.\nLower main section is \"继续处理\", two compact cards each showing the same synthetic botanical orange fox artwork from the reference as a small thumbnail. Card one \"山野狐狸.png\", small amber badge \"待审核\", secondary \"继续审核\". Card two \"徽章设计.png\", neutral label \"有保存记录\", secondary \"查看记录\". These are understated recent-job entries, not a dashboard. Footer hint \"原图保留在本地。\".\nConstraints: show only home-relevant information. No route buttons before file import, no print-size fields, no TIFF form, no reviews or approvals on Home, no live production controls, no account/avatar, no business metrics, no orders, no batch features, no cloud promises. Do not add an enabled AI-generation action because that integration is conditional and unavailable in this core prototype. Output ONLY this polished practical UI screenshot.",
+      "intent": "突出单张图片导入；环境未检查时明确告知；继续任务为次级入口。",
+      "primary": "选择图片",
+      "hidden": "路线参数、图片审核、印刷尺寸、保存表单。",
+      "group": "主流程",
+      "inherited": true,
+      "originalSource": "C:/Users/admin/.codex/generated_images/01a1510a-9045-7432-83d1-7b7fe52e0a35/exec-04ef02da-4d99-4ca8-a874-02839ca12a22.png"
+    },
+    {
+      "id": "route",
+      "title": "选择路线",
+      "file": "02-route.png",
+      "source": "D:/Repositories/printflow-Studio/output/imagegen/SCRUM-11168/2026-10-19-v1/02-route.png",
+      "prompt": "Use case: ui-mockup\nAsset type: PrintFlow Studio / SCRUM-11168 / choose-route high-fidelity raster prototype.\nReference image role: the attached review-screen prototype is a DESIGN SYSTEM and synthetic artwork reference only. Create a NEW different screen consistent with it.\nPrimary request: ONE front-facing flat edge-to-edge complete Windows desktop app UI screenshot, wide landscape about 16:10. Same white and warm off-white surfaces, graphite text, forest-teal accent, restrained mint selection, CJK sans serif, thin borders, crisp accurate Simplified Chinese, sensible 10-12px corners. Same titlebar with original geometric mark and exact \"PrintFlow Studio\", small \"视觉原型 v1\", neutral window controls. No device frame, no browser or presentation backdrop.\nPage state: one image has ALREADY been imported and the operator is now explicitly choosing one of three existing workflows. Header task context exact \"山野狐狸.png\" and small \"本地任务\". A slim left step rail with heading \"开始新任务\", three stages: \"导入图片\" completed, \"选择路线\" CURRENT highlighted, \"确认原图\" upcoming; below subtle note \"后续步骤按路线展开\". Bottom rail links \"返回主页\" and \"帮助\".\nMain heading \"你希望得到什么结果？\"; supporting line \"根据这张图片的用途，选择一条处理路线。\". Under the heading a narrow source summary row showing a small thumbnail of the same orange fox and flowers on cream from the reference, filename \"山野狐狸.png\", quiet text \"已导入 · 原图未修改\". Keep source metadata lightweight and do not show technical hashes.\nThe central content is THREE visually elegant comparable vertical selection cards in one row, generous spacing, modest line icons, no giant illustrations. Card 1 exact title \"准备设计素材\", description \"照片或标志，处理成设计用 PNG。\", small lines \"输出 PNG\" and \"无需印刷尺寸\". Card 2 SELECTED with thin teal border, pale mint tint and top-right selected radio: title \"处理客户设计\", description \"已有排版，继续检查并制作打印文件。\", small lines \"输出 TIFF\" and \"需要印刷尺寸\". Card 3 title \"生成打印 TIFF\", description \"已完成设计，直接制作打印文件。\", small lines \"输出 TIFF\" and \"不经过美图处理\". These are choices with radio semantics, not three simultaneous command buttons. No imaginary speed scores or recommendations.\nBelow cards a subtle contextual sentence for selected card \"可逐步检查增强、去背景和裁切结果。\". Bottom fixed main footer: secondary back action \"重新选择图片\"; informational text \"确认路线后检查原图，尚未开始处理。\"; ONE solid teal primary \"确认路线\" with right arrow.\nConstraints: keep exactly the three named workflows. Choosing route must not start processing, approve an image, bypass original confirmation or promise a save. No print-size settings, no white-ink configuration, no export form on this step. No AI route, no batch/order/account functionality. Accurate Chinese labels; no filler text. Output ONLY this complete practical polished route-choice screenshot.",
+      "intent": "原图导入后，按用途选择三条固定路线；当前选择尚未启动处理。",
+      "primary": "确认路线",
+      "hidden": "后续增强、裁切、白墨和保存表单。",
+      "group": "主流程",
+      "inherited": true,
+      "originalSource": "C:/Users/admin/.codex/generated_images/01a1510a-9045-7432-83d1-7b7fe52e0a35/exec-b85c5b20-0862-4d8c-8f95-d579dc779a8d.png"
+    },
+    {
+      "id": "original",
+      "group": "主流程",
+      "title": "确认原图",
+      "file": "07-original.png",
+      "intent": "确认当前导入图与处理路线。",
+      "primary": "确认原图",
+      "brief": "One large cream-background fox source preview. Route PrepareCustomerDesign. Stage 2 original confirmation active. Title \"确认这张原图\"; subtitle \"请检查图片内容和方向，原图不会被修改。\". Side info filename \"山野狐狸.png\", \"处理客户设计\", source kept local, not processed. Footer primary \"确认原图\", secondary \"重新选择图片\". No enhancement auto-start, no approval/save/size forms.",
+      "source": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-1bad911e-785b-4b1a-aa50-2ba98c815cc1.png",
+      "outputHint": "Generated images are saved to C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35 as C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-1bad911e-785b-4b1a-aa50-2ba98c815cc1.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "prompt": "Use case: ui-mockup. One high-fidelity raster screen for PrintFlow Studio SCRUM-11168 expanded visual prototype. Reference image is an APPROVED design-system and synthetic-artwork reference, not an edit target. Preserve its calm off-white and white surfaces, forest teal #16765D, graphite text, thin dividers, sensible 10px corners, generous efficient spacing, crisp Simplified Chinese CJK sans serif. Same original geometric mark, exact \"PrintFlow Studio\" titlebar, small \"视觉原型 v2\", window controls. One complete front-on edge-to-edge Windows desktop UI screenshot, landscape 16:10, no device/browser/outer presentation board. Same fox illustration and foliage as reference, identical sample artwork and transparent checkerboard when background removed. Default task filename 山野狐狸.png and route 处理客户设计, unless brief overrides. Default left eight-stage user rail: 导入与路线 / 确认原图 / 图片增强 / 去除背景 / 裁切画布 / 印刷设置 / 生成与审核 / 保存结果. Only stages before CURRENT are completed; future steps muted and nonexecutable. Footer fixed with one recommended primary and qualified secondary actions. Main picture and current decision are focal. No irrelevant future forms, no real customer data, no invented operational facts. Use exact quoted Chinese labels in brief; concise text only, no illegible filler. Check prompts' constraints carefully, don't add hidden behavior, automatic approval, auto-resume, printing, cloud or account features. All statuses and measurements are fictional scenario states for prototype, not evidence of a live production file. Output ONLY this one complete practical screen.\nSCENARIO: One large cream-background fox source preview. Route PrepareCustomerDesign. Stage 2 original confirmation active. Title \"确认这张原图\"; subtitle \"请检查图片内容和方向，原图不会被修改。\". Side info filename \"山野狐狸.png\", \"处理客户设计\", source kept local, not processed. Footer primary \"确认原图\", secondary \"重新选择图片\". No enhancement auto-start, no approval/save/size forms."
+    },
+    {
+      "id": "pdf-psd",
+      "group": "主流程",
+      "title": "PDF与PSD源准备",
+      "file": "37-source-preparation.png",
+      "intent": "只准备受管栅格副本，源文件不变、生产通道不沿用。",
+      "primary": "准备单页预览",
+      "brief": "Route \"生成打印 TIFF\", filename \"图案示例.pdf\". Direct-TIFF rail only \"导入与路线\",\"检查设计\" ACTIVE,\"印刷设置\",\"生成与审核\",\"保存结果\". Title \"先准备单页预览\". File illustration at left, required facts at right \"PDF · 单页\", \"300 PPI\", \"原始文件保持不变\"; note \"准备后检查第 1 页及实际尺寸，再设置印刷尺寸。\". Primary \"准备单页预览\"; secondary \"重新选择文件\". No fake rendered preview before prepare. Small compact supporting note \"PSD 使用受管栅格副本；源专色不会直接成为生产通道。\" No multi-page selector or keep-source-white.",
+      "source": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-650ad18d-985a-4b4c-89a6-456cbfa7c353.png",
+      "prompt": "Use case: ui-mockup. One high-fidelity raster screen for PrintFlow Studio SCRUM-11168 expanded visual prototype. Reference image is an APPROVED design-system and synthetic-artwork reference, not an edit target. Preserve its calm off-white and white surfaces, forest teal #16765D, graphite text, thin dividers, sensible 10px corners, generous efficient spacing, crisp Simplified Chinese CJK sans serif. Same original geometric mark, exact \"PrintFlow Studio\" titlebar, small \"视觉原型 v2\", window controls. One complete front-on edge-to-edge Windows desktop UI screenshot, landscape 16:10, no device/browser/outer presentation board. Same fox illustration and foliage as reference, identical sample artwork and transparent checkerboard when background removed. Default task filename 山野狐狸.png and route 处理客户设计, unless brief overrides. Default left eight-stage user rail: 导入与路线 / 确认原图 / 图片增强 / 去除背景 / 裁切画布 / 印刷设置 / 生成与审核 / 保存结果. Only stages before CURRENT are completed; future steps muted and nonexecutable. Footer fixed with one recommended primary and qualified secondary actions. Main picture and current decision are focal. No irrelevant future forms, no real customer data, no invented operational facts. Use exact quoted Chinese labels in brief; concise text only, no illegible filler. Check prompts' constraints carefully, don't add hidden behavior, automatic approval, auto-resume, printing, cloud or account features. All statuses and measurements are fictional scenario states for prototype, not evidence of a live production file. Output ONLY this one complete practical screen.\nSCENARIO: \nIMPORTANT: Reference controls and text must NOT be copied when not in the scenario. Never show a fabricated enhanced result before processing starts. Use spinner only for unknown progress, never ratio-filled progress bars. Do not carry colleague-correction hints onto enhancement/other reviews. No default selection for white-ink choice. Route \"生成打印 TIFF\", filename \"图案示例.pdf\". Direct-TIFF rail only \"导入与路线\",\"检查设计\" ACTIVE,\"印刷设置\",\"生成与审核\",\"保存结果\". Title \"先准备单页预览\". File illustration at left, required facts at right \"PDF · 单页\", \"300 PPI\", \"原始文件保持不变\"; note \"准备后检查第 1 页及实际尺寸，再设置印刷尺寸。\". Primary \"准备单页预览\"; secondary \"重新选择文件\". No fake rendered preview before prepare. Small compact supporting note \"PSD 使用受管栅格副本；源专色不会直接成为生产通道。\" No multi-page selector or keep-source-white.",
+      "editNeeded": "Replace left fox rendered preview with a neutral large PDF document outline and caption 尚未生成预览. No fox visible before preparing raster. Change explanatory text under 300 PPI to 预览栅格分辨率. Keep file facts, direct-TIFF five-stage rail, original unchanged, buttons, source-spot note.",
+      "initialSource": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-13ab55c9-48bd-48e7-8de0-560481c72597.png",
+      "revisionPrompt": "Use case: precise-object-edit / ui-mockup. Edit attached screen with the single source-preparation correction: Replace left fox rendered preview with a neutral large PDF document outline and caption 尚未生成预览. No fox visible before preparing raster. Change explanatory text under 300 PPI to 预览栅格分辨率. Keep file facts, direct-TIFF five-stage rail, original unchanged, buttons, source-spot note. Preserve all other layout, texts, colors, sidebar and dimensions. No additional content.",
+      "revised": true
+    },
+    {
+      "id": "enhance-ready",
+      "group": "主流程",
+      "title": "开始增强",
+      "file": "08-enhance-ready.png",
+      "intent": "可选增强前由用户明确选择开始或跳过。",
+      "primary": "开始增强",
+      "brief": "Stage 3 图片增强 active, before processing. Title \"让图案更清晰\". Large original fox preview; small explanation \"可改善清晰度；处理后仍需你审核。\". Primary footer \"开始增强\", outlined secondary \"跳过增强\", tertiary \"查看原图\". No preselected skip, no auto-run, no save. One recommended primary.",
+      "source": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-f552acaf-d7b9-4110-836f-2f653187a2d8.png",
+      "outputHint": "Generated images are saved to C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35 as C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-590996b6-69f8-40d2-be8e-8848867707ec.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "prompt": "Use case: ui-mockup. One high-fidelity raster screen for PrintFlow Studio SCRUM-11168 expanded visual prototype. Reference image is an APPROVED design-system and synthetic-artwork reference, not an edit target. Preserve its calm off-white and white surfaces, forest teal #16765D, graphite text, thin dividers, sensible 10px corners, generous efficient spacing, crisp Simplified Chinese CJK sans serif. Same original geometric mark, exact \"PrintFlow Studio\" titlebar, small \"视觉原型 v2\", window controls. One complete front-on edge-to-edge Windows desktop UI screenshot, landscape 16:10, no device/browser/outer presentation board. Same fox illustration and foliage as reference, identical sample artwork and transparent checkerboard when background removed. Default task filename 山野狐狸.png and route 处理客户设计, unless brief overrides. Default left eight-stage user rail: 导入与路线 / 确认原图 / 图片增强 / 去除背景 / 裁切画布 / 印刷设置 / 生成与审核 / 保存结果. Only stages before CURRENT are completed; future steps muted and nonexecutable. Footer fixed with one recommended primary and qualified secondary actions. Main picture and current decision are focal. No irrelevant future forms, no real customer data, no invented operational facts. Use exact quoted Chinese labels in brief; concise text only, no illegible filler. Check prompts' constraints carefully, don't add hidden behavior, automatic approval, auto-resume, printing, cloud or account features. All statuses and measurements are fictional scenario states for prototype, not evidence of a live production file. Output ONLY this one complete practical screen.\nSCENARIO: Stage 3 图片增强 active, before processing. Title \"让图案更清晰\". Large original fox preview; small explanation \"可改善清晰度；处理后仍需你审核。\". Primary footer \"开始增强\", outlined secondary \"跳过增强\", tertiary \"查看原图\". No preselected skip, no auto-run, no save. One recommended primary.",
+      "editNeeded": "Remove fabricated enhanced-output preview before processing. Replace entire two-up preview area by one large original preview labeled 原图，尚未开始增强. Preserve all other UI.",
+      "initialSource": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-590996b6-69f8-40d2-be8e-8848867707ec.png",
+      "revisionPrompt": "Remove fabricated enhanced-output preview before processing. Replace entire two-up preview area by one large original preview labeled 原图，尚未开始增强. Preserve all other UI.",
+      "revised": true
+    },
+    {
+      "id": "enhance-running",
+      "group": "主流程",
+      "title": "增强处理中",
+      "file": "09-enhance-running.png",
+      "intent": "真实不定进度、停止和美图接管始终可达。",
+      "primary": "等待处理",
+      "brief": "Stage 3 图片增强 active amber running. Title \"正在增强图片\". A modest indeterminate progress bar, never percent; phrase \"PrintFlow 正在操作美图秀秀，请稍候。\". Fox preview subdued at left with clear status region. Actions \"停止\" outlined and \"在美图秀秀中手动接管\" secondary, both available; no next/approve. Footer \"结果准备好后，需要你检查。\". No invented ETA.",
+      "source": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-089f7741-ab32-4f11-9436-cebdd69ae682.png",
+      "outputHint": "Generated images are saved to C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35 as C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-6f654f01-5bdf-46be-bac8-01ace949e183.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "prompt": "Use case: ui-mockup. One high-fidelity raster screen for PrintFlow Studio SCRUM-11168 expanded visual prototype. Reference image is an APPROVED design-system and synthetic-artwork reference, not an edit target. Preserve its calm off-white and white surfaces, forest teal #16765D, graphite text, thin dividers, sensible 10px corners, generous efficient spacing, crisp Simplified Chinese CJK sans serif. Same original geometric mark, exact \"PrintFlow Studio\" titlebar, small \"视觉原型 v2\", window controls. One complete front-on edge-to-edge Windows desktop UI screenshot, landscape 16:10, no device/browser/outer presentation board. Same fox illustration and foliage as reference, identical sample artwork and transparent checkerboard when background removed. Default task filename 山野狐狸.png and route 处理客户设计, unless brief overrides. Default left eight-stage user rail: 导入与路线 / 确认原图 / 图片增强 / 去除背景 / 裁切画布 / 印刷设置 / 生成与审核 / 保存结果. Only stages before CURRENT are completed; future steps muted and nonexecutable. Footer fixed with one recommended primary and qualified secondary actions. Main picture and current decision are focal. No irrelevant future forms, no real customer data, no invented operational facts. Use exact quoted Chinese labels in brief; concise text only, no illegible filler. Check prompts' constraints carefully, don't add hidden behavior, automatic approval, auto-resume, printing, cloud or account features. All statuses and measurements are fictional scenario states for prototype, not evidence of a live production file. Output ONLY this one complete practical screen.\nSCENARIO: Stage 3 图片增强 active amber running. Title \"正在增强图片\". A modest indeterminate progress bar, never percent; phrase \"PrintFlow 正在操作美图秀秀，请稍候。\". Fox preview subdued at left with clear status region. Actions \"停止\" outlined and \"在美图秀秀中手动接管\" secondary, both available; no next/approve. Footer \"结果准备好后，需要你检查。\". No invented ETA.",
+      "editNeeded": "Remove horizontal ratio-filled progress bar. Use only existing indeterminate spinner plus exact text 处理进度暂不可估算. Preserve rest.",
+      "initialSource": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-6f654f01-5bdf-46be-bac8-01ace949e183.png",
+      "revisionPrompt": "Remove horizontal ratio-filled progress bar. Use only existing indeterminate spinner plus exact text 处理进度暂不可估算. Preserve rest.",
+      "revised": true
+    },
+    {
+      "id": "enhance-review",
+      "group": "主流程",
+      "title": "增强结果审核",
+      "file": "10-enhance-review.png",
+      "intent": "处理前后对比，批准不等于保存。",
+      "primary": "通过增强结果",
+      "brief": "Stage 3 图片增强 active review. Title \"检查增强结果\". Before LEFT and After RIGHT same fox on cream source background, after subtly sharper not different artwork. Noninteractive bullet check guidance \"细节是否清晰\" / \"颜色是否自然\" / \"是否有多余纹理\". Primary \"通过增强结果\", secondary \"驳回增强结果\". NO colleague correction offered here, it belongs only to background-removal review. No save. Footer \"通过后选择是否去除背景。\".",
+      "source": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-9d7c4007-3c35-4eee-a5d7-3cf6a77fc808.png",
+      "outputHint": "Generated images are saved to C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35 as C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-e19d42f1-645b-4d52-b780-4388b3058e15.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "prompt": "Use case: ui-mockup. One high-fidelity raster screen for PrintFlow Studio SCRUM-11168 expanded visual prototype. Reference image is an APPROVED design-system and synthetic-artwork reference, not an edit target. Preserve its calm off-white and white surfaces, forest teal #16765D, graphite text, thin dividers, sensible 10px corners, generous efficient spacing, crisp Simplified Chinese CJK sans serif. Same original geometric mark, exact \"PrintFlow Studio\" titlebar, small \"视觉原型 v2\", window controls. One complete front-on edge-to-edge Windows desktop UI screenshot, landscape 16:10, no device/browser/outer presentation board. Same fox illustration and foliage as reference, identical sample artwork and transparent checkerboard when background removed. Default task filename 山野狐狸.png and route 处理客户设计, unless brief overrides. Default left eight-stage user rail: 导入与路线 / 确认原图 / 图片增强 / 去除背景 / 裁切画布 / 印刷设置 / 生成与审核 / 保存结果. Only stages before CURRENT are completed; future steps muted and nonexecutable. Footer fixed with one recommended primary and qualified secondary actions. Main picture and current decision are focal. No irrelevant future forms, no real customer data, no invented operational facts. Use exact quoted Chinese labels in brief; concise text only, no illegible filler. Check prompts' constraints carefully, don't add hidden behavior, automatic approval, auto-resume, printing, cloud or account features. All statuses and measurements are fictional scenario states for prototype, not evidence of a live production file. Output ONLY this one complete practical screen.\nSCENARIO: Stage 3 图片增强 active review. Title \"检查增强结果\". Before LEFT and After RIGHT same fox on cream source background, after subtly sharper not different artwork. Noninteractive bullet check guidance \"细节是否清晰\" / \"颜色是否自然\" / \"是否有多余纹理\". Primary \"通过增强结果\", secondary \"驳回增强结果\". NO colleague correction offered here, it belongs only to background-removal review. No save. Footer \"通过后选择是否去除背景。\".",
+      "editNeeded": "Remove the unsupported 请同事修正 hint from right guidance. Replace by exact sentence 不满意时，可驳回后重新处理。 Do not add colleague correction action.",
+      "initialSource": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-e19d42f1-645b-4d52-b780-4388b3058e15.png",
+      "revisionPrompt": "Remove the unsupported 请同事修正 hint from right guidance. Replace by exact sentence 不满意时，可驳回后重新处理。 Do not add colleague correction action.",
+      "revised": true
+    },
+    {
+      "id": "background-ready",
+      "group": "主流程",
+      "title": "选择去背景",
+      "file": "11-background-ready.png",
+      "intent": "保留背景与启动去背景均由用户明确选择。",
+      "primary": "开始去背景",
+      "brief": "Stage 4 去除背景 active needs input. Title \"是否需要去除背景？\". Show original enhanced fox on cream. Explain \"需要透明素材时去除背景；完整设计可以保留背景。\". Primary \"开始去背景\", outlined \"保留背景并跳过\", neutral note \"不会自动替你判断。\". No approve controls, crop settings or save forms.",
+      "source": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-c7193791-cd7f-44b6-89ab-90853925cb5b.png",
+      "prompt": "Use case: ui-mockup. One high-fidelity raster screen for PrintFlow Studio SCRUM-11168 expanded visual prototype. Reference image is an APPROVED design-system and synthetic-artwork reference, not an edit target. Preserve its calm off-white and white surfaces, forest teal #16765D, graphite text, thin dividers, sensible 10px corners, generous efficient spacing, crisp Simplified Chinese CJK sans serif. Same original geometric mark, exact \"PrintFlow Studio\" titlebar, small \"视觉原型 v2\", window controls. One complete front-on edge-to-edge Windows desktop UI screenshot, landscape 16:10, no device/browser/outer presentation board. Same fox illustration and foliage as reference, identical sample artwork and transparent checkerboard when background removed. Default task filename 山野狐狸.png and route 处理客户设计, unless brief overrides. Default left eight-stage user rail: 导入与路线 / 确认原图 / 图片增强 / 去除背景 / 裁切画布 / 印刷设置 / 生成与审核 / 保存结果. Only stages before CURRENT are completed; future steps muted and nonexecutable. Footer fixed with one recommended primary and qualified secondary actions. Main picture and current decision are focal. No irrelevant future forms, no real customer data, no invented operational facts. Use exact quoted Chinese labels in brief; concise text only, no illegible filler. Check prompts' constraints carefully, don't add hidden behavior, automatic approval, auto-resume, printing, cloud or account features. All statuses and measurements are fictional scenario states for prototype, not evidence of a live production file. Output ONLY this one complete practical screen.\nSCENARIO: \nIMPORTANT: Reference controls and text must NOT be copied when not in the scenario. Never show a fabricated enhanced result before processing starts. Use spinner only for unknown progress, never ratio-filled progress bars. Do not carry colleague-correction hints onto enhancement/other reviews. No default selection for white-ink choice. Stage 4 去除背景 active needs input. Title \"是否需要去除背景？\". Show original enhanced fox on cream. Explain \"需要透明素材时去除背景；完整设计可以保留背景。\". Primary \"开始去背景\", outlined \"保留背景并跳过\", neutral note \"不会自动替你判断。\". No approve controls, crop settings or save forms.",
+      "editNeeded": "Remove fabricated 去除背景后的效果（示例） preview before processing. Replace two-preview region with ONE large current cream-background image labeled 当前图片，尚未开始去背景. Keep start and skip buttons and all rest.",
+      "initialSource": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-c8e1b34d-2723-4b9e-8621-629e1b6979ee.png",
+      "revisionPrompt": "Remove fabricated 去除背景后的效果（示例） preview before processing. Replace two-preview region with ONE large current cream-background image labeled 当前图片，尚未开始去背景. Keep start and skip buttons and all rest.",
+      "revised": true
+    },
+    {
+      "id": "background-running",
+      "group": "主流程",
+      "title": "去背景处理中",
+      "file": "40-background-running.png",
+      "intent": "去背景独立处理状态，无假进度。",
+      "primary": "等待处理",
+      "ref": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-089f7741-ab32-4f11-9436-cebdd69ae682.png",
+      "brief": "Stage4 去除背景 ACTIVE running; stage3completed. Title \"正在去除背景\". Original cream source preview labeled \"本次输入（参考）\"; no processed result. Spinner only, exact \"处理进度暂不可估算\"; \"PrintFlow 正在操作美图秀秀，请稍候。\". Outlined \"停止\" and \"在美图秀秀中手动接管\". No determinate bar, no next or approval, no viewing upper steps while running. Footer \"处理结束后仍需审核。\".",
+      "source": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-4588288f-1dfa-498a-842e-eab36547736f.png",
+      "prompt": "Use case: ui-mockup. One high-fidelity raster screen for PrintFlow Studio SCRUM-11168 expanded visual prototype. Reference image is an APPROVED design-system and synthetic-artwork reference, not an edit target. Preserve its calm off-white and white surfaces, forest teal #16765D, graphite text, thin dividers, sensible 10px corners, generous efficient spacing, crisp Simplified Chinese CJK sans serif. Same original geometric mark, exact \"PrintFlow Studio\" titlebar, small \"视觉原型 v2\", window controls. One complete front-on edge-to-edge Windows desktop UI screenshot, landscape 16:10, no device/browser/outer presentation board. Same fox illustration and foliage as reference, identical sample artwork and transparent checkerboard when background removed. Default task filename 山野狐狸.png and route 处理客户设计, unless brief overrides. Default left eight-stage user rail: 导入与路线 / 确认原图 / 图片增强 / 去除背景 / 裁切画布 / 印刷设置 / 生成与审核 / 保存结果. Only stages before CURRENT are completed; future steps muted and nonexecutable. Footer fixed with one recommended primary and qualified secondary actions. Main picture and current decision are focal. No irrelevant future forms, no real customer data, no invented operational facts. Use exact quoted Chinese labels in brief; concise text only, no illegible filler. Check prompts' constraints carefully, don't add hidden behavior, automatic approval, auto-resume, printing, cloud or account features. All statuses and measurements are fictional scenario states for prototype, not evidence of a live production file. Output ONLY this one complete practical screen.\nSCENARIO: \nIMPORTANT: Reference controls and text must NOT be copied when not in the scenario. Never show a fabricated enhanced result before processing starts. Use spinner only for unknown progress, never ratio-filled progress bars. Do not carry colleague-correction hints onto enhancement/other reviews. No default selection for white-ink choice. Stage4 去除背景 ACTIVE running; stage3completed. Title \"正在去除背景\". Original cream source preview labeled \"本次输入（参考）\"; no processed result. Spinner only, exact \"处理进度暂不可估算\"; \"PrintFlow 正在操作美图秀秀，请稍候。\". Outlined \"停止\" and \"在美图秀秀中手动接管\". No determinate bar, no next or approval, no viewing upper steps while running. Footer \"处理结束后仍需审核。\"."
+    },
+    {
+      "id": "review",
+      "title": "审核图片",
+      "file": "03-review.png",
+      "source": "D:/Repositories/printflow-Studio/output/imagegen/SCRUM-11168/2026-10-19-v1/03-review.png",
+      "prompt": "Use case: ui-mockup\nAsset type: High-fidelity raster visual prototype for SCRUM-11168, PrintFlow Studio Windows desktop app, Simplified Chinese, design candidate v1.\nPrimary request: Create ONE exceptionally polished, practical modern desktop application screen for a step-by-step print-production assistant. This is a flat, front-on, edge-to-edge UI screenshot, wide landscape about 16:10. The entire image is the actual app window. No device, no browser, no desk, no perspective, no surrounding presentation board. It should look like a beautifully designed shippable professional creative desktop product, calm, humane, readable, meticulously aligned, with excellent typography and restrained visual density.\nDesign language: matte near-white #F6F7F4 canvas, white working surfaces, deep graphite #202E2A text, restrained forest-teal #16765D main accent, pale mint selected states, thin neutral dividers, 10-12px corner radii, discreet shadow only where needed. CJK sans-serif like Microsoft YaHei / Noto Sans SC. Generous but efficient spacing. Avoid purple gradients, glass, neon, enormous pills, excessive nested cards, marketing graphics or decorative charts.\nLayout: narrow top titlebar with a simple original geometric page mark plus exact wordmark \"PrintFlow Studio\" at left, quiet window controls at right. Below it a slim header showing task \"山野狐狸.png\", route \"处理客户设计\", and small \"本地任务\" indicator. Left 210px navigation column with exact heading \"处理步骤\" and vertical numbered progression: \"导入与路线\" completed, \"确认原图\" completed, \"图片增强\" completed, \"去除背景\" ACTIVE with small badge \"待审核\", \"裁切画布\" upcoming, \"印刷设置\" upcoming, \"生成与审核\" upcoming, \"保存结果\" upcoming. Completed stages have small checkmarks, active stage highlighted in pale mint, future stages muted and visibly not clickable. Bottom of left rail has subdued \"返回主页\" and \"帮助\".\nCurrent task in main content: large exact heading \"检查去背景结果\"; short sentence \"请确认主体完整，边缘没有残留。\"; small step overline \"当前步骤 · 去除背景\". Main workspace has a very large image comparison region, with two equal previews side by side, exact labels \"处理前\" on LEFT and \"处理后\" on RIGHT. Both previews contain the exact same synthetic print-ready decorative illustration: a bold vivid burnt-orange red fox surrounded by sage foliage and small cream wildflowers, outlined ink details, isolated emblem composition, high visual quality. Before preview has a neutral cream rectangular source background; after preview shows subtle light transparency checkerboard around the identical fox and foliage. The art is large, attractive, centered and unclipped. This synthetic image is sample print artwork, not customer data. A compact toolbar above the previews has \"并排对比\", zoom minus and plus, \"100%\", and \"适合窗口\". No general drawing or eraser tools.\nTo the right of comparison, a narrow unobtrusive contextual guidance column, exact title \"检查要点\" with three concise lines \"主体是否完整\" / \"边缘是否干净\" / \"透明区域是否正确\"; use small neutral outlined circles, not fake prechecked quality assurances. Underneath a lightweight hint \"不确定时，可请同事修正。\" The preview receives most of the screen's area.\nFixed footer across main content, separated by a hairline: quiet left action \"查看上一步\"; small informative sentence \"通过后进入裁切，当前结果尚未保存。\"; on right a subtle text action \"请同事修正\", an outlined secondary \"驳回此结果\", and ONE solid forest-teal primary button \"通过此结果\" with modest right arrow. Buttons around 42px high. Approve does NOT imply save. Critical distinction: the displayed step is BACKGROUND REMOVAL REVIEW, not completion and not final output.\nConstraints: render all quoted Simplified Chinese text accurately and sharply, no random extra copy, no nonsensical metrics, no charts, no order management, no avatars, no account features, no AI automatic approvals, no print/printer buttons, no filename paths or hashes in primary UI, no print dimensions form or export form on this review step, no fake completion percentage. Preserve safe visual separation between navigation, viewing, and approving. Use plenty of breathing room while remaining realistic for a 1000x700-or-larger desktop window. A small unobtrusive top label \"视觉原型 v1\" may distinguish the concept. Output only this one complete UI screenshot.",
+      "intent": "去背景审核示例：处理前在左，处理后在右；大图、检查要点和当前决策聚焦。",
+      "primary": "通过此结果",
+      "hidden": "尺寸输入与导出表单；通过不表示保存。",
+      "group": "主流程",
+      "inherited": true,
+      "originalSource": "C:/Users/admin/.codex/generated_images/01a1510a-9045-7432-83d1-7b7fe52e0a35/exec-b6213bb4-53c1-4f78-ac3b-83af6f48693b.png"
+    },
+    {
+      "id": "crop-review",
+      "group": "主流程",
+      "title": "裁切结果审核",
+      "file": "39-crop-review.png",
+      "intent": "新裁切产生后独立审核，不把使用裁切当作审批。",
+      "primary": "通过裁切结果",
+      "ref": "D:/Repositories/printflow-Studio/output/imagegen/SCRUM-11168/2026-10-19-v1/04-crop.png",
+      "brief": "Stage5 裁切画布 ACTIVE 待审核. Title \"检查裁切结果\". One large final-cropped transparent fox preview, NO drag handles or crop-edit outline. Right noninteractive checks \"主体没有被切掉\" / \"边缘留白合适\". Footer ONE teal \"通过裁切结果\", outlined \"调整裁切边界\", quiet \"驳回裁切结果\". Note \"通过后设置印刷尺寸，当前结果尚未保存。\". Do not say PNG final or show save forms. This is customer route crop review, not crop edit.",
+      "source": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-6840c78d-dcd0-4381-801c-cc9edd78016b.png",
+      "prompt": "Use case: ui-mockup. One high-fidelity raster screen for PrintFlow Studio SCRUM-11168 expanded visual prototype. Reference image is an APPROVED design-system and synthetic-artwork reference, not an edit target. Preserve its calm off-white and white surfaces, forest teal #16765D, graphite text, thin dividers, sensible 10px corners, generous efficient spacing, crisp Simplified Chinese CJK sans serif. Same original geometric mark, exact \"PrintFlow Studio\" titlebar, small \"视觉原型 v2\", window controls. One complete front-on edge-to-edge Windows desktop UI screenshot, landscape 16:10, no device/browser/outer presentation board. Same fox illustration and foliage as reference, identical sample artwork and transparent checkerboard when background removed. Default task filename 山野狐狸.png and route 处理客户设计, unless brief overrides. Default left eight-stage user rail: 导入与路线 / 确认原图 / 图片增强 / 去除背景 / 裁切画布 / 印刷设置 / 生成与审核 / 保存结果. Only stages before CURRENT are completed; future steps muted and nonexecutable. Footer fixed with one recommended primary and qualified secondary actions. Main picture and current decision are focal. No irrelevant future forms, no real customer data, no invented operational facts. Use exact quoted Chinese labels in brief; concise text only, no illegible filler. Check prompts' constraints carefully, don't add hidden behavior, automatic approval, auto-resume, printing, cloud or account features. All statuses and measurements are fictional scenario states for prototype, not evidence of a live production file. Output ONLY this one complete practical screen.\nSCENARIO: \nIMPORTANT: Reference controls and text must NOT be copied when not in the scenario. Never show a fabricated enhanced result before processing starts. Use spinner only for unknown progress, never ratio-filled progress bars. Do not carry colleague-correction hints onto enhancement/other reviews. No default selection for white-ink choice. Stage5 裁切画布 ACTIVE 待审核. Title \"检查裁切结果\". One large final-cropped transparent fox preview, NO drag handles or crop-edit outline. Right noninteractive checks \"主体没有被切掉\" / \"边缘留白合适\". Footer ONE teal \"通过裁切结果\", outlined \"调整裁切边界\", quiet \"驳回裁切结果\". Note \"通过后设置印刷尺寸，当前结果尚未保存。\". Do not say PNG final or show save forms. This is customer route crop review, not crop edit.",
+      "initialSource": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-a7de3e20-3c7d-4690-88d6-e9992e8738c8.png",
+      "revisionPrompt": "Edit only right inspection guide: replace both green checked circles with neutral gray bullet dots (noninteractive, not checked). Replace text 主体没有被切掉 with 主体有没有被切掉？ and 边缘留白合适 with 边缘留白是否合适？. These are prompts for human inspection, not automatically passed facts. Keep all else exactly.",
+      "revised": true
+    },
+    {
+      "id": "crop",
+      "title": "调整裁切",
+      "file": "04-crop.png",
+      "source": "D:/Repositories/printflow-Studio/output/imagegen/SCRUM-11168/2026-10-19-v1/04-crop.png",
+      "prompt": "Use case: ui-mockup\nAsset type: SCRUM-11168 PrintFlow Studio high-fidelity raster design prototype v1.\nReference role: attached review-screen image is a visual-system and sample-artwork reference only. Generate ONE NEW different screen, NOT a collage or picture inside a picture.\nCanvas: one complete front-facing flat edge-to-edge Windows desktop app screenshot, landscape approximately 16:10. Exactly match reference's titlebar with simple original teal geometric mark, \"PrintFlow Studio\", small \"视觉原型 v1\", and window controls. Match off-white and white surfaces, graphite CJK sans serif, forest-teal accent, pale mint selections, discreet neutral dividers, restrained 10px corners. Crisp correct Simplified Chinese, meticulous alignment, practical professional creative product design. No device frame, browser, perspective, gradients, marketing graphics, charts, avatars or irrelevant forms.\nHeader context: exact filename \"山野狐狸.png\", route \"处理客户设计\", small \"本地任务\".\nLeft rail: heading \"处理步骤\", same eight macro stages \"导入与路线\", \"确认原图\", \"图片增强\", \"去除背景\", \"裁切画布\", \"印刷设置\", \"生成与审核\", \"保存结果\"; use small numbered circles, previous completed with checks, current highlighted mint, future muted. Bottom links \"返回主页\" and \"帮助\".\nArtwork: use the SAME synthetic vivid orange seated fox, sage foliage and cream wildflowers with fine ink lines from reference. This is fictional sample artwork. Preserve subject, style and proportions, never show erasing or painting tools. Only relevant step controls are visible. Output ONLY one complete polished UI screenshot.\n\nCurrent screen: stage 5 \"裁切画布\" active with small badge \"调整中\", previous stages completed, future stages muted. Main overline \"当前步骤 · 裁切画布\"; title \"调整图片边缘\"; subtitle \"拖动边框，保留你需要的完整图案。\".\nThe central and dominant region is ONE large checkerboard image canvas with the orange fox and flowers, generous surrounding transparent margins. A teal rectangular crop outline snugly but safely surrounds all subject and foliage; visible eight square edge/corner handles, subtle dimming outside crop. Show no dimensions/print parameters, no unrelated TIFF/export forms. A compact toolbar above has minus/plus, \"100%\", \"适合窗口\".\nNarrow right contextual column: exact heading \"裁切建议\"; short text \"自动建议已载入\"; simple explanatory line \"请勿切掉尾巴、花朵或细小边缘。\"; outlined secondary action \"恢复自动建议\"; quiet toggle/link \"比较裁切前后\". No fake prechecked inspection criteria and no numeric margin units.\nFixed footer: left secondary action \"取消调整\"; quiet sentence \"使用后仍需审核裁切结果。\"; ONE solid teal primary button \"使用此裁切\". Applying the crop is NOT approval and NOT saving. There is no \"通过\" or \"保存\" button in crop-edit mode. Keep the whole artwork clearly within the chosen crop boundary, not clipped. Exact Chinese copy and clean realistic control sizes.",
+      "intent": "独立调整模式，突出边界、手柄、恢复自动建议和取消；使用新裁切后仍需审核。",
+      "primary": "使用此裁切",
+      "hidden": "通过审批、印刷参数与保存操作。",
+      "group": "主流程",
+      "inherited": true,
+      "originalSource": "C:/Users/admin/.codex/generated_images/01a1510a-9045-7432-83d1-7b7fe52e0a35/exec-9ee77970-7a41-4163-b04c-a45358770031.png"
+    },
+    {
+      "id": "dimensions",
+      "title": "印刷尺寸",
+      "file": "05-print-size.png",
+      "source": "D:/Repositories/printflow-Studio/output/imagegen/SCRUM-11168/2026-10-19-v1/05-print-size.png",
+      "prompt": "Use case: ui-mockup\nAsset type: SCRUM-11168 PrintFlow Studio high-fidelity raster design prototype v1.\nReference role: attached review-screen image is a visual-system and sample-artwork reference only. Generate ONE NEW different screen, NOT a collage or picture inside a picture.\nCanvas: one complete front-facing flat edge-to-edge Windows desktop app screenshot, landscape approximately 16:10. Exactly match reference's titlebar with simple original teal geometric mark, \"PrintFlow Studio\", small \"视觉原型 v1\", and window controls. Match off-white and white surfaces, graphite CJK sans serif, forest-teal accent, pale mint selections, discreet neutral dividers, restrained 10px corners. Crisp correct Simplified Chinese, meticulous alignment, practical professional creative product design. No device frame, browser, perspective, gradients, marketing graphics, charts, avatars or irrelevant forms.\nHeader context: exact filename \"山野狐狸.png\", route \"处理客户设计\", small \"本地任务\".\nLeft rail: heading \"处理步骤\", same eight macro stages \"导入与路线\", \"确认原图\", \"图片增强\", \"去除背景\", \"裁切画布\", \"印刷设置\", \"生成与审核\", \"保存结果\"; use small numbered circles, previous completed with checks, current highlighted mint, future muted. Bottom links \"返回主页\" and \"帮助\".\nArtwork: use the SAME synthetic vivid orange seated fox, sage foliage and cream wildflowers with fine ink lines from reference. This is fictional sample artwork. Preserve subject, style and proportions, never show erasing or painting tools. Only relevant step controls are visible. Output ONLY one complete polished UI screenshot.\n\nCurrent screen: stage 6 \"印刷设置\" active, stages 1-5 completed, 7-8 future. Main overline \"当前步骤 · 印刷设置\"; title \"设置印刷尺寸\"; subtitle \"保持图片比例，选择你需要的实际大小。\".\nTwo balanced columns: left roughly 38% width has a clean focused form, right 62% is a large print preview. Form tabs \"预设尺寸\" and SELECTED \"自定义尺寸\". Radio selection \"指定高度\" selected; exact input \"200\" with suffix \"mm\". Read-only calculated row \"实际宽度\" value \"150 mm\". Subtle locked ratio indicator \"锁定比例 3:4\". Explain \"宽度会按原图比例计算。\". A simple result summary below has \"实际输出\" with \"150 × 200 mm\", \"输出像素\" with \"1772 × 2362 px\", \"生产分辨率\" with \"300 PPI\", and calm neutral positive label \"无需放大\". All values are coherent illustrative sample values, not measurements of actual files. A collapsed disclosure \"查看技术详情\" keeps further technical facts out of the main form. No unnecessary W1/CMYK form at this stage.\nPreview on right: fox artwork on a subtle light checkerboard within portrait white paper-like bounds at 3:4 aspect ratio, spacious background, thin measurement lines showing \"150 mm\" horizontal and \"200 mm\" vertical. Small label \"尺寸预览\" and modest zoom/fit controls. Image stays large and fully visible. Do not show completed TIFF or printing operation.\nFixed footer across main content: back action \"查看上一步\", quiet note \"确认尺寸后进入生成前检查，不会立即生成文件。\", ONE solid teal primary \"确认尺寸\". No approve or save buttons on this size-input step. No enlargement consent checkbox in a no-enlargement example. No arbitrary percentage or fake measured DPI. Render Chinese and all values accurately.",
+      "editPrompt": "Use case: precise-object-edit / ui-mockup\nEdit target: attached PrintFlow Studio size-settings UI prototype.\nMake ONE targeted correction ONLY: inside the portrait image's 150 mm by 200 mm print-preview rectangle, replace the cream/beige paper background behind the fox and foliage with the same subtle light-gray transparency checkerboard already visible around the rectangle. The fox and foliage have already had background removal; the preview must show them over checkerboard right up to all illustration edges, with no cream rectangular fill, no white/brown matte, and no flattening. Keep a very thin neutral rectangle border and all measurement lines.\nPreserve everything else EXACTLY: all window framing, titlebar, side navigation and checkmarks, active step, all Simplified Chinese text, input values 200/150, radio controls, 3:4 ratio, \"150 × 200 mm\", \"1772 × 2362 px\", \"300 PPI\", status, toolbar, footer, colors and spacings. Do not move, resize, redraw or alter the fox/flowers. Do not change any text. No additional elements. Output the corrected complete screenshot in the same dimensions.",
+      "intent": "指定高度、按比例计算宽度；区分实际输出尺寸和技术详情。透明背景修订版。",
+      "primary": "确认尺寸",
+      "hidden": "审批、文件保存与无关白墨选项。",
+      "group": "主流程",
+      "inherited": true,
+      "originalSource": "C:/Users/admin/.codex/generated_images/01a1510a-9045-7432-83d1-7b7fe52e0a35/exec-002e5846-f1c4-49e8-8cb6-f4b999342fe7.png"
+    },
+    {
+      "id": "white-ink",
+      "group": "主流程",
+      "title": "白墨选择",
+      "file": "12-white-ink.png",
+      "intent": "两条 TIFF 路线都需明确选择0/1/2像素分支及理由。",
+      "primary": "确认白墨选择",
+      "brief": "Stage 7 生成与审核 active substep \"白墨选择\". Title \"选择白墨类型\". Three radio cards with NONE SELECTED: \"精细图案 · 内缩 0 px\" / \"普通图案 · 内缩 1 px\" / \"大块实底 · 内缩 2 px\". Small suitable fox preview; explanation \"根据完整图案选择，系统不会自动判断。\"; text area label \"选择理由\" empty placeholder \"说明本次选择的依据\". Disabled primary \"确认白墨选择\" until both selection and reason exist. Collapsed technical disclosure \"生产通道说明\" with visible small note \"源 PSD/PDF 的专色不会直接沿用。\". No \"use existing white ink\" option.",
+      "source": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-59fcc204-e927-471c-b9f7-ca1e7342ad2f.png",
+      "prompt": "Use case: ui-mockup. One high-fidelity raster screen for PrintFlow Studio SCRUM-11168 expanded visual prototype. Reference image is an APPROVED design-system and synthetic-artwork reference, not an edit target. Preserve its calm off-white and white surfaces, forest teal #16765D, graphite text, thin dividers, sensible 10px corners, generous efficient spacing, crisp Simplified Chinese CJK sans serif. Same original geometric mark, exact \"PrintFlow Studio\" titlebar, small \"视觉原型 v2\", window controls. One complete front-on edge-to-edge Windows desktop UI screenshot, landscape 16:10, no device/browser/outer presentation board. Same fox illustration and foliage as reference, identical sample artwork and transparent checkerboard when background removed. Default task filename 山野狐狸.png and route 处理客户设计, unless brief overrides. Default left eight-stage user rail: 导入与路线 / 确认原图 / 图片增强 / 去除背景 / 裁切画布 / 印刷设置 / 生成与审核 / 保存结果. Only stages before CURRENT are completed; future steps muted and nonexecutable. Footer fixed with one recommended primary and qualified secondary actions. Main picture and current decision are focal. No irrelevant future forms, no real customer data, no invented operational facts. Use exact quoted Chinese labels in brief; concise text only, no illegible filler. Check prompts' constraints carefully, don't add hidden behavior, automatic approval, auto-resume, printing, cloud or account features. All statuses and measurements are fictional scenario states for prototype, not evidence of a live production file. Output ONLY this one complete practical screen.\nSCENARIO: \nIMPORTANT: Reference controls and text must NOT be copied when not in the scenario. Never show a fabricated enhanced result before processing starts. Use spinner only for unknown progress, never ratio-filled progress bars. Do not carry colleague-correction hints onto enhancement/other reviews. No default selection for white-ink choice. Stage 7 生成与审核 active substep \"白墨选择\". Title \"选择白墨类型\". Three radio cards with NONE SELECTED: \"精细图案 · 内缩 0 px\" / \"普通图案 · 内缩 1 px\" / \"大块实底 · 内缩 2 px\". Small suitable fox preview; explanation \"根据完整图案选择，系统不会自动判断。\"; text area label \"选择理由\" empty placeholder \"说明本次选择的依据\". Disabled primary \"确认白墨选择\" until both selection and reason exist. Collapsed technical disclosure \"生产通道说明\" with visible small note \"源 PSD/PDF 的专色不会直接沿用。\". No \"use existing white ink\" option."
+    },
+    {
+      "id": "preflight",
+      "group": "主流程",
+      "title": "生成前确认",
+      "file": "13-preflight.png",
+      "intent": "确认尺寸和已明确选择的白墨，再显式生成TIFF。",
+      "primary": "开始生成 TIFF",
+      "brief": "Stage 7 substep \"生成前确认\". Title \"确认后，开始生成 TIFF\". Large transparent fox preview and focused summary: \"实际尺寸 150 × 200 mm\", \"输出像素 1772 × 2362 px\", \"生产分辨率 300 PPI\", \"白墨 精细图案 · 0 px\", \"选择理由 保留细小花叶边缘\". No auto-selected white ink, this snapshot follows explicit user choice. Environment neutral line \"本次开始仍需通过环境校验\" not false ready. Footer primary \"开始生成 TIFF\", secondary \"修改设置\". No final approval/save yet.",
+      "source": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-e0e16766-85ca-4559-9e40-df3989e3afe1.png",
+      "prompt": "Use case: ui-mockup. One high-fidelity raster screen for PrintFlow Studio SCRUM-11168 expanded visual prototype. Reference image is an APPROVED design-system and synthetic-artwork reference, not an edit target. Preserve its calm off-white and white surfaces, forest teal #16765D, graphite text, thin dividers, sensible 10px corners, generous efficient spacing, crisp Simplified Chinese CJK sans serif. Same original geometric mark, exact \"PrintFlow Studio\" titlebar, small \"视觉原型 v2\", window controls. One complete front-on edge-to-edge Windows desktop UI screenshot, landscape 16:10, no device/browser/outer presentation board. Same fox illustration and foliage as reference, identical sample artwork and transparent checkerboard when background removed. Default task filename 山野狐狸.png and route 处理客户设计, unless brief overrides. Default left eight-stage user rail: 导入与路线 / 确认原图 / 图片增强 / 去除背景 / 裁切画布 / 印刷设置 / 生成与审核 / 保存结果. Only stages before CURRENT are completed; future steps muted and nonexecutable. Footer fixed with one recommended primary and qualified secondary actions. Main picture and current decision are focal. No irrelevant future forms, no real customer data, no invented operational facts. Use exact quoted Chinese labels in brief; concise text only, no illegible filler. Check prompts' constraints carefully, don't add hidden behavior, automatic approval, auto-resume, printing, cloud or account features. All statuses and measurements are fictional scenario states for prototype, not evidence of a live production file. Output ONLY this one complete practical screen.\nSCENARIO: \nIMPORTANT: Reference controls and text must NOT be copied when not in the scenario. Never show a fabricated enhanced result before processing starts. Use spinner only for unknown progress, never ratio-filled progress bars. Do not carry colleague-correction hints onto enhancement/other reviews. No default selection for white-ink choice. Stage 7 substep \"生成前确认\". Title \"确认后，开始生成 TIFF\". Large transparent fox preview and focused summary: \"实际尺寸 150 × 200 mm\", \"输出像素 1772 × 2362 px\", \"生产分辨率 300 PPI\", \"白墨 精细图案 · 0 px\", \"选择理由 保留细小花叶边缘\". No auto-selected white ink, this snapshot follows explicit user choice. Environment neutral line \"本次开始仍需通过环境校验\" not false ready. Footer primary \"开始生成 TIFF\", secondary \"修改设置\". No final approval/save yet."
+    },
+    {
+      "id": "tiff-running",
+      "group": "主流程",
+      "title": "TIFF生成中",
+      "file": "14-tiff-running.png",
+      "intent": "Photoshop处理中保留停止和接管，不虚构百分比。",
+      "primary": "等待生成",
+      "brief": "Stage7 生成与审核 processing. Title \"正在生成打印 TIFF\". Stage timeline \"准备工作副本\" completed, \"Photoshop 正在处理\" current, \"校验输出\" upcoming, \"等待你审核\" upcoming; no percentages. Small fox preview, neutral warning \"请勿切换或编辑 Photoshop 当前工作文件。\". Explicit secondary \"停止\" and \"在 Photoshop 中接管\". Footer note \"接管后不支持导回手工 TIFF。\". No approve, no save.",
+      "source": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-a581f5a4-be55-4d7f-bf65-e426655ad00e.png",
+      "prompt": "Use case: ui-mockup. One high-fidelity raster screen for PrintFlow Studio SCRUM-11168 expanded visual prototype. Reference image is an APPROVED design-system and synthetic-artwork reference, not an edit target. Preserve its calm off-white and white surfaces, forest teal #16765D, graphite text, thin dividers, sensible 10px corners, generous efficient spacing, crisp Simplified Chinese CJK sans serif. Same original geometric mark, exact \"PrintFlow Studio\" titlebar, small \"视觉原型 v2\", window controls. One complete front-on edge-to-edge Windows desktop UI screenshot, landscape 16:10, no device/browser/outer presentation board. Same fox illustration and foliage as reference, identical sample artwork and transparent checkerboard when background removed. Default task filename 山野狐狸.png and route 处理客户设计, unless brief overrides. Default left eight-stage user rail: 导入与路线 / 确认原图 / 图片增强 / 去除背景 / 裁切画布 / 印刷设置 / 生成与审核 / 保存结果. Only stages before CURRENT are completed; future steps muted and nonexecutable. Footer fixed with one recommended primary and qualified secondary actions. Main picture and current decision are focal. No irrelevant future forms, no real customer data, no invented operational facts. Use exact quoted Chinese labels in brief; concise text only, no illegible filler. Check prompts' constraints carefully, don't add hidden behavior, automatic approval, auto-resume, printing, cloud or account features. All statuses and measurements are fictional scenario states for prototype, not evidence of a live production file. Output ONLY this one complete practical screen.\nSCENARIO: \nIMPORTANT: Reference controls and text must NOT be copied when not in the scenario. Never show a fabricated enhanced result before processing starts. Use spinner only for unknown progress, never ratio-filled progress bars. Do not carry colleague-correction hints onto enhancement/other reviews. No default selection for white-ink choice. Stage7 生成与审核 processing. Title \"正在生成打印 TIFF\". Stage timeline \"准备工作副本\" completed, \"Photoshop 正在处理\" current, \"校验输出\" upcoming, \"等待你审核\" upcoming; no percentages. Small fox preview, neutral warning \"请勿切换或编辑 Photoshop 当前工作文件。\". Explicit secondary \"停止\" and \"在 Photoshop 中接管\". Footer note \"接管后不支持导回手工 TIFF。\". No approve, no save.",
+      "editNeeded": "Replace cream background behind source fox with subtle checkerboard; label preview 已批准的源图（参考）. Make Photoshop takeover button OUTLINED secondary, not solid emphasized primary. Processing has no recommended action to rush takeover. Preserve spinner/status/stop.",
+      "initialSource": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-f9b38816-9893-4980-bab8-41b55057a760.png",
+      "revisionPrompt": "Replace cream background behind source fox with subtle checkerboard; label preview 已批准的源图（参考）. Make Photoshop takeover button OUTLINED secondary, not solid emphasized primary. Processing has no recommended action to rush takeover. Preserve spinner/status/stop.",
+      "revised": true
+    },
+    {
+      "id": "tiff-review",
+      "group": "主流程",
+      "title": "最终TIFF审核",
+      "file": "15-tiff-review.png",
+      "intent": "颜色/白墨/透明预览与实际尺寸，审批绑定此TIFF。",
+      "primary": "批准此 TIFF",
+      "brief": "Stage7 waiting final review. Header output \"山野狐狸_200mm.tif\". Title \"检查最终打印文件\". Huge fox composite preview; toolbar tabs \"颜色\" ACTIVE, \"白墨\", \"透明\"; right guidance simple bullets \"颜色是否符合预期\" / \"白墨覆盖是否完整\" / \"实际尺寸是否正确\". Metadata \"150 × 200 mm · 300 PPI · CMYK · W1\" illustrative, no fake production certificates. Primary \"批准此 TIFF\", outlined \"驳回此 TIFF\". Footer note \"批准不等于保存；驳回后先移入回收站。\". No automatic regeneration.",
+      "source": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-f02832b9-7430-4a86-833e-0c49f10e116c.png",
+      "prompt": "Use case: ui-mockup. One high-fidelity raster screen for PrintFlow Studio SCRUM-11168 expanded visual prototype. Reference image is an APPROVED design-system and synthetic-artwork reference, not an edit target. Preserve its calm off-white and white surfaces, forest teal #16765D, graphite text, thin dividers, sensible 10px corners, generous efficient spacing, crisp Simplified Chinese CJK sans serif. Same original geometric mark, exact \"PrintFlow Studio\" titlebar, small \"视觉原型 v2\", window controls. One complete front-on edge-to-edge Windows desktop UI screenshot, landscape 16:10, no device/browser/outer presentation board. Same fox illustration and foliage as reference, identical sample artwork and transparent checkerboard when background removed. Default task filename 山野狐狸.png and route 处理客户设计, unless brief overrides. Default left eight-stage user rail: 导入与路线 / 确认原图 / 图片增强 / 去除背景 / 裁切画布 / 印刷设置 / 生成与审核 / 保存结果. Only stages before CURRENT are completed; future steps muted and nonexecutable. Footer fixed with one recommended primary and qualified secondary actions. Main picture and current decision are focal. No irrelevant future forms, no real customer data, no invented operational facts. Use exact quoted Chinese labels in brief; concise text only, no illegible filler. Check prompts' constraints carefully, don't add hidden behavior, automatic approval, auto-resume, printing, cloud or account features. All statuses and measurements are fictional scenario states for prototype, not evidence of a live production file. Output ONLY this one complete practical screen.\nSCENARIO: \nIMPORTANT: Reference controls and text must NOT be copied when not in the scenario. Never show a fabricated enhanced result before processing starts. Use spinner only for unknown progress, never ratio-filled progress bars. Do not carry colleague-correction hints onto enhancement/other reviews. No default selection for white-ink choice. Stage7 waiting final review. Header output \"山野狐狸_200mm.tif\". Title \"检查最终打印文件\". Huge fox composite preview; toolbar tabs \"颜色\" ACTIVE, \"白墨\", \"透明\"; right guidance simple bullets \"颜色是否符合预期\" / \"白墨覆盖是否完整\" / \"实际尺寸是否正确\". Metadata \"150 × 200 mm · 300 PPI · CMYK · W1\" illustrative, no fake production certificates. Primary \"批准此 TIFF\", outlined \"驳回此 TIFF\". Footer note \"批准不等于保存；驳回后先移入回收站。\". No automatic regeneration."
+    },
+    {
+      "id": "white-preview",
+      "group": "主流程",
+      "title": "TIFF白墨预览",
+      "file": "43-white-preview.png",
+      "intent": "最终审核中的白墨查看状态，图例明确。",
+      "primary": "批准此 TIFF",
+      "ref": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-f02832b9-7430-4a86-833e-0c49f10e116c.png",
+      "brief": "Stage7 waiting final TIFF review. Title \"检查白墨覆盖\". Same final review shell but toolbar tabs \"颜色\" inactive / \"白墨\" ACTIVE / \"透明\" inactive. ONE dominant black canvas with WHITE silhouette of same fox and every flower/foliage region; no orange/color artwork in this mode. Exact legend \"亮部 = 有白墨 · 黑色 = 无白墨\". This mask is illustrative mockup artwork, NOT real decoder output. Right checks \"细小区域有没有缺失\" / \"轮廓外有没有多余白墨\"; metadata \"W1 · 内缩 0 px\", \"150 × 200 mm · 300 PPI\". Footer primary \"批准此 TIFF\", secondary \"驳回此 TIFF\"; note \"审批针对完整 TIFF；查看白墨不代表通过。\". No separate white-only approval or save form.",
+      "source": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-c3f7a5c9-09f3-481b-89f2-137a4d422517.png",
+      "prompt": "Use case: ui-mockup. One high-fidelity raster screen for PrintFlow Studio SCRUM-11168 expanded visual prototype. Reference image is an APPROVED design-system and synthetic-artwork reference, not an edit target. Preserve its calm off-white and white surfaces, forest teal #16765D, graphite text, thin dividers, sensible 10px corners, generous efficient spacing, crisp Simplified Chinese CJK sans serif. Same original geometric mark, exact \"PrintFlow Studio\" titlebar, small \"视觉原型 v2\", window controls. One complete front-on edge-to-edge Windows desktop UI screenshot, landscape 16:10, no device/browser/outer presentation board. Same fox illustration and foliage as reference, identical sample artwork and transparent checkerboard when background removed. Default task filename 山野狐狸.png and route 处理客户设计, unless brief overrides. Default left eight-stage user rail: 导入与路线 / 确认原图 / 图片增强 / 去除背景 / 裁切画布 / 印刷设置 / 生成与审核 / 保存结果. Only stages before CURRENT are completed; future steps muted and nonexecutable. Footer fixed with one recommended primary and qualified secondary actions. Main picture and current decision are focal. No irrelevant future forms, no real customer data, no invented operational facts. Use exact quoted Chinese labels in brief; concise text only, no illegible filler. Check prompts' constraints carefully, don't add hidden behavior, automatic approval, auto-resume, printing, cloud or account features. All statuses and measurements are fictional scenario states for prototype, not evidence of a live production file. Output ONLY this one complete practical screen.\nSCENARIO: \nIMPORTANT: Reference controls and text must NOT be copied when not in the scenario. Never show a fabricated enhanced result before processing starts. Use spinner only for unknown progress, never ratio-filled progress bars. Do not carry colleague-correction hints onto enhancement/other reviews. No default selection for white-ink choice. Stage7 waiting final TIFF review. Title \"检查白墨覆盖\". Same final review shell but toolbar tabs \"颜色\" inactive / \"白墨\" ACTIVE / \"透明\" inactive. ONE dominant black canvas with WHITE silhouette of same fox and every flower/foliage region; no orange/color artwork in this mode. Exact legend \"亮部 = 有白墨 · 黑色 = 无白墨\". This mask is illustrative mockup artwork, NOT real decoder output. Right checks \"细小区域有没有缺失\" / \"轮廓外有没有多余白墨\"; metadata \"W1 · 内缩 0 px\", \"150 × 200 mm · 300 PPI\". Footer primary \"批准此 TIFF\", secondary \"驳回此 TIFF\"; note \"审批针对完整 TIFF；查看白墨不代表通过。\". No separate white-only approval or save form."
+    },
+    {
+      "id": "png-final",
+      "group": "主流程",
+      "title": "素材PNG收尾",
+      "file": "16-png-final.png",
+      "intent": "素材路线仅包含PNG，无印刷尺寸和TIFF。",
+      "primary": "确认结果并保存",
+      "brief": "Route \"准备设计素材\"; left rail only six user stages \"导入与路线\",\"确认原图\",\"图片增强\",\"去除背景\",\"裁切画布\",\"保存 PNG\"; crop review current awaiting final approval, no print stages. Title \"确认透明素材并保存\". Large fox on checkerboard, checklist \"主体完整\" / \"裁切边缘合适\"; filename field \"山野狐狸_素材.png\", example folder \"D:\\示例输出\"; neutral states \"待审核\" / \"尚未保存\". Footer primary \"确认结果并保存\", secondary \"仅通过此结果\". Note \"先批准当前结果，再保存；两项分别记录。\" No DPI/white ink/TIFF controls.",
+      "source": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-8404d949-cd5a-4ad0-b94e-f6c9d25f5685.png",
+      "prompt": "Use case: ui-mockup. One high-fidelity raster screen for PrintFlow Studio SCRUM-11168 expanded visual prototype. Reference image is an APPROVED design-system and synthetic-artwork reference, not an edit target. Preserve its calm off-white and white surfaces, forest teal #16765D, graphite text, thin dividers, sensible 10px corners, generous efficient spacing, crisp Simplified Chinese CJK sans serif. Same original geometric mark, exact \"PrintFlow Studio\" titlebar, small \"视觉原型 v2\", window controls. One complete front-on edge-to-edge Windows desktop UI screenshot, landscape 16:10, no device/browser/outer presentation board. Same fox illustration and foliage as reference, identical sample artwork and transparent checkerboard when background removed. Default task filename 山野狐狸.png and route 处理客户设计, unless brief overrides. Default left eight-stage user rail: 导入与路线 / 确认原图 / 图片增强 / 去除背景 / 裁切画布 / 印刷设置 / 生成与审核 / 保存结果. Only stages before CURRENT are completed; future steps muted and nonexecutable. Footer fixed with one recommended primary and qualified secondary actions. Main picture and current decision are focal. No irrelevant future forms, no real customer data, no invented operational facts. Use exact quoted Chinese labels in brief; concise text only, no illegible filler. Check prompts' constraints carefully, don't add hidden behavior, automatic approval, auto-resume, printing, cloud or account features. All statuses and measurements are fictional scenario states for prototype, not evidence of a live production file. Output ONLY this one complete practical screen.\nSCENARIO: \nIMPORTANT: Reference controls and text must NOT be copied when not in the scenario. Never show a fabricated enhanced result before processing starts. Use spinner only for unknown progress, never ratio-filled progress bars. Do not carry colleague-correction hints onto enhancement/other reviews. No default selection for white-ink choice. Route \"准备设计素材\"; left rail only six user stages \"导入与路线\",\"确认原图\",\"图片增强\",\"去除背景\",\"裁切画布\",\"保存 PNG\"; crop review current awaiting final approval, no print stages. Title \"确认透明素材并保存\". Large fox on checkerboard, checklist \"主体完整\" / \"裁切边缘合适\"; filename field \"山野狐狸_素材.png\", example folder \"D:\\示例输出\"; neutral states \"待审核\" / \"尚未保存\". Footer primary \"确认结果并保存\", secondary \"仅通过此结果\". Note \"先批准当前结果，再保存；两项分别记录。\" No DPI/white ink/TIFF controls.",
+      "editNeeded": "Fix left sidebar only. It must show SIX stages: 1 导入与路线 completed,2 确认原图 completed,3 图片增强 completed,4 去除背景 completed,5 裁切画布 ACTIVE 待审核,6 保存 PNG upcoming. Current renderer omitted 去除背景. Keep rest unchanged.",
+      "initialSource": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-e097cbb2-352e-4d04-b9cf-d2435c9bc70a.png",
+      "revisionPrompt": "Fix left sidebar only. It must show SIX stages: 1 导入与路线 completed,2 确认原图 completed,3 图片增强 completed,4 去除背景 completed,5 裁切画布 ACTIVE 待审核,6 保存 PNG upcoming. Current renderer omitted 去除背景. Keep rest unchanged.",
+      "revised": true
+    },
+    {
+      "id": "png-save",
+      "group": "主流程",
+      "title": "保存已批准PNG",
+      "file": "44-png-save.png",
+      "intent": "PNG专属保存状态，无印刷尺寸、白墨或TIFF。",
+      "primary": "保存到所选文件夹",
+      "sourceRef": "D:/Repositories/printflow-Studio/output/imagegen/SCRUM-11168/2026-10-19-v1/06-save.png",
+      "prompt": "Edit this save screen into the PNG route variant. Exact route header 准备设计素材. Sidebar exactly six stages: 导入与路线,确认原图,图片增强,去除背景,裁切画布 all completed; 保存 PNG sixth active. Keep transparent fox, approval and 未保存 facts. Change filename to 山野狐狸_素材.png; replace TIFF / physical size / 300PPI metadata with PNG · 透明素材 ONLY. There must be NO TIFF, 印刷设置, 生成与审核, white ink, physical size, PPI anywhere. Keep folder D:\\示例输出. Primary 保存到所选文件夹, open folder disabled until saved. Small titlebar 视觉原型 v2. Preserve style, all other safe wording.",
+      "source": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-78e3ca49-468d-4a2b-ad49-dbd9d3fe06c9.png"
+    },
+    {
+      "id": "save",
+      "title": "保存结果",
+      "file": "06-save.png",
+      "source": "D:/Repositories/printflow-Studio/output/imagegen/SCRUM-11168/2026-10-19-v1/06-save.png",
+      "prompt": "Use case: ui-mockup\nAsset type: SCRUM-11168 PrintFlow Studio high-fidelity raster design prototype v1.\nReference role: attached review-screen image is a visual-system and sample-artwork reference only. Generate ONE NEW different screen, NOT a collage or picture inside a picture.\nCanvas: one complete front-facing flat edge-to-edge Windows desktop app screenshot, landscape approximately 16:10. Exactly match reference's titlebar with simple original teal geometric mark, \"PrintFlow Studio\", small \"视觉原型 v1\", and window controls. Match off-white and white surfaces, graphite CJK sans serif, forest-teal accent, pale mint selections, discreet neutral dividers, restrained 10px corners. Crisp correct Simplified Chinese, meticulous alignment, practical professional creative product design. No device frame, browser, perspective, gradients, marketing graphics, charts, avatars or irrelevant forms.\nHeader context: exact filename \"山野狐狸.png\", route \"处理客户设计\", small \"本地任务\".\nLeft rail: heading \"处理步骤\", same eight macro stages \"导入与路线\", \"确认原图\", \"图片增强\", \"去除背景\", \"裁切画布\", \"印刷设置\", \"生成与审核\", \"保存结果\"; use small numbered circles, previous completed with checks, current highlighted mint, future muted. Bottom links \"返回主页\" and \"帮助\".\nArtwork: use the SAME synthetic vivid orange seated fox, sage foliage and cream wildflowers with fine ink lines from reference. This is fictional sample artwork. Preserve subject, style and proportions, never show erasing or painting tools. Only relevant step controls are visible. Output ONLY one complete polished UI screenshot.\n\nCurrent screen: stage 8 \"保存结果\" active, previous stages completed. Main overline \"当前步骤 · 保存结果\"; title \"保存已批准的结果\"; subtitle \"确认文件名和文件夹，再保存这份结果。\".\nMain layout: a large pleasant fox-result preview on subtle transparency checkerboard at left (about 52% width), to its right a clean precise save form (48%). Above form show two clearly separated status facts: a small approval check with exact \"此结果已批准\", and a neutral pill \"尚未保存\". These are mockup state labels, not a fabricated file-write receipt.\nForm fields: label \"文件名\", input exact \"山野狐狸_200mm.tif\"; label \"保存到\", folder field exact \"D:\\示例输出\" with outlined \"更改文件夹\". Small metadata line \"TIFF · 150 × 200 mm · 300 PPI\". A quiet note \"保存的是当前已批准的文件。\". A subdued disabled action \"打开所在文件夹\" with helper \"保存成功后可用\". No existing delivery receipt, no fake success check, no completed state and no re-approval checkbox. Filename and folder are synthetic visual examples only.\nBottom fixed main footer: left back action \"查看审核结果\"; quiet note \"批准与保存是两个独立状态。\"; ONE solid teal primary \"保存到所选文件夹\". Do NOT label this action complete or auto-complete the processing job. No print button, no second approve command, no cloud upload, no overcomplicated versions table or unrelated settings. Ensure accurate Chinese and legible full folder/filename text.",
+      "intent": "已批准与尚未保存分别显示；保存位置和文件名清晰；打开文件夹在保存后可用。",
+      "primary": "保存到所选文件夹",
+      "hidden": "新的审核命令与无关图像参数；保存不自动等于任务完成。",
+      "group": "主流程",
+      "inherited": true,
+      "originalSource": "C:/Users/admin/.codex/generated_images/01a1510a-9045-7432-83d1-7b7fe52e0a35/exec-841af174-9198-4c80-9a9c-b387070284b3.png"
+    },
+    {
+      "id": "multi-size",
+      "group": "主流程",
+      "title": "多尺寸结果",
+      "file": "17-multi-size.png",
+      "intent": "每个尺寸拥有独立审核与保存状态。",
+      "primary": "添加另一尺寸",
+      "brief": "Stage8 output overview. Title \"管理这张图的多个尺寸\". Two result cards/rows with thumbnails: \"150 × 200 mm\" approval \"已批准\" delivery \"有保存记录\"; \"180 × 240 mm\" approval \"待审核\" delivery \"尚未保存\". Selected first. One primary \"添加另一尺寸\"; clear row action on second \"审核此尺寸\"; first secondary \"检查保存文件\". Disabled \"完成任务\" because second pending review. Note \"每个尺寸都需要独立审核和保存；保存记录不代表文件仍在原位置。\" No bulk approve.",
+      "source": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-b05a37bf-db76-4d70-87c6-9750ebe466f5.png",
+      "prompt": "Use case: ui-mockup. One high-fidelity raster screen for PrintFlow Studio SCRUM-11168 expanded visual prototype. Reference image is an APPROVED design-system and synthetic-artwork reference, not an edit target. Preserve its calm off-white and white surfaces, forest teal #16765D, graphite text, thin dividers, sensible 10px corners, generous efficient spacing, crisp Simplified Chinese CJK sans serif. Same original geometric mark, exact \"PrintFlow Studio\" titlebar, small \"视觉原型 v2\", window controls. One complete front-on edge-to-edge Windows desktop UI screenshot, landscape 16:10, no device/browser/outer presentation board. Same fox illustration and foliage as reference, identical sample artwork and transparent checkerboard when background removed. Default task filename 山野狐狸.png and route 处理客户设计, unless brief overrides. Default left eight-stage user rail: 导入与路线 / 确认原图 / 图片增强 / 去除背景 / 裁切画布 / 印刷设置 / 生成与审核 / 保存结果. Only stages before CURRENT are completed; future steps muted and nonexecutable. Footer fixed with one recommended primary and qualified secondary actions. Main picture and current decision are focal. No irrelevant future forms, no real customer data, no invented operational facts. Use exact quoted Chinese labels in brief; concise text only, no illegible filler. Check prompts' constraints carefully, don't add hidden behavior, automatic approval, auto-resume, printing, cloud or account features. All statuses and measurements are fictional scenario states for prototype, not evidence of a live production file. Output ONLY this one complete practical screen.\nSCENARIO: \nIMPORTANT: Reference controls and text must NOT be copied when not in the scenario. Never show a fabricated enhanced result before processing starts. Use spinner only for unknown progress, never ratio-filled progress bars. Do not carry colleague-correction hints onto enhancement/other reviews. No default selection for white-ink choice. Stage8 output overview. Title \"管理这张图的多个尺寸\". Two result cards/rows with thumbnails: \"150 × 200 mm\" approval \"已批准\" delivery \"有保存记录\"; \"180 × 240 mm\" approval \"待审核\" delivery \"尚未保存\". Selected first. One primary \"添加另一尺寸\"; clear row action on second \"审核此尺寸\"; first secondary \"检查保存文件\". Disabled \"完成任务\" because second pending review. Note \"每个尺寸都需要独立审核和保存；保存记录不代表文件仍在原位置。\" No bulk approve."
+    },
+    {
+      "id": "saved",
+      "group": "主流程",
+      "title": "保存成功",
+      "file": "18-saved.png",
+      "intent": "保存成功已核实，但业务任务还未完成。",
+      "primary": "完成任务",
+      "brief": "Stage8 save current. Title \"结果已保存\" with quiet teal check. Large fox thumbnail, exact filename \"山野狐狸_200mm.tif\", folder \"D:\\示例输出\". Two separate facts \"文件保存：已核实\" and \"处理任务：待完成\". Primary \"完成任务\", outlined \"打开所在文件夹\", tertiary \"添加另一尺寸\". No claim that clicking open visibly opened Explorer. This is a fictional success-state prototype, no real file receipt.",
+      "source": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-90a606ad-e946-4aac-b51c-165dc3821a9d.png",
+      "prompt": "Use case: ui-mockup. One high-fidelity raster screen for PrintFlow Studio SCRUM-11168 expanded visual prototype. Reference image is an APPROVED design-system and synthetic-artwork reference, not an edit target. Preserve its calm off-white and white surfaces, forest teal #16765D, graphite text, thin dividers, sensible 10px corners, generous efficient spacing, crisp Simplified Chinese CJK sans serif. Same original geometric mark, exact \"PrintFlow Studio\" titlebar, small \"视觉原型 v2\", window controls. One complete front-on edge-to-edge Windows desktop UI screenshot, landscape 16:10, no device/browser/outer presentation board. Same fox illustration and foliage as reference, identical sample artwork and transparent checkerboard when background removed. Default task filename 山野狐狸.png and route 处理客户设计, unless brief overrides. Default left eight-stage user rail: 导入与路线 / 确认原图 / 图片增强 / 去除背景 / 裁切画布 / 印刷设置 / 生成与审核 / 保存结果. Only stages before CURRENT are completed; future steps muted and nonexecutable. Footer fixed with one recommended primary and qualified secondary actions. Main picture and current decision are focal. No irrelevant future forms, no real customer data, no invented operational facts. Use exact quoted Chinese labels in brief; concise text only, no illegible filler. Check prompts' constraints carefully, don't add hidden behavior, automatic approval, auto-resume, printing, cloud or account features. All statuses and measurements are fictional scenario states for prototype, not evidence of a live production file. Output ONLY this one complete practical screen.\nSCENARIO: \nIMPORTANT: Reference controls and text must NOT be copied when not in the scenario. Never show a fabricated enhanced result before processing starts. Use spinner only for unknown progress, never ratio-filled progress bars. Do not carry colleague-correction hints onto enhancement/other reviews. No default selection for white-ink choice. Stage8 save current. Title \"结果已保存\" with quiet teal check. Large fox thumbnail, exact filename \"山野狐狸_200mm.tif\", folder \"D:\\示例输出\". Two separate facts \"文件保存：已核实\" and \"处理任务：待完成\". Primary \"完成任务\", outlined \"打开所在文件夹\", tertiary \"添加另一尺寸\". No claim that clicking open visibly opened Explorer. This is a fictional success-state prototype, no real file receipt.",
+      "editNeeded": "Replace cream background behind fox preview only with subtle transparency checkerboard to preserve actual saved transparent artwork. Keep fox, text, success and pending-completion facts and all layout unchanged.",
+      "initialSource": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-d16153b4-a7fc-43ee-a75f-b8029063bdbb.png",
+      "revisionPrompt": "Replace cream background behind fox preview only with subtle transparency checkerboard to preserve actual saved transparent artwork. Keep fox, text, success and pending-completion facts and all layout unchanged.",
+      "revised": true
+    },
+    {
+      "id": "png-saved",
+      "group": "主流程",
+      "title": "PNG保存成功",
+      "file": "45-png-saved.png",
+      "intent": "素材已保存，但任务仍待完成；可核实文件位置。",
+      "primary": "完成任务",
+      "sourceRef": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-90a606ad-e946-4aac-b51c-165dc3821a9d.png",
+      "prompt": "Edit this success screen into PNG route variant ONLY. Exact route header 准备设计素材. Sidebar exactly six stages: 导入与路线,确认原图,图片增强,去除背景,裁切画布 all completed; 保存 PNG sixth active. Filename 山野狐狸_素材.png. Keep transparent fox, 文件保存：已核实 and 处理任务：待完成 as distinct facts; folder D:\\示例输出. Remove 添加另一尺寸 button because this material route has no print-size branch. Footer only 打开所在文件夹 secondary and 完成任务 primary. Absolutely NO TIFF, 印刷设置,生成与审核, physical dimensions, PPI or white ink anywhere. Preserve all rest and 视觉原型v2.",
+      "source": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-5f46d0ac-0369-4d20-a2c0-7597cc921c58.png"
+    },
+    {
+      "id": "completed",
+      "group": "主流程",
+      "title": "任务完成",
+      "file": "19-completed.png",
+      "intent": "完成事实、保存记录和当前文件核实状态分开。",
+      "primary": "开始新任务",
+      "brief": "A clean completed task page, header file and local job. All required stage checks, title \"这项处理已完成\". Summary \"处理客户设计\", \"已批准的 TIFF\", \"保存记录：1 份\", \"当前位置尚未再次检查\". Small fox preview. Primary \"开始新任务\", secondary \"查看保存记录\" and \"返回主页\". No automatic printing, no fake file-present badge; no editing controls.",
+      "source": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-e0d12c91-282c-46ee-b802-914f73953f8c.png",
+      "prompt": "Use case: ui-mockup. One high-fidelity raster screen for PrintFlow Studio SCRUM-11168 expanded visual prototype. Reference image is an APPROVED design-system and synthetic-artwork reference, not an edit target. Preserve its calm off-white and white surfaces, forest teal #16765D, graphite text, thin dividers, sensible 10px corners, generous efficient spacing, crisp Simplified Chinese CJK sans serif. Same original geometric mark, exact \"PrintFlow Studio\" titlebar, small \"视觉原型 v2\", window controls. One complete front-on edge-to-edge Windows desktop UI screenshot, landscape 16:10, no device/browser/outer presentation board. Same fox illustration and foliage as reference, identical sample artwork and transparent checkerboard when background removed. Default task filename 山野狐狸.png and route 处理客户设计, unless brief overrides. Default left eight-stage user rail: 导入与路线 / 确认原图 / 图片增强 / 去除背景 / 裁切画布 / 印刷设置 / 生成与审核 / 保存结果. Only stages before CURRENT are completed; future steps muted and nonexecutable. Footer fixed with one recommended primary and qualified secondary actions. Main picture and current decision are focal. No irrelevant future forms, no real customer data, no invented operational facts. Use exact quoted Chinese labels in brief; concise text only, no illegible filler. Check prompts' constraints carefully, don't add hidden behavior, automatic approval, auto-resume, printing, cloud or account features. All statuses and measurements are fictional scenario states for prototype, not evidence of a live production file. Output ONLY this one complete practical screen.\nSCENARIO: \nIMPORTANT: Reference controls and text must NOT be copied when not in the scenario. Never show a fabricated enhanced result before processing starts. Use spinner only for unknown progress, never ratio-filled progress bars. Do not carry colleague-correction hints onto enhancement/other reviews. No default selection for white-ink choice. A clean completed task page, header file and local job. All required stage checks, title \"这项处理已完成\". Summary \"处理客户设计\", \"已批准的 TIFF\", \"保存记录：1 份\", \"当前位置尚未再次检查\". Small fox preview. Primary \"开始新任务\", secondary \"查看保存记录\" and \"返回主页\". No automatic printing, no fake file-present badge; no editing controls."
+    },
+    {
+      "id": "correction-prepare",
+      "group": "协作与恢复",
+      "title": "准备同事修正",
+      "file": "20-correction-prepare.png",
+      "intent": "从去背景审核准备参考副本、工作副本和说明。",
+      "primary": "准备修正文件",
+      "brief": "Stage4 background review, title \"请同事修正这张图片\". Large current fox preview, optional multiline label \"需要修正的地方\" with text \"请检查尾巴与花叶边缘。\". Three file-type rows \"原图参考副本\", \"修正工作副本\", \"操作说明\". Note \"准备后任务将移交；原图保持不变。\". Primary \"准备修正文件\", secondary \"取消，返回审核\". No people directory, assignment accounts, messages, cloud or automatic file watching.",
+      "source": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-9ff3e67d-3924-4732-b513-f054a85467ef.png",
+      "prompt": "Use case: ui-mockup. One high-fidelity raster screen for PrintFlow Studio SCRUM-11168 expanded visual prototype. Reference image is an APPROVED design-system and synthetic-artwork reference, not an edit target. Preserve its calm off-white and white surfaces, forest teal #16765D, graphite text, thin dividers, sensible 10px corners, generous efficient spacing, crisp Simplified Chinese CJK sans serif. Same original geometric mark, exact \"PrintFlow Studio\" titlebar, small \"视觉原型 v2\", window controls. One complete front-on edge-to-edge Windows desktop UI screenshot, landscape 16:10, no device/browser/outer presentation board. Same fox illustration and foliage as reference, identical sample artwork and transparent checkerboard when background removed. Default task filename 山野狐狸.png and route 处理客户设计, unless brief overrides. Default left eight-stage user rail: 导入与路线 / 确认原图 / 图片增强 / 去除背景 / 裁切画布 / 印刷设置 / 生成与审核 / 保存结果. Only stages before CURRENT are completed; future steps muted and nonexecutable. Footer fixed with one recommended primary and qualified secondary actions. Main picture and current decision are focal. No irrelevant future forms, no real customer data, no invented operational facts. Use exact quoted Chinese labels in brief; concise text only, no illegible filler. Check prompts' constraints carefully, don't add hidden behavior, automatic approval, auto-resume, printing, cloud or account features. All statuses and measurements are fictional scenario states for prototype, not evidence of a live production file. Output ONLY this one complete practical screen.\nSCENARIO: \nIMPORTANT: Reference controls and text must NOT be copied when not in the scenario. Never show a fabricated enhanced result before processing starts. Use spinner only for unknown progress, never ratio-filled progress bars. Do not carry colleague-correction hints onto enhancement/other reviews. No default selection for white-ink choice. Stage4 background review, title \"请同事修正这张图片\". Large current fox preview, optional multiline label \"需要修正的地方\" with text \"请检查尾巴与花叶边缘。\". Three file-type rows \"原图参考副本\", \"修正工作副本\", \"操作说明\". Note \"准备后任务将移交；原图保持不变。\". Primary \"准备修正文件\", secondary \"取消，返回审核\". No people directory, assignment accounts, messages, cloud or automatic file watching."
+    },
+    {
+      "id": "correction-wait",
+      "group": "协作与恢复",
+      "title": "等待修正与回导",
+      "file": "21-correction-wait.png",
+      "intent": "明确已移交；由用户选择修正图片回导，再重新审核。",
+      "primary": "导入修正后的图片",
+      "brief": "Stage4 badge \"已移交\". Title \"等待修正后的图片\". A gentle three-step instruction \"打开修正文件夹\" / \"请同事修正工作副本\" / \"导入返回的 PNG\". A compact file-package area and small fox reference, no editable brush. Primary \"导入修正后的图片\"; secondary \"打开修正文件夹\"; collapsed \"其他选项\" containing \"恢复自动处理\". Text \"不会自动监控或导入保存文件；导入后仍需审核。\" No waiting percent or auto-approval.",
+      "source": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-8446083c-216a-4e11-a907-5311f2824de1.png",
+      "prompt": "Use case: ui-mockup. One high-fidelity raster screen for PrintFlow Studio SCRUM-11168 expanded visual prototype. Reference image is an APPROVED design-system and synthetic-artwork reference, not an edit target. Preserve its calm off-white and white surfaces, forest teal #16765D, graphite text, thin dividers, sensible 10px corners, generous efficient spacing, crisp Simplified Chinese CJK sans serif. Same original geometric mark, exact \"PrintFlow Studio\" titlebar, small \"视觉原型 v2\", window controls. One complete front-on edge-to-edge Windows desktop UI screenshot, landscape 16:10, no device/browser/outer presentation board. Same fox illustration and foliage as reference, identical sample artwork and transparent checkerboard when background removed. Default task filename 山野狐狸.png and route 处理客户设计, unless brief overrides. Default left eight-stage user rail: 导入与路线 / 确认原图 / 图片增强 / 去除背景 / 裁切画布 / 印刷设置 / 生成与审核 / 保存结果. Only stages before CURRENT are completed; future steps muted and nonexecutable. Footer fixed with one recommended primary and qualified secondary actions. Main picture and current decision are focal. No irrelevant future forms, no real customer data, no invented operational facts. Use exact quoted Chinese labels in brief; concise text only, no illegible filler. Check prompts' constraints carefully, don't add hidden behavior, automatic approval, auto-resume, printing, cloud or account features. All statuses and measurements are fictional scenario states for prototype, not evidence of a live production file. Output ONLY this one complete practical screen.\nSCENARIO: \nIMPORTANT: Reference controls and text must NOT be copied when not in the scenario. Never show a fabricated enhanced result before processing starts. Use spinner only for unknown progress, never ratio-filled progress bars. Do not carry colleague-correction hints onto enhancement/other reviews. No default selection for white-ink choice. Stage4 badge \"已移交\". Title \"等待修正后的图片\". A gentle three-step instruction \"打开修正文件夹\" / \"请同事修正工作副本\" / \"导入返回的 PNG\". A compact file-package area and small fox reference, no editable brush. Primary \"导入修正后的图片\"; secondary \"打开修正文件夹\"; collapsed \"其他选项\" containing \"恢复自动处理\". Text \"不会自动监控或导入保存文件；导入后仍需审核。\" No waiting percent or auto-approval.",
+      "editNeeded": "Correct only two misleading texts. Replace subtitle 我们已将图片移交给同事修正去背景结果，请按以下步骤操作。 with 修正文件已准备，请自行交给同事。 Replace right preview heading 去除背景后的预期效果 with 当前待修正工作副本. No claim files were transmitted. Rest unchanged.",
+      "initialSource": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-2963fe3a-d785-40b4-aa21-159935511c65.png",
+      "revisionPrompt": "Correct only two misleading texts. Replace subtitle 我们已将图片移交给同事修正去背景结果，请按以下步骤操作。 with 修正文件已准备，请自行交给同事。 Replace right preview heading 去除背景后的预期效果 with 当前待修正工作副本. No claim files were transmitted. Rest unchanged.",
+      "revised": true
+    },
+    {
+      "id": "handed-off",
+      "group": "协作与恢复",
+      "title": "Photoshop已接管",
+      "file": "24-handed-off.png",
+      "intent": "外部应用现状保留；恢复自动处理仅回到可重试状态。",
+      "primary": "恢复自动处理",
+      "brief": "Stage7 badge \"已移交\". Title \"现在由你在 Photoshop 中处理\". Small output-reference preview, copy \"PrintFlow 已结束本次控制。请自行检查 Photoshop 当前状态。\" and \"本步骤不能导回手工 TIFF。\". Primary \"恢复自动处理\", secondary \"返回主页\". Footer explains \"恢复后仍需另行开始新尝试，不会接着执行旧尝试。\". No manual TIFF import, no silent resumption, no approved/saved badge.",
+      "source": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-4615068c-6736-4d55-97ec-4879c3fbfdbe.png",
+      "prompt": "Use case: ui-mockup. One high-fidelity raster screen for PrintFlow Studio SCRUM-11168 expanded visual prototype. Reference image is an APPROVED design-system and synthetic-artwork reference, not an edit target. Preserve its calm off-white and white surfaces, forest teal #16765D, graphite text, thin dividers, sensible 10px corners, generous efficient spacing, crisp Simplified Chinese CJK sans serif. Same original geometric mark, exact \"PrintFlow Studio\" titlebar, small \"视觉原型 v2\", window controls. One complete front-on edge-to-edge Windows desktop UI screenshot, landscape 16:10, no device/browser/outer presentation board. Same fox illustration and foliage as reference, identical sample artwork and transparent checkerboard when background removed. Default task filename 山野狐狸.png and route 处理客户设计, unless brief overrides. Default left eight-stage user rail: 导入与路线 / 确认原图 / 图片增强 / 去除背景 / 裁切画布 / 印刷设置 / 生成与审核 / 保存结果. Only stages before CURRENT are completed; future steps muted and nonexecutable. Footer fixed with one recommended primary and qualified secondary actions. Main picture and current decision are focal. No irrelevant future forms, no real customer data, no invented operational facts. Use exact quoted Chinese labels in brief; concise text only, no illegible filler. Check prompts' constraints carefully, don't add hidden behavior, automatic approval, auto-resume, printing, cloud or account features. All statuses and measurements are fictional scenario states for prototype, not evidence of a live production file. Output ONLY this one complete practical screen.\nSCENARIO: \nIMPORTANT: Reference controls and text must NOT be copied when not in the scenario. Never show a fabricated enhanced result before processing starts. Use spinner only for unknown progress, never ratio-filled progress bars. Do not carry colleague-correction hints onto enhancement/other reviews. No default selection for white-ink choice. Stage7 badge \"已移交\". Title \"现在由你在 Photoshop 中处理\". Small output-reference preview, copy \"PrintFlow 已结束本次控制。请自行检查 Photoshop 当前状态。\" and \"本步骤不能导回手工 TIFF。\". Primary \"恢复自动处理\", secondary \"返回主页\". Footer explains \"恢复后仍需另行开始新尝试，不会接着执行旧尝试。\". No manual TIFF import, no silent resumption, no approved/saved badge."
+    },
+    {
+      "id": "recovery",
+      "group": "协作与恢复",
+      "title": "中断后恢复",
+      "file": "25-recovery.png",
+      "intent": "逐任务说明中断位置和合法恢复动作；不自动重启。",
+      "primary": "打开任务",
+      "brief": "Global Home family left rail \"开始任务\",\"最近任务\",\"需要恢复\" ACTIVE,\"环境检查\", bottom settings/help. Title \"有任务需要你处理\". Two compact recovery rows. First fox \"山野狐狸.png\", \"中断于图片增强\", note \"可重新开始此步骤\", controls \"重新开始步骤\", \"打开任务\". Second \"花卉徽章.png\", \"修正结果导入未完成\", note \"先打开任务查看当前状态\", only \"打开任务\"; no generic manual import for correction. Banner \"恢复不会自动继续外部应用中的旧操作。\" No blanket resume-all or false green.",
+      "source": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-f495a137-ef54-4151-ada1-c778d7c582d6.png",
+      "prompt": "Use case: ui-mockup. One high-fidelity raster screen for PrintFlow Studio SCRUM-11168 expanded visual prototype. Reference image is an APPROVED design-system and synthetic-artwork reference, not an edit target. Preserve its calm off-white and white surfaces, forest teal #16765D, graphite text, thin dividers, sensible 10px corners, generous efficient spacing, crisp Simplified Chinese CJK sans serif. Same original geometric mark, exact \"PrintFlow Studio\" titlebar, small \"视觉原型 v2\", window controls. One complete front-on edge-to-edge Windows desktop UI screenshot, landscape 16:10, no device/browser/outer presentation board. Same fox illustration and foliage as reference, identical sample artwork and transparent checkerboard when background removed. Default task filename 山野狐狸.png and route 处理客户设计, unless brief overrides. Default left eight-stage user rail: 导入与路线 / 确认原图 / 图片增强 / 去除背景 / 裁切画布 / 印刷设置 / 生成与审核 / 保存结果. Only stages before CURRENT are completed; future steps muted and nonexecutable. Footer fixed with one recommended primary and qualified secondary actions. Main picture and current decision are focal. No irrelevant future forms, no real customer data, no invented operational facts. Use exact quoted Chinese labels in brief; concise text only, no illegible filler. Check prompts' constraints carefully, don't add hidden behavior, automatic approval, auto-resume, printing, cloud or account features. All statuses and measurements are fictional scenario states for prototype, not evidence of a live production file. Output ONLY this one complete practical screen.\nSCENARIO: \nIMPORTANT: Reference controls and text must NOT be copied when not in the scenario. Never show a fabricated enhanced result before processing starts. Use spinner only for unknown progress, never ratio-filled progress bars. Do not carry colleague-correction hints onto enhancement/other reviews. No default selection for white-ink choice. Global Home family left rail \"开始任务\",\"最近任务\",\"需要恢复\" ACTIVE,\"环境检查\", bottom settings/help. Title \"有任务需要你处理\". Two compact recovery rows. First fox \"山野狐狸.png\", \"中断于图片增强\", note \"可重新开始此步骤\", controls \"重新开始步骤\", \"打开任务\". Second \"花卉徽章.png\", \"修正结果导入未完成\", note \"先打开任务查看当前状态\", only \"打开任务\"; no generic manual import for correction. Banner \"恢复不会自动继续外部应用中的旧操作。\" No blanket resume-all or false green."
+    },
+    {
+      "id": "failure",
+      "group": "异常流程",
+      "title": "处理失败与重试",
+      "file": "22-failure.png",
+      "intent": "输入保留、原因明确，重试不自动开始。",
+      "primary": "重试此步骤",
+      "brief": "Stage3 enhancement failed. Title \"增强步骤未完成\". Calm amber status panel \"美图未产生可确认的结果。\"; preservation note \"原图和上一步结果仍保留。\"; next sentence \"检查美图状态后，可重试此步骤。\". Primary \"重试此步骤\" in teal, secondary \"查看错误详情\", tertiary \"返回主页\". Current fox original preview smaller. No stack trace, no false output, no automatically firing retry. Show code as secondary \"错误代码：示例\" rather than invented real code.",
+      "source": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-915bd04e-2a8f-4295-88cc-256efa9f7013.png",
+      "prompt": "Use case: ui-mockup. One high-fidelity raster screen for PrintFlow Studio SCRUM-11168 expanded visual prototype. Reference image is an APPROVED design-system and synthetic-artwork reference, not an edit target. Preserve its calm off-white and white surfaces, forest teal #16765D, graphite text, thin dividers, sensible 10px corners, generous efficient spacing, crisp Simplified Chinese CJK sans serif. Same original geometric mark, exact \"PrintFlow Studio\" titlebar, small \"视觉原型 v2\", window controls. One complete front-on edge-to-edge Windows desktop UI screenshot, landscape 16:10, no device/browser/outer presentation board. Same fox illustration and foliage as reference, identical sample artwork and transparent checkerboard when background removed. Default task filename 山野狐狸.png and route 处理客户设计, unless brief overrides. Default left eight-stage user rail: 导入与路线 / 确认原图 / 图片增强 / 去除背景 / 裁切画布 / 印刷设置 / 生成与审核 / 保存结果. Only stages before CURRENT are completed; future steps muted and nonexecutable. Footer fixed with one recommended primary and qualified secondary actions. Main picture and current decision are focal. No irrelevant future forms, no real customer data, no invented operational facts. Use exact quoted Chinese labels in brief; concise text only, no illegible filler. Check prompts' constraints carefully, don't add hidden behavior, automatic approval, auto-resume, printing, cloud or account features. All statuses and measurements are fictional scenario states for prototype, not evidence of a live production file. Output ONLY this one complete practical screen.\nSCENARIO: \nIMPORTANT: Reference controls and text must NOT be copied when not in the scenario. Never show a fabricated enhanced result before processing starts. Use spinner only for unknown progress, never ratio-filled progress bars. Do not carry colleague-correction hints onto enhancement/other reviews. No default selection for white-ink choice. Stage3 enhancement failed. Title \"增强步骤未完成\". Calm amber status panel \"美图未产生可确认的结果。\"; preservation note \"原图和上一步结果仍保留。\"; next sentence \"检查美图状态后，可重试此步骤。\". Primary \"重试此步骤\" in teal, secondary \"查看错误详情\", tertiary \"返回主页\". Current fox original preview smaller. No stack trace, no false output, no automatically firing retry. Show code as secondary \"错误代码：示例\" rather than invented real code."
+    },
+    {
+      "id": "stopping",
+      "group": "异常流程",
+      "title": "正在安全停止",
+      "file": "41-stopping.png",
+      "intent": "停止请求尚未完成时不宣称已停止。",
+      "primary": "等待停止确认",
+      "ref": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-089f7741-ab32-4f11-9436-cebdd69ae682.png",
+      "brief": "Stage3enhancement amber stopping. Title \"正在请求停止\". Spinner only. Clear text \"已发送停止请求，请等待当前操作结束。\"; note \"确认停止前，不会开始下一步。\". Small source preview, disabled \"正在停止…\" button. No approve, retry, force close, take over, or stop-success claim. Neutral note \"请勿强制关闭外部应用。\".",
+      "source": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-e0710f2d-fcfa-4815-96fc-cc0ad3d24879.png",
+      "prompt": "Use case: ui-mockup. One high-fidelity raster screen for PrintFlow Studio SCRUM-11168 expanded visual prototype. Reference image is an APPROVED design-system and synthetic-artwork reference, not an edit target. Preserve its calm off-white and white surfaces, forest teal #16765D, graphite text, thin dividers, sensible 10px corners, generous efficient spacing, crisp Simplified Chinese CJK sans serif. Same original geometric mark, exact \"PrintFlow Studio\" titlebar, small \"视觉原型 v2\", window controls. One complete front-on edge-to-edge Windows desktop UI screenshot, landscape 16:10, no device/browser/outer presentation board. Same fox illustration and foliage as reference, identical sample artwork and transparent checkerboard when background removed. Default task filename 山野狐狸.png and route 处理客户设计, unless brief overrides. Default left eight-stage user rail: 导入与路线 / 确认原图 / 图片增强 / 去除背景 / 裁切画布 / 印刷设置 / 生成与审核 / 保存结果. Only stages before CURRENT are completed; future steps muted and nonexecutable. Footer fixed with one recommended primary and qualified secondary actions. Main picture and current decision are focal. No irrelevant future forms, no real customer data, no invented operational facts. Use exact quoted Chinese labels in brief; concise text only, no illegible filler. Check prompts' constraints carefully, don't add hidden behavior, automatic approval, auto-resume, printing, cloud or account features. All statuses and measurements are fictional scenario states for prototype, not evidence of a live production file. Output ONLY this one complete practical screen.\nSCENARIO: \nIMPORTANT: Reference controls and text must NOT be copied when not in the scenario. Never show a fabricated enhanced result before processing starts. Use spinner only for unknown progress, never ratio-filled progress bars. Do not carry colleague-correction hints onto enhancement/other reviews. No default selection for white-ink choice. Stage3enhancement amber stopping. Title \"正在请求停止\". Spinner only. Clear text \"已发送停止请求，请等待当前操作结束。\"; note \"确认停止前，不会开始下一步。\". Small source preview, disabled \"正在停止…\" button. No approve, retry, force close, take over, or stop-success claim. Neutral note \"请勿强制关闭外部应用。\".",
+      "initialSource": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-7980cd72-f343-4194-b877-bec3f2c3ef35.png",
+      "revisionPrompt": "Edit only fixed-footer sentence 结果准备好后，需要你检查。 to 停止完成后，请查看可用操作。. This stopping request must not imply a new result will exist. Preserve entire rest exactly, all spinner, status, no approve/retry and disabled stopping button.",
+      "revised": true
+    },
+    {
+      "id": "takeover",
+      "group": "异常流程",
+      "title": "Photoshop接管确认",
+      "file": "23-takeover.png",
+      "intent": "接管不等于停止外部应用，也不支持手工TIFF回导。",
+      "primary": "确认接管",
+      "brief": "Show stage7 Photoshop processing dimmed under a central accessible modal. Title \"在 Photoshop 中接管？\". Exact clear copy \"PrintFlow 将停止控制 Photoshop，并保持其现状。它可能仍在运行，请先自行检查。\" and emphasized \"此步骤不支持导回手工制作的结果，包括 TIFF。\". Modal footer neutral focus on \"继续自动处理\" cancel and teal primary \"确认接管\". No force-close action, no save or approval.",
+      "source": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-8e5941ea-33bc-4521-8f56-1ed2882d84a0.png",
+      "prompt": "Use case: ui-mockup. One high-fidelity raster screen for PrintFlow Studio SCRUM-11168 expanded visual prototype. Reference image is an APPROVED design-system and synthetic-artwork reference, not an edit target. Preserve its calm off-white and white surfaces, forest teal #16765D, graphite text, thin dividers, sensible 10px corners, generous efficient spacing, crisp Simplified Chinese CJK sans serif. Same original geometric mark, exact \"PrintFlow Studio\" titlebar, small \"视觉原型 v2\", window controls. One complete front-on edge-to-edge Windows desktop UI screenshot, landscape 16:10, no device/browser/outer presentation board. Same fox illustration and foliage as reference, identical sample artwork and transparent checkerboard when background removed. Default task filename 山野狐狸.png and route 处理客户设计, unless brief overrides. Default left eight-stage user rail: 导入与路线 / 确认原图 / 图片增强 / 去除背景 / 裁切画布 / 印刷设置 / 生成与审核 / 保存结果. Only stages before CURRENT are completed; future steps muted and nonexecutable. Footer fixed with one recommended primary and qualified secondary actions. Main picture and current decision are focal. No irrelevant future forms, no real customer data, no invented operational facts. Use exact quoted Chinese labels in brief; concise text only, no illegible filler. Check prompts' constraints carefully, don't add hidden behavior, automatic approval, auto-resume, printing, cloud or account features. All statuses and measurements are fictional scenario states for prototype, not evidence of a live production file. Output ONLY this one complete practical screen.\nSCENARIO: \nIMPORTANT: Reference controls and text must NOT be copied when not in the scenario. Never show a fabricated enhanced result before processing starts. Use spinner only for unknown progress, never ratio-filled progress bars. Do not carry colleague-correction hints onto enhancement/other reviews. No default selection for white-ink choice. Show stage7 Photoshop processing dimmed under a central accessible modal. Title \"在 Photoshop 中接管？\". Exact clear copy \"PrintFlow 将停止控制 Photoshop，并保持其现状。它可能仍在运行，请先自行检查。\" and emphasized \"此步骤不支持导回手工制作的结果，包括 TIFF。\". Modal footer neutral focus on \"继续自动处理\" cancel and teal primary \"确认接管\". No force-close action, no save or approval.",
+      "editNeeded": "Keep modal text and buttons exactly, but REPLACE dimmed background with the Photoshop-generating step7 screen, never background-removal review. Active side stage7, processing spinner, no Approve/Reject buttons behind. Secondary reference supplied for correct underlay.",
+      "initialSource": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-ba356c6b-3660-476e-bc11-0d774b57c04d.png",
+      "revisionPrompt": "Keep modal text and buttons exactly, but REPLACE dimmed background with the Photoshop-generating step7 screen, never background-removal review. Active side stage7, processing spinner, no Approve/Reject buttons behind. Secondary reference supplied for correct underlay.",
+      "revised": true
+    },
+    {
+      "id": "save-failed",
+      "group": "异常流程",
+      "title": "保存失败",
+      "file": "26-save-failed.png",
+      "intent": "批准仍有效，当前未保存；允许修正位置再合法重试。",
+      "primary": "重试保存",
+      "brief": "Stage8 save focused form and fox preview. Title \"保存未完成\". Separate badges \"此结果已批准\" and amber \"未保存\". Reason \"无法写入所选文件夹。\". Existing filename \"山野狐狸_200mm.tif\", folder \"D:\\示例输出\" retained, secondary \"更改文件夹\". Primary \"重试保存\"; secondary \"查看错误详情\"; disabled \"打开所在文件夹\". Note \"批准结果已保留；不会重新生成 TIFF。\" No success or completed badge.",
+      "source": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-b8a0965c-4496-475d-99e2-c8748bd1734d.png",
+      "prompt": "Use case: ui-mockup. One high-fidelity raster screen for PrintFlow Studio SCRUM-11168 expanded visual prototype. Reference image is an APPROVED design-system and synthetic-artwork reference, not an edit target. Preserve its calm off-white and white surfaces, forest teal #16765D, graphite text, thin dividers, sensible 10px corners, generous efficient spacing, crisp Simplified Chinese CJK sans serif. Same original geometric mark, exact \"PrintFlow Studio\" titlebar, small \"视觉原型 v2\", window controls. One complete front-on edge-to-edge Windows desktop UI screenshot, landscape 16:10, no device/browser/outer presentation board. Same fox illustration and foliage as reference, identical sample artwork and transparent checkerboard when background removed. Default task filename 山野狐狸.png and route 处理客户设计, unless brief overrides. Default left eight-stage user rail: 导入与路线 / 确认原图 / 图片增强 / 去除背景 / 裁切画布 / 印刷设置 / 生成与审核 / 保存结果. Only stages before CURRENT are completed; future steps muted and nonexecutable. Footer fixed with one recommended primary and qualified secondary actions. Main picture and current decision are focal. No irrelevant future forms, no real customer data, no invented operational facts. Use exact quoted Chinese labels in brief; concise text only, no illegible filler. Check prompts' constraints carefully, don't add hidden behavior, automatic approval, auto-resume, printing, cloud or account features. All statuses and measurements are fictional scenario states for prototype, not evidence of a live production file. Output ONLY this one complete practical screen.\nSCENARIO: \nIMPORTANT: Reference controls and text must NOT be copied when not in the scenario. Never show a fabricated enhanced result before processing starts. Use spinner only for unknown progress, never ratio-filled progress bars. Do not carry colleague-correction hints onto enhancement/other reviews. No default selection for white-ink choice. Stage8 save focused form and fox preview. Title \"保存未完成\". Separate badges \"此结果已批准\" and amber \"未保存\". Reason \"无法写入所选文件夹。\". Existing filename \"山野狐狸_200mm.tif\", folder \"D:\\示例输出\" retained, secondary \"更改文件夹\". Primary \"重试保存\"; secondary \"查看错误详情\"; disabled \"打开所在文件夹\". Note \"批准结果已保留；不会重新生成 TIFF。\" No success or completed badge."
+    },
+    {
+      "id": "save-uncertain",
+      "group": "异常流程",
+      "title": "保存结果待核实",
+      "file": "27-save-uncertain.png",
+      "intent": "可能已写入，先核实同一次保存，不直接重复另存。",
+      "primary": "再次核实此次保存",
+      "brief": "Stage8 same save form. Title \"这次保存尚未核实\". Amber informative banner \"文件可能已经保存，但系统还没有确认完成。\". Separate approval \"已批准\", delivery \"待核实\". Requested filename and folder visible read-only summary. Primary \"再次核实此次保存\"; no primary retry-save or success. Secondary disclosure \"另存一份\" with note \"选择其他名称或文件夹会另存一份。\"; disabled open-folder. No automatic duplicate write.",
+      "source": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-68d2f1d4-019c-4122-a044-89bbadd6a0fd.png",
+      "prompt": "Use case: ui-mockup. One high-fidelity raster screen for PrintFlow Studio SCRUM-11168 expanded visual prototype. Reference image is an APPROVED design-system and synthetic-artwork reference, not an edit target. Preserve its calm off-white and white surfaces, forest teal #16765D, graphite text, thin dividers, sensible 10px corners, generous efficient spacing, crisp Simplified Chinese CJK sans serif. Same original geometric mark, exact \"PrintFlow Studio\" titlebar, small \"视觉原型 v2\", window controls. One complete front-on edge-to-edge Windows desktop UI screenshot, landscape 16:10, no device/browser/outer presentation board. Same fox illustration and foliage as reference, identical sample artwork and transparent checkerboard when background removed. Default task filename 山野狐狸.png and route 处理客户设计, unless brief overrides. Default left eight-stage user rail: 导入与路线 / 确认原图 / 图片增强 / 去除背景 / 裁切画布 / 印刷设置 / 生成与审核 / 保存结果. Only stages before CURRENT are completed; future steps muted and nonexecutable. Footer fixed with one recommended primary and qualified secondary actions. Main picture and current decision are focal. No irrelevant future forms, no real customer data, no invented operational facts. Use exact quoted Chinese labels in brief; concise text only, no illegible filler. Check prompts' constraints carefully, don't add hidden behavior, automatic approval, auto-resume, printing, cloud or account features. All statuses and measurements are fictional scenario states for prototype, not evidence of a live production file. Output ONLY this one complete practical screen.\nSCENARIO: \nIMPORTANT: Reference controls and text must NOT be copied when not in the scenario. Never show a fabricated enhanced result before processing starts. Use spinner only for unknown progress, never ratio-filled progress bars. Do not carry colleague-correction hints onto enhancement/other reviews. No default selection for white-ink choice. Stage8 same save form. Title \"这次保存尚未核实\". Amber informative banner \"文件可能已经保存，但系统还没有确认完成。\". Separate approval \"已批准\", delivery \"待核实\". Requested filename and folder visible read-only summary. Primary \"再次核实此次保存\"; no primary retry-save or success. Secondary disclosure \"另存一份\" with note \"选择其他名称或文件夹会另存一份。\"; disabled open-folder. No automatic duplicate write.",
+      "editNeeded": "Correct preservation of requested destination only: filename must be 山野狐狸_200mm.tif, 保存位置 must be D:\\示例输出. Remove wrong source filename 山野狐狸.png and route-as-folder 处理客户设计 in save-information column. Keep rest unchanged.",
+      "initialSource": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-33b4d9b3-368f-4bf7-b545-1a2bcd27eaf2.png",
+      "revisionPrompt": "Correct preservation of requested destination only: filename must be 山野狐狸_200mm.tif, 保存位置 must be D:\\示例输出. Remove wrong source filename 山野狐狸.png and route-as-folder 处理客户设计 in save-information column. Keep rest unchanged.",
+      "revised": true
+    },
+    {
+      "id": "collision",
+      "group": "异常流程",
+      "title": "同名文件冲突",
+      "file": "28-collision.png",
+      "intent": "不会覆盖原文件，提供显式新名称或更换目录。",
+      "primary": "使用建议名称",
+      "brief": "Stage8 save form inline conflict. Title \"文件名已被使用\". Amber copy \"目标文件夹已有同名文件，不会覆盖它。\". Current \"山野狐狸_200mm.tif\" with amber outline. Suggested field \"山野狐狸_200mm_2.tif\". Primary \"使用建议名称\", secondary \"更改文件夹\", tertiary \"返回修改名称\". Note \"采用新名称后，仍需确认保存。\" No overwrite button, no claim suggestion is already saved.",
+      "source": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-a2bda36c-164f-47c7-ab17-dfc2fe211cca.png",
+      "prompt": "Use case: ui-mockup. One high-fidelity raster screen for PrintFlow Studio SCRUM-11168 expanded visual prototype. Reference image is an APPROVED design-system and synthetic-artwork reference, not an edit target. Preserve its calm off-white and white surfaces, forest teal #16765D, graphite text, thin dividers, sensible 10px corners, generous efficient spacing, crisp Simplified Chinese CJK sans serif. Same original geometric mark, exact \"PrintFlow Studio\" titlebar, small \"视觉原型 v2\", window controls. One complete front-on edge-to-edge Windows desktop UI screenshot, landscape 16:10, no device/browser/outer presentation board. Same fox illustration and foliage as reference, identical sample artwork and transparent checkerboard when background removed. Default task filename 山野狐狸.png and route 处理客户设计, unless brief overrides. Default left eight-stage user rail: 导入与路线 / 确认原图 / 图片增强 / 去除背景 / 裁切画布 / 印刷设置 / 生成与审核 / 保存结果. Only stages before CURRENT are completed; future steps muted and nonexecutable. Footer fixed with one recommended primary and qualified secondary actions. Main picture and current decision are focal. No irrelevant future forms, no real customer data, no invented operational facts. Use exact quoted Chinese labels in brief; concise text only, no illegible filler. Check prompts' constraints carefully, don't add hidden behavior, automatic approval, auto-resume, printing, cloud or account features. All statuses and measurements are fictional scenario states for prototype, not evidence of a live production file. Output ONLY this one complete practical screen.\nSCENARIO: \nIMPORTANT: Reference controls and text must NOT be copied when not in the scenario. Never show a fabricated enhanced result before processing starts. Use spinner only for unknown progress, never ratio-filled progress bars. Do not carry colleague-correction hints onto enhancement/other reviews. No default selection for white-ink choice. Stage8 save form inline conflict. Title \"文件名已被使用\". Amber copy \"目标文件夹已有同名文件，不会覆盖它。\". Current \"山野狐狸_200mm.tif\" with amber outline. Suggested field \"山野狐狸_200mm_2.tif\". Primary \"使用建议名称\", secondary \"更改文件夹\", tertiary \"返回修改名称\". Note \"采用新名称后，仍需确认保存。\" No overwrite button, no claim suggestion is already saved."
+    },
+    {
+      "id": "return-confirm",
+      "group": "异常流程",
+      "title": "返回重做确认",
+      "file": "29-return-confirm.png",
+      "intent": "返回重做与只读历史分开，说明下游失效。",
+      "primary": "确认返回",
+      "brief": "Dimmed current size page under centered modal. Title \"返回裁切并重新处理？\". Bound job \"山野狐狸.png\". Copy \"后续生成结果将失效，已有审核记录会保留。\". Three impact rows \"当前印刷设置：需重新确认\", \"后续 TIFF：需重新生成\", \"已有审核记录：保留为历史\". Buttons \"取消\" neutral default focus, teal \"确认返回\". Quiet alternate outside modal \"仅查看历史\". No false file deletion or erasure of history.",
+      "source": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-e0507b82-dc3a-4b84-a7c4-a3e3344f521e.png",
+      "prompt": "Use case: ui-mockup. One high-fidelity raster screen for PrintFlow Studio SCRUM-11168 expanded visual prototype. Reference image is an APPROVED design-system and synthetic-artwork reference, not an edit target. Preserve its calm off-white and white surfaces, forest teal #16765D, graphite text, thin dividers, sensible 10px corners, generous efficient spacing, crisp Simplified Chinese CJK sans serif. Same original geometric mark, exact \"PrintFlow Studio\" titlebar, small \"视觉原型 v2\", window controls. One complete front-on edge-to-edge Windows desktop UI screenshot, landscape 16:10, no device/browser/outer presentation board. Same fox illustration and foliage as reference, identical sample artwork and transparent checkerboard when background removed. Default task filename 山野狐狸.png and route 处理客户设计, unless brief overrides. Default left eight-stage user rail: 导入与路线 / 确认原图 / 图片增强 / 去除背景 / 裁切画布 / 印刷设置 / 生成与审核 / 保存结果. Only stages before CURRENT are completed; future steps muted and nonexecutable. Footer fixed with one recommended primary and qualified secondary actions. Main picture and current decision are focal. No irrelevant future forms, no real customer data, no invented operational facts. Use exact quoted Chinese labels in brief; concise text only, no illegible filler. Check prompts' constraints carefully, don't add hidden behavior, automatic approval, auto-resume, printing, cloud or account features. All statuses and measurements are fictional scenario states for prototype, not evidence of a live production file. Output ONLY this one complete practical screen.\nSCENARIO: \nIMPORTANT: Reference controls and text must NOT be copied when not in the scenario. Never show a fabricated enhanced result before processing starts. Use spinner only for unknown progress, never ratio-filled progress bars. Do not carry colleague-correction hints onto enhancement/other reviews. No default selection for white-ink choice. Dimmed current size page under centered modal. Title \"返回裁切并重新处理？\". Bound job \"山野狐狸.png\". Copy \"后续生成结果将失效，已有审核记录会保留。\". Three impact rows \"当前印刷设置：需重新确认\", \"后续 TIFF：需重新生成\", \"已有审核记录：保留为历史\". Buttons \"取消\" neutral default focus, teal \"确认返回\". Quiet alternate outside modal \"仅查看历史\". No false file deletion or erasure of history.",
+      "editNeeded": "Preserve modal exactly but replace dimmed background with current step6 print-dimensions page from supporting reference. A return to crop is only valid from a later step, never current background-removal stage4. Dimmed current sidebar6active, crop5completed. Rest modal unchanged.",
+      "initialSource": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-c6f739f1-a814-4e59-87a0-f6c2d228eb7c.png",
+      "revisionPrompt": "Preserve modal exactly but replace dimmed background with current step6 print-dimensions page from supporting reference. A return to crop is only valid from a later step, never current background-removal stage4. Dimmed current sidebar6active, crop5completed. Rest modal unchanged.\nONLY correct LEFT RAIL: remove amber 待审核 badge and mint active highlight from stage4 去除背景; stage4 must have neutral background and completed checkmark like stages1-3 and5. Stage6 印刷设置 is the ONLY active stage. Keep entire modal, main size form, other UI exactly unchanged. Do not introduce a second active step.",
+      "revised": true,
+      "finalCorrection": "ONLY correct LEFT RAIL: remove amber 待审核 badge and mint active highlight from stage4 去除背景; stage4 must have neutral background and completed checkmark like stages1-3 and5. Stage6 印刷设置 is the ONLY active stage. Keep entire modal, main size form, other UI exactly unchanged. Do not introduce a second active step.",
+      "previousSource": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-fed79fac-068e-4bcf-bb9c-c9db7b68e273.png"
+    },
+    {
+      "id": "draft-leave",
+      "group": "异常流程",
+      "title": "离开未提交输入",
+      "file": "42-draft-leave.png",
+      "intent": "放弃当前草稿与放弃整个任务分别确认。",
+      "primary": "继续编辑",
+      "ref": "D:/Repositories/printflow-Studio/output/imagegen/SCRUM-11168/2026-10-19-v1/05-print-size.png",
+      "brief": "Current dimensions stage6 dimmed under modal, task 山野狐狸.png. Modal title \"离开尚未确认的尺寸输入？\". Text \"当前填写的尺寸尚未提交。离开会放弃本页输入，不会放弃整个处理任务。\". Neutral selected initial focus button \"继续编辑\"; secondary outline \"放弃本页输入并离开\". No save-draft-to-database promise, no whole-task abandon or file deletion. Correct ONLY stage6 active, previous including4/5 completed. Explicit job name within modal.",
+      "source": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-ad43bfd5-a083-4eef-a582-6b643ab2e916.png",
+      "prompt": "Use case: ui-mockup. One high-fidelity raster screen for PrintFlow Studio SCRUM-11168 expanded visual prototype. Reference image is an APPROVED design-system and synthetic-artwork reference, not an edit target. Preserve its calm off-white and white surfaces, forest teal #16765D, graphite text, thin dividers, sensible 10px corners, generous efficient spacing, crisp Simplified Chinese CJK sans serif. Same original geometric mark, exact \"PrintFlow Studio\" titlebar, small \"视觉原型 v2\", window controls. One complete front-on edge-to-edge Windows desktop UI screenshot, landscape 16:10, no device/browser/outer presentation board. Same fox illustration and foliage as reference, identical sample artwork and transparent checkerboard when background removed. Default task filename 山野狐狸.png and route 处理客户设计, unless brief overrides. Default left eight-stage user rail: 导入与路线 / 确认原图 / 图片增强 / 去除背景 / 裁切画布 / 印刷设置 / 生成与审核 / 保存结果. Only stages before CURRENT are completed; future steps muted and nonexecutable. Footer fixed with one recommended primary and qualified secondary actions. Main picture and current decision are focal. No irrelevant future forms, no real customer data, no invented operational facts. Use exact quoted Chinese labels in brief; concise text only, no illegible filler. Check prompts' constraints carefully, don't add hidden behavior, automatic approval, auto-resume, printing, cloud or account features. All statuses and measurements are fictional scenario states for prototype, not evidence of a live production file. Output ONLY this one complete practical screen.\nSCENARIO: \nIMPORTANT: Reference controls and text must NOT be copied when not in the scenario. Never show a fabricated enhanced result before processing starts. Use spinner only for unknown progress, never ratio-filled progress bars. Do not carry colleague-correction hints onto enhancement/other reviews. No default selection for white-ink choice. Current dimensions stage6 dimmed under modal, task 山野狐狸.png. Modal title \"离开尚未确认的尺寸输入？\". Text \"当前填写的尺寸尚未提交。离开会放弃本页输入，不会放弃整个处理任务。\". Neutral selected initial focus button \"继续编辑\"; secondary outline \"放弃本页输入并离开\". No save-draft-to-database promise, no whole-task abandon or file deletion. Correct ONLY stage6 active, previous including4/5 completed. Explicit job name within modal."
+    },
+    {
+      "id": "abandon",
+      "group": "异常流程",
+      "title": "离开与放弃确认",
+      "file": "30-abandon.png",
+      "intent": "未提交草稿与放弃整个任务有明确区别。",
+      "primary": "放弃此任务",
+      "brief": "Dimmed task page with centered modal. Title \"放弃这项处理？\". Bound filename \"山野狐狸.png\". Clear copy \"本任务将停止继续处理。原图保持不变，已有保存记录仍保留。\". Explain \"未提交的界面输入不会被确认。\". Neutral cancel \"继续当前任务\" with visible initial focus, outlined warning action \"放弃此任务\" (not teal approve). No automatic deletion, no discard disguised as back, no approving with Enter by default. This image is full task-abandon confirmation; small note draft-only navigation uses a separate keep/discard prompt in flow gallery.",
+      "source": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-96bed01b-c1ac-4c83-af9d-d5b77ed45db6.png",
+      "prompt": "Use case: ui-mockup. One high-fidelity raster screen for PrintFlow Studio SCRUM-11168 expanded visual prototype. Reference image is an APPROVED design-system and synthetic-artwork reference, not an edit target. Preserve its calm off-white and white surfaces, forest teal #16765D, graphite text, thin dividers, sensible 10px corners, generous efficient spacing, crisp Simplified Chinese CJK sans serif. Same original geometric mark, exact \"PrintFlow Studio\" titlebar, small \"视觉原型 v2\", window controls. One complete front-on edge-to-edge Windows desktop UI screenshot, landscape 16:10, no device/browser/outer presentation board. Same fox illustration and foliage as reference, identical sample artwork and transparent checkerboard when background removed. Default task filename 山野狐狸.png and route 处理客户设计, unless brief overrides. Default left eight-stage user rail: 导入与路线 / 确认原图 / 图片增强 / 去除背景 / 裁切画布 / 印刷设置 / 生成与审核 / 保存结果. Only stages before CURRENT are completed; future steps muted and nonexecutable. Footer fixed with one recommended primary and qualified secondary actions. Main picture and current decision are focal. No irrelevant future forms, no real customer data, no invented operational facts. Use exact quoted Chinese labels in brief; concise text only, no illegible filler. Check prompts' constraints carefully, don't add hidden behavior, automatic approval, auto-resume, printing, cloud or account features. All statuses and measurements are fictional scenario states for prototype, not evidence of a live production file. Output ONLY this one complete practical screen.\nSCENARIO: \nIMPORTANT: Reference controls and text must NOT be copied when not in the scenario. Never show a fabricated enhanced result before processing starts. Use spinner only for unknown progress, never ratio-filled progress bars. Do not carry colleague-correction hints onto enhancement/other reviews. No default selection for white-ink choice. Dimmed task page with centered modal. Title \"放弃这项处理？\". Bound filename \"山野狐狸.png\". Clear copy \"本任务将停止继续处理。原图保持不变，已有保存记录仍保留。\". Explain \"未提交的界面输入不会被确认。\". Neutral cancel \"继续当前任务\" with visible initial focus, outlined warning action \"放弃此任务\" (not teal approve). No automatic deletion, no discard disguised as back, no approving with Enter by default. This image is full task-abandon confirmation; small note draft-only navigation uses a separate keep/discard prompt in flow gallery.",
+      "editNeeded": "Add exact current job filename 山野狐狸.png in a distinct line directly under modal title, so confirmation is bound to displayed job. Preserve all existing text, controls, neutral-cancel initial focus and backdrop.",
+      "initialSource": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-c5bfbbed-e581-4d2b-86b4-ecd398539f04.png",
+      "revisionPrompt": "Add exact current job filename 山野狐狸.png in a distinct line directly under modal title, so confirmation is bound to displayed job. Preserve all existing text, controls, neutral-cancel initial focus and backdrop.",
+      "revised": true
+    },
+    {
+      "id": "enlargement",
+      "group": "异常流程",
+      "title": "放大风险确认",
+      "file": "31-enlargement.png",
+      "intent": "放大授权绑定本尺寸，不替代审核。",
+      "primary": "允许此次放大",
+      "brief": "Stage6 size setting, title \"这个尺寸需要放大图片\". Fox preview, coherent source \"1200 × 1600 px\", target \"150 × 200 mm\", output \"1772 × 2362 px\", production \"300 PPI\", effective source \"203 PPI\" approximate. Amber note \"放大可能使细节变模糊，请先确认是否接受。\". UNCHECKED checkbox \"我了解此尺寸的放大风险\"; primary \"允许此次放大\" DISABLED until checked; secondary \"返回调整尺寸\". Do not say approved, no auto consent, no degrading production300PPI.",
+      "source": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-c799cf3d-857c-4698-96dc-ed51bba4c08b.png",
+      "prompt": "Use case: ui-mockup. One high-fidelity raster screen for PrintFlow Studio SCRUM-11168 expanded visual prototype. Reference image is an APPROVED design-system and synthetic-artwork reference, not an edit target. Preserve its calm off-white and white surfaces, forest teal #16765D, graphite text, thin dividers, sensible 10px corners, generous efficient spacing, crisp Simplified Chinese CJK sans serif. Same original geometric mark, exact \"PrintFlow Studio\" titlebar, small \"视觉原型 v2\", window controls. One complete front-on edge-to-edge Windows desktop UI screenshot, landscape 16:10, no device/browser/outer presentation board. Same fox illustration and foliage as reference, identical sample artwork and transparent checkerboard when background removed. Default task filename 山野狐狸.png and route 处理客户设计, unless brief overrides. Default left eight-stage user rail: 导入与路线 / 确认原图 / 图片增强 / 去除背景 / 裁切画布 / 印刷设置 / 生成与审核 / 保存结果. Only stages before CURRENT are completed; future steps muted and nonexecutable. Footer fixed with one recommended primary and qualified secondary actions. Main picture and current decision are focal. No irrelevant future forms, no real customer data, no invented operational facts. Use exact quoted Chinese labels in brief; concise text only, no illegible filler. Check prompts' constraints carefully, don't add hidden behavior, automatic approval, auto-resume, printing, cloud or account features. All statuses and measurements are fictional scenario states for prototype, not evidence of a live production file. Output ONLY this one complete practical screen.\nSCENARIO: \nIMPORTANT: Reference controls and text must NOT be copied when not in the scenario. Never show a fabricated enhanced result before processing starts. Use spinner only for unknown progress, never ratio-filled progress bars. Do not carry colleague-correction hints onto enhancement/other reviews. No default selection for white-ink choice. Stage6 size setting, title \"这个尺寸需要放大图片\". Fox preview, coherent source \"1200 × 1600 px\", target \"150 × 200 mm\", output \"1772 × 2362 px\", production \"300 PPI\", effective source \"203 PPI\" approximate. Amber note \"放大可能使细节变模糊，请先确认是否接受。\". UNCHECKED checkbox \"我了解此尺寸的放大风险\"; primary \"允许此次放大\" DISABLED until checked; secondary \"返回调整尺寸\". Do not say approved, no auto consent, no degrading production300PPI.",
+      "editNeeded": "Replace two preview headings 原图(1200×1600px) and 放大后效果 with 同一源图（参考） and 目标尺寸示意（尚未生成）. Both fox previews must use transparency checkerboard, no cream background. Preserve all numerical facts, unchecked consent and disabled authorization.",
+      "previousSource": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-ff5f1d18-83be-4989-bbb9-a3c5733a154c.png",
+      "revisionPrompt": "\nReplace two preview headings 原图(1200×1600px) and 放大后效果 with 同一源图（参考） and 目标尺寸示意（尚未生成）. Both fox previews must use transparency checkerboard, no cream background. Preserve all numerical facts, unchecked consent and disabled authorization.",
+      "revised": true
+    },
+    {
+      "id": "input-error",
+      "group": "异常流程",
+      "title": "导入校验失败",
+      "file": "36-input-error.png",
+      "intent": "多页PDF等不支持输入明确拒绝；原件保持不变。",
+      "primary": "重新选择文件",
+      "brief": "Home import family. Title \"这份文件暂时不能处理\". Amber inline panel \"当前只支持单页 PDF。\". Synthetic filename \"多页示例.pdf\"; note \"文件未被修改，也没有启动处理。\". Clear instruction \"请先准备单页文件，再重新选择。\". Primary \"重新选择文件\", secondary \"返回主页\". No unsupported page chooser, no pretending multi-page extraction is supported. Minimal file icon, no fox preview pretending decoded file.",
+      "source": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-24adc0a4-d8f0-44ff-9d41-3b26fee1ccaa.png",
+      "prompt": "Use case: ui-mockup. One high-fidelity raster screen for PrintFlow Studio SCRUM-11168 expanded visual prototype. Reference image is an APPROVED design-system and synthetic-artwork reference, not an edit target. Preserve its calm off-white and white surfaces, forest teal #16765D, graphite text, thin dividers, sensible 10px corners, generous efficient spacing, crisp Simplified Chinese CJK sans serif. Same original geometric mark, exact \"PrintFlow Studio\" titlebar, small \"视觉原型 v2\", window controls. One complete front-on edge-to-edge Windows desktop UI screenshot, landscape 16:10, no device/browser/outer presentation board. Same fox illustration and foliage as reference, identical sample artwork and transparent checkerboard when background removed. Default task filename 山野狐狸.png and route 处理客户设计, unless brief overrides. Default left eight-stage user rail: 导入与路线 / 确认原图 / 图片增强 / 去除背景 / 裁切画布 / 印刷设置 / 生成与审核 / 保存结果. Only stages before CURRENT are completed; future steps muted and nonexecutable. Footer fixed with one recommended primary and qualified secondary actions. Main picture and current decision are focal. No irrelevant future forms, no real customer data, no invented operational facts. Use exact quoted Chinese labels in brief; concise text only, no illegible filler. Check prompts' constraints carefully, don't add hidden behavior, automatic approval, auto-resume, printing, cloud or account features. All statuses and measurements are fictional scenario states for prototype, not evidence of a live production file. Output ONLY this one complete practical screen.\nSCENARIO: \nIMPORTANT: Reference controls and text must NOT be copied when not in the scenario. Never show a fabricated enhanced result before processing starts. Use spinner only for unknown progress, never ratio-filled progress bars. Do not carry colleague-correction hints onto enhancement/other reviews. No default selection for white-ink choice. Home import family. Title \"这份文件暂时不能处理\". Amber inline panel \"当前只支持单页 PDF。\". Synthetic filename \"多页示例.pdf\"; note \"文件未被修改，也没有启动处理。\". Clear instruction \"请先准备单页文件，再重新选择。\". Primary \"重新选择文件\", secondary \"返回主页\". No unsupported page chooser, no pretending multi-page extraction is supported. Minimal file icon, no fox preview pretending decoded file."
+    },
+    {
+      "id": "readiness",
+      "group": "辅助页面",
+      "title": "环境检查",
+      "file": "32-readiness.png",
+      "intent": "历史观察与当前许可分开，必要项未运行不显示通过。",
+      "primary": "安全恢复并重新检查",
+      "brief": "Global rail environment selected. Title \"检查工作站是否就绪\". Summary amber \"尚未确认可以开始生产\". Rows \"工作站预设\" observed checked, \"美图秀秀\" not-run gray, \"Photoshop 当前状态\" amber \"需要检查\", \"颜色设置\" gray \"尚未确认\". Do not blanket green. Clear note \"上次检查结果不能代替本次开始时的环境门禁。\". Primary \"安全恢复并重新检查\", secondary \"刷新状态\"; collapsed \"技术详情\". Explain refresh only reads status, not live check. No auto repair button.",
+      "source": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-fb38b93d-da3d-4d46-bd3f-7d2f1a8c5eb7.png",
+      "prompt": "Use case: ui-mockup. One high-fidelity raster screen for PrintFlow Studio SCRUM-11168 expanded visual prototype. Reference image is an APPROVED design-system and synthetic-artwork reference, not an edit target. Preserve its calm off-white and white surfaces, forest teal #16765D, graphite text, thin dividers, sensible 10px corners, generous efficient spacing, crisp Simplified Chinese CJK sans serif. Same original geometric mark, exact \"PrintFlow Studio\" titlebar, small \"视觉原型 v2\", window controls. One complete front-on edge-to-edge Windows desktop UI screenshot, landscape 16:10, no device/browser/outer presentation board. Same fox illustration and foliage as reference, identical sample artwork and transparent checkerboard when background removed. Default task filename 山野狐狸.png and route 处理客户设计, unless brief overrides. Default left eight-stage user rail: 导入与路线 / 确认原图 / 图片增强 / 去除背景 / 裁切画布 / 印刷设置 / 生成与审核 / 保存结果. Only stages before CURRENT are completed; future steps muted and nonexecutable. Footer fixed with one recommended primary and qualified secondary actions. Main picture and current decision are focal. No irrelevant future forms, no real customer data, no invented operational facts. Use exact quoted Chinese labels in brief; concise text only, no illegible filler. Check prompts' constraints carefully, don't add hidden behavior, automatic approval, auto-resume, printing, cloud or account features. All statuses and measurements are fictional scenario states for prototype, not evidence of a live production file. Output ONLY this one complete practical screen.\nSCENARIO: \nIMPORTANT: Reference controls and text must NOT be copied when not in the scenario. Never show a fabricated enhanced result before processing starts. Use spinner only for unknown progress, never ratio-filled progress bars. Do not carry colleague-correction hints onto enhancement/other reviews. No default selection for white-ink choice. Global rail environment selected. Title \"检查工作站是否就绪\". Summary amber \"尚未确认可以开始生产\". Rows \"工作站预设\" observed checked, \"美图秀秀\" not-run gray, \"Photoshop 当前状态\" amber \"需要检查\", \"颜色设置\" gray \"尚未确认\". Do not blanket green. Clear note \"上次检查结果不能代替本次开始时的环境门禁。\". Primary \"安全恢复并重新检查\", secondary \"刷新状态\"; collapsed \"技术详情\". Explain refresh only reads status, not live check. No auto repair button.",
+      "redrawNeeded": "Standalone global environment page, reference Home chrome instead of review. Remove task filename/header/step rail and ALL fox before/after images. Global rail with environment active. Main entire width for environment status/check rows, primary safety check and refresh, technical disclosure. Preserve original readiness brief.",
+      "initialSource": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-0e548e77-3e42-4b01-83cc-b528ba7af82a.png",
+      "revisionPrompt": "Use case: ui-mockup. Create ONE new standalone GLOBAL utility screen for PrintFlow Studio. Attached Home image is approved STYLE reference only: same titlebar, geometric mark, matte off-white, white surface, forest teal, graphite, CJK typography and spacing. Landscape full front-on desktop screenshot, no device frame. THIS IS NOT A PROCESSING OR REVIEW WORKSPACE. No task filename, no route header, no eight-stage step rail, no fox comparison images, no image editor, no approve/reject buttons. Global sidebar ONLY: 开始任务 / 最近任务 / 需要恢复 / 环境检查, bottom 设置 and 帮助. The relevant global item is active. Main content is full-width utility page, independent of an open task. Exact Simplified Chinese. Standalone global environment page, reference Home chrome instead of review. Remove task filename/header/step rail and ALL fox before/after images. Global rail with environment active. Main entire width for environment status/check rows, primary safety check and refresh, technical disclosure. Preserve original readiness brief.\nDetailed content: Global rail environment selected. Title \"检查工作站是否就绪\". Summary amber \"尚未确认可以开始生产\". Rows \"工作站预设\" observed checked, \"美图秀秀\" not-run gray, \"Photoshop 当前状态\" amber \"需要检查\", \"颜色设置\" gray \"尚未确认\". Do not blanket green. Clear note \"上次检查结果不能代替本次开始时的环境门禁。\". Primary \"安全恢复并重新检查\", secondary \"刷新状态\"; collapsed \"技术详情\". Explain refresh only reads status, not live check. No auto repair button.\nOne complete screenshot, small 视觉原型 v2 label. No unrelated reference content.",
+      "revised": true
+    },
+    {
+      "id": "settings",
+      "group": "辅助页面",
+      "title": "设置",
+      "file": "33-settings.png",
+      "intent": "常用项先行，生产配置只读，修改范围说明明确。",
+      "primary": "应用设置",
+      "brief": "Global rail Settings selected. Title \"设置\". Left main grouped form \"常规\": language \"简体中文\", \"默认安全边（像素）\" input \"8\", hint \"仅用于此后新建的任务\". \"本机记录\": retention days \"30\", hint \"下次安全启动后生效\". Collapsed technical locations. Right quieter read-only \"生产配置\" with \"300 PPI · 固定\", \"输出位置由认可配置确定\", \"颜色设置请到环境检查核对\". Primary \"应用设置\", secondary \"返回原任务\". No editable DPI or auto Photoshop config, no save setting while typing.",
+      "source": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-66450190-03fc-4b86-b6b8-c47423e05361.png",
+      "prompt": "Use case: ui-mockup. One high-fidelity raster screen for PrintFlow Studio SCRUM-11168 expanded visual prototype. Reference image is an APPROVED design-system and synthetic-artwork reference, not an edit target. Preserve its calm off-white and white surfaces, forest teal #16765D, graphite text, thin dividers, sensible 10px corners, generous efficient spacing, crisp Simplified Chinese CJK sans serif. Same original geometric mark, exact \"PrintFlow Studio\" titlebar, small \"视觉原型 v2\", window controls. One complete front-on edge-to-edge Windows desktop UI screenshot, landscape 16:10, no device/browser/outer presentation board. Same fox illustration and foliage as reference, identical sample artwork and transparent checkerboard when background removed. Default task filename 山野狐狸.png and route 处理客户设计, unless brief overrides. Default left eight-stage user rail: 导入与路线 / 确认原图 / 图片增强 / 去除背景 / 裁切画布 / 印刷设置 / 生成与审核 / 保存结果. Only stages before CURRENT are completed; future steps muted and nonexecutable. Footer fixed with one recommended primary and qualified secondary actions. Main picture and current decision are focal. No irrelevant future forms, no real customer data, no invented operational facts. Use exact quoted Chinese labels in brief; concise text only, no illegible filler. Check prompts' constraints carefully, don't add hidden behavior, automatic approval, auto-resume, printing, cloud or account features. All statuses and measurements are fictional scenario states for prototype, not evidence of a live production file. Output ONLY this one complete practical screen.\nSCENARIO: \nIMPORTANT: Reference controls and text must NOT be copied when not in the scenario. Never show a fabricated enhanced result before processing starts. Use spinner only for unknown progress, never ratio-filled progress bars. Do not carry colleague-correction hints onto enhancement/other reviews. No default selection for white-ink choice. Global rail Settings selected. Title \"设置\". Left main grouped form \"常规\": language \"简体中文\", \"默认安全边（像素）\" input \"8\", hint \"仅用于此后新建的任务\". \"本机记录\": retention days \"30\", hint \"下次安全启动后生效\". Collapsed technical locations. Right quieter read-only \"生产配置\" with \"300 PPI · 固定\", \"输出位置由认可配置确定\", \"颜色设置请到环境检查核对\". Primary \"应用设置\", secondary \"返回原任务\". No editable DPI or auto Photoshop config, no save setting while typing.",
+      "redrawNeeded": "Standalone global Settings page using Home reference; no filename, no process step rail, no active crop stage. Global sidebar starts task/recent/environment then settings ACTIVE. Preserve form and read-only production info, no artwork.",
+      "initialSource": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-b643876f-e2e0-489f-a883-e08036eff30a.png",
+      "revisionPrompt": "Use case: ui-mockup. Create ONE new standalone GLOBAL utility screen for PrintFlow Studio. Attached Home image is approved STYLE reference only: same titlebar, geometric mark, matte off-white, white surface, forest teal, graphite, CJK typography and spacing. Landscape full front-on desktop screenshot, no device frame. THIS IS NOT A PROCESSING OR REVIEW WORKSPACE. No task filename, no route header, no eight-stage step rail, no fox comparison images, no image editor, no approve/reject buttons. Global sidebar ONLY: 开始任务 / 最近任务 / 需要恢复 / 环境检查, bottom 设置 and 帮助. The relevant global item is active. Main content is full-width utility page, independent of an open task. Exact Simplified Chinese. Standalone global Settings page using Home reference; no filename, no process step rail, no active crop stage. Global sidebar starts task/recent/environment then settings ACTIVE. Preserve form and read-only production info, no artwork.\nDetailed content: Global rail Settings selected. Title \"设置\". Left main grouped form \"常规\": language \"简体中文\", \"默认安全边（像素）\" input \"8\", hint \"仅用于此后新建的任务\". \"本机记录\": retention days \"30\", hint \"下次安全启动后生效\". Collapsed technical locations. Right quieter read-only \"生产配置\" with \"300 PPI · 固定\", \"输出位置由认可配置确定\", \"颜色设置请到环境检查核对\". Primary \"应用设置\", secondary \"返回原任务\". No editable DPI or auto Photoshop config, no save setting while typing.\nOne complete screenshot, small 视觉原型 v2 label. No unrelated reference content.",
+      "revised": true
+    },
+    {
+      "id": "recent",
+      "group": "辅助页面",
+      "title": "最近任务",
+      "file": "34-recent.png",
+      "intent": "状态真实分列；保存历史不等于当前文件仍存在。",
+      "primary": "继续处理",
+      "brief": "Global recent selected, title \"最近任务\". Elegant calm list of four jobs with small fox/flower thumbnails; columns \"任务\",\"当前状态\",\"保存情况\",\"操作\". Examples \"山野狐狸.png\" state \"待审核\" save \"尚未保存\" action \"继续审核\"; \"花卉徽章.png\" state \"已移交\" save \"尚未保存\" action \"查看修正任务\"; \"图案素材.png\" state \"已完成\" save \"有保存记录·尚未检查\" action \"查看记录\"; \"线稿图案.png\" state \"已中断\" save \"尚未保存\" action \"查看恢复\". No fabricated timestamps/private names. No bulk delete files. Remove-from-list disclosure clearly \"仅移出列表，不删除文件\".",
+      "source": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-12430099-b70a-4d11-a67d-bb74a506bd02.png",
+      "prompt": "Use case: ui-mockup. One high-fidelity raster screen for PrintFlow Studio SCRUM-11168 expanded visual prototype. Reference image is an APPROVED design-system and synthetic-artwork reference, not an edit target. Preserve its calm off-white and white surfaces, forest teal #16765D, graphite text, thin dividers, sensible 10px corners, generous efficient spacing, crisp Simplified Chinese CJK sans serif. Same original geometric mark, exact \"PrintFlow Studio\" titlebar, small \"视觉原型 v2\", window controls. One complete front-on edge-to-edge Windows desktop UI screenshot, landscape 16:10, no device/browser/outer presentation board. Same fox illustration and foliage as reference, identical sample artwork and transparent checkerboard when background removed. Default task filename 山野狐狸.png and route 处理客户设计, unless brief overrides. Default left eight-stage user rail: 导入与路线 / 确认原图 / 图片增强 / 去除背景 / 裁切画布 / 印刷设置 / 生成与审核 / 保存结果. Only stages before CURRENT are completed; future steps muted and nonexecutable. Footer fixed with one recommended primary and qualified secondary actions. Main picture and current decision are focal. No irrelevant future forms, no real customer data, no invented operational facts. Use exact quoted Chinese labels in brief; concise text only, no illegible filler. Check prompts' constraints carefully, don't add hidden behavior, automatic approval, auto-resume, printing, cloud or account features. All statuses and measurements are fictional scenario states for prototype, not evidence of a live production file. Output ONLY this one complete practical screen.\nSCENARIO: \nIMPORTANT: Reference controls and text must NOT be copied when not in the scenario. Never show a fabricated enhanced result before processing starts. Use spinner only for unknown progress, never ratio-filled progress bars. Do not carry colleague-correction hints onto enhancement/other reviews. No default selection for white-ink choice. Global recent selected, title \"最近任务\". Elegant calm list of four jobs with small fox/flower thumbnails; columns \"任务\",\"当前状态\",\"保存情况\",\"操作\". Examples \"山野狐狸.png\" state \"待审核\" save \"尚未保存\" action \"继续审核\"; \"花卉徽章.png\" state \"已移交\" save \"尚未保存\" action \"查看修正任务\"; \"图案素材.png\" state \"已完成\" save \"有保存记录·尚未检查\" action \"查看记录\"; \"线稿图案.png\" state \"已中断\" save \"尚未保存\" action \"查看恢复\". No fabricated timestamps/private names. No bulk delete files. Remove-from-list disclosure clearly \"仅移出列表，不删除文件\".",
+      "redrawNeeded": "Standalone Recent jobs page using Home reference, completely remove background-removal review, two fox previews, review checks and approval buttons. Global rail Recent active. Main full width clean table of four status/approval/delivery task rows, only corresponding continue/view actions. Follow original recent brief.",
+      "initialSource": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-a56a5adb-a5c0-4caa-9689-8a124dbc6061.png",
+      "revisionPrompt": "Use case: ui-mockup. Create ONE new standalone GLOBAL utility screen for PrintFlow Studio. Attached Home image is approved STYLE reference only: same titlebar, geometric mark, matte off-white, white surface, forest teal, graphite, CJK typography and spacing. Landscape full front-on desktop screenshot, no device frame. THIS IS NOT A PROCESSING OR REVIEW WORKSPACE. No task filename, no route header, no eight-stage step rail, no fox comparison images, no image editor, no approve/reject buttons. Global sidebar ONLY: 开始任务 / 最近任务 / 需要恢复 / 环境检查, bottom 设置 and 帮助. The relevant global item is active. Main content is full-width utility page, independent of an open task. Exact Simplified Chinese. Standalone Recent jobs page using Home reference, completely remove background-removal review, two fox previews, review checks and approval buttons. Global rail Recent active. Main full width clean table of four status/approval/delivery task rows, only corresponding continue/view actions. Follow original recent brief.\nDetailed content: Global recent selected, title \"最近任务\". Elegant calm list of four jobs with small fox/flower thumbnails; columns \"任务\",\"当前状态\",\"保存情况\",\"操作\". Examples \"山野狐狸.png\" state \"待审核\" save \"尚未保存\" action \"继续审核\"; \"花卉徽章.png\" state \"已移交\" save \"尚未保存\" action \"查看修正任务\"; \"图案素材.png\" state \"已完成\" save \"有保存记录·尚未检查\" action \"查看记录\"; \"线稿图案.png\" state \"已中断\" save \"尚未保存\" action \"查看恢复\". No fabricated timestamps/private names. No bulk delete files. Remove-from-list disclosure clearly \"仅移出列表，不删除文件\".\nOne complete screenshot, small 视觉原型 v2 label. No unrelated reference content.",
+      "revised": true
+    },
+    {
+      "id": "error-details",
+      "group": "辅助页面",
+      "title": "错误详情与诊断",
+      "file": "35-error-details.png",
+      "intent": "技术信息收纳；导出诊断包仅显式触发。",
+      "primary": "导出诊断包",
+      "brief": "Global detail page with back link \"返回处理\". Title \"错误详情\". Plain sections \"发生了什么\" with \"增强未产生可确认的输出，原图仍保留。\"; \"处理信息\" rows route/step/job; \"错误代码\" value \"示例代码\"; screenshot placeholder \"未捕获诊断截图\"; disclosure \"技术详情\" closed. Primary \"导出诊断包\"; secondary \"返回处理\". Note \"诊断包保存在本地，由你选择是否另行提供给他人。\" No cloud-send action, no raw stacktrace in main layout.",
+      "source": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-801b2921-612c-4b62-afca-0a26884cad0b.png",
+      "prompt": "Use case: ui-mockup. One high-fidelity raster screen for PrintFlow Studio SCRUM-11168 expanded visual prototype. Reference image is an APPROVED design-system and synthetic-artwork reference, not an edit target. Preserve its calm off-white and white surfaces, forest teal #16765D, graphite text, thin dividers, sensible 10px corners, generous efficient spacing, crisp Simplified Chinese CJK sans serif. Same original geometric mark, exact \"PrintFlow Studio\" titlebar, small \"视觉原型 v2\", window controls. One complete front-on edge-to-edge Windows desktop UI screenshot, landscape 16:10, no device/browser/outer presentation board. Same fox illustration and foliage as reference, identical sample artwork and transparent checkerboard when background removed. Default task filename 山野狐狸.png and route 处理客户设计, unless brief overrides. Default left eight-stage user rail: 导入与路线 / 确认原图 / 图片增强 / 去除背景 / 裁切画布 / 印刷设置 / 生成与审核 / 保存结果. Only stages before CURRENT are completed; future steps muted and nonexecutable. Footer fixed with one recommended primary and qualified secondary actions. Main picture and current decision are focal. No irrelevant future forms, no real customer data, no invented operational facts. Use exact quoted Chinese labels in brief; concise text only, no illegible filler. Check prompts' constraints carefully, don't add hidden behavior, automatic approval, auto-resume, printing, cloud or account features. All statuses and measurements are fictional scenario states for prototype, not evidence of a live production file. Output ONLY this one complete practical screen.\nSCENARIO: \nIMPORTANT: Reference controls and text must NOT be copied when not in the scenario. Never show a fabricated enhanced result before processing starts. Use spinner only for unknown progress, never ratio-filled progress bars. Do not carry colleague-correction hints onto enhancement/other reviews. No default selection for white-ink choice. Global detail page with back link \"返回处理\". Title \"错误详情\". Plain sections \"发生了什么\" with \"增强未产生可确认的输出，原图仍保留。\"; \"处理信息\" rows route/step/job; \"错误代码\" value \"示例代码\"; screenshot placeholder \"未捕获诊断截图\"; disclosure \"技术详情\" closed. Primary \"导出诊断包\"; secondary \"返回处理\". Note \"诊断包保存在本地，由你选择是否另行提供给他人。\" No cloud-send action, no raw stacktrace in main layout."
+    },
+    {
+      "id": "ai-planned",
+      "group": "条件接入",
+      "title": "AI设计分步接入",
+      "file": "38-ai-planned.png",
+      "intent": "只呈现待接入设计，不承诺已有自动生图能力。",
+      "primary": "复制 Prompt",
+      "brief": "Separate clearly labeled planned AI interface, top amber badge \"规划预览 · 尚未接入\". Sidebar stages \"描述需求\",\"参考附件\",\"确认 Prompt\" ACTIVE,\"生成与接收\",\"导入素材\". Title \"确认你的设计描述\". Editor text \"绘制一只橙色狐狸，周围有花叶，适合独立印花图案。\". Prompt source/template controls minimal; selected attachments list \"参考图.png · 手动上传清单\", \"需求说明.txt\". Primary enabled design action \"复制 Prompt\". Disabled \"开始生成\" with explanation \"等待 AI 业务能力接入\". Secondary \"手动回收图片\" shown as conceptual fallback, not fake background monitoring. Small sentence \"自动上传与结果接收由原 AI Epic 实现。\" No browser brand claims, no generated progress or false success.",
+      "source": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-b6484341-ac2e-4b2b-b20a-c8341584a426.png",
+      "prompt": "Use case: ui-mockup. One high-fidelity raster screen for PrintFlow Studio SCRUM-11168 expanded visual prototype. Reference image is an APPROVED design-system and synthetic-artwork reference, not an edit target. Preserve its calm off-white and white surfaces, forest teal #16765D, graphite text, thin dividers, sensible 10px corners, generous efficient spacing, crisp Simplified Chinese CJK sans serif. Same original geometric mark, exact \"PrintFlow Studio\" titlebar, small \"视觉原型 v2\", window controls. One complete front-on edge-to-edge Windows desktop UI screenshot, landscape 16:10, no device/browser/outer presentation board. Same fox illustration and foliage as reference, identical sample artwork and transparent checkerboard when background removed. Default task filename 山野狐狸.png and route 处理客户设计, unless brief overrides. Default left eight-stage user rail: 导入与路线 / 确认原图 / 图片增强 / 去除背景 / 裁切画布 / 印刷设置 / 生成与审核 / 保存结果. Only stages before CURRENT are completed; future steps muted and nonexecutable. Footer fixed with one recommended primary and qualified secondary actions. Main picture and current decision are focal. No irrelevant future forms, no real customer data, no invented operational facts. Use exact quoted Chinese labels in brief; concise text only, no illegible filler. Check prompts' constraints carefully, don't add hidden behavior, automatic approval, auto-resume, printing, cloud or account features. All statuses and measurements are fictional scenario states for prototype, not evidence of a live production file. Output ONLY this one complete practical screen.\nSCENARIO: \nIMPORTANT: Reference controls and text must NOT be copied when not in the scenario. Never show a fabricated enhanced result before processing starts. Use spinner only for unknown progress, never ratio-filled progress bars. Do not carry colleague-correction hints onto enhancement/other reviews. No default selection for white-ink choice. Separate clearly labeled planned AI interface, top amber badge \"规划预览 · 尚未接入\". Sidebar stages \"描述需求\",\"参考附件\",\"确认 Prompt\" ACTIVE,\"生成与接收\",\"导入素材\". Title \"确认你的设计描述\". Editor text \"绘制一只橙色狐狸，周围有花叶，适合独立印花图案。\". Prompt source/template controls minimal; selected attachments list \"参考图.png · 手动上传清单\", \"需求说明.txt\". Primary enabled design action \"复制 Prompt\". Disabled \"开始生成\" with explanation \"等待 AI 业务能力接入\". Secondary \"手动回收图片\" shown as conceptual fallback, not fake background monitoring. Small sentence \"自动上传与结果接收由原 AI Epic 实现。\" No browser brand claims, no generated progress or false success."
+    }
+  ],
+  "design": {
+    "canvas": "#F6F7F4",
+    "surface": "#FFFFFF",
+    "ink": "#202E2A",
+    "muted": "#65706B",
+    "primary": "#16765D",
+    "selection": "#E8F4EF",
+    "border": "#DCE3DE",
+    "warning": "#FFF1C8",
+    "font": "Microsoft YaHei / Noto Sans SC",
+    "spacing": [
+      4,
+      8,
+      12,
+      16,
+      24,
+      32
+    ],
+    "cornerRadius": 10,
+    "controlMinHeight": 42,
+    "principles": [
+      "当前内容优先",
+      "一个推荐主操作",
+      "辅助操作按需可见",
+      "真实状态优先于装饰反馈",
+      "图片与决策突出"
+    ]
+  },
+  "coverage": {
+    "imageScreens": 45,
+    "inherited": 6,
+    "newImageScreens": 39,
+    "flowScenarios": 18,
+    "generatedAll": true,
+    "interfaceImplementation": false,
+    "physicalWorkstationDpi": false,
+    "noviceAcceptance": false,
+    "epicComplete": false
+  },
+  "scenarios": [
+    {
+      "id": "customer",
+      "name": "客户设计 · 完整路线",
+      "route": "customer",
+      "nodes": [
+        "home",
+        "route",
+        "original",
+        "enhance-ready",
+        "enhance-running",
+        "enhance-review",
+        "background-ready",
+        "background-running",
+        "review",
+        "crop-review",
+        "dimensions",
+        "white-ink",
+        "preflight",
+        "tiff-running",
+        "tiff-review",
+        "save",
+        "saved",
+        "completed"
+      ]
+    },
+    {
+      "id": "asset",
+      "name": "设计素材 · PNG 路线",
+      "route": "asset",
+      "nodes": [
+        "home",
+        "route",
+        "original",
+        "enhance-ready",
+        "enhance-running",
+        "enhance-review",
+        "background-ready",
+        "background-running",
+        "review",
+        "crop-review",
+        "png-final",
+        "png-save",
+        "png-saved",
+        "home"
+      ],
+      "note": "增强/去背景/裁切为共享组件，侧栏按素材路线投影；PNG收尾、独立保存和成功页已单独绘制，素材路线没有印刷尺寸/白墨/TIFF。"
+    },
+    {
+      "id": "tiff",
+      "name": "完成设计 · 直接 TIFF",
+      "route": "tiff",
+      "nodes": [
+        "home",
+        "route",
+        "pdf-psd",
+        "original",
+        "dimensions",
+        "white-ink",
+        "preflight",
+        "tiff-running",
+        "tiff-review",
+        "save",
+        "saved",
+        "completed"
+      ],
+      "note": "PDF准备后需检查受管栅格图再确认尺寸；PNG等已完成设计不需要源文件准备。通用版式按直接TIFF五阶段投影，无美图或默认裁切。"
+    },
+    {
+      "id": "rejection",
+      "name": "审核驳回 → 新尝试",
+      "nodes": [
+        "enhance-review",
+        "enhance-ready",
+        "enhance-running",
+        "enhance-review"
+      ],
+      "note": "驳回不会自动生成新结果，进入可重试状态，用户显式开始新尝试。"
+    },
+    {
+      "id": "correction",
+      "name": "同事修正 → 显式回导",
+      "nodes": [
+        "review",
+        "correction-prepare",
+        "correction-wait",
+        "review",
+        "crop-review"
+      ],
+      "note": "回导必须对应当前有效请求与结果身份；回到背景审核并不自动通过。"
+    },
+    {
+      "id": "takeover",
+      "name": "Photoshop 接管与重入",
+      "nodes": [
+        "tiff-running",
+        "takeover",
+        "handed-off",
+        "preflight",
+        "tiff-running",
+        "tiff-review"
+      ]
+    },
+    {
+      "id": "stop",
+      "name": "请求停止 → 确认中断",
+      "nodes": [
+        "enhance-running",
+        "stopping",
+        "failure",
+        "enhance-ready"
+      ]
+    },
+    {
+      "id": "recovery",
+      "name": "重启后恢复任务",
+      "nodes": [
+        "home",
+        "recovery",
+        "failure",
+        "enhance-ready",
+        "enhance-running"
+      ]
+    },
+    {
+      "id": "save-failure",
+      "name": "保存失败 → 修正与重试",
+      "nodes": [
+        "save",
+        "save-failed",
+        "save",
+        "saved"
+      ]
+    },
+    {
+      "id": "uncertain",
+      "name": "保存待核实 → 核实结果",
+      "nodes": [
+        "save",
+        "save-uncertain",
+        "saved"
+      ],
+      "note": "核实失败可停留当前待核实状态；另存一份是独立分支，不能把核实按钮变为重新写文件。"
+    },
+    {
+      "id": "collision",
+      "name": "同名冲突 → 明确新名称",
+      "nodes": [
+        "save",
+        "collision",
+        "save",
+        "saved"
+      ]
+    },
+    {
+      "id": "return",
+      "name": "返回重做 → 重新审核",
+      "nodes": [
+        "dimensions",
+        "return-confirm",
+        "crop",
+        "crop-review",
+        "dimensions"
+      ]
+    },
+    {
+      "id": "draft",
+      "name": "离开未提交表单",
+      "nodes": [
+        "dimensions",
+        "draft-leave",
+        "dimensions"
+      ],
+      "note": "继续编辑保留本页输入；确认离开则丢弃本页草稿并返回来源，原业务任务不放弃。"
+    },
+    {
+      "id": "abandon",
+      "name": "放弃当前处理任务",
+      "nodes": [
+        "review",
+        "abandon",
+        "home"
+      ]
+    },
+    {
+      "id": "enlargement",
+      "name": "放大风险与本次授权",
+      "nodes": [
+        "dimensions",
+        "enlargement",
+        "dimensions",
+        "white-ink",
+        "preflight"
+      ],
+      "note": "授权针对当前具体尺寸；返回并修改尺寸使旧授权不可复用，确认尺寸仍是独立动作。"
+    },
+    {
+      "id": "import",
+      "name": "导入拒绝 → 重新选择",
+      "nodes": [
+        "home",
+        "input-error",
+        "home"
+      ]
+    },
+    {
+      "id": "utilities",
+      "name": "环境、设置和最近任务",
+      "nodes": [
+        "home",
+        "readiness",
+        "settings",
+        "recent",
+        "error-details"
+      ]
+    },
+    {
+      "id": "ai",
+      "name": "AI 条件接入与手动交接",
+      "nodes": [
+        "ai-planned"
+      ],
+      "note": "规划预览；开始生成禁用。仅设计模板、Prompt/附件、阶段和手动交接布局，不证明自动上传/生图/回收已实现。"
+    }
+  ],
+  "edges": {
+    "home": [
+      [
+        "演示导入一张图片",
+        "route"
+      ],
+      [
+        "导入校验失败",
+        "input-error"
+      ],
+      [
+        "查看需要恢复",
+        "recovery"
+      ],
+      [
+        "检查环境",
+        "readiness"
+      ],
+      [
+        "查看最近任务",
+        "recent"
+      ]
+    ],
+    "route": [
+      [
+        "客户设计：检查原图",
+        "original"
+      ],
+      [
+        "素材路线：查看PNG收尾",
+        "png-final"
+      ],
+      [
+        "直接TIFF：源文件准备",
+        "pdf-psd"
+      ]
+    ],
+    "original": [
+      [
+        "确认原图后选择增强",
+        "enhance-ready"
+      ],
+      [
+        "查看直接TIFF尺寸步骤",
+        "dimensions"
+      ],
+      [
+        "重新选择图片",
+        "home"
+      ]
+    ],
+    "enhance-ready": [
+      [
+        "开始增强（演示）",
+        "enhance-running"
+      ],
+      [
+        "跳过增强",
+        "background-ready"
+      ]
+    ],
+    "enhance-running": [
+      [
+        "模拟增强成功",
+        "enhance-review"
+      ],
+      [
+        "模拟增强失败",
+        "failure"
+      ],
+      [
+        "请求停止",
+        "stopping"
+      ]
+    ],
+    "enhance-review": [
+      [
+        "通过增强结果",
+        "background-ready"
+      ],
+      [
+        "驳回，准备新尝试",
+        "enhance-ready"
+      ]
+    ],
+    "background-ready": [
+      [
+        "开始去背景（演示）",
+        "background-running"
+      ],
+      [
+        "跳过处理：查看后续裁切",
+        "crop-review"
+      ]
+    ],
+    "background-running": [
+      [
+        "模拟处理成功",
+        "review"
+      ],
+      [
+        "模拟失败：查看错误模板",
+        "failure"
+      ],
+      [
+        "请求停止",
+        "stopping"
+      ]
+    ],
+    "review": [
+      [
+        "通过后查看裁切审核",
+        "crop-review"
+      ],
+      [
+        "请同事修正",
+        "correction-prepare"
+      ],
+      [
+        "驳回，重新选择去背景",
+        "background-ready"
+      ],
+      [
+        "放弃当前任务",
+        "abandon"
+      ]
+    ],
+    "crop-review": [
+      [
+        "通过裁切结果",
+        "dimensions"
+      ],
+      [
+        "调整裁切边界",
+        "crop"
+      ],
+      [
+        "素材路线：最终检查与保存",
+        "png-final"
+      ]
+    ],
+    "crop": [
+      [
+        "使用此裁切，回到待审核",
+        "crop-review"
+      ],
+      [
+        "取消调整，保留原结果",
+        "crop-review"
+      ]
+    ],
+    "dimensions": [
+      [
+        "确认尺寸后选择白墨",
+        "white-ink"
+      ],
+      [
+        "查看需要放大场景",
+        "enlargement"
+      ],
+      [
+        "返回重做确认",
+        "return-confirm"
+      ],
+      [
+        "离开未提交输入",
+        "draft-leave"
+      ]
+    ],
+    "white-ink": [
+      [
+        "确认白墨选择",
+        "preflight",
+        "white-input"
+      ]
+    ],
+    "preflight": [
+      [
+        "开始生成TIFF（演示）",
+        "tiff-running"
+      ],
+      [
+        "修改设置",
+        "dimensions"
+      ]
+    ],
+    "tiff-running": [
+      [
+        "模拟生成及校验成功",
+        "tiff-review"
+      ],
+      [
+        "在Photoshop中接管",
+        "takeover"
+      ],
+      [
+        "模拟失败",
+        "failure"
+      ],
+      [
+        "请求停止：查看状态模板",
+        "stopping"
+      ]
+    ],
+    "tiff-review": [
+      [
+        "批准此TIFF",
+        "save"
+      ],
+      [
+        "查看白墨覆盖",
+        "white-preview"
+      ],
+      [
+        "驳回：准备重新生成",
+        "preflight"
+      ]
+    ],
+    "white-preview": [
+      [
+        "批准完整TIFF",
+        "save"
+      ],
+      [
+        "返回颜色预览",
+        "tiff-review"
+      ],
+      [
+        "驳回：准备新尝试",
+        "preflight"
+      ]
+    ],
+    "png-final": [
+      [
+        "模拟确认与保存成功",
+        "png-saved"
+      ],
+      [
+        "仅通过，进入PNG保存",
+        "png-save"
+      ],
+      [
+        "调整裁切",
+        "crop"
+      ]
+    ],
+    "save": [
+      [
+        "模拟保存成功",
+        "saved"
+      ],
+      [
+        "模拟保存失败",
+        "save-failed"
+      ],
+      [
+        "模拟保存结果待核实",
+        "save-uncertain"
+      ],
+      [
+        "模拟同名冲突",
+        "collision"
+      ]
+    ],
+    "saved": [
+      [
+        "完成处理任务",
+        "completed"
+      ],
+      [
+        "添加另一尺寸",
+        "multi-size"
+      ]
+    ],
+    "completed": [
+      [
+        "开始新任务",
+        "home"
+      ],
+      [
+        "查看记录",
+        "recent"
+      ]
+    ],
+    "multi-size": [
+      [
+        "添加另一尺寸：设置尺寸",
+        "dimensions"
+      ],
+      [
+        "审核待处理尺寸",
+        "tiff-review"
+      ]
+    ],
+    "correction-prepare": [
+      [
+        "准备修正文件",
+        "correction-wait"
+      ],
+      [
+        "取消，返回审核",
+        "review"
+      ]
+    ],
+    "correction-wait": [
+      [
+        "模拟有效修正图片回导",
+        "review"
+      ],
+      [
+        "恢复自动处理前查看当前资格",
+        "background-ready"
+      ]
+    ],
+    "failure": [
+      [
+        "准备重试增强",
+        "enhance-ready"
+      ],
+      [
+        "查看错误详情",
+        "error-details"
+      ],
+      [
+        "返回主页",
+        "home"
+      ]
+    ],
+    "takeover": [
+      [
+        "继续自动处理（取消）",
+        "tiff-running"
+      ],
+      [
+        "确认接管",
+        "handed-off"
+      ]
+    ],
+    "handed-off": [
+      [
+        "恢复自动处理：准备新尝试",
+        "preflight"
+      ],
+      [
+        "返回主页",
+        "home"
+      ]
+    ],
+    "recovery": [
+      [
+        "打开增强中断任务",
+        "failure"
+      ],
+      [
+        "打开未完成修正导入",
+        "correction-wait"
+      ]
+    ],
+    "save-failed": [
+      [
+        "修正保存位置后重试",
+        "save"
+      ],
+      [
+        "查看错误详情",
+        "error-details"
+      ]
+    ],
+    "save-uncertain": [
+      [
+        "模拟再次核实成功",
+        "saved"
+      ],
+      [
+        "模拟仍未核实",
+        "save-uncertain"
+      ],
+      [
+        "明确另存一份",
+        "save"
+      ]
+    ],
+    "collision": [
+      [
+        "使用建议名称后确认保存",
+        "save"
+      ],
+      [
+        "返回修改名称",
+        "save"
+      ]
+    ],
+    "return-confirm": [
+      [
+        "取消，保留原状态",
+        "dimensions"
+      ],
+      [
+        "确认返回并重新裁切",
+        "crop"
+      ]
+    ],
+    "draft-leave": [
+      [
+        "继续编辑",
+        "dimensions"
+      ],
+      [
+        "放弃本页输入并离开",
+        "home"
+      ]
+    ],
+    "abandon": [
+      [
+        "继续当前任务",
+        "review"
+      ],
+      [
+        "确认放弃当前任务",
+        "home"
+      ]
+    ],
+    "enlargement": [
+      [
+        "返回调整尺寸",
+        "dimensions"
+      ],
+      [
+        "允许此次放大，回到尺寸确认",
+        "dimensions",
+        "enlargement"
+      ]
+    ],
+    "readiness": [
+      [
+        "查看设置",
+        "settings"
+      ],
+      [
+        "返回主页",
+        "home"
+      ]
+    ],
+    "settings": [
+      [
+        "返回来源任务（示例）",
+        "dimensions"
+      ],
+      [
+        "返回主页",
+        "home"
+      ]
+    ],
+    "recent": [
+      [
+        "继续审核",
+        "review"
+      ],
+      [
+        "查看修正任务",
+        "correction-wait"
+      ],
+      [
+        "查看恢复",
+        "recovery"
+      ],
+      [
+        "查看完成记录",
+        "completed"
+      ]
+    ],
+    "error-details": [
+      [
+        "返回增强失败示例",
+        "failure"
+      ]
+    ],
+    "input-error": [
+      [
+        "重新选择文件",
+        "home"
+      ]
+    ],
+    "pdf-psd": [
+      [
+        "模拟准备完成，检查栅格副本",
+        "original"
+      ],
+      [
+        "重新选择文件",
+        "home"
+      ]
+    ],
+    "ai-planned": [
+      [
+        "查看手动回收后的素材路线",
+        "png-final"
+      ]
+    ],
+    "stopping": [
+      [
+        "模拟确认停止，查看可用操作",
+        "failure"
+      ]
+    ],
+    "png-save": [
+      [
+        "模拟保存成功",
+        "png-saved"
+      ],
+      [
+        "返回素材最终检查",
+        "png-final"
+      ]
+    ],
+    "png-saved": [
+      [
+        "模拟完成任务，返回主页",
+        "home"
+      ]
+    ]
+  },
+  "issues": [
+    {
+      "key": "SCRUM-11174",
+      "scope": "页面、步骤、状态和复用映射",
+      "status": "DESIGN_ACCEPTED",
+      "jiraStatus": "Done"
+    },
+    {
+      "key": "SCRUM-11175",
+      "scope": "视觉变量、控件状态和组件规范",
+      "status": "DESIGN_ACCEPTED",
+      "jiraStatus": "Done"
+    },
+    {
+      "key": "SCRUM-11176",
+      "scope": "三路线、关键分支和确认交互原型",
+      "status": "DESIGN_ACCEPTED",
+      "jiraStatus": "Done"
+    },
+    {
+      "key": "SCRUM-11177",
+      "scope": "WPF主题与组件实现",
+      "status": "USER_ACCEPTED",
+      "jiraStatus": "Done"
+    }
+  ],
+  "sourceCommit": "de7bca6e0a8462584b4d6bf4d16307d1335e2fb3",
+  "constraints": [
+    "原图/InputSnapshot和精确审批身份保留；业务工作流、资格与下游失效由现有服务授权。",
+    "两条TIFF路线均需用户明确选0/1/2px白墨分支和理由；无默认选择；源PSD/PDF的专色不沿用。",
+    "素材路线没有印刷尺寸、白墨和TIFF；直接TIFF路线没有美图和默认裁切。",
+    "通过、保存、完成分别记录；未知进度不能伪造百分比。",
+    "Photoshop接管不强制结束外部应用，不允许手工TIFF回导；重入之后另行启动新尝试。",
+    "同事修正只从合法去背景审核发起；准备副本后由人自行交给同事，再显式选择回导。",
+    "保存待核实先核实同一次保存；另存是明确独立操作；同名不会覆盖。",
+    "返回修改明确下游影响，历史审核保留；放弃本页输入不等于放弃任务。"
+  ],
+  "reviewNotes": [
+    "本包为视觉和流程评审材料，事件按钮只切换情景，不执行处理、审批、写文件、打印或外部控制。",
+    "共享版式使用客户路线示例图，三路线差异以路线图/信息矩阵为准；素材PNG和直接TIFF源准备另有专属画面。",
+    "源准备完成后的栅格检查复用原图页布局，实施时必须显示真实页/尺寸；未准备前只显示文件占位。",
+    "白墨图是生成器绘制的示意，不是实际TIFF解码或生产通道验证。",
+    "AI仅为规划预览且生成按钮禁用，不作为既有功能完成证据。",
+    "旧缺陷N1–N4/F6、PNG审批/绑定、generic recovery等仍需原任务处置，图像修订不代表底层缺陷已修复。",
+    "用户于2026-10-19批准扩展v2设计；窗口/缩放矩阵是验证目标，真实产品交互、工作站和新手验收须另行验证。",
+    "个别图像会有像素级字体/间距差异，实施以设计变量和正式文案为准。",
+    "本轮未修改产品源码，未运行生产桌面或处理客户图片；未提交/推送或发布。"
+  ],
+  "designApprovalRecord": "design-approval.json",
+  "implementationAuthorizationRecord": "implementation-authorization.json",
+  "e2ImplementationAuthorizationRecord": "e2-implementation-authorization.json",
+  "e2Delivery": {
+    "epic": "SCRUM-11169",
+    "children": [
+      "SCRUM-11178",
+      "SCRUM-11179",
+      "SCRUM-11180",
+      "SCRUM-11181"
+    ],
+    "jiraStatus": "In Review",
+    "userAccepted": false,
+    "branch": "codex/scrum-11169-guided-shell",
+    "head": "55657e37badb406cbc96a0d8db24abe6386d932d",
+    "sourceFixCommit": "aa3a3eb98dbcaa5a2a71727a91a074a7237e0d30",
+    "actualReviewer": "gpt-6-astra/high verified01a1522f-e4d6-7560-9633-17f7ebf74092",
+    "importantFixed": 6,
+    "minorDeferred": 1,
+    "guidedFreshBuildPassed": 85,
+    "controllerBehaviorPassed": 82,
+    "persistencePassed": 277,
+    "auditedUiPassed": 1344,
+    "auditedUiInheritedFailures": 14,
+    "visibleOrOptInExclusions": 11,
+    "mergePushDeploy": false,
+    "scratchCleanup": "policy rejected; retained",
+    "limitations": "Three first-run test windows closed; Tab/Space unresolved; real devices and production NOT RUN"
+  }
+}

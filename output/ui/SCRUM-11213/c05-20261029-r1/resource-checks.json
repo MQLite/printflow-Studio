@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "englishKeys": 1021,
+  "chineseKeys": 1021,
+  "matchingFullPlaceholderTokens": true,
+  "typedAccessorsChecked": 824,
+  "baselineChangedKeys": 189,
+  "laterThanLastCopyStage": [
+    "Session_TakeOverHint"
+  ],
+  "accessibleNameSourceSites": 216,
+  "hardcodedCopy": "No product edits in C05; existing repository-wide absence not claimed",
+  "limits": "XML/source checks are not semantic compilation, screen reader or human comprehension evidence"
+}

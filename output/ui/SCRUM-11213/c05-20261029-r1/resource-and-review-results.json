@@ -1,0 +1,435 @@
+{
+  "group": "resource-and-review",
+  "exitCode": 0,
+  "discovered": 105,
+  "complete": true,
+  "exactInstances": true,
+  "counts": {
+    "Passed": 105
+  },
+  "rows": [
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.The_readiness_screen_has_wording_in_both_languages",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.No_stop_message_claims_the_external_application_is_finished(forbidden: \"no longer running\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.A_specialized_refusal_does_not_turn_an_unconfirmed_event_into_a_fact(key: \"FailureNotice_PhotoshopLaunchFailed\", language: \"en\", unsupportedClaim: \"was started\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.No_operator_string_offers_a_resampling_method(forbidden: \"双三次\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.The_production_TIFF_review_strings_exist_in_both_languages",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.The_take_over_confirmation_states_each_consequence(required: \"stop controlling Meitu\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.PlainChineseReviewCopyTests.Review_action_names_its_object_fits_and_keeps_exact_target(step: \"enhancement\", width: 1280, height: 720)",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.The_colour_preview_legend_disclaims_printed_colour_accuracy",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.Meitu_launch_failure_sentence_claims_neither_a_start_nor_a_retry(language: \"en\", fact: \"could not be started or did not become ready\", unsupported: [\"was started\", \"in time\", \"try again\", \"retry\"])",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.PlainChineseReviewCopyTests.Review_action_names_its_object_fits_and_keeps_exact_target(step: \"background\", width: 984, height: 661)",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.The_confirmation_claims_nothing_about_cutout_quality(forbidden: \"no need to check\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.No_environment_string_offers_a_way_past_the_gate(forbidden: \"Override\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.No_failure_guidance_sentence_carries_a_bare_code",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.Operator_action_labels_offer_no_force_termination(forbidden: \"terminate\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.No_operator_string_offers_a_resampling_method(forbidden: \"Bicubic\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.A_shared_failure_sentence_suggests_no_retry_and_claims_only_what_every_path_supports(key: \"Failure_UnknownDialog\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.PlainChineseReviewCopyTests.Returned_correction_guidance_names_the_actual_review_action",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.The_restart_requirement_names_what_it_is_about",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.The_confirmation_claims_nothing_about_cutout_quality(forbidden: \"always correct\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.The_background_removal_authority_strings_exist_in_both_languages",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.A_shared_failure_sentence_suggests_no_retry_and_claims_only_what_every_path_supports(key: \"Failure_PreconditionNotMet\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.A_shared_failure_sentence_suggests_no_retry_and_claims_only_what_every_path_supports(key: \"Failure_AdapterUnavailable\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.PlainChineseReviewCopyTests.Review_action_names_its_object_fits_and_keeps_exact_target(step: \"tiff\", width: 1920, height: 1080)",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.The_failure_guidance_strings_exist_in_both_languages_with_the_same_placeholders",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.No_operator_string_offers_a_resampling_method(forbidden: \"插值\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.Every_workstation_check_has_operator_wording_in_both_languages",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.The_current_print_size_step_and_guidance_use_one_Chinese_term",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.PlainChineseReviewCopyTests.Review_action_names_its_object_fits_and_keeps_exact_target(step: \"tiff\", width: 1280, height: 720)",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.PlainChineseReviewCopyTests.Review_action_names_its_object_fits_and_keeps_exact_target(step: \"trim\", width: 984, height: 661)",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.PlainChineseReviewCopyTests.Review_action_names_its_object_fits_and_keeps_exact_target(step: \"background\", width: 1920, height: 1080)",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.Specialized_action_notices_leave_recovery_advice_to_the_current_screen",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.Shared_source_preparation_copy_does_not_promise_a_print_route",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.No_operator_string_offers_a_resampling_method(forbidden: \"Interpolation\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.Operator_action_labels_offer_no_force_termination(forbidden: \"kill\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.The_confirmation_claims_nothing_about_cutout_quality(forbidden: \"perfect\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.Enlargement_wording_requires_a_second_choice_without_promising_clarity",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.The_trim_bounds_wording_names_no_internal_type(forbidden: \"ContentBounds\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.A_shared_failure_sentence_suggests_no_retry_and_claims_only_what_every_path_supports(key: \"Failure_OutputUnreadable\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.PlainChineseReviewCopyTests.Review_action_names_its_object_fits_and_keeps_exact_target(step: \"trim\", width: 1920, height: 1080)",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.A_specialized_refusal_does_not_turn_an_unconfirmed_event_into_a_fact(key: \"FailureNotice_PhotoshopLaunchFailed\", language: \"zh-CN\", unsupportedClaim: \"已启动\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.A_shared_failure_sentence_suggests_no_retry_and_claims_only_what_every_path_supports(key: \"Failure_OutputValidationFailed\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.No_stop_message_claims_the_external_application_is_finished(forbidden: \"has finished\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.No_environment_string_offers_a_way_past_the_gate(forbidden: \"Enable production\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.PlainChineseReviewCopyTests.Review_action_names_its_object_fits_and_keeps_exact_target(step: \"background\", width: 1280, height: 720)",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.Stop_and_take_over_are_not_worded_as_the_same_action",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.Take_over_guidance_has_force_close_and_manual_recovery_parity",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.No_stop_message_claims_the_external_application_is_finished(forbidden: \"safely closed\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.PlainChineseReviewCopyTests.Review_action_names_its_object_fits_and_keeps_exact_target(step: \"tiff\", width: 984, height: 661)",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.The_refresh_wording_distinguishes_re_observing_from_re_reading",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.A_shared_failure_sentence_suggests_no_retry_and_claims_only_what_every_path_supports(key: \"Failure_WorkspaceError\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.Every_typed_accessor_resolves_to_a_real_resource",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.No_operator_string_offers_a_resampling_method(forbidden: \"重新取样\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.A_specialized_refusal_does_not_turn_an_unconfirmed_event_into_a_fact(key: \"FailureNotice_MeituLaunchFailed\", language: \"en\", unsupportedClaim: \"was started\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.PlainChineseReviewCopyTests.Review_action_names_its_object_fits_and_keeps_exact_target(step: \"enhancement\", width: 984, height: 661)",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.The_take_over_confirmation_states_each_consequence(required: \"Return to automation\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.The_trim_bounds_wording_names_no_internal_type(forbidden: \"AppliedBounds\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.A_shared_failure_sentence_suggests_no_retry_and_claims_only_what_every_path_supports(key: \"Failure_Timeout\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.The_trim_bounds_wording_names_no_internal_type(forbidden: \"TrimGeometry\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.No_stop_message_claims_the_external_application_is_finished(forbidden: \"is finished\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.No_environment_string_offers_a_way_past_the_gate(forbidden: \"Continue anyway\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.A_specialized_refusal_does_not_turn_an_unconfirmed_event_into_a_fact(key: \"FailureNotice_RevisionIntegrityMismatch\", language: \"en\", unsupportedClaim: \"The file changed\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.The_trim_bounds_strings_exist_in_both_languages",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.The_take_over_confirmation_states_each_consequence(required: \"will not produce a Revision\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.No_environment_string_offers_a_way_past_the_gate(forbidden: \"仍然继续\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.No_environment_string_offers_a_way_past_the_gate(forbidden: \"强制启用\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.The_zh_CN_file_carries_no_string_the_English_file_has_dropped",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.Operator_action_labels_offer_no_force_termination(forbidden: \"force close\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.Meitu_launch_failure_sentence_claims_neither_a_start_nor_a_retry(language: \"zh-CN\", fact: \"美图未能启动或未能就绪\", unsupported: [\"已启动\", \"规定时间\", \"重试\", \"再试\"])",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.No_environment_string_offers_a_way_past_the_gate(forbidden: \"忽略校验\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.The_stop_and_take_over_strings_exist_in_both_languages",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.Operator_action_labels_offer_no_force_termination(forbidden: \"force-close\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.No_operator_label_offers_to_terminate_the_external_application(forbidden: \"kill\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.No_failure_wrapper_or_help_line_suggests_retrying",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.The_flexible_size_operator_strings_exist_in_both_languages",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.The_maximum_bound_strings_exist_in_both_languages",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.The_confirmation_claims_nothing_about_cutout_quality(forbidden: \"guaranteed\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.No_stop_message_claims_the_external_application_is_finished(forbidden: \"nothing further to do\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.The_projected_figures_are_never_described_as_an_actual_photoshop_result(key: \"Session_PreparationProjectedSize\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.The_projected_figures_are_never_described_as_an_actual_photoshop_result(key: \"Session_PreparationAttemptProjected\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.The_trim_bounds_wording_names_no_internal_type(forbidden: \"TrimBounds\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.A_shared_failure_sentence_suggests_no_retry_and_claims_only_what_every_path_supports(key: \"Failure_OutputMissing\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.The_read_only_advisory_says_it_does_not_block",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.No_operator_label_offers_to_terminate_the_external_application(forbidden: \"force quit\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.The_take_over_confirmation_states_each_consequence(required: \"left exactly as it is\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.PlainChineseReviewCopyTests.Review_action_names_its_object_fits_and_keeps_exact_target(step: \"enhancement\", width: 1920, height: 1080)",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.A_shared_failure_sentence_suggests_no_retry_and_claims_only_what_every_path_supports(key: \"Failure_PersistenceError\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.The_maximum_bound_wording_describes_limits_rather_than_an_exact_size",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.No_operator_label_offers_to_terminate_the_external_application(forbidden: \"terminate\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.The_trim_bounds_wording_names_no_internal_type(forbidden: \"Int32Rect\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.Every_workstation_check_has_a_neutral_subject_in_both_languages",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.No_resource_value_is_left_empty",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.A_specialized_refusal_does_not_turn_an_unconfirmed_event_into_a_fact(key: \"FailureNotice_MeituLaunchFailed\", language: \"zh-CN\", unsupportedClaim: \"已启动\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.A_specialized_refusal_does_not_turn_an_unconfirmed_event_into_a_fact(key: \"FailureNotice_RevisionIntegrityMismatch\", language: \"zh-CN\", unsupportedClaim: \"文件在显示后发生了变化\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.No_operator_string_offers_a_resampling_method(forbidden: \"Resample\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.Every_failure_help_line_names_Error_details_and_a_colleague_or_supervisor",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.No_operator_label_offers_to_terminate_the_external_application(forbidden: \"end task\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.The_trim_bounds_wording_names_no_internal_type(forbidden: \"half-open\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.The_dimension_review_warning_reports_no_failure_and_no_deletion",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.A_shared_failure_sentence_suggests_no_retry_and_claims_only_what_every_path_supports(key: \"Failure_Cancelled\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.The_confirmation_claims_nothing_about_cutout_quality(forbidden: \"guarantee\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.Every_English_string_has_a_zh_CN_translation",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.No_environment_string_offers_a_way_past_the_gate(forbidden: \"Ignore verification\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.The_trim_bounds_wording_names_no_internal_type(forbidden: \"RightExclusive\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Architecture.LocalisationResourceTests.The_trim_bounds_wording_names_no_internal_type(forbidden: \"BottomExclusive\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.PlainChineseReviewCopyTests.Review_action_names_its_object_fits_and_keeps_exact_target(step: \"trim\", width: 1280, height: 720)",
+      "outcome": "Passed"
+    }
+  ],
+  "trx": "D:\\Repositories\\printflow-Studio\\output\\ui\\SCRUM-11213\\c05-20261029-r1\\checks\\resource-and-review.trx",
+  "sha256": "a776bd799637206162a87521ea315530f7231bd2cbe9714c795c875b9bc201de",
+  "runErrors": []
+}

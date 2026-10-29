@@ -1,0 +1,103 @@
+{
+  "group": "accessibility",
+  "exitCode": 0,
+  "discovered": 22,
+  "complete": true,
+  "exactInstances": true,
+  "counts": {
+    "Passed": 22
+  },
+  "rows": [
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.SessionAccessibilityTests.Every_required_operator_action_renders_with_its_own_automation_id",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.WorkflowPurposeCardTests.Language_switch_refreshes_existing_cards_without_selecting_or_replacing_them",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.HomeRecentAccessibilityTests.The_missing_picture_state_is_translated(culture: \"zh-CN\", expected: \"无预览\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.WorkflowPurposeCardTests.Every_card_explains_purpose_result_and_dimensions_without_clipping(culture: \"zh-CN\", width: 1000, height: 700)",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.HomeRecentAccessibilityTests.The_row_actions_are_localised_while_their_identities_are_not",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.SessionAccessibilityTests.Submit_manual_result_is_enabled_and_invokable_when_the_session_is_eligible",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.WorkflowPurposeCardTests.Every_card_explains_purpose_result_and_dimensions_without_clipping(culture: \"en\", width: 1920, height: 1040)",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.HomeRecentAccessibilityTests.A_removable_row_renders_its_thumbnail_and_every_stable_identity",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.SessionAccessibilityTests.Submit_manual_result_announces_its_localised_operator_wording",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.WorkflowPurposeCardTests.Asset_route_has_no_print_size_or_TIFF_and_preparation_remains_optional",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.HomeRecentAccessibilityTests.A_keyboard_operator_reaches_both_row_actions_without_being_trapped",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.SessionAccessibilityTests.Simultaneously_visible_actions_never_share_an_automation_id",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.HomeRecentAccessibilityTests.The_missing_picture_state_is_translated(culture: \"en-US\", expected: \"No preview\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.HomeRecentAccessibilityTests.Both_row_actions_expose_the_invoke_pattern",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.WorkflowPurposeCardTests.Every_card_explains_purpose_result_and_dimensions_without_clipping(culture: \"zh-CN\", width: 1920, height: 1040)",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.SessionAccessibilityTests.No_rendered_element_announces_a_type_or_resource_name",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.HomeRecentAccessibilityTests.A_driver_removes_one_finished_record_and_nothing_else_changes",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.WorkflowPurposeCardTests.Every_card_explains_purpose_result_and_dimensions_without_clipping(culture: \"en\", width: 1000, height: 700)",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.SessionAccessibilityTests.Automation_ids_are_stable_across_languages_while_names_are_translated",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.SessionAccessibilityTests.Invoking_the_rendered_button_imports_the_chosen_file_and_asks_for_review",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.SessionAccessibilityTests.Submit_manual_result_is_not_offered_while_the_session_is_still_automated",
+      "outcome": "Passed"
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.SessionAccessibilityTests.The_tab_stops_reach_submit_manual_result_and_skip_the_display_only_lists",
+      "outcome": "Passed"
+    }
+  ],
+  "trx": "D:\\Repositories\\printflow-Studio\\output\\ui\\SCRUM-11213\\c05-20261029-r1\\checks\\accessibility.trx",
+  "sha256": "a9ce39361d7e7f8acf1442c6d7730de96e1119147425716db99233751d333536",
+  "runErrors": []
+}

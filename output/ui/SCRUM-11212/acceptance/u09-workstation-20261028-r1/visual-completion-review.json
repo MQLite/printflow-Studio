@@ -1,0 +1,821 @@
+{
+  "schemaVersion": 1,
+  "review": "U09 completion/import/completed-comparison screenshot visual review",
+  "reviewer": "u09_completion_visual_review",
+  "scope": {
+    "assignedGroups": [
+      "completion",
+      "import",
+      "completed-comparison"
+    ],
+    "assignedFrameCount": 64,
+    "actuallyViewedFrameCount": 64,
+    "groupCounts": {
+      "completed-comparison": 8,
+      "completion": 31,
+      "import": 25
+    },
+    "evidenceType": "Synthetic 96 DPI offscreen UserControl captures; static pixels only",
+    "sourceManifest": "C:/Users/admin/.codex/worktrees/scrum-11201-shared-theme/printflow-Studio/output/ui/SCRUM-11212/candidates/u09-visual-20261028-r1/source-final.json",
+    "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+    "screenshotManifest": "C:/Users/admin/.codex/worktrees/scrum-11201-shared-theme/printflow-Studio/output/ui/SCRUM-11212/candidates/u09-visual-20261028-r1/screenshot-manifest.json",
+    "screenshotManifestSha256": "0feb2f84299c37594e9d5cbbaeb09802619583a5512ea19bd64dfbd9987c404c",
+    "allAssignedImageHashesMatched": true
+  },
+  "conclusion": "All assigned frames reviewed. Two compact recent-task frames have an initial-viewport startup-warning visibility concern. Main completion/save/history, recovery, settings, import, route and draft-confirmation meanings and primary actions are readable in the reviewed frames. This is not a full U09 or 140-state acceptance pass.",
+  "dispositionCounts": {
+    "acceptable": 36,
+    "acceptable-with-scope-limit": 25,
+    "material-visibility-issue": 2,
+    "acceptable-with-fixture-observation": 1
+  },
+  "materialIssues": [
+    {
+      "id": "VIS-COMP-01",
+      "title": "Compact recent-task startup warning is cropped to icon/border in initial viewport",
+      "severity": "Visibility concern; current production-blocking effect not established",
+      "frames": [
+        {
+          "path": "screenshots/completion/recent-1000x700.png",
+          "region": {
+            "x": 208,
+            "y": 344,
+            "width": 768,
+            "height": 22
+          }
+        },
+        {
+          "path": "screenshots/completion/recent-1280x720.png",
+          "region": {
+            "x": 208,
+            "y": 346,
+            "width": 1048,
+            "height": 30
+          }
+        }
+      ],
+      "observation": "The warning area initially shows a yellow strip and icon without a readable message. This is partial content at the bottom of Home.Upper's scroll viewport. The visible workstation section still says this startup has not been checked; continue/abandon controls and no-auto-processing caveat remain readable.",
+      "sourceContext": "HomeView.xaml:207 defines Home.Upper with automatic vertical scrolling; lines236-252 place preset/recovery warnings outside the StartupDetails expander. HomeViewModel.cs:186-196 describes these as startup preset/recovery warnings; Strings.zh-CN.resx:1313 asks the operator to view workstation checks when startup preset validation failed. They are not simply hidden informational counts, but this review does not establish them as current live production blockers.",
+      "expected": "When a startup warning exists, expose at least its meaningful warning summary in the compact initial view, or provide an equally clear visible indication directing the operator to its details.",
+      "notEstablished": "Scrolling was not operated. No claim that the warning is inaccessible or that current production is permitted/blocked is made."
+    }
+  ],
+  "evidenceObservations": [
+    {
+      "id": "FIXTURE-COMP-01",
+      "title": "Synthetic save fixture has conflicting dimension labels",
+      "path": "screenshots/completion/save-1920x1080.png",
+      "regions": [
+        {
+          "x": 968,
+          "y": 525,
+          "width": 900,
+          "height": 36
+        },
+        {
+          "x": 947,
+          "y": 798,
+          "width": 910,
+          "height": 24
+        }
+      ],
+      "observation": "Save-as summary says 0.5 x 0.4 mm while Outputs produced says 200 x 150 mm (2362 x 1772 px at 300 dpi). Preview metadata is 6 x 5 px. Static synthetic evidence cannot establish whether this is only fixture metadata or a real product-path inconsistency.",
+      "disposition": "Known legacy MaxBounds/F6 negative evidence, as identified by controller; not a newly fixed or acceptance-passed size path.",
+      "controllerContext": "Controller reports fresh separate F2D/F2C TargetEdgeV1 TIFFs were verified coherent (1800 x 1350 px; 152.4 x 114.3 mm), while F6 deliberately preserves the 6 x 5 MaxBounds disagreement. This sub-review did not inspect or validate those fresh TIFFs."
+    }
+  ],
+  "sourceContextFiles": [
+    {
+      "path": "src/PrintFlow.App/Views/HomeView.xaml",
+      "sha256": "a2356ea1aabf79776e0174a395c041a6b7611b601fd33b16ef417f49c75079b7",
+      "matchesSourceManifest": true
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/HomeViewModel.cs",
+      "sha256": "966c7c3e60e2205fe73b3ea9576c8fd81cbb7bc88a61163d2e87775b8e12aec0",
+      "matchesSourceManifest": true
+    },
+    {
+      "path": "src/PrintFlow.App/Resources/Strings.zh-CN.resx",
+      "sha256": "023abb0a02b2630072693c2a6c4b6a3bbe38c2f9511385c1b4038c2b278c9ed7",
+      "matchesSourceManifest": true
+    }
+  ],
+  "unverifiedScopes": [
+    "Actual desktop windows, window chrome and actual available client area",
+    "Physical display scaling, non-96-DPI rendering and runtime resize behavior",
+    "Mouse/keyboard/touch input, focus order, scrolling and expansion reachability",
+    "Real file existence/persistence, save collision behavior and verification actions",
+    "Real Photoshop/Meitu execution, PDF/PSD processing, production readiness and recovery side effects",
+    "Production image fidelity and realistic image sizes; captured fixtures are synthetic",
+    "Genuine novice usability acceptance (deferred)",
+    "Unassigned frames/groups and any full U09/140-state claim"
+  ],
+  "method": "Viewed each of the 64 listed image files directly with tools.view_image at original detail in batches of four. Recomputed every PNG SHA-256 and source-final.json hash. Read only three manifest-matching source files to contextualize the cropped warning. No builds, tests, desktop operation, source edits, Git changes, or historical-artifact edits.",
+  "frames": [
+    {
+      "path": "screenshots/completed-comparison/completed-en-US-1000x700.png",
+      "sha256": "935881d1b730e5cdde3d926a8f7557d8d96f185aadf592f5c380b029891d7ac4",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 0,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable-with-scope-limit",
+      "observation": "Completion, approval and historical save distinguished; current file explicitly unchecked. Small before/after panes remain visible; comparison options extend in scrollable toolbar, so access requires interaction verification."
+    },
+    {
+      "path": "screenshots/completed-comparison/completed-en-US-1280x720.png",
+      "sha256": "dca896719789b40715c1ec449f5332f3383b352990a5bb5151dcbdb2946287cb",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 1,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable-with-scope-limit",
+      "observation": "Completion and unchecked historical save explicit; side-by-side panes usable. Secondary after filename ellipsized; lower delivery controls are below visible scroll area."
+    },
+    {
+      "path": "screenshots/completed-comparison/completed-en-US-1920x1080.png",
+      "sha256": "bbf68c64c2b200ddce1f10f2cbcc854c07e08a48b68f6753ca4068d356cd34bb",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 2,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable",
+      "observation": "Completion, approval, historical save and unchecked current location distinct. Check saved file, full path, save accordion and sizeable before/after images readable."
+    },
+    {
+      "path": "screenshots/completed-comparison/completed-en-US-984x661.png",
+      "sha256": "038c29eb8518b0ac59d4daf4d37f7835d7f2bfb873530275e90f7491c37df984",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 3,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable-with-scope-limit",
+      "observation": "Completion and unchecked historical record explicit at compact size; small before/after pictures visible. Toolbar/content overflow has scrollbars; offscreen control access unverified."
+    },
+    {
+      "path": "screenshots/completed-comparison/completed-zh-CN-1000x700.png",
+      "sha256": "80740c6e90a9d64ae56d5ca2a6f244de03742b486506d8f22b06496af4981c65",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 4,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable-with-scope-limit",
+      "observation": "Chinese completion, approval and unchecked historical save distinct; both small pictures visible. Comparison options are partially outside scrollable toolbar viewport; interaction access unverified."
+    },
+    {
+      "path": "screenshots/completed-comparison/completed-zh-CN-1280x720.png",
+      "sha256": "e9785269c9698814eb18f528df715e52473df65b89267dfafcafa24a967abfd0",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 5,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable-with-scope-limit",
+      "observation": "Chinese status and current-file caveat readable; paired pictures usable; secondary filename ellipsized and delivery controls continue below scroll viewport."
+    },
+    {
+      "path": "screenshots/completed-comparison/completed-zh-CN-1920x1080.png",
+      "sha256": "c155866c5005880d599e6dacfd1952320b7075aa223ced07bd4ddee2e5af2a55",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 6,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable",
+      "observation": "Chinese completion/save/approval distinctions, full path and check-file action readable; sizeable comparison panes and background controls visible."
+    },
+    {
+      "path": "screenshots/completed-comparison/completed-zh-CN-984x661.png",
+      "sha256": "76ff3f3a8921c88ea312ff1741b8ca6a884039e436634a4e6d7b86bd330d48db",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 7,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable-with-scope-limit",
+      "observation": "Compact Chinese status and current-file caveat readable; paired pictures visible. Toolbar and delivery region have vertical overflow; offscreen access unverified."
+    },
+    {
+      "path": "screenshots/completion/completed-1000x700.png",
+      "sha256": "c8278b8e3d4c73f0d90ef7f15bb56b4811e65a2d85dcf94398b768f1135778bf",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 8,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable-with-scope-limit",
+      "observation": "Completed state, approved result and verified save shown with explanation that records do not establish current file presence. Picture remains usable; delivery content continues below scrollbar."
+    },
+    {
+      "path": "screenshots/completion/completed-1280x720.png",
+      "sha256": "9b0c8941e9d5834e7cc3940160c84c7fe9149d45105dc990bb1e66f582bfc139",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 9,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable-with-scope-limit",
+      "observation": "Completion, approval and saved record readable with record/current-file caveat; large current preview. Full path and lower actions extend below visible scroll viewport."
+    },
+    {
+      "path": "screenshots/completion/completed-1920x1080.png",
+      "sha256": "61d0e5e20b48ce5e3fbc4edeb4dbd612cda534d150dad9ccc6c906012e42f633",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 10,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable",
+      "observation": "Completion, approval, saved record and current-file caveat visible; full path and check-file action readable with large current preview."
+    },
+    {
+      "path": "screenshots/completion/confirmation-1000x700.png",
+      "sha256": "44df71aa5279e789e84d8c7db9ed0fed2286eb3a890c89ce3c16d86af3a9b1c3",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 11,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable",
+      "observation": "Abandon confirmation clearly says task cannot continue, retained inputs/results/history and no deletion; keep and confirm-abandon actions distinguishable."
+    },
+    {
+      "path": "screenshots/completion/correction-prepare-1000x700.png",
+      "sha256": "455a0e0aff2ed4bfa90ef1f73b85e92c046be2ef309b542df97403471227ec36",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 12,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable",
+      "observation": "Correction handoff preparation explains retained original/results, manual file handoff and no automatic start; note field and prepare-copy action readable; both previews visible."
+    },
+    {
+      "path": "screenshots/completion/correction-returned-1000x700.png",
+      "sha256": "ce9689028ff6f1cd4d6c7793c5bbb0e5c4d11653392f8612054bd152a3b50762",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 13,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable-with-scope-limit",
+      "observation": "Returned correction explicitly requires review; header says approval continues to trim rather than rerunning background removal. Reject, correction request and approve controls visible; long checklist scrolls."
+    },
+    {
+      "path": "screenshots/completion/correction-waiting-1000x700.png",
+      "sha256": "ec3f6458c972ee269cfb0722b76e7dba10efd9cfaba8f3c089748758a1fa4e78",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 14,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable-with-scope-limit",
+      "observation": "Waiting/handoff state and explicit import action readable; no folder watching or automatic restart promised. Small paired previews visible; long file-transfer details scroll."
+    },
+    {
+      "path": "screenshots/completion/correction-waiting-1280x720.png",
+      "sha256": "40939a0c5f204bfdfeaefbc1a61356a768c670c16ec5ce43fa25c48b57c61a56",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 15,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable-with-scope-limit",
+      "observation": "Waiting/handoff/import state clear with paired previews; transfer filenames and folder path readable but lower instruction text continues in scroller."
+    },
+    {
+      "path": "screenshots/completion/correction-waiting-1920x1080.png",
+      "sha256": "a56b060945b60706fd8e1b2f8c47bffe55250559943d859a69b28668f7045079",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 16,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable",
+      "observation": "Manual handoff workflow, retained results, exact transparent PNG requirement, explicit import and no rerun of background removal readable; large paired previews."
+    },
+    {
+      "path": "screenshots/completion/error-details-1000x700.png",
+      "sha256": "cb1e864760c1df6e9507438a509f05419e302c9f4c8d3ae065157aef87366c23",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 17,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable-with-scope-limit",
+      "observation": "Timeout explanation distinguishes stopped waiting from external program possibly still running; preserved original and unused attempt stated. Retry/manual/return actions visible; lower diagnostics scroll."
+    },
+    {
+      "path": "screenshots/completion/failure-1000x700.png",
+      "sha256": "176b079ce5603c019900e4abaade0007bc822d349b11b5a479feb14bc2e25713",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 18,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable",
+      "observation": "Stopped/failure state, retained input/results and no automatic start clear; retry, error details and manual handling actions readable with usable preview."
+    },
+    {
+      "path": "screenshots/completion/readiness-1000x700.png",
+      "sha256": "a629b8b79e7b82b825543f529647ba71e0676352c9db95d710068f2f62a4348b",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 19,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable",
+      "observation": "Ready report explicitly time-bound and revalidated per production request; safe recovery and refresh described distinctly, with visible actions and no blocker."
+    },
+    {
+      "path": "screenshots/completion/readiness-1280x720.png",
+      "sha256": "cce3a3e3ac834bacd733c612135dd942d0885f48780bfee78d37d66cea81d85f",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 20,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable",
+      "observation": "Ready report, dated check, per-request revalidation caveat, recovery/refresh distinction and buttons fully readable."
+    },
+    {
+      "path": "screenshots/completion/readiness-1920x1080.png",
+      "sha256": "d6fced4b16396f01048f67cb6f2540cafe1859d2cd547a3bb8ac84b0e3cf7fe2",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 21,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable",
+      "observation": "Ready report and timestamp readable with clear recovery/refresh scope and actions; generous whitespace does not obscure essential information."
+    },
+    {
+      "path": "screenshots/completion/readiness-blocked-1000x700.png",
+      "sha256": "f6b83bb9e90ee8614f4296bff4fbe916f13c5d632de43da3c06e988f988ca149",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 22,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable-with-scope-limit",
+      "observation": "Not-ready status and mandatory unrun check visible; no successful live-check history stated and recovery/refresh actions readable. Check list scrolls."
+    },
+    {
+      "path": "screenshots/completion/readiness-stale-1000x700.png",
+      "sha256": "6a37c29b0581f2424fd76964ca93568b53feda6a54f3300147b713028884871f",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 23,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable-with-scope-limit",
+      "observation": "Stale historical evidence explicitly not current readiness; previous-success time and mandatory unrun blocker readable with recovery/refresh actions; check list scrolls."
+    },
+    {
+      "path": "screenshots/completion/readiness-unchecked-1000x700.png",
+      "sha256": "fc6a3263a4c0e1bc5b6559b65f152ae19cbbb0a1d6c167cd1a1a01524d327fad",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 24,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable",
+      "observation": "Unchecked readiness clearly cannot confirm production; recovery/refresh scope and actions readable; no false ready claim."
+    },
+    {
+      "path": "screenshots/completion/recent-1000x700.png",
+      "sha256": "60da59f1fd2ff8c85f24d4a3f76b35761f3bdefec90efdcdb7a761c6b04ffd9e",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 25,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "material-visibility-issue",
+      "observation": "Yellow startup-warning region x208..976,y344..366 shows border/icon but clips the message below initial viewport. Continue and abandon actions/readable stopped state remain visible; scrolling not operated."
+    },
+    {
+      "path": "screenshots/completion/recent-1280x720.png",
+      "sha256": "dc43cb27abc315026ba4a9d521f835080b3da9a17208e8f2508b0d99eca6f237",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 26,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "material-visibility-issue",
+      "observation": "Yellow startup-warning region x208..1256,y346..376 shows icon but no readable warning message in initial viewport. Stopped task and continuation caveat readable; scrolling not operated."
+    },
+    {
+      "path": "screenshots/completion/recent-1920x1080.png",
+      "sha256": "54668364e0311c1036541dbcdb0ffeb682030f21070d625f46e2005d27f0d10e",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 27,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable-with-scope-limit",
+      "observation": "Startup validation/recovery warnings, unchecked workstation, stopped task and continuation-without-auto-processing caveat visible; startup-details area and task history use scroll/expansion."
+    },
+    {
+      "path": "screenshots/completion/recovery-1000x700.png",
+      "sha256": "7587ce0b63cd2a4ab8daf0f3c9fd7e1305f96537b12e36f3e813556db92d54c1",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 28,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable",
+      "observation": "Interrupted step and stopped state clear; retained results/no auto start explicit; retry/manual/error/skip/route controls readable with usable preview."
+    },
+    {
+      "path": "screenshots/completion/recovery-1280x720.png",
+      "sha256": "bd17a812a639e694875e3f46ab59b2ba8f6b0bb005b76808feeb7aa3364fcc0b",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 29,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable",
+      "observation": "Interrupted recovery state, no auto start and external-software check instruction readable; relevant actions visible with large preview."
+    },
+    {
+      "path": "screenshots/completion/recovery-1920x1080.png",
+      "sha256": "d09fc33bf7a0c3279fee626197479e25e590c8696e2e2a1a49c5c957011e5439",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 30,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable",
+      "observation": "Interrupted recovery state and explicit retry operation clear; all main recovery actions readable and large preview available."
+    },
+    {
+      "path": "screenshots/completion/save-1000x700.png",
+      "sha256": "8f86b8130ff8ae352580497a386ceb3c786206fd82c4e051efc1284595d82f98",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 31,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable-with-scope-limit",
+      "observation": "Approved, not saved to target folder, and unfinished task stated separately; filename/folder selection and save action readable. Folder textbox truncation has adjacent summary; lower save detail scrolls."
+    },
+    {
+      "path": "screenshots/completion/save-1280x720.png",
+      "sha256": "af6c14d905e34539c26dabce6d542043fbaa4cfe9544da34518fce7f1a724b22",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 32,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable-with-scope-limit",
+      "observation": "Approval, unsaved target folder and unfinished task distinct; filename/folder and save controls readable, large preview; lower explanatory content scrolls."
+    },
+    {
+      "path": "screenshots/completion/save-1920x1080.png",
+      "sha256": "7aab9340880b67f40729bdb27a20d7f52b5d4e7e88cb17122ab77e91ed8cee67",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 33,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable-with-fixture-observation",
+      "observation": "Approval/save/completion distinctions and full controls readable with large preview. Save summary says 0.5 x 0.4 mm while Outputs produced says 200 x 150 mm. Controller identifies this 6 x 5 px capture as known legacy MaxBounds/F6 negative evidence; dimension correctness is not accepted by this visual review."
+    },
+    {
+      "path": "screenshots/completion/save-collision-1000x700.png",
+      "sha256": "0b6949abebc783b7d3bc110490fd21b723eac346de753e0d305847dda5bc6524",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 34,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable-with-scope-limit",
+      "observation": "Collision explicitly unsaved, existing result.tif not overwritten; alternate result (2).tif action visible and clear. Filename/folder controls and preview usable; details scroll."
+    },
+    {
+      "path": "screenshots/completion/save-uncertain-1000x700.png",
+      "sha256": "5cffb4ee4b57cabf2b2eae8f0efdb27f4c1efae6400feafd12f0bcbe7bbe7113",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 35,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable-with-scope-limit",
+      "observation": "Save uncertainty explicitly marked, task unfinished, and verify-this-save action described as no rewrite/new copy. Main verify action and preview visible; details scroll."
+    },
+    {
+      "path": "screenshots/completion/settings-1000x700.png",
+      "sha256": "dba92baa422589b643b380d3b17d55805c5a22ac266524e22709c64913b4c513",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 36,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable-with-scope-limit",
+      "observation": "Language, safety margin, retention and view-only production settings readable; unvalidated config/unchecked Photoshop clear. Save settings and readiness action visible; technical accordion partially below viewport."
+    },
+    {
+      "path": "screenshots/completion/settings-1280x720.png",
+      "sha256": "37b50fc61428d05ffe88fc580a301f19237165af244d2b0aaf341ff8c63e85a2",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 37,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable",
+      "observation": "General settings and view-only production configuration distinguished; unvalidated/unchecked states, retention scope, readiness link and save action readable."
+    },
+    {
+      "path": "screenshots/completion/settings-1920x1080.png",
+      "sha256": "2c8ef2a425b6c8a243092d79a73d80450d5633990ea566b9c303174737e018de",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 38,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable",
+      "observation": "All essential settings and production restrictions readable; actions and diagnostic expander visible without overlap."
+    },
+    {
+      "path": "screenshots/import/home-continue-1000x700.png",
+      "sha256": "7701bf286ef9e5c8b4ddf10bcf35385c5a77b6796f5b1a033ccef0e0bbfc8362",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 39,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable-with-scope-limit",
+      "observation": "Single-file import, unavailable AI design, unchecked workstation and continue/abandon task actions readable; continuing does not auto-process. Optional startup-details heading partially clipped in top scroller."
+    },
+    {
+      "path": "screenshots/import/home-continue-1280x720.png",
+      "sha256": "5d4881f8188e8bbc14b3e490a08fa750dec223038b005e3543643770cf37dcd2",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 40,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable-with-scope-limit",
+      "observation": "Import and continue task decisions clear, original-check pending task and no automatic processing caveat readable; optional startup section at scroll boundary."
+    },
+    {
+      "path": "screenshots/import/home-continue-1920x1080.png",
+      "sha256": "f66e579d19f9ff1d64f1b60201807c293d2deea026eb128dff7068f1e73a9dac",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 41,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable",
+      "observation": "Single-file import, unavailable AI design, unchecked workstation, pending original review and manual continuation all readable."
+    },
+    {
+      "path": "screenshots/import/import-pending-1000x700.png",
+      "sha256": "468e47612c6895d0c11f505839b7728ad824d567610e53fdd5832e34786bdfb0",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 42,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable-with-scope-limit",
+      "observation": "Import in progress and unchanged original stated; chooser disabled and cancel-wait action readable. Lower optional home content scrolls."
+    },
+    {
+      "path": "screenshots/import/import-refused-multiple-1000x700.png",
+      "sha256": "535c31e89ea4303310b7ef5a06e35c234908b4515a85406588fba62c0bb09a83",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 43,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable",
+      "observation": "Two-file refusal clearly says no processing started and only one file accepted; reselect action visible and message fully readable."
+    },
+    {
+      "path": "screenshots/import/original-GeneratePrintTiff-1000x700.png",
+      "sha256": "acef07fd25d8a69b1b9e2b1af0afa65abab04a1c14d700a1fb516f7329b84782",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 44,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable",
+      "observation": "Print-TIFF route and source preservation visible; original review instruction, background/zoom controls, route change and confirm-original action readable with usable picture."
+    },
+    {
+      "path": "screenshots/import/original-GeneratePrintTiff-1280x720.png",
+      "sha256": "3630c6f38b880b1dbc1da4a30f0d77cd78911c5317b2e78ec6d416133fb85f1d",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 45,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable",
+      "observation": "Print-TIFF route original review and preservation clear; confirm-original and change-route actions visible; picture area ample."
+    },
+    {
+      "path": "screenshots/import/original-GeneratePrintTiff-1920x1080.png",
+      "sha256": "079eeee60a9c5d4e9744a9ba5faa7bf9701b685c1593e0e8a34f3b700e376213",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 46,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable",
+      "observation": "Print-TIFF route original review and preservation clear; full controls and large picture available; synthetic output warning readable."
+    },
+    {
+      "path": "screenshots/import/original-PrepareAsset-1000x700.png",
+      "sha256": "fe8b44d1266ae9b0fd974523ec9d637a2cb2d9a164c271bb0fd4bed2b5ab8b28",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 47,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable",
+      "observation": "Prepare-asset route source review and preservation explicit; confirm/change-route actions readable with usable preview and background/zoom controls."
+    },
+    {
+      "path": "screenshots/import/original-PrepareAsset-1280x720.png",
+      "sha256": "a1a81dacadc531e81bbd07808eb55558981c8b7604e1a970cf065f4b9fef40b0",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 48,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable",
+      "observation": "Prepare-asset route and source preservation explicit; original confirmation and change route readable; picture ample."
+    },
+    {
+      "path": "screenshots/import/original-PrepareAsset-1920x1080.png",
+      "sha256": "1bd21acc40069d4d1fc0d1b325c5af9fd7dbab8002a8a8a0cc2d843ca209c319",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 49,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable",
+      "observation": "Prepare-asset route full step list and original confirmation visible with very large preview and readable controls."
+    },
+    {
+      "path": "screenshots/import/original-PrepareCustomerDesign-1000x700.png",
+      "sha256": "943ec90490c0e57230902f7559966a62d1634570f4e1ce60077b7ad4c78b412a",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 50,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable",
+      "observation": "Customer-design route and source preservation clear; original review instruction and confirmation/change-route actions readable; picture usable."
+    },
+    {
+      "path": "screenshots/import/original-PrepareCustomerDesign-1280x720.png",
+      "sha256": "775bb118d6d7f41f237e2846a7309eadd1d04c3aa5306dbc57bd09a38d82fccc",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 51,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable",
+      "observation": "Customer-design original review, preservation and confirmation readable; large preview and main controls unobscured."
+    },
+    {
+      "path": "screenshots/import/original-PrepareCustomerDesign-1920x1080.png",
+      "sha256": "d55e2ff18dd0031466d9f14ed8c82d42f221329ff29b3f19cb20815db9afa39c",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 52,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable",
+      "observation": "Customer-design route, complete step list, unchanged original and confirm-original action readable with very large preview."
+    },
+    {
+      "path": "screenshots/import/pdf-pending-1000x700.png",
+      "sha256": "7dce857d2e1e57e36286cb1235afd955e136758d7b36311d1c30bc872bb773bb",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 53,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable",
+      "observation": "PDF requires explicit preparation before preview; single-page/300PPI and no production spot-channel preservation limits readable; unchanged source and prepare action clear."
+    },
+    {
+      "path": "screenshots/import/pdf-review-1000x700.png",
+      "sha256": "aad2d21eea048e719f0c14d165000e8de024568ea0270379486633b0c66c288a",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 54,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable-with-scope-limit",
+      "observation": "Prepared single-page PDF review identifies rasterized preview, page1, 300PPI and actual size. Usable picture with reject/manual/approve actions; lower review form scrolls."
+    },
+    {
+      "path": "screenshots/import/psd-pending-1000x700.png",
+      "sha256": "e6210a1fe153bd1eed9745234193f0f47dfb6688d78640f4a8acfcb3250d30ce",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 55,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable",
+      "observation": "PSD preparation needed before preview, unchanged source, supported RGB8 compatible composite and spot-channel limitation readable; prepare action visible."
+    },
+    {
+      "path": "screenshots/import/psd-review-1000x700.png",
+      "sha256": "402dc0c930392b19a4558d127e6670f5cee9ef9249af041fe726df414b506193",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 56,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable-with-scope-limit",
+      "observation": "PSD preview identified as controlled Photoshop raster copy, source unchanged and spot channels not reused; picture usable with reject/manual/approve controls; lower review form scrolls."
+    },
+    {
+      "path": "screenshots/import/review-draft-leave-1000x700.png",
+      "sha256": "63a8a6fd04e253c119a4d0034dbd71d39bf51e584d8833cf3184c5994bb0f109",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 57,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable",
+      "observation": "Draft-leave confirmation fully readable and distinguishes abandoning only this page input from abandoning entire task; continue editing and discard/leave actions clear."
+    },
+    {
+      "path": "screenshots/import/review-draft-leave-1280x720.png",
+      "sha256": "c8746fa2fece930ac410956cbfa2587f387a8751f465bd8e65ced09af12aba5a",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 58,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable",
+      "observation": "Draft-leave confirmation text and both choices readable; background route actions disabled and source thumbnail retained."
+    },
+    {
+      "path": "screenshots/import/review-draft-leave-1920x1080.png",
+      "sha256": "9f073be857dd8141bc0dcfbe31a045774d803c2c8b17584a31f0d933239c06f5",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 59,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable",
+      "observation": "Draft-leave confirmation and both actions readable at large size; explicit page-input-only scope, no entire task abandonment."
+    },
+    {
+      "path": "screenshots/import/review-resume-route-1000x700.png",
+      "sha256": "92d44b112f8b65c4ba10c346a800c7ad64d61bad3b4ed043312b3f6de282f562",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 60,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable",
+      "observation": "Resumed route choice shows retained source and output base name; three route outcomes, print-size needs and change-before-first-result caveat readable."
+    },
+    {
+      "path": "screenshots/import/route-choice-1000x700.png",
+      "sha256": "acec1a8f8fcd041b4e819c3f1558bfaf526f0c4e531242341d9ecc1e083d6350",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 61,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable",
+      "observation": "Three routes clearly describe intended input, PNG versus print TIFF outcome and print-size needs; source/output-name distinction and all actions readable."
+    },
+    {
+      "path": "screenshots/import/route-choice-1280x720.png",
+      "sha256": "fd55971b6389209abdb5fb006c90441127860e36b8685ed2ede7dc8986748f75",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 62,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable",
+      "observation": "Route outcomes and required dimensions readable; source thumbnail/name, output base name, route buttons and return-home retention caveat clear."
+    },
+    {
+      "path": "screenshots/import/route-choice-1920x1080.png",
+      "sha256": "563ed87ccba4a79c5525edbf9aad25df59111da1fa3417dfe0d9ac4cad741947",
+      "sourceManifestSha256": "e89f5b7c884a3597a01ad8fccc8e364ef831b0122fb5343557181574bbab824f",
+      "index": 63,
+      "viewed": true,
+      "viewMethod": "tools.view_image(detail=original)",
+      "sha256VerifiedAgainstFile": true,
+      "disposition": "acceptable",
+      "observation": "All route information and controls readable with clear PNG/TIFF distinction, source retention and naming explanation."
+    }
+  ]
+}
