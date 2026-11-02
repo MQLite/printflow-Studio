@@ -10,6 +10,8 @@
 
 **Spec:** [已通过的0.3设计稿](../specs/2026-11-03-memorial-guided-design.md)；[概念图与模板样例](../../../output/imagegen/ai-memorial-guided/2026-11-03-v1/README.md)。执行者同时读取规格和本计划。
 
+**Jira tracking:** 用户随后通过本计划并要求建单；已创建并回读核对2个Epic、12个Task和20条关系，详见[Jira Backlog台账](2026-11-03-memorial-jira-backlog.md)。源计划快照为 `adee5e8`；本轮建单不启动产品实施。
+
 ## 授权与基线
 
 - 2026-11-03 用户通过设计并要求 Superpowers 开发前规划。本次仅写计划与记录批准状态，没有实施、运行新功能测试、建 Jira、推送或发布。
