@@ -1,0 +1,128 @@
+{
+  "status": "design examples; not product runtime configuration",
+  "date": "2026-11-03",
+  "mode": "quick-prompt",
+  "rendering": {
+    "optionalDateLines": "Omit the whole date line when its field is blank or set to not displayed.",
+    "manualFinalText": "Copied verbatim; edits do not overwrite the template.",
+    "noCodeEvaluation": true
+  },
+  "templates": [
+    {
+      "id": "memorial-tshirt-quick",
+      "name": "人物纪念T恤",
+      "variables": [
+        {
+          "key": "姓名",
+          "required": true,
+          "default": null
+        },
+        {
+          "key": "人物参考",
+          "required": false,
+          "default": null
+        },
+        {
+          "key": "版式参考",
+          "required": false,
+          "default": null
+        },
+        {
+          "key": "出生日期行",
+          "required": false,
+          "default": null
+        },
+        {
+          "key": "离世日期行",
+          "required": false,
+          "default": null
+        },
+        {
+          "key": "设计规格",
+          "required": false,
+          "default": "280×390mm"
+        },
+        {
+          "key": "补充要求",
+          "required": false,
+          "default": null
+        }
+      ],
+      "body": "为{{人物参考}}中的人物制作纪念T恤独立图案，参考{{版式参考}}的布局与装饰。\n姓名：{{姓名}}\n{{出生日期行}}\n{{离世日期行}}\n设计区域：{{设计规格}}，按此构图意图安排内容。\n保持人物面部、表情、服饰和胸前饰物；保留指定原装饰，不擅自增加或删减。\n{{补充要求}}\n图案外围及指定间隙透明，保留完整主体与清晰边缘；输出独立图案，不绘制衣服实物或样机。"
+    },
+    {
+      "id": "memorial-badge-quick",
+      "name": "圆形纪念徽章",
+      "variables": [
+        {
+          "key": "姓名",
+          "required": true,
+          "default": null
+        },
+        {
+          "key": "人物参考",
+          "required": false,
+          "default": null
+        },
+        {
+          "key": "版式参考",
+          "required": false,
+          "default": null
+        },
+        {
+          "key": "出生日期行",
+          "required": false,
+          "default": null
+        },
+        {
+          "key": "离世日期行",
+          "required": false,
+          "default": null
+        },
+        {
+          "key": "画布外圆",
+          "required": false,
+          "default": "86mm"
+        },
+        {
+          "key": "内容安全区",
+          "required": false,
+          "default": "72mm"
+        },
+        {
+          "key": "补充要求",
+          "required": false,
+          "default": null
+        }
+      ],
+      "body": "为{{人物参考}}中的人物制作圆形纪念徽章图案，参考{{版式参考}}。\n姓名：{{姓名}}\n{{出生日期行}}\n{{离世日期行}}\n本次预设：画布外圆{{画布外圆}}，关键内容安全区{{内容安全区}}；实际产品模板仍需确认。\n保持人物面部、表情、服饰与饰物；沿用指定原装饰。\n姓名、人脸、日期与需完整显示的内容放在安全区内；外围环带只延伸背景，外圆之外透明。\n{{补充要求}}\n提供独立圆形图案，不绘制实物徽章或样机。"
+    },
+    {
+      "id": "memorial-text-change-quick",
+      "name": "只改姓名日期",
+      "variables": [
+        {
+          "key": "待修改图稿",
+          "required": false,
+          "default": null
+        },
+        {
+          "key": "原文字",
+          "required": true,
+          "default": null
+        },
+        {
+          "key": "新文字",
+          "required": true,
+          "default": null
+        },
+        {
+          "key": "补充要求",
+          "required": false,
+          "default": null
+        }
+      ],
+      "body": "修改{{待修改图稿}}中的指定文字。\n原文字：{{原文字}}\n替换为：{{新文字}}\n新文字逐字采用原文，包括大小写、数字、符号与日期格式。\n其余人物面部、表情、衣服、饰物、装饰、配色和布局保持不变；不重新生成整张人物图。\n{{补充要求}}\n保留原有透明区域和图案边界。"
+    }
+  ]
+}

@@ -25,7 +25,14 @@
       "Width": 1585,
       "Height": 992,
       "Sha256": "FBE53643BE13E8F0BF7F6C2300C2AACBA36271CBE6EDEE2DD4EE3FC948324460"
+    },
+    {
+      "File": "04-quick-prompt-mode.png",
+      "Bytes": 1643512,
+      "Width": 1585,
+      "Height": 992,
+      "Sha256": "CF48318AE2D05FB9E0F1690D2E3096B4D2F944042C16DAD0D66EDDC63F753D7A"
     }
   ],
-  "HumanReview": "Reviewed inline: character/medal/frame continuity, date difference 1039→1939, label capitalization, disabled confirmation, product lineage and 86/72/7 annotations. Illustrative geometry is not production proof."
+  "HumanReview": "Reviewed inline: character/medal/frame continuity, date difference 1039→1939, label capitalization, disabled confirmation, product lineage and 86/72/7 annotations. Illustrative geometry is not production proof. Revision 0.2 adds a quick prompt page with editable reusable template and independent final prompt; no six-step gate or automatic image submission."
 }
