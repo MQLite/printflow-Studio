@@ -32,7 +32,14 @@
       "Width": 1585,
       "Height": 992,
       "Sha256": "CF48318AE2D05FB9E0F1690D2E3096B4D2F944042C16DAD0D66EDDC63F753D7A"
+    },
+    {
+      "File": "05-quick-photo-slots-and-detail-link.png",
+      "Bytes": 1724012,
+      "Width": 1586,
+      "Height": 992,
+      "Sha256": "3392916A520B2358A0851A49047C4576B58E10FC7C940D067582D46764551F9F"
     }
   ],
-  "HumanReview": "Reviewed inline: character/medal/frame continuity, date difference 1039→1939, label capitalization, disabled confirmation, product lineage and 86/72/7 annotations. Illustrative geometry is not production proof. Revision 0.2 adds a quick prompt page with editable reusable template and independent final prompt; no six-step gate or automatic image submission."
+  "HumanReview": "Reviewed inline: character/medal/frame continuity, date difference 1039→1939, label capitalization, disabled confirmation, product lineage and 86/72/7 annotations. Illustrative geometry is not production proof. Revision 0.2 adds a quick prompt page with editable reusable template and independent final prompt; no six-step gate or automatic image submission. Revision 0.3 shows inline person/layout photo pickers, matching empty form slots, a same-draft detail-mode transition and a copy-draft action while two photo roles remain unfilled. No runtime behavior is asserted."
 }

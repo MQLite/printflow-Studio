@@ -5,7 +5,9 @@
   "rendering": {
     "optionalDateLines": "Omit the whole date line when its field is blank or set to not displayed.",
     "manualFinalText": "Copied verbatim; edits do not overwrite the template.",
-    "noCodeEvaluation": true
+    "noCodeEvaluation": true,
+    "imageReferenceSlots": "Render an inline photo-selection control for the reference variable; share its stable binding with the form photo card and detailed mode. Export role/upload-name text plus attachment list, not controls or local paths.",
+    "quickToDetailed": "Continue the same draft with all known fields, image bindings and verbatim manual final text. Unconfirmed detailed items remain unconfirmed."
   },
   "templates": [
     {
@@ -20,12 +22,18 @@
         {
           "key": "人物参考",
           "required": false,
-          "default": null
+          "default": null,
+          "inputType": "image-reference",
+          "slotId": "person-photo",
+          "pickerLabel": "选择人物照片"
         },
         {
           "key": "版式参考",
           "required": false,
-          "default": null
+          "default": null,
+          "inputType": "image-reference",
+          "slotId": "layout-reference",
+          "pickerLabel": "选择版式参考图片"
         },
         {
           "key": "出生日期行",
@@ -62,12 +70,18 @@
         {
           "key": "人物参考",
           "required": false,
-          "default": null
+          "default": null,
+          "inputType": "image-reference",
+          "slotId": "person-photo",
+          "pickerLabel": "选择人物照片"
         },
         {
           "key": "版式参考",
           "required": false,
-          "default": null
+          "default": null,
+          "inputType": "image-reference",
+          "slotId": "layout-reference",
+          "pickerLabel": "选择版式参考图片"
         },
         {
           "key": "出生日期行",
@@ -104,7 +118,10 @@
         {
           "key": "待修改图稿",
           "required": false,
-          "default": null
+          "default": null,
+          "inputType": "image-reference",
+          "slotId": "edit-source",
+          "pickerLabel": "选择待修改图稿"
         },
         {
           "key": "原文字",
