@@ -1,0 +1,31 @@
+{
+  "Date": "2026-11-03",
+  "Timezone": "Pacific/Auckland",
+  "Tool": "built-in image_gen",
+  "Status": "concept-only; pending user review",
+  "SyntheticAssets": true,
+  "Images": [
+    {
+      "File": "01-preserve-person-and-decor.png",
+      "Bytes": 1639143,
+      "Width": 1586,
+      "Height": 992,
+      "Sha256": "E7438DBC8C333D7B1505108C8380BD20B9D3FAC4EC72034BA7455223155A8FFE"
+    },
+    {
+      "File": "02-verify-name-and-dates.png",
+      "Bytes": 1730817,
+      "Width": 1586,
+      "Height": 992,
+      "Sha256": "747F35905A11F105E6BA19D5E56E8FF3580362F9EC028D4ADFC9E5D058A2172F"
+    },
+    {
+      "File": "03-convert-tshirt-to-badge.png",
+      "Bytes": 1800769,
+      "Width": 1585,
+      "Height": 992,
+      "Sha256": "FBE53643BE13E8F0BF7F6C2300C2AACBA36271CBE6EDEE2DD4EE3FC948324460"
+    }
+  ],
+  "HumanReview": "Reviewed inline: character/medal/frame continuity, date difference 1039→1939, label capitalization, disabled confirmation, product lineage and 86/72/7 annotations. Illustrative geometry is not production proof."
+}
