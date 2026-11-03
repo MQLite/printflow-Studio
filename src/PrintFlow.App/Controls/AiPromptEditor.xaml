@@ -1,0 +1,8 @@
+<UserControl x:Class="PrintFlow.App.Controls.AiPromptEditor"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <RichTextBox x:Name="Editor" AcceptsReturn="True" AcceptsTab="False"
+                 IsDocumentEnabled="True" AllowDrop="False" VerticalScrollBarVisibility="Auto"
+                 HorizontalScrollBarVisibility="Disabled" Padding="8"
+                 SpellCheck.IsEnabled="False" />
+</UserControl>

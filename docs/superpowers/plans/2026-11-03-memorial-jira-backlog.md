@@ -8,6 +8,8 @@
 
 后续A3 / SCRUM-11221 已实现：稳定图片槽位、受管快照、同句柄核验预览、当前引用纯文本与附件清单；独立审查4项Important已RED→GREEN修复，最终636项回归通过，详见[A3实施记录](../../codex/memorial-authoring/SCRUM-11221.md)。移交In Review，未关闭任务；A4–A7及B1–B5仍待实施。
 
+后续A4 / SCRUM-11222 已实现：可编辑全文、稳定内嵌引用、键盘激活、精确文字粘贴、撤销/重做与宿主标签更新；独立审查1项P1已RED→GREEN修复并复审通过，最终750项分组测试通过，详见[A4实施记录](../../codex/memorial-authoring/SCRUM-11222.md)。本地交付可供Review，未修改Jira状态或关闭任务；A5–A7及B1–B5仍待实施。
+
 用户已批准实施计划，并明确要求“请据此计划添加到Jira Tasks & Epics”。本轮使用 Atlassian spec-to-backlog 工作流在既有 SCRUM 项目创建2个Epic和12个Task，没有启动产品实施或推送/发布。负责人、Sprint、故事点未设置；全部工单回读为To Do。
 
 ## 来源与追踪

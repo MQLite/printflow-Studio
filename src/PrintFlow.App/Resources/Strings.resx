@@ -1436,4 +1436,5 @@
   <data name="Session_SaveReviewResult" xml:space="preserve"><value>View reviewed comparison</value></data>
   <data name="Session_SaveHideReview" xml:space="preserve"><value>Return to result preview</value></data>
   <data name="Session_SaveCurrentResult" xml:space="preserve"><value>Current result preview</value></data>
+  <data name="AiPrompt_ChoosePhoto" xml:space="preserve"><value>Choose photo</value></data>
 </root>

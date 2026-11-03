@@ -138,20 +138,22 @@ Task<OperationResult<DecodedPreview>> IAiAuthoringAssetPreview.LoadAsync(Guid ow
 
 ### Task A4: 可编辑全文与内嵌选图控件
 
+2026-11-03 实施记录：[SCRUM-11222 / A4](../../codex/memorial-authoring/SCRUM-11222.md)。13项离屏编辑测试、最终750项分组测试通过；locked restore与串行Release build通过。独立审查1项P1已RED→GREEN修复并复审通过，无剩余发现。控件通过事件交给宿主选图，A5页面/持久化接入尚未实施。
+
 **Files:** Create `src/PrintFlow.App/Controls/AiPromptEditor.xaml`、`.xaml.cs`及`AiPromptEditorProjection.cs`; Test `tests/PrintFlow.Tests/Integration/Ui/AiPromptEditorTests.cs`。
 
 **Interfaces:** Consumes A1文档；Produces dependency property `Document:AiPromptDocument`、`ImageReferenceInvoked`（SlotId事件）及 `DocumentEdited`（新Document事件），供A5使用。控件不自行保存、选文件或组装模板。
 
-- [ ] **Step 1 — RED tests:** `Typing_and_paste_preserve_text_around_reference_nodes`、`Removing_token_emits_reference_removal_without_choosing_another_image`、`Keyboard_can_activate_both_photo_slots`。断言实际编辑后的模型与复制结果：
+- [x] **Step 1 — RED tests:** `Typing_and_paste_preserve_text_around_reference_nodes`、`Removing_token_emits_reference_removal_without_choosing_another_image`、`Keyboard_can_activate_both_photo_slots`。断言实际编辑后的模型与复制结果：
   ```csharp
   editedText.ShouldBe("  ʻĀna\r\n陈 {{姓名}}  ");
   invokedSlot.ShouldBe("layout-reference");
   plainTypedImage3.ShouldBeOfType<AiTextPart>();
   ```
-- [ ] **Step 2:** 在安全UI过滤器下单独运行该类，预期失败；不启动真实桌面输入。
-- [ ] **Step 3:** RichTextBox/FlowDocument只投影已知Text/Image节点，引用用可聚焦按钮；禁止把TextRange.Text附带的末尾换行回写数据，也不能正则重建所有引用。实现caret、粘贴、撤销/重做的节点编辑映射；模板变量在最终文档中不是可执行语法。
-- [ ] **Step 4:** 字符、引用身份、键盘焦点、重绑定循环和撤销/重做测试0失败；绑定错误为0。
-- [ ] **Step 5:** Commit `feat(ui): edit prompt text with actionable image-reference tokens`。
+- [x] **Step 2:** 在安全UI过滤器下单独运行该类，预期失败；不启动真实桌面输入。
+- [x] **Step 3:** RichTextBox/FlowDocument只投影已知Text/Image节点，引用用可聚焦按钮；禁止把TextRange.Text附带的末尾换行回写数据，也不能正则重建所有引用。实现caret、粘贴、撤销/重做的节点编辑映射；模板变量在最终文档中不是可执行语法。
+- [x] **Step 4:** 字符、引用身份、键盘焦点、重绑定循环和撤销/重做测试0失败；绑定错误为0。
+- [x] **Step 5:** Commit `feat(ui): edit prompt text with actionable image-reference tokens`。
 
 ### Task A5: 快速页与模板编辑
 

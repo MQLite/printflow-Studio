@@ -20,6 +20,7 @@ namespace PrintFlow.App.Resources;
 /// </remarks>
 internal static class Strings
 {
+    internal static string AiPrompt_ChoosePhoto => Get(nameof(AiPrompt_ChoosePhoto));
     internal static string Session_HistoryHeading => Get(nameof(Session_HistoryHeading));
     internal static string Session_HistoryNotice => Get(nameof(Session_HistoryNotice));
     internal static string Session_HistoryOpen => Get(nameof(Session_HistoryOpen));
