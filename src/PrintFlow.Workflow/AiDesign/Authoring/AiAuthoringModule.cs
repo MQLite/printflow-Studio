@@ -32,6 +32,38 @@ public sealed partial class AiAuthoringModule(IAiAuthoringDraftStore store, AiTe
             AiAuthoringDraft next;
             switch (edit)
             {
+                case AiAuthoringEdit.SetDateInterpretation interpretation:
+                    if (interpretation.Format is null || interpretation.Format.Length > 0 && !AiDetailedReview.DateFormats.Contains(interpretation.Format, StringComparer.Ordinal) ||
+                        !draft.TemplateSnapshot.Fields.Any(x => x.Key == interpretation.FieldKey && AiAuthoringConfirmationRules.IsDate(x))) return Fail("Choose an explicit supported date format.");
+                    var dateField = draft.TemplateSnapshot.Fields.Single(x => x.Key == interpretation.FieldKey);
+                    next = draft with { Fields = new Dictionary<string, string>(draft.Fields, StringComparer.Ordinal) { [AiTemplateMetadata.FormatKey(draft.TemplateSnapshot, dateField)] = interpretation.Format } };
+                    break;
+                case AiAuthoringEdit.SetPreservation preservation:
+                    if (preservation.Rule is not { } rule || !AiDetailedReview.ActiveAssets(draft).Any(x => x.Id == rule.AssetId))
+                        return Fail("An active image is required for preservation permissions.");
+                    next = draft with { Preservation = draft.Preservation.Where(x => x.AssetId != rule.AssetId).Append(rule).ToArray() };
+                    break;
+                case AiAuthoringEdit.ConfirmField confirmation:
+                    if (!AiAuthoringConfirmationRules.CanConfirm(draft, confirmation.Key) || AiAuthoringConfirmationRules.ContentHash(draft, confirmation.Key) != confirmation.ExpectedContentHash)
+                        return Fail("The displayed content is missing, invalid or changed; review it again.");
+                    var preservedAsset = AiDetailedReview.ActiveAssets(draft).SingleOrDefault(x => AiAuthoringConfirmationRules.PreservationKey(x.Id) == confirmation.Key);
+                    if (preservedAsset is not null)
+                    {
+                        if (attachments is null) return Fail("Verified image reads are unavailable.");
+                        var verifiedPreservation = await attachments.VerifyImagesAsync(id, [preservedAsset], ct);
+                        if (verifiedPreservation.IsFailure) return OperationResult.Fail<AiAuthoringDraft>(verifiedPreservation.Failure);
+                    }
+                    next = draft with { Confirmations = new Dictionary<string, string>(draft.Confirmations, StringComparer.Ordinal) { [confirmation.Key] = confirmation.ExpectedContentHash } };
+                    break;
+                case AiAuthoringEdit.AcknowledgeDocumentReconciliation reconciliation:
+                    if (AiAuthoringConfirmationRules.DocumentHash(draft.FinalDocument) != reconciliation.ExpectedDocumentHash || AiAuthoringConfirmationRules.FieldsHash(draft) != reconciliation.ExpectedFieldsHash)
+                        return Fail("The document or fields changed; compare both sides again.");
+                    next = draft with { Confirmations = new Dictionary<string, string>(draft.Confirmations, StringComparer.Ordinal)
+                    {
+                        [AiAuthoringConfirmationRules.ReconciledDocument] = reconciliation.ExpectedDocumentHash,
+                        [AiAuthoringConfirmationRules.ReconciledFields] = reconciliation.ExpectedFieldsHash
+                    } };
+                    break;
                 case AiAuthoringEdit.RestoreRevision restore:
                     var history = await store.ReadHistoryAsync(id, ct);
                     if (history.IsFailure) return OperationResult.Fail<AiAuthoringDraft>(history.Failure);
@@ -48,7 +80,7 @@ public sealed partial class AiAuthoringModule(IAiAuthoringDraftStore store, AiTe
                     break;
                 case AiAuthoringEdit.SetField field:
                     if (field.Value is null || !draft.TemplateSnapshot.Fields.Any(x => x.Kind != AiTemplateFieldKind.ImageReference && (x.Key == field.Key ||
-                        x.Kind == AiTemplateFieldKind.OptionalDateLine && (x.Key + ".label" == field.Key || x.Key + ".format" == field.Key))))
+                        AiAuthoringConfirmationRules.IsDate(x) && (AiTemplateMetadata.LabelKey(draft.TemplateSnapshot, x) == field.Key || AiTemplateMetadata.FormatKey(draft.TemplateSnapshot, x) == field.Key))))
                         return Fail("Unknown authoring field.");
                     var fields = new Dictionary<string, string>(draft.Fields, StringComparer.Ordinal) { [field.Key] = field.Value };
                     next = draft with { Fields = fields, NeedsFieldReconcile = draft.NeedsFieldReconcile || draft.IsManuallyEdited };
@@ -94,7 +126,7 @@ public sealed partial class AiAuthoringModule(IAiAuthoringDraftStore store, AiTe
             }
             // Every prior successful state already has an immutable snapshot. Publish the new
             // pointer only after the next snapshot exists; a failed save cannot erase the old one.
-            next = AiAuthoringSnapshots.Draft(next);
+            next = AiAuthoringSnapshots.Draft(AiAuthoringConfirmationRules.Refresh(next));
             var active = ActiveAssets(next);
             if (active.Count > AiDesignAttachmentLimits.MaximumFiles || active.Any(x => x.ByteLength > AiDesignAttachmentLimits.ImageBytes || !IsImageMetadata(x)) ||
                 active.Sum(x => x.ByteLength) > AiDesignAttachmentLimits.TotalBytes) return Fail("Active image attachment limit exceeded.");

@@ -1,0 +1,47 @@
+using PrintFlow.App.Resources;
+namespace PrintFlow.App.Views.AiDesign;
+public static class AiDetailedLabels
+{
+    public static string Detailed => Strings.AiDetail_Detailed;
+    public static string FirstPending => Strings.AiDetail_FirstPending;
+    public static string Step1 => Strings.AiDetail_Step1;
+    public static string Step2 => Strings.AiDetail_Step2;
+    public static string Step3 => Strings.AiDetail_Step3;
+    public static string Step4 => Strings.AiDetail_Step4;
+    public static string Step5 => Strings.AiDetail_Step5;
+    public static string Step6 => Strings.AiDetail_Step6;
+    public static string Current => Strings.AiDetail_Current;
+    public static string Confirmed => Strings.AiDetail_Confirmed;
+    public static string Pending => Strings.AiDetail_Pending;
+    public static string Omitted => Strings.AiDetail_Omitted;
+    public static string UnusualYear => Strings.AiDetail_UnusualYear;
+    public static string FormatRequired => Strings.AiDetail_FormatRequired;
+    public static string DateOrder => Strings.AiDetail_DateOrder;
+    public static string InvalidDate => Strings.AiDetail_InvalidDate;
+    public static string PreservationConflict => Strings.AiDetail_PreservationConflict;
+    public static string ModeNotice => Strings.AiDetail_ModeNotice;
+    public static string ReferencesNotice => Strings.AiDetail_ReferencesNotice;
+    public static string PreserveNotice => Strings.AiDetail_PreserveNotice;
+    public static string Keep => Strings.AiDetail_Keep;
+    public static string Move => Strings.AiDetail_Move;
+    public static string Scale => Strings.AiDetail_Scale;
+    public static string Crop => Strings.AiDetail_Crop;
+    public static string Redraw => Strings.AiDetail_Redraw;
+    public static string RedrawNotice => Strings.AiDetail_RedrawNotice;
+    public static string ConfirmPreservation => Strings.AiDetail_ConfirmPreservation;
+    public static string ConfirmText => Strings.AiDetail_ConfirmText;
+    public static string SavedInput => Strings.AiDetail_SavedInput;
+    public static string ProposedText => Strings.AiDetail_ProposedText;
+    public static string DateFormat => Strings.AiDetail_DateFormat;
+    public static string DateMeaning => Strings.AiDetail_DateMeaning;
+    public static string CompareNotice => Strings.AiDetail_CompareNotice;
+    public static string Acknowledge => Strings.AiDetail_Acknowledge;
+    public static string TextPreviewNotice => Strings.AiDetail_TextPreviewNotice;
+    public static string CapabilityMissing => Strings.AiDetail_CapabilityMissing;
+    public static string PreviewLayout => Strings.AiDetail_PreviewLayout;
+    public static string Next => Strings.AiDetail_Next;
+    public static string Tshirt => Strings.AiDetail_Tshirt;
+    public static string Badge => Strings.AiDetail_Badge;
+    public static string TextChange => Strings.AiDetail_TextChange;
+    public static string SummaryNotice => Strings.AiDetail_SummaryNotice;
+}

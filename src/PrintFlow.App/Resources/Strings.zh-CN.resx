@@ -1500,4 +1500,46 @@
   <data name="AiPrompt_FieldsChangedNotice" xml:space="preserve"><value>信息已变，可重新生成提示词。</value></data>
   <data name="AiPrompt_SaveInstanceTemplate" xml:space="preserve"><value>将本次另存为模板</value></data>
   <data name="AiPrompt_InstancePreviewNotice" xml:space="preserve"><value>此预览保留本次全文，并将图片引用与能明确匹配的已知字段还原为变量。请逐字核对：无法匹配或手改过的客户内容须自行换回变量后确认。客户照片与本次字段值不成为模板默认值。</value></data>
+  <data name="AiDetail_Detailed" xml:space="preserve"><value>详细核对</value></data>
+  <data name="AiDetail_FirstPending" xml:space="preserve"><value>首个待核对步骤</value></data>
+  <data name="AiDetail_Step1" xml:space="preserve"><value>1  选择任务</value></data>
+  <data name="AiDetail_Step2" xml:space="preserve"><value>2  选择参考</value></data>
+  <data name="AiDetail_Step3" xml:space="preserve"><value>3  确认保留</value></data>
+  <data name="AiDetail_Step4" xml:space="preserve"><value>4  核对文字</value></data>
+  <data name="AiDetail_Step5" xml:space="preserve"><value>5  设置成品</value></data>
+  <data name="AiDetail_Step6" xml:space="preserve"><value>6  检查描述</value></data>
+  <data name="AiDetail_Current" xml:space="preserve"><value>当前</value></data>
+  <data name="AiDetail_Confirmed" xml:space="preserve"><value>已核对</value></data>
+  <data name="AiDetail_Pending" xml:space="preserve"><value>待核对</value></data>
+  <data name="AiDetail_Omitted" xml:space="preserve"><value>不显示，未提供日期</value></data>
+  <data name="AiDetail_UnusualYear" xml:space="preserve"><value>年份异常，请核对来源后单独确认；保留原值，不自动更正。</value></data>
+  <data name="AiDetail_FormatRequired" xml:space="preserve"><value>请选择来源日期格式，不会自动推断日/月顺序。</value></data>
+  <data name="AiDetail_DateOrder" xml:space="preserve"><value>出生日期晚于离世日期，请修正或清空对应日期后确认。</value></data>
+  <data name="AiDetail_InvalidDate" xml:space="preserve"><value>此日期不符合所选格式或不是有效日历日期。</value></data>
+  <data name="AiDetail_PreservationConflict" xml:space="preserve"><value>原样保留与允许重绘冲突，请明确选择处理权限。</value></data>
+  <data name="AiDetail_ModeNotice" xml:space="preserve"><value>快速与详细使用同一草稿，全文与照片身份共用。</value></data>
+  <data name="AiDetail_ReferencesNotice" xml:space="preserve"><value>请补齐每个图片引用，或明确删除不需要的引用。此处只选择受管草稿文件，不表示已上传。</value></data>
+  <data name="AiDetail_PreserveNotice" xml:space="preserve"><value>建议权限不等于已确认，请对照原图逐份确认。</value></data>
+  <data name="AiDetail_Keep" xml:space="preserve"><value>原样保留内容</value></data>
+  <data name="AiDetail_Move" xml:space="preserve"><value>允许移动</value></data>
+  <data name="AiDetail_Scale" xml:space="preserve"><value>允许等比缩放</value></data>
+  <data name="AiDetail_Crop" xml:space="preserve"><value>允许裁切</value></data>
+  <data name="AiDetail_Redraw" xml:space="preserve"><value>允许重绘</value></data>
+  <data name="AiDetail_RedrawNotice" xml:space="preserve"><value>重绘可能改变人物面部或饰物；此处记录明确权限，不保证保真。</value></data>
+  <data name="AiDetail_ConfirmPreservation" xml:space="preserve"><value>已对照此图核对保留范围与权限</value></data>
+  <data name="AiDetail_ConfirmText" xml:space="preserve"><value>已逐字核对本项文字与解释</value></data>
+  <data name="AiDetail_SavedInput" xml:space="preserve"><value>本次核对开始时的已保存输入</value></data>
+  <data name="AiDetail_ProposedText" xml:space="preserve"><value>拟用文字（保留原文）</value></data>
+  <data name="AiDetail_DateFormat" xml:space="preserve"><value>来源日期格式</value></data>
+  <data name="AiDetail_DateMeaning" xml:space="preserve"><value>日期解释</value></data>
+  <data name="AiDetail_CompareNotice" xml:space="preserve"><value>请并排核对左侧字段与右侧手改全文。确认两侧已核对，不会代替姓名、日期或素材的逐项确认。</value></data>
+  <data name="AiDetail_Acknowledge" xml:space="preserve"><value>已核对当前字段与这份全文</value></data>
+  <data name="AiDetail_TextPreviewNotice" xml:space="preserve"><value>此处仅展示文字原文，排版、字体缺字与成品布局仍需实际合成预览核验。</value></data>
+  <data name="AiDetail_CapabilityMissing" xml:space="preserve"><value>实际版式预览、安全区核验与严格合成尚未接入。历史预设仅作为待确认的成品意图，可保存或复制需求草稿交接。</value></data>
+  <data name="AiDetail_PreviewLayout" xml:space="preserve"><value>版式预览暂不可用</value></data>
+  <data name="AiDetail_Next" xml:space="preserve"><value>下一步</value></data>
+  <data name="AiDetail_Tshirt" xml:space="preserve"><value>纪念T恤</value></data>
+  <data name="AiDetail_Badge" xml:space="preserve"><value>圆形纪念徽章</value></data>
+  <data name="AiDetail_TextChange" xml:space="preserve"><value>仅修改文字</value></data>
+  <data name="AiDetail_SummaryNotice" xml:space="preserve"><value>这是需求草稿，逐项待核对内容与版式能力缺口仍保留；保存或复制不等于生产文件已批准。</value></data>
 </root>

@@ -176,6 +176,8 @@ Task<OperationResult<DecodedPreview>> IAiAuthoringAssetPreview.LoadAsync(Guid ow
 
 ### Task A6: 同稿切详细、文字与保留确认
 
+2026-11-03 实施记录：[SCRUM-11224 / A6](../../codex/memorial-authoring/SCRUM-11224.md)。同稿快速/详细切换、六步核对、精确文字与素材权限哈希确认、双哈希手改核对、日期解释与异常年份提醒已实现。独立诊断/审查发现的1项P1与3项P2均已复现、修复并复审通过；最终794项分组测试通过（24项新A6用例）。仅本地任务提交，未推送、合并或修改Jira；A7/B仍待实施，真实版式/严格合成能力保持不可用。
+
 **Files:** Create Workflow `Authoring/{AiDetailedReview,AiAuthoringConfirmationRules}.cs`; Create VM `.Detailed.cs`; Create View `DetailedPromptView.xaml`; Tests `Unit/AiDesign/Authoring/DetailedConfirmationTests.cs`、`Integration/Ui/AiModeHandoffTests.cs`。
 
 **Interfaces:** Consumes A1–A5；Adds edits `SetPreservation(AiPreservationRule Rule)`、`ConfirmField(string Key,string ExpectedContentHash)`、`SetDateInterpretation(string FieldKey,string Format)`、`AcknowledgeDocumentReconciliation(string ExpectedDocumentHash,string ExpectedFieldsHash)`；Produces `AiDetailedReview.GetFirstIncompleteStep(AiAuthoringDraft):int`（1..6）、`ValidateDates(string? birth,string? death,string birthFormat,string deathFormat):IReadOnlyList<AiAuthoringIssue>`。姓名确认key=`name`，日期=`birth-date`/`death-date`；标签/解释变化使对应hash失效。模板变量改名后通过Semantic找到对应值；图片保留确认绑定源内容hash和权限，不依赖图1/图2显示序号。Reconciliation仅在用户并排核对且两个hash仍匹配时解除冲突标记，不解析手改全文，也不代替任何逐项确认；任一侧再改即重新待核对。

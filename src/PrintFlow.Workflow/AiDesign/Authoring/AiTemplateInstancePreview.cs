@@ -28,7 +28,7 @@ public static class AiTemplateInstancePreview
             candidates.Add((value, definition.Key));
             if (definition.Kind == AiTemplateFieldKind.OptionalDateLine)
             {
-                string? label = draft.Fields.TryGetValue(definition.Key + ".label", out var enteredLabel) ? enteredLabel : definition.DateLabel;
+                string? label = draft.Fields.TryGetValue(AiTemplateMetadata.LabelKey(draft.TemplateSnapshot, definition), out var enteredLabel) ? enteredLabel : definition.DateLabel;
                 if (!string.IsNullOrEmpty(label)) candidates.Add((label + ": " + value, definition.Key));
             }
         }

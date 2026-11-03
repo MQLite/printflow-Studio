@@ -10,15 +10,17 @@
   <ResourceDictionary>
    <ResourceDictionary.MergedDictionaries><ResourceDictionary Source="/PrintFlow.App;component/Themes/WpfUiTheme.xaml" /></ResourceDictionary.MergedDictionaries>
    <BooleanToVisibilityConverter x:Key="BoolVisibility" />
+   <DataTemplate x:Key="QuickPage"><local:QuickPromptView/></DataTemplate>
+   <DataTemplate x:Key="DetailedPage"><local:DetailedPromptView/></DataTemplate>
   </ResourceDictionary>
  </UserControl.Resources>
  <Grid Margin="20">
   <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
   <StackPanel Margin="0,0,0,14">
    <TextBlock Text="{x:Static r:AiPromptLabels.AiPrompt_Title}" FontSize="26" FontWeight="SemiBold"/>
-   <TextBlock Text="{x:Static r:AiPromptLabels.AiPrompt_DetailPending}" Margin="0,6,0,0" TextWrapping="Wrap"/>
+   <WrapPanel Margin="0,6,0,0"><Button Content="{x:Static r:AiPromptLabels.AiPrompt_Quick}" Command="{Binding SwitchToQuickCommand}" Padding="12,6" Margin="0,0,8,0" IsEnabled="{Binding CanEdit}"/><Button Content="{x:Static r:AiDetailedLabels.Detailed}" Command="{Binding SwitchToDetailedCommand}" Padding="12,6" Margin="0,0,12,0" IsEnabled="{Binding CanEdit}"/><TextBlock Text="{x:Static r:AiDetailedLabels.ModeNotice}" VerticalAlignment="Center" TextWrapping="Wrap"/></WrapPanel>
   </StackPanel>
-  <local:QuickPromptView Grid.Row="1"/>
+  <ContentControl Grid.Row="1" Content="{Binding}"><ContentControl.Style><Style TargetType="ContentControl"><Setter Property="ContentTemplate" Value="{StaticResource QuickPage}"/><Style.Triggers><DataTrigger Binding="{Binding IsDetailed}" Value="True"><Setter Property="ContentTemplate" Value="{StaticResource DetailedPage}"/></DataTrigger></Style.Triggers></Style></ContentControl.Style></ContentControl>
   <Grid Grid.Row="2" Margin="0,12,0,0">
    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
    <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">

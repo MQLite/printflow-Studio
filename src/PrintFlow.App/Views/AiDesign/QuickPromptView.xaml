@@ -48,7 +48,7 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
      <StackPanel>
       <TextBlock Text="{x:Static r:AiPromptLabels.AiPrompt_NoDate}" TextWrapping="Wrap" Margin="0,0,0,10"/>
-      <ItemsControl ItemsSource="{Binding Fields}"><ItemsControl.ItemTemplate><DataTemplate>
+      <ItemsControl ItemsSource="{Binding QuickFields}"><ItemsControl.ItemTemplate><DataTemplate>
        <StackPanel><TextBlock Text="{Binding Label}" TextWrapping="Wrap"/><TextBox Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="{Binding Label}" AcceptsReturn="True" TextWrapping="Wrap" MaxHeight="110" VerticalScrollBarVisibility="Auto"/></StackPanel>
       </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
       <TextBlock Text="{x:Static r:AiPromptLabels.AiPrompt_Photos}" FontWeight="SemiBold" Margin="0,8,0,8"/>

@@ -69,7 +69,7 @@ public static partial class PromptDocumentComposer
                     {
                         if (field.Kind == AiTemplateFieldKind.OptionalDateLine)
                         {
-                            string? label = values.TryGetValue(key + ".label", out string? overriddenLabel)
+                            string? label = values.TryGetValue(AiTemplateMetadata.LabelKey(template, field), out string? overriddenLabel)
                                 ? overriddenLabel : field.DateLabel;
                             if (!string.IsNullOrEmpty(label)) text.Append(label).Append(": ");
                         }

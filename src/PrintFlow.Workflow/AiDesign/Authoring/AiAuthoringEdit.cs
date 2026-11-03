@@ -4,6 +4,10 @@ namespace PrintFlow.Workflow.AiDesign.Authoring;
 
 public abstract record AiAuthoringEdit
 {
+    public sealed record SetPreservation(AiPreservationRule Rule) : AiAuthoringEdit;
+    public sealed record ConfirmField(string Key, string ExpectedContentHash) : AiAuthoringEdit;
+    public sealed record SetDateInterpretation(string FieldKey, string Format) : AiAuthoringEdit;
+    public sealed record AcknowledgeDocumentReconciliation(string ExpectedDocumentHash, string ExpectedFieldsHash) : AiAuthoringEdit;
     public sealed record RestoreRevision(long Revision) : AiAuthoringEdit;
     public sealed record SetField(string Key, string Value) : AiAuthoringEdit;
     public sealed record ReplaceDocument(AiPromptDocument Document) : AiAuthoringEdit;

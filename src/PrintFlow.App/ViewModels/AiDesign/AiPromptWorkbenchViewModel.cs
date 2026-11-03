@@ -55,7 +55,7 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject
     public bool IsBusy { get => busy; private set { SetProperty(ref busy, value); OnPropertyChanged(nameof(CanEdit)); } }
     public bool CanEdit => !IsBusy;
     public bool HasUnsavedChanges => Draft is not null && (!Document.Parts.SequenceEqual(Draft.FinalDocument.Parts) ||
-        Fields.Any(x => x.Value != Draft.Fields.GetValueOrDefault(x.Key, x.InitialValue)));
+        Fields.Any(x => x.Value != Draft.Fields.GetValueOrDefault(x.Key, x.InitialValue)) || HasUnsavedPreservationChanges);
     public string? Error { get => error; private set => SetProperty(ref error, value); }
     public string? Status { get => status; private set => SetProperty(ref status, value); }
     public string? PromptNotice
@@ -94,6 +94,7 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject
     {
         this.module = module; this.catalog = catalog; this.preview = preview; this.picker = picker; this.clipboard = clipboard;
         InitializeTemplateCommands();
+        InitializeDetailedCommands();
         ComposeCommand = new AsyncRelayCommand(() => ComposeAsync(false, default));
         CopyCommand = new AsyncRelayCommand(CopyAsync);
         SaveDraftCommand = new AsyncRelayCommand(async () => { await FlushAsync(default); });
@@ -147,8 +148,9 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject
     private bool IsCurrent(long capturedEpoch) => active && epoch == capturedEpoch;
     private void Edited()
     {
-        editGeneration++; Status = null; ClearPending(); OnPropertyChanged(nameof(HasUnsavedChanges)); OnPropertyChanged(nameof(PromptNotice));
+        editGeneration++; Status = null; ClearPending(); OnPropertyChanged(nameof(HasUnsavedChanges)); OnPropertyChanged(nameof(PromptNotice)); NotifyDetailed();
     }
+    internal void PreservationEdited() => Edited();
     private void FieldEdited(object? sender, PropertyChangedEventArgs e) { if (e.PropertyName == nameof(AiPromptFieldInput.Value)) Edited(); }
     private void ClearPending() { IsChangePending = false; pendingTemplate = null; pendingRestore = null; }
     private static OperationResult<AiAuthoringDraft> Refused() => OperationResult.Fail<AiAuthoringDraft>(FailureCode.PreconditionNotMet, "Draft is unavailable or changed; retry the action.");
@@ -165,6 +167,7 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject
         long generation = editGeneration, capturedEpoch = epoch;
         var capturedDocument = Document;
         var fields = Fields.Select(x => (x.Key, x.Value, x.InitialValue)).ToArray();
+        var rules = PreservationChecks.Where(x => x.IsEdited).Select(x => x.Rule).ToArray();
         if (!Draft.FinalDocument.Parts.SequenceEqual(capturedDocument.Parts))
         {
             var saved = await ApplyCoreAsync(new AiAuthoringEdit.ReplaceDocument(capturedDocument), ct);
@@ -174,12 +177,22 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject
         {
             if (!IsCurrent(capturedEpoch)) return Refused();
             if (Draft.Fields.GetValueOrDefault(key, initialValue) == value) continue;
-            var saved = await ApplyCoreAsync(new AiAuthoringEdit.SetField(key, value), ct);
+            var dateFormat = Fields.SingleOrDefault(x => x.Key == key && x.IsDateFormat);
+            AiAuthoringEdit change = dateFormat is not null ? new AiAuthoringEdit.SetDateInterpretation(dateFormat.DateFieldKey!, value) : new AiAuthoringEdit.SetField(key, value);
+            var saved = await ApplyCoreAsync(change, ct);
+            if (saved.IsFailure) return saved;
+        }
+        foreach (var rule in rules)
+        {
+            if (!IsCurrent(capturedEpoch)) return Refused();
+            if (Draft.Preservation.Contains(rule)) continue;
+            var saved = await ApplyCoreAsync(new AiAuthoringEdit.SetPreservation(rule), ct);
             if (saved.IsFailure) return saved;
         }
         OnPropertyChanged(nameof(HasUnsavedChanges));
         if (!IsCurrent(capturedEpoch) || generation != editGeneration) { Error = Strings.AiPrompt_Changed; return Refused(); }
         RefreshExport(); Status = Strings.AiPrompt_Saved;
+        NotifyDetailed();
         return OperationResult.Ok(Draft);
     }
     private async Task<OperationResult<AiAuthoringDraft>> ApplyCoreAsync(AiAuthoringEdit edit, CancellationToken ct)
@@ -216,8 +229,15 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject
             input.PropertyChanged += FieldEdited; Fields.Add(input);
             if (definition.Kind == AiTemplateFieldKind.OptionalDateLine)
             {
-                var label = new AiPromptFieldInput(definition with { Key = definition.Key + ".label" }, value.Fields.GetValueOrDefault(definition.Key + ".label", definition.DateLabel ?? ""));
+                string labelKey = AiTemplateMetadata.LabelKey(value.TemplateSnapshot, definition);
+                var label = new AiPromptFieldInput(definition with { Key = labelKey }, value.Fields.GetValueOrDefault(labelKey, definition.DateLabel ?? ""), false, definition.Key);
                 label.PropertyChanged += FieldEdited; Fields.Add(label);
+            }
+            if (AiAuthoringConfirmationRules.IsDate(definition))
+            {
+                string formatKey = AiTemplateMetadata.FormatKey(value.TemplateSnapshot, definition);
+                var format = new AiPromptFieldInput(definition with { Key = formatKey }, value.Fields.GetValueOrDefault(formatKey, ""), true, definition.Key);
+                format.PropertyChanged += FieldEdited; Fields.Add(format);
             }
         }
         Photos.Clear(); ExpandedPhoto = null; OnPropertyChanged(nameof(ExpandedPhoto));
@@ -228,6 +248,7 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject
             Photos.Add(new(slot, value.Assets.SingleOrDefault(x => x.Id == assetId), value.Assets));
         }
         RefreshExport(); OnPropertyChanged(nameof(HasUnsavedChanges)); OnPropertyChanged(nameof(PromptNotice));
+        RefreshDetailed();
         foreach (var photo in Photos.ToArray())
         {
             if (photo.Asset is not { } asset) continue;
@@ -261,11 +282,11 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject
     }
 }
 
-public sealed class AiPromptFieldInput(AiTemplateField definition, string initialValue) : ObservableObject
+public sealed class AiPromptFieldInput(AiTemplateField definition, string initialValue, bool isDateFormat = false, string? dateFieldKey = null) : ObservableObject
 {
     private string value = initialValue;
     public string Key => definition.Key;
-    public string Label => definition.Key.EndsWith(".label", StringComparison.Ordinal) ? definition.Key[..^6] + " · " + Strings.AiPrompt_DateLabel : definition.Semantic switch
+    public string Label => dateFieldKey is not null && !isDateFormat ? dateFieldKey + " · " + Strings.AiPrompt_DateLabel : definition.Semantic switch
     {
         AiTemplateSemantic.Name => Strings.AiPrompt_NameField,
         AiTemplateSemantic.BirthDate => Strings.AiPrompt_BirthField,
@@ -273,6 +294,8 @@ public sealed class AiPromptFieldInput(AiTemplateField definition, string initia
         _ => definition.Key
     };
     public string InitialValue { get; } = initialValue;
+    public bool IsDateFormat => isDateFormat;
+    public string? DateFieldKey => dateFieldKey;
     public string Value { get => value; set => SetProperty(ref this.value, value); }
 }
 

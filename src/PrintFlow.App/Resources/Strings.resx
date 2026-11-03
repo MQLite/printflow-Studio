@@ -1510,4 +1510,46 @@
   <data name="AiPrompt_FieldsChangedNotice" xml:space="preserve"><value>Information changed. Generate the prompt again to include it.</value></data>
   <data name="AiPrompt_SaveInstanceTemplate" xml:space="preserve"><value>Save this prompt as a template</value></data>
   <data name="AiPrompt_InstancePreviewNotice" xml:space="preserve"><value>This preview preserves your current wording and converts image references and matching known fields to variables. Check every line: ambiguous or manually changed customer details must be replaced with variables before you confirm. No customer photos or field values become template defaults.</value></data>
+  <data name="AiDetail_Detailed" xml:space="preserve"><value>Detailed review</value></data>
+  <data name="AiDetail_FirstPending" xml:space="preserve"><value>First pending step</value></data>
+  <data name="AiDetail_Step1" xml:space="preserve"><value>1  Choose task</value></data>
+  <data name="AiDetail_Step2" xml:space="preserve"><value>2  Reference images</value></data>
+  <data name="AiDetail_Step3" xml:space="preserve"><value>3  Preservation</value></data>
+  <data name="AiDetail_Step4" xml:space="preserve"><value>4  Exact text</value></data>
+  <data name="AiDetail_Step5" xml:space="preserve"><value>5  Product intent</value></data>
+  <data name="AiDetail_Step6" xml:space="preserve"><value>6  Review description</value></data>
+  <data name="AiDetail_Current" xml:space="preserve"><value>Current</value></data>
+  <data name="AiDetail_Confirmed" xml:space="preserve"><value>Confirmed</value></data>
+  <data name="AiDetail_Pending" xml:space="preserve"><value>Needs review</value></data>
+  <data name="AiDetail_Omitted" xml:space="preserve"><value>Omitted; no date supplied</value></data>
+  <data name="AiDetail_UnusualYear" xml:space="preserve"><value>Unusual year: check the source before confirming. The original value will be kept.</value></data>
+  <data name="AiDetail_FormatRequired" xml:space="preserve"><value>Choose the source date format. Day/month order is not inferred.</value></data>
+  <data name="AiDetail_DateOrder" xml:space="preserve"><value>Birth is later than death. Correct or omit the relevant date before confirming.</value></data>
+  <data name="AiDetail_InvalidDate" xml:space="preserve"><value>This is not a valid date in the selected format.</value></data>
+  <data name="AiDetail_PreservationConflict" xml:space="preserve"><value>Keeping content unchanged conflicts with redrawing it. Choose the intended permission.</value></data>
+  <data name="AiDetail_ModeNotice" xml:space="preserve"><value>Continue this draft in either mode. Text and photo identities are shared.</value></data>
+  <data name="AiDetail_ReferencesNotice" xml:space="preserve"><value>Choose each referenced image, or explicitly remove its reference. This selects managed draft files; it does not upload them.</value></data>
+  <data name="AiDetail_PreserveNotice" xml:space="preserve"><value>Suggested permissions are not confirmations. Review the original image and confirm each asset separately.</value></data>
+  <data name="AiDetail_Keep" xml:space="preserve"><value>Keep original content</value></data>
+  <data name="AiDetail_Move" xml:space="preserve"><value>Allow moving</value></data>
+  <data name="AiDetail_Scale" xml:space="preserve"><value>Allow uniform scaling</value></data>
+  <data name="AiDetail_Crop" xml:space="preserve"><value>Allow cropping</value></data>
+  <data name="AiDetail_Redraw" xml:space="preserve"><value>Allow redrawing</value></data>
+  <data name="AiDetail_RedrawNotice" xml:space="preserve"><value>Redrawing may change faces or ornaments. It is an explicit permission, not a fidelity guarantee.</value></data>
+  <data name="AiDetail_ConfirmPreservation" xml:space="preserve"><value>I checked this image and these permissions</value></data>
+  <data name="AiDetail_ConfirmText" xml:space="preserve"><value>I checked this exact text and interpretation</value></data>
+  <data name="AiDetail_SavedInput" xml:space="preserve"><value>Saved input at the start of this review</value></data>
+  <data name="AiDetail_ProposedText" xml:space="preserve"><value>Text to use (verbatim)</value></data>
+  <data name="AiDetail_DateFormat" xml:space="preserve"><value>Source date format</value></data>
+  <data name="AiDetail_DateMeaning" xml:space="preserve"><value>Interpreted date</value></data>
+  <data name="AiDetail_CompareNotice" xml:space="preserve"><value>Compare the fields on the left with the editable prompt on the right. This acknowledgement does not confirm any individual field.</value></data>
+  <data name="AiDetail_Acknowledge" xml:space="preserve"><value>I compared the current fields and this full prompt</value></data>
+  <data name="AiDetail_TextPreviewNotice" xml:space="preserve"><value>This shows the literal text. Typesetting, font coverage and product layout still require a real composition preview.</value></data>
+  <data name="AiDetail_CapabilityMissing" xml:space="preserve"><value>Layout preview, safe-area checks and strict composition are not available yet. These historical presets remain unverified product intentions. Save or copy this requirement draft for handoff.</value></data>
+  <data name="AiDetail_PreviewLayout" xml:space="preserve"><value>Layout preview unavailable</value></data>
+  <data name="AiDetail_Next" xml:space="preserve"><value>Next step</value></data>
+  <data name="AiDetail_Tshirt" xml:space="preserve"><value>Memorial T-shirt</value></data>
+  <data name="AiDetail_Badge" xml:space="preserve"><value>Round memorial badge</value></data>
+  <data name="AiDetail_TextChange" xml:space="preserve"><value>Text changes only</value></data>
+  <data name="AiDetail_SummaryNotice" xml:space="preserve"><value>This is a requirement draft. Individual checks and unavailable layout capabilities remain visible; saving or copying does not approve a production file.</value></data>
 </root>
