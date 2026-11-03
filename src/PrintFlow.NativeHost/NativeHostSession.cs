@@ -95,7 +95,7 @@ public sealed class NativeHostSession : IAsyncDisposable
             var a=request.Value.Attachments.SingleOrDefault(a=>a.Id==attachmentId);
             if(a is null)return OperationResult.Fail<Unit>(FailureCode.PreconditionNotMet,"AttachmentNotSelected");
             var opened=await _attachments.OpenVerifiedAsync(fence.RequestId,a,ct);if(opened.IsFailure)return OperationResult.Fail<Unit>(opened.Failure);
-            await using var input=opened.Value;int count=(int)((a.ByteLength+NativeMessageCodec.MaxRawChunkLength-1)/NativeMessageCodec.MaxRawChunkLength),index=0;
+            await using var lease=opened.Value;var input=lease.Stream;int count=(int)((a.ByteLength+NativeMessageCodec.MaxRawChunkLength-1)/NativeMessageCodec.MaxRawChunkLength),index=0;
             byte[] buffer=new byte[NativeMessageCodec.MaxRawChunkLength];long sent=0;
             while(sent<a.ByteLength)
             {

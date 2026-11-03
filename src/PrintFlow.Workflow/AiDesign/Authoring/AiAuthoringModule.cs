@@ -1,9 +1,10 @@
+using PrintFlow.Domain.AiDesign;
 using PrintFlow.Domain.AiDesign.Authoring;
 using PrintFlow.Domain.Results;
 
 namespace PrintFlow.Workflow.AiDesign.Authoring;
 
-public sealed class AiAuthoringModule(IAiAuthoringDraftStore store, AiTemplateCatalog catalog)
+public sealed partial class AiAuthoringModule(IAiAuthoringDraftStore store, AiTemplateCatalog catalog, IAiDesignAttachments? attachments = null)
 {
     public async Task<OperationResult<AiAuthoringDraft>> CreateAsync(AiTemplateRef template, CancellationToken ct)
     {
@@ -31,8 +32,8 @@ public sealed class AiAuthoringModule(IAiAuthoringDraftStore store, AiTemplateCa
             switch (edit)
             {
                 case AiAuthoringEdit.SetField field:
-                    if (field.Value is null || !draft.TemplateSnapshot.Fields.Any(x => x.Key == field.Key ||
-                        x.Kind == AiTemplateFieldKind.OptionalDateLine && (x.Key + ".label" == field.Key || x.Key + ".format" == field.Key)))
+                    if (field.Value is null || !draft.TemplateSnapshot.Fields.Any(x => x.Kind != AiTemplateFieldKind.ImageReference && (x.Key == field.Key ||
+                        x.Kind == AiTemplateFieldKind.OptionalDateLine && (x.Key + ".label" == field.Key || x.Key + ".format" == field.Key))))
                         return Fail("Unknown authoring field.");
                     var fields = new Dictionary<string, string>(draft.Fields, StringComparer.Ordinal) { [field.Key] = field.Value };
                     next = draft with { Fields = fields, NeedsFieldReconcile = draft.NeedsFieldReconcile || draft.IsManuallyEdited };
@@ -54,12 +55,46 @@ public sealed class AiAuthoringModule(IAiAuthoringDraftStore store, AiTemplateCa
                     if (template is null) return Fail("Template is missing or stale.");
                     next = WithTemplate(draft, template);
                     break;
+                case AiAuthoringEdit.BindImage image:
+                    var bound = await BindNewImageAsync(draft, image, ct); if (bound.IsFailure) return bound;
+                    next = bound.Value;
+                    break;
+                case AiAuthoringEdit.BindExistingImage existing:
+                    var reused = await BindExistingImageAsync(draft, existing, ct); if (reused.IsFailure) return reused;
+                    next = reused.Value;
+                    break;
+                case AiAuthoringEdit.InsertImageReference insertion:
+                    next = InsertReference(draft, insertion);
+                    break;
+                case AiAuthoringEdit.RemoveReference removal:
+                    if (!draft.FinalDocument.Parts.OfType<AiImagePart>().Any(x => x.PartId == removal.PartId)) return Fail("Image reference is missing.");
+                    next = draft with { FinalDocument = new(draft.FinalDocument.Parts.Where(x => x.PartId != removal.PartId).ToArray()), IsManuallyEdited = true, NeedsFieldReconcile = true };
+                    break;
+                case AiAuthoringEdit.RemoveImage removal:
+                    if (!draft.Assets.Any(x => x.Id == removal.AssetId)) return Fail("Image is missing.");
+                    next = draft with { Bindings = draft.Bindings.Where(x => x.AssetId != removal.AssetId).ToArray() };
+                    break;
                 default:
                     return Fail("This authoring edit is not available yet.");
             }
             // Every prior successful state already has an immutable snapshot. Publish the new
             // pointer only after the next snapshot exists; a failed save cannot erase the old one.
-            return await store.SaveAsync(AiAuthoringSnapshots.Draft(next), expectedRevision, ct);
+            next = AiAuthoringSnapshots.Draft(next);
+            var active = ActiveAssets(next);
+            if (active.Count > AiDesignAttachmentLimits.MaximumFiles || active.Any(x => x.ByteLength > AiDesignAttachmentLimits.ImageBytes || !IsImageMetadata(x)) ||
+                active.Sum(x => x.ByteLength) > AiDesignAttachmentLimits.TotalBytes) return Fail("Active image attachment limit exceeded.");
+            if (edit is not (AiAuthoringEdit.BindImage or AiAuthoringEdit.BindExistingImage))
+            {
+                var previous = ActiveAssets(draft).Select(x => x.Id).ToHashSet();
+                var activated = active.Where(x => !previous.Contains(x.Id)).ToArray();
+                if (activated.Length > 0)
+                {
+                    if (attachments is null) return Fail("Verified image reads are unavailable.");
+                    var verified = await attachments.VerifyImagesAsync(draft.Id, activated, ct);
+                    if (verified.IsFailure) return OperationResult.Fail<AiAuthoringDraft>(verified.Failure);
+                }
+            }
+            return await store.SaveAsync(next, expectedRevision, ct);
         }
         catch (ArgumentException) { return Fail("Invalid authoring edit."); }
     }
@@ -68,17 +103,33 @@ public sealed class AiAuthoringModule(IAiAuthoringDraftStore store, AiTemplateCa
     {
         draft = AiAuthoringSnapshots.Draft(draft);
         var text = new System.Text.StringBuilder(); var issues = new List<AiAuthoringIssue>();
+        var required = new Dictionary<Guid, AiDesignAttachment>();
         foreach (var part in draft.FinalDocument.Parts)
         {
             if (part is AiTextPart literal) text.Append(literal.Text);
             else if (part is AiImagePart image)
             {
                 string role = draft.Slots.Single(x => x.SlotId == image.SlotId).Role;
-                text.Append('[').Append(role).Append("：待选择图片]");
-                issues.Add(new("missing-image", null, image.SlotId));
+                var binding = draft.Bindings.SingleOrDefault(x => x.SlotId == image.SlotId);
+                var asset = binding is null ? null : draft.Assets.SingleOrDefault(x => x.Id == binding.AssetId);
+                if (asset is not null && IsImageMetadata(asset))
+                {
+                    text.Append(role).Append('：').Append(asset.UploadName);
+                    required[asset.Id] = asset;
+                }
+                else
+                {
+                    text.Append('[').Append(role).Append("：待选择图片]");
+                    issues.Add(new("missing-image", null, image.SlotId));
+                }
             }
         }
-        return new(text.ToString(), [], issues.AsReadOnly());
+        var activeSlots = draft.FinalDocument.Parts.OfType<AiImagePart>().Select(x => x.SlotId).ToHashSet(StringComparer.Ordinal);
+        var manifest = required.Values.OrderBy(x => x.Order).Select(asset => asset with
+        {
+            Purpose = string.Join(" / ", draft.Slots.Where(slot => activeSlots.Contains(slot.SlotId) && draft.Bindings.Any(b => b.SlotId == slot.SlotId && b.AssetId == asset.Id)).Select(slot => slot.Role))
+        }).ToArray();
+        return new(text.ToString(), Array.AsReadOnly(manifest), issues.AsReadOnly());
     }
 
     private static AiAuthoringDraft WithTemplate(AiAuthoringDraft draft, AiTemplateDefinition template)

@@ -116,23 +116,25 @@ Task<OperationResult<DecodedPreview>> IAiAuthoringAssetPreview.LoadAsync(Guid ow
 
 ### Task A3: 槽位、受管照片与纯文本交接
 
+2026-11-03 实施记录：[SCRUM-11221 / A3](../../codex/memorial-authoring/SCRUM-11221.md)。21项新增测试；针对性87项、最终AI/架构分组636项通过；locked restore与Release build通过。独立审查4项Important已由7项RED用例复现并修复。新增VerifyImagesAsync字节核验能力，通用附件旧语义不变；NativeHost仅适配读取lease.Stream，协议/schema不变。
+
 **Files:** Modify Module及必要的 `Infrastructure/AiDesign/FileAiDesignAttachments.cs`; Create Infrastructure `AiDesign/Authoring/{VerifiedAiAttachmentReader,FileAiAuthoringAssetPreview}.cs`; Create Workflow `IAiAuthoringAssetPreview.cs`; Tests `Integration/AiDesign/Authoring/AuthoringReferenceTests.cs`。
 
 内部读取契约：`VerifiedAiAttachmentReader.OpenAsync(Guid ownerId,AiDesignAttachment asset,CancellationToken ct):Task<OperationResult<VerifiedAiAttachmentRead>>`。`VerifiedAiAttachmentRead:IAsyncDisposable`持有已核验的只读`Stream`与祖先/文件身份句柄，直至调用者完成读取才释放；不向调用者提供用于重新打开的路径。预览有2048像素最长边限制，返回真实解码后的PNG payload；验证与预览期间均不修改快照。
 
 **Interfaces:** Consumes A1/A2与现有 `IAiDesignAttachments.SnapshotAsync/VerifyAsync`；Produces `BindImage/BindExistingImage/RemoveReference/RemoveImage`、`Export`的真实RequiredAttachments，以及Preview seam。DraftId作为快照ownerId，复用现有Requests附件根与持久化高水位计数；不创建 `request.json`，旧ListAsync仍忽略无authority的目录。
 
-- [ ] **Step 1 — RED tests:** `Replacing_person_image_preserves_manual_text`、`Same_names_and_reordering_do_not_rebind_slots`、`Removing_reference_does_not_upload_unused_asset`、`Changed_original_cannot_change_snapshot`、`One_asset_can_fill_two_roles_once`、`Inserted_decor_reference_keeps_explicit_role_after_roundtrip`。断言：
+- [x] **Step 1 — RED tests:** `Replacing_person_image_preserves_manual_text`、`Same_names_and_reordering_do_not_rebind_slots`、`Removing_reference_does_not_upload_unused_asset`、`Changed_original_cannot_change_snapshot`、`One_asset_can_fill_two_roles_once`、`Inserted_decor_reference_keeps_explicit_role_after_roundtrip`。断言：
   ```csharp
   after.FinalDocument.Parts.OfType<AiTextPart>().ShouldBe(beforeTextParts);
   export.RequiredAttachments.Select(a => a.Id).Distinct().Count().ShouldBe(1);
   export.Text.ShouldContain("attachment-02.png");
   export.Text.ShouldNotContain("C:\\");
   ```
-- [ ] **Step 2:** Run filter `FullyQualifiedName~AuthoringReferenceTests`；预期失败。
-- [ ] **Step 3:** 执行明确选图后封存，用稳定SlotId→AssetId绑定，不解析普通“图3”。替换时只把仍活动的独立素材传入SnapshotAsync，历史素材元数据另保留、不计当前8份/80MiB；编号继续用旧模块持久化高水位。复用同图需明确绑定已有AssetId或验证完整hash/长度后去重，不能按文件名去重。抽取同句柄验证读取供预览/B合成复用，包含seal、长度、hash及祖先检查，禁止verify后另开未核验路径。
-- [ ] **Step 4:** Export仅展开文档仍引用的槽位，缺图输出待补充说明；移除引用不等于删除素材/目录。新测试＋旧Attachment/OwnedStaging/Architecture测试0失败，并验证新草稿不进入旧Request列表。
-- [ ] **Step 5:** Commit `feat(ai-authoring): bind inline image roles to verified attachment snapshots`。
+- [x] **Step 2:** Run filter `FullyQualifiedName~AuthoringReferenceTests`；预期失败。
+- [x] **Step 3:** 执行明确选图后封存，用稳定SlotId→AssetId绑定，不解析普通“图3”。替换时只把仍活动的独立素材传入SnapshotAsync，历史素材元数据另保留、不计当前8份/80MiB；编号继续用旧模块持久化高水位。复用同图需明确绑定已有AssetId或验证完整hash/长度后去重，不能按文件名去重。抽取同句柄验证读取供预览/B合成复用，包含seal、长度、hash及祖先检查，禁止verify后另开未核验路径。
+- [x] **Step 4:** Export仅展开文档仍引用的槽位，缺图输出待补充说明；移除引用不等于删除素材/目录。新测试＋旧Attachment/OwnedStaging/Architecture测试0失败，并验证新草稿不进入旧Request列表。
+- [x] **Step 5:** Commit `feat(ai-authoring): bind inline image roles to verified attachment snapshots`。
 
 ### Task A4: 可编辑全文与内嵌选图控件
 
