@@ -22,6 +22,11 @@ using PrintFlow.Workflow.Engine;
 using PrintFlow.Workflow.Delivery;
 using PrintFlow.Workflow.Ports;
 using PrintFlow.Workflow.Services;
+using PrintFlow.App.ViewModels.AiDesign;
+using PrintFlow.Workflow.AiDesign;
+using PrintFlow.Workflow.AiDesign.Authoring;
+using PrintFlow.Infrastructure.AiDesign;
+using PrintFlow.Infrastructure.AiDesign.Authoring;
 
 namespace PrintFlow.App.Composition;
 
@@ -212,6 +217,16 @@ public static class ServiceRegistration
         // the screens themselves are transient so each visit starts from a clean view model
         // and cannot carry the previous session's state forward.
         services.AddSingleton<INavigationService, NavigationService>();
+        services.AddSingleton<IAiDesignNavigation>(p => (NavigationService)p.GetRequiredService<INavigationService>());
+        services.AddSingleton<IAiAuthoringDraftStore>(_ => new FileAiAuthoringDraftStore(workspaceRootAbsolute));
+        services.AddSingleton<IAiTemplateLibraryStore>(_ => new FileAiTemplateLibraryStore(workspaceRootAbsolute, System.Globalization.CultureInfo.CurrentUICulture.Name));
+        services.AddSingleton<AiTemplateCatalog>();
+        services.AddSingleton<IAiDesignAttachments>(_ => new FileAiDesignAttachments(workspaceRootAbsolute));
+        services.AddSingleton<AiAuthoringModule>();
+        services.AddSingleton<IAiAuthoringAssetPreview>(_ => new FileAiAuthoringAssetPreview(workspaceRootAbsolute));
+        services.AddSingleton<IAiPromptClipboard, SystemAiPromptClipboard>();
+        services.AddSingleton<IAiDraftLeavePrompt, SystemAiDraftLeavePrompt>();
+        services.AddTransient<AiPromptWorkbenchViewModel>();
         services.AddSingleton<IFilePicker, OpenFileDialogPicker>();
         services.AddSingleton<IDiagnosticPackageDestinationPicker, SaveDiagnosticPackageDialog>();
         services.AddSingleton<IDeliveryFolderPicker, OpenFolderDialogPicker>();

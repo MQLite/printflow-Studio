@@ -215,10 +215,16 @@
                     <ui:SymbolIcon Symbol="Image24" FontSize="24" Foreground="{DynamicResource PF.Brush.ImportIcon}" VerticalAlignment="Center" Margin="0,0,10,0" />
                     <TextBlock Text="{Binding SampleDropLabel}" FontSize="22" FontWeight="SemiBold" />
                 </StackPanel>
+                <WrapPanel HorizontalAlignment="Center">
                 <views:SessionActionButton Style="{StaticResource PF.Button.Primary}" MinWidth="180" Content="{Binding ChooseFileLabel}"
                         Command="{Binding ChooseFileCommand}" IsEnabled="{Binding CanStartImport}"
                         AutomationProperties.AutomationId="Home.ChooseFile"
                         AutomationProperties.Name="{Binding ChooseFileLabel}" HorizontalAlignment="Center" />
+                <views:SessionActionButton Style="{StaticResource PF.Button.Secondary}" Content="{Binding PromptWorkbenchLabel}"
+                        Command="{Binding OpenPromptWorkbenchCommand}" IsEnabled="{Binding CanOpenPromptWorkbench}"
+                        Margin="12,0,0,0" AutomationProperties.AutomationId="Home.PromptWorkbench"
+                        AutomationProperties.Name="{Binding PromptWorkbenchLabel}" />
+                </WrapPanel>
                 <TextBlock Text="{Binding ImportHint}" TextWrapping="Wrap" TextAlignment="Center" Foreground="{DynamicResource PF.Brush.Muted}" FontSize="{DynamicResource PF.Font.Body}" Margin="8,8,8,8" />
                 <StackPanel Visibility="{Binding IsImporting, Converter={StaticResource BoolToVisibility}}" Margin="0,12,0,0">
                     <TextBlock Text="{Binding ImportProgress}" TextWrapping="Wrap" AutomationProperties.AutomationId="Home.ImportProgress" />

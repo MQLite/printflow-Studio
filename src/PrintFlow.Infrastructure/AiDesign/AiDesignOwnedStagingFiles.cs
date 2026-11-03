@@ -37,6 +37,13 @@ public static class AiDesignOwnedStagingFiles
         return PinnedParents.Open(root, System.IO.Path.Combine(root, ".lock"));
     }
 
+    internal static IDisposable PinAuthoringDraftsRoot(string workspaceRoot)
+    {
+        string root = System.IO.Path.Combine(ValidRoot(workspaceRoot), "AiDesign", "Authoring", "Drafts");
+        PrepareDirectory(root);
+        return PinnedParents.Open(root, System.IO.Path.Combine(root, ".enumeration"));
+    }
+
     internal static async Task PublishAuthoringAsync(OwnedFile version, OwnedFile pointer, CancellationToken ct)
     {
         await version.MoveWithinBatchAsync(ct);

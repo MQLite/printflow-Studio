@@ -13,7 +13,7 @@ using PrintFlow.Workflow.Ports;
 namespace PrintFlow.App.ViewModels.AiDesign;
 
 /// <summary>One editable draft. Module commands own persistence; this host retains unsaved UI text.</summary>
-public sealed partial class AiPromptWorkbenchViewModel : ObservableObject
+public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAuthoringCloseGuard, IEntryScreenLifetime
 {
     private readonly AiAuthoringModule module;
     private readonly AiTemplateCatalog catalog;
@@ -53,7 +53,7 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject
     public AiTemplateEditorViewModel? TemplateEditor { get => templateEditor; private set => SetProperty(ref templateEditor, value); }
     public bool IsChangePending { get => changePending; private set => SetProperty(ref changePending, value); }
     public bool IsBusy { get => busy; private set { SetProperty(ref busy, value); OnPropertyChanged(nameof(CanEdit)); } }
-    public bool CanEdit => !IsBusy;
+    public bool CanEdit => !IsBusy && !isClosing;
     public bool HasUnsavedChanges => Draft is not null && (!Document.Parts.SequenceEqual(Draft.FinalDocument.Parts) ||
         Fields.Any(x => x.Value != Draft.Fields.GetValueOrDefault(x.Key, x.InitialValue)) || HasUnsavedPreservationChanges);
     public string? Error { get => error; private set => SetProperty(ref error, value); }
@@ -87,12 +87,18 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject
     public IAsyncRelayCommand AddReferenceCommand { get; }
     public IRelayCommand<AiPromptPhotoSlot> ExpandPhotoCommand { get; }
     public IRelayCommand ClosePhotoCommand { get; }
-    public IRelayCommand CloseTemplateCommand { get; }
+    public IAsyncRelayCommand CloseTemplateCommand { get; }
 
     public AiPromptWorkbenchViewModel(AiAuthoringModule module, AiTemplateCatalog catalog, IAiAuthoringAssetPreview preview,
-        IFilePicker picker, IAiPromptClipboard clipboard)
+        IFilePicker picker, IAiPromptClipboard clipboard, IAiDraftLeavePrompt? leavePrompt = null, INavigationService? navigation = null)
     {
         this.module = module; this.catalog = catalog; this.preview = preview; this.picker = picker; this.clipboard = clipboard;
+        this.leavePrompt = leavePrompt; this.navigation = navigation;
+        ReturnHomeCommand = new AsyncRelayCommand(async () => { if (this.navigation is not null) await this.navigation.GoHomeAsync(default); });
+        ShowSavedDraftsCommand = new AsyncRelayCommand(async () => await RunAsync(async () => { await ListSavedDraftsCoreAsync(default); }, default));
+        OpenSavedDraftCommand = new AsyncRelayCommand<AiSavedDraftChoice>(OpenSavedDraftAsync);
+        CloseSavedDraftsCommand = new AsyncRelayCommand(async () =>
+        { if (Draft is null && navigation is not null) await navigation.GoHomeAsync(default); else if (Draft is not null) IsSavedDraftsVisible = false; });
         InitializeTemplateCommands();
         InitializeDetailedCommands();
         ComposeCommand = new AsyncRelayCommand(() => ComposeAsync(false, default));
@@ -122,7 +128,8 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject
         });
         ExpandPhotoCommand = new RelayCommand<AiPromptPhotoSlot>(value => { ExpandedPhoto = value; OnPropertyChanged(nameof(ExpandedPhoto)); });
         ClosePhotoCommand = new RelayCommand(() => { ExpandedPhoto = null; OnPropertyChanged(nameof(ExpandedPhoto)); });
-        CloseTemplateCommand = new RelayCommand(() => TemplateEditor = null);
+        CloseTemplateCommand = new AsyncRelayCommand(async () =>
+        { if (TemplateEditor?.HasUnsavedChanges != true || await RequestCloseAsync(default)) TemplateEditor = null; });
     }
 
     public async Task OpenAsync(Guid? draftId, CancellationToken ct)
@@ -133,11 +140,11 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject
             if (Draft is not null && HasUnsavedChanges && (await FlushCoreAsync(ct)).IsFailure) return;
             if (!IsCurrent(opening)) return;
             var library = await catalog.ReadLibraryAsync(ct);
-            if (library.IsFailure) { Error = Strings.AiPrompt_SaveFailed; return; }
+            if (library.IsFailure) { await ShowRecoveryAfterOpenFailureAsync(ct); return; }
             SetTemplates(library.Value);
             var result = draftId is { } id ? await module.ReadAsync(id, ct) :
                 await module.CreateAsync(Templates.Single(x => x.Reference.Id == library.Value.DefaultId).Reference, ct);
-            if (result.IsFailure) { Error = Strings.AiPrompt_SaveFailed; return; }
+            if (result.IsFailure) { await ShowRecoveryAfterOpenFailureAsync(ct); return; }
             if (!IsCurrent(opening)) return;
             ClearPending(); TemplateEditor = null; History = []; OnPropertyChanged(nameof(History));
             await PresentAsync(result.Value, ct);
@@ -218,6 +225,10 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject
     private async Task PresentAsync(AiAuthoringDraft value, CancellationToken ct)
     {
         long capturedEpoch = epoch;
+        if (Draft?.Id != value.Id)
+        {
+            ReferenceRole = ""; OnPropertyChanged(nameof(ReferenceRole)); Status = null;
+        }
         if (Draft?.Id != value.Id || Draft.Template != value.Template) editingTemplate = null;
         Draft = value;
         document = value.FinalDocument; OnPropertyChanged(nameof(Document));

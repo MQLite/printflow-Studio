@@ -3,6 +3,8 @@ using PrintFlow.App.ViewModels;
 using PrintFlow.Workflow.Services;
 using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Results;
+using PrintFlow.App.ViewModels.AiDesign;
+using PrintFlow.App.Resources;
 
 namespace PrintFlow.App.Navigation;
 
@@ -16,7 +18,7 @@ namespace PrintFlow.App.Navigation;
 /// cycle. Destinations are transient except for one suspended source task during a utility
 /// visit. Returning reloads that exact task before retaining any matching UI draft.
 /// </remarks>
-public sealed class NavigationService : INavigationService, IUtilityTaskNavigation
+public sealed class NavigationService : INavigationService, IUtilityTaskNavigation, IAiDesignNavigation
 {
     private readonly IServiceProvider _services;
     private SessionViewModel? _utilitySource;
@@ -66,6 +68,7 @@ public sealed class NavigationService : INavigationService, IUtilityTaskNavigati
     /// <inheritdoc />
     public async Task GoHomeAsync(CancellationToken cancellationToken)
     {
+        if (!await CanLeaveAuthoringAsync(cancellationToken)) return;
         _utilitySource = null;
         HomeViewModel home = _services.GetRequiredService<HomeViewModel>();
         Show(home);
@@ -75,6 +78,7 @@ public sealed class NavigationService : INavigationService, IUtilityTaskNavigati
     /// <inheritdoc />
     public void GoToWorkflowSelection(SessionView session)
     {
+        if (Current is IAiAuthoringCloseGuard) return;
         _utilitySource = null;
         ArgumentNullException.ThrowIfNull(session);
 
@@ -86,6 +90,7 @@ public sealed class NavigationService : INavigationService, IUtilityTaskNavigati
     /// <inheritdoc />
     public void GoToSession(SessionView session)
     {
+        if (Current is IAiAuthoringCloseGuard) return;
         _utilitySource = null;
         ArgumentNullException.ThrowIfNull(session);
 
@@ -97,6 +102,7 @@ public sealed class NavigationService : INavigationService, IUtilityTaskNavigati
     /// <inheritdoc />
     public async Task GoToEnvironmentReadinessAsync(CancellationToken cancellationToken)
     {
+        if (!await CanLeaveAuthoringAsync(cancellationToken)) return;
         if (!CaptureUtilitySource()) return;
         EnvironmentReadinessViewModel readiness =
             _services.GetRequiredService<EnvironmentReadinessViewModel>();
@@ -107,6 +113,7 @@ public sealed class NavigationService : INavigationService, IUtilityTaskNavigati
     /// <inheritdoc />
     public async Task GoToSettingsAsync(CancellationToken cancellationToken)
     {
+        if (!await CanLeaveAuthoringAsync(cancellationToken)) return;
         if (!CaptureUtilitySource()) return;
         SettingsViewModel settings = _services.GetRequiredService<SettingsViewModel>();
         Show(settings);
@@ -116,6 +123,7 @@ public sealed class NavigationService : INavigationService, IUtilityTaskNavigati
     public async Task GoToErrorDetailsAsync(
         SessionId sessionId, AttemptId attemptId, CancellationToken cancellationToken)
     {
+        if (!await CanLeaveAuthoringAsync(cancellationToken)) return;
         _utilitySource = null;
         ErrorDetailsViewModel details = _services.GetRequiredService<ErrorDetailsViewModel>();
         Show(details);
@@ -127,5 +135,23 @@ public sealed class NavigationService : INavigationService, IUtilityTaskNavigati
         if (Current is IEntryScreenLifetime entry) entry.Deactivate();
         Current = viewModel;
         CurrentChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    private async Task<bool> CanLeaveAuthoringAsync(CancellationToken ct)
+    {
+        var source = Current;
+        return source is not IAiAuthoringCloseGuard guard || await guard.RequestCloseAsync(ct) && ReferenceEquals(Current, source);
+    }
+
+    public async Task GoToPromptWorkbenchAsync(Guid? draftId, CancellationToken ct)
+    {
+        if (Current is not HomeViewModel home || !home.CanOpenPromptWorkbench) return;
+        var vm = _services.GetRequiredService<AiPromptWorkbenchViewModel>();
+        await vm.OpenAsync(draftId, ct);
+        if (!ReferenceEquals(Current, home) || !home.CanOpenPromptWorkbench) { vm.Deactivate(); return; }
+        if ((vm.Draft is null || vm.Error is not null) && !(vm.IsSavedDraftsVisible && vm.SavedDrafts.Count > 0))
+        { home.Notice = vm.Error ?? Strings.AiPrompt_SaveFailed; vm.Deactivate(); return; }
+        _utilitySource = null;
+        Show(vm);
     }
 }

@@ -197,15 +197,17 @@ Task<OperationResult<DecodedPreview>> IAiAuthoringAssetPreview.LoadAsync(Guid ow
 
 ### Task A7: 接入首页、退出保护与整合交付
 
+2026-11-03 实施记录：[SCRUM-11225 / A7](../../codex/memorial-authoring/SCRUM-11225.md)。首页与DI、异步退出保护、模板弹层保护和草稿发现/重启恢复已接通。独立审查6项Important均已测试修复，最终19组935项通过（23项新A7用例）；locked restore与Release build通过。保留一次原AI进程崩溃租约用例失败及单独/整组复跑通过证据。一项摘要特殊字符截断Minor延期，原文不受影响。A已交付为离线提示词工作台；B、真实自动通道与生产验证仍待完成。仅本地提交。
+
 **Files:** Create Navigation `IAiDesignNavigation.cs`、`IAiAuthoringCloseGuard.cs`、`IAiDraftLeavePrompt.cs`和系统prompt adapter；Modify `NavigationService.cs`、`Composition/ServiceRegistration.cs`、`HomeViewModel.cs`、`HomeView.xaml`、`MainWindow.xaml`、`MainWindow.xaml.cs`、新VM与资源；Tests `Integration/Ui/AiAuthoringEntryTests.cs`、`Integration/AiDesign/Authoring/AuthoringGraphTests.cs`。
 
 **Interfaces:** `IAiDesignNavigation.GoToPromptWorkbenchAsync(Guid? draftId,ct):Task`，NavigationService实现，和现有INavigationService解析到同一singleton。新入口能力可选注入Home，旧fixture构造不强迫改写；入口只在当前Home且无导入操作时可用。`IAiAuthoringCloseGuard.RequestCloseAsync(ct):Task<bool>`由工作台VM实现；`IAiDraftLeavePrompt.ChooseAsync(ct):Task<AiDraftLeaveChoice>`，enum值`Save/Discard/Cancel`。
 
-- [ ] **Step 1 — RED tests:** `Home_opens_prompt_only_workbench_without_starting_workflow_or_browser`、`Save_failure_blocks_close_and_mode_change`、`Close_cancel_keeps_latest_editor_content`、`Double_close_awaits_one_save`；用真实store与受控prompt adapter，验证保存失败不导航、取消不丢编辑、成功保存后重开原文。
-- [ ] **Step 2:** 安全过滤运行两个新类，预期失败。
-- [ ] **Step 3:** 注册新模块/文件存储/VM/DataTemplate。Home新增“AI设计提示词”入口，原Unavailable文案只对应实际不可用能力；不全局打开自动生图。VM保存/返回先Flush；正常关闭若有未保存编辑提供Save/Discard/Cancel，失败或取消保持窗口。MainWindow仅在Current实现CloseGuard时异步协调关闭及重入，Shell仍只持Current，不接管业务。进程异常退出只恢复上次成功保存稿，界面不把未落盘内容标已保存。
-- [ ] **Step 4:** locked restore＋Release build＋本计划所有新测试＋原AI/Architecture/Startup/ManualResultImport/Home路线针对性回归0新增失败；UI分进程。检查zh/en键/占位符、1000×700和1920×1080离屏布局，主操作与两个图片按钮均可键盘到达。真实窗口/DPI/读屏另列NOT RUN。
-- [ ] **Step 5:** Commit `feat(ai-authoring): expose prompt workbench with durable leave protection`；更新任务与验证台账，明确A已交付、B/真实自动通道仍待完成。
+- [x] **Step 1 — RED tests:** `Home_opens_prompt_only_workbench_without_starting_workflow_or_browser`、`Save_failure_blocks_close_and_mode_change`、`Close_cancel_keeps_latest_editor_content`、`Double_close_awaits_one_save`；用真实store与受控prompt adapter，验证保存失败不导航、取消不丢编辑、成功保存后重开原文。
+- [x] **Step 2:** 安全过滤运行两个新类，预期失败。
+- [x] **Step 3:** 注册新模块/文件存储/VM/DataTemplate。Home新增“AI设计提示词”入口，原Unavailable文案只对应实际不可用能力；不全局打开自动生图。VM保存/返回先Flush；正常关闭若有未保存编辑提供Save/Discard/Cancel，失败或取消保持窗口。MainWindow仅在Current实现CloseGuard时异步协调关闭及重入，Shell仍只持Current，不接管业务。进程异常退出只恢复上次成功保存稿，界面不把未落盘内容标已保存。
+- [x] **Step 4:** locked restore＋Release build＋本计划所有新测试＋原AI/Architecture/Startup/ManualResultImport/Home路线针对性回归0新增失败；UI分进程。检查zh/en键/占位符、1000×700和1920×1080离屏布局，主操作与两个图片按钮均可键盘到达。真实窗口/DPI/读屏另列NOT RUN。
+- [x] **Step 5:** Commit `feat(ai-authoring): expose prompt workbench with durable leave protection`；更新任务与验证台账，明确A已交付、B/真实自动通道仍待完成。
 
 ## 运行命令约定
 

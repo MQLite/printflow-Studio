@@ -6,6 +6,7 @@ namespace PrintFlow.Workflow.AiDesign.Authoring;
 
 public sealed partial class AiAuthoringModule(IAiAuthoringDraftStore store, AiTemplateCatalog catalog, IAiDesignAttachments? attachments = null)
 {
+    public Task<OperationResult<AiAuthoringDraftListing>> ListAsync(CancellationToken ct) => store.ListAsync(ct);
     public async Task<OperationResult<AiAuthoringDraft>> CreateAsync(AiTemplateRef template, CancellationToken ct)
     {
         var listed = await catalog.ListAsync(ct); if (listed.IsFailure) return OperationResult.Fail<AiAuthoringDraft>(listed.Failure);

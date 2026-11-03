@@ -14,9 +14,19 @@
    <DataTemplate x:Key="DetailedPage"><local:DetailedPromptView/></DataTemplate>
   </ResourceDictionary>
  </UserControl.Resources>
- <Grid Margin="20">
+ <Grid Margin="20" IsEnabled="{Binding CanEdit}">
   <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+  <Grid Grid.RowSpan="3">
+   <Grid.Style><Style TargetType="Grid"><Setter Property="IsEnabled" Value="False"/><Style.Triggers><MultiDataTrigger><MultiDataTrigger.Conditions>
+    <Condition Binding="{Binding TemplateEditor}" Value="{x:Null}"/><Condition Binding="{Binding ExpandedPhoto}" Value="{x:Null}"/>
+    <Condition Binding="{Binding IsChangePending}" Value="False"/><Condition Binding="{Binding IsSavedDraftsVisible}" Value="False"/>
+   </MultiDataTrigger.Conditions><Setter Property="IsEnabled" Value="True"/></MultiDataTrigger></Style.Triggers></Style></Grid.Style>
+   <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
   <StackPanel Margin="0,0,0,14">
+   <WrapPanel Margin="0,0,0,8">
+    <Button Content="{Binding ReturnHomeLabel}" Command="{Binding ReturnHomeCommand}" IsEnabled="{Binding CanEdit}" Margin="0,0,10,0" Padding="10,4" AutomationProperties.AutomationId="AiPrompt.ReturnHome"/>
+    <Button Content="{Binding SavedDraftsLabel}" Command="{Binding ShowSavedDraftsCommand}" IsEnabled="{Binding CanEdit}" Padding="10,4" AutomationProperties.AutomationId="AiPrompt.SavedDrafts"/>
+   </WrapPanel>
    <TextBlock Text="{x:Static r:AiPromptLabels.AiPrompt_Title}" FontSize="26" FontWeight="SemiBold"/>
    <WrapPanel Margin="0,6,0,0"><Button Content="{x:Static r:AiPromptLabels.AiPrompt_Quick}" Command="{Binding SwitchToQuickCommand}" Padding="12,6" Margin="0,0,8,0" IsEnabled="{Binding CanEdit}"/><Button Content="{x:Static r:AiDetailedLabels.Detailed}" Command="{Binding SwitchToDetailedCommand}" Padding="12,6" Margin="0,0,12,0" IsEnabled="{Binding CanEdit}"/><TextBlock Text="{x:Static r:AiDetailedLabels.ModeNotice}" VerticalAlignment="Center" TextWrapping="Wrap"/></WrapPanel>
   </StackPanel>
@@ -31,7 +41,8 @@
    <Button Grid.Column="2" Content="{x:Static r:AiPromptLabels.AiPrompt_Copy}" Command="{Binding CopyCommand}" Padding="20,10" IsEnabled="{Binding CanEdit}"
     AutomationProperties.AutomationId="AiPrompt.Copy" Background="#007F6B" Foreground="White"/>
   </Grid>
-  <Border Grid.Row="1" Grid.RowSpan="2" Background="{DynamicResource PF.Brush.Canvas}" Padding="14" BorderBrush="#007F6B" BorderThickness="2"
+  </Grid>
+  <Border Grid.Row="1" Grid.RowSpan="2" Background="{DynamicResource PF.Brush.Canvas}" Padding="14" BorderBrush="#007F6B" BorderThickness="2" KeyboardNavigation.TabNavigation="Cycle"
    Visibility="{Binding IsChangePending, Converter={StaticResource BoolVisibility}}">
    <StackPanel VerticalAlignment="Center" MaxWidth="520">
     <TextBlock Text="{x:Static r:AiPromptLabels.AiPrompt_ConfirmChange}" TextWrapping="Wrap" FontSize="18"/>
@@ -41,18 +52,33 @@
     </WrapPanel>
    </StackPanel>
   </Border>
-  <Border Grid.RowSpan="3" Background="{DynamicResource PF.Brush.Canvas}" BorderBrush="#007F6B" BorderThickness="1" Padding="16">
+  <Border Grid.RowSpan="3" Background="{DynamicResource PF.Brush.Canvas}" BorderBrush="#007F6B" BorderThickness="1" Padding="16" KeyboardNavigation.TabNavigation="Cycle">
    <Border.Style><Style TargetType="Border"><Setter Property="Visibility" Value="Visible"/><Style.Triggers><DataTrigger Binding="{Binding TemplateEditor}" Value="{x:Null}"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></Border.Style>
    <DockPanel>
     <Button DockPanel.Dock="Bottom" Content="{x:Static r:AiPromptLabels.AiPrompt_Close}" Command="{Binding CloseTemplateCommand}" HorizontalAlignment="Right" Padding="16,8" Margin="0,8,0,0"/>
     <local:TemplateEditorView DataContext="{Binding TemplateEditor}"/>
    </DockPanel>
   </Border>
-  <Border Grid.RowSpan="3" Background="{DynamicResource PF.Brush.Canvas}" Padding="16">
+  <Border Grid.RowSpan="3" Background="{DynamicResource PF.Brush.Canvas}" Padding="16" KeyboardNavigation.TabNavigation="Cycle">
    <Border.Style><Style TargetType="Border"><Setter Property="Visibility" Value="Visible"/><Style.Triggers><DataTrigger Binding="{Binding ExpandedPhoto}" Value="{x:Null}"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></Border.Style>
    <DockPanel>
     <Button DockPanel.Dock="Bottom" Content="{x:Static r:AiPromptLabels.AiPrompt_Close}" Command="{Binding ClosePhotoCommand}" Padding="16,8" HorizontalAlignment="Right"/>
     <local:PromptPhotoPreview DataContext="{Binding ExpandedPhoto}"/>
+   </DockPanel>
+  </Border>
+  <Border Grid.RowSpan="3" Background="{DynamicResource PF.Brush.Canvas}" Padding="16" KeyboardNavigation.TabNavigation="Cycle" Visibility="{Binding IsSavedDraftsVisible, Converter={StaticResource BoolVisibility}}">
+   <DockPanel>
+    <TextBlock DockPanel.Dock="Top" Text="{Binding SavedDraftsLabel}" FontSize="22" Margin="0,0,0,12"/>
+    <TextBlock DockPanel.Dock="Top" Text="{Binding SavedDraftsNotice}" TextWrapping="Wrap" Margin="0,0,0,8" AutomationProperties.LiveSetting="Polite"/>
+    <TextBlock DockPanel.Dock="Top" Text="{Binding Error}" TextWrapping="Wrap" Margin="0,0,0,8" Foreground="#B42318" AutomationProperties.AutomationId="AiPrompt.SavedDraftError" AutomationProperties.LiveSetting="Polite"/>
+    <Button DockPanel.Dock="Bottom" Content="{x:Static r:AiPromptLabels.AiPrompt_Close}" Command="{Binding CloseSavedDraftsCommand}" HorizontalAlignment="Right" Padding="16,8"/>
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+     <ItemsControl ItemsSource="{Binding SavedDrafts}"><ItemsControl.ItemTemplate><DataTemplate>
+      <Button Command="{Binding DataContext.OpenSavedDraftCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" HorizontalContentAlignment="Left" Margin="0,0,0,8" Padding="12">
+       <StackPanel><TextBlock Text="{Binding Name}" FontWeight="SemiBold"/><TextBlock Text="{Binding DisplayLabel}" TextWrapping="Wrap"/><TextBlock Text="{Binding TextPreview}" TextWrapping="Wrap"/></StackPanel>
+      </Button>
+     </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+    </ScrollViewer>
    </DockPanel>
   </Border>
  </Grid>

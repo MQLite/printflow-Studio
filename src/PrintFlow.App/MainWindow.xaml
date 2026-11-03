@@ -5,6 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:views="clr-namespace:PrintFlow.App.Views"
         xmlns:vm="clr-namespace:PrintFlow.App.ViewModels"
+        xmlns:aivm="clr-namespace:PrintFlow.App.ViewModels.AiDesign"
+        xmlns:aiview="clr-namespace:PrintFlow.App.Views.AiDesign"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=vm:ShellViewModel}"
         Title="{Binding Title}"
@@ -18,6 +20,9 @@
         AutomationProperties.Name="{Binding Title}">
 
     <Window.Resources>
+        <DataTemplate DataType="{x:Type aivm:AiPromptWorkbenchViewModel}">
+            <aiview:AiPromptWorkbenchView />
+        </DataTemplate>
         <!--
             The whole navigation mechanism: a view model becomes its screen here, so no view
             model ever references a View type and no screen constructs another (Part 3C2 §16).

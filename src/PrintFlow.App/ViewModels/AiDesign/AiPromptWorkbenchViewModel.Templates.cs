@@ -51,22 +51,30 @@ public sealed partial class AiPromptWorkbenchViewModel
         SetTemplates(savedLibrary.Value);
     }, default);
 
-    private async Task EditTemplateAsync() => await RunAsync(async () =>
+    private async Task EditTemplateAsync()
     {
-        if ((await FlushCoreAsync(default)).IsFailure) return;
-        var library = await catalog.ReadLibraryAsync(default);
-        if (library.IsFailure) { Error = Strings.AiPrompt_TemplateSaveFailed; return; }
-        var current = library.Value.Templates.SingleOrDefault(x => x.Reference.Id == (editingTemplate?.Reference.Id ?? Draft!.Template.Id));
-        TemplateEditor = CreateTemplateEditor(current?.Reference, current?.Content ?? editingTemplate?.Content ?? Draft!.TemplateSnapshot);
-    }, default);
+        if (TemplateEditor?.HasUnsavedChanges == true && !await RequestCloseAsync(default)) return;
+        await RunAsync(async () =>
+        {
+            if ((await FlushCoreAsync(default)).IsFailure) return;
+            var library = await catalog.ReadLibraryAsync(default);
+            if (library.IsFailure) { Error = Strings.AiPrompt_TemplateSaveFailed; return; }
+            var current = library.Value.Templates.SingleOrDefault(x => x.Reference.Id == (editingTemplate?.Reference.Id ?? Draft!.Template.Id));
+            TemplateEditor = CreateTemplateEditor(current?.Reference, current?.Content ?? editingTemplate?.Content ?? Draft!.TemplateSnapshot);
+        }, default);
+    }
 
-    private async Task SaveInstanceTemplateAsync() => await RunAsync(async () =>
+    private async Task SaveInstanceTemplateAsync()
     {
-        if ((await FlushCoreAsync(default)).IsFailure) return;
-        TemplateEditor = CreateTemplateEditor(null, AiTemplateInstancePreview.Create(Draft!));
-        TemplateEditor.SaveAsNew = true;
-        TemplateEditor.IsInstancePreview = true;
-    }, default);
+        if (TemplateEditor?.HasUnsavedChanges == true && !await RequestCloseAsync(default)) return;
+        await RunAsync(async () =>
+        {
+            if ((await FlushCoreAsync(default)).IsFailure) return;
+            TemplateEditor = CreateTemplateEditor(null, AiTemplateInstancePreview.Create(Draft!));
+            TemplateEditor.SaveAsNew = true;
+            TemplateEditor.IsInstancePreview = true;
+        }, default);
+    }
 
     private AiTemplateEditorViewModel CreateTemplateEditor(AiTemplateRef? source, AiTemplateContent content)
     {

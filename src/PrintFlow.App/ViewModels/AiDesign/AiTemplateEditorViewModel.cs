@@ -17,6 +17,9 @@ public sealed class AiTemplateEditorViewModel : ObservableObject
     private string name, body;
     private bool confirmed, saveAsNew, busy, instancePreview;
     private long generation;
+    private long savedGeneration;
+    public long EditGeneration => generation;
+    public bool HasUnsavedChanges => generation != savedGeneration || IsInstancePreview && SavedTemplate is null;
     private string? error, status;
     public string Name { get => name; set { if (SetProperty(ref name, value)) Changed(); } }
     public string Body { get => body; set { if (SetProperty(ref body, value)) Changed(); } }
@@ -61,7 +64,7 @@ public sealed class AiTemplateEditorViewModel : ObservableObject
         input.PropertyChanged += FieldChanged; Fields.Add(input);
     }
     private void FieldChanged(object? sender, PropertyChangedEventArgs e) => Changed();
-    private void Changed() { generation++; PreviewConfirmed = false; Status = null; }
+    private void Changed() { generation++; PreviewConfirmed = false; Status = null; OnPropertyChanged(nameof(HasUnsavedChanges)); }
     private async Task SaveAsync()
     {
         Error = null;
@@ -74,6 +77,7 @@ public sealed class AiTemplateEditorViewModel : ObservableObject
             var result = await catalog.SaveAsync(SavedTemplate?.Reference ?? source, content, SaveAsNew, default);
             if (result.IsFailure) { Error = Strings.AiPrompt_TemplateSaveFailed; return; }
             SavedTemplate = result.Value; OnPropertyChanged(nameof(SavedTemplate));
+            savedGeneration = captured; OnPropertyChanged(nameof(HasUnsavedChanges));
             if (captured == generation) Status = Strings.AiPrompt_Saved;
             await saved(result.Value);
         }

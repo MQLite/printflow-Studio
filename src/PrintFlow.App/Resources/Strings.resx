@@ -1339,7 +1339,7 @@
   <data name="Session_KeepDraft" xml:space="preserve"><value>Keep editing</value></data>
   <data name="Session_DiscardDraft" xml:space="preserve"><value>Discard input and leave</value></data>
   <data name="Session_ReturnImpact" xml:space="preserve"><value>Return to {0}. Steps to redo: {1}. Dependent dimensions, output results and approvals must be redone. Existing history is retained.</value></data>
-  <data name="Home_GuidedAiUnavailable" xml:space="preserve"><value>AI design is not available yet. Choose a local image to use any of the three routes.</value></data>
+  <data name="Home_GuidedAiUnavailable" xml:space="preserve"><value>Save and copy prompts here. Automatic generation and composition are not available yet.</value></data>
   <data name="Home_GuidedCancelImport" xml:space="preserve"><value>Stop waiting for import</value></data>
   <data name="Home_GuidedContinue" xml:space="preserve"><value>Continue a task</value></data>
   <data name="Home_GuidedEnvironmentDetails" xml:space="preserve"><value>Workstation details and checks</value></data>
@@ -1552,4 +1552,15 @@
   <data name="AiDetail_Badge" xml:space="preserve"><value>Round memorial badge</value></data>
   <data name="AiDetail_TextChange" xml:space="preserve"><value>Text changes only</value></data>
   <data name="AiDetail_SummaryNotice" xml:space="preserve"><value>This is a requirement draft. Individual checks and unavailable layout capabilities remain visible; saving or copying does not approve a production file.</value></data>
+  <data name="Home_PromptWorkbench" xml:space="preserve"><value>AI design prompts</value></data>
+  <data name="AiPrompt_ReturnHome" xml:space="preserve"><value>Back to Home</value></data>
+  <data name="AiPrompt_Discard" xml:space="preserve"><value>Discard unsaved edits</value></data>
+  <data name="AiPrompt_LeaveTitle" xml:space="preserve"><value>Save before leaving?</value></data>
+  <data name="AiPrompt_LeaveMessage" xml:space="preserve"><value>Save the current prompt and template edits, discard unsaved edits, or cancel to keep editing. Template changes must be confirmed in the template preview before saving.</value></data>
+  <data name="AiPrompt_SavedDrafts" xml:space="preserve"><value>Saved prompt drafts</value></data>
+  <data name="AiPrompt_DraftLabel" xml:space="preserve"><value>{0} · Saved {1:g} · Draft {2}</value></data>
+  <data name="AiPrompt_DraftsPartial" xml:space="preserve"><value>{0} saved drafts could not be read. Other saved drafts are available below; retry after resolving the file access or storage problem.</value></data>
+  <data name="AiPrompt_DraftsEmpty" xml:space="preserve"><value>No saved prompt drafts are available.</value></data>
+  <data name="AiPrompt_DraftReadFailed" xml:space="preserve"><value>The saved draft could not be opened. Your current edits are still here. Check storage and file access, then select the draft again.</value></data>
+  <data name="AiPrompt_NewDraftFailed" xml:space="preserve"><value>A new draft could not be created. You can open an existing saved draft below, or return Home and check storage and file access.</value></data>
 </root>

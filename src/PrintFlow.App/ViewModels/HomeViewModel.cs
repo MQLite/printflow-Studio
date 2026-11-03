@@ -36,6 +36,10 @@ public sealed partial class HomeViewModel : ObservableObject, IEntryScreenLifeti
     public string SampleDropLabel => Strings.Resolve("Home_SampleDropLabel");
     public string CancelImportLabel => Strings.Resolve("Home_GuidedCancelImport");
     public string AiUnavailable => Strings.Resolve("Home_GuidedAiUnavailable");
+    private readonly IAiDesignNavigation? _aiNavigation;
+    public string PromptWorkbenchLabel => Strings.Resolve("Home_PromptWorkbench");
+    public bool CanOpenPromptWorkbench => _aiNavigation is not null && CanStartImport && !IsImporting;
+    public IAsyncRelayCommand OpenPromptWorkbenchCommand { get; }
     public string ContinueHeading => Strings.Resolve("Home_GuidedContinue");
     public string EnvironmentDetailsLabel => Strings.Resolve("Home_GuidedEnvironmentDetails");
     public IEnumerable<RecentSessionRow> ContinueSessions => RecentSessions.Where(x => x.CanContinueProcessing || x.HasOpenCorrection);
@@ -51,9 +55,11 @@ public sealed partial class HomeViewModel : ObservableObject, IEntryScreenLifeti
         _import?.Cancel();
         _thumbnails?.Cancel();
         OnPropertyChanged(nameof(CanStartImport));
+        NotifyPromptEntry();
     }
 
-    partial void OnIsBusyChanged(bool value) => OnPropertyChanged(nameof(CanStartImport));
+    partial void OnIsBusyChanged(bool value) { OnPropertyChanged(nameof(CanStartImport)); NotifyPromptEntry(); }
+    private void NotifyPromptEntry() { OnPropertyChanged(nameof(CanOpenPromptWorkbench)); OpenPromptWorkbenchCommand.NotifyCanExecuteChanged(); }
 
     [RelayCommand]
     private void CancelImport() => _import?.Cancel();
@@ -116,7 +122,8 @@ public sealed partial class HomeViewModel : ObservableObject, IEntryScreenLifeti
         IFilePicker filePicker,
         StartupStatusAccessor startupStatus,
         ReadinessObservationAccessor readiness,
-        ILocalisationService? localisation = null)
+        ILocalisationService? localisation = null,
+        IAiDesignNavigation? aiNavigation = null)
     {
         ArgumentNullException.ThrowIfNull(sessions);
         ArgumentNullException.ThrowIfNull(previews);
@@ -128,6 +135,9 @@ public sealed partial class HomeViewModel : ObservableObject, IEntryScreenLifeti
         _sessions = sessions;
         _previews = previews;
         _navigation = navigation;
+        _aiNavigation = aiNavigation;
+        OpenPromptWorkbenchCommand = new AsyncRelayCommand(async () =>
+        { if (CanOpenPromptWorkbench) await _aiNavigation!.GoToPromptWorkbenchAsync(null, default); }, () => CanOpenPromptWorkbench);
         _filePicker = filePicker;
         _startupStatus = startupStatus;
         _readinessObservations = readiness;
@@ -472,6 +482,8 @@ public sealed partial class HomeViewModel : ObservableObject, IEntryScreenLifeti
     [NotifyPropertyChangedFor(nameof(IsConfirmingAbandon))]
     [NotifyPropertyChangedFor(nameof(CanStartImport))]
     [NotifyPropertyChangedFor(nameof(AreListsInteractive))]
+    [NotifyPropertyChangedFor(nameof(CanOpenPromptWorkbench))]
+    [NotifyCanExecuteChangedFor(nameof(OpenPromptWorkbenchCommand))]
     private AbandonConfirmation? _pendingAbandon;
 
     public bool IsConfirmingAbandon => PendingAbandon is not null;

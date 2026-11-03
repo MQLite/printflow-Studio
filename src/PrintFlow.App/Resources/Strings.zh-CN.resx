@@ -1329,7 +1329,7 @@
   <data name="Session_KeepDraft" xml:space="preserve"><value>继续编辑</value></data>
   <data name="Session_DiscardDraft" xml:space="preserve"><value>放弃输入并离开</value></data>
   <data name="Session_ReturnImpact" xml:space="preserve"><value>返回“{0}”后，须重新处理：{1}。相关尺寸、输出结果和审核都须重做；已有历史记录会保留。</value></data>
-  <data name="Home_GuidedAiUnavailable" xml:space="preserve"><value>AI 设计暂不可用。选择本地图片后，可使用三条现有路线。</value></data>
+  <data name="Home_GuidedAiUnavailable" xml:space="preserve"><value>可保存、复制设计提示词；自动生图与排版合成暂不可用。</value></data>
   <data name="Home_GuidedCancelImport" xml:space="preserve"><value>取消本次导入等待</value></data>
   <data name="Home_GuidedContinue" xml:space="preserve"><value>继续待处理任务</value></data>
   <data name="Home_GuidedEnvironmentDetails" xml:space="preserve"><value>环境详情与检查</value></data>
@@ -1542,4 +1542,15 @@
   <data name="AiDetail_Badge" xml:space="preserve"><value>圆形纪念徽章</value></data>
   <data name="AiDetail_TextChange" xml:space="preserve"><value>仅修改文字</value></data>
   <data name="AiDetail_SummaryNotice" xml:space="preserve"><value>这是需求草稿，逐项待核对内容与版式能力缺口仍保留；保存或复制不等于生产文件已批准。</value></data>
+  <data name="Home_PromptWorkbench" xml:space="preserve"><value>AI设计提示词</value></data>
+  <data name="AiPrompt_ReturnHome" xml:space="preserve"><value>返回首页</value></data>
+  <data name="AiPrompt_Discard" xml:space="preserve"><value>放弃未保存修改</value></data>
+  <data name="AiPrompt_LeaveTitle" xml:space="preserve"><value>离开前保存？</value></data>
+  <data name="AiPrompt_LeaveMessage" xml:space="preserve"><value>保存本次提示词与模板修改，放弃未保存修改，或取消并继续编辑。模板修改须先在模板预览中确认。</value></data>
+  <data name="AiPrompt_SavedDrafts" xml:space="preserve"><value>已保存的提示词草稿</value></data>
+  <data name="AiPrompt_DraftLabel" xml:space="preserve"><value>{0} · 保存于{1:g} · 草稿{2}</value></data>
+  <data name="AiPrompt_DraftsPartial" xml:space="preserve"><value>有{0}份已保存草稿暂时无法读取。下方仍可打开其他草稿；解决文件访问或存储问题后可重试。</value></data>
+  <data name="AiPrompt_DraftsEmpty" xml:space="preserve"><value>暂无可打开的提示词草稿。</value></data>
+  <data name="AiPrompt_DraftReadFailed" xml:space="preserve"><value>无法打开这份草稿，本次编辑仍保留。请检查存储与文件访问后，再次选择该草稿。</value></data>
+  <data name="AiPrompt_NewDraftFailed" xml:space="preserve"><value>无法创建新草稿。可在下方打开已有草稿，或返回首页检查存储与文件访问。</value></data>
 </root>

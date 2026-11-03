@@ -215,11 +215,11 @@ internal sealed class PromptWorkbenchFixture : IDisposable
     public AiTemplateCatalog Catalog { get; }
     public AiAuthoringModule Module { get; }
     public AiPromptWorkbenchViewModel Vm { get; }
-    public PromptWorkbenchFixture()
+    public PromptWorkbenchFixture(PrintFlow.App.Navigation.IAiDraftLeavePrompt? leavePrompt = null)
     {
         Catalog = new(new FileAiTemplateLibraryStore(Root.Root));
         Module = new(new FileAiAuthoringDraftStore(Root.Root), Catalog, new FileAiDesignAttachments(Root.Root));
-        Vm = new(Module, Catalog, new FileAiAuthoringAssetPreview(Root.Root), Picker, Clipboard);
+        Vm = new(Module, Catalog, new FileAiAuthoringAssetPreview(Root.Root), Picker, Clipboard, leavePrompt);
     }
     public void Dispose() => Root.Dispose();
     public static string Png(string root, int width)
