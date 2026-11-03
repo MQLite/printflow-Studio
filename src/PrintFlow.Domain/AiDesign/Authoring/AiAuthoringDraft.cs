@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using PrintFlow.Domain.AiDesign.Memorial;
 
 namespace PrintFlow.Domain.AiDesign.Authoring;
 
@@ -9,7 +10,8 @@ public sealed record AiAuthoringDraft
 {
     public required Guid Id { get; init; }
     public long Revision { get; init; }
-    public int SchemaVersion { get; init; } = 1;
+    public int SchemaVersion { get; init; } = 2;
+    public MemorialLayout? Layout { get; init; }
     public required AiTemplateRef Template { get; init; }
     public required AiTemplateContent TemplateSnapshot { get; init; }
     public AiProductKind Product { get; init; }

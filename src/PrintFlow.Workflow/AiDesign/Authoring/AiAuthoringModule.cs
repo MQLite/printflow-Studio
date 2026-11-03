@@ -1,6 +1,7 @@
 using PrintFlow.Domain.AiDesign;
 using PrintFlow.Domain.AiDesign.Authoring;
 using PrintFlow.Domain.Results;
+using PrintFlow.Workflow.AiDesign.Memorial;
 
 namespace PrintFlow.Workflow.AiDesign.Authoring;
 
@@ -27,12 +28,23 @@ public sealed partial class AiAuthoringModule(IAiAuthoringDraftStore store, AiTe
         {
             if (edit is AiAuthoringEdit.ReplaceDocument replacement)
                 edit = replacement with { Document = AiAuthoringSnapshots.Document(replacement.Document) };
+            if (edit is AiAuthoringEdit.SetLayout pendingLayout)
+                edit = pendingLayout with { Layout = MemorialLayoutModule.Freeze(pendingLayout.Layout) };
             var read = await store.ReadAsync(id, ct); if (read.IsFailure) return read;
             var draft = read.Value;
             if (draft.Revision != expectedRevision) return Fail("Draft is stale.");
             AiAuthoringDraft next;
             switch (edit)
             {
+                case AiAuthoringEdit.SetLayout placement:
+                    var layout = placement.Layout;
+                    bool changed = !MemorialLayoutModule.SameContent(draft.Layout, layout);
+                    if (changed) layout = layout with { ProductTemplateConfirmed = false };
+                    var layoutIssues = MemorialLayoutModule.Validate(draft, layout);
+                    if (layoutIssues.Any(x => x.Key is "TextMismatch" or "DuplicateText" or "PreservationConflict") ||
+                        layout.ProductTemplateConfirmed && layoutIssues.Count > 0) return Fail("The layout has unresolved text, geometry or preservation issues.");
+                    next = draft with { Layout = layout };
+                    break;
                 case AiAuthoringEdit.SetDateInterpretation interpretation:
                     if (interpretation.Format is null || interpretation.Format.Length > 0 && !AiDetailedReview.DateFormats.Contains(interpretation.Format, StringComparer.Ordinal) ||
                         !draft.TemplateSnapshot.Fields.Any(x => x.Key == interpretation.FieldKey && AiAuthoringConfirmationRules.IsDate(x))) return Fail("Choose an explicit supported date format.");
@@ -127,6 +139,9 @@ public sealed partial class AiAuthoringModule(IAiAuthoringDraftStore store, AiTe
             }
             // Every prior successful state already has an immutable snapshot. Publish the new
             // pointer only after the next snapshot exists; a failed save cannot erase the old one.
+            if (next.Layout is not null && (!MemorialLayoutModule.SameInputs(draft, next) ||
+                edit is not AiAuthoringEdit.SetLayout && !MemorialLayoutModule.SameContent(draft.Layout, next.Layout)))
+                next = next with { Layout = next.Layout with { ProductTemplateConfirmed = false } };
             next = AiAuthoringSnapshots.Draft(AiAuthoringConfirmationRules.Refresh(next));
             var active = ActiveAssets(next);
             if (active.Count > AiDesignAttachmentLimits.MaximumFiles || active.Any(x => x.ByteLength > AiDesignAttachmentLimits.ImageBytes || !IsImageMetadata(x)) ||
@@ -191,7 +206,7 @@ public sealed partial class AiAuthoringModule(IAiAuthoringDraftStore store, AiTe
         {
             Template = template.Reference, TemplateSnapshot = template.Content, Product = template.Content.Product,
             Fields = fields, Slots = slots, Bindings = [], InitialDocument = composition.Document, FinalDocument = composition.Document,
-            IsManuallyEdited = false, NeedsFieldReconcile = false, Confirmations = new Dictionary<string, string>()
+            IsManuallyEdited = false, NeedsFieldReconcile = false, Confirmations = new Dictionary<string, string>(), Layout = null
         });
     }
 

@@ -44,6 +44,8 @@ record MemorialRenderResult(MemorialRenderRef File, long DraftRevision, FileFact
 
 B1扩展Authoring schema至2，增加 `Layout:MemorialLayout?`，并在Workflow命令union增加 `SetLayout(MemorialLayout Layout)`，通过A的ApplyAsync及revision CAS保存；读取schema1时保持所有原文/照片与确认，Layout为空且待设置，不能自动确认。ParentDraftId/ParentDraftRevision继续使用A中已定义属性。`SetLayout`不能改变已核对的Text原文，只能调整样式/几何；不匹配Semantic对应字段时返回issue。
 
+B1实施接口补充（2026-11-03）：`MemorialImageLayer.SourceExtent:RectPx?`记录原点为0的完整源像素框，B3须对真实解码尺寸核验；`AllowEdgeExtension:bool`明确未受保护新增装饰的环带权限。`MemorialLayoutModule.TextInputs(draft)`返回冻结的精确文字字典；日期原文沿用`birth-date`/`death-date`等确认key，非空日期对应的非空标签另用`DateLabelKey(field)`（`date-label:<文字确认key>`）作为图层key，与该日期共用原文/标签/解释的内容确认。日期不显示时不输出其标签。B2须沿用此接口，不能从未经核对的常量绘制标签。不同几何/裁切的SetLayout先取消版式确认，随后同内容SetLayout才可明确确认；历史恢复也遵守几何变更失效规则。
+
 ```csharp
 // B1 pure geometry/permission module, no rendering or file work.
 IReadOnlyList<AiAuthoringIssue> MemorialLayoutModule.Validate(AiAuthoringDraft draft, MemorialLayout layout);
@@ -69,21 +71,23 @@ MemorialVersionModule消耗A的store和B4的asset-fork port；所有返回集合
 
 ### Task B1: 毫米版式、保护权限与规格
 
+2026-11-03 实施记录：[SCRUM-11226 / B1](../../codex/memorial-authoring/SCRUM-11226.md)。毫米版式、保留/几何独立权限、日期标签原文、schema1→2与CAS持久化已实现。独立审查5项Important已RED→GREEN修复；38项B1新用例，最终19组973项通过；locked restore与零警告/错误Release构建通过。本地交付，B2–B5未启动。
+
 **Files:** Create Domain `AiDesign/Memorial/{MemorialLayout,MemorialRenderPlan}.cs`; Create Workflow `AiDesign/Memorial/MemorialLayoutModule.cs`; Modify Authoring DTO/store的schema读取；Tests `Unit/AiDesign/Memorial/MemorialLayoutTests.cs`、`Integration/AiDesign/Authoring/AuthoringSchemaUpgradeTests.cs`。
 
 **Interfaces:** Consumes A草稿/规则；Produces B数据与Validate。精确预设：T恤 `280×390`，徽章 `86×86`、OuterDiameter=`86`、SafeDiameter=`72`；单侧环带`7`。数字必须有限且>0；安全直径≤外圆，徽章宽高等于外圆。
 
-- [ ] **Step 1 — RED tests:** `Badge_ring_is_7mm`、`Critical_bounds_must_fit_safe_circle`、`Medal_cannot_be_cropped_to_make_layout_fit`、`Unconfirmed_template_cannot_be_accepted`、`Schema1_keeps_manual_text_and_requires_layout`。断言：
+- [x] **Step 1 — RED tests:** `Badge_ring_is_7mm`、`Critical_bounds_must_fit_safe_circle`、`Medal_cannot_be_cropped_to_make_layout_fit`、`Unconfirmed_template_cannot_be_accepted`、`Schema1_keeps_manual_text_and_requires_layout`。断言：
   ```csharp
   ((86d - 72d) / 2).ShouldBe(7);
   outsideIssues.Select(i => i.Key).ShouldContain("OutsideSafeArea");
   croppedIssues.Select(i => i.Key).ShouldContain("PreservationConflict");
   migrated.FinalDocument.ShouldBe(original.FinalDocument);
   ```
-- [ ] **Step 2:** Run `dotnet test tests/PrintFlow.Tests/PrintFlow.Tests.csproj -c Release --filter "FullyQualifiedName~MemorialLayoutTests|FullyQualifiedName~AuthoringSchemaUpgradeTests"`；预期编译或行为失败。
-- [ ] **Step 3:** 用布局坐标验证：关键矩形四角均在36mm半径安全圆内；人物完整源框默认受保护，用户明确裁切后只接受被确认范围，不能自动猜人脸区域。原装饰整体变换需匹配其权限；复杂拆分保持未支持。只允许背景/明确允许的边缘装饰进入7mm环带。配置变化撤销布局确认，不撤销无变化文字内容确认。
-- [ ] **Step 4:** 几何、NaN/负数、边界相切、超长姓名、权限冲突及schema升级测试0失败；不改变旧Request schema。
-- [ ] **Step 5:** Commit `feat(memorial): validate protected layouts and product specifications`。
+- [x] **Step 2:** Run `dotnet test tests/PrintFlow.Tests/PrintFlow.Tests.csproj -c Release --filter "FullyQualifiedName~MemorialLayoutTests|FullyQualifiedName~AuthoringSchemaUpgradeTests"`；预期编译或行为失败。
+- [x] **Step 3:** 用布局坐标验证：关键矩形四角均在36mm半径安全圆内；人物完整源框默认受保护，用户明确裁切后只接受被确认范围，不能自动猜人脸区域。原装饰整体变换需匹配其权限；复杂拆分保持未支持。只允许背景/明确允许的边缘装饰进入7mm环带。配置变化撤销布局确认，不撤销无变化文字内容确认。
+- [x] **Step 4:** 几何、NaN/负数、边界相切、超长姓名、权限冲突及schema升级测试0失败；不改变旧Request schema。
+- [x] **Step 5:** Commit `feat(memorial): validate protected layouts and product specifications`。
 
 ### Task B2: 精确文字层与弧线排版
 
