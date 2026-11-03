@@ -4,6 +4,8 @@
 
 开发跟踪（后续记录，不改变下方建单时的历史快照）：A1 / SCRUM-11219 已实现并通过独立代码审查，验证见[实施记录](../../codex/memorial-authoring/SCRUM-11219.md)。Jira移交In Review；未关闭Task/Epic。A2–A7和B1–B5仍待实施。
 
+后续A2 / SCRUM-11220 已实现：个人模板版本、目录偏好、锁与CAS、原子持久化及保存稿重开；独立审查4项Important均已测试修复，最终615项回归通过，详见[A2实施记录](../../codex/memorial-authoring/SCRUM-11220.md)。移交In Review，未关闭任务；A3–A7及B1–B5仍待实施。A5接入前需补齐历史版本浏览/恢复接口。
+
 用户已批准实施计划，并明确要求“请据此计划添加到Jira Tasks & Epics”。本轮使用 Atlassian spec-to-backlog 工作流在既有 SCRUM 项目创建2个Epic和12个Task，没有启动产品实施或推送/发布。负责人、Sprint、故事点未设置；全部工单回读为To Do。
 
 ## 来源与追踪

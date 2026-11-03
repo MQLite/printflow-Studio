@@ -14,6 +14,39 @@ public static class AiDesignOwnedStagingFiles
 {
     public enum RequestPurpose { RequestAuthority, AttachmentSequence, BridgeQueue }
 
+    internal static OwnedFile CreateAuthoring(string workspaceRoot, Guid? draftId, Guid? versionId)
+    {
+        string root = AuthoringDirectory(workspaceRoot, draftId);
+        if (versionId == Guid.Empty) throw new IOException("Authoring version identity required.");
+        PrepareDirectory(root);
+        string destination = versionId is null ? "current.json" : $"revision-{versionId:N}.json";
+        return OwnedFile.Create(root, System.IO.Path.Combine(root, $".authoring-{Guid.NewGuid():N}.tmp"), System.IO.Path.Combine(root, destination));
+    }
+
+    internal static string AuthoringDirectory(string workspaceRoot, Guid? draftId)
+    {
+        if (draftId == Guid.Empty) throw new IOException("Authoring draft identity required.");
+        string root = System.IO.Path.Combine(ValidRoot(workspaceRoot), "AiDesign", "Authoring");
+        return draftId is null ? System.IO.Path.Combine(root, "Templates")
+            : System.IO.Path.Combine(root, "Drafts", draftId.Value.ToString("D"));
+    }
+
+    internal static IDisposable PinAuthoringDirectory(string workspaceRoot, Guid? draftId)
+    {
+        string root = AuthoringDirectory(workspaceRoot, draftId); PrepareDirectory(root);
+        return PinnedParents.Open(root, System.IO.Path.Combine(root, ".lock"));
+    }
+
+    internal static async Task PublishAuthoringAsync(OwnedFile version, OwnedFile pointer, CancellationToken ct)
+    {
+        await version.MoveWithinBatchAsync(ct);
+        // Reopen and verify the moved creation identity, then deny write/delete sharing
+        // until the authority pointer commits. This guard unwinds before caller rollback.
+        using var versionIdentity = version.PinIdentity();
+        await pointer.PublishAsync(ct);
+        version.Release();
+    }
+
     public static OwnedFile CreateRequest(string workspaceRoot, Guid requestId, RequestPurpose purpose)
         => CreateRequestCore(workspaceRoot, requestId, purpose, Guid.NewGuid());
 
@@ -240,6 +273,8 @@ public static class AiDesignOwnedStagingFiles
             }
             catch { current.Dispose(); throw; }
         }
+
+        internal IDisposable PinIdentity() => VerifyIdentity();
 
         internal void Release() => _owned = false;
 

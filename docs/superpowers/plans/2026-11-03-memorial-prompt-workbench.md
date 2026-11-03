@@ -96,21 +96,23 @@ Task<OperationResult<DecodedPreview>> IAiAuthoringAssetPreview.LoadAsync(Guid ow
 
 ### Task A2: 模板个人版本和可恢复草稿
 
+2026-11-03 实施记录：[SCRUM-11220 / A2](../../codex/memorial-authoring/SCRUM-11220.md)。19项新增测试；针对性66项、最终AI/架构分组615项通过；locked restore/Release build通过。独立审查4项Important均已RED→GREEN修复。当前稿重开已实现；历史版本浏览/恢复接口需在A5接入UI前补齐。
+
 **Files:** Create Domain `AiDesign/Authoring/AiTemplateLibrary.cs`; Create Workflow `IAiAuthoringDraftStore.cs`、`IAiTemplateLibraryStore.cs`、`AiTemplateCatalog.cs`、`AiAuthoringModule.cs`; Create Infrastructure `AiDesign/Authoring/{FileAiAuthoringDraftStore,FileAiTemplateLibraryStore}.cs`; Tests `Integration/AiDesign/Authoring/{AuthoringPersistenceTests,TemplateCatalogTests}.cs`。
 
 **Interfaces:** Consumes A1；Produces存储/Catalog/Module接口。文件根为 `AiDesign/Authoring/Drafts/<id>/` 与 `AiDesign/Authoring/Templates/`；不修改SQLite或旧Request schema。草稿保存保留不可变历史版本及当前指针，模板版本与草稿版本独立。
 
-- [ ] **Step 1 — RED tests:** `Two_store_instances_cannot_overwrite_same_revision`、`Builtin_edit_preserves_original_and_frozen_old_draft`、`Failed_publication_keeps_last_saved_draft`、`Deleting_template_does_not_erase_saved_prompt`。断言：
+- [x] **Step 1 — RED tests:** `Two_store_instances_cannot_overwrite_same_revision`、`Builtin_edit_preserves_original_and_frozen_old_draft`、`Failed_publication_keeps_last_saved_draft`、`Deleting_template_does_not_erase_saved_prompt`。断言：
   ```csharp
   saves.Count(x => x.IsSuccess).ShouldBe(1);
   saved.TemplateSnapshot.Body.ShouldBe(originalBody);
   reopened.FinalDocument.ShouldBe(lastCommittedDocument);
   personal.BuiltinOriginId.ShouldBe("memorial-tshirt-quick");
   ```
-- [ ] **Step 2:** Run filter `FullyQualifiedName~AuthoringPersistenceTests|FullyQualifiedName~TemplateCatalogTests`；预期行为失败。
-- [ ] **Step 3:** 实现FileShare.None锁＋CAS；原子发布只操作本次创建并持有身份的临时文件，复用现有owned-staging原语，拒绝reparse ancestry，不广泛删除目录。`SaveAsync(expectedRevision:null)`仅新建；模板保存/恢复/偏好修改均保留历史。Module先实现非图片编辑、读取、创建、按真实最终文档复制；切模板和重建前写历史快照，写入失败保持原稿并返回失败。
-- [ ] **Step 4:** 新存储测试与原 `AiDesignRequestStoreTests`、`AiDesignOwnedStagingFilesTests`均0失败；测试真实磁盘、损坏JSON、取消、两实例竞争及owned替换失败，禁止用fixture返回期望字符串代替。
-- [ ] **Step 5:** Commit `feat(ai-authoring): persist versioned templates and drafts without overwriting edits`。
+- [x] **Step 2:** Run filter `FullyQualifiedName~AuthoringPersistenceTests|FullyQualifiedName~TemplateCatalogTests`；预期行为失败。
+- [x] **Step 3:** 实现FileShare.None锁＋CAS；原子发布只操作本次创建并持有身份的临时文件，复用现有owned-staging原语，拒绝reparse ancestry，不广泛删除目录。`SaveAsync(expectedRevision:null)`仅新建；模板保存/恢复/偏好修改均保留历史。Module先实现非图片编辑、读取、创建、按真实最终文档复制；切模板和重建前写历史快照，写入失败保持原稿并返回失败。
+- [x] **Step 4:** 新存储测试与原 `AiDesignRequestStoreTests`、`AiDesignOwnedStagingFilesTests`均0失败；测试真实磁盘、损坏JSON、取消、两实例竞争及owned替换失败，禁止用fixture返回期望字符串代替。
+- [x] **Step 5:** Commit `feat(ai-authoring): persist versioned templates and drafts without overwriting edits`。
 
 ### Task A3: 槽位、受管照片与纯文本交接
 
