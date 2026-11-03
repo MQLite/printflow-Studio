@@ -91,21 +91,25 @@ MemorialVersionModule消耗A的store和B4的asset-fork port；所有返回集合
 
 ### Task B2: 精确文字层与弧线排版
 
+2026-11-03 实施记录：[SCRUM-11227 / B2](../../codex/memorial-authoring/SCRUM-11227.md)。精确确认文字/日期标签、真实字体度量与缺字检查、塑形字形簇弧线、RTL段落与可复用毫米轮廓已实现。独立审查6项Important已RED→GREEN修复，44项新测试；最终20组1017项通过，locked restore与零警告/错误Release构建通过。1项极长文本扫描性能Minor延期；B3–B5未启动。
+
 **Files:** Create Infrastructure `AiDesign/Memorial/WpfMemorialTextLayout.cs`; Create Workflow `IMemorialTextLayout.cs`; Tests `Integration/AiDesign/Memorial/MemorialTextLayoutTests.cs`。
 
 **Interfaces:** Consumes A中Semantic、姓名/日期确认、B1 Canvas与显式styles；ProducesArrange返回的真实TextLine。Style的Key绑定语义字段，Text只能从该草稿对应已确认字段读取。WPF类型留在Infrastructure；使用系统已安装字体和WPF字体度量，不下载字体，不调用模型重写文字。
 
-- [ ] **Step 1 — RED tests:** `Name_macrons_apostrophe_and_case_survive_layout`、`Long_name_offers_layout_change_instead_of_truncation`、`Missing_glyph_blocks_confirmation`、`Arc_changes_positions_not_text`。断言：
+B2接入合同：`WpfMemorialTextLayout`的Infrastructure内部`Prepare(line)`返回冻结的毫米轮廓和只读字形簇来源/位置；B3须复用同一配置的适配器，不能另写一套文字测量/绘制逻辑。Domain仍只保存文字和style，不保存WPF对象或机器字体glyph编号。失败通过`OperationFailure.Context["issue"]`和`["field"]`定位。直线只采用原文显式换行，弧线目前为不超过π的单行上弧；用户指定字号不自动变化。默认2mm下限可配置，不代表实物可读性标准。RTL段落按Windows只读双向分类与显式方向标记处理；`GetStringTypeW`声明集中于既有`Automation/NativeMethods.cs`，不增加包。B3/B4在渲染/后台路径调用同步接口；极长文字的线性索引优化仍待后续处理。
+
+- [x] **Step 1 — RED tests:** `Name_macrons_apostrophe_and_case_survive_layout`、`Long_name_offers_layout_change_instead_of_truncation`、`Missing_glyph_blocks_confirmation`、`Arc_changes_positions_not_text`。断言：
   ```csharp
   nameLine.Text.ShouldBe("ʻĀna  DEMO 陈");
   arcLine.Text.ShouldBe(flatLine.Text);
   longNameFailure.IsSuccess.ShouldBeFalse();
   originalDate.ShouldBe("12/06/1039");
   ```
-- [ ] **Step 2:** Run `dotnet test tests/PrintFlow.Tests/PrintFlow.Tests.csproj -c Release --filter FullyQualifiedName~MemorialTextLayoutTests`；预期失败。
-- [ ] **Step 3:** 沿用A6日期解释与确认，不对原文大小写/Unicode做归一化。直线排版使用字体度量，弧线排版放置同一文字的glyph，连字/组合符作为塑形后的cluster处理，不能按UTF-16 char逐字拆。缺字、无法容纳、未核对文字返回issue。视觉模板字号/留白集中为可调整参数；达到可读性下限时让用户换行/改版式，不静默缩字或删字。
-- [ ] **Step 4:** 真实系统字体度量与glyph覆盖、组合字符、CJK/Latin混排、可选日期行和弧线测试0失败；具体可读性仍需后续真实成品验收，不能由像素图推定。
-- [ ] **Step 5:** Commit `feat(memorial): lay out verified literal text as editable layers`。
+- [x] **Step 2:** Run `dotnet test tests/PrintFlow.Tests/PrintFlow.Tests.csproj -c Release --filter FullyQualifiedName~MemorialTextLayoutTests`；预期失败。
+- [x] **Step 3:** 沿用A6日期解释与确认，不对原文大小写/Unicode做归一化。直线排版使用字体度量，弧线排版放置同一文字的glyph，连字/组合符作为塑形后的cluster处理，不能按UTF-16 char逐字拆。缺字、无法容纳、未核对文字返回issue。视觉模板字号/留白集中为可调整参数；达到可读性下限时让用户换行/改版式，不静默缩字或删字。
+- [x] **Step 4:** 真实系统字体度量与glyph覆盖、组合字符、CJK/Latin混排、可选日期行和弧线测试0失败；具体可读性仍需后续真实成品验收，不能由像素图推定。
+- [x] **Step 5:** Commit `feat(memorial): lay out verified literal text as editable layers`。
 
 ### Task B3: 原素材合成与受管PNG
 

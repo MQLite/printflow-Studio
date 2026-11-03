@@ -21,6 +21,13 @@ namespace PrintFlow.Infrastructure.Automation;
 /// </remarks>
 internal static partial class NativeMethods
 {
+    // Read-only OS bidi classification for memorial text paragraph direction.
+    // Caller supplies exactly one output ushort per UTF-16 source code unit.
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true, SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool GetStringTypeW(uint informationType, string source, int characterCount,
+        [Out, MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)] ushort[] characterTypes);
+
     // Workspace retention reads link identity before clearing a redundant copy's readonly
     // attribute. This query cannot mutate files or interact with external applications.
     [DllImport("kernel32.dll", SetLastError = true)]
