@@ -2,6 +2,8 @@
 
 日期：2026-11-03，Pacific/Auckland。状态：**已创建并回读核对**。
 
+开发跟踪（后续记录，不改变下方建单时的历史快照）：A1 / SCRUM-11219 已实现并通过独立代码审查，验证见[实施记录](../../codex/memorial-authoring/SCRUM-11219.md)。Jira移交In Review；未关闭Task/Epic。A2–A7和B1–B5仍待实施。
+
 用户已批准实施计划，并明确要求“请据此计划添加到Jira Tasks & Epics”。本轮使用 Atlassian spec-to-backlog 工作流在既有 SCRUM 项目创建2个Epic和12个Task，没有启动产品实施或推送/发布。负责人、Sprint、故事点未设置；全部工单回读为To Do。
 
 ## 来源与追踪

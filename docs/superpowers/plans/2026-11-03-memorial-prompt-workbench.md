@@ -76,21 +76,23 @@ Task<OperationResult<DecodedPreview>> IAiAuthoringAssetPreview.LoadAsync(Guid ow
 
 ### Task A1: 模板和结构化提示词文档
 
+2026-11-03 实施记录：[SCRUM-11219 / A1](../../codex/memorial-authoring/SCRUM-11219.md)。新旧模板23项通过，AI/架构回归复跑596项通过；首次旧NativeHost时序失败保留在记录中；独立代码审查无问题。
+
 **Files:** Create `src/PrintFlow.Domain/AiDesign/Authoring/{AiTemplateDefinition,AiPromptDocument,AiAuthoringDraft,AiPromptExport}.cs`; Create `src/PrintFlow.Workflow/AiDesign/Authoring/{AiAuthoringEdit,BuiltInAiTemplates,PromptDocumentComposer}.cs`; Test `tests/PrintFlow.Tests/Unit/AiDesign/Authoring/PromptDocumentComposerTests.cs`。
 
 **Interfaces:** Consumes design样例；Produces以上DTO、`BuiltInAiTemplates.All`与`Compose`。三个模板id准确为 `memorial-tshirt-quick`、`memorial-badge-quick`、`memorial-text-change-quick`；将样例人工整理为Workflow静态数据，不在运行时读output目录。
 
-- [ ] **Step 1 — RED tests:** 定义 `Compose_preserves_operator_literals`、`Missing_dates_omit_whole_label_line`、`Unknown_variable_remains_visible`、`Image_variable_creates_slot_not_a_path`。断言至少含：
+- [x] **Step 1 — RED tests:** 定义 `Compose_preserves_operator_literals`、`Missing_dates_omit_whole_label_line`、`Unknown_variable_remains_visible`、`Image_variable_creates_slot_not_a_path`。断言至少含：
   ```csharp
   literal.ShouldBe("  ʻĀna\r\n陈 {{姓名}}  "); // value copied exactly; no recursive substitution
   missingDatesText.ShouldNotContain("SUNRISE");
   imagePart.SlotId.ShouldBe("person-photo");
   unknownText.ShouldContain("{{未定义}}");
   ```
-- [ ] **Step 2:** Run `dotnet test tests/PrintFlow.Tests -c Release --filter FullyQualifiedName~PromptDocumentComposerTests`；预期未创建类型或行为断言失败。
-- [ ] **Step 3:** 实现固定语法 `{{字段名}}` 单次替换；OptionalDateLine的标签与值形成一个可省略行；普通未知/空变量保留并报issue；图片输出 `AiImagePart`。body没有变量也合法；不加脚本/表达式/递归。内置中英文提示分别定义，客户值不翻译。
-- [ ] **Step 4:** 同filter必须0失败，并跑原 `PromptTemplateTests`；v1行为不变。
-- [ ] **Step 5:** Commit `feat(ai-authoring): compose editable prompt documents from reusable templates`。
+- [x] **Step 2:** Run `dotnet test tests/PrintFlow.Tests -c Release --filter FullyQualifiedName~PromptDocumentComposerTests`；预期未创建类型或行为断言失败。
+- [x] **Step 3:** 实现固定语法 `{{字段名}}` 单次替换；OptionalDateLine的标签与值形成一个可省略行；普通未知/空变量保留并报issue；图片输出 `AiImagePart`。body没有变量也合法；不加脚本/表达式/递归。内置中英文提示分别定义，客户值不翻译。
+- [x] **Step 4:** 同filter必须0失败，并跑原 `PromptTemplateTests`；v1行为不变。
+- [x] **Step 5:** Commit `feat(ai-authoring): compose editable prompt documents from reusable templates`。
 
 ### Task A2: 模板个人版本和可恢复草稿
 
