@@ -157,6 +157,8 @@ Task<OperationResult<DecodedPreview>> IAiAuthoringAssetPreview.LoadAsync(Guid ow
 
 ### Task A5: 快速页与模板编辑
 
+2026-11-03 实施记录：[SCRUM-11223 / A5](../../codex/memorial-authoring/SCRUM-11223.md)。快速三栏、模板编辑/本次另存预览、图片身份与迟到选择保护、精确复制、最近历史恢复已实现。独立审查3项P2已RED→GREEN修复并复审通过；最终770项分组测试通过。本地任务提交，未推送、合并或修改Jira；A6/A7/B仍待实施。
+
 **Files:** Create `ViewModels/AiDesign/{AiPromptWorkbenchViewModel,AiPromptWorkbenchViewModel.Quick,AiPromptWorkbenchViewModel.Templates}.cs`; Create `Views/AiDesign/{AiPromptWorkbenchView,QuickPromptView,TemplateEditorView}.xaml`及必要code-behind；Modify `Resources/Strings.resx`、`Strings.zh-CN.resx`; Tests `Integration/Ui/{AiQuickPromptTests,AiTemplateEditorTests}.cs`。
 
 **Interfaces:** Consumes Module/Catalog/Preview、现有 `IFilePicker` 和A4；Produces VM `OpenAsync(Guid? draftId,ct)`、`FlushAsync(ct):Task<OperationResult<AiAuthoringDraft>>`，`PickSlotImageCommand(string)`、`ComposeCommand`、`CopyCommand`、`SaveDraftCommand`、`EditTemplateCommand`。新增 App seam `IAiPromptClipboard.SetText(string)`，系统Clipboard与测试adapter各自实现，避免测试触碰真实剪贴板。

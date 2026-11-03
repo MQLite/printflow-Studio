@@ -4,6 +4,7 @@ namespace PrintFlow.Workflow.AiDesign.Authoring;
 
 public abstract record AiAuthoringEdit
 {
+    public sealed record RestoreRevision(long Revision) : AiAuthoringEdit;
     public sealed record SetField(string Key, string Value) : AiAuthoringEdit;
     public sealed record ReplaceDocument(AiPromptDocument Document) : AiAuthoringEdit;
     public sealed record Recompose(bool PreservePrevious) : AiAuthoringEdit;

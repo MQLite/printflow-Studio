@@ -1437,4 +1437,77 @@
   <data name="Session_SaveHideReview" xml:space="preserve"><value>Return to result preview</value></data>
   <data name="Session_SaveCurrentResult" xml:space="preserve"><value>Current result preview</value></data>
   <data name="AiPrompt_ChoosePhoto" xml:space="preserve"><value>Choose photo</value></data>
+  <data name="AiPrompt_Title" xml:space="preserve"><value>AI design prompts</value></data>
+  <data name="AiPrompt_Quick" xml:space="preserve"><value>Quick prompts</value></data>
+  <data name="AiPrompt_DetailPending" xml:space="preserve"><value>Detailed review will be available in the next step.</value></data>
+  <data name="AiPrompt_Templates" xml:space="preserve"><value>Reusable templates</value></data>
+  <data name="AiPrompt_Inputs" xml:space="preserve"><value>This draft</value></data>
+  <data name="AiPrompt_FinalText" xml:space="preserve"><value>Editable prompt</value></data>
+  <data name="AiPrompt_Compose" xml:space="preserve"><value>Generate prompt</value></data>
+  <data name="AiPrompt_Copy" xml:space="preserve"><value>Copy prompt</value></data>
+  <data name="AiPrompt_Save" xml:space="preserve"><value>Save draft</value></data>
+  <data name="AiPrompt_EditTemplate" xml:space="preserve"><value>Edit reusable template</value></data>
+  <data name="AiPrompt_Saved" xml:space="preserve"><value>Draft saved.</value></data>
+  <data name="AiPrompt_Copied" xml:space="preserve"><value>Prompt copied. Provide the listed image files separately.</value></data>
+  <data name="AiPrompt_SaveFailed" xml:space="preserve"><value>Could not save or read this draft. Your edits remain here; retry before continuing.</value></data>
+  <data name="AiPrompt_Changed" xml:space="preserve"><value>The draft changed during this action. Your latest edits remain; retry.</value></data>
+  <data name="AiPrompt_CopyFailed" xml:space="preserve"><value>Could not access the clipboard. Your draft is saved; retry copying.</value></data>
+  <data name="AiPrompt_PreviewFailed" xml:space="preserve"><value>This image preview is unavailable. Choose a verified image again.</value></data>
+  <data name="AiPrompt_TemplateConfirmRequired" xml:space="preserve"><value>Review the variable template preview and confirm before saving.</value></data>
+  <data name="AiPrompt_TemplateSaveFailed" xml:space="preserve"><value>Template could not be saved. Check variables, image slots and defaults, then retry.</value></data>
+  <data name="AiPrompt_TemplateNotice" xml:space="preserve"><value>This preview starts from the reusable variable template. Customer fields, images and manual draft text are not copied into it. Edit the preview for future drafts; the current prompt stays as saved.</value></data>
+  <data name="AiPrompt_TemplateName" xml:space="preserve"><value>Template name</value></data>
+  <data name="AiPrompt_TemplateBody" xml:space="preserve"><value>Variable template preview</value></data>
+  <data name="AiPrompt_TemplateFields" xml:space="preserve"><value>Variables and optional lines</value></data>
+  <data name="AiPrompt_Confirmed" xml:space="preserve"><value>I checked the variables and removed customer-specific content.</value></data>
+  <data name="AiPrompt_SaveTemplate" xml:space="preserve"><value>Save template</value></data>
+  <data name="AiPrompt_SaveAsNew" xml:space="preserve"><value>Save as a new personal template</value></data>
+  <data name="AiPrompt_Close" xml:space="preserve"><value>Close</value></data>
+  <data name="AiPrompt_ConfirmChange" xml:space="preserve"><value>The current draft has been saved. Continue by creating a new revision? The previous version remains in recent history.</value></data>
+  <data name="AiPrompt_PreserveContinue" xml:space="preserve"><value>Keep previous version and continue</value></data>
+  <data name="AiPrompt_Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="AiPrompt_History" xml:space="preserve"><value>Recent saved versions (up to 50)</value></data>
+  <data name="AiPrompt_Restore" xml:space="preserve"><value>Restore this version</value></data>
+  <data name="AiPrompt_Photos" xml:space="preserve"><value>Referenced photos</value></data>
+  <data name="AiPrompt_RemovePhoto" xml:space="preserve"><value>Remove photo from all roles</value></data>
+  <data name="AiPrompt_Expand" xml:space="preserve"><value>Enlarge</value></data>
+  <data name="AiPrompt_Reuse" xml:space="preserve"><value>Use selected saved image</value></data>
+  <data name="AiPrompt_AddReference" xml:space="preserve"><value>Insert image reference</value></data>
+  <data name="AiPrompt_ReferenceRole" xml:space="preserve"><value>Role for new image reference</value></data>
+  <data name="AiPrompt_Manifest" xml:space="preserve"><value>Files to provide with this prompt</value></data>
+  <data name="AiPrompt_ManifestNotice" xml:space="preserve"><value>Image references are expanded to upload names when copied. Missing photos stay marked as pending. Automatic image generation is unavailable here.</value></data>
+  <data name="AiPrompt_NoDate" xml:space="preserve"><value>Leave the date empty to omit that line. Preserve the original spelling and date text.</value></data>
+  <data name="AiPrompt_AddField" xml:space="preserve"><value>Add variable</value></data>
+  <data name="AiPrompt_RemoveField" xml:space="preserve"><value>Remove variable</value></data>
+  <data name="AiPrompt_Key" xml:space="preserve"><value>Variable name</value></data>
+  <data name="AiPrompt_Kind" xml:space="preserve"><value>Type</value></data>
+  <data name="AiPrompt_Semantic" xml:space="preserve"><value>Meaning</value></data>
+  <data name="AiPrompt_Default" xml:space="preserve"><value>Reusable default</value></data>
+  <data name="AiPrompt_Slot" xml:space="preserve"><value>Stable image slot</value></data>
+  <data name="AiPrompt_DateLabel" xml:space="preserve"><value>Date label</value></data>
+  <data name="AiPrompt_Required" xml:space="preserve"><value>Required</value></data>
+  <data name="AiPrompt_DefaultTemplate" xml:space="preserve"><value>Default template</value></data>
+  <data name="AiPrompt_Favorites" xml:space="preserve"><value>Favorites</value></data>
+  <data name="AiPrompt_SetDefault" xml:space="preserve"><value>Set as default</value></data>
+  <data name="AiPrompt_ToggleFavorite" xml:space="preserve"><value>Favorite / unfavorite</value></data>
+  <data name="AiPrompt_MoveUp" xml:space="preserve"><value>Move up</value></data>
+  <data name="AiPrompt_MoveDown" xml:space="preserve"><value>Move down</value></data>
+  <data name="AiPrompt_DeletePersonal" xml:space="preserve"><value>Delete personal template</value></data>
+  <data name="AiPrompt_RestoreBuiltin" xml:space="preserve"><value>Restore built-in original</value></data>
+  <data name="AiPrompt_Manage" xml:space="preserve"><value>Manage templates</value></data>
+  <data name="AiPrompt_NameField" xml:space="preserve"><value>Name (verbatim)</value></data>
+  <data name="AiPrompt_BirthField" xml:space="preserve"><value>Birth date (optional)</value></data>
+  <data name="AiPrompt_DeathField" xml:space="preserve"><value>Death date (optional)</value></data>
+  <data name="AiPrompt_TextKind" xml:space="preserve"><value>Text</value></data>
+  <data name="AiPrompt_DateKind" xml:space="preserve"><value>Optional date line</value></data>
+  <data name="AiPrompt_ImageKind" xml:space="preserve"><value>Image reference</value></data>
+  <data name="AiPrompt_FreeText" xml:space="preserve"><value>Other text</value></data>
+  <data name="AiPrompt_PersonImage" xml:space="preserve"><value>Person photo</value></data>
+  <data name="AiPrompt_LayoutImage" xml:space="preserve"><value>Layout reference</value></data>
+  <data name="AiPrompt_EditSourceImage" xml:space="preserve"><value>Artwork to edit</value></data>
+  <data name="AiPrompt_SelectTemplate" xml:space="preserve"><value>Use this template</value></data>
+  <data name="AiPrompt_ManualNotice" xml:space="preserve"><value>Edited for this draft. Field changes will not overwrite this text.</value></data>
+  <data name="AiPrompt_FieldsChangedNotice" xml:space="preserve"><value>Information changed. Generate the prompt again to include it.</value></data>
+  <data name="AiPrompt_SaveInstanceTemplate" xml:space="preserve"><value>Save this prompt as a template</value></data>
+  <data name="AiPrompt_InstancePreviewNotice" xml:space="preserve"><value>This preview preserves your current wording and converts image references and matching known fields to variables. Check every line: ambiguous or manually changed customer details must be replaced with variables before you confirm. No customer photos or field values become template defaults.</value></data>
 </root>

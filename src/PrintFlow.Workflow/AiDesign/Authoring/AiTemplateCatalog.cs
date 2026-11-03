@@ -5,6 +5,7 @@ namespace PrintFlow.Workflow.AiDesign.Authoring;
 
 public sealed class AiTemplateCatalog(IAiTemplateLibraryStore store, string language = "zh-CN")
 {
+    public Task<OperationResult<AiTemplateLibrary>> ReadLibraryAsync(CancellationToken ct) => store.ReadAsync(ct);
     public async Task<OperationResult<IReadOnlyList<AiTemplateDefinition>>> ListAsync(CancellationToken ct)
     {
         var result = await store.ReadAsync(ct);

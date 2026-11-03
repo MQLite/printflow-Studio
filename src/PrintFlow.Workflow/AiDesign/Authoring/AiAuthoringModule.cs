@@ -19,6 +19,7 @@ public sealed partial class AiAuthoringModule(IAiAuthoringDraftStore store, AiTe
         return await store.SaveAsync(draft, null, ct);
     }
     public Task<OperationResult<AiAuthoringDraft>> ReadAsync(Guid id, CancellationToken ct) => store.ReadAsync(id, ct);
+    public Task<OperationResult<IReadOnlyList<AiAuthoringDraft>>> ReadHistoryAsync(Guid id, CancellationToken ct) => store.ReadHistoryAsync(id, ct);
     public async Task<OperationResult<AiAuthoringDraft>> ApplyAsync(Guid id, long expectedRevision, AiAuthoringEdit edit, CancellationToken ct)
     {
         try
@@ -31,6 +32,20 @@ public sealed partial class AiAuthoringModule(IAiAuthoringDraftStore store, AiTe
             AiAuthoringDraft next;
             switch (edit)
             {
+                case AiAuthoringEdit.RestoreRevision restore:
+                    var history = await store.ReadHistoryAsync(id, ct);
+                    if (history.IsFailure) return OperationResult.Fail<AiAuthoringDraft>(history.Failure);
+                    var historical = history.Value.SingleOrDefault(x => x.Revision == restore.Revision);
+                    if (historical is null) return Fail("Historical revision is unavailable.");
+                    next = historical with { Revision = expectedRevision };
+                    var historicalAssets = ActiveAssets(next);
+                    if (historicalAssets.Count > 0)
+                    {
+                        if (attachments is null) return Fail("Verified image reads are unavailable.");
+                        var verifiedHistory = await attachments.VerifyImagesAsync(id, historicalAssets, ct);
+                        if (verifiedHistory.IsFailure) return OperationResult.Fail<AiAuthoringDraft>(verifiedHistory.Failure);
+                    }
+                    break;
                 case AiAuthoringEdit.SetField field:
                     if (field.Value is null || !draft.TemplateSnapshot.Fields.Any(x => x.Kind != AiTemplateFieldKind.ImageReference && (x.Key == field.Key ||
                         x.Kind == AiTemplateFieldKind.OptionalDateLine && (x.Key + ".label" == field.Key || x.Key + ".format" == field.Key))))

@@ -14,6 +14,34 @@ internal sealed class AuthoringVersionedFileStore<T>(string workspaceRoot, Guid?
     private sealed record Pointer(int SchemaVersion, long Revision, Guid VersionId);
     private sealed record Version(int SchemaVersion, Guid VersionId, Guid? PreviousVersionId, T Value);
 
+    public async Task<OperationResult<IReadOnlyList<T>>> ReadHistoryAsync(CancellationToken ct)
+    {
+        try
+        {
+            ct.ThrowIfCancellationRequested();
+            using var parents = AiDesignOwnedStagingFiles.PinAuthoringDirectory(workspaceRoot, draftId);
+            await using var gate = await LockAsync(ct);
+            var current = await ReadCurrentAsync(ct) ?? throw new IOException("Saved authoring data is missing.");
+            List<T> values = []; HashSet<Guid> seen = [];
+            Guid? nextId = current.Pointer.VersionId; long expected = current.Pointer.Revision;
+            while (nextId is { } id && values.Count < 50)
+            {
+                if (id == Guid.Empty || !seen.Add(id)) throw new JsonException("Invalid authoring history link.");
+                var version = await ReadJsonAsync<Version>(Path.Combine(DirectoryPath, $"revision-{id:N}.json"), MaxSnapshotBytes, ct);
+                if (version.SchemaVersion != 1 || version.VersionId != id || version.Value is null ||
+                    version.PreviousVersionId == Guid.Empty || version.PreviousVersionId == id)
+                    throw new JsonException("Invalid authoring history identity.");
+                var value = freeze(version.Value);
+                if (revision(value) != expected || (expected == 0) != (version.PreviousVersionId is null))
+                    throw new JsonException("Invalid authoring history revision.");
+                values.Add(value); nextId = version.PreviousVersionId; expected--;
+            }
+            return OperationResult.Ok<IReadOnlyList<T>>(values.AsReadOnly());
+        }
+        catch (Exception ex) when (IsBoundaryFailure(ex))
+        { return OperationResult.Fail<IReadOnlyList<T>>(ex is OperationCanceledException ? FailureCode.Cancelled : FailureCode.PersistenceError, "Authoring history could not be read."); }
+    }
+
     public async Task<OperationResult<T>> ReadAsync(CancellationToken ct)
     {
         try

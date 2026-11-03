@@ -1,0 +1,96 @@
+<UserControl x:Class="PrintFlow.App.Views.AiDesign.QuickPromptView"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:r="clr-namespace:PrintFlow.App.Views.AiDesign" xmlns:controls="clr-namespace:PrintFlow.App.Controls"
+ xmlns:views="clr-namespace:PrintFlow.App.Views">
+ <UserControl.Resources>
+  <views:PreviewPayloadConverter x:Key="Preview"/>
+  <r:PromptHistoryPreviewConverter x:Key="HistoryPreview"/>
+  <Style TargetType="Button"><Setter Property="Padding" Value="9,7"/><Setter Property="Margin" Value="0,4,6,4"/></Style>
+  <Style TargetType="TextBox"><Setter Property="Padding" Value="7"/><Setter Property="Margin" Value="0,4,0,10"/></Style>
+  <Style x:Key="Panel" TargetType="Border"><Setter Property="Padding" Value="12"/><Setter Property="CornerRadius" Value="8"/><Setter Property="BorderThickness" Value="1"/><Setter Property="BorderBrush" Value="#C4D9D4"/><Setter Property="Background" Value="{DynamicResource PF.Brush.Canvas}"/></Style>
+  <Style x:Key="Heading" TargetType="TextBlock"><Setter Property="FontWeight" Value="SemiBold"/><Setter Property="FontSize" Value="18"/><Setter Property="Margin" Value="0,0,0,12"/><Setter Property="TextWrapping" Value="Wrap"/></Style>
+ </UserControl.Resources>
+ <Grid IsEnabled="{Binding CanEdit}">
+  <Grid.ColumnDefinitions><ColumnDefinition Width="1.1*" MinWidth="180"/><ColumnDefinition Width="12"/><ColumnDefinition Width="1.5*" MinWidth="240"/><ColumnDefinition Width="12"/><ColumnDefinition Width="2.2*" MinWidth="330"/></Grid.ColumnDefinitions>
+  <Border Style="{StaticResource Panel}">
+   <DockPanel>
+    <TextBlock DockPanel.Dock="Top" Style="{StaticResource Heading}" Text="{x:Static r:AiPromptLabels.AiPrompt_Templates}"/>
+    <StackPanel DockPanel.Dock="Bottom">
+     <Button Content="{x:Static r:AiPromptLabels.AiPrompt_EditTemplate}" Command="{Binding EditTemplateCommand}" HorizontalContentAlignment="Left"/>
+     <Button Command="{Binding SaveInstanceTemplateCommand}" HorizontalContentAlignment="Left"><TextBlock Text="{x:Static r:AiPromptLabels.AiPrompt_SaveInstanceTemplate}" TextWrapping="Wrap"/></Button>
+    </StackPanel>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+     <StackPanel>
+      <TextBlock Text="{x:Static r:AiPromptLabels.AiPrompt_DefaultTemplate}" FontSize="12"/><TextBlock Text="{Binding DefaultTemplateName}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,2,0,8"/>
+      <TextBlock Text="{x:Static r:AiPromptLabels.AiPrompt_Favorites}" FontSize="12"/><TextBlock Text="{Binding FavoriteTemplateNames}" TextWrapping="Wrap" Margin="0,2,0,12"/>
+      <ItemsControl ItemsSource="{Binding Templates}"><ItemsControl.ItemTemplate><DataTemplate>
+       <StackPanel Margin="0,0,0,10">
+        <Button Command="{Binding DataContext.SelectTemplateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" HorizontalContentAlignment="Stretch" Padding="10,16" Margin="0,0,0,4">
+         <TextBlock Text="{Binding Content.Name}" TextWrapping="Wrap" FontWeight="SemiBold"/>
+        </Button>
+        <Expander Header="{x:Static r:AiPromptLabels.AiPrompt_Manage}"><StackPanel>
+         <Button Content="{x:Static r:AiPromptLabels.AiPrompt_SetDefault}" Command="{Binding DataContext.SetDefaultTemplateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"/>
+         <Button Content="{x:Static r:AiPromptLabels.AiPrompt_ToggleFavorite}" Command="{Binding DataContext.ToggleFavoriteCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"/>
+         <WrapPanel><Button Content="{x:Static r:AiPromptLabels.AiPrompt_MoveUp}" Command="{Binding DataContext.MoveTemplateUpCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"/><Button Content="{x:Static r:AiPromptLabels.AiPrompt_MoveDown}" Command="{Binding DataContext.MoveTemplateDownCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"/></WrapPanel>
+         <Button Content="{x:Static r:AiPromptLabels.AiPrompt_DeletePersonal}" Command="{Binding DataContext.DeleteTemplateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"/>
+         <Button Content="{x:Static r:AiPromptLabels.AiPrompt_RestoreBuiltin}" Command="{Binding DataContext.RestoreBuiltinCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"/>
+        </StackPanel></Expander>
+       </StackPanel>
+      </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+     </StackPanel>
+    </ScrollViewer>
+   </DockPanel>
+  </Border>
+  <Border Grid.Column="2" Style="{StaticResource Panel}">
+   <DockPanel>
+    <TextBlock DockPanel.Dock="Top" Style="{StaticResource Heading}" Text="{x:Static r:AiPromptLabels.AiPrompt_Inputs}"/>
+    <Button DockPanel.Dock="Bottom" Content="{x:Static r:AiPromptLabels.AiPrompt_Compose}" Command="{Binding ComposeCommand}" AutomationProperties.AutomationId="AiPrompt.Compose"/>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+     <StackPanel>
+      <TextBlock Text="{x:Static r:AiPromptLabels.AiPrompt_NoDate}" TextWrapping="Wrap" Margin="0,0,0,10"/>
+      <ItemsControl ItemsSource="{Binding Fields}"><ItemsControl.ItemTemplate><DataTemplate>
+       <StackPanel><TextBlock Text="{Binding Label}" TextWrapping="Wrap"/><TextBox Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="{Binding Label}" AcceptsReturn="True" TextWrapping="Wrap" MaxHeight="110" VerticalScrollBarVisibility="Auto"/></StackPanel>
+      </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+      <TextBlock Text="{x:Static r:AiPromptLabels.AiPrompt_Photos}" FontWeight="SemiBold" Margin="0,8,0,8"/>
+      <ItemsControl ItemsSource="{Binding Photos}"><ItemsControl.ItemTemplate><DataTemplate>
+       <Border Style="{StaticResource Panel}" Margin="0,0,0,10" Padding="8">
+        <StackPanel>
+         <TextBlock Text="{Binding Role}" FontWeight="SemiBold" TextWrapping="Wrap"/>
+         <Image Source="{Binding Preview.Payload, Converter={StaticResource Preview}}" Height="76" Stretch="Uniform" AutomationProperties.Name="{Binding Role}"/>
+         <TextBlock Text="{Binding FileName}" TextWrapping="Wrap" FontSize="12"/>
+         <TextBlock Text="{Binding PreviewError}" TextWrapping="Wrap" Foreground="#B42318"/>
+         <Button Content="{x:Static r:AiPromptLabels.AiPrompt_ChoosePhoto}" Command="{Binding DataContext.PickSlotImageCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding SlotId}" AutomationProperties.Name="{Binding Role}"/>
+         <WrapPanel>
+          <Button Content="{x:Static r:AiPromptLabels.AiPrompt_Expand}" Command="{Binding DataContext.ExpandPhotoCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"/>
+          <Button Content="{x:Static r:AiPromptLabels.AiPrompt_RemovePhoto}" Command="{Binding DataContext.RemovePhotoCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"/>
+         </WrapPanel>
+         <ComboBox ItemsSource="{Binding AvailableAssets}" SelectedItem="{Binding SelectedAsset}" DisplayMemberPath="UploadName" AutomationProperties.Name="{x:Static r:AiPromptLabels.AiPrompt_Reuse}"/>
+         <Button Content="{x:Static r:AiPromptLabels.AiPrompt_Reuse}" Command="{Binding DataContext.ReusePhotoCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"/>
+        </StackPanel>
+       </Border>
+      </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+      <Expander Header="{x:Static r:AiPromptLabels.AiPrompt_AddReference}"><StackPanel><TextBox Text="{Binding ReferenceRole, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="{x:Static r:AiPromptLabels.AiPrompt_ReferenceRole}"/><Button Content="{x:Static r:AiPromptLabels.AiPrompt_AddReference}" Command="{Binding AddReferenceCommand}"/></StackPanel></Expander>
+     </StackPanel>
+    </ScrollViewer>
+   </DockPanel>
+  </Border>
+  <Border Grid.Column="4" Style="{StaticResource Panel}">
+   <Grid>
+    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+    <StackPanel><TextBlock Style="{StaticResource Heading}" Text="{x:Static r:AiPromptLabels.AiPrompt_FinalText}"/><TextBlock Text="{Binding PromptNotice}" TextWrapping="Wrap" Foreground="#875800" Margin="0,0,0,6" AutomationProperties.LiveSetting="Polite"/></StackPanel>
+    <controls:AiPromptEditor Grid.Row="1" x:Name="PromptEditor" Document="{Binding Document, Mode=TwoWay}" ReferenceLabels="{Binding ReferenceLabels}" ImageReferenceInvoked="OnImageReferenceInvoked" AutomationProperties.Name="{x:Static r:AiPromptLabels.AiPrompt_FinalText}"/>
+    <StackPanel Grid.Row="2" Margin="0,10,0,0">
+     <TextBlock Text="{x:Static r:AiPromptLabels.AiPrompt_ManifestNotice}" TextWrapping="Wrap" FontSize="12"/>
+     <Expander Header="{x:Static r:AiPromptLabels.AiPrompt_Manifest}"><ScrollViewer MaxHeight="120" VerticalScrollBarVisibility="Auto"><ItemsControl ItemsSource="{Binding AttachmentManifest}"><ItemsControl.ItemTemplate><DataTemplate><TextBlock TextWrapping="Wrap"><Run Text="{Binding UploadName}"/><Run Text=" · "/><Run Text="{Binding Purpose}"/></TextBlock></DataTemplate></ItemsControl.ItemTemplate></ItemsControl></ScrollViewer></Expander>
+    </StackPanel>
+    <Expander Grid.Row="3" Header="{x:Static r:AiPromptLabels.AiPrompt_History}" Margin="0,8,0,0">
+     <StackPanel><Button Content="{x:Static r:AiPromptLabels.AiPrompt_History}" Command="{Binding RefreshHistoryCommand}"/>
+      <ScrollViewer MaxHeight="130" VerticalScrollBarVisibility="Auto"><ItemsControl ItemsSource="{Binding History}"><ItemsControl.ItemTemplate><DataTemplate>
+       <Expander Header="{Binding Revision}"><StackPanel><TextBlock Text="{Binding FinalDocument, Converter={StaticResource HistoryPreview}}" TextWrapping="Wrap" MaxHeight="140" TextTrimming="CharacterEllipsis"/><Button Content="{x:Static r:AiPromptLabels.AiPrompt_Restore}" Command="{Binding DataContext.RestoreHistoryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"/></StackPanel></Expander>
+      </DataTemplate></ItemsControl.ItemTemplate></ItemsControl></ScrollViewer>
+     </StackPanel>
+    </Expander>
+   </Grid>
+  </Border>
+ </Grid>
+</UserControl>
