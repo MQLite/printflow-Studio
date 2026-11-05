@@ -41,6 +41,9 @@ public sealed class FileAiAuthoringDraftStore(string workspaceRoot) : IAiAuthori
     public Task<OperationResult<AiAuthoringDraft>> ReadAsync(Guid id, CancellationToken ct) => Store(id).ReadAsync(ct);
     public Task<OperationResult<IReadOnlyList<AiAuthoringDraft>>> ReadHistoryAsync(Guid id, CancellationToken ct) => Store(id).ReadHistoryAsync(ct);
     public Task<OperationResult<AiAuthoringDraft>> SaveAsync(AiAuthoringDraft value, long? expectedRevision, CancellationToken ct) => Store(value.Id).SaveAsync(value, expectedRevision, ct);
+    public Task<OperationResult<T>> WithCurrentRevisionAsync<T>(Guid id, long expectedRevision,
+        Func<AiAuthoringDraft, Task<OperationResult<T>>> publish, CancellationToken ct) =>
+        Store(id).WithCurrentRevisionAsync(expectedRevision, publish, ct);
 
     private AuthoringVersionedFileStore<AiAuthoringDraft> Store(Guid id) => new(workspaceRoot, id,
         value => value is not null && value.Id == id ? AiAuthoringSnapshots.Draft(value) : throw new ArgumentException("Draft identity mismatch."),

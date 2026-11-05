@@ -27,6 +27,8 @@ using PrintFlow.Workflow.AiDesign;
 using PrintFlow.Workflow.AiDesign.Authoring;
 using PrintFlow.Infrastructure.AiDesign;
 using PrintFlow.Infrastructure.AiDesign.Authoring;
+using PrintFlow.Infrastructure.AiDesign.Memorial;
+using PrintFlow.Workflow.AiDesign.Memorial;
 
 namespace PrintFlow.App.Composition;
 
@@ -224,6 +226,24 @@ public static class ServiceRegistration
         services.AddSingleton<IAiDesignAttachments>(_ => new FileAiDesignAttachments(workspaceRootAbsolute));
         services.AddSingleton<AiAuthoringModule>();
         services.AddSingleton<IAiAuthoringAssetPreview>(_ => new FileAiAuthoringAssetPreview(workspaceRootAbsolute));
+        services.AddSingleton(_ => new VerifiedAiAttachmentReader(workspaceRootAbsolute));
+        services.AddSingleton(_ => new WpfMemorialTextLayout());
+        services.AddSingleton<IMemorialTextLayout>(p => p.GetRequiredService<WpfMemorialTextLayout>());
+        services.AddSingleton(_ => new FileMemorialRenderStore(workspaceRootAbsolute));
+        services.AddSingleton<IMemorialRenderStore>(p => p.GetRequiredService<FileMemorialRenderStore>());
+        services.AddSingleton<IMemorialRenderer, WpfMemorialRenderer>();
+        services.AddSingleton<IMemorialRenderPreview, FileMemorialRenderPreview>();
+        services.AddSingleton<MemorialCompositionModule>();
+        services.AddSingleton<IAiAuthoringAssetFork>(_ => new FileAiAuthoringAssetFork(workspaceRootAbsolute));
+        services.AddSingleton(p => new MemorialVersionModule(p.GetRequiredService<IAiAuthoringDraftStore>(),
+            p.GetRequiredService<IAiAuthoringAssetFork>(), System.Globalization.CultureInfo.CurrentUICulture.Name));
+        services.AddSingleton<IMemorialReviewStore>(_ => new FileMemorialReviewStore(workspaceRootAbsolute));
+        services.AddSingleton<MemorialReviewChecklist>();
+        services.AddSingleton<IMemorialMaterialExporter>(p => new FileMemorialMaterialExporter(
+            p.GetRequiredService<IMemorialRenderStore>(), p.GetRequiredService<IMemorialReviewStore>(),
+            p.GetRequiredService<IAiAuthoringDraftStore>(), [workspaceRootAbsolute, System.IO.Path.GetDirectoryName(presetManifestPath)!]));
+        services.AddSingleton<IAiDesignPngSavePicker, SaveAiDesignPngDialog>();
+        services.AddSingleton<AiMemorialServices>();
         services.AddSingleton<IAiPromptClipboard, SystemAiPromptClipboard>();
         services.AddSingleton<IAiDraftLeavePrompt, SystemAiDraftLeavePrompt>();
         services.AddTransient<AiPromptWorkbenchViewModel>();

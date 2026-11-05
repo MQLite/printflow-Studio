@@ -113,6 +113,9 @@ public sealed class AuthoringGraphTests
         public Task<OperationResult<AiAuthoringDraft>> ReadAsync(Guid id, CancellationToken ct) => inner.ReadAsync(id, ct);
         public Task<OperationResult<IReadOnlyList<AiAuthoringDraft>>> ReadHistoryAsync(Guid id, CancellationToken ct) => inner.ReadHistoryAsync(id, ct);
         public Task<OperationResult<AiAuthoringDraftListing>> ListAsync(CancellationToken ct) => inner.ListAsync(ct);
+        public Task<OperationResult<T>> WithCurrentRevisionAsync<T>(Guid id, long expectedRevision,
+            Func<AiAuthoringDraft, Task<OperationResult<T>>> publish, CancellationToken ct) =>
+            inner.WithCurrentRevisionAsync(id, expectedRevision, publish, ct);
         public Task<OperationResult<AiAuthoringDraft>> SaveAsync(AiAuthoringDraft value, long? expectedRevision, CancellationToken ct) =>
             expectedRevision is null ? Task.FromResult(OperationResult.Fail<AiAuthoringDraft>(FailureCode.PersistenceError, "New publication refused.")) : inner.SaveAsync(value, expectedRevision, ct);
     }

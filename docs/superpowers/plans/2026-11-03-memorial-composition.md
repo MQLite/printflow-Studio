@@ -10,6 +10,8 @@
 
 **Spec:** [已通过设计](../specs/2026-11-03-memorial-guided-design.md)；同时读取[主计划](2026-11-03-memorial-authoring-plan.md)与[A接口](2026-11-03-memorial-prompt-workbench.md)。
 
+2026-11-05 续接：[B3–B5 实施与验证记录](../../codex/memorial-authoring/SCRUM-11228-11230.md)。受管发布、转换和导出共用修订保护，作为同一集成提交记录；人工及生产验收继续保留。
+
 ## Global Constraints
 
 继承主计划全部约束。A完成后B才可实施。原样沿用表示来源素材与内容不被重新绘制，只允许明确的几何变换；等比重采样后的PNG字节可以不同，不能用输出字节不同就判断人物已被重绘。参考原图不具备可用素材时准确报缺口，不调用自动抠图或装饰拆层。

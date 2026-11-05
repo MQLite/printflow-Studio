@@ -1,0 +1,42 @@
+<UserControl x:Class="PrintFlow.App.Views.AiDesign.MemorialResultReviewView"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:r="clr-namespace:PrintFlow.App.Views.AiDesign">
+ <UserControl.Resources>
+  <BooleanToVisibilityConverter x:Key="VisibleIf"/>
+  <Style TargetType="TextBlock"><Setter Property="TextWrapping" Value="Wrap"/></Style>
+  <Style TargetType="Button"><Setter Property="Margin" Value="0,4,5,4"/><Setter Property="Padding" Value="8,5"/></Style>
+ </UserControl.Resources>
+ <StackPanel>
+  <TextBlock Text="{x:Static r:AiMemorialLabels.MaterialHelp}" Margin="0,0,0,6"/>
+  <Button Content="{x:Static r:AiMemorialLabels.RenderMaterial}" Command="{Binding RenderMemorialMaterialCommand}" IsEnabled="{Binding CanPreviewLayout}" AutomationProperties.AutomationId="Memorial.RenderMaterial"/>
+  <Button Content="{x:Static r:AiMemorialLabels.LoadResults}" Command="{Binding RefreshMemorialResultsCommand}"/>
+  <ItemsControl ItemsSource="{Binding MemorialResults}"><ItemsControl.ItemTemplate><DataTemplate>
+   <Button Command="{Binding DataContext.OpenMemorialResultCommand, RelativeSource={RelativeSource AncestorType=r:MemorialResultReviewView}}" CommandParameter="{Binding}" HorizontalContentAlignment="Left">
+    <TextBlock Text="{Binding Label}"/>
+   </Button>
+  </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+  <StackPanel Visibility="{Binding HasMemorialParent, Converter={StaticResource VisibleIf}}">
+   <TextBlock Text="{x:Static r:AiMemorialLabels.CompareSource}" FontWeight="SemiBold" Margin="0,6,0,0"/>
+   <ItemsControl ItemsSource="{Binding MemorialSourceResults}"><ItemsControl.ItemTemplate><DataTemplate>
+    <Button Command="{Binding DataContext.CompareMemorialSourceCommand, RelativeSource={RelativeSource AncestorType=r:MemorialResultReviewView}}" CommandParameter="{Binding}" HorizontalContentAlignment="Left">
+     <TextBlock Text="{Binding Label}"/>
+    </Button>
+   </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+  </StackPanel>
+  <TextBlock Text="{Binding MemorialResultLabel}" FontWeight="SemiBold" Margin="0,10,0,4"/>
+  <TextBlock Text="{x:Static r:AiMemorialLabels.Historical}" Foreground="#875800" Visibility="{Binding IsMemorialResultHistorical, Converter={StaticResource VisibleIf}}"/>
+  <StackPanel Visibility="{Binding IsCurrentMemorialReview, Converter={StaticResource VisibleIf}}">
+   <TextBlock Text="{x:Static r:AiMemorialLabels.ReviewHelp}" Margin="0,0,0,6"/>
+   <ItemsControl ItemsSource="{Binding MemorialChecks}"><ItemsControl.ItemTemplate><DataTemplate>
+    <CheckBox IsChecked="{Binding Checked, Mode=OneWay}" Command="{Binding DataContext.ToggleMemorialCheckCommand, RelativeSource={RelativeSource AncestorType=r:MemorialResultReviewView}}"
+              CommandParameter="{Binding}" IsEnabled="{Binding DataContext.CanCheckMemorialResult, RelativeSource={RelativeSource AncestorType=r:MemorialResultReviewView}}" Margin="0,5">
+     <TextBlock Text="{Binding Label}"/>
+    </CheckBox>
+   </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+   <Button Content="{x:Static r:AiMemorialLabels.Accept}" Command="{Binding AcceptMemorialResultCommand}" IsEnabled="{Binding CanAcceptMemorialResult}" AutomationProperties.AutomationId="Memorial.Accept"/>
+   <TextBlock Text="{x:Static r:AiMemorialLabels.Accepted}" Visibility="{Binding IsMemorialResultAccepted, Converter={StaticResource VisibleIf}}"/>
+   <Button Content="{x:Static r:AiMemorialLabels.Export}" Command="{Binding ExportMemorialPngCommand}" IsEnabled="{Binding CanExportMemorialPng}" AutomationProperties.AutomationId="Memorial.Export"/>
+  </StackPanel>
+  <TextBlock Text="{x:Static r:AiMemorialLabels.ManualHandoff}" Margin="0,8,0,0"/>
+ </StackPanel>
+</UserControl>

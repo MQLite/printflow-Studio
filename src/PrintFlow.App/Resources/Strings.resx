@@ -1572,4 +1572,82 @@
   <data name="Session_BackgroundRemovalMode_PortraitPets" xml:space="preserve"><value>Portraits / Pets</value></data>
   <data name="Session_BackgroundRemovalMode_Products" xml:space="preserve"><value>Products / Goods</value></data>
   <data name="Session_BackgroundRemovalMode_LogosStamps" xml:space="preserve"><value>Logos / Stamps</value></data>
+  <data name="AiMemorial_LayoutHelp" xml:space="preserve"><value>Review the source images and exact text first. Choose which images are placed in the design, then save and confirm the placement. To use a local background, add it as a reference in step 2, review its permissions in step 3, and select the Background role here.</value></data>
+  <data name="AiMemorial_EditLayout" xml:space="preserve"><value>Edit layout</value></data>
+  <data name="AiMemorial_MmHelp" xml:space="preserve"><value>All measurements are in millimetres. Image height follows its source proportions.</value></data>
+  <data name="AiMemorial_LayerRole" xml:space="preserve"><value>Layer role</value></data>
+  <data name="AiMemorial_Left" xml:space="preserve"><value>Left</value></data>
+  <data name="AiMemorial_Top" xml:space="preserve"><value>Top</value></data>
+  <data name="AiMemorial_Width" xml:space="preserve"><value>Width</value></data>
+  <data name="AiMemorial_Height" xml:space="preserve"><value>Height</value></data>
+  <data name="AiMemorial_Font" xml:space="preserve"><value>Installed font</value></data>
+  <data name="AiMemorial_FontSize" xml:space="preserve"><value>Size (mm)</value></data>
+  <data name="AiMemorial_TextPlacement" xml:space="preserve"><value>Text shape</value></data>
+  <data name="AiMemorial_Radius" xml:space="preserve"><value>Radius (mm)</value></data>
+  <data name="AiMemorial_SaveLayout" xml:space="preserve"><value>Save placement</value></data>
+  <data name="AiMemorial_DiscardLayout" xml:space="preserve"><value>Discard placement edits</value></data>
+  <data name="AiMemorial_ConfirmLayout" xml:space="preserve"><value>Confirm saved layout</value></data>
+  <data name="AiMemorial_Preview" xml:space="preserve"><value>Render preview · 96 DPI</value></data>
+  <data name="AiMemorial_Convert" xml:space="preserve"><value>Make the other product</value></data>
+  <data name="AiMemorial_ConfirmConversion" xml:space="preserve"><value>Create separate draft</value></data>
+  <data name="AiMemorial_Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="AiMemorial_CancelTask" xml:space="preserve"><value>Stop current action</value></data>
+  <data name="AiMemorial_MaterialHelp" xml:space="preserve"><value>Render a separate design material at 300 DPI. Review that exact result before exporting it.</value></data>
+  <data name="AiMemorial_RenderMaterial" xml:space="preserve"><value>Render design PNG</value></data>
+  <data name="AiMemorial_LoadResults" xml:space="preserve"><value>Load saved results</value></data>
+  <data name="AiMemorial_CompareSource" xml:space="preserve"><value>Compare the source version</value></data>
+  <data name="AiMemorial_Historical" xml:space="preserve"><value>This result is from a different draft revision or the current draft has unsaved changes. It is available for viewing.</value></data>
+  <data name="AiMemorial_ReviewHelp" xml:space="preserve"><value>Check each item against the displayed source and result. Your checks apply only to this exact image.</value></data>
+  <data name="AiMemorial_Accept" xml:space="preserve"><value>Accept this design material</value></data>
+  <data name="AiMemorial_Accepted" xml:space="preserve"><value>Design material accepted. Printing checks are still required.</value></data>
+  <data name="AiMemorial_Export" xml:space="preserve"><value>Save design PNG…</value></data>
+  <data name="AiMemorial_ManualHandoff" xml:space="preserve"><value>Save the accepted PNG and choose it manually in the existing import workflow. The design review does not approve printing.</value></data>
+  <data name="AiMemorial_ProofTitle" xml:space="preserve"><value>Source and result</value></data>
+  <data name="AiMemorial_Checkerboard" xml:space="preserve"><value>Checkerboard</value></data>
+  <data name="AiMemorial_Black" xml:space="preserve"><value>Black</value></data>
+  <data name="AiMemorial_White" xml:space="preserve"><value>White</value></data>
+  <data name="AiMemorial_Guide" xml:space="preserve"><value>Badge safety guide</value></data>
+  <data name="AiMemorial_LayoutConfirmed" xml:space="preserve"><value>Layout confirmed</value></data>
+  <data name="AiMemorial_LayoutPending" xml:space="preserve"><value>Layout needs confirmation</value></data>
+  <data name="AiMemorial_SourceUnavailable" xml:space="preserve"><value>A verified source image could not be read. Reopen the draft or select the intended image again.</value></data>
+  <data name="AiMemorial_PlacementInputsChanged" xml:space="preserve"><value>Text, images or permissions changed. Discard the old placement edits and open the layout again.</value></data>
+  <data name="AiMemorial_InvalidPlacement" xml:space="preserve"><value>Enter finite positions and positive dimensions. Review the placement and source sizes.</value></data>
+  <data name="AiMemorial_TextDoesNotFit" xml:space="preserve"><value>The literal text does not fit. Enlarge its box, choose flat placement or adjust the font size.</value></data>
+  <data name="AiMemorial_MissingGlyph" xml:space="preserve"><value>The installed font cannot draw all characters. Choose a suitable font.</value></data>
+  <data name="AiMemorial_TextLayoutFailed" xml:space="preserve"><value>Review the exact text, font, and text box before saving.</value></data>
+  <data name="AiMemorial_OutsideArea" xml:space="preserve"><value>A layer is outside its allowed canvas or safety area. Adjust its position or size.</value></data>
+  <data name="AiMemorial_PlacementPermission" xml:space="preserve"><value>A source is missing or its placement exceeds the confirmed permissions. Review the source roles and permissions.</value></data>
+  <data name="AiMemorial_BadgeSize" xml:space="preserve"><value>Badge: outer circle {0:0.##} mm · safety circle {1:0.##} mm</value></data>
+  <data name="AiMemorial_ShirtSize" xml:space="preserve"><value>T-shirt design: {0:0.##} × {1:0.##} mm</value></data>
+  <data name="AiMemorial_RoleReference" xml:space="preserve"><value>Reference only</value></data>
+  <data name="AiMemorial_RolePerson" xml:space="preserve"><value>Person</value></data>
+  <data name="AiMemorial_RoleOriginalDecor" xml:space="preserve"><value>Original decoration</value></data>
+  <data name="AiMemorial_RoleGeneratedDecor" xml:space="preserve"><value>New decoration</value></data>
+  <data name="AiMemorial_RoleBackground" xml:space="preserve"><value>Background</value></data>
+  <data name="AiMemorial_TextFlat" xml:space="preserve"><value>Flat</value></data>
+  <data name="AiMemorial_TextArc" xml:space="preserve"><value>Upper arc</value></data>
+  <data name="AiMemorial_SourceReference" xml:space="preserve"><value>Reference image</value></data>
+  <data name="AiMemorial_SourceVersion" xml:space="preserve"><value>Source version</value></data>
+  <data name="AiMemorial_ConversionDetails" xml:space="preserve"><value>From saved revision {0}: {1}. Target: {2}. The new draft carries over the selected images and structured text. Hand-edited prompt prose stays in the source. Confirm the target placement, scale, text layout and safe area.</value></data>
+  <data name="AiMemorial_Cancelled" xml:space="preserve"><value>Action cancelled.</value></data>
+  <data name="AiMemorial_RenderFailed" xml:space="preserve"><value>Could not create a verified result. Check the saved layout and source images, then try again.</value></data>
+  <data name="AiMemorial_RenderReady" xml:space="preserve"><value>Verified design image ready to view.</value></data>
+  <data name="AiMemorial_ResultUnavailable" xml:space="preserve"><value>The saved result could not be verified or displayed.</value></data>
+  <data name="AiMemorial_ReviewUnavailable" xml:space="preserve"><value>The review could not be saved or restored. Reload the exact result and check it again.</value></data>
+  <data name="AiMemorial_ExportFailed" xml:space="preserve"><value>The PNG was not saved. Choose a new filename outside the protected workspace, and make sure the result is still current.</value></data>
+  <data name="AiMemorial_Exported" xml:space="preserve"><value>Saved design PNG to {0}. Printing checks are still required.</value></data>
+  <data name="AiMemorial_ConversionFailed" xml:space="preserve"><value>Could not create the separate product draft. Check the source version and image permissions.</value></data>
+  <data name="AiMemorial_ConversionReady" xml:space="preserve"><value>Separate product draft created. Review its new layout before rendering.</value></data>
+  <data name="AiMemorial_ResultLabel" xml:space="preserve"><value>{0} · revision {1} · {2} × {3} px · {4}</value></data>
+  <data name="AiMemorial_PreviewKind" xml:space="preserve"><value>Preview</value></data>
+  <data name="AiMemorial_MaterialKind" xml:space="preserve"><value>Design material</value></data>
+  <data name="AiMemorial_CheckPerson" xml:space="preserve"><value>Person, face and original details are retained</value></data>
+  <data name="AiMemorial_CheckDecor" xml:space="preserve"><value>Original decoration is complete</value></data>
+  <data name="AiMemorial_CheckText" xml:space="preserve"><value>Name, dates and labels match the verified text</value></data>
+  <data name="AiMemorial_CheckLayout" xml:space="preserve"><value>Placement and safe area are correct</value></data>
+  <data name="AiMemorial_CheckTransparency" xml:space="preserve"><value>Transparent areas look correct on the preview backgrounds</value></data>
+  <data name="AiMemorial_EnlargeProof" xml:space="preserve"><value>Inspect larger preview…</value></data>
+  <data name="AiMemorial_Zoom" xml:space="preserve"><value>Zoom</value></data>
+  <data name="AiMemorial_Background" xml:space="preserve"><value>Preview background</value></data>
+  <data name="AiMemorial_ProofReduced" xml:space="preserve"><value>The display image was reduced. The saved PNG retains the full dimensions shown above.</value></data>
 </root>

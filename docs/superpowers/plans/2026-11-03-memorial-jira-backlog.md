@@ -20,6 +20,8 @@
 
 后续B2 / SCRUM-11227 已实现：精确确认文字与日期标签、真实WPF字体度量/缺字检查、塑形字形簇弧线和RTL段落、B3可复用的冻结毫米轮廓；独立审查6项Important已RED→GREEN修复，44项新用例，最终20组1017项通过，详见[B2实施记录](../../codex/memorial-authoring/SCRUM-11227.md)。1项极长文字扫描性能Minor延期。本地交付，未修改Jira或关闭任务；B3–B5仍待实施，合成/自动通道能力门禁未启用。
 
+2026-11-05 续接 B3–B5：本地合成、独立成品转换、放大对照、结果核对与安全 PNG 导出已实施。见[本轮实施及 Jira 对照](../../codex/memorial-authoring/SCRUM-11228-11230.md)。实际 Work 和人工验收仍保留原门禁，未更改 Jira 状态。
+
 用户已批准实施计划，并明确要求“请据此计划添加到Jira Tasks & Epics”。本轮使用 Atlassian spec-to-backlog 工作流在既有 SCRUM 项目创建2个Epic和12个Task，没有启动产品实施或推送/发布。负责人、Sprint、故事点未设置；全部工单回读为To Do。
 
 ## 来源与追踪

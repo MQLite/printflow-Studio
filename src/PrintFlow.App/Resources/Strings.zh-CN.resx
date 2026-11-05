@@ -1562,4 +1562,82 @@
   <data name="Session_BackgroundRemovalMode_PortraitPets" xml:space="preserve"><value>人像宠物</value></data>
   <data name="Session_BackgroundRemovalMode_Products" xml:space="preserve"><value>商品货物</value></data>
   <data name="Session_BackgroundRemovalMode_LogosStamps" xml:space="preserve"><value>图标印章</value></data>
+  <data name="AiMemorial_LayoutHelp" xml:space="preserve"><value>先核对来源图片和精确文字，再选择排入成品的图片，保存并确认位置。使用本地背景时，先在第 2 步添加参考图，在第 3 步核对权限，再在此选择「背景」。</value></data>
+  <data name="AiMemorial_EditLayout" xml:space="preserve"><value>编辑版式</value></data>
+  <data name="AiMemorial_MmHelp" xml:space="preserve"><value>尺寸单位为毫米。图片高度随来源比例调整。</value></data>
+  <data name="AiMemorial_LayerRole" xml:space="preserve"><value>图层用途</value></data>
+  <data name="AiMemorial_Left" xml:space="preserve"><value>左</value></data>
+  <data name="AiMemorial_Top" xml:space="preserve"><value>上</value></data>
+  <data name="AiMemorial_Width" xml:space="preserve"><value>宽</value></data>
+  <data name="AiMemorial_Height" xml:space="preserve"><value>高</value></data>
+  <data name="AiMemorial_Font" xml:space="preserve"><value>已安装字体</value></data>
+  <data name="AiMemorial_FontSize" xml:space="preserve"><value>字号（毫米）</value></data>
+  <data name="AiMemorial_TextPlacement" xml:space="preserve"><value>文字形状</value></data>
+  <data name="AiMemorial_Radius" xml:space="preserve"><value>半径（毫米）</value></data>
+  <data name="AiMemorial_SaveLayout" xml:space="preserve"><value>保存排版</value></data>
+  <data name="AiMemorial_DiscardLayout" xml:space="preserve"><value>放弃版式编辑</value></data>
+  <data name="AiMemorial_ConfirmLayout" xml:space="preserve"><value>确认已保存的版式</value></data>
+  <data name="AiMemorial_Preview" xml:space="preserve"><value>生成预览 · 96 DPI</value></data>
+  <data name="AiMemorial_Convert" xml:space="preserve"><value>制作另一种成品</value></data>
+  <data name="AiMemorial_ConfirmConversion" xml:space="preserve"><value>创建独立草稿</value></data>
+  <data name="AiMemorial_Cancel" xml:space="preserve"><value>取消</value></data>
+  <data name="AiMemorial_CancelTask" xml:space="preserve"><value>停止当前操作</value></data>
+  <data name="AiMemorial_MaterialHelp" xml:space="preserve"><value>以 300 DPI 生成独立设计素材。导出前请核对这份确切的结果。</value></data>
+  <data name="AiMemorial_RenderMaterial" xml:space="preserve"><value>生成设计素材 PNG</value></data>
+  <data name="AiMemorial_LoadResults" xml:space="preserve"><value>读取已保存结果</value></data>
+  <data name="AiMemorial_CompareSource" xml:space="preserve"><value>对照来源版本</value></data>
+  <data name="AiMemorial_Historical" xml:space="preserve"><value>此结果来自其他草稿修订，或当前草稿有未保存改动。可查看此结果。</value></data>
+  <data name="AiMemorial_ReviewHelp" xml:space="preserve"><value>逐项对照来源和结果。核对记录只适用于这张确切的图片。</value></data>
+  <data name="AiMemorial_Accept" xml:space="preserve"><value>接受这份设计素材</value></data>
+  <data name="AiMemorial_Accepted" xml:space="preserve"><value>已接受设计素材，仍需印刷核对。</value></data>
+  <data name="AiMemorial_Export" xml:space="preserve"><value>另存设计素材 PNG…</value></data>
+  <data name="AiMemorial_ManualHandoff" xml:space="preserve"><value>另存已接受的 PNG，再在既有导入流程中手动选择。设计核对不等于生产批准。</value></data>
+  <data name="AiMemorial_ProofTitle" xml:space="preserve"><value>来源与结果</value></data>
+  <data name="AiMemorial_Checkerboard" xml:space="preserve"><value>棋盘底</value></data>
+  <data name="AiMemorial_Black" xml:space="preserve"><value>黑底</value></data>
+  <data name="AiMemorial_White" xml:space="preserve"><value>白底</value></data>
+  <data name="AiMemorial_Guide" xml:space="preserve"><value>徽章安全区辅助线</value></data>
+  <data name="AiMemorial_LayoutConfirmed" xml:space="preserve"><value>已确认版式</value></data>
+  <data name="AiMemorial_LayoutPending" xml:space="preserve"><value>版式待确认</value></data>
+  <data name="AiMemorial_SourceUnavailable" xml:space="preserve"><value>无法读取已核验的来源图片。请重新打开草稿或重新选择对应图片。</value></data>
+  <data name="AiMemorial_PlacementInputsChanged" xml:space="preserve"><value>文字、图片或权限已变更。请放弃旧排版编辑，再重新打开版式。</value></data>
+  <data name="AiMemorial_InvalidPlacement" xml:space="preserve"><value>请输入有效坐标和正数尺寸，并检查排版与来源尺寸。</value></data>
+  <data name="AiMemorial_TextDoesNotFit" xml:space="preserve"><value>原文无法放入文字框。请加大文字框、改为平排或调整字号。</value></data>
+  <data name="AiMemorial_MissingGlyph" xml:space="preserve"><value>当前字体无法绘出全部字符。请换用合适的已安装字体。</value></data>
+  <data name="AiMemorial_TextLayoutFailed" xml:space="preserve"><value>保存前请检查精确文字、字体与文字框。</value></data>
+  <data name="AiMemorial_OutsideArea" xml:space="preserve"><value>图层超出允许的画布或安全区，请调整位置或尺寸。</value></data>
+  <data name="AiMemorial_PlacementPermission" xml:space="preserve"><value>缺少来源图层，或排版超出已核对的权限。请检查来源用途和权限。</value></data>
+  <data name="AiMemorial_BadgeSize" xml:space="preserve"><value>徽章：外圆 {0:0.##} 毫米 · 安全区 {1:0.##} 毫米</value></data>
+  <data name="AiMemorial_ShirtSize" xml:space="preserve"><value>T 恤设计：{0:0.##} × {1:0.##} 毫米</value></data>
+  <data name="AiMemorial_RoleReference" xml:space="preserve"><value>仅作参考</value></data>
+  <data name="AiMemorial_RolePerson" xml:space="preserve"><value>人物</value></data>
+  <data name="AiMemorial_RoleOriginalDecor" xml:space="preserve"><value>原装饰</value></data>
+  <data name="AiMemorial_RoleGeneratedDecor" xml:space="preserve"><value>新增装饰</value></data>
+  <data name="AiMemorial_RoleBackground" xml:space="preserve"><value>背景</value></data>
+  <data name="AiMemorial_TextFlat" xml:space="preserve"><value>平排</value></data>
+  <data name="AiMemorial_TextArc" xml:space="preserve"><value>上弧</value></data>
+  <data name="AiMemorial_SourceReference" xml:space="preserve"><value>参考图片</value></data>
+  <data name="AiMemorial_SourceVersion" xml:space="preserve"><value>来源版本</value></data>
+  <data name="AiMemorial_ConversionDetails" xml:space="preserve"><value>来源为已保存修订 {0}：{1}。目标：{2}。新草稿沿用选定图片和表单文字，手改提示词留在来源版本。请重新核对目标位置、比例、文字排版和安全区。</value></data>
+  <data name="AiMemorial_Cancelled" xml:space="preserve"><value>操作已取消。</value></data>
+  <data name="AiMemorial_RenderFailed" xml:space="preserve"><value>无法生成已核验结果。请检查保存的版式与来源图片后重试。</value></data>
+  <data name="AiMemorial_RenderReady" xml:space="preserve"><value>已核验的设计图片可查看。</value></data>
+  <data name="AiMemorial_ResultUnavailable" xml:space="preserve"><value>无法核验或显示这份已保存的结果。</value></data>
+  <data name="AiMemorial_ReviewUnavailable" xml:space="preserve"><value>无法保存或恢复核对记录。请重新读取这份结果并核对。</value></data>
+  <data name="AiMemorial_ExportFailed" xml:space="preserve"><value>PNG 未保存。请在受保护工作区之外选择新文件名，并确认结果仍是当前版本。</value></data>
+  <data name="AiMemorial_Exported" xml:space="preserve"><value>设计 PNG 已保存至 {0}。仍需印刷核对。</value></data>
+  <data name="AiMemorial_ConversionFailed" xml:space="preserve"><value>无法创建独立的成品草稿。请检查来源版本和图片权限。</value></data>
+  <data name="AiMemorial_ConversionReady" xml:space="preserve"><value>已创建独立成品草稿。生成前请核对新版式。</value></data>
+  <data name="AiMemorial_ResultLabel" xml:space="preserve"><value>{0} · 修订 {1} · {2} × {3} 像素 · {4}</value></data>
+  <data name="AiMemorial_PreviewKind" xml:space="preserve"><value>预览</value></data>
+  <data name="AiMemorial_MaterialKind" xml:space="preserve"><value>设计素材</value></data>
+  <data name="AiMemorial_CheckPerson" xml:space="preserve"><value>人物、面部和原有细节完整沿用</value></data>
+  <data name="AiMemorial_CheckDecor" xml:space="preserve"><value>原装饰完整</value></data>
+  <data name="AiMemorial_CheckText" xml:space="preserve"><value>姓名、日期和标签与已核对的原文一致</value></data>
+  <data name="AiMemorial_CheckLayout" xml:space="preserve"><value>排版和安全区符合要求</value></data>
+  <data name="AiMemorial_CheckTransparency" xml:space="preserve"><value>在不同预览底色下核对透明区域</value></data>
+  <data name="AiMemorial_EnlargeProof" xml:space="preserve"><value>放大检查预览…</value></data>
+  <data name="AiMemorial_Zoom" xml:space="preserve"><value>缩放</value></data>
+  <data name="AiMemorial_Background" xml:space="preserve"><value>预览底色</value></data>
+  <data name="AiMemorial_ProofReduced" xml:space="preserve"><value>显示图片已缩小。保存的 PNG 保留上方所示的完整像素尺寸。</value></data>
 </root>

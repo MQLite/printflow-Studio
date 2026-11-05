@@ -11,8 +11,14 @@
   <Style TargetType="TextBlock"><Setter Property="TextWrapping" Value="Wrap"/></Style>
   <Style x:Key="Panel" TargetType="Border"><Setter Property="Padding" Value="12"/><Setter Property="CornerRadius" Value="8"/><Setter Property="BorderThickness" Value="1"/><Setter Property="BorderBrush" Value="#C4D9D4"/><Setter Property="Background" Value="{DynamicResource PF.Brush.Canvas}"/></Style>
   <Style x:Key="Heading" TargetType="TextBlock"><Setter Property="FontWeight" Value="SemiBold"/><Setter Property="FontSize" Value="18"/><Setter Property="Margin" Value="0,0,0,10"/></Style>
+  <DrawingBrush x:Key="MemorialCheckerboard" TileMode="Tile" Viewport="0,0,16,16" ViewportUnits="Absolute" Viewbox="0,0,16,16" ViewboxUnits="Absolute">
+   <DrawingBrush.Drawing><DrawingGroup><GeometryDrawing Brush="#FAFAFA" Geometry="M0,0 H16 V16 H0 Z"/><GeometryDrawing Brush="#D6D6D6" Geometry="M0,0 H8 V8 H0 Z M8,8 H16 V16 H8 Z"/></DrawingGroup></DrawingBrush.Drawing>
+  </DrawingBrush>
   </ResourceDictionary>
  </UserControl.Resources>
+ <DockPanel>
+ <Button DockPanel.Dock="Bottom" Content="{x:Static r:AiMemorialLabels.CancelTask}" Command="{Binding CancelMemorialTaskCommand}"
+         Visibility="{Binding IsMemorialTaskRunning, Converter={StaticResource BoolVisibility}}" HorizontalAlignment="Center"/>
  <Grid IsEnabled="{Binding CanEdit}">
   <Grid.ColumnDefinitions><ColumnDefinition Width="1*" MinWidth="130"/><ColumnDefinition Width="12"/><ColumnDefinition Width="2.3*" MinWidth="245"/><ColumnDefinition Width="12"/><ColumnDefinition Width="2.7*" MinWidth="300"/></Grid.ColumnDefinitions>
   <Border Style="{StaticResource Panel}"><ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
@@ -84,13 +90,16 @@
      </StackPanel></Border>
     </StackPanel>
     <StackPanel Visibility="{Binding IsStep5, Converter={StaticResource BoolVisibility}}">
-     <TextBlock Style="{StaticResource Heading}" Text="{x:Static r:AiDetailedLabels.Step5}"/><TextBlock Text="{x:Static r:AiDetailedLabels.CapabilityMissing}" Foreground="#875800" Margin="0,0,0,12"/>
-     <ItemsControl ItemsSource="{Binding QuickFields}"><ItemsControl.ItemTemplate><DataTemplate><StackPanel><TextBlock Text="{Binding Label}"/><TextBox Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" AcceptsReturn="True" MaxHeight="110" VerticalScrollBarVisibility="Auto" AutomationProperties.Name="{Binding Label}"/></StackPanel></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
-     <Button Content="{x:Static r:AiDetailedLabels.PreviewLayout}" IsEnabled="{Binding CanPreviewLayout}"/>
+     <TextBlock Style="{StaticResource Heading}" Text="{x:Static r:AiDetailedLabels.Step5}"/>
+     <TextBlock Text="{x:Static r:AiDetailedLabels.CapabilityMissing}" Foreground="#875800">
+      <TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Visibility" Value="Visible"/><Style.Triggers><DataTrigger Binding="{Binding IsMemorialLayoutAvailable}" Value="True"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+     </TextBlock>
+     <r:MemorialLayoutView Visibility="{Binding IsMemorialLayoutAvailable, Converter={StaticResource BoolVisibility}}"/>
     </StackPanel>
     <StackPanel Visibility="{Binding IsStep6, Converter={StaticResource BoolVisibility}}">
      <TextBlock Style="{StaticResource Heading}" Text="{x:Static r:AiDetailedLabels.Step6}"/><TextBlock Text="{Binding DetailedSummary}" FontWeight="SemiBold" Margin="0,0,0,10"/>
-     <TextBlock Text="{x:Static r:AiDetailedLabels.SummaryNotice}" Margin="0,0,0,12"/><TextBlock Text="{x:Static r:AiDetailedLabels.CapabilityMissing}" Foreground="#875800" Margin="0,0,0,12"/>
+     <TextBlock Text="{x:Static r:AiDetailedLabels.SummaryNotice}" Margin="0,0,0,12"/>
+     <r:MemorialResultReviewView Visibility="{Binding IsMemorialLayoutAvailable, Converter={StaticResource BoolVisibility}}"/>
      <ItemsControl ItemsSource="{Binding TextChecks}"><ItemsControl.ItemTemplate><DataTemplate><StackPanel Margin="0,0,0,12"><TextBlock Text="{Binding Input.Label}" FontWeight="SemiBold"/><TextBlock Text="{Binding Input.Value}"/><TextBlock Text="{Binding Status}"/></StackPanel></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
      <ItemsControl ItemsSource="{Binding PreservationChecks}"><ItemsControl.ItemTemplate><DataTemplate><StackPanel Margin="0,0,0,10"><TextBlock Text="{Binding Roles}" FontWeight="SemiBold"/><TextBlock Text="{Binding Asset.UploadName}"/><TextBlock Text="{Binding Status}"/></StackPanel></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
     </StackPanel>
@@ -99,11 +108,42 @@
   <Border Grid.Column="4" Style="{StaticResource Panel}"><Grid>
    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
    <StackPanel><TextBlock Style="{StaticResource Heading}" Text="{x:Static r:AiPromptLabels.AiPrompt_FinalText}"/><TextBlock Text="{Binding PromptNotice}" Foreground="#875800" Margin="0,0,0,6"/></StackPanel>
-   <controls:AiPromptEditor Grid.Row="1" Document="{Binding Document, Mode=TwoWay}" ReferenceLabels="{Binding ReferenceLabels}" ImageReferenceInvoked="OnImageReferenceInvoked" AutomationProperties.Name="{x:Static r:AiPromptLabels.AiPrompt_FinalText}"/>
+   <Grid Grid.Row="1">
+    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+    <StackPanel Visibility="{Binding IsMemorialResultVisible, Converter={StaticResource BoolVisibility}}" Margin="0,0,0,10">
+     <TextBlock Text="{x:Static r:AiMemorialLabels.ProofTitle}" FontWeight="SemiBold"/>
+     <Button Content="{x:Static r:AiMemorialLabels.EnlargeProof}" Click="OnEnlargeMemorialProof" HorizontalAlignment="Left"/>
+     <ComboBox x:Name="MemorialProofBackground" SelectedIndex="0" AutomationProperties.Name="{x:Static r:AiMemorialLabels.ProofTitle}" Margin="0,4">
+      <ComboBoxItem Content="{x:Static r:AiMemorialLabels.Checkerboard}"/>
+      <ComboBoxItem Content="{x:Static r:AiMemorialLabels.Black}"/>
+      <ComboBoxItem Content="{x:Static r:AiMemorialLabels.White}"/>
+     </ComboBox>
+     <Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="6"/><ColumnDefinition/></Grid.ColumnDefinitions>
+      <StackPanel>
+       <TextBlock Text="{Binding MemorialComparisonLabel}" FontSize="12"/>
+       <Border Background="{StaticResource MemorialCheckerboard}" Margin="0,4,0,0">
+        <Image Source="{Binding MemorialComparisonImage.Payload, Converter={StaticResource Preview}}" Height="190" Stretch="Uniform" AutomationProperties.Name="{Binding MemorialComparisonLabel}"/>
+       </Border>
+      </StackPanel>
+      <StackPanel Grid.Column="2">
+       <TextBlock Text="{Binding MemorialResultLabel}" FontSize="12"/>
+       <Border Margin="0,4,0,0">
+        <Border.Style><Style TargetType="Border"><Setter Property="Background" Value="{StaticResource MemorialCheckerboard}"/><Style.Triggers>
+         <DataTrigger Binding="{Binding SelectedIndex, ElementName=MemorialProofBackground}" Value="1"><Setter Property="Background" Value="Black"/></DataTrigger>
+         <DataTrigger Binding="{Binding SelectedIndex, ElementName=MemorialProofBackground}" Value="2"><Setter Property="Background" Value="White"/></DataTrigger>
+        </Style.Triggers></Style></Border.Style>
+        <Image Source="{Binding MemorialResultImage.Payload, Converter={StaticResource Preview}}" Height="190" Stretch="Uniform" AutomationProperties.Name="{Binding MemorialResultLabel}"/>
+       </Border>
+      </StackPanel>
+     </Grid>
+    </StackPanel>
+    <controls:AiPromptEditor Grid.Row="1" Document="{Binding Document, Mode=TwoWay}" ReferenceLabels="{Binding ReferenceLabels}" ImageReferenceInvoked="OnImageReferenceInvoked" AutomationProperties.Name="{x:Static r:AiPromptLabels.AiPrompt_FinalText}"/>
+   </Grid>
    <StackPanel Grid.Row="2" Margin="0,10,0,0"><TextBlock Text="{x:Static r:AiPromptLabels.AiPrompt_ManifestNotice}" FontSize="12"/>
     <Button Content="{x:Static r:AiPromptLabels.AiPrompt_Compose}" Command="{Binding ComposeCommand}"/>
     <Expander Header="{x:Static r:AiPromptLabels.AiPrompt_Manifest}"><ScrollViewer MaxHeight="100" VerticalScrollBarVisibility="Auto"><ItemsControl ItemsSource="{Binding AttachmentManifest}"><ItemsControl.ItemTemplate><DataTemplate><TextBlock><Run Text="{Binding UploadName}"/><Run Text=" · "/><Run Text="{Binding Purpose}"/></TextBlock></DataTemplate></ItemsControl.ItemTemplate></ItemsControl></ScrollViewer></Expander>
    </StackPanel>
   </Grid></Border>
  </Grid>
+ </DockPanel>
 </UserControl>
