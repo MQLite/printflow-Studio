@@ -227,6 +227,70 @@ public sealed class GuardedMeituUiDriverTests
         h.Elements.AddEditorOpenControl(h.Target.Window.Handle, h.Target.Process.ProcessId);
     }
 
+    private sealed class EditorStartupClock : TimeProvider
+    {
+        private DateTimeOffset _now = DateTimeOffset.UnixEpoch;
+        public override DateTimeOffset GetUtcNow() => _now;
+        public void Advance() => _now += TimeSpan.FromSeconds(5);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Cold_editor_startup_uses_the_launch_budget_before_opening_the_picker(bool becomesReady)
+    {
+        Harness h = Build(meituInForeground: true);
+        EditorStartupClock clock = new();
+        MeituAutomationOptions options = FastOptions with
+        {
+            DialogTimeout = TimeSpan.FromSeconds(15),
+            LaunchTimeout = TimeSpan.FromSeconds(60),
+        };
+        GuardedMeituUiDriver driver = new(h.Locator, h.Elements, h.Input, h.Evidence,
+            new StubMeituBaselineProvider(MeituFakes.Baseline()), options, clock);
+        ExternalWindowRef editor = MeituFakes.Window(handle: 0x3000, title: MeituFakes.EditorTitle);
+        ExternalWindowRef picker = MeituFakes.Window(handle: 0x4000, title: "打开", className: "#32770");
+        h.Elements.SetTexts(h.Target.Window.Handle, [.. MeituFakes.WelcomeMarkers]);
+        h.Elements.AddStartPageCard(h.Target.Window.Handle, "图片编辑");
+        h.Elements.SetTexts(editor.Handle, [.. MeituFakes.EmptyEditorMarkers]);
+        h.Elements.AddEditorOpenControl(editor.Handle, h.Target.Process.ProcessId);
+        h.Elements.AddDialogControl(picker.Handle, "1148", "Edit");
+        h.Elements.AddDialogControl(picker.Handle, "1", "Button");
+        bool starting = false;
+        h.Elements.OnInvoke = id =>
+        {
+            if (id == MeituFakes.CardAutomationId) starting = true;
+            if (id == "1") h.Elements.SetTexts(editor.Handle, [.. MeituFakes.EditorMarkers]);
+        };
+        h.Elements.OnReadTextSnapshot = _ =>
+        {
+            if (!starting) return;
+            clock.Advance();
+            if (becomesReady && clock.GetUtcNow() >= DateTimeOffset.UnixEpoch + TimeSpan.FromSeconds(20))
+            {
+                starting = false;
+                h.Locator.Replace(h.Target.Process, editor, picker);
+            }
+        };
+
+        var opened = await driver.OpenWorkingCopyAsync(
+            h.Target, @"C:\Temp\printflow\working.png", CancellationToken.None);
+
+        opened.IsSuccess.ShouldBe(becomesReady,
+            opened.IsFailure ? opened.Failure.TechnicalDetail : string.Empty);
+        if (becomesReady)
+        {
+            opened.Value.Window.Handle.ShouldBe(editor.Handle);
+            h.Elements.ValueWrites.ShouldHaveSingleItem();
+        }
+        else
+        {
+            h.Elements.ValueWrites.ShouldBeEmpty();
+            h.Elements.Invocations.ShouldBe(new[] { MeituFakes.CardAutomationId });
+            opened.Failure.TechnicalDetail.ShouldContain("within 60 s");
+        }
+    }
+
     [Fact]
     public async Task Opening_a_working_copy_writes_the_path_into_a_dialog_owned_by_the_verified_process()
     {
@@ -257,6 +321,39 @@ public sealed class GuardedMeituUiDriverTests
         // The window handed back is the one the file went into, because that is the window a
         // caller must confirm against (§13).
         opened.Value.Window.Title.ShouldBe(MeituFakes.EditorTitle);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Retained_Enhancement_is_cleared_on_the_empty_editor_before_opening_any_file(bool clears)
+    {
+        Harness h = Build(meituInForeground: true);
+        ShowEmptyEditor(h);
+        ExternalWindowRef editor = h.Target.Window with { Title = MeituFakes.EditorTitle };
+        ExternalWindowRef picker = MeituFakes.Window(handle: 0x2000, title: "打开", className: "#32770");
+        h.Locator.Replace(h.Target.Process, editor, picker);
+        h.Elements.SetTexts(editor.Handle,
+            [.. MeituFakes.EmptyEditorMarkers, .. MeituFakes.CompletionMarkers]);
+        h.Elements.AddEnhancementAction(editor.Handle, processId: editor.OwningProcessId);
+        h.Elements.AddDialogControl(picker.Handle, "1148", "Edit");
+        h.Elements.AddDialogControl(picker.Handle, "1", "Button");
+        h.Elements.OnInvoke = id =>
+        {
+            if (id == MeituFakes.ModuleAutomationId && clears)
+                h.Elements.SetTexts(editor.Handle, [.. MeituFakes.EmptyEditorMarkers]);
+            if (id == "1") h.Elements.SetTexts(editor.Handle, [.. MeituFakes.EditorMarkers]);
+        };
+
+        var opened = await h.Driver.OpenWorkingCopyAsync(h.Target, @"C:\Temp\working.png", CancellationToken.None);
+
+        opened.IsSuccess.ShouldBe(clears, opened.IsFailure ? opened.Failure.TechnicalDetail : "");
+        h.Elements.Invocations.Count(id => id == MeituFakes.ModuleAutomationId).ShouldBe(1);
+        if (clears)
+            h.Elements.Invocations.IndexOf(MeituFakes.ModuleAutomationId).ShouldBeLessThan(
+                h.Elements.Invocations.IndexOf("MainWindow.OpenMaskWidget.backgroundWidget.openWidget.widget_2.openButton"));
+        else
+            h.Elements.ValueWrites.ShouldBeEmpty();
     }
 
     /// <summary>
@@ -985,6 +1082,38 @@ public sealed class GuardedMeituUiDriverTests
         confirmed.IsFailure.ShouldBeTrue();
         confirmed.Failure.Code.ShouldBe(FailureCode.MeituUnknownState);
         h.Elements.Invocations.ShouldContain("MainWindow.titleFrame.closeButton");
+        h.Elements.ValueWrites.ShouldBeEmpty();
+    }
+
+    [Theory]
+    [InlineData("\uE0E6")]
+    [InlineData("\uE0EA")]
+    public async Task Save_identity_probe_cancels_with_either_observed_close_icon(string closeIcon)
+    {
+        const string closePath = ".SaveMaskWidget.widgetRight.titleFrame.closeButton";
+        MeituBaseline baseline = MeituFakes.Baseline();
+        baseline = baseline with
+        {
+            DocumentIdentity = baseline.DocumentIdentity! with
+            {
+                CancelControl = new MeituControlSignature(
+                    "\uE0E6", closePath, "Button", "proui::IconFontButton", UiPatternKind.Invoke),
+            },
+        };
+        Harness h = BuildWith(baseline);
+        (MeituTarget editor, ExternalWindowRef dialog) = ShowLoadedEditorAndIdentityDialog(h);
+        h.Elements.Remove(dialog.Handle, "MainWindow.titleFrame.closeButton");
+        string closeId = "MainWindow.MaskDialog.MaskCenterWidget" + closePath;
+        h.Elements.AddIdentityDialogControl(dialog.Handle, closeId, closeIcon,
+            "Button", "proui::IconFontButton", UiPatternKind.Invoke, editor.Process.ProcessId);
+        h.Elements.SetReadValue("MainWindow.wName.fileNameEdit", "PF_IDENTITY_A_副本");
+
+        var result = await h.Driver.ConfirmWorkingCopyIdentityAsync(
+            editor, "PF_IDENTITY_A.png", CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue(result.IsFailure ? result.Failure.TechnicalDetail : string.Empty);
+        h.Locator.Refresh(dialog.Handle).IsFailure.ShouldBeTrue();
+        h.Elements.Invocations.ShouldBe(new[] { "MainWindow.editorPage.saveButton", closeId });
         h.Elements.ValueWrites.ShouldBeEmpty();
     }
 

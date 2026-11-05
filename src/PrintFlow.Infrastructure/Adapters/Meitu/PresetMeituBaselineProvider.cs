@@ -25,8 +25,8 @@ namespace PrintFlow.Infrastructure.Adapters.Meitu;
 /// characters — a deterministic rule with its own unit tests, not a hand-copied list that could
 /// drift from the signed evidence.
 ///
-/// The result is computed once and cached: signed evidence does not change while the process
-/// runs, and re-reading it per call would only add a way for the two answers to differ.
+/// Signed recognition evidence is computed once and cached. The executable path follows Meitu's
+/// installation configuration on each read, so an update does not pin startup to an old folder.
 /// </remarks>
 public sealed class PresetMeituBaselineProvider : IMeituBaselineProvider
 {
@@ -46,7 +46,14 @@ public sealed class PresetMeituBaselineProvider : IMeituBaselineProvider
     }
 
     /// <inheritdoc />
-    public OperationResult<MeituBaseline> GetVerifiedBaseline() => _baseline.Value;
+    public OperationResult<MeituBaseline> GetVerifiedBaseline()
+    {
+        OperationResult<MeituBaseline> baseline = _baseline.Value;
+        return baseline.IsFailure ? baseline : OperationResult.Ok(baseline.Value with
+        {
+            ExecutablePath = MeituExecutablePathResolver.Resolve(baseline.Value.ExecutablePath),
+        });
+    }
 
     private OperationResult<MeituBaseline> Load()
     {

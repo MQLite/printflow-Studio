@@ -263,7 +263,7 @@
     <value>文件在显示后发生了变化，该决定未生效。请重新执行该步骤。</value>
   </data>
   <data name="Failure_EnvironmentNotVerified" xml:space="preserve">
-    <value>本工作站尚未通过自动处理环境校验。</value>
+    <value>本步骤所需配置暂不可用，请查看错误详情。</value>
   </data>
   <data name="Failure_AdapterUnavailable" xml:space="preserve">
     <value>所需的程序不可用或正被其他任务使用，或者操作意外中止。PrintFlow 不会更改你的原始文件。</value>
@@ -290,7 +290,7 @@
     <value>该图片没有可用于裁切的透明区域，需要手动裁切。</value>
   </data>
   <data name="Failure_MeituNotInstalled" xml:space="preserve">
-    <value>未在本机找到已批准的美图程序，或版本与批准的版本不一致。请检查工作站配置。</value>
+    <value>找不到或无法读取美图秀秀程序，请检查安装位置。</value>
   </data>
   <data name="Failure_MeituLaunchFailed" xml:space="preserve">
     <value>美图未能启动或未能就绪。</value>
@@ -546,7 +546,11 @@
   <data name="Session_TrimRightLabel" xml:space="preserve"><value>右</value></data>
   <data name="Session_TrimBottomLabel" xml:space="preserve"><value>下</value></data>
   <data name="Session_TrimLeftLabel" xml:space="preserve"><value>左</value></data>
-  <data name="Session_TrimApply" xml:space="preserve"><value>应用边距</value></data>
+  <data name="Session_TrimApply" xml:space="preserve"><value>应用裁边设置</value></data>
+  <data name="Session_TrimIgnoreNoise" xml:space="preserve"><value>忽略极淡孤立噪点</value></data>
+  <data name="Session_TrimNoiseHint" xml:space="preserve"><value>保留与主体相连的柔和边缘。关闭后保留所有非透明像素。</value></data>
+  <data name="Session_TrimNoiseIgnored" xml:space="preserve"><value>已忽略极淡孤立噪点</value></data>
+  <data name="Session_TrimNoisePreserved" xml:space="preserve"><value>已保留所有非透明像素</value></data>
   <data name="Session_TrimMarginInvalid" xml:space="preserve">
     <value>边距无效。请输入大于或等于零的整数像素值。</value>
   </data>
@@ -568,23 +572,23 @@
   <!-- Background removal, reviewed-content authority (Epic 11300 Part C2B2 §3, §9, §11, §14). -->
   <data name="Session_BackgroundRemovalHeading" xml:space="preserve"><value>去除背景</value></data>
   <data name="Session_BackgroundRemovalHint" xml:space="preserve">
-    <value>美图会自动判定上方图片的前景主体。运行该步骤前，请先针对此图片授权。</value>
+    <value>请选择识别模式，运行该步骤前，请先针对此图片确认授权。</value>
   </data>
-  <data name="Session_BackgroundRemovalAuthorise" xml:space="preserve"><value>对此图片使用自动选择</value></data>
+  <data name="Session_BackgroundRemovalAuthorise" xml:space="preserve"><value>对此图片使用所选识别模式</value></data>
   <data name="Session_BackgroundRemovalConfirmQuestion" xml:space="preserve">
-    <value>美图将自行判定此图片的前景主体。请在审核通过前检查结果。此授权仅适用于上方显示的图片，不适用于其后续版本。</value>
+    <value>美图将使用“{0}”识别此图片的前景主体。请在审核通过前检查结果。此授权仅适用于上方显示的图片，不适用于其后续版本。</value>
   </data>
-  <data name="Session_BackgroundRemovalConfirm" xml:space="preserve"><value>确认使用自动选择</value></data>
+  <data name="Session_BackgroundRemovalConfirm" xml:space="preserve"><value>确认使用所选模式</value></data>
   <data name="Session_BackgroundRemovalCancel" xml:space="preserve"><value>取消本次确认</value></data>
   <data name="Session_BackgroundRemovalAuthorised" xml:space="preserve">
-    <value>已对此图片授权自动选择 · 版本 {0}</value>
+    <value>已对此图片授权{1} · 版本 {0}</value>
   </data>
   <data name="Session_BackgroundRemovalNotAuthorised" xml:space="preserve">
-    <value>尚未授权。对此图片授权自动选择后，方可使用“运行步骤”。</value>
+    <value>请针对此图片确认所选识别模式，然后运行步骤。</value>
   </data>
   <data name="Session_BackgroundRemovalRunnable" xml:space="preserve"><value>可以运行去除背景。</value></data>
   <data name="Session_BackgroundRemovalAttemptAudit" xml:space="preserve">
-    <value>去除背景：自动选择 — 已针对已审图片版本 {0} 授权</value>
+    <value>去除背景：{1} — 已针对已审图片版本 {0} 授权</value>
   </data>
   <data name="Session_Stop" xml:space="preserve"><value>停止</value></data>
   <data name="Session_StopHint" xml:space="preserve">
@@ -634,7 +638,7 @@
     <value>当前工作文件夹不是本工作站校验时使用的那一个。</value>
   </data>
   <data name="EnvironmentCheck_ProductionRevalidation" xml:space="preserve">
-    <value>本次安装尚未通过重新验证。PrintFlow、Windows、美图或 Photoshop 升级后，必须重新运行环境检查与标准测试集并全部通过，才能恢复生产作业。</value>
+    <value>历史验证记录与当前安装不一致。此项仅供诊断参考，不影响开始处理。</value>
   </data>
   <data name="EnvironmentCheck_OperatingSystem" xml:space="preserve">
     <value>本机的 Windows 版本与已校验的工作站不一致。</value>
@@ -652,7 +656,7 @@
     <value>预设中登记的美图秀秀或 Photoshop 界面语言，仅供参考。</value>
   </data>
   <data name="EnvironmentCheck_MeituExecutable" xml:space="preserve">
-    <value>美图秀秀与已认可的生产基线不一致。</value>
+    <value>找不到或无法读取配置的美图秀秀程序，请检查安装位置。</value>
   </data>
   <data name="EnvironmentCheck_PhotoshopExecutable" xml:space="preserve">
     <value>Photoshop 与已认可的生产基线不一致。</value>
@@ -671,10 +675,10 @@
   <data name="EnvironmentCheck_PhotoshopColourSettings" xml:space="preserve"><value>Photoshop 色彩设置与已认可的预设不一致。</value></data>
   <data name="EnvironmentCheck_PhotoshopTestImageRoundTrip" xml:space="preserve"><value>上一次测试图像检查未完成。请点“安全恢复并重新检查”，PrintFlow 会先确认 Photoshop 的当前状态。</value></data>
   <data name="Environment_Verified" xml:space="preserve">
-    <value>本工作站已通过生产环境校验。</value>
+    <value>环境诊断项目已通过。</value>
   </data>
   <data name="Environment_NotVerified" xml:space="preserve">
-    <value>生产工作站环境校验未通过。</value>
+    <value>发现环境诊断差异，不影响开始处理。</value>
   </data>
   <data name="Environment_Advisories" xml:space="preserve">
     <value>提示（不影响生产处理）</value>
@@ -729,10 +733,10 @@
   <data name="EnvironmentCheckName_PhotoshopColourSettings" xml:space="preserve"><value>Photoshop 色彩设置</value></data>
   <data name="EnvironmentCheckName_PhotoshopTestImageRoundTrip" xml:space="preserve"><value>Photoshop 测试图像</value></data>
   <data name="Environment_Heading" xml:space="preserve">
-    <value>生产就绪状态</value>
+    <value>环境诊断（可选）</value>
   </data>
   <data name="Environment_Hint" xml:space="preserve">
-    <value>检查这台工作站能否开始生产。安全恢复只处理 PrintFlow 测试图像，不会更改你的工作文件或应用设置。</value>
+    <value>用于排查本机配置和应用状态，不是开始处理的前提。诊断未运行或未通过时仍可开始处理；具体问题会在对应步骤提示。</value>
   </data>
   <data name="Environment_Open" xml:space="preserve">
     <value>生产就绪状态</value>
@@ -770,10 +774,10 @@
     <value>检查项</value>
   </data>
   <data name="Environment_BlockingHeading" xml:space="preserve">
-    <value>正在阻止生产处理</value>
+    <value>需要留意的诊断结果</value>
   </data>
   <data name="Environment_NoBlockingFailures" xml:space="preserve">
-    <value>没有任何项目阻止生产处理。</value>
+    <value>没有发现需要留意的诊断结果。</value>
   </data>
   <data name="Environment_AdvisoriesPresent" xml:space="preserve">
     <value>提示：有</value>
@@ -794,18 +798,18 @@
   <data name="Environment_LiveCheckNotRun" xml:space="preserve"><value>前置检查未通过，本项未运行。请先处理未通过的检查项，再重新检查。</value></data>
   <data name="Environment_CheckNotRun" xml:space="preserve"><value>本项检查未运行，没有观察结果。</value></data>
   <data name="Environment_UnlistedCheck" xml:space="preserve"><value>未列出的检查项</value></data>
-  <data name="Environment_NotConfirmedNotRun" xml:space="preserve"><value>生产工作站环境尚未确认：有必需检查未运行。</value></data>
+  <data name="Environment_NotConfirmedNotRun" xml:space="preserve"><value>部分诊断项目尚未运行，可直接开始处理。</value></data>
   <data name="Environment_Blocking" xml:space="preserve">
-    <value>必须满足</value>
+    <value>诊断项目</value>
   </data>
   <data name="Environment_Advisory" xml:space="preserve">
     <value>仅供参考</value>
   </data>
   <data name="Environment_RestartRequired" xml:space="preserve">
-    <value>如果已认可的 PrintFlow 工作站记录、Photoshop 安装、美图秀秀安装或已校验的动作文件被替换或更新，请先重启 PrintFlow，然后再使用生产模式。</value>
+    <value>更新程序后请重启 PrintFlow 以加载最新代码和配置。环境诊断不是处理前提。</value>
   </data>
   <data name="Environment_RefreshScope" xml:space="preserve">
-    <value>“刷新状态”只读取状态，不会恢复测试图像，也不会重新检查应用。已认可的安装文件要重启 PrintFlow 才会重新读取。</value>
+    <value>“刷新状态”只读取诊断状态。诊断结果不会限制开始处理。</value>
   </data>
   <data name="Failure_PsdCompositeMissing" xml:space="preserve"><value>无法验证此 PSD 的兼容合成图。请在 Photoshop 中启用“最大兼容性”另存副本，再导入该副本。</value></data>
   <data name="Failure_PsdPreparationFailed" xml:space="preserve"><value>Photoshop 未能从此 PSD 生成通过验证的栅格图。原始文件已保留，请检查失败原因后重试。</value></data>
@@ -1291,21 +1295,21 @@
   <data name="FailureNotice_PsdPreparationFailed" xml:space="preserve"><value>Photoshop 未能从此 PSD 生成通过验证的栅格图，原始文件已保留。</value></data>
   <data name="FailureNotice_PdfPreparationFailed" xml:space="preserve"><value>PDF 准备失败，未生成通过验证的栅格图。</value></data>
   <!-- SCRUM-11152: Home readiness summary and startup details. -->
-  <data name="Home_ReadinessHeading" xml:space="preserve"><value>工作站检查</value></data>
-  <data name="Home_ReadinessNotChecked" xml:space="preserve"><value>本次启动后尚未检查。</value></data>
-  <data name="Home_ReadinessNotCheckedHint" xml:space="preserve"><value>请选择“查看工作站检查”检查本工作站。之前运行的检查结果不会沿用。</value></data>
+  <data name="Home_ReadinessHeading" xml:space="preserve"><value>环境诊断（可选）</value></data>
+  <data name="Home_ReadinessNotChecked" xml:space="preserve"><value>尚未运行环境诊断。</value></data>
+  <data name="Home_ReadinessNotCheckedHint" xml:space="preserve"><value>可直接开始处理；需要排查问题时再查看工作站检查。</value></data>
   <data name="Home_ReadinessChecking" xml:space="preserve"><value>正在检查工作站……</value></data>
   <data name="Home_ReadinessCheckingHint" xml:space="preserve"><value>请选择“查看工作站检查”查看该检查。</value></data>
   <data name="Home_ReadinessReady" xml:space="preserve"><value>上次检查通过。</value></data>
-  <data name="Home_ReadinessReadyHint" xml:space="preserve"><value>这是上次记录的检查结果。每个自动步骤仍会重新检查工作站。</value></data>
-  <data name="Home_ReadinessBlocked" xml:space="preserve"><value>暂时不能自动处理。</value></data>
+  <data name="Home_ReadinessReadyHint" xml:space="preserve"><value>这是诊断记录。执行步骤时会确认所需应用、图片和当前界面。</value></data>
+  <data name="Home_ReadinessBlocked" xml:space="preserve"><value>诊断发现环境差异。</value></data>
   <data name="Home_ReadinessFirstReason" xml:space="preserve"><value>原因：{0}。{1}</value></data>
-  <data name="Home_ReadinessLiveCheckPending" xml:space="preserve"><value>原因：美图秀秀和 Photoshop 的检查目前没有有效结果。请选择“查看工作站检查”，然后选择“{0}”。</value></data>
-  <data name="Home_ReadinessBlockedHint" xml:space="preserve"><value>请点“查看工作站检查”，查看全部阻塞原因；需要时请熟练同事或主管帮忙。</value></data>
-  <data name="Home_ReadinessNotConfirmed" xml:space="preserve"><value>需要重新检查工作站。</value></data>
+  <data name="Home_ReadinessLiveCheckPending" xml:space="preserve"><value>应用诊断尚无结果，不影响开始处理。如需排查，可查看工作站检查并选择“{0}”。</value></data>
+  <data name="Home_ReadinessBlockedHint" xml:space="preserve"><value>诊断结果不阻止处理。可直接开始任务，或查看工作站检查排查差异。</value></data>
+  <data name="Home_ReadinessNotConfirmed" xml:space="preserve"><value>环境诊断尚未完成。</value></data>
   <data name="Home_ReadinessUnfinishedReason" xml:space="preserve"><value>上一次检查未完成，因此不会把更早的结果显示为当前结果。</value></data>
   <data name="Home_ReadinessNoReason" xml:space="preserve"><value>上一次检查未给出原因。请选择“查看工作站检查”查看详情。</value></data>
-  <data name="Home_ReadinessNotConfirmedHint" xml:space="preserve"><value>请选择“查看工作站检查”重新检查。请熟练同事或主管帮忙。</value></data>
+  <data name="Home_ReadinessNotConfirmedHint" xml:space="preserve"><value>可直接开始处理；需要时再查看工作站检查。</value></data>
   <data name="Home_ReadinessCheckedAt" xml:space="preserve"><value>检查时间：{0}</value></data>
   <data name="Home_ReadinessTechnicalCheck" xml:space="preserve"><value>检查标识：{0} · {1}</value></data>
   <data name="Home_StartupDetails" xml:space="preserve"><value>启动详情</value></data>
@@ -1402,9 +1406,9 @@
   <data name="Home_RecentNextHandedOff" xml:space="preserve"><value>打开移交详情，查看当前允许的后续操作。</value></data>
   <data name="Home_RecentNextHistory" xml:space="preserve"><value>请打开处理详情，核实当前文件。仅有保存记录，不能确认文件现在仍在。</value></data>
   <data name="Environment_Unchecked" xml:space="preserve"><value>尚未检查</value></data>
-  <data name="Environment_ObservationUnchecked" xml:space="preserve"><value>尚未检查，不能确认可以生产。请先查看环境报告。</value></data>
-  <data name="Environment_ObservationBlocked" xml:space="preserve"><value>有必要检查未运行。请处理下方阻塞原因；历史结果不能作为当前生产许可。</value></data>
-  <data name="Environment_ObservationCurrent" xml:space="preserve"><value>本次报告对应下方检查结果。每次生产请求仍会重新核验，不代表以后一直就绪。</value></data>
+  <data name="Environment_ObservationUnchecked" xml:space="preserve"><value>尚未运行环境诊断，可直接开始处理。</value></data>
+  <data name="Environment_ObservationBlocked" xml:space="preserve"><value>部分诊断项目未运行。可查看下方原因，也可直接返回任务开始处理。</value></data>
+  <data name="Environment_ObservationCurrent" xml:space="preserve"><value>本报告仅用于排查环境差异。执行步骤时会确认所需应用、图片和当前界面。</value></data>
   <data name="Environment_EvidenceNever" xml:space="preserve"><value>尚无成功的实时检查历史。</value></data>
   <data name="Environment_EvidenceExpired" xml:space="preserve"><value>历史检查证据已失效。上次成功：{0}。不能据此确认当前就绪。</value></data>
   <data name="Environment_EvidenceDeferred" xml:space="preserve"><value>当前未重新观察应用状态。历史成功时间：{0}；不能据此开始生产。</value></data>
@@ -1553,4 +1557,9 @@
   <data name="AiPrompt_DraftsEmpty" xml:space="preserve"><value>暂无可打开的提示词草稿。</value></data>
   <data name="AiPrompt_DraftReadFailed" xml:space="preserve"><value>无法打开这份草稿，本次编辑仍保留。请检查存储与文件访问后，再次选择该草稿。</value></data>
   <data name="AiPrompt_NewDraftFailed" xml:space="preserve"><value>无法创建新草稿。可在下方打开已有草稿，或返回首页检查存储与文件访问。</value></data>
+  <data name="Session_BackgroundRemovalModeHeading" xml:space="preserve"><value>识别模式</value></data>
+  <data name="Session_BackgroundRemovalMode_Automatic" xml:space="preserve"><value>自动选择</value></data>
+  <data name="Session_BackgroundRemovalMode_PortraitPets" xml:space="preserve"><value>人像宠物</value></data>
+  <data name="Session_BackgroundRemovalMode_Products" xml:space="preserve"><value>商品货物</value></data>
+  <data name="Session_BackgroundRemovalMode_LogosStamps" xml:space="preserve"><value>图标印章</value></data>
 </root>

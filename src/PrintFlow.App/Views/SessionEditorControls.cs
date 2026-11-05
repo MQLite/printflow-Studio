@@ -145,6 +145,17 @@ public sealed class SessionListBox : ListBox
     }
 }
 
+public sealed class SessionCheckBox : CheckBox
+{
+    private readonly SessionInputGuard _input;
+    public SessionCheckBox() => _input = new(this);
+    protected override AutomationPeer OnCreateAutomationPeer() => new Peer(this);
+    private sealed class Peer(SessionCheckBox owner) : CheckBoxAutomationPeer(owner)
+    {
+        public override object? GetPattern(PatternInterface pattern) => owner._input.Wrap(pattern, base.GetPattern(pattern));
+    }
+}
+
 public sealed class SessionRadioButton : RadioButton
 {
     private readonly SessionInputGuard _input;

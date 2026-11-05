@@ -9,8 +9,8 @@ using PrintFlow.Workflow.Ports;
 namespace PrintFlow.Infrastructure.Imaging;
 
 /// <summary>
-/// The real deterministic trim: decode with WIC, find every pixel whose alpha is greater than
-/// zero, apply the margin, crop the canvas to it, write a PNG (Epic 11200 Part B §13).
+/// Decode with WIC, select alpha bounds under the recorded noise policy, apply the margin,
+/// crop the original canvas and write a PNG.
 /// </summary>
 /// <remarks>
 /// <b>What it will not do.</b> If the source carries no alpha channel, or its container cannot
@@ -45,7 +45,7 @@ public sealed class DeterministicAlphaTrimProcessor : ITrimProcessor
     }
 
     /// <inheritdoc />
-    public string ProcessorId => "internal-alpha-trim-v1";
+    public string ProcessorId => "internal-alpha-trim-v2";
 
     /// <inheritdoc />
     public async Task<OperationResult<TrimResult>> TrimAsync(
@@ -119,7 +119,10 @@ public sealed class DeterministicAlphaTrimProcessor : ITrimProcessor
                 $"'{frame.Format}' could not be converted to a readable alpha plane.", width, height));
         }
 
-        if (AlphaBounds.Compute(width, height, alpha) is not { } content)
+        TrimBounds? detected = request.IgnoreSmallNoise
+            ? NoiseTolerantAlphaBounds.Compute(width, height, alpha, cancellationToken)
+            : AlphaBounds.Compute(width, height, alpha);
+        if (detected is not { } content)
         {
             return OperationResult.Ok(TrimResult.ManualCropRequired(
                 "Every pixel is fully transparent, so there is no content to crop to.", width, height));

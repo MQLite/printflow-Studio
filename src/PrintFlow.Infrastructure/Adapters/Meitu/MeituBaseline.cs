@@ -10,8 +10,8 @@ namespace PrintFlow.Infrastructure.Adapters.Meitu;
 /// the signed Epic 11000 preset chain (Epic 11300 Part A §7).
 /// </summary>
 /// <param name="ExecutablePath">The one executable PrintFlow may launch or match against.</param>
-/// <param name="ExecutableSha256">The accepted binary digest for that executable.</param>
-/// <param name="AcceptedVersion">The accepted Meitu runtime version, recorded as evidence.</param>
+/// <param name="ExecutableSha256">The historical binary digest, retained as informational evidence.</param>
+/// <param name="AcceptedVersion">The historical Meitu runtime version, recorded as informational evidence.</param>
 /// <param name="UiLanguage">The Meitu UI language the recognition signals were captured in.</param>
 /// <param name="AcceptedWindowTitles">
 /// Titles observed on the accepted runtime. Corroborating evidence only — process ownership,
@@ -60,7 +60,7 @@ namespace PrintFlow.Infrastructure.Adapters.Meitu;
 /// </param>
 /// <remarks>
 /// This record is the adapter's <i>only</i> source of Meitu facts. Nothing in the adapter
-/// hard-codes a path, a version or a label, so a Meitu upgrade is a preset revalidation rather
+/// hard-codes a path, a version or a label, so interface recognition follows preset evidence rather
 /// than a code change (§7).
 ///
 /// The four evidence-backed members added in Part B1 are nullable on purpose, and the
@@ -267,7 +267,21 @@ public sealed record MeituControlSignature(
     string AutomationIdContains,
     string ControlTypeName,
     string ClassName,
-    UiPatternKind RequiredPattern);
+    UiPatternKind RequiredPattern)
+{
+    // Meitu 7.9 changed the Save close icon from U+E0E6 to U+E0EA without changing
+    // its widget path, class or behaviour. Limit compatibility to these two observed
+    // glyphs on the two Save close controls; ordinary named controls still match exactly.
+    internal bool HasVersionedSaveCloseIcon =>
+        Name == "\uE0E6" && ControlTypeName == "Button" &&
+        ClassName == "proui::IconFontButton" && RequiredPattern == UiPatternKind.Invoke &&
+        AutomationIdContains is ".SaveMaskWidget.widgetRight.titleFrame.closeButton" or
+            ".SaveResultMaskWidget.titleFrame.closeButton";
+
+    internal bool MatchesName(string name) =>
+        string.Equals(name, Name, StringComparison.Ordinal) ||
+        (HasVersionedSaveCloseIcon && name == "\uE0EA");
+}
 
 /// <summary>
 /// Supplies the verified <see cref="MeituBaseline"/>, or refuses.

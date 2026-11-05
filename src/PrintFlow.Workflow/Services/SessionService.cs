@@ -1925,6 +1925,26 @@ public sealed partial class SessionService : ISessionService
                 "No workstation automation lease authority was composed for this external operation.");
         }
 
+        // Readiness owns its own bounded workstation lease. Run it before acquiring the
+        // attempt's lease so a cold start can launch the applications without self-contention.
+        if (_environmentGate is IPreparingEnvironmentGate preparingGate)
+        {
+            WorkstationAutomationLeaseObservation availability = await _automationLeases
+                .ObserveAsync(_enclosingAutomationLease, cancellationToken).ConfigureAwait(false);
+            // A known busy owner is refused by acquisition below. An explicit enclosing owner
+            // has prepared its scope; readiness must not acquire a competing lease. Unknown
+            // includes an uninitialised authority: readiness must try its guarded acquisition.
+            if (availability.Status is not (WorkstationAutomationLeaseStatus.Busy or WorkstationAutomationLeaseStatus.Owned))
+            {
+                OperationResult<Unit> prepared = await preparingGate
+                    .PrepareAsync(adapterMode, cancellationToken).ConfigureAwait(false);
+                if (prepared.IsFailure)
+                {
+                    return OperationResult.Fail<SessionView>(prepared.Failure);
+                }
+            }
+        }
+
         OperationResult<IWorkstationAutomationLease> acquired = await _automationLeases
             .TryAcquireAsync(_enclosingAutomationLease, cancellationToken)
             .ConfigureAwait(false);
@@ -2035,7 +2055,8 @@ public sealed partial class SessionService : ISessionService
         // human drew, and a margin means nothing to it (§17).
         if (work is { Step: StepKind.Trim, ManualCrop: null })
         {
-            runningAttempt = runningAttempt.WithTrimParameters(started.State.TrimMargin);
+            runningAttempt = runningAttempt.WithTrimParameters(
+                started.State.TrimMargin, started.State.IgnoreSmallTrimNoise);
         }
 
         // The reviewed-content authority, written with the same opening transaction and for the
@@ -2534,6 +2555,7 @@ public sealed partial class SessionService : ISessionService
                         // phase the adapter itself reports — this only hands over the channel
                         // (Part D2A §4, §9).
                         Stop = stop,
+                        BackgroundRemovalMode = attempt.BackgroundRemovalAuthority?.Mode ?? BackgroundRemovalMode.Automatic,
                     },
                     cancellationToken);
                 if (result.IsFailure)
@@ -2761,7 +2783,8 @@ public sealed partial class SessionService : ISessionService
                     new TrimRequest(
                         workingCopy.Value,
                         trimOutput,
-                        state.TrimMargin),
+                        state.TrimMargin,
+                        state.IgnoreSmallTrimNoise),
                     cancellationToken);
                 if (trimmed.IsFailure)
                 {
@@ -3477,6 +3500,7 @@ public sealed partial class SessionService : ISessionService
             Dimensions = newSnapshot.Dimensions,
             WhiteUnderbaseBranch = newSnapshot.WhiteUnderbaseBranch,
             TrimMargin = newSnapshot.TrimMargin,
+            IgnoreSmallTrimNoise = newSnapshot.IgnoreSmallTrimNoise,
             BackgroundRemovalAuthority = newSnapshot.BackgroundRemovalAuthority,
 
             // Carried across with the dimensions they belong to, so the pair, its reading and the

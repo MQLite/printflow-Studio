@@ -27,6 +27,7 @@ internal sealed class SessionRow
     public string? WhiteUnderbaseBranch { get; set; }
     public string? CurrentStepState { get; set; }
     public bool HasRunningCurrentAttempt { get; set; }
+    public bool? IgnoreSmallTrimNoise { get; set; }
     public string? TrimMode { get; set; }
     public int? TrimMarginTop { get; set; }
     public int? TrimMarginRight { get; set; }
@@ -35,6 +36,7 @@ internal sealed class SessionRow
 
     // The pending reviewed-content authority for background removal: what the NEXT run would be
     // allowed to do (Epic 11300 Part C2B1 §10). All three move together, or all three are null.
+    public string? BackgroundRemovalMode { get; set; }
     public string? BackgroundRemovalDecision { get; set; }
 
     public string? BackgroundRemovalRevisionId { get; set; }
@@ -210,6 +212,7 @@ internal sealed class AttemptRow
 
     // How this attempt's deterministic trim was parameterised (Epic 11200 Part C3 §14).
     // Null for anything that is not a deterministic trim, including a manual crop.
+    public bool? IgnoreSmallTrimNoise { get; set; }
     public string? TrimMode { get; set; }
     public int? TrimMarginTop { get; set; }
     public int? TrimMarginRight { get; set; }
@@ -218,6 +221,7 @@ internal sealed class AttemptRow
 
     // What THIS attempt was authorised by, when it was an authorised background removal
     // (Epic 11300 Part C2B1 §11). Null for everything else, including an enhancement.
+    public string? BackgroundRemovalMode { get; set; }
     public string? BackgroundRemovalDecision { get; set; }
 
     public string? BackgroundRemovalRevisionId { get; set; }

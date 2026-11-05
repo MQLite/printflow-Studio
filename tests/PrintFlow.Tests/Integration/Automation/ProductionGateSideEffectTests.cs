@@ -314,7 +314,7 @@ public sealed class ProductionGateSideEffectTests
     [InlineData(RefusalCase.NonInteractiveSession)]
     [InlineData(RefusalCase.UnsupportedRemoteSession)]
     [InlineData(RefusalCase.SecureDesktop)]
-    [InlineData(RefusalCase.WrongMeituExecutableDigest)]
+    [InlineData(RefusalCase.MissingMeituExecutable)]
     [InlineData(RefusalCase.WrongPhotoshopExecutableDigest)]
     [InlineData(RefusalCase.WrongActionDigest)]
     [InlineData(RefusalCase.WrongWorkspaceRoot)]
@@ -358,7 +358,7 @@ public sealed class ProductionGateSideEffectTests
         NonInteractiveSession,
         UnsupportedRemoteSession,
         SecureDesktop,
-        WrongMeituExecutableDigest,
+        MissingMeituExecutable,
         WrongPhotoshopExecutableDigest,
         WrongActionDigest,
         WrongWorkspaceRoot,
@@ -395,8 +395,8 @@ public sealed class ProductionGateSideEffectTests
                 fixture.Facts.Session = fixture.Facts.Session with { InputDesktopName = "Winlogon" };
                 break;
 
-            case RefusalCase.WrongMeituExecutableDigest:
-                WorkstationVerificationFixture.Corrupt(fixture.MeituPath);
+            case RefusalCase.MissingMeituExecutable:
+                WorkstationVerificationFixture.Remove(fixture.MeituPath);
                 break;
 
             case RefusalCase.WrongPhotoshopExecutableDigest:
@@ -674,8 +674,14 @@ public sealed class ProductionGateSideEffectTests
             application.WorkspaceRoot, "TestAuthority", "workstation-lease.db");
         return ServiceRegistration.BuildServiceProvider(
             configuration, application.WorkspaceRoot, factory, services =>
+            {
                 services.AddSingleton<IWorkstationAutomationLeaseManager>(
                     new SqliteWorkstationAutomationLeaseManager(
-                        leaseStore, "test.gate-side-effect." + Guid.NewGuid().ToString("N"))));
+                        leaseStore, "test.gate-side-effect." + Guid.NewGuid().ToString("N")));
+                // These validation-runner cases deliberately enforce a report. Normal app
+                // processing is covered by OptionalEnvironmentChecksTests and does not.
+                services.AddSingleton<IEnvironmentGate>(provider => new VerifiedEnvironmentGate(
+                    provider.GetRequiredService<IProductionWorkstationVerifier>()));
+            });
     }
 }

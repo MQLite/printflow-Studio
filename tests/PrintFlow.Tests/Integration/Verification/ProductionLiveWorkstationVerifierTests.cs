@@ -1256,7 +1256,8 @@ public sealed class ProductionLiveWorkstationVerifierTests
             CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<OperationResult<MeituBackgroundRemovalOutcome>> RemoveBackgroundAsync(
             MeituOpenedWorkingCopy opened, WorkspaceFileRef workingCopy, BackgroundRemovalDecision modeDecision,
-            IAutomationStopSignal stop, CancellationToken cancellationToken) => throw new NotSupportedException();
+            IAutomationStopSignal stop, CancellationToken cancellationToken,
+            BackgroundRemovalMode mode = BackgroundRemovalMode.Automatic) => throw new NotSupportedException();
         public Task<OperationResult<MeituExportedOutput>> ExportEnhancedResultAsync(
             MeituEnhancementOutcome enhancement, WorkspaceFileRef workingCopy, FileFacts workingCopyFactsBefore,
             WorkspaceFileRef output, IAutomationStopSignal stop, CancellationToken cancellationToken) =>

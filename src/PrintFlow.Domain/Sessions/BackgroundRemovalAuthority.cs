@@ -61,7 +61,8 @@ public enum BackgroundRemovalDecision
 public sealed record BackgroundRemovalAuthority(
     BackgroundRemovalDecision Decision,
     RevisionId ReviewedRevisionId,
-    Sha256 ReviewedSha256)
+    Sha256 ReviewedSha256,
+    BackgroundRemovalMode Mode = BackgroundRemovalMode.Automatic)
 {
     /// <summary>
     /// Creates an authority, refusing one that authorises nothing.
@@ -73,7 +74,8 @@ public sealed record BackgroundRemovalAuthority(
     /// only way to spell it.
     /// </remarks>
     public static BackgroundRemovalAuthority For(
-        BackgroundRemovalDecision decision, RevisionId reviewedRevisionId, Sha256 reviewedSha256)
+        BackgroundRemovalDecision decision, RevisionId reviewedRevisionId, Sha256 reviewedSha256,
+        BackgroundRemovalMode mode = BackgroundRemovalMode.Automatic)
     {
         if (decision == BackgroundRemovalDecision.Unspecified)
         {
@@ -82,7 +84,12 @@ public sealed record BackgroundRemovalAuthority(
                 "Unspecified is the absence of a decision; an authority that authorises nothing is null, not a record.");
         }
 
-        return new BackgroundRemovalAuthority(decision, reviewedRevisionId, reviewedSha256);
+        if (!Enum.IsDefined(mode))
+        {
+            throw new ArgumentOutOfRangeException(nameof(mode), mode, "Unknown background-removal recogniser.");
+        }
+
+        return new BackgroundRemovalAuthority(decision, reviewedRevisionId, reviewedSha256, mode);
     }
 
     /// <summary>

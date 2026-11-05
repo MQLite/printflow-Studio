@@ -286,7 +286,7 @@ public sealed class MeituWorkstationSmoke
                 Log($"identity before      : {removed.Value.IdentityBeforeAction.State} " +
                     $"({removed.Value.ObservedDocumentIdentity})");
                 Log($"automatic mode       : {removed.Value.ObservedAutomaticModeName}");
-                Log($"busy observed        : {removed.Value.Busy.State}");
+                Log($"busy observed        : {removed.Value.Busy?.State.ToString() ?? "not observed; verified recognition transition"}");
                 Log($"completion observed  : " +
                     $"{MeituBackgroundRemovalRule.Classify(baseline.Value.BackgroundRemoval!, removed.Value.Completion.Observation)} " +
                     "(positive signed controls; Busy absent)");
@@ -1222,6 +1222,158 @@ public sealed class MeituWorkstationSmoke
         {
             WriteTranscript(transcript.ToString());
             Console.WriteLine($"controlled workspace retained until Meitu releases the image: {root}");
+        }
+    }
+
+    [Fact]
+    public async Task Enhancement_followed_by_cutout_uses_the_enhanced_working_copy()
+    {
+        if (Environment.GetEnvironmentVariable("PRINTFLOW_MEITU_SMOKE_SEQUENCE") != "1") return;
+        await using WorkstationAutomationLeaseScope lease =
+            await WorkstationAutomationLeaseScope.AcquireDefaultAsync();
+        string root = Path.Combine(Path.GetTempPath(), "PrintFlowMeituSequence", Guid.NewGuid().ToString("N"));
+        string evidence = Path.Combine(root, "Evidence");
+        bool mayStillBeLoaded = true;
+        try
+        {
+            PrintFlowConfiguration configuration = PrintFlowConfiguration.LoadFromFile(RepositoryFile("appsettings.json"));
+            (string manifest, Sha256 expected) = PresetForSmoke(configuration);
+            var (sourcePath, source, workspace) = PrepareOpaqueBackgroundRemovalWorkingCopy(root);
+            byte[] original = await File.ReadAllBytesAsync(sourcePath);
+            IMeituProcessor adapter = MeituAutomationComposition.CreateProductionProcessor(
+                manifest, expected, workspace, evidence, TimeProvider.System);
+            WorkspaceFileRef enhancedFile = SiblingOf(source,
+                Path.GetFileNameWithoutExtension(source.FileName) + "_HD.png");
+            var enhanced = await adapter.ProcessAsync(new MeituRequest(source, MeituOperation.Enhance,
+                BackgroundRemovalDecision.Unspecified, ParentOf(source), enhancedFile), CancellationToken.None);
+            enhanced.IsSuccess.ShouldBeTrue(enhanced.IsFailure ? enhanced.Failure.TechnicalDetail : "");
+            Console.WriteLine("enhancement: " + enhanced.Value.AdapterNotes);
+            enhanced.Value.AdapterNotes.ShouldNotBeNull().ShouldNotContain("WARNING");
+            WorkspaceFileRef cutoutInput = SiblingOf(source, "SEQUENCE_ENHANCED_INPUT.png");
+            string cutoutInputPath = workspace.ResolveAbsolute(cutoutInput);
+            File.Copy(workspace.ResolveAbsolute(enhancedFile), cutoutInputPath);
+            byte[] cutoutInputBefore = await File.ReadAllBytesAsync(cutoutInputPath);
+            WorkspaceFileRef cutoutFile = SiblingOf(source, "SEQUENCE_ENHANCED_INPUT_CUTOUT.png");
+            var cutout = await adapter.ProcessAsync(new MeituRequest(cutoutInput, MeituOperation.RemoveBackground,
+                BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent,
+                ParentOf(cutoutInput), cutoutFile), CancellationToken.None);
+            cutout.IsSuccess.ShouldBeTrue(cutout.IsFailure ? cutout.Failure.TechnicalDetail : "");
+            Console.WriteLine("cutout: " + cutout.Value.AdapterNotes);
+            cutout.Value.AdapterNotes.ShouldNotBeNull().ShouldNotContain("WARNING");
+            (await File.ReadAllBytesAsync(sourcePath)).ShouldBe(original);
+            (await File.ReadAllBytesAsync(cutoutInputPath)).ShouldBe(cutoutInputBefore);
+            mayStillBeLoaded = false;
+        }
+        finally
+        {
+            if (mayStillBeLoaded)
+                Console.WriteLine($"synthetic sequence and failure evidence retained: {root}");
+            else
+                CleanUp(root, evidence, mayStillBeLoaded: false);
+        }
+    }
+
+    /// <summary>
+    /// Opt-in synthetic export proof for every recogniser, including a return to Automatic
+    /// after specific modes. The guarded driver owns any automatic entry processing and undo
+    /// before the requested recogniser is run.
+    /// </summary>
+    [Fact]
+    public async Task Every_recognition_mode_exports_a_valid_cutout_and_returns_to_empty_editor()
+    {
+        if (Environment.GetEnvironmentVariable("PRINTFLOW_MEITU_SMOKE_MODES") != "1") return;
+
+        await using WorkstationAutomationLeaseScope lease =
+            await WorkstationAutomationLeaseScope.AcquireDefaultAsync();
+        string root = Path.Combine(Path.GetTempPath(), "PrintFlowMeituModes", Guid.NewGuid().ToString("N"));
+        string evidence = Path.Combine(root, "Evidence");
+        StringBuilder transcript = new();
+        void Log(string line)
+        {
+            transcript.AppendLine(line);
+            Console.WriteLine(line);
+        }
+
+        bool allSucceeded = false;
+        bool mayStillBeLoaded = false;
+        try
+        {
+            Log($"# Meitu recognition modes smoke — {DateTimeOffset.Now:O}");
+            Log($"synthetic workspace: {root}");
+            PrintFlowConfiguration configuration = PrintFlowConfiguration.LoadFromFile(RepositoryFile("appsettings.json"));
+            (string manifest, Sha256 expected) = PresetForSmoke(configuration);
+            var (sourcePath, source, workspace) = PrepareOpaqueBackgroundRemovalWorkingCopy(root);
+            WicFileInspector inspector = new();
+            FileFacts sourceBefore = (await inspector.InspectAsync(sourcePath, CancellationToken.None)).Value;
+            IMeituProcessor adapter = MeituAutomationComposition.CreateProductionProcessor(
+                manifest, expected, workspace, evidence, TimeProvider.System);
+            IMeituAutomationFoundation foundation = (IMeituAutomationFoundation)adapter;
+            BackgroundRemovalMode[] modes =
+            [
+                BackgroundRemovalMode.Automatic,
+                BackgroundRemovalMode.PortraitPets,
+                BackgroundRemovalMode.Products,
+                BackgroundRemovalMode.LogosStamps,
+                BackgroundRemovalMode.Automatic,
+            ];
+
+            for (int index = 0; index < modes.Length; index++)
+            {
+                BackgroundRemovalMode mode = modes[index];
+                WorkspaceFileRef input = SiblingOf(source, $"MODES_{index + 1}_{mode}.png");
+                WorkspaceFileRef output = SiblingOf(input, $"MODES_{index + 1}_{mode}_CUTOUT.png");
+                string inputPath = workspace.ResolveAbsolute(input);
+                File.Copy(sourcePath, inputPath);
+                FileFacts inputBefore = (await inspector.InspectAsync(inputPath, CancellationToken.None)).Value;
+                Log($"run {index + 1}/{modes.Length}: {mode}; source {inputBefore.Sha256}");
+                mayStillBeLoaded = true;
+                OperationResult<AdapterOutput> result = await adapter.ProcessAsync(new MeituRequest(
+                    input, MeituOperation.RemoveBackground,
+                    BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent,
+                    ParentOf(input), output)
+                {
+                    BackgroundRemovalMode = mode,
+                }, CancellationToken.None);
+                if (result.IsFailure)
+                    Log($"REFUSED {mode}: {result.Failure.Code}; {result.Failure.TechnicalDetail}");
+                result.IsSuccess.ShouldBeTrue(result.IsFailure ? result.Failure.ToString() : "");
+                result.Value.ProducedFile.ShouldBe(output);
+                string notes = result.Value.AdapterNotes.ShouldNotBeNull();
+                Log($"{mode}: {notes}");
+                notes.ShouldNotContain("WARNING");
+                notes.ShouldContain("the editor was returned to its signed empty state");
+
+                OperationResult<MeituReadiness> ready = await foundation.EnsureReadyAsync(CancellationToken.None);
+                ready.IsSuccess.ShouldBeTrue(ready.IsFailure ? ready.Failure.ToString() : "");
+                ready.Value.State.State.ShouldBe(MeituStartingState.KnownEditorEmpty);
+                mayStillBeLoaded = false;
+
+                string outputPath = workspace.ResolveAbsolute(output);
+                FileFacts facts = (await inspector.InspectAsync(outputPath, CancellationToken.None)).Value;
+                facts.Format.ShouldBe(ImageFormat.Png);
+                facts.PixelWidth.ShouldBe(inputBefore.PixelWidth);
+                facts.PixelHeight.ShouldBe(inputBefore.PixelHeight);
+                facts.HasAlpha.ShouldBe(true);
+                MeituTransparencyFacts alpha = (await new WicMeituTransparencyInspector()
+                    .InspectAsync(outputPath, CancellationToken.None)).Value;
+                alpha.HasTransparentPixels.ShouldBeTrue();
+                alpha.HasVisiblePixels.ShouldBeTrue();
+                (await inspector.InspectAsync(inputPath, CancellationToken.None)).Value.Sha256.ShouldBe(inputBefore.Sha256);
+                (await inspector.InspectAsync(sourcePath, CancellationToken.None)).Value.Sha256.ShouldBe(sourceBefore.Sha256);
+                Log($"PASS {mode}: PNG {facts.PixelWidth}x{facts.PixelHeight}; " +
+                    $"transparent {alpha.TransparentPixelCount}; visible {alpha.VisiblePixelCount}; " +
+                    $"source unchanged; signed empty editor");
+            }
+
+            allSucceeded = true;
+        }
+        finally
+        {
+            WriteTranscript(transcript.ToString());
+            if (allSucceeded)
+                CleanUp(root, evidence, mayStillBeLoaded: false);
+            else
+                Console.WriteLine($"recognition-mode failure evidence retained: {root}; image may still be loaded: {mayStillBeLoaded}");
         }
     }
 

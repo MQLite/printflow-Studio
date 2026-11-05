@@ -1,4 +1,6 @@
 using System.IO;
+using Dapper;
+using Microsoft.Data.Sqlite;
 using PrintFlow.Domain.Attempts;
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
@@ -34,6 +36,91 @@ namespace PrintFlow.Tests.Integration.Persistence;
 [Collection(SqliteCollection.Name)]
 public sealed class BackgroundRemovalDecisionTests
 {
+    [Theory]
+    [InlineData(BackgroundRemovalMode.Automatic)]
+    [InlineData(BackgroundRemovalMode.PortraitPets)]
+    [InlineData(BackgroundRemovalMode.Products)]
+    [InlineData(BackgroundRemovalMode.LogosStamps)]
+    public async Task Recognition_mode_roundtrips_and_reaches_adapter_from_attempt(BackgroundRemovalMode mode)
+    {
+        using SessionServiceHarness harness = new();
+        CountingMeituProcessor meitu = new(harness.FakeMeitu);
+        ISessionService service = harness.CreateServiceWithMeitu(meitu);
+        SessionId id = await StartAtBackgroundRemovalAsync(harness, service);
+        ArtefactView reviewed = await ReviewedArtefactAsync(service, id);
+        await Must(service.ExecuteAsync(id, new WorkflowCommand.SetBackgroundRemovalDecision(
+            BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent,
+            reviewed.RevisionId, reviewed.Facts.Sha256, mode), "tester", CancellationToken.None));
+        (await harness.CreateService().LoadAsync(id, CancellationToken.None)).Value.BackgroundRemovalMode.ShouldBe(mode);
+        await RunBackgroundRemovalAsync(service, id);
+        meitu.LastBackgroundRemovalMode.ShouldBe(mode);
+        SessionAggregate loaded = await LoadAsync(harness, id);
+        ProcessingAttempt attempt = loaded.Attempts.Single(a => a.Step == StepKind.BackgroundRemoval);
+        attempt.BackgroundRemovalAuthority.ShouldNotBeNull().Mode.ShouldBe(mode);
+
+        // A new pending choice must not relabel the result already on screen.
+        var changedSession = loaded.Session with
+        {
+            BackgroundRemovalAuthority = loaded.Session.BackgroundRemovalAuthority! with { Mode = BackgroundRemovalMode.Products },
+        };
+        var mutation = SessionMutation.Empty(changedSession) with
+        {
+            UpsertAttempts = [attempt with
+            {
+                BackgroundRemovalAuthority = attempt.BackgroundRemovalAuthority! with { Mode = BackgroundRemovalMode.Products },
+            }],
+        };
+        (await harness.Repository.CommitAsync(mutation, CancellationToken.None)).IsSuccess.ShouldBeTrue();
+        SessionView view = (await harness.CreateService().LoadAsync(id, CancellationToken.None)).Value;
+        view.BackgroundRemovalMode.ShouldBe(BackgroundRemovalMode.Products);
+        view.BackgroundRemovalAttemptMode.ShouldBe(mode);
+        (await LoadAsync(harness, id)).Attempts.Single(a => a.Id == attempt.Id)
+            .BackgroundRemovalAuthority!.Mode.ShouldBe(mode);
+    }
+
+    [Fact]
+    public async Task Legacy_null_modes_read_as_automatic_and_attempt_mode_cannot_be_rewritten_by_sql()
+    {
+        using SessionServiceHarness harness = new();
+        ISessionService service = harness.CreateService();
+        SessionId id = await StartAtBackgroundRemovalAsync(harness, service);
+        await SessionServiceHarness.AuthoriseBackgroundRemovalAsync(service, id);
+        using (var connection = harness.Database.OpenRaw())
+            connection.Execute("UPDATE ProcessingSession SET BackgroundRemovalMode = NULL WHERE Id = @Id", new { Id = id.ToString() });
+        (await LoadAsync(harness, id)).Session.BackgroundRemovalAuthority!.Mode.ShouldBe(BackgroundRemovalMode.Automatic);
+        // A historical attempt has no mode column value. Loading and closing it must
+        // retain that original audit value, even though the domain reads Automatic.
+        string legacyAttemptId = Guid.CreateVersion7().ToString();
+        using (var connection = harness.Database.OpenRaw())
+        {
+            connection.Execute("""
+                INSERT INTO ProcessingAttempt (Id, SessionId, StepKind, Operation, AdapterId,
+                    StartedAtUtc, EndedAtUtc, ResultStatus, RetrySequence,
+                    BackgroundRemovalDecision, BackgroundRemovalRevisionId, BackgroundRemovalReviewedSha)
+                SELECT @AttemptId, Id, 'BackgroundRemoval', 'REMOVE_BACKGROUND', 'legacy-meitu',
+                    CreatedAtUtc, UpdatedAtUtc, 'FAILED', 0,
+                    BackgroundRemovalDecision, BackgroundRemovalRevisionId, BackgroundRemovalReviewedSha
+                FROM ProcessingSession WHERE Id = @Id
+                """, new { AttemptId = legacyAttemptId, Id = id.ToString() });
+        }
+        SessionAggregate legacy = await LoadAsync(harness, id);
+        ProcessingAttempt historical = legacy.Attempts.Single(a => a.Id.ToString() == legacyAttemptId);
+        historical.BackgroundRemovalAuthority!.Mode.ShouldBe(BackgroundRemovalMode.Automatic);
+        (await harness.Repository.CommitAsync(SessionMutation.Empty(legacy.Session) with
+        {
+            UpsertAttempts = [historical],
+        }, CancellationToken.None)).IsSuccess.ShouldBeTrue();
+        using (var connection = harness.Database.OpenRaw())
+            connection.QuerySingle<string?>("SELECT BackgroundRemovalMode FROM ProcessingAttempt WHERE Id = @Id",
+                new { Id = legacyAttemptId }).ShouldBeNull();
+        await RunBackgroundRemovalAsync(service, id);
+        using var sql = harness.Database.OpenRaw();
+        Should.Throw<SqliteException>(() => sql.Execute(
+            "UPDATE ProcessingAttempt SET BackgroundRemovalMode = 'PRODUCTS' WHERE SessionId = @Id AND BackgroundRemovalDecision IS NOT NULL",
+            new { Id = id.ToString() }));
+        Should.Throw<SqliteException>(() => sql.Execute(
+            "UPDATE ProcessingSession SET BackgroundRemovalMode = 'UNKNOWN' WHERE Id = @Id", new { Id = id.ToString() }));
+    }
     // -----------------------------------------------------------------------------
     // §7: a missing product decision is not a failed processing attempt
     // -----------------------------------------------------------------------------
@@ -767,6 +854,7 @@ public sealed class BackgroundRemovalDecisionTests
         public BackgroundRemovalDecision? LastBackgroundRemovalDecision { get; private set; }
 
         public BackgroundRemovalDecision? LastEnhanceDecision { get; private set; }
+        public BackgroundRemovalMode? LastBackgroundRemovalMode { get; private set; }
 
         public Task<OperationResult<AdapterOutput>> ProcessAsync(
             MeituRequest request, CancellationToken cancellationToken)
@@ -775,6 +863,7 @@ public sealed class BackgroundRemovalDecisionTests
             {
                 BackgroundRemovalCalls++;
                 LastBackgroundRemovalDecision = request.BackgroundRemovalDecision;
+                LastBackgroundRemovalMode = request.BackgroundRemovalMode;
             }
             else
             {

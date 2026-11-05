@@ -603,8 +603,8 @@ public sealed class SqliteSessionRepository : ISessionRepository
                  CompletedAtUtc, HandedOffAtUtc, HandOffReason, AbandonedAtUtc, AbandonReason,
                  DimensionsWidthMm, DimensionsHeightMm, DimensionsPixelWidth, DimensionsPixelHeight,
                  DimensionsPreset, WhiteUnderbaseBranch,
-                 TrimMode, TrimMarginTop, TrimMarginRight, TrimMarginBottom, TrimMarginLeft,
-                 BackgroundRemovalDecision, BackgroundRemovalRevisionId, BackgroundRemovalReviewedSha,
+                 TrimMode, TrimMarginTop, TrimMarginRight, TrimMarginBottom, TrimMarginLeft, IgnoreSmallTrimNoise,
+                 BackgroundRemovalDecision, BackgroundRemovalRevisionId, BackgroundRemovalReviewedSha, BackgroundRemovalMode,
                  DimensionSemantics,
                  PrintPlanSourceRevisionId, PrintPlanSourceSha256,
                  PrintPlanSourcePixelWidth, PrintPlanSourcePixelHeight,
@@ -631,8 +631,8 @@ public sealed class SqliteSessionRepository : ISessionRepository
                  @CompletedAtUtc, @HandedOffAtUtc, @HandOffReason, @AbandonedAtUtc, @AbandonReason,
                  @DimensionsWidthMm, @DimensionsHeightMm, @DimensionsPixelWidth, @DimensionsPixelHeight,
                  @DimensionsPreset, @WhiteUnderbaseBranch,
-                 @TrimMode, @TrimMarginTop, @TrimMarginRight, @TrimMarginBottom, @TrimMarginLeft,
-                 @BackgroundRemovalDecision, @BackgroundRemovalRevisionId, @BackgroundRemovalReviewedSha,
+                 @TrimMode, @TrimMarginTop, @TrimMarginRight, @TrimMarginBottom, @TrimMarginLeft, @IgnoreSmallTrimNoise,
+                 @BackgroundRemovalDecision, @BackgroundRemovalRevisionId, @BackgroundRemovalReviewedSha, @BackgroundRemovalMode,
                  @DimensionSemantics,
                  @PrintPlanSourceRevisionId, @PrintPlanSourceSha256,
                  @PrintPlanSourcePixelWidth, @PrintPlanSourcePixelHeight,
@@ -680,11 +680,13 @@ public sealed class SqliteSessionRepository : ISessionRepository
                 TrimMarginRight = excluded.TrimMarginRight,
                 TrimMarginBottom = excluded.TrimMarginBottom,
                 TrimMarginLeft = excluded.TrimMarginLeft,
+                IgnoreSmallTrimNoise = excluded.IgnoreSmallTrimNoise,
 
                 -- The session pending background-removal authority, so it updates for the same
                 -- reason: it is what the next run would be allowed to do, and the operator may
                 -- authorise different content. The attempt copy is the one that must never be
                 -- rewritten (Epic 11300 Part C2B1 §10, §11).
+                BackgroundRemovalMode = excluded.BackgroundRemovalMode,
                 BackgroundRemovalDecision = excluded.BackgroundRemovalDecision,
                 BackgroundRemovalRevisionId = excluded.BackgroundRemovalRevisionId,
                 BackgroundRemovalReviewedSha = excluded.BackgroundRemovalReviewedSha,
@@ -898,8 +900,8 @@ public sealed class SqliteSessionRepository : ISessionRepository
             INSERT INTO ProcessingAttempt
                 (Id, SessionId, StepKind, InputRevisionId, Operation, AdapterId, StartedAtUtc, EndedAtUtc,
                  ResultStatus, OutputRevisionId, FailureCode, FailureDetailJson, RetryOfAttemptId, RetrySequence,
-                 TrimMode, TrimMarginTop, TrimMarginRight, TrimMarginBottom, TrimMarginLeft,
-                 BackgroundRemovalDecision, BackgroundRemovalRevisionId, BackgroundRemovalReviewedSha,
+                 TrimMode, TrimMarginTop, TrimMarginRight, TrimMarginBottom, TrimMarginLeft, IgnoreSmallTrimNoise,
+                 BackgroundRemovalDecision, BackgroundRemovalRevisionId, BackgroundRemovalReviewedSha, BackgroundRemovalMode,
                   AdapterNotes, ManualResultSourcePath,
                  TrimContentLeft, TrimContentTop, TrimContentRight, TrimContentBottom,
                  TrimAppliedLeft, TrimAppliedTop, TrimAppliedRight, TrimAppliedBottom,
@@ -927,8 +929,8 @@ public sealed class SqliteSessionRepository : ISessionRepository
             VALUES
                 (@Id, @SessionId, @StepKind, @InputRevisionId, @Operation, @AdapterId, @StartedAtUtc, @EndedAtUtc,
                  @ResultStatus, @OutputRevisionId, @FailureCode, @FailureDetailJson, @RetryOfAttemptId, @RetrySequence,
-                 @TrimMode, @TrimMarginTop, @TrimMarginRight, @TrimMarginBottom, @TrimMarginLeft,
-                 @BackgroundRemovalDecision, @BackgroundRemovalRevisionId, @BackgroundRemovalReviewedSha,
+                 @TrimMode, @TrimMarginTop, @TrimMarginRight, @TrimMarginBottom, @TrimMarginLeft, @IgnoreSmallTrimNoise,
+                 @BackgroundRemovalDecision, @BackgroundRemovalRevisionId, @BackgroundRemovalReviewedSha, @BackgroundRemovalMode,
                   @AdapterNotes, @ManualResultSourcePath,
                  @TrimContentLeft, @TrimContentTop, @TrimContentRight, @TrimContentBottom,
                  @TrimAppliedLeft, @TrimAppliedTop, @TrimAppliedRight, @TrimAppliedBottom,

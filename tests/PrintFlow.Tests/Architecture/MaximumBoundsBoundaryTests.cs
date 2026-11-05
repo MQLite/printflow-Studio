@@ -606,7 +606,7 @@ public sealed class MaximumBoundsBoundaryTests
     /// </para>
     /// </remarks>
     [Fact]
-    public void The_migration_set_ends_at_the_correction_request_migration()
+    public void The_migration_set_ends_at_the_additive_trim_noise_policy_migration()
     {
         string directory = Path.Combine(FindProjectDirectory("PrintFlow.Infrastructure"), "Sqlite");
 
@@ -625,7 +625,10 @@ public sealed class MaximumBoundsBoundaryTests
         // SCRUM-11117: one nullable ProcessingSession column so a finished record can leave the list.
         // SCRUM-11144: additive delivery/attempt/alias tables; no existing table changes.
         // SCRUM-11148: one additive CorrectionRequest table; no existing table changes.
-        scripts.Last().ShouldBe("0019_correction_request.sql");
+        // Recognition modes add nullable session/attempt audit columns, preserving legacy rows.
+        scripts.ShouldContain("0019_correction_request.sql");
+        scripts.ShouldContain("0020_background_removal_mode.sql");
+        scripts.Last().ShouldBe("0021_trim_noise_policy.sql");
     }
 
     // -------------------------------------------------------------------------------------

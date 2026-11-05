@@ -257,7 +257,7 @@ public sealed class EnvironmentReadinessScreenTests
     public Task The_screen_resolves_its_wording_in_en_US() =>
         InCulture("en-US", async screen =>
         {
-            screen.Heading.ShouldBe("Production readiness");
+            screen.Heading.ShouldBe("Environment diagnostics (optional)");
             screen.RefreshLabel.ShouldBe("Refresh status");
             screen.RunLiveChecksLabel.ShouldBe("Safe recovery and recheck");
             screen.RestartRequirement.ShouldContain("restart PrintFlow", Case.Insensitive);

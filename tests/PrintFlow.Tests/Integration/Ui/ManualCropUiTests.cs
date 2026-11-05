@@ -367,7 +367,7 @@ public sealed class ManualCropUiTests
 
         // Both crops survive, and only one deterministic attempt was ever made.
         aggregate.Revisions.Count(r => r.Operation == OperationKind.ManualImport).ShouldBe(2);
-        aggregate.Attempts.Count(a => a.AdapterId == "internal-alpha-trim-v1").ShouldBe(1);
+        aggregate.Attempts.Count(a => a.AdapterId == "internal-alpha-trim-v2").ShouldBe(1);
         aggregate.Reviews.ShouldContain(r => r.Step == StepKind.Trim && !r.IsApproved);
     }
 

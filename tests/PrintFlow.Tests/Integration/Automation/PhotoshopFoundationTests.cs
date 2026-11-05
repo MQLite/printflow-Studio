@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
+using Microsoft.Extensions.Time.Testing;
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Outputs;
@@ -102,8 +103,12 @@ public sealed class PhotoshopFoundationTests : IDisposable
         string windowTitle = PhotoshopFakes.NoDocumentTitle,
         bool registerProcess = true,
         bool inForeground = true,
-        IPhotoshopRuntimeFactReader? runtimeFacts = null)
+        IPhotoshopRuntimeFactReader? runtimeFacts = null,
+        TimeProvider? clock = null,
+        PhotoshopAutomationOptions? options = null)
     {
+        clock ??= TimeProvider.System;
+        options ??= FastOptions;
         FakeWindowLocator locator = new();
         FakeVerifiedControlSink controls = new();
         RecordingInputSink input = new();
@@ -134,7 +139,7 @@ public sealed class PhotoshopFoundationTests : IDisposable
 
         StubPhotoshopBaselineProvider baselines = new(baseline);
         GuardedPhotoshopUiDriver driver = new(
-            locator, controls, input, evidence, baselines, FastOptions, TimeProvider.System);
+            locator, controls, input, evidence, baselines, options, clock);
 
         // A managed directory that really exists, because the open path checks the file is on
         // disk before it touches Photoshop.
@@ -143,10 +148,10 @@ public sealed class PhotoshopFoundationTests : IDisposable
 
         ProductionPhotoshopOutputProcessor adapter = runtimeFacts is null
             ? new ProductionPhotoshopOutputProcessor(
-                baselines, locator, driver, new StubPhotoshopWorkspace(managed), FastOptions, TimeProvider.System)
+                baselines, locator, driver, new StubPhotoshopWorkspace(managed), options, clock)
             : new ProductionPhotoshopOutputProcessor(
-                baselines, locator, driver, new StubPhotoshopWorkspace(managed), FastOptions,
-                TimeProvider.System, runtimeFacts);
+                baselines, locator, driver, new StubPhotoshopWorkspace(managed), options,
+                clock, runtimeFacts);
 
         return new Harness(adapter, locator, controls, input, evidence, target, managed);
     }
@@ -693,6 +698,270 @@ public sealed class PhotoshopFoundationTests : IDisposable
         facts.ReadCalls.ShouldBe(3, "pre-open, opened-document identity, and pre-close are separate censuses");
         h.Input.Sends.Select(send => send.Shortcut).ShouldBe(
             [KnownShortcut.OpenFile, KnownShortcut.CloseActiveDocument]);
+    }
+
+    [Fact]
+    public async Task Open_waits_for_the_starting_Photoshop_automation_object_before_sending_input()
+    {
+        PhotoshopColourSettingsContract settings = new("sRGB", "CMYK", "Gray", "Spot");
+        string expectedPath = Path.Combine(_root, "Working", PhotoshopFakes.ExpectedFileName);
+        Harness? h = null;
+        CallbackRuntimeFacts facts = new(call =>
+        {
+            if (call <= 2)
+            {
+                h!.Input.Sends.ShouldBeEmpty("no open may be sent before the document census is readable");
+                return StartingAutomationUnavailable();
+            }
+
+            return OperationResult.Ok(new PhotoshopRuntimeFacts(settings,
+                call == 3 ? [] : [new PhotoshopRuntimeDocument(
+                    PhotoshopFakes.ExpectedFileName, expectedPath, IsSaved: true, IsActive: true)]));
+        });
+        h = Build(BaselineForRealFile(), runtimeFacts: facts);
+        WorkspaceFileRef managed = WorkspaceFileRef.Create(
+            $"Sessions/S1/Working/{PhotoshopFakes.ExpectedFileName}", WorkspaceArea.Working);
+        File.WriteAllBytes(expectedPath, [1, 2, 3]);
+        StageOpenThenDocument(h, managed.FileName);
+
+        OperationResult<PhotoshopOpenedDocument> opened = await h.Adapter.OpenManagedWorkingFileAsync(
+            managed, CancellationToken.None);
+
+        opened.IsSuccess.ShouldBeTrue(opened.IsFailure ? opened.Failure.TechnicalDetail : "");
+        facts.ReadCalls.ShouldBe(4, "two unavailable observations, the pre-open census, and exact identity");
+        h.Input.Sends.Select(send => send.Shortcut).ShouldBe([KnownShortcut.OpenFile]);
+    }
+
+    private static OperationResult<PhotoshopRuntimeFacts> StartingAutomationUnavailable() =>
+        OperationResult.Fail<PhotoshopRuntimeFacts>(OperationFailure.Create(
+            FailureCode.PhotoshopUnknownState,
+            "Photoshop live settings could not be read: MK_E_UNAVAILABLE (0x800401E3)",
+            isRetryable: true,
+            context: new Dictionary<string, string> { ["automationHResult"] = "0x800401E3" }));
+
+    [Fact]
+    public async Task A_slow_externally_started_Photoshop_can_register_after_ninety_seconds()
+    {
+        FakeTimeProvider clock = new();
+        DateTimeOffset started = clock.GetUtcNow();
+        PhotoshopColourSettingsContract settings = new("sRGB", "CMYK", "Gray", "Spot");
+        string expectedPath = Path.Combine(_root, "Working", PhotoshopFakes.ExpectedFileName);
+        CallbackRuntimeFacts facts = new(call =>
+        {
+            if (call <= 3)
+            {
+                clock.Advance(TimeSpan.FromSeconds(30));
+                return StartingAutomationUnavailable();
+            }
+
+            return OperationResult.Ok(new PhotoshopRuntimeFacts(settings,
+                call == 4 ? [] : [new PhotoshopRuntimeDocument(
+                    PhotoshopFakes.ExpectedFileName, expectedPath, IsSaved: true, IsActive: true)]));
+        });
+        Harness h = Build(BaselineForRealFile(), runtimeFacts: facts, clock: clock,
+            options: FastOptions with { LaunchTimeout = TimeSpan.FromMinutes(2), PollInterval = TimeSpan.Zero });
+        WorkspaceFileRef managed = ManagedStartupFile(h);
+        StageOpenThenDocument(h, managed.FileName);
+
+        OperationResult<PhotoshopOpenedDocument> opened = await h.Adapter.OpenManagedWorkingFileAsync(
+            managed, CancellationToken.None);
+
+        opened.IsSuccess.ShouldBeTrue(opened.IsFailure ? opened.Failure.TechnicalDetail : "");
+        (clock.GetUtcNow() - started).ShouldBe(TimeSpan.FromSeconds(90));
+        facts.ReadCalls.ShouldBe(5);
+        h.Locator.LaunchCount.ShouldBe(0, "this wait also applies to a process started by the operator");
+        h.Input.Sends.Select(send => send.Shortcut).ShouldBe([KnownShortcut.OpenFile]);
+    }
+
+    [Fact]
+    public async Task Open_times_out_if_the_automation_object_never_registers_without_sending_input()
+    {
+        CallbackRuntimeFacts facts = new(_ => StartingAutomationUnavailable());
+        Harness h = Build(BaselineForRealFile(), runtimeFacts: facts);
+
+        OperationResult<PhotoshopOpenedDocument> opened = await h.Adapter.OpenManagedWorkingFileAsync(
+            ManagedStartupFile(h), CancellationToken.None);
+
+        opened.IsFailure.ShouldBeTrue();
+        opened.Failure.Context["automationReadyTimedOut"].ShouldBe("true");
+        opened.Failure.Context["automationHResult"].ShouldBe("0x800401E3");
+        opened.Failure.Context["inputSent"].ShouldBe("false");
+        facts.ReadCalls.ShouldBeGreaterThan(1);
+        h.Input.Sends.ShouldBeEmpty();
+        h.Controls.Writes.ShouldBeEmpty();
+        h.Controls.Presses.ShouldBeEmpty();
+        h.Locator.LaunchCount.ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task Open_does_not_retry_unrelated_runtime_failures()
+    {
+        OperationFailure failure = OperationFailure.Create(
+            FailureCode.PhotoshopUnknownState, "The automation object reports another installation.");
+        CallbackRuntimeFacts facts = new(_ => OperationResult.Fail<PhotoshopRuntimeFacts>(failure));
+        Harness h = Build(BaselineForRealFile(), runtimeFacts: facts);
+
+        OperationResult<PhotoshopOpenedDocument> opened = await h.Adapter.OpenManagedWorkingFileAsync(
+            ManagedStartupFile(h), CancellationToken.None);
+
+        opened.Failure.ShouldBe(failure);
+        facts.ReadCalls.ShouldBe(1);
+        h.Input.Sends.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task Waiting_for_the_automation_object_can_be_cancelled_without_opening_a_file()
+    {
+        using CancellationTokenSource cancellation = new();
+        CallbackRuntimeFacts facts = new(_ =>
+        {
+            cancellation.Cancel();
+            return StartingAutomationUnavailable();
+        });
+        Harness h = Build(BaselineForRealFile(), runtimeFacts: facts);
+
+        await Should.ThrowAsync<OperationCanceledException>(() => h.Adapter.OpenManagedWorkingFileAsync(
+            ManagedStartupFile(h), cancellation.Token));
+
+        facts.ReadCalls.ShouldBe(1);
+        h.Input.Sends.ShouldBeEmpty();
+        h.Controls.Writes.ShouldBeEmpty();
+    }
+
+    [Theory]
+    [InlineData("process-replaced", FailureCode.PhotoshopTargetLost)]
+    [InlineData("second-process", FailureCode.PhotoshopTargetLost)]
+    [InlineData("modal", FailureCode.PhotoshopBlockingDialog)]
+    public async Task Startup_wait_stops_when_the_process_or_safe_window_changes(
+        string change, FailureCode expected)
+    {
+        Harness? h = null;
+        CallbackRuntimeFacts facts = new(_ =>
+        {
+            if (change == "process-replaced")
+            {
+                h!.Locator.RunningProcesses.Clear();
+                h.Locator.RunningProcesses.Add(h.Target.Process with
+                {
+                    StartedUtc = h.Target.Process.StartedUtc.AddMinutes(1),
+                });
+            }
+            else if (change == "second-process")
+            {
+                h!.Locator.RunningProcesses.Add(h.Target.Process with { ProcessId = 9999 });
+            }
+            else
+            {
+                h!.Locator.OwnedDialogs.Add(PhotoshopFakes.Dialog(0xAF000, title: "Unexpected dialog"));
+            }
+
+            return StartingAutomationUnavailable();
+        });
+        h = Build(BaselineForRealFile(), runtimeFacts: facts);
+
+        OperationResult<PhotoshopOpenedDocument> opened = await h.Adapter.OpenManagedWorkingFileAsync(
+            ManagedStartupFile(h), CancellationToken.None);
+
+        opened.IsFailure.ShouldBeTrue();
+        opened.Failure.Code.ShouldBe(expected);
+        facts.ReadCalls.ShouldBe(1, "a changed process or a modal must stop before another COM observation");
+        h.Input.Sends.ShouldBeEmpty();
+        h.Controls.Writes.ShouldBeEmpty();
+        h.Controls.Presses.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task Unsaved_work_discovered_after_startup_wait_still_prevents_open()
+    {
+        PhotoshopColourSettingsContract settings = new("sRGB", "CMYK", "Gray", "Spot");
+        CallbackRuntimeFacts facts = new(call => call == 1
+            ? StartingAutomationUnavailable()
+            : OperationResult.Ok(new PhotoshopRuntimeFacts(settings,
+                [new PhotoshopRuntimeDocument("unsaved.psd", null, IsSaved: false, IsActive: true)])));
+        Harness h = Build(BaselineForRealFile(), runtimeFacts: facts);
+
+        OperationResult<PhotoshopOpenedDocument> opened = await h.Adapter.OpenManagedWorkingFileAsync(
+            ManagedStartupFile(h), CancellationToken.None);
+
+        opened.IsFailure.ShouldBeTrue();
+        opened.Failure.TechnicalDetail.ShouldContain("unsaved changes");
+        facts.ReadCalls.ShouldBe(2);
+        h.Input.Sends.ShouldBeEmpty();
+        h.Controls.Writes.ShouldBeEmpty();
+    }
+
+    private static WorkspaceFileRef ManagedStartupFile(Harness h)
+    {
+        WorkspaceFileRef managed = WorkspaceFileRef.Create(
+            $"Sessions/S1/Working/{PhotoshopFakes.ExpectedFileName}", WorkspaceArea.Working);
+        File.WriteAllBytes(Path.Combine(h.ManagedDirectory, managed.FileName), [1, 2, 3]);
+        return managed;
+    }
+
+    [Fact]
+    public async Task Open_refuses_a_second_process_appearing_during_the_successful_preopen_census()
+    {
+        Harness? h = null;
+        CallbackRuntimeFacts facts = new(_ =>
+        {
+            h!.Locator.RunningProcesses.Add(h.Target.Process with { ProcessId = 9999 });
+            return OperationResult.Ok(new PhotoshopRuntimeFacts(
+                new PhotoshopColourSettingsContract("sRGB", "CMYK", "Gray", "Spot"), []));
+        });
+        h = Build(BaselineForRealFile(), runtimeFacts: facts);
+
+        OperationResult<PhotoshopOpenedDocument> opened = await h.Adapter.OpenManagedWorkingFileAsync(
+            ManagedStartupFile(h), CancellationToken.None);
+
+        opened.IsFailure.ShouldBeTrue();
+        opened.Failure.Code.ShouldBe(FailureCode.PhotoshopTargetLost);
+        facts.ReadCalls.ShouldBe(1);
+        h.Input.Sends.ShouldBeEmpty();
+        h.Controls.Writes.ShouldBeEmpty();
+    }
+
+    private sealed class CallbackRuntimeFacts(Func<int, OperationResult<PhotoshopRuntimeFacts>> read)
+        : IPhotoshopRuntimeFactReader
+    {
+        public int ReadCalls { get; private set; }
+
+        public OperationResult<PhotoshopRuntimeFacts> Read(string acceptedExecutablePath) => read(++ReadCalls);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Colour_setting_differences_do_not_gate_open_but_unsaved_work_still_does(bool unsaved)
+    {
+        PhotoshopBaseline baseline = BaselineForRealFile() with
+        {
+            ColourSettings = new PhotoshopColourSettingsContract("baseline RGB", "baseline CMYK", "baseline Gray", "baseline Spot"),
+        };
+        PhotoshopColourSettingsContract current = new("current RGB", "current CMYK", "current Gray", "current Spot");
+        string expectedPath = Path.Combine(_root, "Working", PhotoshopFakes.ExpectedFileName);
+        PhotoshopRuntimeDocument exact = new(PhotoshopFakes.ExpectedFileName, expectedPath, IsSaved: true, IsActive: true);
+        SequencedRuntimeFacts facts = new(current,
+            unsaved ? [new PhotoshopRuntimeDocument("customer.psd", null, IsSaved: false, IsActive: true)] : [],
+            [exact]);
+        Harness h = Build(baseline, runtimeFacts: facts);
+        WorkspaceFileRef managed = WorkspaceFileRef.Create(
+            $"Sessions/S1/Working/{PhotoshopFakes.ExpectedFileName}", WorkspaceArea.Working);
+        File.WriteAllBytes(expectedPath, [1, 2, 3]);
+        StageOpenThenDocument(h, managed.FileName);
+
+        OperationResult<PhotoshopOpenedDocument> result = await h.Adapter.OpenManagedWorkingFileAsync(managed, CancellationToken.None);
+
+        if (unsaved)
+        {
+            result.IsFailure.ShouldBeTrue();
+            result.Failure.Code.ShouldBe(FailureCode.PhotoshopUnknownState);
+            h.Input.Sends.ShouldBeEmpty();
+        }
+        else
+        {
+            result.IsSuccess.ShouldBeTrue(result.IsFailure ? result.Failure.ToString() : "");
+            h.Input.Sends.Select(send => send.Shortcut).ShouldBe([KnownShortcut.OpenFile]);
+        }
     }
 
     [Theory]

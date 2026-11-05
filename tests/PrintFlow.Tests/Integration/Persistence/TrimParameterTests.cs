@@ -30,6 +30,54 @@ namespace PrintFlow.Tests.Integration.Persistence;
 [Collection(SqliteCollection.Name)]
 public sealed class TrimParameterTests
 {
+    [Theory]
+    [InlineData(true, 80, 70)]
+    [InlineData(false, 100, 85)]
+    public async Task Noise_policy_survives_restart_and_is_recorded_with_the_actual_crop(
+        bool ignoreNoise, int expectedWidth, int expectedHeight)
+    {
+        using SessionServiceHarness harness = new();
+        string source = harness.Workspace.CreateSourceFile("noise.png", SyntheticImages.PngWithAlpha(
+            120, 100, (x, y) => x is >= 20 and < 100 && y is >= 15 and < 85 ? (byte)200 :
+                x == 0 && y == 0 ? (byte)1 : (byte)0));
+        ISessionService first = harness.CreateService();
+        SessionId id = await StartAtTrimAsync(first, source);
+        await Must(first.ExecuteAsync(id,
+            new WorkflowCommand.SetTrimParameters(TrimMargin.Tight, ignoreNoise), "tester", CancellationToken.None));
+
+        ISessionService reopened = harness.CreateService();
+        (await reopened.LoadAsync(id, CancellationToken.None)).Value.IgnoreSmallTrimNoise.ShouldBe(ignoreNoise);
+        SessionView result = await RunTrimAsync(reopened, id);
+
+        (await TrimmedSizeAsync(harness, id)).ShouldBe((expectedWidth, expectedHeight));
+        result.CurrentTrimIgnoresSmallNoise.ShouldBe(ignoreNoise);
+        SessionAggregate stored = await LoadAsync(harness, id);
+        stored.Session.IgnoreSmallTrimNoise.ShouldBe(ignoreNoise);
+        stored.Attempts.Single(a => a.Step == StepKind.Trim).IgnoreSmallTrimNoise.ShouldBe(ignoreNoise);
+    }
+
+    [Fact]
+    public async Task A_retry_records_its_own_noise_policy_without_rewriting_the_previous_attempt()
+    {
+        using SessionServiceHarness harness = new();
+        ISessionService service = harness.CreateService();
+        SessionId id = await StartAtTrimAsync(service, harness.WriteBorderedSourcePng());
+        SessionView first = await RunTrimAsync(service, id);
+        SessionStep step = first.Steps.Single(s => s.Step == StepKind.Trim);
+        await Must(service.ExecuteAsync(id, new WorkflowCommand.Reject(StepKind.Trim,
+            step.CurrentRevisionSha256!.Value, RejectionReason.EdgeError, "preserve faint details"),
+            "tester", CancellationToken.None));
+        await Must(service.ExecuteAsync(id, new WorkflowCommand.Retry(StepKind.Trim), "tester", CancellationToken.None));
+        await Must(service.ExecuteAsync(id, new WorkflowCommand.SetTrimParameters(TrimMargin.Tight, false),
+            "tester", CancellationToken.None));
+        SessionView second = await RunTrimAsync(service, id);
+
+        SessionAggregate aggregate = await LoadAsync(harness, id);
+        aggregate.Attempts.Single(a => a.OutputRevisionId == step.CurrentRevisionId).IgnoreSmallTrimNoise.ShouldBe(true);
+        aggregate.Attempts.Single(a => a.OutputRevisionId == second.CurrentArtefact!.RevisionId).IgnoreSmallTrimNoise.ShouldBe(false);
+        second.CurrentTrimIgnoresSmallNoise.ShouldBeFalse();
+    }
+
     // -----------------------------------------------------------------------------
     // §20: the margin actually reaches the processor
     // -----------------------------------------------------------------------------

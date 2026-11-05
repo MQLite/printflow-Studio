@@ -12,10 +12,10 @@ namespace PrintFlow.Tests.Integration.Verification;
 /// </summary>
 /// <remarks>
 /// The matrix these tests cover is the whole of the original requirement's revalidation clause:
-/// a PrintFlow, Windows, Meitu or Photoshop upgrade must require rerunning the standard test set
-/// before production use rather than silently changing the supported environment. Each of those
-/// four is one test here, and each asserts the same thing — the gate refuses — because the
-/// requirement makes no distinction between them.
+/// a PrintFlow, Windows or Photoshop upgrade must require rerunning the standard test set
+/// before production use rather than silently changing the supported environment. Each
+/// upgrade is covered here. A Meitu-only version change is allowed and remains subject to
+/// the executable availability and runtime interface checks.
 /// <para>
 /// The fixture starts revalidated, so every test in this file changes exactly one fact and
 /// watches Production close. A test that passed because two things were wrong would not be
@@ -113,12 +113,10 @@ public sealed class ProductionRevalidationTests
     }
 
     /// <summary>
-    /// A Meitu upgrade the preset has already accepted. The Meitu executable check passes — the
-    /// binary on disk is the one the current preset names — and Production still closes, because
-    /// the environment that was tested is not the environment in front of the operator.
+    /// Historical Meitu digests are recorded for diagnostics and do not pin the installed version.
     /// </summary>
     [Fact]
-    public void A_meitu_upgrade_the_preset_already_accepts_still_closes_production()
+    public void A_different_recorded_Meitu_digest_does_not_close_production()
     {
         using WorkstationVerificationFixture fixture = new();
         fixture.WriteRevalidationRecord(
@@ -129,10 +127,10 @@ public sealed class ProductionRevalidationTests
 
         WorkstationVerificationResult result = fixture.CreateVerifier().Verify();
 
-        result.Verified.ShouldBeFalse();
+        result.Verified.ShouldBeTrue(result.Describe());
         result.Checks.Single(c => c.Check == WorkstationVerificationCheck.MeituExecutable)
             .Outcome.ShouldBe(WorkstationCheckOutcome.Passed);
-        Revalidation(result).Explanation.ShouldContain("Meitu");
+        Revalidation(result).Outcome.ShouldBe(WorkstationCheckOutcome.Passed);
     }
 
     [Fact]

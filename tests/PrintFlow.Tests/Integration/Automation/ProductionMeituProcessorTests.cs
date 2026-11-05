@@ -138,6 +138,29 @@ public sealed class ProductionMeituProcessorTests : IDisposable
         h.Input.Sends.ShouldBeEmpty();
     }
 
+    [Fact]
+    public async Task Undefined_recogniser_is_refused_before_any_file_or_window_interaction()
+    {
+        Harness h = Build();
+        WorkspaceFileRef input = WorkspaceFileRef.Create("Sessions/S_1/Working/A_1/missing.png", WorkspaceArea.Working);
+        WorkspaceFileRef output = WorkspaceFileRef.Create("Sessions/S_1/Working/A_1/missing_CUTOUT.png", WorkspaceArea.Working);
+        OperationResult<AdapterOutput> result = await h.Adapter.ProcessAsync(new MeituRequest(
+            input, MeituOperation.RemoveBackground,
+            BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent,
+            WorkspaceDirRef.Create("Sessions/S_1/Working/A_1"), output)
+        {
+            BackgroundRemovalMode = (BackgroundRemovalMode)999,
+        }, CancellationToken.None);
+
+        result.IsFailure.ShouldBeTrue();
+        result.Failure.Code.ShouldBe(FailureCode.PreconditionNotMet);
+        result.Failure.IsRetryable.ShouldBeFalse();
+        result.Failure.Context["inputSent"].ShouldBe("false");
+        h.Elements.Invocations.ShouldBeEmpty();
+        h.Elements.ValueWrites.ShouldBeEmpty();
+        h.Input.Sends.ShouldBeEmpty();
+    }
+
     /// <summary>
     /// An Enhancement whose expected output is its own input is refused before Meitu is touched
     /// (Epic 11300 Part B2B §19).
@@ -246,44 +269,52 @@ public sealed class ProductionMeituProcessorTests : IDisposable
         h.Locator.LaunchCount.ShouldBe(0);
     }
 
+    [Fact]
+    public async Task An_unreadable_executable_is_not_launched()
+    {
+        Harness h = Build();
+        using FileStream locked = new(_executablePath, FileMode.Open, FileAccess.Read, FileShare.None);
+
+        OperationResult<MeituReadiness> ready = await h.Adapter.EnsureReadyAsync(CancellationToken.None);
+
+        ready.IsFailure.ShouldBeTrue();
+        ready.Failure.Code.ShouldBe(FailureCode.MeituNotInstalled);
+        h.Locator.LaunchCount.ShouldBe(0);
+    }
+
     /// <summary>
-    /// A binary at the accepted path whose hash has moved is not the accepted binary.
+    /// A Meitu update may change the binary while retaining a supported interface.
     /// </summary>
     /// <remarks>
-    /// This is what makes a silent Meitu auto-update stop automation rather than run it against
-    /// an unvalidated UI. Epic 11000 allows upgrades — it requires revalidation first, and this
-    /// is where that requirement becomes enforceable.
+    /// Startup depends on the actual recognised state, without pinning Meitu's binary version.
     /// </remarks>
     [Fact]
-    public async Task An_executable_whose_hash_has_changed_fails_closed()
+    public async Task An_executable_whose_hash_has_changed_can_launch_into_a_recognised_state()
     {
         Harness h = Build(Baseline() with
         {
             ExecutableSha256 = Sha256.Parse(
                 "0000000000000000000000000000000000000000000000000000000000000000"),
         });
+        h.Locator.LaunchResult = Process(id: 777);
+        ShowWelcomePage(h.Elements, MeituFakes.Window(owningProcessId: 777));
 
         OperationResult<MeituReadiness> ready = await h.Adapter.EnsureReadyAsync(CancellationToken.None);
 
-        ready.IsFailure.ShouldBeTrue();
-        ready.Failure.Code.ShouldBe(FailureCode.MeituNotInstalled);
-        ready.Failure.Context.ShouldContainKey("actualSha256");
-        h.Locator.LaunchCount.ShouldBe(0);
+        ready.IsSuccess.ShouldBeTrue();
+        ready.Value.WasLaunched.ShouldBeTrue();
+        ready.Value.State.State.ShouldBe(MeituStartingState.KnownWelcome);
+        h.Locator.LaunchCount.ShouldBe(1);
     }
 
     /// <summary>
-    /// A binary replaced <i>after</i> a passing run is refused on the next one, in the same
-    /// process (Epic 11500 Part C §7).
+    /// A Meitu update between runs is accepted when the current interface remains recognised.
     /// </summary>
     /// <remarks>
-    /// The operation-time half of Part C's immutable-baseline decision. Epic 11500's environment
-    /// gate reads the signed baseline once per process and therefore keeps authorising until
-    /// PrintFlow restarts; this rule re-hashes the accepted path on every run, so a Meitu binary
-    /// replaced between two steps is refused before anything is launched or driven — whatever
-    /// the gate still believes.
+    /// The same path and process ownership rules apply after the update.
     /// </remarks>
     [Fact]
-    public async Task A_binary_replaced_after_a_passing_run_is_refused_on_the_next_run()
+    public async Task A_binary_updated_after_a_passing_run_can_reuse_a_recognised_instance()
     {
         Harness h = Build();
         ExternalProcessRef process = Process();
@@ -297,10 +328,24 @@ public sealed class ProductionMeituProcessorTests : IDisposable
 
         OperationResult<MeituReadiness> after = await h.Adapter.EnsureReadyAsync(CancellationToken.None);
 
-        after.IsFailure.ShouldBeTrue();
-        after.Failure.Code.ShouldBe(FailureCode.MeituNotInstalled);
-        after.Failure.Context.ShouldContainKey("actualSha256");
+        after.IsSuccess.ShouldBeTrue();
+        after.Value.WasLaunched.ShouldBeFalse();
         h.Locator.LaunchCount.ShouldBe(0);
+        h.Input.Sends.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task A_different_Meitu_binary_with_an_unknown_interface_is_still_refused()
+    {
+        Harness h = Build(Baseline() with { ExecutableSha256 = Sha256.Parse(new string('0', 64)) });
+        h.Locator.Register(Process(), MeituFakes.Window());
+        h.Elements.SetTexts(MeituFakes.Window().Handle, "Unsupported interface");
+
+        OperationResult<MeituReadiness> ready = await h.Adapter.EnsureReadyAsync(CancellationToken.None);
+
+        ready.IsFailure.ShouldBeTrue();
+        ready.Failure.Code.ShouldBe(FailureCode.MeituUnknownState);
+        h.Elements.Invocations.ShouldBeEmpty();
         h.Input.Sends.ShouldBeEmpty();
     }
 

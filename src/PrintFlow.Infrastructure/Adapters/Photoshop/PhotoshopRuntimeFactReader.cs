@@ -46,7 +46,22 @@ internal sealed class RotPhotoshopRuntimeFactReader : IPhotoshopRuntimeFactReade
         try
         {
             Marshal.ThrowExceptionForHR(NativeMethods.CLSIDFromProgID(PhotoshopCc2019ProgId, out Guid classId));
-            Marshal.ThrowExceptionForHR(NativeMethods.GetActiveObject(ref classId, 0, out application));
+            int activeResult = NativeMethods.GetActiveObject(ref classId, 0, out application);
+            if (activeResult == unchecked((int)0x800401E3)) // MK_E_UNAVAILABLE: not registered in the ROT yet.
+            {
+                return OperationResult.Fail<PhotoshopRuntimeFacts>(OperationFailure.Create(
+                    FailureCode.PhotoshopUnknownState,
+                    "The running Photoshop CC 2019 automation object is not available yet (0x800401E3).",
+                    isRetryable: true,
+                    context: new Dictionary<string, string>
+                    {
+                        ["automationHResult"] = "0x800401E3",
+                        ["settingsChanged"] = "false",
+                        ["inputSent"] = "false",
+                    }));
+            }
+
+            Marshal.ThrowExceptionForHR(activeResult);
             if (application is null)
             {
                 return Unavailable("The running Photoshop CC 2019 automation object was not available.");

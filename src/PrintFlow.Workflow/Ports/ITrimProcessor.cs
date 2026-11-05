@@ -17,7 +17,8 @@ namespace PrintFlow.Workflow.Ports;
 public sealed record TrimRequest(
     WorkspaceFileRef Input,
     WorkspaceFileRef ExpectedOutput,
-    TrimMargin Margin)
+    TrimMargin Margin,
+    bool IgnoreSmallNoise = true)
 {
     /// <summary>The mode the operator asked for, carried by <see cref="Margin"/> itself.</summary>
     public TrimMode Mode => Margin.Mode;
@@ -58,7 +59,7 @@ public sealed record TrimResult
     /// <summary>What the attempt established.</summary>
     public TrimOutcome Outcome { get; }
 
-    /// <summary>The smallest rectangle containing every <c>alpha &gt; 0</c> pixel, before margins.</summary>
+    /// <summary>The detected content rectangle under the request's noise policy, before margins.</summary>
     public TrimBounds? ContentBounds { get; }
 
     /// <summary>The rectangle actually cropped to: <see cref="ContentBounds"/> grown by the margin and clamped to the canvas.</summary>

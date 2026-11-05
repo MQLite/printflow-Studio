@@ -154,18 +154,23 @@ public sealed partial class SessionViewModel
         var edge = SelectedTargetEdgeChoice; var preset = _customPresetContext; var pending = _pendingPreset;
         var choosing = IsChoosingCustomSize; var white = SelectedWhiteUnderbaseChoice; var whiteEditing = _isChoosingGuidedWhiteInk;
         var mode = SelectedTrimMode; var uniform = UniformMarginText; var top = TopMarginText;
+        var ignoreSmallNoise = IgnoreSmallTrimNoise;
         var right = RightMarginText; var bottom = BottomMarginText; var left = LeftMarginText;
         var reason = SelectedRejectionReason; var notes = RejectionNotes; var correction = CorrectionNote;
+        var recognitionMode = SelectedBackgroundRemovalMode;
         return (string.Join("\u001f", width, height, custom, edge?.Edge.ToString(), preset?.Preset.ToString(),
             pending.ToString(), choosing.ToString(), white?.Branch.ToString(), whiteEditing.ToString(), mode?.Mode.ToString(),
-            uniform, top, right, bottom, left, reason?.Reason.ToString(), notes, correction), () =>
+            uniform, top, right, bottom, left, reason?.Reason.ToString(), notes, correction,
+            recognitionMode.ToString(), ignoreSmallNoise.ToString()), () =>
         {
             WidthMmText = width; HeightMmText = height; CustomMillimetresText = custom;
             SelectedTargetEdgeChoice = edge; _customPresetContext = preset; _pendingPreset = pending;
             IsChoosingCustomSize = choosing; SelectedWhiteUnderbaseChoice = white; _isChoosingGuidedWhiteInk = whiteEditing;
             SelectedTrimMode = mode!; UniformMarginText = uniform; TopMarginText = top;
+            IgnoreSmallTrimNoise = ignoreSmallNoise;
             RightMarginText = right; BottomMarginText = bottom; LeftMarginText = left;
             SelectedRejectionReason = reason!; RejectionNotes = notes; CorrectionNote = correction;
+            SelectedBackgroundRemovalMode = recognitionMode;
             NotifyCustomSizeStateChanged(); NotifyGuidedPresentation();
         });
     }

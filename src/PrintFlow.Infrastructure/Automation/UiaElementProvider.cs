@@ -198,7 +198,19 @@ public sealed class UiaElementProvider : IUiElementProvider
                     ? default
                     : new UiBounds(rect.X, rect.Y, rect.Width, rect.Height),
                 IsEnabled: current.IsEnabled,
-                IsOffscreen: current.IsOffscreen));
+                IsOffscreen: current.IsOffscreen)
+            {
+                IsSelected = native.TryGetCurrentPattern(SelectionItemPattern.Pattern, out object? selection)
+                    ? ((SelectionItemPattern)selection).Current.IsSelected
+                    : native.TryGetCurrentPattern(TogglePattern.Pattern, out object? toggle)
+                        ? ((TogglePattern)toggle).Current.ToggleState switch
+                        {
+                            ToggleState.On => true,
+                            ToggleState.Off => false,
+                            _ => null,
+                        }
+                        : null,
+            });
         }
         catch (ElementNotAvailableException ex)
         {

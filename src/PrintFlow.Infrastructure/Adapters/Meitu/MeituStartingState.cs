@@ -83,7 +83,11 @@ public sealed record MeituObservation(
     ImmutableArray<string> OwnedDialogTitles,
     bool MainWindowEnabled,
     string? ExpectedWorkingCopyFileName,
-    string? ObservedDocumentIdentity = null);
+    string? ObservedDocumentIdentity = null)
+{
+    /// <summary>The unique, visible, enabled apply-to-background control was structurally verified.</summary>
+    public bool BackgroundRemovalApplyControlObserved { get; init; }
+}
 
 /// <summary>The classified state plus the evidence the classification rested on.</summary>
 /// <param name="State">What PrintFlow decided the screen is.</param>

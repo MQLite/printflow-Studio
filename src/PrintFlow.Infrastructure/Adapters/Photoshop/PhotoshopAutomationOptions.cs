@@ -14,7 +14,7 @@ namespace PrintFlow.Infrastructure.Adapters.Photoshop;
 /// </remarks>
 public sealed record PhotoshopAutomationOptions
 {
-    /// <summary>How long a launched Photoshop has to reach an identifiable window in a recognised state.</summary>
+    /// <summary>Startup budget for a recognised window, and for pre-open automation-object registration.</summary>
     /// <remarks>
     /// Generous because Photoshop CC 2019 is genuinely slow to start on a cold cache — it
     /// presents a window well before the start screen it hosts has finished loading, and the

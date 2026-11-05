@@ -348,17 +348,64 @@ public sealed class ProductionWorkstationVerifierTests
     }
 
     [Fact]
-    public void A_changed_Meitu_binary_fails_verification()
+    public void A_changed_Meitu_binary_does_not_require_a_specific_version()
     {
         using WorkstationVerificationFixture fixture = new();
         WorkstationVerificationFixture.Corrupt(fixture.MeituPath);
 
         WorkstationVerificationResult result = fixture.CreateVerifier().Verify();
 
-        result.Verified.ShouldBeFalse();
+        result.Verified.ShouldBeTrue(result.Describe());
         WorkstationCheckResult meitu = Check(result, WorkstationVerificationCheck.MeituExecutable);
-        meitu.Outcome.ShouldBe(WorkstationCheckOutcome.Failed);
-        meitu.FailureCode.ShouldBe(FailureCode.MeituNotInstalled);
+        meitu.Outcome.ShouldBe(WorkstationCheckOutcome.Passed);
+        meitu.FailureCode.ShouldBeNull();
+    }
+
+    [Theory]
+    [InlineData("10.0.0", "10.0.0.1")]
+    [InlineData("1.0.0", "1.0.0.1")]
+    [InlineData(null, null)]
+    public void Meitu_version_resources_are_informational(string? productVersion, string? fileVersion)
+    {
+        using WorkstationVerificationFixture fixture = new();
+        fixture.Artifacts = new MeituVersionReader(
+            fixture.Artifacts, fixture.MeituPath, productVersion, fileVersion);
+
+        WorkstationVerificationResult result = fixture.CreateVerifier().Verify();
+
+        result.Verified.ShouldBeTrue(result.Describe());
+        Outcome(result, WorkstationVerificationCheck.MeituExecutable).ShouldBe(WorkstationCheckOutcome.Passed);
+    }
+
+    [Fact]
+    public void An_unreadable_Meitu_executable_still_fails_verification()
+    {
+        using WorkstationVerificationFixture fixture = new();
+        using FileStream locked = new(fixture.MeituPath, FileMode.Open, FileAccess.Read, FileShare.None);
+
+        WorkstationVerificationResult result = fixture.CreateVerifier().Verify();
+
+        result.Verified.ShouldBeFalse();
+        Check(result, WorkstationVerificationCheck.MeituExecutable).Observed.ShouldBe("(unreadable)");
+    }
+
+    [Fact]
+    public void The_current_Meitu_installation_verifies_when_the_historical_executable_is_gone()
+    {
+        using WorkstationVerificationFixture fixture = new();
+        string root = Path.GetDirectoryName(fixture.MeituPath)!;
+        string current = Path.Combine(root, "2.0.0", Path.GetFileName(fixture.MeituPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(current)!);
+        File.Copy(fixture.MeituPath, current);
+        File.Delete(fixture.MeituPath);
+        File.WriteAllText(Path.Combine(root, "Config.ini"), "[Main]\nVersion=2.0.0\n");
+
+        WorkstationVerificationResult result = fixture.CreateVerifier().Verify();
+
+        result.Verified.ShouldBeTrue(result.Describe());
+        WorkstationCheckResult meitu = Check(result, WorkstationVerificationCheck.MeituExecutable);
+        meitu.Outcome.ShouldBe(WorkstationCheckOutcome.Passed);
+        meitu.Observed!.ShouldStartWith(current);
     }
 
     [Fact]
@@ -370,6 +417,21 @@ public sealed class ProductionWorkstationVerifierTests
         WorkstationVerificationResult result = fixture.CreateVerifier().Verify();
 
         Check(result, WorkstationVerificationCheck.MeituExecutable).Observed.ShouldBe("(absent)");
+    }
+
+    private sealed class MeituVersionReader(
+        IWorkstationArtifactReader inner, string meituPath, string? productVersion, string? fileVersion)
+        : IWorkstationArtifactReader
+    {
+        public FileIdentityFacts ReadFile(string path)
+        {
+            FileIdentityFacts facts = inner.ReadFile(path);
+            return path == meituPath
+                ? facts with { ProductVersion = productVersion, FileVersion = fileVersion }
+                : facts;
+        }
+
+        public DirectoryFacts ReadDirectory(string path) => inner.ReadDirectory(path);
     }
 
     // -- Photoshop -----------------------------------------------------------------------

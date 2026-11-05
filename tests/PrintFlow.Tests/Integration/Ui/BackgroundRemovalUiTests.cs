@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.IO;
 using PrintFlow.App.ViewModels;
 using PrintFlow.Domain.Attempts;
@@ -37,6 +37,144 @@ namespace PrintFlow.Tests.Integration.Ui;
 [Collection(SqliteCollection.Name)]
 public sealed class BackgroundRemovalUiTests
 {
+    [Theory]
+    [InlineData("Automatic")]
+    [InlineData("PortraitPets")]
+    [InlineData("Products")]
+    [InlineData("LogosStamps")]
+    public async Task Recognition_mode_is_confirmed_persisted_reloaded_and_audited(string mode)
+    {
+        using HomeScreenHarness harness = new();
+        AtBackgroundRemoval open = await AtBackgroundRemovalAsync(harness, $"br-mode-{mode}.png");
+        SessionViewModel screen = open.Screen;
+        SetRecognitionMode(screen, mode);
+        await AuthoriseAsync(screen);
+        (await open.ReloadAsync()).Session.BackgroundRemovalAuthority.ShouldNotBeNull().Mode.ToString().ShouldBe(mode);
+        RestartedSession restarted = harness.RestartSession(new RecordingNavigation());
+        SessionViewModel resumed = restarted.Screen;
+        resumed.Open((await restarted.Sessions.LoadAsync(open.Id, CancellationToken.None)).Value);
+        GetRecognitionMode(resumed).ShouldBe(mode);
+        resumed.CanRunStep.ShouldBeTrue();
+        await resumed.RunStepCommand.ExecuteAsync(null);
+        resumed.IsReviewRequired.ShouldBeTrue();
+        string audit = resumed.BackgroundRemovalAttemptAudit;
+        string modeLabel = resumed.SelectedBackgroundRemovalModeLabel;
+        audit.ShouldContain(modeLabel);
+        SetRecognitionMode(resumed, mode == "Products" ? "LogosStamps" : "Products");
+        resumed.BackgroundRemovalAttemptAudit.ShouldBe(audit);
+        ProcessingAttempt attempt = (await open.ReloadAsync()).Attempts.Single(a => a.Step == StepKind.BackgroundRemoval);
+        attempt.BackgroundRemovalAuthority!.Mode.ToString().ShouldBe(mode);
+        await resumed.RejectCommand.ExecuteAsync(null);
+        await resumed.RetryCommand.ExecuteAsync(null);
+        GetRecognitionMode(resumed).ShouldBe(mode, "retry restores the confirmed recogniser");
+        resumed.CanRunStep.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task Changing_a_recognition_mode_blocks_the_old_run_until_the_new_choice_is_confirmed()
+    {
+        using HomeScreenHarness harness = new();
+        AtBackgroundRemoval open = await AtBackgroundRemovalAsync(harness, "br-mode-change.png");
+        SessionViewModel screen = open.Screen;
+        await AuthoriseAsync(screen);
+        SetRecognitionMode(screen, "Products");
+        screen.CanRunStep.ShouldBeFalse();
+        screen.CanRunBackgroundRemoval.ShouldBeFalse();
+        screen.ShowsGuidedAutomaticBegin.ShouldBeTrue();
+        screen.RecommendedCommand.ShouldBe(screen.BeginAutomaticSelectionCommand);
+        screen.BeginAutomaticSelectionCommand.Execute(null);
+        screen.RecommendedCommand.ShouldBe(screen.ConfirmAutomaticSelectionCommand);
+        int calls = harness.Meitu.CallCount;
+        await screen.RunStepCommand.ExecuteAsync(null);
+        harness.Meitu.CallCount.ShouldBe(calls);
+        (await open.ReloadAsync()).Attempts.ShouldNotContain(a => a.Step == StepKind.BackgroundRemoval);
+        GetRecognitionMode(screen).ShouldBe("Products");
+        await AuthoriseAsync(screen);
+        screen.CanRunStep.ShouldBeTrue();
+        GetRecognitionMode(screen).ShouldBe("Products");
+    }
+
+    private static void SetRecognitionMode(SessionViewModel screen, string mode)
+    {
+        screen.SelectedBackgroundRemovalMode = Enum.Parse<BackgroundRemovalMode>(mode);
+    }
+
+    private static string GetRecognitionMode(SessionViewModel screen) =>
+        screen.SelectedBackgroundRemovalMode.ToString();
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task A_provisional_recogniser_survives_same_context_reload_and_utility_return(bool utility)
+    {
+        using HomeScreenHarness harness = new();
+        AtBackgroundRemoval open = await AtBackgroundRemovalAsync(harness, "br-mode-draft-reload.png");
+        SessionViewModel screen = open.Screen;
+        await AuthoriseAsync(screen);
+        screen.SelectedBackgroundRemovalMode = BackgroundRemovalMode.Products;
+        SessionView current = (await harness.Sessions.LoadAsync(open.Id, default)).Value;
+        if (utility)
+        {
+            screen.SuspendForUtility();
+            screen.ResumeFromUtility(current);
+        }
+        else screen.Open(current);
+        screen.SelectedBackgroundRemovalMode.ShouldBe(BackgroundRemovalMode.Products);
+        screen.CanRunStep.ShouldBeFalse();
+        int calls = harness.Meitu.CallCount;
+        await screen.RunStepCommand.ExecuteAsync(null);
+        harness.Meitu.CallCount.ShouldBe(calls);
+        (await open.ReloadAsync()).Session.BackgroundRemovalAuthority!.Mode.ShouldBe(BackgroundRemovalMode.Automatic);
+    }
+
+    [Fact]
+    public async Task A_provisional_recogniser_has_keep_discard_protection_and_confirmation_marks_it_clean()
+    {
+        using HomeScreenHarness harness = new();
+        AtBackgroundRemoval open = await AtBackgroundRemovalAsync(harness, "br-mode-draft-leave.png");
+        SessionViewModel screen = open.Screen;
+        await AuthoriseAsync(screen);
+        screen.SelectedBackgroundRemovalMode = BackgroundRemovalMode.Products;
+        screen.SelectedReturnTarget = screen.ReturnTargets.Single(t => t.Step == StepKind.Enhancement);
+        screen.BeginReturnCommand.Execute(null);
+        screen.IsConfirmingDraftLeave.ShouldBeTrue();
+        screen.KeepDraftCommand.Execute(null);
+        screen.SelectedBackgroundRemovalMode.ShouldBe(BackgroundRemovalMode.Products);
+        screen.CanRunStep.ShouldBeFalse();
+        screen.BeginReturnCommand.Execute(null);
+        await screen.DiscardDraftAndLeaveCommand.ExecuteAsync(null);
+        screen.SelectedBackgroundRemovalMode.ShouldBe(BackgroundRemovalMode.Automatic);
+        screen.IsConfirmingReturn.ShouldBeTrue();
+        screen.CancelReturnCommand.Execute(null);
+        screen.SelectedBackgroundRemovalMode = BackgroundRemovalMode.Products;
+        await AuthoriseAsync(screen);
+        screen.SelectedReturnTarget = screen.ReturnTargets.Single(t => t.Step == StepKind.Enhancement);
+        screen.BeginReturnCommand.Execute(null);
+        screen.IsConfirmingDraftLeave.ShouldBeFalse("confirmed mode is a saved decision");
+        screen.IsConfirmingReturn.ShouldBeTrue();
+    }
+
+    [Theory]
+    [InlineData("zh-CN", "自动选择", "人像宠物", "商品货物", "图标印章")]
+    [InlineData("en", "Automatic Selection", "Portraits / Pets", "Products / Goods", "Logos / Stamps")]
+    public async Task Recognition_choices_and_recorded_authority_use_the_selected_language(
+        string culture, string automatic, string portraits, string products, string logos)
+    {
+        using OperatorCultureScope language = new(culture);
+        using HomeScreenHarness harness = new();
+        AtBackgroundRemoval open = await AtBackgroundRemovalAsync(harness, "br-mode-language.png");
+        SessionViewModel screen = open.Screen;
+        screen.BackgroundRemovalModes.Select(choice => choice.Label).ShouldBe([automatic, portraits, products, logos]);
+        screen.SelectedBackgroundRemovalMode = BackgroundRemovalMode.Products;
+        screen.AutomaticSelectionConfirmQuestion.ShouldContain(products);
+        await AuthoriseAsync(screen);
+        screen.AutomaticSelectionAuthorisedNotice.ShouldContain(products);
+        screen.SelectedBackgroundRemovalMode = BackgroundRemovalMode.LogosStamps;
+        screen.HasRecordedBackgroundRemovalAuthorisation.ShouldBeTrue();
+        screen.AutomaticSelectionAuthorisedNotice.ShouldContain(products, Case.Sensitive,
+            "the stored authority is distinct from the draft picker");
+    }
+
     // -------------------------------------------------------------------------------------
     // §7, §8, §10: nothing is authorised until the operator says so
     // -------------------------------------------------------------------------------------

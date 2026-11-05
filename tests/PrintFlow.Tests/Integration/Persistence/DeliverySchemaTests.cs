@@ -29,8 +29,8 @@ public sealed class DeliverySchemaTests
         Execute(connection, "PRAGMA foreign_keys=ON; PRAGMA user_version=17;");
         InsertSession(connection);
         MigrationRunner.Migrate(connection).IsSuccess.ShouldBeTrue();
-        // SCRUM-11148 adds migration 0019 after the delivery schema; both remain additive.
-        Scalar(connection, "PRAGMA user_version").ShouldBe(19L);
+        // All later additive migrations must preserve the original delivery/session rows.
+        Scalar(connection, "PRAGMA user_version").ShouldBe(MigrationRunner.NewestKnownVersion);
         Scalar(connection, "SELECT COUNT(*) FROM ProcessingSession WHERE Id='s'").ShouldBe(1L);
         Scalar(connection, "SELECT COUNT(*) FROM ArtifactDelivery").ShouldBe(0L);
         Scalar(connection, "SELECT COUNT(*) FROM CorrectionRequest").ShouldBe(0L);

@@ -74,6 +74,8 @@ public sealed record WorkflowSnapshot(
     /// </remarks>
     public TrimMargin TrimMargin { get; init; } = TrimMargin.Tight;
 
+    public bool IgnoreSmallTrimNoise { get; init; } = true;
+
     /// <summary>
     /// The reviewed-content authority the next Background Removal attempt would run under
     /// (Epic 11300 Part C2B1 §4).
@@ -445,6 +447,7 @@ public sealed record WorkflowSnapshot(
             && Nullable.Equals(WhiteUnderbaseBranch, other.WhiteUnderbaseBranch)
             && ApprovedPrintOutputCount == other.ApprovedPrintOutputCount
             && TrimMargin.Equals(other.TrimMargin)
+            && IgnoreSmallTrimNoise == other.IgnoreSmallTrimNoise
             && Equals(BackgroundRemovalAuthority, other.BackgroundRemovalAuthority)
             && Nullable.Equals(DimensionSemantics, other.DimensionSemantics)
             && Equals(PrintPreparationPlan, other.PrintPreparationPlan)
@@ -467,6 +470,7 @@ public sealed record WorkflowSnapshot(
         hash.Add(WhiteUnderbaseBranch);
         hash.Add(ApprovedPrintOutputCount);
         hash.Add(TrimMargin);
+        hash.Add(IgnoreSmallTrimNoise);
         hash.Add(BackgroundRemovalAuthority);
         hash.Add(DimensionSemantics);
         hash.Add(PrintPreparationPlan);

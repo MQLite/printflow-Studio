@@ -129,9 +129,12 @@ public sealed record ProcessingAttempt(
     /// </remarks>
     public TrimMargin? TrimParameters { get; init; }
 
+    /// <summary>The producing attempt's noise policy; null denotes a historical exact-alpha trim.</summary>
+    public bool? IgnoreSmallTrimNoise { get; init; }
+
     /// <summary>Records the trim margin this attempt is about to run with.</summary>
-    public ProcessingAttempt WithTrimParameters(TrimMargin margin) =>
-        this with { TrimParameters = margin };
+    public ProcessingAttempt WithTrimParameters(TrimMargin margin, bool? ignoreSmallNoise = null) =>
+        this with { TrimParameters = margin, IgnoreSmallTrimNoise = ignoreSmallNoise };
 
     /// <summary>
     /// The rectangles the deterministic trim established when this attempt produced a cropped

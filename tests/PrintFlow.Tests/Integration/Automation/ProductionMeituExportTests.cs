@@ -1,4 +1,5 @@
 using System.IO;
+using System.Reflection;
 using System.Security.Cryptography;
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Results;
@@ -28,6 +29,10 @@ namespace PrintFlow.Tests.Integration.Automation;
 /// </remarks>
 public sealed class ProductionMeituExportTests : IDisposable
 {
+    private const string RecognitionRoot = "MainWindow.MattingNewParameterWidget.widget.stackedMattingWidget.page1.scrollArea.qt_scrollarea_viewport.scrollAreaWidgetContents.mattingnew";
+    private const string RecognitionUndoId = "MainWindow.centralwidget.mainStackedWidget.editPage.subBackgroundWidget.titleWidget.stackedWidget.editorPage.undoButton";
+    private const string RecognitionRedoId = "MainWindow.centralwidget.mainStackedWidget.editPage.subBackgroundWidget.titleWidget.stackedWidget.editorPage.redoButton";
+    private static string RecognizerId(int index) => RecognitionRoot + ".centerWidget.item1.container1.btnSod" + index;
     private const string SaveId = "MainWindow.editorPage.saveButton";
     private const string CancelId = "MainWindow.MaskDialog.SaveMaskWidget.titleFrame.closeButton";
     private const string SurfaceFileNameId = "MainWindow.MaskDialog.SaveMaskWidget.wName.fileNameEdit";
@@ -48,14 +53,14 @@ public sealed class ProductionMeituExportTests : IDisposable
     private static readonly MeituAutomationOptions FastOptions = new()
     {
         PollInterval = TimeSpan.FromMilliseconds(5),
-        ActivationTimeout = TimeSpan.FromMilliseconds(60),
-        DialogTimeout = TimeSpan.FromMilliseconds(60),
+        ActivationTimeout = TimeSpan.FromMilliseconds(250),
+        DialogTimeout = TimeSpan.FromMilliseconds(250),
         AttachTimeout = TimeSpan.FromMilliseconds(60),
         AutoEnhancementWatchTimeout = TimeSpan.FromMilliseconds(60),
-        EnhancementBusyTimeout = TimeSpan.FromMilliseconds(200),
-        EnhancementCompletionTimeout = TimeSpan.FromMilliseconds(300),
-        BackgroundRemovalBusyTimeout = TimeSpan.FromMilliseconds(200),
-        BackgroundRemovalCompletionTimeout = TimeSpan.FromMilliseconds(300),
+        EnhancementBusyTimeout = TimeSpan.FromMilliseconds(500),
+        EnhancementCompletionTimeout = TimeSpan.FromSeconds(1),
+        BackgroundRemovalBusyTimeout = TimeSpan.FromMilliseconds(500),
+        BackgroundRemovalCompletionTimeout = TimeSpan.FromSeconds(1),
         OutputStabilityTimeout = TimeSpan.FromMilliseconds(400),
         OutputPollInterval = TimeSpan.FromMilliseconds(5),
     };
@@ -146,7 +151,13 @@ public sealed class ProductionMeituExportTests : IDisposable
         bool mutateSourceOnExport = false,
         bool backgroundBusyObserved = true,
         string? cutoutFileName = null,
-        IMeituOutputProbe? outputProbe = null)
+        IMeituOutputProbe? outputProbe = null,
+        bool appTakesFocusAfterExport = false,
+        bool refuseCleanupActivation = false,
+        Action<BackgroundRemovalMode>? captureBackgroundMode = null,
+        BackgroundRemovalMode? reportedBackgroundMode = null,
+        bool? instantRecognitionEvidence = null,
+        string? reapplyDefect = null)
     {
         ExternalProcessRef process = MeituFakes.Process() with { ExecutablePath = _executablePath };
         ExternalWindowRef editor = MeituFakes.Window(
@@ -219,6 +230,30 @@ public sealed class ProductionMeituExportTests : IDisposable
         bool documentLoaded = false;
         bool pickerUp = false;
 
+        void Recognizers(int selected)
+        {
+            for (int index = 0; index < 4; index++)
+            {
+                string id = RecognizerId(index);
+                foreach (string old in new[] { id, id + ".widget", id + ".widget.label" })
+                    elements.Remove(editor.Handle, old);
+                var owner = elements.Add(editor.Handle, new UiElementIdentity(
+                    "CheckBox", id, "", "CMattingIconButton", process.ProcessId,
+                    [UiPatternKind.Invoke, UiPatternKind.Toggle],
+                    new UiBounds(100 + index * 60, 220, 51, 80), true, false)
+                {
+                    IsSelected = selected == index,
+                });
+                var group = elements.Add(editor.Handle, new UiElementIdentity(
+                    "Group", id + ".widget", "", "QWidget", process.ProcessId,
+                    [UiPatternKind.Invoke], new UiBounds(102 + index * 60, 222, 47, 76), true, false), owner);
+                string label = index switch { 0 => "关闭\n", 1 => "人像\n宠物", 2 => "商品\n货物", _ => "图标\n印章" };
+                elements.Add(editor.Handle, new UiElementIdentity(
+                    "Text", id + ".widget.label", label, "QLabel", process.ProcessId,
+                    [UiPatternKind.Invoke], new UiBounds(102 + index * 60, 260, 47, 32), true, false), group);
+            }
+        }
+
         elements.OnReadTextSnapshot = _ =>
         {
             if (!documentLoaded)
@@ -245,6 +280,22 @@ public sealed class ProductionMeituExportTests : IDisposable
 
         elements.OnInvoke = invoked =>
         {
+            if (invoked == RecognitionUndoId)
+            {
+                Recognizers(0);
+                elements.Add(editor.Handle, new UiElementIdentity(
+                    "Button", RecognitionRedoId, "\uE2A4", "proui::IconFontButton", process.ProcessId,
+                    [UiPatternKind.Invoke], new UiBounds(1036, 50, 32, 32), true, false));
+                return;
+            }
+            int recognizer = Enumerable.Range(1, 3).FirstOrDefault(index => invoked == RecognizerId(index));
+            if (recognizer != 0)
+            {
+                Recognizers(recognizer);
+                backgroundReads = 0;
+                removingBackground = true;
+                return;
+            }
             // The picker's Open button and the destination dialog's confirm control both report
             // automation id "1" — they are both Windows common dialogs, and they do on the real
             // machine too. Which one was pressed is decided by which dialog is up, exactly as the
@@ -283,6 +334,12 @@ public sealed class ProductionMeituExportTests : IDisposable
                 case MeituFakes.BackgroundActionMarker:
                     removingBackground = true;
                     backgroundReads = 0;
+                    Recognizers(3);
+                    elements.Remove(editor.Handle, RecognitionUndoId);
+                    elements.Remove(editor.Handle, RecognitionRedoId);
+                    elements.Add(editor.Handle, new UiElementIdentity(
+                        "Button", RecognitionUndoId, "\uE2A3", "proui::IconFontButton", process.ProcessId,
+                        [UiPatternKind.Invoke], new UiBounds(1000, 50, 32, 32), true, false));
                     break;
 
                 case MeituFakes.BackgroundReturnMarker:
@@ -322,7 +379,18 @@ public sealed class ProductionMeituExportTests : IDisposable
 
                 case ResultCloseId:
                     locator.OwnedDialogs.Remove(result);
+                    if (appTakesFocusAfterExport)
+                    {
+                        locator.Foreground = new ForegroundIdentity(
+                            new WindowHandle(0x9000), 9999, "PrintFlow.App");
+                    }
+                    locator.RefuseActivation = refuseCleanupActivation;
+                    break;
+
+                case "MainWindow.editorPage.closeButton":
+                    documentLoaded = false;
                     enhancing = false;
+                    removingBackground = false;
                     elements.SetTexts(editor.Handle, [.. MeituFakes.EmptyEditorMarkers]);
                     break;
             }
@@ -337,11 +405,22 @@ public sealed class ProductionMeituExportTests : IDisposable
         GuardedMeituUiDriver driver = new(
             locator, elements, new RecordingInputSink(), new RecordingEvidenceSink(),
             baselines, FastOptions, TimeProvider.System);
+        IMeituUiDriver adapterDriver = driver;
+        if (captureBackgroundMode is not null || reportedBackgroundMode is not null || instantRecognitionEvidence.HasValue)
+        {
+            adapterDriver = DispatchProxy.Create<IMeituUiDriver, RecognitionModeProbe>();
+            var probe = (RecognitionModeProbe)adapterDriver;
+            probe.Inner = driver;
+            probe.Capture = captureBackgroundMode ?? (_ => { });
+            probe.ReportedMode = reportedBackgroundMode;
+            probe.InstantRecognitionEvidence = instantRecognitionEvidence;
+            probe.ReapplyDefect = reapplyDefect;
+        }
 
         return new Scenario
         {
             Adapter = new ProductionMeituProcessor(
-                baselines, locator, driver, workspace, new WicFileInspector(),
+                baselines, locator, adapterDriver, workspace, new WicFileInspector(),
                 new WicMeituTransparencyInspector(),
                 outputProbe ?? new FileSystemMeituOutputProbe(), FastOptions, TimeProvider.System),
             Elements = elements,
@@ -408,7 +487,8 @@ public sealed class ProductionMeituExportTests : IDisposable
         }
     }
 
-    private Task<OperationResult<AdapterOutput>> ProcessAsync(Scenario s) =>
+    private Task<OperationResult<AdapterOutput>> ProcessAsync(
+        Scenario s, BackgroundRemovalMode mode = BackgroundRemovalMode.Automatic) =>
         s.Adapter.ProcessAsync(
             new MeituRequest(
                 Working,
@@ -417,8 +497,166 @@ public sealed class ProductionMeituExportTests : IDisposable
                     ? BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent
                     : BackgroundRemovalDecision.Unspecified,
                 WorkspaceDirRef.Create("Sessions/S_1/Working/A_1"),
-                s.Output),
+                s.Output)
+            {
+                BackgroundRemovalMode = mode,
+            },
             CancellationToken.None);
+
+    public class RecognitionModeProbe : DispatchProxy
+    {
+        public IMeituUiDriver Inner { get; set; } = null!;
+        public Action<BackgroundRemovalMode> Capture { get; set; } = null!;
+        public BackgroundRemovalMode? ReportedMode { get; set; }
+        public bool? InstantRecognitionEvidence { get; set; }
+        public string? ReapplyDefect { get; set; }
+
+        protected override object? Invoke(MethodInfo? method, object?[]? args)
+        {
+            if (method!.Name == nameof(IMeituUiDriver.RunBackgroundRemovalAsync))
+            {
+                Capture(args!.LastOrDefault() is BackgroundRemovalMode mode ? mode : BackgroundRemovalMode.Automatic);
+                if (ReportedMode is not null || InstantRecognitionEvidence.HasValue)
+                {
+                    // Keep the existing synthetic UI/export lifecycle real while controlling
+                    // the driver's reported recogniser at the processor's trust boundary.
+                    object?[] automaticArgs = (object?[])args!.Clone();
+                    automaticArgs[^1] = BackgroundRemovalMode.Automatic;
+                    return ReportModeAsync((Task<OperationResult<MeituBackgroundRemovalOutcome>>)
+                        method.Invoke(Inner, automaticArgs)!, ReportedMode, InstantRecognitionEvidence, ReapplyDefect);
+                }
+                return Task.FromResult(OperationResult.Fail<MeituBackgroundRemovalOutcome>(
+                    FailureCode.UnknownDialog, "Synthetic recognition-mode boundary reached."));
+            }
+
+            return method.Invoke(Inner, args);
+        }
+
+        private static async Task<OperationResult<MeituBackgroundRemovalOutcome>> ReportModeAsync(
+            Task<OperationResult<MeituBackgroundRemovalOutcome>> run, BackgroundRemovalMode? mode,
+            bool? instantRecognitionEvidence, string? reapplyDefect)
+        {
+            OperationResult<MeituBackgroundRemovalOutcome> result = await run;
+            if (result.IsFailure) return result;
+            BackgroundRemovalMode reported = mode ?? result.Value.Mode;
+            MeituRecognitionReapplyEvidence? evidence = instantRecognitionEvidence == true
+                ? MeituRecognitionReapplyEvidenceFixture.Create(MeituFakes.BackgroundRemoval(),
+                    result.Value.ObservedDocumentIdentity, result.Value.Target.Process.ProcessId,
+                    reapplyDefect == "different-recognizer" ? 3 : reported == BackgroundRemovalMode.Automatic ? 3 : (int)reported)
+                : null;
+            if (reapplyDefect == "foreign-title" && evidence is not null)
+                evidence = evidence with
+                {
+                    Before = evidence.Before with { Observation = evidence.Before.Observation with { WindowTitle = "foreign editor" } },
+                    After = evidence.After with { Observation = evidence.After.Observation with { WindowTitle = "foreign editor" } },
+                };
+            MeituStateSnapshot completion = evidence?.After ?? result.Value.Completion;
+            if (reapplyDefect == "different-completion")
+                completion = completion with { Observation = completion.Observation with { WindowTitle = "different observation" } };
+            return OperationResult.Ok(result.Value with
+            {
+                Mode = reported,
+                Busy = instantRecognitionEvidence.HasValue ? null : result.Value.Busy,
+                Completion = completion,
+                ReappliedRecognition = evidence,
+            });
+        }
+    }
+
+    [Theory]
+    [InlineData(false, BackgroundRemovalMode.Automatic)]
+    [InlineData(true, BackgroundRemovalMode.Automatic)]
+    [InlineData(true, BackgroundRemovalMode.PortraitPets)]
+    [InlineData(true, BackgroundRemovalMode.Products)]
+    [InlineData(true, BackgroundRemovalMode.LogosStamps)]
+    public async Task An_instant_result_without_Busy_requires_strict_native_reapply_evidence(
+        bool evidencePresent, BackgroundRemovalMode mode)
+    {
+        Scenario s = Build(backgroundRemoval: true, produces: ExportProduces.CutoutPng,
+            instantRecognitionEvidence: evidencePresent, reportedBackgroundMode: mode);
+        OperationResult<AdapterOutput> result = await ProcessAsync(s, mode);
+
+        result.IsSuccess.ShouldBe(evidencePresent, result.IsFailure ? result.Failure.ToString() : "");
+        s.DestinationConfirms[0].ShouldBe(evidencePresent ? 1 : 0);
+        File.Exists(s.OutputAbsolute).ShouldBe(evidencePresent);
+        if (!evidencePresent) result.Failure.Code.ShouldBe(FailureCode.MeituUnknownState);
+    }
+
+    [Theory]
+    [InlineData("different-completion")]
+    [InlineData("different-recognizer")]
+    [InlineData("foreign-title")]
+    public async Task Instant_reapply_evidence_must_describe_the_same_completion_and_requested_recognizer(string defect)
+    {
+        Scenario s = Build(backgroundRemoval: true, produces: ExportProduces.CutoutPng,
+            reportedBackgroundMode: BackgroundRemovalMode.Products,
+            instantRecognitionEvidence: true, reapplyDefect: defect);
+        OperationResult<AdapterOutput> result = await ProcessAsync(s, BackgroundRemovalMode.Products);
+        result.IsFailure.ShouldBeTrue();
+        result.Failure.Code.ShouldBe(FailureCode.MeituUnknownState);
+        s.DestinationConfirms[0].ShouldBe(0);
+        File.Exists(s.OutputAbsolute).ShouldBeFalse();
+    }
+
+    [Theory]
+    [InlineData(BackgroundRemovalMode.Automatic)]
+    [InlineData(BackgroundRemovalMode.PortraitPets)]
+    [InlineData(BackgroundRemovalMode.Products)]
+    [InlineData(BackgroundRemovalMode.LogosStamps)]
+    public async Task Explicit_request_recogniser_reaches_the_UI_driver_through_the_foundation(BackgroundRemovalMode mode)
+    {
+        BackgroundRemovalMode? received = null;
+        Scenario s = Build(backgroundRemoval: true, captureBackgroundMode: value => received = value);
+        OperationResult<AdapterOutput> result = await s.Adapter.ProcessAsync(new MeituRequest(
+            Working, MeituOperation.RemoveBackground,
+            BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent,
+            WorkspaceDirRef.Create("Sessions/S_1/Working/A_1"), s.Output)
+        {
+            BackgroundRemovalMode = mode,
+        }, CancellationToken.None);
+
+        received.ShouldBe(mode);
+        result.IsFailure.ShouldBeTrue();
+        result.Failure.Code.ShouldBe(FailureCode.UnknownDialog);
+        File.Exists(s.OutputAbsolute).ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task A_different_reported_recogniser_is_refused_before_export()
+    {
+        Scenario s = Build(backgroundRemoval: true, produces: ExportProduces.CutoutPng,
+            reportedBackgroundMode: BackgroundRemovalMode.Products);
+        OperationResult<AdapterOutput> result = await ProcessAsync(s);
+
+        result.IsFailure.ShouldBeTrue();
+        result.Failure.Code.ShouldBe(FailureCode.PreconditionNotMet);
+        s.DestinationConfirms[0].ShouldBe(0);
+        File.Exists(s.OutputAbsolute).ShouldBeFalse();
+    }
+
+    [Theory]
+    [InlineData(BackgroundRemovalMode.Automatic, "mode Automatic")]
+    [InlineData(BackgroundRemovalMode.PortraitPets, "mode PortraitPets")]
+    [InlineData(BackgroundRemovalMode.Products, "mode Products")]
+    [InlineData(BackgroundRemovalMode.LogosStamps, "mode LogosStamps")]
+    public async Task Successful_cutout_notes_include_the_verified_actual_recogniser(
+        BackgroundRemovalMode mode, string expectedNote)
+    {
+        Scenario s = Build(backgroundRemoval: true, produces: ExportProduces.CutoutPng,
+            reportedBackgroundMode: mode);
+        OperationResult<AdapterOutput> result = await s.Adapter.ProcessAsync(new MeituRequest(
+            Working, MeituOperation.RemoveBackground,
+            BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent,
+            WorkspaceDirRef.Create("Sessions/S_1/Working/A_1"), s.Output)
+        {
+            BackgroundRemovalMode = mode,
+        }, CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue(result.IsFailure ? result.Failure.ToString() : "");
+        result.Value.AdapterNotes.ShouldNotBeNull().ShouldContain(expectedNote);
+        s.DestinationConfirms[0].ShouldBe(1);
+        File.Exists(s.OutputAbsolute).ShouldBeTrue();
+    }
 
     private sealed class NeverSettlesProbe : IMeituOutputProbe
     {
@@ -431,6 +669,35 @@ public sealed class ProductionMeituExportTests : IDisposable
     // -----------------------------------------------------------------------------
     // Success (§3, §27)
     // -----------------------------------------------------------------------------
+
+    [Fact]
+    public async Task Enhancement_releases_its_document_when_PrintFlow_regains_focus_before_cutout()
+    {
+        Scenario s = Build(appTakesFocusAfterExport: true);
+
+        OperationResult<AdapterOutput> enhanced = await ProcessAsync(s);
+
+        enhanced.IsSuccess.ShouldBeTrue(enhanced.IsFailure ? enhanced.Failure.TechnicalDetail : "");
+        enhanced.Value.AdapterNotes.ShouldNotBeNull().ShouldNotContain("WARNING");
+        s.Invocations("MainWindow.editorPage.closeButton").ShouldBe(1);
+        OperationResult<MeituReadiness> next = await s.Adapter.EnsureReadyAsync(CancellationToken.None);
+        next.IsSuccess.ShouldBeTrue(next.IsFailure ? next.Failure.TechnicalDetail : "");
+        next.Value.State.State.ShouldBe(MeituStartingState.KnownEditorEmpty);
+    }
+
+    [Fact]
+    public async Task Refused_cleanup_activation_preserves_the_export_without_sending_document_close()
+    {
+        Scenario s = Build(appTakesFocusAfterExport: true, refuseCleanupActivation: true);
+
+        OperationResult<AdapterOutput> enhanced = await ProcessAsync(s);
+
+        enhanced.IsSuccess.ShouldBeTrue();
+        File.Exists(s.OutputAbsolute).ShouldBeTrue();
+        enhanced.Value.AdapterNotes.ShouldNotBeNull().ShouldContain("WARNING");
+        s.Invocations("MainWindow.editorPage.closeButton").ShouldBe(0);
+        (await s.Adapter.EnsureReadyAsync(CancellationToken.None)).IsFailure.ShouldBeTrue();
+    }
 
     /// <summary>
     /// A complete run returns the managed output reference, and the file is really there.
@@ -498,6 +765,8 @@ public sealed class ProductionMeituExportTests : IDisposable
             if (invoked == ResultCloseId)
             {
                 s.Elements.SetTexts(new WindowHandle(0x1000), ["unexpected retained editor state"]);
+                s.Elements.Remove(new WindowHandle(0x1000), "MainWindow.editorPage.closeButton");
+                s.Elements.Remove(new WindowHandle(0x1000), "MainWindow.editorPage.closeButton.textLabel");
             }
         };
 
@@ -691,13 +960,18 @@ public sealed class ProductionMeituExportTests : IDisposable
     // Background Removal C2A
     // -----------------------------------------------------------------------------
 
-    [Fact]
-    public async Task A_reviewed_content_cutout_succeeds_through_the_production_seam()
+    [Theory]
+    [InlineData(BackgroundRemovalMode.Automatic, 3)]
+    [InlineData(BackgroundRemovalMode.PortraitPets, 1)]
+    [InlineData(BackgroundRemovalMode.Products, 2)]
+    [InlineData(BackgroundRemovalMode.LogosStamps, 3)]
+    public async Task A_reviewed_content_cutout_succeeds_through_the_production_seam(
+        BackgroundRemovalMode mode, int selectedRecognizer)
     {
         Scenario s = Build(ExportProduces.CutoutPng, backgroundRemoval: true);
         byte[] sourceBefore = await File.ReadAllBytesAsync(s.WorkingAbsolute);
 
-        OperationResult<AdapterOutput> result = await ProcessAsync(s);
+        OperationResult<AdapterOutput> result = await ProcessAsync(s, mode);
 
         result.IsSuccess.ShouldBeTrue(result.IsFailure ? result.Failure.TechnicalDetail : string.Empty);
         result.Value.ProducedFile.ShouldBe(s.Output);
@@ -706,6 +980,9 @@ public sealed class ProductionMeituExportTests : IDisposable
         s.DestinationConfirms[0].ShouldBe(1);
         s.Invocations(MeituFakes.BackgroundActionMarker).ShouldBe(1);
         s.Invocations(MeituFakes.BackgroundReturnMarker).ShouldBe(1);
+        s.Invocations(RecognitionUndoId).ShouldBe(1);
+        s.Invocations(RecognizerId(selectedRecognizer)).ShouldBe(1);
+        result.Value.AdapterNotes!.ShouldContain($"mode {mode}");
         result.Value.AdapterNotes!.ShouldContain("UseAutomaticSelectionForReviewedContent");
         result.Value.AdapterNotes!.ShouldContain("transparent pixels");
         result.Value.AdapterNotes!.ShouldContain("visible pixels");

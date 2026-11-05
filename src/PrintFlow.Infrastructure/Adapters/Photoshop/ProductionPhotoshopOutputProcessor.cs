@@ -430,22 +430,21 @@ public sealed partial class ProductionPhotoshopOutputProcessor :
             return OperationResult.Fail<PhotoshopOpenedDocument>(ready.Failure);
         }
 
+        bool otherDocumentsOpen =
+            ready.Value.State.State is PhotoshopStartingState.KnownEditorWithOtherDocument
+                or PhotoshopStartingState.KnownEditorWithExpectedDocument;
+
         if (_runtimeFacts is not null)
         {
-            OperationResult<PhotoshopRuntimeFacts> runtime = _runtimeFacts.Read(
-                _baselines.GetVerifiedBaseline().Value.ExecutablePath);
+            OperationResult<PhotoshopRuntimeFacts> runtime = await WaitForRuntimeBeforeOpenAsync(
+                ready.Value, cancellationToken).ConfigureAwait(false);
             if (runtime.IsFailure)
                 return OperationResult.Fail<PhotoshopOpenedDocument>(runtime.Failure);
 
-            PhotoshopColourSettingsContract? expectedSettings = _baselines.GetVerifiedBaseline().Value.ColourSettings;
-            if (expectedSettings is null ||
-                !PhotoshopColourSettingsRule.Matches(expectedSettings, runtime.Value.ColourSettings))
-                return OperationResult.Fail<PhotoshopOpenedDocument>(OperationFailure.Create(
-                    FailureCode.EnvironmentNotVerified,
-                    "Photoshop's active colour settings do not match the accepted preset. Nothing was opened.",
-                    isRetryable: false,
-                    context: new Dictionary<string, string> { ["inputSent"] = "false" }));
+            otherDocumentsOpen = runtime.Value.Documents.Length > 0;
 
+            // Working-space differences are optional diagnostic findings, not an open-file
+            // prerequisite. Existing unsaved work still prevents automation from taking over.
             if (runtime.Value.UnsavedDocumentCount > 0)
                 return OperationResult.Fail<PhotoshopOpenedDocument>(OperationFailure.Create(
                     FailureCode.PhotoshopUnknownState,
@@ -470,10 +469,6 @@ public sealed partial class ProductionPhotoshopOutputProcessor :
 
         // Read before the open, because it cannot be read after: whether Photoshop was already
         // holding documents decides what cleanup is permitted to do later (§21).
-        bool otherDocumentsOpen =
-            ready.Value.State.State is PhotoshopStartingState.KnownEditorWithOtherDocument
-                or PhotoshopStartingState.KnownEditorWithExpectedDocument;
-
         OperationResult<PhotoshopTarget> opened = await _driver
             .OpenManagedDocumentAsync(ready.Value.Target, absolutePath, observe, cancellationToken)
             .ConfigureAwait(false);
@@ -485,6 +480,65 @@ public sealed partial class ProductionPhotoshopOutputProcessor :
         return await ConfirmOpenedDocumentAsync(
             opened.Value, workingFile, absolutePath, otherDocumentsOpen, cancellationToken, observe)
             .ConfigureAwait(false);
+    }
+
+    // A recognised frame can appear before Photoshop registers its automation object. This is
+    // only a pre-open readiness wait: no mutation or post-mutation failure is ever retried.
+    private async Task<OperationResult<PhotoshopRuntimeFacts>> WaitForRuntimeBeforeOpenAsync(
+        PhotoshopReadiness ready, CancellationToken cancellationToken)
+    {
+        OperationResult<PhotoshopBaseline> baseline = _baselines.GetVerifiedBaseline();
+        if (baseline.IsFailure)
+            return OperationResult.Fail<PhotoshopRuntimeFacts>(baseline.Failure);
+
+        // Also allow the startup budget when attaching: Photoshop may have just been started
+        // by the operator, or by GenerateAsync's preceding EnsureReadyAsync call.
+        DateTimeOffset deadline = _clock.GetUtcNow() + _options.LaunchTimeout;
+        while (true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            OperationResult<Unit> continuity = VerifySoleProcessContinuity(ready.Target, baseline.Value);
+            if (continuity.IsFailure)
+                return OperationResult.Fail<PhotoshopRuntimeFacts>(continuity.Failure);
+
+            OperationResult<PhotoshopStateSnapshot> state = await _driver.InspectStateAsync(
+                ready.Target, expectedDocumentFileName: null, cancellationToken).ConfigureAwait(false);
+            if (state.IsFailure)
+                return OperationResult.Fail<PhotoshopRuntimeFacts>(state.Failure);
+            if (!state.Value.IsSafeStartingState)
+                return Capture<PhotoshopRuntimeFacts>(
+                    ready.Target, UnsafeState(state.Value, ready.WasLaunched), "runtime-startup-blocked");
+
+            OperationResult<PhotoshopRuntimeFacts> runtime = _runtimeFacts!.Read(baseline.Value.ExecutablePath);
+            if (runtime.IsSuccess)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                OperationResult<Unit> after = VerifySoleProcessContinuity(ready.Target, baseline.Value);
+                return after.IsFailure ? OperationResult.Fail<PhotoshopRuntimeFacts>(after.Failure) : runtime;
+            }
+
+            if (runtime.Failure.Code != FailureCode.PhotoshopUnknownState ||
+                !runtime.Failure.Context.TryGetValue("automationHResult", out string? result) ||
+                result != "0x800401E3")
+                return runtime;
+
+            TimeSpan remaining = deadline - _clock.GetUtcNow();
+            if (remaining <= TimeSpan.Zero)
+                return OperationResult.Fail<PhotoshopRuntimeFacts>(runtime.Failure with
+                {
+                    TechnicalDetail = $"Photoshop's window is recognised, but its automation object " +
+                        $"remained unavailable for {_options.LaunchTimeout.TotalSeconds:0.###}s " +
+                        "(0x800401E3). No file was opened and no output was produced.",
+                    Context = new Dictionary<string, string>(runtime.Failure.Context)
+                    {
+                        ["automationReadyTimedOut"] = "true",
+                        ["inputSent"] = "false",
+                    },
+                });
+
+            await Task.Delay(remaining < _options.PollInterval ? remaining : _options.PollInterval,
+                _clock, cancellationToken).ConfigureAwait(false);
+        }
     }
 
     /// <summary>

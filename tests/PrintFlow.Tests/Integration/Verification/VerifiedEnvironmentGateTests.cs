@@ -464,7 +464,7 @@ public sealed class VerifiedEnvironmentGateTests
     public void A_meitu_failure_closes_production_for_photoshop_too()
     {
         using WorkstationVerificationFixture fixture = new();
-        WorkstationVerificationFixture.Corrupt(fixture.MeituPath);
+        WorkstationVerificationFixture.Remove(fixture.MeituPath);
         VerifiedEnvironmentGate gate = new(fixture.CreateVerifier());
 
         gate.Verify(AdapterExecutionMode.Production).IsFailure.ShouldBeTrue();
@@ -499,7 +499,7 @@ public sealed class VerifiedEnvironmentGateTests
         // The gate owns no process-starting surface; its additional port only publishes observations.
         typeof(VerifiedEnvironmentGate).GetConstructors().ShouldHaveSingleItem()
             .GetParameters().Select(parameter => parameter.ParameterType)
-            .ShouldBe([typeof(IProductionWorkstationVerifier), typeof(IEnvironmentReadinessObservations)]);
+            .ShouldBe([typeof(IProductionWorkstationVerifier), typeof(IEnvironmentReadinessObservations), typeof(bool)]);
     }
 
     // ---------------------------------------------------------------- §20
@@ -593,7 +593,7 @@ public sealed class VerifiedEnvironmentGateTests
                 break;
 
             case WorkstationVerificationCheck.MeituExecutable:
-                WorkstationVerificationFixture.Corrupt(fixture.MeituPath);
+                WorkstationVerificationFixture.Remove(fixture.MeituPath);
                 break;
 
             case WorkstationVerificationCheck.PhotoshopExecutable:

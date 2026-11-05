@@ -6,41 +6,16 @@ using PrintFlow.Workflow.Ports;
 namespace PrintFlow.Infrastructure.Gate;
 
 /// <summary>
-/// The production-authorisation gate, decided by the accepted workstation verifier
-/// (Epic 11500 Part B §4).
+/// Reports workstation diagnostics and optionally enforces them for explicit validation callers.
 /// </summary>
 /// <remarks>
-/// Supersedes Epic 11100's <c>FoundationEnvironmentGate</c>, which refused every
-/// <see cref="AdapterExecutionMode.Production"/> adapter unconditionally because nothing had yet
-/// established what this workstation is. Part A built that establishment; this gate is the only
-/// thing that consumes it. The historical fail-closed intent is not weakened by the change — an
-/// unverified workstation is refused exactly as before — it is now refused on evidence rather
-/// than on the absence of any.
-/// <para>
-/// <b>The division of labour.</b> The verifier establishes facts; this gate decides. It asks one
-/// question of the whole workstation, not a different question per adapter: the accepted preset
-/// describes one production workstation, so Production means that contract passes as a whole and
-/// there is no arrangement in which Photoshop is authorised while Meitu is not (§13).
-/// </para>
-/// <para>
-/// <b>Nothing is cached here.</b> Every Production request calls
-/// <see cref="IProductionWorkstationVerifier.Verify"/> afresh, so an operator who locked the
-/// screen, attached a monitor or switched to a remote session between two steps is refused on
-/// the second even though the first passed — and one who put the workstation back is allowed
-/// again without restarting PrintFlow (§6, §7). The verifier's own immutable half stays cached
-/// inside the verifier, where the bytes it read cannot change without invalidating the hash that
-/// approved them.
-/// </para>
-/// <para>
-/// <b>Authorisation launches nothing.</b> <see cref="Verify"/> and the diagnostic
-/// <see cref="Read"/> only re-observe the current certified processes; neither puts Photoshop,
-/// Meitu or Maintop on the operator's screen. The separately named
-/// <see cref="RunLiveChecksAsync"/> is the sole explicit readiness operation allowed to launch or
-/// drive them. Per-attempt automation guards still re-check the live state immediately before an
-/// operation (§16), including foreground ownership through <c>PhotoshopTargetLost</c> (§17).
-/// </para>
+/// The application composes this with environment enforcement disabled. Ordinary processing
+/// consults no workstation report or live probe; the adapters perform their operation-specific
+/// executable, document, interface and foreground checks under the workstation automation lease.
+/// Explicit diagnostics still report actual failures. Validation runners may retain enforcement.
 /// </remarks>
 public sealed class VerifiedEnvironmentGate :
+    IPreparingEnvironmentGate,
     IWorkstationScopedEnvironmentGate,
     IInternalProductionEnvironmentGate,
     IEnvironmentDiagnostics
@@ -66,18 +41,22 @@ public sealed class VerifiedEnvironmentGate :
 
     private readonly IProductionWorkstationVerifier _verifier;
     private readonly IEnvironmentReadinessObservations? _observations;
+    private readonly bool _requireEnvironmentVerification;
 
     /// <param name="verifier">
-    /// The Part A workstation verifier. Required, with no permissive fallback: a gate that could
-    /// be constructed without one would be a gate that could authorise Production without
-    /// evidence (§14).
+    /// The workstation verifier used for diagnostics and explicitly enforced validation.
+    /// </param>
+    /// <param name="requireEnvironmentVerification">
+    /// Whether processing requires a passing workstation report. The normal app sets this false.
     /// </param>
     public VerifiedEnvironmentGate(IProductionWorkstationVerifier verifier,
-        IEnvironmentReadinessObservations? observations = null)
+        IEnvironmentReadinessObservations? observations = null,
+        bool requireEnvironmentVerification = true)
     {
         ArgumentNullException.ThrowIfNull(verifier);
         _verifier = verifier;
         _observations = observations;
+        _requireEnvironmentVerification = requireEnvironmentVerification;
     }
 
     /// <inheritdoc />
@@ -122,6 +101,35 @@ public sealed class VerifiedEnvironmentGate :
         _ => OperationResult.Fail<Unit>(
             FailureCode.EnvironmentNotVerified, $"Unknown adapter execution mode '{mode}'."),
     };
+
+    /// <inheritdoc />
+    public async Task<OperationResult<Unit>> PrepareAsync(
+        AdapterExecutionMode mode, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (mode != AdapterExecutionMode.Production || !_requireEnvironmentVerification)
+        {
+            return Verify(mode);
+        }
+
+        long? ticket = BeginObservation();
+        try
+        {
+            WorkstationVerificationResult result = _verifier.Verify();
+            // Only application readiness can be repaired by starting the accepted apps.
+            // Static trust and current desktop failures must be resolved before any launch.
+            if (!result.Verified && result.Preset is not null && result.BlockingChecks.Any() &&
+                result.BlockingChecks.All(check => check.Kind is WorkstationCheckKind.Live or WorkstationCheckKind.Smoke))
+            {
+                result = await _verifier.RunLiveChecksAsync(cancellationToken).ConfigureAwait(false);
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+            CompleteObservation(ticket, result);
+            return Authorise(result);
+        }
+        finally { AbandonObservation(ticket); }
+    }
 
     /// <inheritdoc />
     public EnvironmentReadinessReport Read()
@@ -203,6 +211,7 @@ public sealed class VerifiedEnvironmentGate :
     private OperationResult<Unit> AuthoriseProduction(
         IWorkstationAutomationLease? workstationLease = null)
     {
+        if (!_requireEnvironmentVerification) return OperationResult.Ok();
         long? ticket = BeginObservation();
         try
         {
@@ -215,6 +224,7 @@ public sealed class VerifiedEnvironmentGate :
 
     private OperationResult<Unit> AuthoriseInternalProduction()
     {
+        if (!_requireEnvironmentVerification) return OperationResult.Ok();
         long? ticket = BeginObservation();
         try
         {

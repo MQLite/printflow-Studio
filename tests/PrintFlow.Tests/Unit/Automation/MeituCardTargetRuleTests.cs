@@ -341,4 +341,38 @@ public sealed class MeituCardTargetRuleTests
         chosen.IsFailure.ShouldBeTrue();
         chosen.Failure.Code.ShouldBe(FailureCode.MeituOpenInputFailed);
     }
+
+    [Theory]
+    [InlineData("\uE0EA", ".SaveMaskWidget.widgetRight.titleFrame.closeButton", "proui::IconFontButton", MeituPid, true)]
+    [InlineData("\uE0EA", ".SaveResultMaskWidget.titleFrame.closeButton", "proui::IconFontButton", MeituPid, true)]
+    [InlineData("\uE0E9", ".SaveMaskWidget.widgetRight.titleFrame.closeButton", "proui::IconFontButton", MeituPid, false)]
+    [InlineData("保存", ".SaveMaskWidget.widgetRight.titleFrame.closeButton", "proui::IconFontButton", MeituPid, false)]
+    [InlineData("\uE0EA", ".captionWidget.closeButton", "proui::IconFontButton", MeituPid, false)]
+    [InlineData("\uE0EA", ".SaveMaskWidget.widgetRight.titleFrame.closeButton", "OtherButton", MeituPid, false)]
+    [InlineData("\uE0EA", ".SaveMaskWidget.widgetRight.titleFrame.closeButton", "proui::IconFontButton", 9999, false)]
+    public void Updated_Save_close_icon_still_requires_the_exact_structure_and_process(
+        string name, string path, string className, int processId, bool accepted)
+    {
+        MeituControlSignature signature = new("\uE0E6",
+            path == ".SaveResultMaskWidget.titleFrame.closeButton" ? path :
+                ".SaveMaskWidget.widgetRight.titleFrame.closeButton",
+            "Button", "proui::IconFontButton", UiPatternKind.Invoke);
+        UiElementIdentity control = OpenControl(name, "MainWindow" + path, "Button", className, processId);
+
+        MeituCardTargetRule.SelectSignedControl(signature, MeituPid, [control])
+            .IsSuccess.ShouldBe(accepted);
+    }
+
+    [Fact]
+    public void Old_and_updated_Save_close_icons_together_are_ambiguous()
+    {
+        const string path = ".SaveMaskWidget.widgetRight.titleFrame.closeButton";
+        MeituControlSignature signature = new("\uE0E6", path,
+            "Button", "proui::IconFontButton", UiPatternKind.Invoke);
+        UiElementIdentity control = OpenControl("\uE0E6", "MainWindow" + path,
+            "Button", "proui::IconFontButton");
+
+        MeituCardTargetRule.SelectSignedControl(signature, MeituPid,
+            [control, control with { Name = "\uE0EA" }]).IsFailure.ShouldBeTrue();
+    }
 }

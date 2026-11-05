@@ -382,11 +382,11 @@ public sealed class ApplicationStartupTests
         recovery.CallCount.ShouldBe(1);
         result.Services.ShouldNotBeNull();
 
-        // Production is composed and refused, which is the whole shape of the activation.
+        // Processing is available without a mandatory environment report.
         result.Services!.GetRequiredService<IMeituProcessor>().Mode
             .ShouldBe(AdapterExecutionMode.Production);
         result.Services.GetRequiredService<IEnvironmentGate>()
-            .Verify(AdapterExecutionMode.Production).IsFailure.ShouldBeTrue();
+            .Verify(AdapterExecutionMode.Production).IsSuccess.ShouldBeTrue();
     }
 
     /// <summary>

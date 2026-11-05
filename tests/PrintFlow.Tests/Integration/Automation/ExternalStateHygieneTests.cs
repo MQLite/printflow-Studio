@@ -440,11 +440,10 @@ public sealed class ExternalStateHygieneTests : IDisposable
     }
 
     /// <summary>
-    /// Meitu closed between jobs is relaunched, and the relaunched process is identity checked
-    /// (§13).
+    /// Meitu closed between jobs is relaunched, and updates retain the runtime interface guards.
     /// </summary>
     [Fact]
-    public async Task Meitu_closed_between_jobs_is_relaunched_and_still_identity_checked()
+    public async Task Meitu_closed_between_jobs_is_relaunched_without_pinning_its_version()
     {
         MeituHarness h = BuildMeitu(registerProcess: false);
 
@@ -461,13 +460,13 @@ public sealed class ExternalStateHygieneTests : IDisposable
         ready.IsSuccess.ShouldBeTrue(ready.IsFailure ? ready.Failure.ToString() : "");
         h.Locator.LaunchCount.ShouldBe(1);
 
-        // The same path with a binary whose bytes are not the accepted ones: refused, whatever
-        // the path says. Relaunch is not a way around identity.
+        // An update at the configured path is allowed while the current interface stays recognised.
         File.WriteAllBytes(_meituExecutable, [0x4D, 0x5A, 0xFF, 0xFF]);
 
-        OperationResult<MeituReadiness> refused = await h.Adapter.EnsureReadyAsync(CancellationToken.None);
-        refused.IsFailure.ShouldBeTrue();
-        refused.Failure.Code.ShouldBe(FailureCode.MeituNotInstalled);
+        OperationResult<MeituReadiness> updated = await h.Adapter.EnsureReadyAsync(CancellationToken.None);
+        updated.IsSuccess.ShouldBeTrue();
+        updated.Value.WasLaunched.ShouldBeFalse();
+        h.Locator.LaunchCount.ShouldBe(1);
     }
 
     /// <summary>

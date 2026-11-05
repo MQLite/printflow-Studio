@@ -641,6 +641,9 @@ public sealed partial class SessionViewModel : ObservableObject
     [ObservableProperty]
     private TrimModeChoice _selectedTrimMode;
 
+    [ObservableProperty]
+    private bool _ignoreSmallTrimNoise = true;
+
     /// <summary>Unconfirmed operator input for <see cref="TrimMode.UniformMargin"/>.</summary>
     [ObservableProperty]
     private string? _uniformMarginText;
@@ -1254,6 +1257,13 @@ public sealed partial class SessionViewModel : ObservableObject
 
     public string ApplyTrimMarginLabel => Strings.Session_TrimApply;
 
+    public string IgnoreSmallTrimNoiseLabel => Strings.Session_TrimIgnoreNoise;
+    public string TrimNoiseHint => Strings.Session_TrimNoiseHint;
+    public string PendingTrimNoiseSummary => _session?.IgnoreSmallTrimNoise == true
+        ? Strings.Session_TrimNoiseIgnored : Strings.Session_TrimNoisePreserved;
+    public string CurrentTrimNoiseSummary => _session?.CurrentTrimIgnoresSmallNoise == true
+        ? Strings.Session_TrimNoiseIgnored : Strings.Session_TrimNoisePreserved;
+
     public string TrimCurrentLabel => Strings.Session_TrimCurrentLabel;
 
     /// <summary>
@@ -1375,11 +1385,12 @@ public sealed partial class SessionViewModel : ObservableObject
     /// What the operator confirms before the authority is recorded (§11).
     /// </summary>
     /// <remarks>
-    /// It says Meitu decides the subject on its own and that the result still needs checking.
+    /// It names the chosen recogniser and says the result still needs checking.
     /// It promises nothing about cutout quality and claims nothing about later versions of the
     /// image, because the authority covers neither.
     /// </remarks>
-    public string AutomaticSelectionConfirmQuestion => Strings.Session_BackgroundRemovalConfirmQuestion;
+    public string AutomaticSelectionConfirmQuestion => string.Format(CultureInfo.CurrentCulture,
+        Strings.Session_BackgroundRemovalConfirmQuestion, SelectedBackgroundRemovalModeLabel);
 
     public string ConfirmAutomaticSelectionLabel => Strings.Session_BackgroundRemovalConfirm;
 
@@ -1406,7 +1417,7 @@ public sealed partial class SessionViewModel : ObservableObject
         CanAuthoriseAutomaticSelection && _session?.CurrentArtefact is not null && !IsBusy;
 
     /// <summary>
-    /// Whether an authority covering the artefact on screen is in force (§9).
+    /// Whether the selected recogniser is authorised for the artefact on screen (§9).
     /// </summary>
     /// <remarks>
     /// <see cref="SessionView.BackgroundRemovalDecision"/> is already the <i>usable</i>
@@ -1417,7 +1428,7 @@ public sealed partial class SessionViewModel : ObservableObject
     /// the engine that decides whether the run starts (§2, §6).
     /// </remarks>
     public bool IsAutomaticSelectionAuthorised =>
-        _session?.BackgroundRemovalDecision == BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent;
+        HasRecordedBackgroundRemovalAuthorisation && !HasUnconfirmedBackgroundRemovalMode;
 
     /// <summary>
     /// Whether the screen is in the unauthorised state (§9).
@@ -1434,7 +1445,8 @@ public sealed partial class SessionViewModel : ObservableObject
     public string AutomaticSelectionAuthorisedNotice =>
         _session?.BackgroundRemovalDecisionRevisionId is { } revision
             ? string.Format(
-                CultureInfo.CurrentCulture, Strings.Session_BackgroundRemovalAuthorised, ShortRevision(revision))
+                CultureInfo.CurrentCulture, Strings.Session_BackgroundRemovalAuthorised, ShortRevision(revision),
+                BackgroundRemovalModeLabel(_session.BackgroundRemovalMode))
             : string.Empty;
 
     /// <summary>
@@ -1445,9 +1457,10 @@ public sealed partial class SessionViewModel : ObservableObject
     /// "<see cref="IsAutomaticSelectionAuthorised"/> is true": readiness is the engine probing
     /// the real <c>StartStep</c>, which weighs the step state and the automation lock as well as
     /// the decision. Inferring it from the decision alone would offer a run in states where the
-    /// command would be refused (§8).
+    /// command would be refused (§8). A provisional recogniser change additionally blocks the
+    /// old persisted mode until the operator confirms the new choice.
     /// </remarks>
-    public bool CanRunBackgroundRemoval => _session?.CanRunBackgroundRemoval == true;
+    public bool CanRunBackgroundRemoval => _session?.CanRunBackgroundRemoval == true && !HasUnconfirmedBackgroundRemovalMode;
 
     /// <summary>
     /// The authority the cutout under review was produced under (§14, §15).
@@ -1458,7 +1471,7 @@ public sealed partial class SessionViewModel : ObservableObject
     /// decision. The two differ the moment an operator returns upstream and authorises different
     /// content, and it is the historical one that describes what is on screen (§15).
     /// <para>
-    /// It names the reviewed Revision in short form and says nothing else: no attempt id, no
+    /// It names the recorded recogniser and reviewed Revision in short form: no attempt id, no
     /// timestamps, no adapter detail (§14).
     /// </para>
     /// </remarks>
@@ -1468,7 +1481,7 @@ public sealed partial class SessionViewModel : ObservableObject
                 CultureInfo.CurrentCulture,
                 _session.BackgroundRemovalAttemptDecision == BackgroundRemovalDecision.ManualResultForReviewedContent
                     ? Strings.Session_ManualBackgroundRemovalAudit : Strings.Session_BackgroundRemovalAttemptAudit,
-                ShortRevision(reviewed))
+                ShortRevision(reviewed), BackgroundRemovalModeLabel(_session.BackgroundRemovalAttemptMode))
             : string.Empty;
 
     /// <inheritdoc cref="BackgroundRemovalAttemptAudit" />
@@ -1587,7 +1600,7 @@ public sealed partial class SessionViewModel : ObservableObject
 
     public bool CanConfirmOriginal => Allows(CommandKind.ConfirmOriginal);
 
-    public bool CanRunStep => Allows(CommandKind.StartStep);
+    public bool CanRunStep => Allows(CommandKind.StartStep) && !HasUnconfirmedBackgroundRemovalMode;
 
     public bool CanApprove => Allows(CommandKind.Approve);
 
@@ -2160,7 +2173,8 @@ public sealed partial class SessionViewModel : ObservableObject
     /// </remarks>
     [RelayCommand]
     private Task RunStepAsync(CancellationToken cancellationToken) =>
-        RunAsync(step => new WorkflowCommand.StartStep(step), cancellationToken);
+        HasUnconfirmedBackgroundRemovalMode ? Task.CompletedTask
+            : RunAsync(step => new WorkflowCommand.StartStep(step), cancellationToken);
 
     /// <summary>
     /// Approves the result currently on screen, bound to its exact hash (Part 3C3A §10).
@@ -2596,12 +2610,15 @@ public sealed partial class SessionViewModel : ObservableObject
             return;
         }
 
+        var submittedDraft = CapturePageDraft();
         await RunAsync(
             new WorkflowCommand.SetBackgroundRemovalDecision(
                 BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent,
                 displayed.RevisionId,
-                displayed.Sha256),
-            cancellationToken).ConfigureAwait(true);
+                displayed.Sha256,
+                SelectedBackgroundRemovalMode),
+            cancellationToken,
+            _ => _cleanDraft = submittedDraft).ConfigureAwait(true);
     }
 
     // --- Trim margin (Part C3 §9–§13) -----------------------------------------------------
@@ -2631,7 +2648,7 @@ public sealed partial class SessionViewModel : ObservableObject
         }
 
         var submittedDraft = CapturePageDraft();
-        return RunAsync(new WorkflowCommand.SetTrimParameters(margin), cancellationToken,
+        return RunAsync(new WorkflowCommand.SetTrimParameters(margin, IgnoreSmallTrimNoise), cancellationToken,
             _ => _cleanDraft = submittedDraft);
     }
 
@@ -3536,6 +3553,7 @@ public sealed partial class SessionViewModel : ObservableObject
         bool lostTrimAdjustment = IsAdjustingTrim && !keepTrimDraft &&
             session.CurrentStep?.CurrentRevisionId == _trimAdjustTarget?.ResultRevisionId;
         _session = session;
+        ShowBackgroundRemovalMode();
         ShowCommittedPreflight(session);
 
         // Zoom belongs to the artefact being looked at, so a new one opens fitted (§15).
@@ -3598,6 +3616,7 @@ public sealed partial class SessionViewModel : ObservableObject
         // Applying a margin and then looking at the boxes must not show a different number from
         // the summary beside them (§13, §18).
         ShowTrimMargin(session.TrimMargin);
+        IgnoreSmallTrimNoise = session.IgnoreSmallTrimNoise;
 
         ReturnTargets.Clear();
         foreach (ReturnTargetView target in session.ReturnTargets)
@@ -3707,6 +3726,8 @@ public sealed partial class SessionViewModel : ObservableObject
         OnPropertyChanged(nameof(CanSetTrimParameters));
         OnPropertyChanged(nameof(PendingTrimSummary));
         OnPropertyChanged(nameof(TrimParametersSummary));
+        OnPropertyChanged(nameof(PendingTrimNoiseSummary));
+        OnPropertyChanged(nameof(CurrentTrimNoiseSummary));
         OnPropertyChanged(nameof(HasManualCropGeometry));
         OnPropertyChanged(nameof(ManualCropReviewSelected));
         OnPropertyChanged(nameof(ManualCropReviewApplied));

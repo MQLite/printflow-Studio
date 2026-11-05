@@ -607,7 +607,7 @@ public sealed class SessionSmokeTests
 
         // The refusal and the crop are both in the history, produced by the two named processors.
         aggregate.Attempts.ShouldContain(a =>
-            a.AdapterId == "internal-alpha-trim-v1" && a.Status == AttemptStatus.Failed);
+            a.AdapterId == "internal-alpha-trim-v2" && a.Status == AttemptStatus.Failed);
         aggregate.Attempts.ShouldContain(a =>
             a.AdapterId == "internal-manual-crop-v1" && a.OutputRevisionId == manual.Id);
 

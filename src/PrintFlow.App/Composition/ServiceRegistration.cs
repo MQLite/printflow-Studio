@@ -255,7 +255,7 @@ public static class ServiceRegistration
     }
 
     /// <summary>
-    /// Wires the workstation verifier and the one gate that consults it (Epic 11500 Part B §14).
+    /// Wires optional workstation diagnostics without making them a processing prerequisite.
     /// </summary>
     /// <remarks>
     /// Every accepted value comes from the configuration this method was handed — the already
@@ -267,17 +267,11 @@ public static class ServiceRegistration
     /// <para>
     /// <b>Registration only, and nothing is verified here.</b> Constructing the verifier reads no
     /// file; the manifest, the evidence chain, the binaries and the session are read on the first
-    /// <c>Verify</c>, which happens when something asks for Production authorisation. That is what
-    /// keeps a workstation that fails verification from turning into "PrintFlow cannot start"
-    /// (§15) — the shell opens, Fake work proceeds, and only Production is closed.
+    /// diagnostic request. Processing does not require a matching historical workstation report.
     /// </para>
     /// <para>
-    /// <b>Exactly one gate, and no permissive fallback.</b> There is no branch here on
-    /// <c>Adapters:Mode</c>, no development gate, and no path that registers an
-    /// <see cref="IEnvironmentGate"/> which authorises Production without asking the verifier
-    /// (§14, §24). <see cref="VerifiedEnvironmentGate"/> is registered as a concrete singleton and
-    /// both interfaces resolve to that same instance, so the object that authorises and the object
-    /// that reports are one — and so no second consumer of the verifier exists.
+    /// Both interfaces share one instance. Its reports remain factual, while its processing
+    /// methods skip workstation verification and leave runtime checks to the selected adapter.
     /// </para>
     /// </remarks>
     private static void RegisterEnvironmentGate(
@@ -307,7 +301,10 @@ public static class ServiceRegistration
                 System.IO.Path.Combine(workspaceRootAbsolute, EvidenceFolderName),
                 provider.GetRequiredService<TimeProvider>()));
 
-        services.AddSingleton<VerifiedEnvironmentGate>();
+        services.AddSingleton(provider => new VerifiedEnvironmentGate(
+            provider.GetRequiredService<IProductionWorkstationVerifier>(),
+            provider.GetRequiredService<IEnvironmentReadinessObservations>(),
+            requireEnvironmentVerification: false));
         services.AddSingleton<IEnvironmentGate>(p => p.GetRequiredService<VerifiedEnvironmentGate>());
         services.AddSingleton<IEnvironmentDiagnostics>(p => p.GetRequiredService<VerifiedEnvironmentGate>());
     }
@@ -323,13 +320,8 @@ public static class ServiceRegistration
     /// would make that single answer a lie. Both branches therefore register both ports, and
     /// there is no arrangement of configuration that registers one of each.
     /// <para>
-    /// <b>Composition is not authorisation.</b> Constructing the Production adapters means only
-    /// that the objects exist; whether they may run is decided later and elsewhere, by
-    /// <see cref="IEnvironmentGate"/>, on every adapter-backed step. Nothing here consults the
-    /// verifier, and nothing here pre-authorises a workflow — which is why
-    /// <c>Adapters.Mode = Production</c> on a workstation that fails verification produces an
-    /// application that starts normally and refuses Production work, rather than one that cannot
-    /// start (§5).
+    /// Production adapters validate their executable, current interface and document when the
+    /// corresponding step runs. Optional environment diagnostics do not grant or withhold entry.
     /// </para>
     /// <para>
     /// <b>Nothing is launched, read or hashed here.</b> Both compositions assemble Win32 locators,

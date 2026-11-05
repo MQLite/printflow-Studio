@@ -110,6 +110,9 @@ public sealed record UiElementIdentity(
     bool IsEnabled,
     bool IsOffscreen)
 {
+    /// <summary>Positive native selection/toggle state; null when the control exposes neither.</summary>
+    public bool? IsSelected { get; init; }
+
     /// <summary>Whether the element exposes <paramref name="pattern"/>.</summary>
     public bool Supports(UiPatternKind pattern) =>
         !SupportedPatterns.IsDefaultOrEmpty && SupportedPatterns.Contains(pattern);

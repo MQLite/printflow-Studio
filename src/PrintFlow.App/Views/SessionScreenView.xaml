@@ -1671,6 +1671,12 @@
                             Visibility="{Binding ShowsGuidedBackgroundDecision, Converter={StaticResource BoolToVisibility}}">
                         <StackPanel>
                             <TextBlock Text="{Binding BackgroundRemovalHeading}" FontSize="15" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding BackgroundRemovalModeHeading}" Margin="0,10,0,4" />
+                            <ComboBox ItemsSource="{Binding BackgroundRemovalModes}"
+                                      DisplayMemberPath="Label" SelectedValuePath="Mode"
+                                      SelectedValue="{Binding SelectedBackgroundRemovalMode, Mode=TwoWay}"
+                                      AutomationProperties.Name="{Binding BackgroundRemovalModeHeading}"
+                                      IsEnabled="{Binding CanBeginAutomaticSelection}" />
                             <TextBlock Text="{Binding BackgroundRemovalHint}"
                                        TextWrapping="Wrap"
                                        Opacity="0.7"
@@ -1724,7 +1730,7 @@
                                        TextWrapping="Wrap"
                                        FontWeight="SemiBold"
                                        Margin="0,10,0,0"
-                                       Visibility="{Binding IsAutomaticSelectionAuthorised, Converter={StaticResource BoolToVisibility}}" />
+                                       Visibility="{Binding HasRecordedBackgroundRemovalAuthorisation, Converter={StaticResource BoolToVisibility}}" />
 
                             <!-- Readiness, from CanRunBackgroundRemoval and nothing else (§8). -->
                             <TextBlock Text="{Binding BackgroundRemovalRunnableNotice}"
@@ -1830,11 +1836,20 @@
 
 
 
+                            <local:SessionCheckBox Content="{Binding IgnoreSmallTrimNoiseLabel}"
+                                      Style="{StaticResource PF.Input.CheckBox}"
+                                      IsChecked="{Binding IgnoreSmallTrimNoise, Mode=TwoWay}"
+                                      AutomationProperties.AutomationId="Session.Trim.IgnoreSmallNoise"
+                                      AutomationProperties.Name="{Binding IgnoreSmallTrimNoiseLabel}"
+                                      Margin="0,12,0,0" />
+                            <TextBlock Text="{Binding TrimNoiseHint}" TextWrapping="Wrap" Opacity="0.65" Margin="0,4,0,0" />
+
                             <!-- The persisted decision, so it says what Run Step would do (§18). -->
                             <StackPanel Orientation="Horizontal" Margin="0,10,0,0" Opacity="0.8">
                                 <TextBlock Text="{Binding TrimCurrentLabel}" Opacity="0.75" Margin="0,0,8,0" />
                                 <TextBlock Text="{Binding PendingTrimSummary}" TextWrapping="Wrap" />
                             </StackPanel>
+                            <TextBlock Text="{Binding PendingTrimNoiseSummary}" TextWrapping="Wrap" Opacity="0.8" Margin="0,4,0,0" />
                         </StackPanel>
                     </Border>
 
@@ -2321,6 +2336,9 @@
                                        TextWrapping="Wrap"
                                        Opacity="0.8"
                                        Margin="0,8,0,0"
+                                       Visibility="{Binding HasTrimParameters, Converter={StaticResource BoolToVisibility}}" />
+
+                            <TextBlock Text="{Binding CurrentTrimNoiseSummary}" TextWrapping="Wrap" Opacity="0.8"
                                        Visibility="{Binding HasTrimParameters, Converter={StaticResource BoolToVisibility}}" />
 
                             <StackPanel Margin="0,8,0,0" AutomationProperties.AutomationId="Session.ManualCropReviewMetadata"

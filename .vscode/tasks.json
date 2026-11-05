@@ -35,6 +35,23 @@
       "problemMatcher": []
     },
     {
+      "label": "PrintFlow: copy production debug settings",
+      "type": "process",
+      "command": "powershell.exe",
+      "args": [
+        "-NoProfile",
+        "-Command",
+        "Copy-Item -LiteralPath '${workspaceFolder}\\.vscode\\appsettings.debug-production.json' -Destination '${workspaceFolder}\\src\\PrintFlow.App\\bin\\Debug\\net10.0-windows10.0.19041.0\\appsettings.local.json' -Force"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "PrintFlow: prepare production debug",
+      "dependsOrder": "sequence",
+      "dependsOn": ["PrintFlow: build (Debug)", "PrintFlow: copy production debug settings"],
+      "problemMatcher": []
+    },
+    {
       "label": "PrintFlow: prepare debug",
       "dependsOrder": "sequence",
       "dependsOn": ["PrintFlow: build (Debug)", "PrintFlow: copy debug settings"],

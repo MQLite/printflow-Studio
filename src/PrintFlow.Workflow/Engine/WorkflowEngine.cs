@@ -289,8 +289,8 @@ public sealed class WorkflowEngine : IWorkflowEngine
         }
 
         return WorkflowTransition.Accepted(
-            state with { TrimMargin = command.Margin },
-            new WorkflowEffect.PersistTrimParameters(command.Margin));
+            state with { TrimMargin = command.Margin, IgnoreSmallTrimNoise = command.IgnoreSmallNoise },
+            new WorkflowEffect.PersistTrimParameters(command.Margin, command.IgnoreSmallNoise));
     }
 
     /// <summary>
@@ -329,6 +329,13 @@ public sealed class WorkflowEngine : IWorkflowEngine
         if (!state.Definition.Contains(StepKind.BackgroundRemoval))
         {
             return NotInWorkflow(state, StepKind.BackgroundRemoval);
+        }
+
+        if (!Enum.IsDefined(command.Mode))
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.InvalidPayload,
+                $"'{command.Mode}' is not a supported background-removal recogniser.");
         }
 
         if (command.Decision != BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent)
@@ -379,7 +386,7 @@ public sealed class WorkflowEngine : IWorkflowEngine
         }
 
         BackgroundRemovalAuthority authority = BackgroundRemovalAuthority.For(
-            command.Decision, upstream.Id, upstream.Sha256);
+            command.Decision, upstream.Id, upstream.Sha256, command.Mode);
 
         return WorkflowTransition.Accepted(
             state with { BackgroundRemovalAuthority = authority },
@@ -2029,7 +2036,7 @@ public sealed class WorkflowEngine : IWorkflowEngine
                     pending.Projection.RequestedMillimetres),
             CommandKind.SelectWhiteUnderbaseBranch =>
                 new WorkflowCommand.SelectWhiteUnderbaseBranch(ProbeBranch, ProbeReason),
-            CommandKind.SetTrimParameters => new WorkflowCommand.SetTrimParameters(state.TrimMargin),
+            CommandKind.SetTrimParameters => new WorkflowCommand.SetTrimParameters(state.TrimMargin, state.IgnoreSmallTrimNoise),
 
             // Probed with the name the session already holds, never an invented one: nothing is
             // applied by a probe, so this asks "may the name be changed at all" without proposing

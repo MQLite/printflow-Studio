@@ -19,6 +19,39 @@ namespace PrintFlow.Tests.Unit.Workflow;
 /// </remarks>
 public sealed class BackgroundRemovalAuthorityTests
 {
+    [Theory]
+    [InlineData(BackgroundRemovalMode.Automatic)]
+    [InlineData(BackgroundRemovalMode.PortraitPets)]
+    [InlineData(BackgroundRemovalMode.Products)]
+    [InlineData(BackgroundRemovalMode.LogosStamps)]
+    public void Recognition_mode_is_bound_to_reviewed_content(BackgroundRemovalMode mode)
+    {
+        WorkflowScenario scenario = AtBackgroundRemoval(out RevisionId upstream);
+        scenario.Must(new WorkflowCommand.SetBackgroundRemovalDecision(
+            Authorised, upstream, WorkflowScenario.HashOf(upstream), mode));
+        scenario.State.UsableBackgroundRemovalAuthority.ShouldNotBeNull().Mode.ShouldBe(mode);
+        scenario.Effect<WorkflowEffect.PersistBackgroundRemovalDecision>().Authority.Mode.ShouldBe(mode);
+        WorkflowTransition stale = scenario.Apply(new WorkflowCommand.SetBackgroundRemovalDecision(
+            Authorised, upstream, WorkflowScenario.ForeignHash, mode));
+        stale.IsRejected.ShouldBeTrue();
+        stale.Effects.ShouldBeEmpty();
+        scenario.State.UsableBackgroundRemovalAuthority.ShouldNotBeNull().Mode.ShouldBe(mode);
+    }
+
+    [Fact]
+    public void Undefined_recognition_mode_is_rejected_without_effects()
+    {
+        WorkflowScenario scenario = AtBackgroundRemoval(out RevisionId upstream);
+        WorkflowTransition refused = scenario.Apply(new WorkflowCommand.SetBackgroundRemovalDecision(
+            Authorised, upstream, WorkflowScenario.HashOf(upstream), (BackgroundRemovalMode)999));
+        refused.IsRejected.ShouldBeTrue();
+        refused.Rejection!.Code.ShouldBe(RejectionCode.InvalidPayload);
+        refused.Effects.ShouldBeEmpty();
+        scenario.State.BackgroundRemovalAuthority.ShouldBeNull();
+        Should.Throw<ArgumentOutOfRangeException>(() => BackgroundRemovalAuthority.For(
+            Authorised, upstream, WorkflowScenario.HashOf(upstream), (BackgroundRemovalMode)999));
+    }
+
     private const BackgroundRemovalDecision Authorised =
         BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent;
 

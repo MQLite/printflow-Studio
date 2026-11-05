@@ -96,4 +96,62 @@ public sealed class MeituBackgroundRemovalRuleTests
         MeituBackgroundRemovalRule.Classify(broken, Showing("智能识别中...", "取消"))
             .ShouldBe(MeituBackgroundRemovalPhase.Unobserved);
     }
+
+    [Fact]
+    public void Structurally_observed_apply_button_and_its_visible_text_complete_the_expanded_panel()
+    {
+        MeituObservation observation = Showing("自动选择", "局部抠图", "手动修补", "反选", "应用到背景") with
+        {
+            BackgroundRemovalApplyControlObserved = true,
+        };
+        MeituBackgroundRemovalRule.Classify(Signature(), observation)
+            .ShouldBe(MeituBackgroundRemovalPhase.Complete);
+    }
+
+    [Fact]
+    public void Apply_button_text_without_structural_evidence_does_not_complete()
+    {
+        MeituBackgroundRemovalRule.Classify(Signature(),
+            Showing("自动选择", "局部抠图", "手动修补", "反选", "应用到背景"))
+            .ShouldBe(MeituBackgroundRemovalPhase.Unobserved);
+    }
+
+    [Fact]
+    public void Apply_button_structural_evidence_without_visible_text_does_not_complete()
+    {
+        MeituObservation observation = Showing("自动选择", "局部抠图", "手动修补", "反选") with
+        {
+            BackgroundRemovalApplyControlObserved = true,
+        };
+        MeituBackgroundRemovalRule.Classify(Signature(), observation)
+            .ShouldBe(MeituBackgroundRemovalPhase.Unobserved);
+    }
+
+    [Theory]
+    [InlineData("自动选择")]
+    [InlineData("局部抠图")]
+    [InlineData("手动修补")]
+    [InlineData("反选")]
+    public void Apply_button_cannot_replace_any_other_required_marker(string missing)
+    {
+        string[] controls = ["自动选择", "局部抠图", "手动修补", "反选", "应用到背景"];
+        MeituObservation observation = Showing(controls.Where(text => text != missing).ToArray()) with
+        {
+            BackgroundRemovalApplyControlObserved = true,
+        };
+        MeituBackgroundRemovalRule.Classify(Signature(), observation)
+            .ShouldBe(MeituBackgroundRemovalPhase.Unobserved);
+    }
+
+    [Fact]
+    public void Busy_overrides_the_structurally_verified_expanded_completion_panel()
+    {
+        MeituObservation observation = Showing("自动选择", "局部抠图", "手动修补", "反选", "应用到背景",
+            "智能识别中...", "取消") with
+        {
+            BackgroundRemovalApplyControlObserved = true,
+        };
+        MeituBackgroundRemovalRule.Classify(Signature(), observation)
+            .ShouldBe(MeituBackgroundRemovalPhase.Busy);
+    }
 }

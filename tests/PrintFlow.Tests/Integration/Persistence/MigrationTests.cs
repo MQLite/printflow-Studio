@@ -12,6 +12,38 @@ namespace PrintFlow.Tests.Integration.Persistence;
 public sealed class MigrationTests
 {
     [Fact]
+    public void Noise_policy_upgrade_defaults_pending_sessions_but_preserves_historical_attempts_as_null()
+    {
+        using TempDatabase database = new(migrate: false);
+        using var connection = database.OpenRaw();
+        foreach (string resource in typeof(MigrationRunner).Assembly.GetManifestResourceNames()
+            .Where(n => n.Contains(".Migrations.", StringComparison.Ordinal) && n.EndsWith(".sql", StringComparison.Ordinal))
+            .OrderBy(n => n, StringComparer.Ordinal))
+        {
+            string file = resource[(resource.LastIndexOf(".Migrations.", StringComparison.Ordinal) + 12)..];
+            if (int.Parse(file[..4], System.Globalization.CultureInfo.InvariantCulture) >= 21) continue;
+            Execute(connection, ReadMigrationScript(file));
+        }
+
+        InsertSession(connection, "noise-upgrade", []);
+        Execute(connection, """
+            INSERT INTO ProcessingAttempt (Id, SessionId, StepKind, Operation, AdapterId, StartedAtUtc,
+                EndedAtUtc, ResultStatus, RetrySequence)
+            VALUES ('old-trim', 'noise-upgrade', 'Trim', 'TRIM', 'internal-alpha-trim-v1',
+                '2026-01-01T00:00:00.000Z', '2026-01-01T00:00:01.000Z', 'FAILED', 0);
+            PRAGMA user_version = 20;
+            """);
+        MigrationRunner.Migrate(connection).IsSuccess.ShouldBeTrue();
+        using var command = connection.CreateCommand();
+        command.CommandText = "SELECT IgnoreSmallTrimNoise FROM ProcessingSession WHERE Id = 'noise-upgrade'";
+        Convert.ToInt64(command.ExecuteScalar()).ShouldBe(1);
+        command.CommandText = "SELECT IgnoreSmallTrimNoise FROM ProcessingAttempt WHERE Id = 'old-trim'";
+        command.ExecuteScalar().ShouldBe(DBNull.Value);
+        Should.Throw<SqliteException>(() => Execute(connection,
+            "UPDATE ProcessingSession SET IgnoreSmallTrimNoise = 2 WHERE Id = 'noise-upgrade'"));
+    }
+
+    [Fact]
     public void Manual_crop_migration_preserves_v12_historical_nulls_and_rejects_partial_metadata()
     {
         using TempDatabase database = new(migrate: false);

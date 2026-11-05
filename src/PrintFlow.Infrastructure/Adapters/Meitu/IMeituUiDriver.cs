@@ -219,7 +219,8 @@ public interface IMeituUiDriver
         string expectedWorkingCopyFileName,
         BackgroundRemovalDecision modeDecision,
         IAutomationStopSignal stop,
-        CancellationToken cancellationToken);
+        CancellationToken cancellationToken,
+        BackgroundRemovalMode mode = BackgroundRemovalMode.Automatic);
 
     /// <summary>
     /// Returns the loaded editor to its signed empty state through the signed close control.
@@ -460,13 +461,29 @@ public sealed record MeituEnhancementOutcome(
     MeituStateSnapshot Completion,
     MeituStateSnapshot IdentityAfterEnhancement);
 
+/// <summary>Native control and document evidence of an undone cutout being reapplied.</summary>
+public sealed record MeituRecognitionReapplyEvidence(
+    int RecognizerIndex,
+    MeituStateSnapshot Before,
+    MeituStateSnapshot After,
+    System.Collections.Immutable.ImmutableArray<UiElementIdentity> BeforeControls,
+    System.Collections.Immutable.ImmutableArray<UiElementIdentity> AfterControls);
+
 /// <summary>What one guarded C1 Background Removal run positively observed.</summary>
+/// <param name="Busy">
+/// The real processing observation, or null when an instant cached result is instead
+/// correlated by strictly verified <see cref="ReappliedRecognition"/> native evidence.
+/// </param>
 public sealed record MeituBackgroundRemovalOutcome(
     MeituTarget Target,
     string ObservedDocumentIdentity,
     BackgroundRemovalDecision ModeDecision,
     string ObservedAutomaticModeName,
     MeituStateSnapshot IdentityBeforeAction,
-    MeituStateSnapshot Busy,
+    MeituStateSnapshot? Busy,
     MeituStateSnapshot Completion,
-    MeituStateSnapshot IdentityAfterCompletion);
+    MeituStateSnapshot IdentityAfterCompletion)
+{
+    public BackgroundRemovalMode Mode { get; init; } = BackgroundRemovalMode.Automatic;
+    public MeituRecognitionReapplyEvidence? ReappliedRecognition { get; init; }
+}

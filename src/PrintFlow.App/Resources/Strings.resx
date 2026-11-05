@@ -263,7 +263,7 @@
     <value>The file changed after it was shown, so the decision was not applied. Run the step again.</value>
   </data>
   <data name="Failure_EnvironmentNotVerified" xml:space="preserve">
-    <value>This workstation has not been verified for automated processing.</value>
+    <value>The configuration needed for this step is unavailable. See the error details.</value>
   </data>
   <data name="Failure_AdapterUnavailable" xml:space="preserve">
     <value>A program it needs was unavailable or in use by another job, or the operation stopped unexpectedly. PrintFlow never changes your original file.</value>
@@ -290,7 +290,7 @@
     <value>This image has no transparent area to trim to, so it must be cropped by hand.</value>
   </data>
   <data name="Failure_MeituNotInstalled" xml:space="preserve">
-    <value>The approved Meitu program was not found on this computer, or it is not the approved version. Please check the workstation setup.</value>
+    <value>Meitu could not be found or read. Please check its installation path.</value>
   </data>
   <data name="Failure_MeituLaunchFailed" xml:space="preserve">
     <value>Meitu could not be started or did not become ready.</value>
@@ -545,7 +545,11 @@
   <data name="Session_TrimRightLabel" xml:space="preserve"><value>Right</value></data>
   <data name="Session_TrimBottomLabel" xml:space="preserve"><value>Bottom</value></data>
   <data name="Session_TrimLeftLabel" xml:space="preserve"><value>Left</value></data>
-  <data name="Session_TrimApply" xml:space="preserve"><value>Apply Margin</value></data>
+  <data name="Session_TrimApply" xml:space="preserve"><value>Apply Trim Settings</value></data>
+  <data name="Session_TrimIgnoreNoise" xml:space="preserve"><value>Ignore faint isolated specks</value></data>
+  <data name="Session_TrimNoiseHint" xml:space="preserve"><value>Keep soft edges connected to the artwork. Turn this off to retain every non-transparent pixel.</value></data>
+  <data name="Session_TrimNoiseIgnored" xml:space="preserve"><value>Faint isolated specks ignored</value></data>
+  <data name="Session_TrimNoisePreserved" xml:space="preserve"><value>All non-transparent pixels retained</value></data>
   <data name="Session_TrimMarginInvalid" xml:space="preserve">
     <value>Invalid margin. Enter a whole number of pixels that is zero or greater.</value>
   </data>
@@ -578,23 +582,23 @@
   <!-- Background removal, reviewed-content authority (Epic 11300 Part C2B2 §3, §9, §11, §14). -->
   <data name="Session_BackgroundRemovalHeading" xml:space="preserve"><value>Background removal</value></data>
   <data name="Session_BackgroundRemovalHint" xml:space="preserve">
-    <value>Meitu decides the foreground subject automatically for the image shown above. Authorise it for this image before running the step.</value>
+    <value>Choose a recognition mode, then authorise it for the image shown above before running the step.</value>
   </data>
-  <data name="Session_BackgroundRemovalAuthorise" xml:space="preserve"><value>Use Automatic Selection for this image</value></data>
+  <data name="Session_BackgroundRemovalAuthorise" xml:space="preserve"><value>Use this recognition mode for this image</value></data>
   <data name="Session_BackgroundRemovalConfirmQuestion" xml:space="preserve">
-    <value>Meitu will decide the foreground subject of this image on its own. Check the result before approving it. This applies to the image shown above only, not to later versions of it.</value>
+    <value>Meitu will recognise the foreground subject using {0}. Check the result before approving it. This applies to the image shown above only, not to later versions of it.</value>
   </data>
   <data name="Session_BackgroundRemovalConfirm" xml:space="preserve"><value>Confirm</value></data>
   <data name="Session_BackgroundRemovalCancel" xml:space="preserve"><value>Cancel</value></data>
   <data name="Session_BackgroundRemovalAuthorised" xml:space="preserve">
-    <value>Automatic Selection authorised for this image · Revision {0}</value>
+    <value>{1} authorised for this image · Revision {0}</value>
   </data>
   <data name="Session_BackgroundRemovalNotAuthorised" xml:space="preserve">
-    <value>Not authorised yet. Run Step becomes available once Automatic Selection is authorised for this image.</value>
+    <value>Confirm the selected recognition mode for this image before running the step.</value>
   </data>
   <data name="Session_BackgroundRemovalRunnable" xml:space="preserve"><value>Ready to run background removal.</value></data>
   <data name="Session_BackgroundRemovalAttemptAudit" xml:space="preserve">
-    <value>Background removal: Automatic Selection — authorised for reviewed Revision {0}</value>
+    <value>Background removal: {1} — authorised for reviewed Revision {0}</value>
   </data>
   <data name="Session_Stop" xml:space="preserve"><value>Stop</value></data>
   <data name="Session_StopHint" xml:space="preserve">
@@ -644,7 +648,7 @@
     <value>The working folder is not the one this workstation was verified with.</value>
   </data>
   <data name="EnvironmentCheck_ProductionRevalidation" xml:space="preserve">
-    <value>This installation has not been revalidated. After any PrintFlow, Windows, Meitu or Photoshop upgrade, the environment check and the standard test set must both be rerun and pass before production work may resume.</value>
+    <value>The historical validation record does not match this installation. This diagnostic finding does not prevent processing.</value>
   </data>
   <data name="EnvironmentCheck_OperatingSystem" xml:space="preserve">
     <value>This computer's Windows version does not match the verified workstation.</value>
@@ -662,7 +666,7 @@
     <value>The recorded interface language of Meitu or Photoshop, for reference.</value>
   </data>
   <data name="EnvironmentCheck_MeituExecutable" xml:space="preserve">
-    <value>Meitu does not match the accepted production baseline.</value>
+    <value>The configured Meitu program could not be found or read. Please check its installation path.</value>
   </data>
   <data name="EnvironmentCheck_PhotoshopExecutable" xml:space="preserve">
     <value>Photoshop does not match the accepted production baseline.</value>
@@ -681,10 +685,10 @@
   <data name="EnvironmentCheck_PhotoshopColourSettings" xml:space="preserve"><value>Photoshop colour settings do not match the accepted preset.</value></data>
   <data name="EnvironmentCheck_PhotoshopTestImageRoundTrip" xml:space="preserve"><value>The last test-image check did not finish. Choose Safe recovery and recheck; PrintFlow will first check Photoshop's current state.</value></data>
   <data name="Environment_Verified" xml:space="preserve">
-    <value>Workstation verified for production work.</value>
+    <value>Environment diagnostic checks passed.</value>
   </data>
   <data name="Environment_NotVerified" xml:space="preserve">
-    <value>Production workstation verification failed.</value>
+    <value>Environment differences were found. Processing is still available.</value>
   </data>
   <data name="Environment_Advisories" xml:space="preserve">
     <value>Notes (these do not stop production work)</value>
@@ -739,10 +743,10 @@
   <data name="EnvironmentCheckName_PhotoshopColourSettings" xml:space="preserve"><value>Photoshop colour settings</value></data>
   <data name="EnvironmentCheckName_PhotoshopTestImageRoundTrip" xml:space="preserve"><value>Photoshop test image</value></data>
   <data name="Environment_Heading" xml:space="preserve">
-    <value>Production readiness</value>
+    <value>Environment diagnostics (optional)</value>
   </data>
   <data name="Environment_Hint" xml:space="preserve">
-    <value>Check whether this workstation is ready for production. Safe recovery handles only PrintFlow test images and leaves your work and application settings unchanged.</value>
+    <value>Use these diagnostics to investigate local configuration and application state. Checks do not need to run or pass before processing; step-specific problems are reported when that step runs.</value>
   </data>
   <data name="Environment_Open" xml:space="preserve">
     <value>Production readiness</value>
@@ -780,10 +784,10 @@
     <value>Checks</value>
   </data>
   <data name="Environment_BlockingHeading" xml:space="preserve">
-    <value>Stopping production work</value>
+    <value>Diagnostic findings to review</value>
   </data>
   <data name="Environment_NoBlockingFailures" xml:space="preserve">
-    <value>Nothing is stopping production work.</value>
+    <value>No diagnostic findings need attention.</value>
   </data>
   <data name="Environment_AdvisoriesPresent" xml:space="preserve">
     <value>Advisories: present</value>
@@ -804,18 +808,18 @@
   <data name="Environment_LiveCheckNotRun" xml:space="preserve"><value>This check did not run because a prerequisite has not passed. Resolve the failed check first, then recheck.</value></data>
   <data name="Environment_CheckNotRun" xml:space="preserve"><value>This check did not run, so nothing was observed.</value></data>
   <data name="Environment_UnlistedCheck" xml:space="preserve"><value>Unlisted check</value></data>
-  <data name="Environment_NotConfirmedNotRun" xml:space="preserve"><value>Production workstation readiness is not confirmed: a required check did not run.</value></data>
+  <data name="Environment_NotConfirmedNotRun" xml:space="preserve"><value>Some diagnostic checks have not run. You can start processing.</value></data>
   <data name="Environment_Blocking" xml:space="preserve">
-    <value>Required</value>
+    <value>Diagnostic check</value>
   </data>
   <data name="Environment_Advisory" xml:space="preserve">
     <value>Advisory</value>
   </data>
   <data name="Environment_RestartRequired" xml:space="preserve">
-    <value>If an accepted PrintFlow workstation record, the Photoshop installation, the Meitu installation or the verified action file is replaced or updated, restart PrintFlow before using production mode.</value>
+    <value>Restart PrintFlow after updating the program to load the latest code and configuration. Environment diagnostics are optional.</value>
   </data>
   <data name="Environment_RefreshScope" xml:space="preserve">
-    <value>Refresh status only reads current status; it does not recover test images or run a fresh application check. Accepted installation files are not re-read until PrintFlow restarts.</value>
+    <value>Refresh status only reads diagnostic state. Diagnostic results do not restrict processing.</value>
   </data>
   <data name="Failure_PsdCompositeMissing" xml:space="preserve"><value>This PSD has no verified compatible composite. Save a copy in Photoshop with Maximize Compatibility enabled, then import that copy.</value></data>
   <data name="Failure_PsdPreparationFailed" xml:space="preserve"><value>Photoshop could not produce a verified raster from this PSD. The source is preserved; review the failure before retrying.</value></data>
@@ -1301,21 +1305,21 @@
   <data name="FailureNotice_PsdPreparationFailed" xml:space="preserve"><value>Photoshop could not produce a verified raster from this PSD. The source is preserved.</value></data>
   <data name="FailureNotice_PdfPreparationFailed" xml:space="preserve"><value>PDF preparation failed. No validated raster is available.</value></data>
   <!-- SCRUM-11152: Home readiness summary and startup details. -->
-  <data name="Home_ReadinessHeading" xml:space="preserve"><value>Workstation check</value></data>
-  <data name="Home_ReadinessNotChecked" xml:space="preserve"><value>Not checked in this run.</value></data>
-  <data name="Home_ReadinessNotCheckedHint" xml:space="preserve"><value>Choose “View workstation checks” to check this workstation. A result from an earlier run is not used.</value></data>
+  <data name="Home_ReadinessHeading" xml:space="preserve"><value>Environment diagnostics (optional)</value></data>
+  <data name="Home_ReadinessNotChecked" xml:space="preserve"><value>Environment diagnostics have not run.</value></data>
+  <data name="Home_ReadinessNotCheckedHint" xml:space="preserve"><value>You can start processing. View workstation checks when you need to investigate a problem.</value></data>
   <data name="Home_ReadinessChecking" xml:space="preserve"><value>Checking the workstation…</value></data>
   <data name="Home_ReadinessCheckingHint" xml:space="preserve"><value>Choose “View workstation checks” to see the check.</value></data>
   <data name="Home_ReadinessReady" xml:space="preserve"><value>Passed at last check.</value></data>
-  <data name="Home_ReadinessReadyHint" xml:space="preserve"><value>This is a recorded observation. Each automatic step still uses its own workstation check.</value></data>
-  <data name="Home_ReadinessBlocked" xml:space="preserve"><value>Automatic processing is blocked.</value></data>
+  <data name="Home_ReadinessReadyHint" xml:space="preserve"><value>This is a diagnostic observation. Each step checks its required application, image and current interface.</value></data>
+  <data name="Home_ReadinessBlocked" xml:space="preserve"><value>Diagnostics found environment differences.</value></data>
   <data name="Home_ReadinessFirstReason" xml:space="preserve"><value>Reason: {0}. {1}</value></data>
-  <data name="Home_ReadinessLiveCheckPending" xml:space="preserve"><value>Reason: the Meitu and Photoshop check has no current result. Choose “View workstation checks”, then “{0}”.</value></data>
-  <data name="Home_ReadinessBlockedHint" xml:space="preserve"><value>Choose “View workstation checks” to see every check. Ask an experienced colleague or supervisor for help.</value></data>
-  <data name="Home_ReadinessNotConfirmed" xml:space="preserve"><value>Readiness needs to be checked again.</value></data>
+  <data name="Home_ReadinessLiveCheckPending" xml:space="preserve"><value>Application diagnostics have no result. Processing is still available. To investigate, view workstation checks and choose “{0}”.</value></data>
+  <data name="Home_ReadinessBlockedHint" xml:space="preserve"><value>Diagnostics do not block processing. Start your task or view workstation checks to investigate the differences.</value></data>
+  <data name="Home_ReadinessNotConfirmed" xml:space="preserve"><value>Environment diagnostics are incomplete.</value></data>
   <data name="Home_ReadinessUnfinishedReason" xml:space="preserve"><value>The last check did not finish, so no earlier result is shown as current.</value></data>
   <data name="Home_ReadinessNoReason" xml:space="preserve"><value>The last check did not name a reason. Choose “View workstation checks” for details.</value></data>
-  <data name="Home_ReadinessNotConfirmedHint" xml:space="preserve"><value>Choose “View workstation checks” to check again. Ask an experienced colleague or supervisor for help.</value></data>
+  <data name="Home_ReadinessNotConfirmedHint" xml:space="preserve"><value>You can start processing. View workstation checks when needed.</value></data>
   <data name="Home_ReadinessCheckedAt" xml:space="preserve"><value>Checked at {0}</value></data>
   <data name="Home_ReadinessTechnicalCheck" xml:space="preserve"><value>Check identifier: {0} · {1}</value></data>
   <data name="Home_StartupDetails" xml:space="preserve"><value>Startup details</value></data>
@@ -1412,9 +1416,9 @@
   <data name="Home_RecentNextHandedOff" xml:space="preserve"><value>Open handoff details to see the currently supported ways to continue.</value></data>
   <data name="Home_RecentNextHistory" xml:space="preserve"><value>View the processing record. Open details to check the current file; saved history alone cannot confirm it.</value></data>
   <data name="Environment_Unchecked" xml:space="preserve"><value>Not checked yet</value></data>
-  <data name="Environment_ObservationUnchecked" xml:space="preserve"><value>Not checked yet. No report has been read; this does not confirm production readiness.</value></data>
-  <data name="Environment_ObservationBlocked" xml:space="preserve"><value>Some required checks did not run. Read the blockers below; historical results do not grant production permission.</value></data>
-  <data name="Environment_ObservationCurrent" xml:space="preserve"><value>This report describes the observation shown below. Every production request is checked again.</value></data>
+  <data name="Environment_ObservationUnchecked" xml:space="preserve"><value>Environment diagnostics have not run. You can start processing.</value></data>
+  <data name="Environment_ObservationBlocked" xml:space="preserve"><value>Some diagnostic checks did not run. Review the reasons below or return to your task and start processing.</value></data>
+  <data name="Environment_ObservationCurrent" xml:space="preserve"><value>This report helps investigate environment differences. Each step checks its required application, image and current interface.</value></data>
   <data name="Environment_EvidenceNever" xml:space="preserve"><value>No successful live-check history is recorded.</value></data>
   <data name="Environment_EvidenceExpired" xml:space="preserve"><value>Historical check evidence is no longer available. Last success: {0}. It cannot confirm current readiness.</value></data>
   <data name="Environment_EvidenceDeferred" xml:space="preserve"><value>Current state was not observed again. Historical success: {0}; this is not current production permission.</value></data>
@@ -1563,4 +1567,9 @@
   <data name="AiPrompt_DraftsEmpty" xml:space="preserve"><value>No saved prompt drafts are available.</value></data>
   <data name="AiPrompt_DraftReadFailed" xml:space="preserve"><value>The saved draft could not be opened. Your current edits are still here. Check storage and file access, then select the draft again.</value></data>
   <data name="AiPrompt_NewDraftFailed" xml:space="preserve"><value>A new draft could not be created. You can open an existing saved draft below, or return Home and check storage and file access.</value></data>
+  <data name="Session_BackgroundRemovalModeHeading" xml:space="preserve"><value>Recognition mode</value></data>
+  <data name="Session_BackgroundRemovalMode_Automatic" xml:space="preserve"><value>Automatic Selection</value></data>
+  <data name="Session_BackgroundRemovalMode_PortraitPets" xml:space="preserve"><value>Portraits / Pets</value></data>
+  <data name="Session_BackgroundRemovalMode_Products" xml:space="preserve"><value>Products / Goods</value></data>
+  <data name="Session_BackgroundRemovalMode_LogosStamps" xml:space="preserve"><value>Logos / Stamps</value></data>
 </root>

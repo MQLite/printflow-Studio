@@ -141,7 +141,8 @@ public interface IMeituAutomationFoundation
         WorkspaceFileRef workingCopy,
         BackgroundRemovalDecision modeDecision,
         IAutomationStopSignal stop,
-        CancellationToken cancellationToken);
+        CancellationToken cancellationToken,
+        BackgroundRemovalMode mode = BackgroundRemovalMode.Automatic);
 
     /// <summary>
     /// Writes the enhanced result to a PrintFlow-controlled path and validates what landed there

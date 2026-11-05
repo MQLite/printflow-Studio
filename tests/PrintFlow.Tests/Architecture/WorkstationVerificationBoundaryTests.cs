@@ -282,12 +282,12 @@ public sealed class WorkstationVerificationBoundaryTests
     {
         ConstructorInfo constructor = typeof(VerifiedEnvironmentGate).GetConstructors().ShouldHaveSingleItem();
         constructor.GetParameters().Select(parameter => parameter.ParameterType)
-            .ShouldBe([typeof(IProductionWorkstationVerifier), typeof(IEnvironmentReadinessObservations)]);
+            .ShouldBe([typeof(IProductionWorkstationVerifier), typeof(IEnvironmentReadinessObservations), typeof(bool)]);
 
         typeof(VerifiedEnvironmentGate)
             .GetFields(BindingFlags.NonPublic | BindingFlags.Instance)
             .Select(f => f.FieldType)
-            .ShouldBe([typeof(IProductionWorkstationVerifier), typeof(IEnvironmentReadinessObservations)]);
+            .ShouldBe([typeof(IProductionWorkstationVerifier), typeof(IEnvironmentReadinessObservations), typeof(bool)]);
     }
 
     /// <summary>

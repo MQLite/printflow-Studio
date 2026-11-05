@@ -12,7 +12,7 @@ namespace PrintFlow.Infrastructure.Verification;
 /// </summary>
 /// <remarks>
 /// Deliberately more than a boolean. SCRUM-11123 requires the standard test set to be rerun
-/// before production use after any PrintFlow, Windows, Meitu or Photoshop upgrade, and the
+/// before production use after a PrintFlow, Windows or Photoshop upgrade, and the
 /// honest answers to "did it pass" include "the set does not exist yet". That case is
 /// <see cref="NotAvailable"/> and it blocks Production exactly as a failure does — a test set
 /// that was never built cannot have passed, and the gate must not be able to read its absence
@@ -92,11 +92,11 @@ public sealed record StandardRegressionSetOutcome(
 /// the outcome SCRUM-11123 exists to prevent.
 /// <para>
 /// <b>What it binds.</b> The product version, the preset identity and its digest, the operating
-/// system build, and the accepted Meitu and Photoshop digests. Changing any one of them makes
+/// system build, and the accepted Photoshop digest. Changing any one of them makes
 /// the record describe an environment that is no longer the one in front of the operator, and
 /// the check fails closed until a new record is written. That is the whole of §19: PrintFlow,
-/// Windows, Meitu or Photoshop upgraded means revalidation, with no path where one of them is
-/// silently absorbed.
+/// Windows or Photoshop upgraded means revalidation. The recorded Meitu digest is historical
+/// evidence; Meitu compatibility is established against the running interface instead.
 /// <para>
 /// Two of those are also verified independently — the preset digest by
 /// <see cref="WorkstationVerificationCheck.PresetIntegrity"/>, the binaries by their own
@@ -127,7 +127,7 @@ public sealed record StandardRegressionSetOutcome(
 /// <param name="PresetVersion">That preset's version.</param>
 /// <param name="PresetSha256">That preset manifest's digest.</param>
 /// <param name="OperatingSystemBuild">The Windows build the revalidation ran on.</param>
-/// <param name="MeituSha256">The accepted Meitu binary digest at revalidation time.</param>
+/// <param name="MeituSha256">The historical Meitu binary digest at revalidation time, for reference.</param>
 /// <param name="PhotoshopSha256">The accepted Photoshop binary digest at revalidation time.</param>
 /// <param name="EnvironmentReadinessPassed">Whether the readiness run passed.</param>
 /// <param name="StandardRegressionSet">What the standard test set concluded.</param>
@@ -409,13 +409,8 @@ internal static class ProductionRevalidationEvaluator
                 "environment: rerun Environment Readiness and the standard regression set.");
         }
 
-        if (!MatchesDigest(record.MeituSha256, requirements.Meitu.Sha256))
-        {
-            return Fail(expected, $"Meitu {Short(record.MeituSha256)}",
-                "The accepted Meitu binary is not the one the recorded revalidation was run " +
-                "against. A Meitu upgrade changes the supported environment: rerun Environment " +
-                "Readiness and the standard regression set before returning to Production.");
-        }
+        // MeituSha256 remains historical evidence, not a version pin. Meitu updates are
+        // admitted through executable availability and the operation-time interface guards.
 
         if (!MatchesDigest(record.PhotoshopSha256, requirements.Photoshop.Sha256))
         {

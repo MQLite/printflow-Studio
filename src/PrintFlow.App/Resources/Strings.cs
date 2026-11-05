@@ -20,6 +20,10 @@ namespace PrintFlow.App.Resources;
 /// </remarks>
 internal static class Strings
 {
+    internal static string Session_TrimIgnoreNoise => Get(nameof(Session_TrimIgnoreNoise));
+    internal static string Session_TrimNoiseHint => Get(nameof(Session_TrimNoiseHint));
+    internal static string Session_TrimNoiseIgnored => Get(nameof(Session_TrimNoiseIgnored));
+    internal static string Session_TrimNoisePreserved => Get(nameof(Session_TrimNoisePreserved));
     internal static string AiDetail_Detailed => Get(nameof(AiDetail_Detailed));
     internal static string AiDetail_FirstPending => Get(nameof(AiDetail_FirstPending));
     internal static string AiDetail_Step1 => Get(nameof(AiDetail_Step1));

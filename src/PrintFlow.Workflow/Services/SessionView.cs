@@ -631,6 +631,9 @@ public sealed record SessionView(
 {
     public IReadOnlyList<SessionHistoryView> History { get; init; } = [];
 
+    public bool IgnoreSmallTrimNoise { get; init; } = true;
+    public bool CurrentTrimIgnoresSmallNoise { get; init; }
+
     /// <summary>The actual pre-trim input of the approved trim promoted to the current PNG.</summary>
     public ArtefactView? ApprovedPngReviewInput
     {
@@ -651,6 +654,8 @@ public sealed record SessionView(
 
     /// <summary>Post-completion maintenance outcome; failure leaves State = Completed.</summary>
     public SessionCleanupResult? CompletionCleanup { get; init; }
+    public BackgroundRemovalMode BackgroundRemovalMode { get; init; } = BackgroundRemovalMode.Automatic;
+    public BackgroundRemovalMode BackgroundRemovalAttemptMode { get; init; } = BackgroundRemovalMode.Automatic;
 
     /// <summary>The exact terminal attempt represented by the current failure surface.</summary>
     public AttemptId? CurrentFailureAttemptId { get; init; }
@@ -1000,6 +1005,11 @@ public sealed record SessionView(
             RootRevisionId = revisions.FirstOrDefault(r => r.IsRoot)?.Id,
             PdfInspection = attempts.LastOrDefault(a => a.PdfInspection is not null)?.PdfInspection,
             CurrentFailureAttemptId = ErrorDetailsSelection.Current(snapshot.CurrentStep, attempts)?.Id,
+            BackgroundRemovalMode = usable?.Mode ?? BackgroundRemovalMode.Automatic,
+            BackgroundRemovalAttemptMode = producingAuthority?.Mode ?? BackgroundRemovalMode.Automatic,
+            IgnoreSmallTrimNoise = snapshot.IgnoreSmallTrimNoise,
+            CurrentTrimIgnoresSmallNoise = current is not null &&
+                attempts.FirstOrDefault(attempt => attempt.OutputRevisionId == current.RevisionId)?.IgnoreSmallTrimNoise == true,
         };
     }
 
