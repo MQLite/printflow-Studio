@@ -57,7 +57,9 @@ public sealed class PhotoshopWorkflowOutputWorkstationSmoke
     [Fact]
     public async Task One_real_Photoshop_run_reaches_ReviewRequired_with_exactly_one_TIFF_Revision()
     {
-        if (Environment.GetEnvironmentVariable(EnableVariable) != "1") return;
+        string? scenario = Environment.GetEnvironmentVariable(EnableVariable);
+        bool presetEnlargement = scenario == "preset-enlargement";
+        if (scenario != "1" && !presetEnlargement) return;
 
         PrintFlowConfiguration configuration = PrintFlowConfiguration.LoadFromFile(
             RepositoryFile("appsettings.json"));
@@ -130,15 +132,28 @@ public sealed class PhotoshopWorkflowOutputWorkstationSmoke
             CancellationToken.None));
 
         PrintDimensions dimensions = PrintDimensions.FromMillimetres(50.8, 100, SizePreset.Custom);
-        Accept(await service.ExecuteAsync(
-            id, new WorkflowCommand.SetPrintDimensions(dimensions), "qa", CancellationToken.None));
+        WorkflowCommand size = presetEnlargement
+            ? new WorkflowCommand.SetPresetFitSize(SizePreset.A5)
+            : new WorkflowCommand.SetPrintDimensions(dimensions);
+        Accept(await service.ExecuteAsync(id, size, "qa", CancellationToken.None));
         Accept(await service.ExecuteAsync(
             id,
             new WorkflowCommand.SelectWhiteUnderbaseBranch(WhiteUnderbaseBranch.W1_1px, "ordinary design"),
             "qa",
             CancellationToken.None));
 
-        Console.WriteLine($"size decision        : max {dimensions.MaxWidthMm}x{dimensions.MaxHeightMm} mm @ 300 ppi");
+        if (presetEnlargement)
+        {
+            SessionView pending = Accept(await service.LoadAsync(id, CancellationToken.None));
+            pending.CanRunPhotoshopOutput.ShouldBeFalse();
+            Guid offer = pending.Sizing.EnlargementOfferId.ShouldNotBeNull();
+            Accept(await service.AuthoriseCurrentEnlargementAsync(id, offer, "qa", CancellationToken.None));
+            Console.WriteLine("size decision        : A5 with explicit enlargement confirmation");
+        }
+        else
+        {
+            Console.WriteLine($"size decision        : max {dimensions.MaxWidthMm}x{dimensions.MaxHeightMm} mm @ 300 ppi");
+        }
         Console.WriteLine($"W1 branch            : {WhiteUnderbaseBranch.W1_1px}");
         Console.WriteLine("starting real Photoshop run ...");
         WindowClassCensus beforeWindows = WindowClassCensus.Read("Photoshop");
@@ -167,6 +182,7 @@ public sealed class PhotoshopWorkflowOutputWorkstationSmoke
             aggregate.Steps.Single(s => s.Step == StepKind.PhotoshopOutput).State
                 .ShouldNotBe(StepState.ReviewRequired);
             Console.WriteLine("no Revision was created and the step did not become reviewable.");
+            if (presetEnlargement) Accept(produced);
             return;
         }
 
@@ -211,6 +227,14 @@ public sealed class PhotoshopWorkflowOutputWorkstationSmoke
             .InspectAsync(tiffPath, CancellationToken.None));
         onDisk.Sha256.ShouldBe(tiff.Facts.Sha256);
         onDisk.ByteLength.ShouldBe(tiff.Facts.ByteLength);
+        if (presetEnlargement)
+        {
+            attempt.Preparation.ShouldBeOfType<TargetEdgePreparation>().IsAuthorisedEnlargement.ShouldBeTrue();
+            onDisk.PixelWidth.ShouldBe(2391);
+            onDisk.PixelHeight.ShouldBe(1594);
+            onDisk.DpiX.ShouldBe(300);
+            onDisk.DpiY.ShouldBe(300);
+        }
         afterDocuments.ShouldBe(beforeDocuments, "this job must retain no new dirty Working document.");
 
         // The upstream source is unchanged, and only one TIFF was produced.

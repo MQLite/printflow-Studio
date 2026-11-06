@@ -787,6 +787,9 @@ public sealed class MaximumBoundsUiTests
         screen.CanRunPhotoshopOutput.ShouldBeFalse("the branch is still missing");
 
         await ChooseBranchAsync(screen);
+        screen.NeedsEnlargementAuthority.ShouldBeTrue();
+        screen.CanRunPhotoshopOutput.ShouldBeFalse();
+        await screen.ContinueWithSizeCommand.ExecuteAsync(null);
         screen.CanRunPhotoshopOutput.ShouldBeTrue();
 
         await screen.RunStepCommand.ExecuteAsync(null);

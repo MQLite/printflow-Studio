@@ -232,7 +232,24 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
             .ConfigureAwait(false);
         if (exported.IsFailure)
         {
-            return OperationResult.Fail<AdapterOutput>(exported.Failure);
+            OperationFailure failure = exported.Failure;
+            // A size rejection follows a confirmed export of a settled, decoded image.
+            // Meitu can still be showing its save confirmation and holding our working copy.
+            if (failure.MessageKey == MeituEnhancementOutputRule.ShrunkOutputMessageKey &&
+                request.Stop.RequestedMode is null && !cancellationToken.IsCancellationRequested)
+            {
+                string rejectedOutputCleanup = await ReturnToNeutralStateAsync(
+                    enhanced.Value.Target, cancellationToken, outputValidated: false).ConfigureAwait(false);
+                failure = failure with
+                {
+                    Context = new Dictionary<string, string>(failure.Context)
+                    {
+                        ["meituCleanup"] = rejectedOutputCleanup,
+                    },
+                };
+            }
+
+            return OperationResult.Fail<AdapterOutput>(failure);
         }
 
         string cleanup = await ReturnToNeutralStateAsync(enhanced.Value.Target, cancellationToken)
@@ -813,10 +830,8 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
     /// (Epic 11300 Part B2B §24, §26).
     /// </summary>
     /// <remarks>
-    /// Returns a description instead of a result because there is no caller-visible decision to
-    /// make: the output already exists and is already validated, so the only question is what to
-    /// write down. What the caller must not be able to do is treat a tidy-up problem as a
-    /// processing problem, and a method that cannot fail cannot be misread that way.
+    /// Returns a description for diagnostics. The output's validation outcome has already been
+    /// decided, and a cleanup problem does not replace it.
     ///
     /// The order matters. Meitu's post-save surface disables the editor while it is up, so the
     /// document cannot be closed until it is dismissed — and the close is what makes the next
@@ -826,16 +841,18 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
     /// a blocking modal and stops without touching it, and that is what gets reported here.
     /// </remarks>
     private async Task<string> ReturnToNeutralStateAsync(
-        MeituTarget target, CancellationToken cancellationToken)
+        MeituTarget target, CancellationToken cancellationToken, bool outputValidated = true)
     {
+        string outputStatus = outputValidated ? "The output is valid" : "The output was rejected";
         try
         {
+            cancellationToken.ThrowIfCancellationRequested();
             OperationResult<bool> dismissed = await _driver
                 .DismissExportResultSurfaceAsync(target, cancellationToken).ConfigureAwait(false);
             if (dismissed.IsFailure)
             {
                 return $"WARNING: Meitu's save-confirmation surface could not be dismissed " +
-                       $"({dismissed.Failure.Code}). The output is valid; the next attempt must not " +
+                       $"({dismissed.Failure.Code}). {outputStatus}; the next attempt must not " +
                        "proceed until an operator has cleared it.";
             }
 
@@ -847,24 +864,27 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
             if (activated.IsFailure)
             {
                 return $"WARNING: the document is still loaded ({activated.Failure.Code}: " +
-                       $"{activated.Failure.TechnicalDetail}). The output is valid; Meitu could not " +
+                       $"{activated.Failure.TechnicalDetail}). {outputStatus}; Meitu could not " +
                        "be reacquired for cleanup.";
             }
 
             OperationResult<MeituTarget> closed = await _driver
                 .CloseDocumentAsync(activated.Value, cancellationToken).ConfigureAwait(false);
 
-            return closed.IsSuccess
-                ? "the editor was returned to its signed empty state"
-                : $"WARNING: the document is still loaded ({closed.Failure.Code}: " +
-                  $"{closed.Failure.TechnicalDetail}). The output is valid; Meitu is not in a state the " +
-                  "next attempt may blindly proceed against.";
+            if (closed.IsSuccess)
+            {
+                ExternalAppFocusHandoff.MarkEmptyEditor(closed.Value.Window);
+                return "the editor was returned to its signed empty state";
+            }
+
+            return $"WARNING: the document is still loaded ({closed.Failure.Code}: " +
+                   $"{closed.Failure.TechnicalDetail}). {outputStatus}; Meitu is not in a state the " +
+                   "next attempt may blindly proceed against.";
         }
         catch (OperationCanceledException)
         {
-            // §34: cancellation after the output exists must not discard it. The result is
-            // already validated; only the tidying is abandoned.
-            return "WARNING: cleanup was cancelled. The output is valid; the document may still be loaded.";
+            // Cancellation during cleanup leaves the export's validation outcome intact.
+            return $"WARNING: cleanup was cancelled. {outputStatus}; the document may still be loaded.";
         }
     }
 

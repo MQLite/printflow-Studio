@@ -149,9 +149,13 @@ public sealed class PrintDimensionsPreflightUiTests
         model.Preflight.EffectiveSourcePpiY.ShouldBe(1200);
         model.ApplyPresetCommand.Execute(model.SizePresets.Single(p => p.Preset == SizePreset.A4));
         await model.PreflightLoaded;
-        PrintDimensionsPreflight presetDraft = model.Preflight!;
+        PrintDimensionsPreflight presetDraft = model.Preflight.ShouldNotBeNull();
+        presetDraft.RequiresEnlargement.ShouldBeTrue();
+        presetDraft.EnlargementOfferId.ShouldBeNull();
         await model.SetMaximumBoundsCommand.ExecuteAsync(null);
-        model.Preflight.ShouldBe(presetDraft);
+        PrintDimensionsPreflight confirmed = model.Preflight.ShouldNotBeNull();
+        confirmed.EnlargementOfferId.ShouldNotBeNull();
+        (confirmed with { EnlargementOfferId = null }).ShouldBe(presetDraft);
         model.IsDraftPreflight.ShouldBeFalse();
     }
 

@@ -21,6 +21,8 @@ namespace PrintFlow.Infrastructure.Adapters.Meitu;
 /// </remarks>
 public static class MeituEnhancementOutputRule
 {
+    internal const string ShrunkOutputMessageKey = "Failure_MeituEnhancementShrunkOutput";
+
     /// <summary>
     /// Decides whether <paramref name="output"/> is an acceptable Enhancement result for
     /// <paramref name="source"/>.
@@ -95,7 +97,8 @@ public static class MeituEnhancementOutputRule
                 {
                     ["sourcePixels"] = $"{source.PixelWidth}x{source.PixelHeight}",
                     ["outputPixels"] = $"{output.PixelWidth}x{output.PixelHeight}",
-                }));
+                },
+                messageKey: ShrunkOutputMessageKey));
         }
 
         return OperationResult.Ok();

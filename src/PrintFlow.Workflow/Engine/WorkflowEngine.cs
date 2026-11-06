@@ -1386,18 +1386,10 @@ public sealed class WorkflowEngine : IWorkflowEngine
     /// preset (Epic 11400 Part B1A.2D §3, §15, §17).
     /// </summary>
     /// <remarks>
-    /// The engine decides legality and stamps the reading; it cannot decide the millimetres,
-    /// because a snapshot carries neither the verified preset nor the source's pixels. So the
-    /// state it produces deliberately leaves <see cref="WorkflowSnapshot.Dimensions"/>,
-    /// <see cref="WorkflowSnapshot.SizeSelection"/> and
-    /// <see cref="WorkflowSnapshot.PrintPreparationPlan"/> for <c>SessionService</c> to attach in
-    /// the same act — the arrangement <see cref="SetPrintDimensions"/> already uses for the plan
-    /// (§17).
-    /// <para>
-    /// Ordinary preset use stays exactly what the accepted B1A.1 contract made it: the
-    /// recommendation becomes a fit box and <c>FitWithinBounds</c> selects the single edge.
-    /// <c>ScaleToTargetEdge</c> is never called for it (§17).
-    /// </para>
+    /// The engine decides legality and clears the previous sizing decision. SessionService
+    /// attaches the dimensions and plan from the verified preset and source pixels in the same
+    /// transaction. A preset that requires enlargement uses a target-edge plan and a separate
+    /// enlargement confirmation.
     /// </remarks>
     private static WorkflowTransition SetPresetFitSize(
         WorkflowSnapshot state, WorkflowCommand.SetPresetFitSize command, CommandContext context)
@@ -1428,9 +1420,7 @@ public sealed class WorkflowEngine : IWorkflowEngine
         return WorkflowTransition.Accepted(
             state.WithStep(confirmed) with
             {
-                // Ordinary preset use is a maximum-bound decision, so it is recorded under the
-                // reading it is made under. TargetEdgeV1 is what a custom edge produces, and the
-                // two are never interchangeable (§5).
+                // SessionService supplies the final semantics with the computed plan.
                 DimensionSemantics = PrintDimensionSemantics.MaxBoundsV1,
                 Dimensions = null,
                 SizeSelection = null,

@@ -117,7 +117,8 @@ public sealed partial class SessionViewModel
 
     private bool HasPageDraft() => _cleanDraft is { } clean && CapturePageDraft().Signature != clean.Signature ||
         IsCropping || IsAdjustingTrim || IsAskingColleague ||
-        SelectedSave is { NavigationDraft: not null } save && (save.NameEdited || save.FolderEdited);
+        SelectedSave is { } save && (save.RenameDraft is not null ||
+            save.NavigationDraft is not null && (save.NameEdited || save.FolderEdited));
 
     [RelayCommand]
     private void KeepDraft()
@@ -135,14 +136,18 @@ public sealed partial class SessionViewModel
         _cleanDraft?.Restore();
         ClearCropState();
         if (IsAskingColleague) CancelAskColleague();
-        if (SelectedSave is { } save && save.NavigationDraft is { } draft)
+        if (SelectedSave is { } save && (save.CopyDraft || save.RenameDraft is not null))
         {
-            save.FileName = draft.Name;
-            save.Folder = draft.Folder;
-            save.NameEdited = false;
-            save.FolderEdited = false;
-            save.NavigationDraft = null;
-            save.Generation++;
+            CancelSaveEdit();
+        }
+        else if (SelectedSave is { } normalSave && normalSave.NavigationDraft is { } draft)
+        {
+            normalSave.FileName = draft.Name;
+            normalSave.Folder = draft.Folder;
+            normalSave.NameEdited = false;
+            normalSave.FolderEdited = false;
+            normalSave.NavigationDraft = null;
+            normalSave.Generation++;
             NotifyFinalSaveChanged();
         }
         await intent.Continue(cancellationToken).ConfigureAwait(true);

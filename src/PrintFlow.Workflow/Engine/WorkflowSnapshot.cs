@@ -245,6 +245,10 @@ public sealed record WorkflowSnapshot(
         SizeSelection is not { Mode: OperatorSizingMode.PresetFit, Recommendation: { } held } ||
         ConfiguredRecommendations?.For(held.Preset) == held;
 
+    internal bool IsPresetTarget =>
+        DimensionSemantics == PrintDimensionSemantics.TargetEdgeV1 &&
+        Dimensions is { Preset: not SizePreset.Custom };
+
     /// <summary>
     /// The operator's current size decision in the flexible-size vocabulary
     /// (Epic 11400 Part B1A.2D §6).
@@ -305,6 +309,14 @@ public sealed record WorkflowSnapshot(
             if (DimensionSemantics != PrintDimensionSemantics.TargetEdgeV1 ||
                 TargetEdgePlan is not { } plan ||
                 UpstreamResultOf(StepKind.PhotoshopOutput) is not { } upstream)
+            {
+                return null;
+            }
+
+            if (IsPresetTarget &&
+                (plan.Selection.Recommendation is not { } recommendation ||
+                 recommendation.Preset != Dimensions!.Value.Preset ||
+                 ConfiguredRecommendations?.For(recommendation.Preset) != recommendation))
             {
                 return null;
             }

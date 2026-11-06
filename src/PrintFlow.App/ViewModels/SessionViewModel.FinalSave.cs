@@ -93,6 +93,9 @@ internal sealed class FinalSaveTarget
     public bool FolderEdited { get; set; }
     public bool FolderFromPreference { get; set; }
     public (string Name, string Folder)? NavigationDraft { get; set; }
+    public bool CopyDraft { get; set; }
+    public string? RenameDraft { get; set; }
+    public string? RenameError { get; set; }
 
     public DeliveryOffer? Offer { get; set; }
     public ArtifactRefusal Refusal { get; set; } = ArtifactRefusal.None;
@@ -211,13 +214,14 @@ public partial class SessionViewModel
         set
         {
             // A list rebuild can make a selector write back null; that is not a choice.
-            if (value is null || SelectedSave is not { } target || !SaveDisplay.IsEditable ||
+            if (value is null || SelectedSave is not { } target || !CanSelectFinalSaveRecord ||
                 value.DeliveryId == SelectedFinalSaveRecord?.DeliveryId) return;
             target.ShownDeliveryId = value.DeliveryId;
             // The last outcome on screen described another save.
             target.Fact = null;
             target.LastOpen = null;
             target.ActionError = null;
+            target.RenameError = null;
             AdoptRecordedDraft(target);
             NotifyFinalSaveChanged();
         }
@@ -255,7 +259,8 @@ public partial class SessionViewModel
     public string SaveFolderLabel => Strings.FinalSave_FolderLabel;
     public string ChangeLocationLabel => Strings.FinalSave_ChangeLocation;
     public string ConfirmAndSaveLabel => Strings.FinalSave_ConfirmAndSave;
-    public string SaveApprovedLabel => SaveDisplay.IsRetry ? Strings.FinalSave_RetrySave : Strings.FinalSave_SaveApproved;
+    public string SaveApprovedLabel => SaveDisplay.IsRetry ? Strings.FinalSave_RetrySave :
+        SelectedSave?.CopyDraft == true ? Strings.FinalSave_SaveAnotherCopy : Strings.FinalSave_SaveApproved;
     public string RetryRecordedLabel => Strings.FinalSave_RetrySave;
     public string CheckAgainLabel => Strings.FinalSave_CheckAgain;
     public string CheckSavedLabel => Strings.FinalSave_CheckSaved;
@@ -271,7 +276,8 @@ public partial class SessionViewModel
     /// <summary>Operator-entered external filename; editing never renames the managed file or OutputName.</summary>
     public string SaveFileNameText
     {
-        get => SelectedSave?.FileName ?? string.Empty;
+        get => SelectedSave is { CopyDraft: false } && SaveDisplay.SavedPath is { } saved
+            ? DeliveryDraftText.FileNameOf(saved) : SelectedSave?.FileName ?? string.Empty;
         set
         {
             if (SelectedSave is not { } target || !SaveDisplay.IsEditable || value == target.FileName) return;
@@ -283,15 +289,17 @@ public partial class SessionViewModel
         }
     }
 
-    public string SaveFolderText => SelectedSave is { Folder.Length: > 0 } target ? target.Folder : Strings.FinalSave_NoFolderValue;
+    public string SaveFolderText => SelectedSave is { CopyDraft: false } && SaveDisplay.SavedPath is { } saved
+        ? DeliveryDraftText.FolderOf(saved)
+        : SelectedSave is { Folder.Length: > 0 } target ? target.Folder : Strings.FinalSave_NoFolderValue;
     public string SaveSummary => SelectedSave is { } target ? Summary(target) : string.Empty;
     /// <summary>An ineligible result or an unfinished PNG preparation offers no draft to edit.</summary>
     public bool ShowsSaveDraft => HasFinalSave && SaveDisplay.Kind is not (FinalSaveKind.Ineligible or FinalSaveKind.PngPreparation);
     public string SaveDraftNotice => ShowsSaveDraft && SelectedSave is { } target ? DraftNotice(target) : string.Empty;
     public bool HasSaveDraftNotice => SaveDraftNotice.Length > 0;
     public string FinalSaveStatus => SaveDisplay.Status;
-    public string FinalSaveAlert => SaveDisplay.Alert ?? string.Empty;
-    public bool HasFinalSaveAlert => SaveDisplay.Alert is { Length: > 0 };
+    public string FinalSaveAlert => JoinLines(SaveDisplay.Alert, SelectedSave?.RenameError) ?? string.Empty;
+    public bool HasFinalSaveAlert => FinalSaveAlert.Length > 0;
     public string FinalSaveSecondary => SaveDisplay.Secondary ?? string.Empty;
     public bool HasFinalSaveSecondary => SaveDisplay.Secondary is { Length: > 0 };
     public string FinalSaveSavedPath => SaveDisplay.SavedPath ?? string.Empty;
@@ -301,6 +309,8 @@ public partial class SessionViewModel
     public string FinalSaveOpenNotice => SelectedSave?.LastOpen is { } open ? OpenNotice(open) : string.Empty;
     public bool HasFinalSaveOpenNotice => FinalSaveOpenNotice.Length > 0;
     public bool IsSaveDraftEditable => SaveDisplay.IsEditable;
+    public bool CanSelectSaveResult => CanInteractWithLivePage && !IsAdjustingTrim && !IsBusy && _finalSaveOperation is null;
+    public bool CanSelectFinalSaveRecord => CanSelectSaveResult && SelectedSave is { CopyDraft: false, RenameDraft: null };
     public bool IsFinalSaveWorking => SaveDisplay.Kind == FinalSaveKind.Working;
     public double FinalSaveProgress => SaveDisplay.Progress ?? 0;
     public bool HasFinalSaveProgress => SaveDisplay.Progress is not null;
@@ -314,6 +324,46 @@ public partial class SessionViewModel
     public bool CanUseSuggestedName => SaveDisplay.Suggestion is not null && SaveDisplay.IsEditable;
     public bool CanCancelSave => SaveDisplay.CanCancel;
     public bool CanChangeLocation => SaveDisplay.IsEditable && _folderPicker is not null;
+    public string RenameSavedLabel => Strings.FinalSave_RenameSaved;
+    public string ApplyRenameLabel => Strings.FinalSave_ApplyRename;
+    public string CancelSaveEditLabel => Strings.FinalSave_CancelEdit;
+    public bool ShowsRenameDraft => SelectedSave?.RenameDraft is not null;
+    public bool CanEditRename => ShowsRenameDraft && CanInteractWithLivePage && !IsAdjustingTrim && !IsBusy && !IsFinalSaveWorking;
+    public bool ShowsCopyDraft => SelectedSave?.CopyDraft == true;
+    public bool CanBeginCopy => CanEditSavedDelivery && SelectedSave?.Offer is not null &&
+        SaveDisplay.Kind is FinalSaveKind.Saved or FinalSaveKind.SavedPreviously or FinalSaveKind.Changed or FinalSaveKind.Unavailable;
+    public bool CanBeginRename => CanEditSavedDelivery && SaveDisplay.Kind is FinalSaveKind.Saved or FinalSaveKind.SavedPreviously;
+    private bool CanEditSavedDelivery => CanInteractWithLivePage && !IsAdjustingTrim && !IsBusy && !ShowsCopyDraft &&
+        !ShowsRenameDraft && SaveDisplay.DeliveryId is { } id &&
+        SelectedSave?.History?.FirstOrDefault(state => state.DeliveryId == id)?.PendingRenameFileName is null;
+
+    public string RenameFileNameText
+    {
+        get => SelectedSave?.RenameDraft ?? string.Empty;
+        set
+        {
+            if (!CanEditRename || SelectedSave is not { } target || target.RenameDraft == value) return;
+            target.RenameDraft = value ?? string.Empty;
+            target.RenameError = null;
+            target.Generation++;
+            NotifyFinalSaveChanged();
+        }
+    }
+
+    public string RenameDraftNotice
+    {
+        get
+        {
+            if (SelectedSave is not { RenameDraft: { } draft } target) return string.Empty;
+            (_, string? problem, string? notice) = EffectiveName(draft, target.Kind);
+            return problem ?? notice ?? string.Empty;
+        }
+    }
+    public bool CanApplyRename => CanEditRename && SaveDisplay.SavedPath is { } path &&
+        SelectedSave is { RenameDraft: { } draft } target && EffectiveName(draft, target.Kind).Effective is { } name &&
+        name != DeliveryDraftText.FileNameOf(path);
+    public string? RenameIdentity => CanApplyRename && SelectedSave is { } target
+        ? $"{RecordedActionIdentity}|{target.Generation}" : null;
 
     /// <summary>True when the section shows an approved result that is not in the operator's folder.</summary>
     internal bool IsFinalSaveUnsaved => HasFinalSave &&
@@ -468,6 +518,8 @@ public partial class SessionViewModel
         target.HistoryStale = false;
         target.ShownDeliveryId = null;
         target.LastOpen = null;
+        target.CopyDraft = false;
+        target.RenameDraft = target.RenameError = null;
         if (!keepDelivery || target.Fact is not DeliveryFact)
         {
             target.Fact = null;
@@ -614,8 +666,62 @@ public partial class SessionViewModel
     {
         if (!CanCheckSavedFile || _finalSave is null || SelectedSave is not { } target || SaveDisplay.DeliveryId is not { } deliveryId ||
             _finalSaveOperation is not null || IsBusy) return;
+        target.RenameError = null;
         await RunDeliveryStepAsync(target, null, true, async _ =>
             new ObservationFact(await _finalSave.CheckAsync(deliveryId, CancellationToken.None).ConfigureAwait(false))).ConfigureAwait(true);
+    }
+
+    [RelayCommand]
+    private void BeginCopy()
+    {
+        if (!CanBeginCopy || SelectedSave is not { } target) return;
+        target.FileName = SaveFileNameText;
+        target.Folder = SaveFolderText;
+        target.NavigationDraft = (target.FileName, target.Folder);
+        target.CopyDraft = true;
+        target.RenameError = null;
+        target.Generation++;
+        NotifyFinalSaveChanged();
+    }
+
+    [RelayCommand]
+    private void BeginRename()
+    {
+        if (!CanBeginRename || SelectedSave is not { } target) return;
+        target.RenameDraft = SaveFileNameText;
+        target.RenameError = null;
+        NotifyFinalSaveChanged();
+    }
+
+    [RelayCommand]
+    private void CancelSaveEdit()
+    {
+        if (!CanInteractWithLivePage || IsAdjustingTrim || IsBusy || IsFinalSaveWorking || SelectedSave is not { } target) return;
+        target.RenameDraft = null;
+        target.RenameError = null;
+        if (target.CopyDraft)
+        {
+            if (target.NavigationDraft is { } original) (target.FileName, target.Folder) = original;
+            target.CopyDraft = false;
+            target.NavigationDraft = null;
+            target.Captured = null;
+            target.NameEdited = target.FolderEdited = false;
+            target.Fact = null;
+            target.ActionError = null;
+        }
+        target.Generation++;
+        NotifyFinalSaveChanged();
+    }
+
+    [RelayCommand]
+    private async Task ApplyRenameAsync()
+    {
+        if (!CanApplyRename || _finalSave is null || SelectedSave is not { RenameDraft: { } draft } target ||
+            SaveDisplay is not { DeliveryId: { } id, SavedPath: { } path } ||
+            EffectiveName(draft, target.Kind).Effective is not { } name) return;
+        await RunDeliveryStepAsync(target, null, true, async _ => new RenameFact(
+            await _finalSave.Delivery.RenameDeliveredAsync(id, path, name, CancellationToken.None).ConfigureAwait(false)))
+            .ConfigureAwait(true);
     }
 
     [RelayCommand]
@@ -804,8 +910,15 @@ public partial class SessionViewModel
         {
             object fact = await Task.Run(() => run(progress)).ConfigureAwait(true);
             if (!OwnsFinalSaveOperation(operation)) return;
-            target.Fact = fact;
-            if (target.Fact is DeliveryFact delivery) AcceptConfirmedSaveDraft(target, delivery.Outcome);
+            if (fact is RenameFact rename)
+            {
+                ApplyRenameFact(target, rename.Outcome);
+            }
+            else
+            {
+                target.Fact = fact;
+                if (fact is DeliveryFact delivery) AcceptConfirmedSaveDraft(target, delivery.Outcome);
+            }
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {
@@ -818,8 +931,28 @@ public partial class SessionViewModel
     }
 
     private sealed record DeliveryFact(DeliveryOutcome Outcome);
+    private sealed record RenameFact(DeliveryOutcome Outcome);
     private sealed record ObservationFact(DeliveryFileObservation Observation);
     private sealed record ApprovalFact(FinalSaveResult? Result, string? Error = null);
+
+    private static void ApplyRenameFact(FinalSaveTarget target, DeliveryOutcome outcome)
+    {
+        if (outcome.Code is DeliveryCode.Delivered or DeliveryCode.AlreadyDelivered && outcome.FinalPath is { } path)
+        {
+            target.RenameDraft = target.RenameError = null;
+            target.FileName = DeliveryDraftText.FileNameOf(path);
+            target.Fact = new DeliveryFact(outcome);
+            target.LastOpen = null;
+            return;
+        }
+        target.RenameError = outcome.Code switch
+        {
+            DeliveryCode.Collision => Strings.FinalSave_RenameCollision,
+            DeliveryCode.NeedsReconciliation => Strings.FinalSave_RenameNeedsCheck,
+            _ => Strings.FinalSave_RenameFailed,
+        };
+        if (outcome.Code == DeliveryCode.NeedsReconciliation) target.RenameDraft = null;
+    }
 
     private static void AcceptConfirmedSaveDraft(FinalSaveTarget target, DeliveryOutcome? outcome)
     {
@@ -829,6 +962,7 @@ public partial class SessionViewModel
             captured.FileName != EffectiveName(target.FileName, target.Kind).Effective) return;
         // The next edit starts from this confirmed intent. Retain its request and delivery facts.
         target.NavigationDraft = null;
+        target.CopyDraft = false;
         target.NameEdited = false;
         target.FolderEdited = false;
     }
@@ -875,6 +1009,9 @@ public partial class SessionViewModel
             _ => FromHistory(target),
         };
         if (display.Kind == FinalSaveKind.Ineligible) return display;
+        DeliveryState? record = target.History?.FirstOrDefault(state => state.DeliveryId == display.DeliveryId);
+        bool lockedSaved = record?.PendingRenameFileName is not null || !target.CopyDraft &&
+            (record?.Status == "Delivered" || display.Kind is FinalSaveKind.Saved or FinalSaveKind.SavedPreviously);
 
         // Re-saving the recorded name and folder adds nothing (the backend would coalesce it), so
         // the ordinary save is offered only for a changed draft, a failed intent's retry (same
@@ -903,9 +1040,9 @@ public partial class SessionViewModel
         {
             Alert = JoinLines(display.Alert, ActionIncomplete(target)),
             Secondary = secondary.Count == 0 ? null : string.Join(Environment.NewLine, secondary),
-            IsEditable = idle,
+            IsEditable = idle && !lockedSaved,
             IsRetry = display.Kind == FinalSaveKind.Failed && unchangedIntent,
-            CanSaveApproved = canSave && offerSave,
+            CanSaveApproved = canSave && offerSave && !lockedSaved,
             CanRetryRecorded = idle && display.CanRetryRecorded,
             CanCheckAgain = idle && display.CanCheckAgain,
             CanCheckSaved = idle && display.CanCheckSaved,
@@ -1046,7 +1183,8 @@ public partial class SessionViewModel
             {
                 Kind = FinalSaveKind.SavedPreviously, Details = details, DeliveryId = shown.DeliveryId, SavedPath = shown.FinalPath,
                 Status = Format(Strings.FinalSave_SavedPreviously, DeliveryDraftText.FileNameOf(shown.FinalPath), shown.RequestedFolder),
-                CanCheckSaved = true, CanOpen = true,
+                Alert = shown.PendingRenameFileName is null ? null : Strings.FinalSave_RenameNeedsCheck,
+                CanCheckSaved = true, CanOpen = shown.PendingRenameFileName is null,
             };
         // Only a durable ready checkpoint can have been published; earlier attempts cannot have
         // produced a final file, so they are offered as an ordinary retry at the recorded place.
@@ -1170,7 +1308,7 @@ public partial class SessionViewModel
 
     private string Summary(FinalSaveTarget target)
     {
-        string name = EffectiveName(target.FileName, target.Kind).Effective ?? target.FileName;
+        string name = EffectiveName(SaveFileNameText, target.Kind).Effective ?? SaveFileNameText;
         string type = target.Kind == ArtifactKind.ApprovedAssetPng ? Strings.FinalSave_TypePng
             : TiffMillimetres(target) is { } size ? Format(Strings.FinalSave_TypeTiff, size.Width, size.Height)
             : Strings.FinalSave_TypeTiffSizePending;
@@ -1188,6 +1326,7 @@ public partial class SessionViewModel
 
     private string DraftNotice(FinalSaveTarget target)
     {
+        if (!target.CopyDraft && SaveDisplay.SavedPath is not null) return string.Empty;
         (string? effective, string? problem, string? notice) = EffectiveName(target.FileName, target.Kind);
         List<string> lines = [];
         if (problem is not null) lines.Add(problem);
@@ -1243,6 +1382,10 @@ public partial class SessionViewModel
         nameof(CanCheckSavedFile), nameof(CanOpenContainingFolder), nameof(CanSaveAnotherCopy), nameof(CanUseSuggestedName),
         nameof(UseSuggestionLabel), nameof(CanCancelSave), nameof(CanChangeLocation), nameof(ConfirmAndSaveIdentity),
         nameof(SaveApprovedIdentity), nameof(RecordedActionIdentity), nameof(HasFinalSaveRecords), nameof(SelectedFinalSaveRecord),
+        nameof(RenameSavedLabel), nameof(ApplyRenameLabel), nameof(CancelSaveEditLabel), nameof(ShowsRenameDraft),
+        nameof(CanEditRename), nameof(ShowsCopyDraft), nameof(CanBeginCopy), nameof(CanBeginRename),
+        nameof(RenameFileNameText), nameof(RenameDraftNotice), nameof(CanApplyRename), nameof(RenameIdentity),
+        nameof(CanSelectSaveResult), nameof(CanSelectFinalSaveRecord),
     ];
 
     /// <summary>Row objects are kept per DeliveryId; the list changes only when the records do.</summary>

@@ -78,9 +78,9 @@ internal static class WindowsDeliveryNative
         catch { handle.Dispose(); throw; }
     }
 
-    internal static SafeFileHandle OpenFinal(string path, bool stagedHandleIsHeld)
+    internal static SafeFileHandle OpenFinal(string path, bool stagedHandleIsHeld, bool forRename = false)
     {
-        SafeFileHandle handle = NativeMethods.CreateFileW(path, GenericRead,
+        SafeFileHandle handle = NativeMethods.CreateFileW(path, GenericRead | (forRename ? DeleteAccess : 0),
             stagedHandleIsHeld ? ShareRead | ShareWrite | ShareDelete : ShareRead,
             0, OpenExisting, OpenReparsePoint, 0);
         if (handle.IsInvalid) throw Error("Open final destination");

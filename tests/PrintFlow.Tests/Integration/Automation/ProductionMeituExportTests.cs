@@ -869,14 +869,21 @@ public sealed class ProductionMeituExportTests : IDisposable
     }
 
     [Fact]
-    public async Task An_export_smaller_than_its_working_copy_fails()
+    public async Task A_shrunk_enhancement_is_rejected_and_releases_its_document()
     {
         Scenario s = Build(ExportProduces.ShrunkPng);
 
         OperationResult<AdapterOutput> result = await ProcessAsync(s);
 
         result.IsFailure.ShouldBeTrue();
+        result.Failure.Code.ShouldBe(FailureCode.OutputUnreadable);
         result.Failure.Context["outputPixels"].ShouldBe("160x120");
+        s.Invocations(ResultCloseId).ShouldBe(1);
+        s.Invocations("MainWindow.editorPage.closeButton").ShouldBe(1);
+        OperationResult<MeituReadiness> next = await s.Adapter.EnsureReadyAsync(CancellationToken.None);
+        next.IsSuccess.ShouldBeTrue(next.IsFailure ? next.Failure.TechnicalDetail : "");
+        next.Value.State.State.ShouldBe(MeituStartingState.KnownEditorEmpty);
+        result.Failure.MessageKey.ShouldBe("Failure_MeituEnhancementShrunkOutput");
     }
 
     // -----------------------------------------------------------------------------

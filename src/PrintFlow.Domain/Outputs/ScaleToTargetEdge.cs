@@ -122,16 +122,17 @@ public static class ScaleToTargetEdge
                 nameof(selectedTargetEdge), selectedTargetEdge, "Unknown target edge."),
         };
 
-        int requestedPixels = MillimetresToPixels(requestedMillimetres);
+        int requestedPixels = ValidatePixelCount(
+            RoundedPixelsFromMillimetres(requestedMillimetres),
+            "The requested millimetres exceed the supported pixel range.");
         int sourceAuthoritativePixels = photoshopEdge == LimitingEdge.Width
             ? sourcePixelWidth
             : sourcePixelHeight;
         int sourceOtherPixels = photoshopEdge == LimitingEdge.Width
             ? sourcePixelHeight
             : sourcePixelWidth;
-        int derivedOtherPixels = RoundPositiveRational(
-            (BigInteger)sourceOtherPixels * requestedPixels,
-            sourceAuthoritativePixels,
+        int derivedOtherPixels = ValidatePixelCount(
+            RoundRational((BigInteger)sourceOtherPixels * requestedPixels, sourceAuthoritativePixels),
             "The proportional target edge exceeds the supported pixel range.");
 
         int projectedWidth = photoshopEdge == LimitingEdge.Width
@@ -166,13 +167,10 @@ public static class ScaleToTargetEdge
             policy);
     }
 
-    private static int MillimetresToPixels(decimal millimetres)
+    internal static BigInteger RoundedPixelsFromMillimetres(decimal millimetres)
     {
         (BigInteger numerator, BigInteger denominator) = DecimalRational(millimetres);
-        return RoundPositiveRational(
-            numerator * 1500,
-            denominator * 127,
-            "The requested millimetres exceed the supported pixel range.");
+        return RoundRational(numerator * 1500, denominator * 127);
     }
 
     private static (BigInteger Numerator, BigInteger Denominator) DecimalRational(decimal value)
@@ -186,27 +184,26 @@ public static class ScaleToTargetEdge
         return (numerator, BigInteger.Pow(10, scale));
     }
 
-    private static int RoundPositiveRational(
-        BigInteger numerator, BigInteger denominator, string overflowMessage)
+    private static BigInteger RoundRational(BigInteger numerator, BigInteger denominator)
     {
         BigInteger quotient = BigInteger.DivRem(numerator, denominator, out BigInteger remainder);
-        if (remainder * 2 >= denominator)
-        {
-            quotient += BigInteger.One;
-        }
+        return remainder * 2 >= denominator ? quotient + BigInteger.One : quotient;
+    }
 
-        if (quotient < BigInteger.One)
+    private static int ValidatePixelCount(BigInteger pixels, string overflowMessage)
+    {
+        if (pixels < BigInteger.One)
         {
             throw new ArgumentOutOfRangeException(
-                nameof(numerator), "The requested size rounds below one pixel.");
+                nameof(pixels), "The requested size rounds below one pixel.");
         }
 
-        if (quotient > int.MaxValue)
+        if (pixels > int.MaxValue)
         {
-            throw new ArgumentOutOfRangeException(nameof(numerator), overflowMessage);
+            throw new ArgumentOutOfRangeException(nameof(pixels), overflowMessage);
         }
 
-        return (int)quotient;
+        return (int)pixels;
     }
 
     private static void Positive(int pixels, string parameterName)

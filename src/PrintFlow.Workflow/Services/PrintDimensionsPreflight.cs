@@ -40,8 +40,8 @@ public enum PrintSizeGovernor
     WithinLimits,
 
     /// <summary>
-    /// Maximum bounds the source exceeds: <see cref="PrintDimensionsPreflight.GoverningEdge"/> is
-    /// the edge the plan limits to its bound, and the other edge follows proportionally.
+    /// <see cref="PrintDimensionsPreflight.GoverningEdge"/> reaches its bound, and the other
+    /// edge follows proportionally.
     /// </summary>
     LimitReached,
 

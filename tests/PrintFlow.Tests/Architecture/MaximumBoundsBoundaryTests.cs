@@ -628,7 +628,8 @@ public sealed class MaximumBoundsBoundaryTests
         // Recognition modes add nullable session/attempt audit columns, preserving legacy rows.
         scripts.ShouldContain("0019_correction_request.sql");
         scripts.ShouldContain("0020_background_removal_mode.sql");
-        scripts.Last().ShouldBe("0021_trim_noise_policy.sql");
+        scripts.ShouldContain("0021_trim_noise_policy.sql");
+        scripts.Last().ShouldBe("0022_delivery_rename.sql");
     }
 
     // -------------------------------------------------------------------------------------

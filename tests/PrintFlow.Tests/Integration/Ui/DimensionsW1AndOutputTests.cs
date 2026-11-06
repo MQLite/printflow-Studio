@@ -149,8 +149,9 @@ public sealed class DimensionsW1AndOutputTests
 
         PrintDimensions stored = (await open.ReloadAsync()).Session.Dimensions.ShouldNotBeNull();
         stored.WidthMm.ShouldBe(280);
-        stored.HeightMm.ShouldBe(280);
+        stored.HeightMm.ShouldBeLessThan(stored.WidthMm);
         stored.Preset.ShouldBe(SizePreset.A4);
+        screen.NeedsEnlargementAuthority.ShouldBeTrue();
     }
 
     /// <summary>

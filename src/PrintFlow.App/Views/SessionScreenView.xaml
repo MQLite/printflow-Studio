@@ -103,6 +103,41 @@
 
 
 
+        <DataTemplate x:Key="SavedFileActionsTemplate">
+            <StackPanel>
+                <WrapPanel Margin="0,6,0,0">
+                    <local:SessionActionButton Content="{Binding RenameSavedLabel}" Command="{Binding BeginRenameCommand}"
+                            AutomationProperties.AutomationId="Session.FinalSave.BeginRename"
+                            AutomationProperties.Name="{Binding RenameSavedLabel}"
+                            Visibility="{Binding CanBeginRename, Converter={StaticResource BoolToVisibility}}" />
+                    <local:SessionActionButton Content="{Binding SaveAnotherCopyLabel}" Command="{Binding BeginCopyCommand}"
+                            AutomationProperties.AutomationId="Session.FinalSave.BeginCopy"
+                            AutomationProperties.Name="{Binding SaveAnotherCopyLabel}"
+                            Visibility="{Binding CanBeginCopy, Converter={StaticResource BoolToVisibility}}" />
+                    <local:SessionActionButton Content="{Binding CancelSaveEditLabel}" Command="{Binding CancelSaveEditCommand}"
+                            AutomationProperties.Name="{Binding CancelSaveEditLabel}"
+                            IsEnabled="{Binding IsSaveDraftEditable}"
+                            Visibility="{Binding ShowsCopyDraft, Converter={StaticResource BoolToVisibility}}" />
+                </WrapPanel>
+                <StackPanel Margin="0,6,0,0" Visibility="{Binding ShowsRenameDraft, Converter={StaticResource BoolToVisibility}}">
+                    <TextBlock Text="{Binding SaveFileNameLabel}" Style="{StaticResource MetadataLabel}" />
+                    <local:SessionTextBox Text="{Binding RenameFileNameText, UpdateSourceTrigger=PropertyChanged}"
+                            IsEnabled="{Binding CanEditRename}" AutomationProperties.Name="{Binding SaveFileNameLabel}"
+                            AutomationProperties.AutomationId="Session.FinalSave.RenameFileName" />
+                    <TextBlock Text="{Binding RenameDraftNotice}" TextWrapping="Wrap" />
+                    <WrapPanel>
+                        <local:ReviewApprovalButton Content="{Binding ApplyRenameLabel}" Command="{Binding ApplyRenameCommand}"
+                                TargetIdentity="{Binding RenameIdentity}" IsEnabled="{Binding CanApplyRename}"
+                                AutomationProperties.Name="{Binding ApplyRenameLabel}"
+                                AutomationProperties.AutomationId="Session.FinalSave.ApplyRename" />
+                        <local:SessionActionButton Content="{Binding CancelSaveEditLabel}" Command="{Binding CancelSaveEditCommand}"
+                                AutomationProperties.Name="{Binding CancelSaveEditLabel}"
+                                IsEnabled="{Binding CanEditRename}" />
+                    </WrapPanel>
+                </StackPanel>
+            </StackPanel>
+        </DataTemplate>
+
         <!-- Final review and save section (SCRUM-11145); instantiated only while it applies. -->
         <DataTemplate x:Key="FinalSaveTemplate">
             <Border BorderBrush="{DynamicResource PF.Brush.Border}" Background="{DynamicResource PF.Brush.Surface}" BorderThickness="1" CornerRadius="10" Padding="16" Margin="0,0,0,14"
@@ -130,7 +165,7 @@
                         <local:SessionComboBox ItemsSource="{Binding FinalSaveTargets}"
                                   SelectedItem="{Binding SelectedFinalSaveTarget, Mode=TwoWay}"
                                   TextSearch.TextPath="Label" HorizontalContentAlignment="Stretch"
-                                  IsEnabled="{Binding IsSaveDraftEditable}"
+                                  IsEnabled="{Binding CanSelectSaveResult}"
                                   AutomationProperties.AutomationId="Session.FinalSave.Target"
                                   AutomationProperties.Name="{Binding FinalSaveTargetLabel}">
                             <local:SessionComboBox.ItemTemplate>
@@ -160,7 +195,7 @@
                                   SelectedItem="{Binding SelectedFinalSaveRecord, Mode=TwoWay}"
                                   HorizontalContentAlignment="Stretch"
                                   TextSearch.TextPath="Label"
-                                  IsEnabled="{Binding IsSaveDraftEditable}"
+                                  IsEnabled="{Binding CanSelectFinalSaveRecord}"
                                   AutomationProperties.AutomationId="Session.FinalSave.Record"
                                   AutomationProperties.Name="{Binding FinalSaveRecordsLabel}">
                             <local:SessionComboBox.ItemTemplate>
@@ -212,6 +247,7 @@
                                  AutomationProperties.Name="{Binding SavedPathLabel}" />
                     </StackPanel>
 
+                    <ContentControl Content="{Binding}" ContentTemplate="{StaticResource SavedFileActionsTemplate}" Focusable="False" IsTabStop="False" />
                     <WrapPanel Margin="0,10,0,0">
                         <WrapPanel.Resources>
                             <Style TargetType="Button" BasedOn="{StaticResource RecommendedAction}">
@@ -281,7 +317,7 @@
                         <local:SessionComboBox ItemsSource="{Binding FinalSaveTargets}"
                                   SelectedItem="{Binding SelectedFinalSaveTarget, Mode=TwoWay}"
                                   TextSearch.TextPath="Label" HorizontalContentAlignment="Stretch"
-                                  IsEnabled="{Binding IsSaveDraftEditable}"
+                                  IsEnabled="{Binding CanSelectSaveResult}"
                                   AutomationProperties.AutomationId="Session.FinalSave.Target"
                                   AutomationProperties.Name="{Binding FinalSaveTargetLabel}">
                             <local:SessionComboBox.ItemTemplate>
@@ -313,7 +349,7 @@
                                   SelectedItem="{Binding SelectedFinalSaveRecord, Mode=TwoWay}"
                                   HorizontalContentAlignment="Stretch"
                                   TextSearch.TextPath="Label"
-                                  IsEnabled="{Binding IsSaveDraftEditable}"
+                                  IsEnabled="{Binding CanSelectFinalSaveRecord}"
                                   AutomationProperties.AutomationId="Session.FinalSave.Record"
                                   AutomationProperties.Name="{Binding FinalSaveRecordsLabel}">
                             <local:SessionComboBox.ItemTemplate>
@@ -371,6 +407,7 @@
                                  AutomationProperties.Name="{Binding SavedPathLabel}" />
                     </StackPanel>
 
+                    <ContentControl Content="{Binding}" ContentTemplate="{StaticResource SavedFileActionsTemplate}" Focusable="False" IsTabStop="False" />
                     <WrapPanel Margin="0,10,0,0">
                         <WrapPanel.Resources>
                             <Style TargetType="Button" BasedOn="{StaticResource RecommendedAction}">

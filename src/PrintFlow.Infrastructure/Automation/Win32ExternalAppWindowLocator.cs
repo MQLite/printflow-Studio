@@ -111,6 +111,7 @@ public sealed class Win32ExternalAppWindowLocator : IExternalAppWindowLocator
                     $"Starting '{executableAbsolutePath}' returned no process.");
             }
 
+            ExternalAppFocusHandoff.TrackProcess(started.Id);
             string modulePath = TryReadMainModulePath(started) ?? executableAbsolutePath;
             return OperationResult.Ok(
                 new ExternalProcessRef(started.Id, modulePath, started.StartTime.ToUniversalTime()));
@@ -218,6 +219,7 @@ public sealed class Win32ExternalAppWindowLocator : IExternalAppWindowLocator
                 FailureCode.MeituTargetLost, $"Window {window.Handle} no longer exists.");
         }
 
+        ExternalAppFocusHandoff.TrackProcess(window.OwningProcessId);
         if (NativeMethods.IsIconic(window.Handle.Value))
         {
             NativeMethods.ShowWindow(window.Handle.Value, NativeMethods.SW_RESTORE);

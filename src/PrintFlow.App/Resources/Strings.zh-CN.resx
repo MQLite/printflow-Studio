@@ -250,6 +250,9 @@
   <data name="Failure_OutputUnreadable" xml:space="preserve">
     <value>PrintFlow 所需的文件存在，但无法完整读取，因此未被使用。PrintFlow 不会更改你的原始文件。</value>
   </data>
+  <data name="Failure_MeituEnhancementShrunkOutput" xml:space="preserve">
+    <value>美图秀秀导出的高清图比原图小。PrintFlow 保留了原图供后续打印。</value>
+  </data>
   <data name="Failure_OutputValidationFailed" xml:space="preserve">
     <value>有文件未通过 PrintFlow 的检查，因此未被采用。PrintFlow 不会更改你的原始文件。</value>
   </data>
@@ -381,7 +384,7 @@
   <data name="Session_DimensionsNotSet" xml:space="preserve"><value>尚未设置</value></data>
   <data name="Session_PresetsLabel" xml:space="preserve"><value>预设尺寸</value></data>
   <data name="Session_PresetHint" xml:space="preserve">
-    <value>预设填入的是最大尺寸，确认前可以修改。图片保持原比例，由宽度或高度的上限决定是否缩小。</value>
+    <value>使用预设时，图片会保持原比例，调整到先达到上限的一边。需要放大时，须先确认。</value>
   </data>
   <data name="Session_SizeHeading" xml:space="preserve"><value>印刷尺寸</value></data>
   <data name="Session_UsePreset" xml:space="preserve"><value>使用预设</value></data>
@@ -1088,6 +1091,12 @@
   <data name="FinalSave_NameInvalid" xml:space="preserve"><value>请输入普通文件名，不能包含 \ / : * ? " &lt; &gt; |，也不能以点或空格结尾。</value></data>
   <data name="FinalSave_NameWrongType" xml:space="preserve"><value>此结果为 {0} 文件，文件名必须以 {1} 结尾。</value></data>
   <data name="FinalSave_ConfirmAndSave" xml:space="preserve"><value>确认结果并保存</value></data>
+  <data name="FinalSave_RenameSaved" xml:space="preserve"><value>重命名已保存文件</value></data>
+  <data name="FinalSave_ApplyRename" xml:space="preserve"><value>确认重命名</value></data>
+  <data name="FinalSave_CancelEdit" xml:space="preserve"><value>取消</value></data>
+  <data name="FinalSave_RenameCollision" xml:space="preserve"><value>此文件夹已有同名文件，请换一个名称。</value></data>
+  <data name="FinalSave_RenameFailed" xml:space="preserve"><value>无法核实或重命名文件，请先检查已保存的文件再试。</value></data>
+  <data name="FinalSave_RenameNeedsCheck" xml:space="preserve"><value>重命名结果待核实，请检查已保存的文件以确认当前名称。</value></data>
   <data name="FinalSave_SaveApproved" xml:space="preserve"><value>保存已审核结果</value></data>
   <data name="FinalSave_RetrySave" xml:space="preserve"><value>重试保存</value></data>
   <data name="FinalSave_CheckAgain" xml:space="preserve"><value>核实这次保存</value></data>
@@ -1262,7 +1271,7 @@
   <data name="Session_GuidanceHelpNoAdjustTrim" xml:space="preserve"><value>此结果无法调整裁切边缘。如有内容被裁掉，请选择“{0}”，之后可以重新尝试。</value></data>
   <data name="Session_GuidanceHelpTiff" xml:space="preserve"><value>不确定？请先请有经验的同事查看再决定。在 PrintFlow 之外修改的 TIFF 无法导入。</value></data>
   <data name="Session_GuidanceHelpTiffReturn" xml:space="preserve"><value>如需先修改印刷尺寸，请使用下方“{0}”。</value></data>
-  <data name="Session_SizeHelpPreset" xml:space="preserve"><value>需要标准尺寸时，选择预设。预设是尺寸上限，不是最终印刷尺寸。大图片会缩小到上限以内，小图片不会被放大；图片保持原比例。</value></data>
+  <data name="Session_SizeHelpPreset" xml:space="preserve"><value>选择预设后，图片会按原比例调整到先达到上限的一边。小图需要放大时，须先确认。</value></data>
   <data name="Session_SizeHelpCustom" xml:space="preserve"><value>某一边需要准确尺寸时，选择“{0}”。请选择“{1}”、“{2}”或“{3}”（图片较长的一边），再输入毫米数。另一边按原比例计算；需要放大时，仍须你单独授权。</value></data>
   <data name="Session_SizeSummaryDraft" xml:space="preserve"><value>按当前设置，整张图片（含透明边缘）的印刷尺寸预计约为 {0:0.0} × {1:0.0} 毫米。</value></data>
   <data name="Session_SizeSummaryCurrent" xml:space="preserve"><value>按已选尺寸，整张图片（含透明边缘）的印刷尺寸约为 {0:0.0} × {1:0.0} 毫米。</value></data>

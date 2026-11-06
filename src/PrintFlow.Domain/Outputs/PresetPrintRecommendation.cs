@@ -208,6 +208,25 @@ public sealed record PresetPrintRecommendation
         _ => throw new InvalidOperationException($"Unknown recommendation kind {Kind}."),
     };
 
+    /// <summary>Resolves the preset to an exact edge for the operator's enlargement offer.</summary>
+    public FlexibleSizeSelection SelectLimitTarget(int sourcePixelWidth, int sourcePixelHeight)
+    {
+        TargetEdge edge = Kind switch
+        {
+            // Compare the rounded bounds so Photoshop's proportional edge fits after rounding.
+            PresetRecommendationKind.MaximumBox =>
+                sourcePixelWidth * ScaleToTargetEdge.RoundedPixelsFromMillimetres(MaxHeightMm) >=
+                sourcePixelHeight * ScaleToTargetEdge.RoundedPixelsFromMillimetres(MaxWidthMm)
+                ? TargetEdge.Width : TargetEdge.Height,
+            PresetRecommendationKind.MaximumLongEdge => TargetEdge.LongEdge,
+            PresetRecommendationKind.MaximumShortEdge => sourcePixelWidth > sourcePixelHeight
+                ? TargetEdge.Height : TargetEdge.Width,
+            _ => throw new InvalidOperationException($"Unknown recommendation kind {Kind}."),
+        };
+        return FlexibleSizeSelection.OverridePreset(
+            this, edge, edge == TargetEdge.Height ? MaxHeightMm : MaxWidthMm);
+    }
+
     /// <summary>
     /// Whether a projected result stays inside what this recommendation permits
     /// (post-final A5 correction §9, §10).
@@ -243,12 +262,14 @@ public sealed record PresetPrintRecommendation
         return Kind switch
         {
             PresetRecommendationKind.MaximumBox =>
-                projectedPixelWidth <= PixelsOf(MaxWidthMm) &&
-                projectedPixelHeight <= PixelsOf(MaxHeightMm),
+                projectedPixelWidth <= ScaleToTargetEdge.RoundedPixelsFromMillimetres(MaxWidthMm) &&
+                projectedPixelHeight <= ScaleToTargetEdge.RoundedPixelsFromMillimetres(MaxHeightMm),
             PresetRecommendationKind.MaximumLongEdge =>
-                Math.Max(projectedPixelWidth, projectedPixelHeight) <= PixelsOf(MaxWidthMm),
+                Math.Max(projectedPixelWidth, projectedPixelHeight) <=
+                ScaleToTargetEdge.RoundedPixelsFromMillimetres(MaxWidthMm),
             PresetRecommendationKind.MaximumShortEdge =>
-                Math.Min(projectedPixelWidth, projectedPixelHeight) <= PixelsOf(MaxWidthMm),
+                Math.Min(projectedPixelWidth, projectedPixelHeight) <=
+                ScaleToTargetEdge.RoundedPixelsFromMillimetres(MaxWidthMm),
             _ => throw new InvalidOperationException($"Unknown recommendation kind {Kind}."),
         };
     }
@@ -293,9 +314,6 @@ public sealed record PresetPrintRecommendation
                 parameterName, pixels, "A projected geometry is positive whole pixels.");
         }
     }
-
-    private static int PixelsOf(decimal millimetres) =>
-        PrintDimensions.PixelsFromMillimetres((double)millimetres);
 
     public override string ToString() => Kind switch
     {

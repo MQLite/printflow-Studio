@@ -120,7 +120,8 @@ public sealed class PlainChinesePrintCopyTests
         var model = await PrintSizeGuidanceSetup.OpenStateAsync(h, "draft");
         model.MaximumBoundsHint.ShouldContain("细小方格");
         model.PresetModeHelp.ShouldContain("上限");
-        model.PresetModeHelp.ShouldContain("不是最终印刷尺寸");
+        model.PresetModeHelp.ShouldContain("按原比例");
+        model.PresetModeHelp.ShouldContain("须先确认");
         model.CustomModeHelp.ShouldContain("单独授权");
         var viewport = new Size(width, height);
         WpfRendering.RenderExpectingNoBindingErrors(() => new SessionScreenView { DataContext = model }, viewport, tree =>

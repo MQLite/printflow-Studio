@@ -170,8 +170,10 @@ internal static partial class NativeMethods
     internal const int SM_CYVIRTUALSCREEN = 79;
 
     internal const int GWL_STYLE = -16;
+    internal const int GWL_EXSTYLE = -20;
     internal const long WS_VISIBLE = 0x10000000L;
     internal const long WS_DISABLED = 0x08000000L;
+    internal const long WS_EX_TOPMOST = 0x00000008L;
 
     internal const uint GW_OWNER = 4;
 
@@ -358,9 +360,50 @@ internal static partial class NativeMethods
     [return: MarshalAs(UnmanagedType.Bool)]
     internal static partial bool SetForegroundWindow(nint hWnd);
 
+    internal const uint FlashTaskbar = 2;
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct FlashWindowInfo
+    {
+        internal uint Size;
+        internal nint Window;
+        internal uint Flags;
+        internal uint Count;
+        internal uint Timeout;
+    }
+
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static partial bool FlashWindowEx(ref FlashWindowInfo info);
+
     [LibraryImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
     internal static partial bool ShowWindow(nint hWnd, int command);
+
+    internal const int SW_MINIMIZE = 6;
+    internal const uint SWP_NOSIZE = 0x0001;
+    internal const uint SWP_NOMOVE = 0x0002;
+    internal const uint SWP_NOACTIVATE = 0x0010;
+    internal const uint SWP_NOOWNERZORDER = 0x0200;
+
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static partial bool ShowWindowAsync(nint hWnd, int command);
+
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static partial bool SetWindowPos(nint hWnd, nint insertAfter, int x, int y, int width, int height, uint flags);
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct LastInputInfo
+    {
+        internal uint Size;
+        internal uint Tick;
+    }
+
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static partial bool GetLastInputInfo(ref LastInputInfo info);
 
     // -- input (keyboard only) ----------------------------------------------------------
 

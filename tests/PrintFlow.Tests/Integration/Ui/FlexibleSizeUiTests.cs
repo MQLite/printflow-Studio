@@ -83,12 +83,24 @@ public sealed class FlexibleSizeUiTests
         screen.NeedsEnlargementAuthority.ShouldBeFalse();
     }
 
-    [Fact]
-    public async Task Enlargement_is_gated_until_the_service_confirms_the_current_offer()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Enlargement_is_gated_until_the_service_confirms_the_current_offer(bool usePreset)
     {
         using HomeScreenHarness harness = new();
         SessionViewModel screen = await AtDimensionsAsync(harness, TinySource(harness, "enlarge.png"));
-        await ChooseCustomAsync(screen, TargetEdge.LongEdge, "100");
+        if (usePreset)
+        {
+            await screen.UsePresetCommand.ExecuteAsync(
+                screen.SizePresets.Single(choice => choice.Preset == SizePreset.A4));
+            screen.HasPresetSizeSelection.ShouldBeTrue();
+            screen.CurrentSizeSummary.ShouldContain("A4");
+        }
+        else
+        {
+            await ChooseCustomAsync(screen, TargetEdge.LongEdge, "100");
+        }
         await ChooseBranchAsync(screen);
 
         screen.NeedsEnlargementAuthority.ShouldBeTrue();

@@ -2004,7 +2004,7 @@ public sealed partial class SessionViewModel : ObservableObject
                 return string.Empty;
             }
 
-            if (attempt.Semantics == PrintDimensionSemantics.MaxBoundsV1 && attempt.Preset is { } preset)
+            if (attempt.RequestedTargetEdge is null && attempt.Preset is { } preset)
             {
                 return string.Format(
                     CultureInfo.CurrentCulture,
@@ -2033,7 +2033,7 @@ public sealed partial class SessionViewModel : ObservableObject
     public string PreparationAttemptPresetContext =>
         _session?.AttemptPreparation is
         {
-            Semantics: PrintDimensionSemantics.TargetEdgeV1,
+            PresetOverride: true,
             Preset: { } preset,
         }
             ? string.Format(
@@ -3405,6 +3405,9 @@ public sealed partial class SessionViewModel : ObservableObject
         IsBusy = true;
         try
         {
+            using IDisposable? focusHandoff = Composition.StudioWindowFocus.BeginHandoff(
+                () => IsCurrent() && !IsHandedOff,
+                _session.CurrentStep?.Step is StepKind.Enhancement or StepKind.BackgroundRemoval);
             Notice = null;
             OperationResult<SessionView> result = await call(id).ConfigureAwait(true);
             if (!IsCurrent()) return;

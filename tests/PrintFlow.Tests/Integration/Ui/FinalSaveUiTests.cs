@@ -113,6 +113,11 @@ public sealed class FinalSaveUiTests
             File.Exists(saved).ShouldBeTrue();
             screen.CanOpenContainingFolder.ShouldBeTrue();
             screen.CanSaveApproved.ShouldBeFalse("the same name and folder are already saved");
+            screen.SaveFileNameText = "accidental-copy.png";
+            screen.SaveFileNameText.ShouldBe("keep-extent.png");
+            screen.IsSaveDraftEditable.ShouldBeFalse();
+            await screen.SaveApprovedCommand.ExecuteAsync(null);
+            Directory.GetFiles(folder).ShouldBe([saved]);
             picker.Calls.ShouldBe(2, "only the explicit Change location opened a dialog");
             var counts = await FinalSaveFixtures.WorkCountsAsync(h, review.Id);
             counts.Promotions.ShouldBe(1);
@@ -130,6 +135,49 @@ public sealed class FinalSaveUiTests
             await screen.FinalSaveFactsLoaded;
             screen.NextStepText.ShouldBe(Strings.Session_NextCompleted);
             screen.FinalSaveStatus.ShouldContain(Path.GetFileName(saved));
+        }
+        finally { FinalSaveFixtures.Remove(folder); }
+    }
+
+    [Fact]
+    public async Task First_save_uses_the_entered_name_then_rename_and_copy_are_separate_actions()
+    {
+        using CultureScope culture = new("en");
+        using SessionServiceHarness h = new();
+        ISessionService workflow = h.CreateService();
+        SessionView review = await FinalSaveFixtures.PngAtFinalReviewAsync(h, workflow);
+        string folder = FinalSaveFixtures.NewFolder("ui-rename-copy");
+        try
+        {
+            var delivery = FinalSaveFixtures.Delivery(h);
+            var picker = new StubFolderPicker { Next = folder };
+            var screen = await OpenAsync(h, workflow, delivery, picker, new RecordingDeliveredFileShell(), review);
+            screen.ChangeLocationCommand.Execute(null);
+            screen.SaveFileNameText = "first";
+            await screen.ConfirmAndSaveCommand.ExecuteAsync(null);
+            await screen.FinalSaveFactsLoaded;
+            Directory.GetFiles(folder).ShouldBe([Path.Combine(folder, "first.png")]);
+
+            screen.BeginRenameCommand.Execute(null);
+            screen.RenameFileNameText = "renamed";
+            await screen.ApplyRenameCommand.ExecuteAsync(null);
+            await screen.FinalSaveFactsLoaded;
+            string renamed = Path.Combine(folder, "renamed.png");
+            Directory.GetFiles(folder).ShouldBe([renamed]);
+            screen.SaveFileNameText.ShouldBe("renamed.png");
+            screen.FinalSaveSavedPath.ShouldBe(renamed);
+
+            screen.BeginCopyCommand.Execute(null);
+            screen.CanSaveApproved.ShouldBeFalse();
+            screen.SaveFileNameText = "explicit-copy";
+            await screen.SaveApprovedCommand.ExecuteAsync(null);
+            await screen.FinalSaveFactsLoaded;
+            Directory.GetFiles(folder).Order().ShouldBe(new[] { Path.Combine(folder, "explicit-copy.png"), renamed }.Order());
+            screen.IsSaveDraftEditable.ShouldBeFalse();
+            screen.CanSelectSaveResult.ShouldBeTrue();
+            screen.CanSelectFinalSaveRecord.ShouldBeTrue();
+            screen.SelectedFinalSaveRecord = screen.FinalSaveRecords.Single(record => record.Label.Contains("renamed.png"));
+            screen.FinalSaveSavedPath.ShouldBe(renamed);
         }
         finally { FinalSaveFixtures.Remove(folder); }
     }
@@ -327,7 +375,7 @@ public sealed class FinalSaveUiTests
         string[] keys = typeof(Strings).GetProperties(System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)
             .Select(p => p.Name).Where(n => n.StartsWith("FinalSave_", StringComparison.Ordinal) ||
                                             n is "Session_NextFinalReview" or "Session_NextFinalReviewNeedsDraft" or "Session_NextCompletedNotSaved").ToArray();
-        keys.Length.ShouldBe(95); // 89 + the closeout's record list and not-refreshed history + SCRUM-11147 FinalSave_TrimAdjustOpen
+        keys.Length.ShouldBe(101);
         foreach (string key in keys)
         {
             string en = manager.GetString(key, CultureInfo.GetCultureInfo("en"))!;
@@ -747,6 +795,7 @@ public sealed class FinalSaveUiTests
                 await screen.SaveApprovedCommand.ExecuteAsync(null);
                 await screen.FinalSaveFactsLoaded;
                 screen.FinalSaveSavedPath.ShouldNotBeEmpty();
+                screen.BeginCopyCommand.Execute(null);
             }
             picker.Next = folder;
             screen.ChangeLocationCommand.Execute(null);

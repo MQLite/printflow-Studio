@@ -26,6 +26,10 @@ public interface IDeliveryRepository
         Guid deliveryId, Guid attemptId, string finalFileId,
         DateTimeOffset finalCreationUtc, DateTimeOffset verifiedAtUtc,
         CancellationToken cancellationToken);
+    Task<OperationResult<bool>> BeginRenameAsync(DeliveryRecord expected, DeliveryRename rename) =>
+        Task.FromResult(OperationResult.Fail<bool>(FailureCode.PersistenceError, "Rename journal is unavailable."));
+    Task<OperationResult<bool>> EndRenameAsync(DeliveryRename rename, DateTimeOffset? finalCreationUtc) =>
+        Task.FromResult(OperationResult.Fail<bool>(FailureCode.PersistenceError, "Rename journal is unavailable."));
 
     /// <summary>Reads the preference row written only by <see cref="MarkDeliveredAsync"/>.</summary>
     Task<OperationResult<DeliveryDestinationPreferenceView?>> ReadDestinationPreferenceAsync(

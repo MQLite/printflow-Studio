@@ -5,6 +5,27 @@ namespace PrintFlow.Tests.Unit.Domain;
 public sealed class ScaleToTargetEdgeTests
 {
     [Fact]
+    public void Preset_box_enlargement_fits_both_pixel_limits_after_rounding()
+    {
+        PresetPrintRecommendation preset = PresetPrintRecommendation.MaximumBox(SizePreset.A3Portrait, 250m, 252m);
+        FlexibleSizeSelection selection = preset.SelectLimitTarget(125, 126);
+        ScaleToTargetEdgeResult result = ScaleToTargetEdge.Calculate(
+            125, 126, selection.SelectedTargetEdge!.Value, selection.RequestedMillimetres!.Value);
+
+        result.PhotoshopTargetEdge.ShouldBe(LimitingEdge.Height);
+        preset.Covers(result.ProjectedPixelWidth, result.ProjectedPixelHeight).ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Preset_coverage_accepts_an_edge_at_its_exact_decimal_midpoint()
+    {
+        PresetPrintRecommendation preset = PresetPrintRecommendation.MaximumLongEdge(SizePreset.A4, 256.667m);
+
+        preset.Covers(3032, 1500).ShouldBeTrue();
+        preset.Covers(3033, 1500).ShouldBeFalse();
+    }
+
+    [Fact]
     public void Custom_width_is_the_only_authoritative_edge()
     {
         ScaleToTargetEdgeResult result = ScaleToTargetEdge.Calculate(6000, 4000, TargetEdge.Width, 254m);

@@ -569,14 +569,13 @@ public sealed partial class SessionService : ISessionService
         ProducingWork? work = ProducingWorkOf(transition.Effects);
         if (work is null)
         {
-            // The engine accepted the decision and stamped the semantics; the millimetres, the
-            // selection and the plan it could not calculate are attached here, to the state it
-            // produced. Nothing else writes these fields, so the accepted decision and the
-            // geometry behind it are always the same act (Epic 11400 Part B1A.2D §17).
+            // The engine accepted the decision. Attach the dimensions and the semantics of the
+            // plan calculated from the approved source in the same transaction.
             WorkflowSnapshot state = recorded is null
                 ? transition.State
                 : transition.State with
                 {
+                    DimensionSemantics = recorded.TargetEdgePlan?.Semantics ?? PrintPreparationPlan.Semantics,
                     Dimensions = recorded.Dimensions,
                     SizeSelection = recorded.Selection,
                     PrintPreparationPlan = recorded.BoundsPlan,
@@ -787,16 +786,24 @@ public sealed partial class SessionService : ISessionService
                         return OperationResult.Fail<RecordedSize>(recommendation.Failure);
                     }
 
-                    // The configured recommendation is handed to the Domain whole, and the Domain
-                    // decides. PresetPrintRecommendation.Fit is the single sizing authority for
-                    // every configured form — a box, a maximum long edge, and from v1.15.0 a
-                    // maximum short edge — so no service, screen or adapter has an opinion about
-                    // which edge A5 limits or whether it caps the other one. Nothing here reads a
-                    // millimetre, an ISO paper size or PrintDimensions.NominalMillimetres
-                    // (post-final A5 correction §10, §11).
                     PrintPreparationPlan plan = PrintPreparationPlan.For(
                         source.RevisionId, source.Sha256, source.PixelWidth, source.PixelHeight,
                         recommendation.Value);
+
+                    if (!plan.RequiresShrink)
+                    {
+                        FlexibleSizeSelection selection = recommendation.Value.SelectLimitTarget(
+                            source.PixelWidth, source.PixelHeight);
+                        TargetEdgePrintPreparationPlan target = TargetEdgePrintPreparationPlan.For(
+                            source.RevisionId, source.Sha256, source.PixelWidth, source.PixelHeight, selection);
+                        if (target.RequiresEnlargementAuthority)
+                        {
+                            // The exact edge uses the same confirmation and persisted authority
+                            // as a custom target. The dimensions retain the named preset.
+                            return OperationResult.Ok(new RecordedSize(
+                                target.AsRecordedDimensions(preset.Preset), selection, BoundsPlan: null, target));
+                        }
+                    }
 
                     return OperationResult.Ok(new RecordedSize(
                         PrintDimensions.FromMillimetres(
@@ -1329,7 +1336,7 @@ public sealed partial class SessionService : ISessionService
         if (snapshot.UsableTargetEdgePlan is { } target)
         {
             return new RecordedSize(
-                target.AsRecordedDimensions(), snapshot.SizeSelection, BoundsPlan: null, target);
+                snapshot.Dimensions ?? target.AsRecordedDimensions(), snapshot.SizeSelection, BoundsPlan: null, target);
         }
 
         return null;
@@ -1382,9 +1389,10 @@ public sealed partial class SessionService : ISessionService
             outputPixelHeight = target.Projection.ProjectedPixelHeight;
             productionOutputPpi = target.ProductionDpi;
             requiresEnlargement = target.RequiresEnlargementAuthority;
-            governor = PrintSizeGovernor.SelectedEdge;
+            bool fromPreset = size.Dimensions.Preset != SizePreset.Custom;
+            governor = fromPreset ? PrintSizeGovernor.LimitReached : PrintSizeGovernor.SelectedEdge;
             governingEdge = target.Projection.PhotoshopTargetEdge;
-            selectedTargetEdge = target.Projection.SelectedTargetEdge;
+            selectedTargetEdge = fromPreset ? null : target.Projection.SelectedTargetEdge;
         }
 
         double widthMm = outputPixelWidth * MillimetresPerInch / productionOutputPpi;
