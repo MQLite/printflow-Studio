@@ -220,6 +220,9 @@ public sealed class PrintDimensionsPreflightUiTests
                     millimetres.IsKeyboardFocused.ShouldBeTrue();
                     millimetres.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next)).ShouldBeTrue();
                     confirm.IsKeyboardFocused.ShouldBeTrue();
+                    confirm.MoveFocus(new TraversalRequest(FocusNavigationDirection.Previous)).ShouldBeTrue();
+                    millimetres.IsKeyboardFocused.ShouldBeTrue();
+                    millimetres.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next)).ShouldBeTrue();
                     confirm.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next)).ShouldBeTrue();
                     confirm.IsKeyboardFocused.ShouldBeFalse();
                     return true;
@@ -306,7 +309,7 @@ public sealed class PrintDimensionsPreflightUiTests
         }, WpfRendering.ReviewViewport, Path.Combine(directory, $"{culture}-{name}.png"),
             tree =>
             {
-                Control<Border>(tree.Root, "Preflight").BringIntoView();
+                Control<FrameworkElement>(tree.Root, "Preflight").BringIntoView();
                 SharedReviewSurfaceTests.Settle(tree.Root);
             });
     }

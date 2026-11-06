@@ -672,6 +672,9 @@
                     <Setter Property="BorderBrush" Value="#9BAFC0" />
                     <Setter Property="BorderThickness" Value="1" />
                     <Style.Triggers>
+                        <DataTrigger Binding="{Binding ShowsGuidedCustomSizeAction}" Value="True">
+                            <Setter Property="KeyboardNavigation.TabIndex" Value="0" />
+                        </DataTrigger>
                         <Trigger Property="IsFocused" Value="True">
                             <Setter Property="BorderBrush" Value="{DynamicResource PF.Brush.Primary}" />
                             <Setter Property="BorderThickness" Value="2" />
@@ -1951,13 +1954,17 @@
                                     <StackPanel Margin="0,8,0,0">
 
                                         <TextBlock Text="{Binding TargetEdgeLabel}" Opacity="0.6" Margin="0,0,0,4" />
+                                        <!-- The confirmation lives in the fixed footer. Keep it next in
+                                             the tab order while leaving the preview and footer links reachable. -->
                                         <local:SessionComboBox Style="{StaticResource PF.Input.ComboBox}" ItemsSource="{Binding TargetEdgeChoices}"
+                                                  TabIndex="1"
                                                   SelectedItem="{Binding SelectedTargetEdgeChoice}"
                                                   AutomationProperties.AutomationId="Session.PrintDimensions.TargetEdge"
                                                   AutomationProperties.Name="{Binding TargetEdgeLabel}"
                                                   DisplayMemberPath="Label" />
                                         <TextBlock Text="{Binding TargetSizeMmLabel}" Opacity="0.6" Margin="0,0,0,4" />
                                         <local:SessionTextBox Style="{StaticResource PF.Input.TextBox}" AutomationProperties.AutomationId="Session.PrintDimensions.TargetMillimetres"
+                                                 TabIndex="2"
                                                  AutomationProperties.Name="{Binding TargetSizeMmLabel}"
                                                  Text="{Binding CustomMillimetresText, UpdateSourceTrigger=PropertyChanged}" />
                                     </StackPanel>
@@ -2630,6 +2637,7 @@
 <local:SessionActionButton Style="{StaticResource RecommendedAction}" Content="{Binding ConfirmCustomSizeLabel}"
                                             Command="{Binding ConfirmCustomSizeCommand}"
                                             IsEnabled="{Binding CanConfirmGuidedCustomSize}"
+                                            TabIndex="3"
                                             AutomationProperties.AutomationId="Session.PrintDimensions.ConfirmSize"
                                             HorizontalAlignment="Left"
                                             Padding="14,6"
