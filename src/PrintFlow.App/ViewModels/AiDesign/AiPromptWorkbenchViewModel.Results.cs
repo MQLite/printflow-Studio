@@ -272,6 +272,7 @@ public sealed partial class AiPromptWorkbenchViewModel
         foreach (string property in new[]
         {
             nameof(IsMemorialLayoutAvailable), nameof(CanPrepareMemorialLayout), nameof(CanSaveMemorialLayout),
+            nameof(IsMemorialLayoutEditorStale), nameof(MemorialLayoutEditLabel),
             nameof(CanConfirmMemorialLayout), nameof(CanPreviewLayout), nameof(MemorialCanvasLabel), nameof(MemorialLayoutStatus), nameof(MemorialLayoutIssues),
             nameof(MemorialResult), nameof(MemorialResultImage), nameof(MemorialComparisonImage), nameof(MemorialComparisonLabel), nameof(MemorialResultLabel),
             nameof(IsMemorialResultVisible), nameof(IsMemorialResultHistorical), nameof(IsMemorialResultAccepted), nameof(IsCurrentMemorialReview),

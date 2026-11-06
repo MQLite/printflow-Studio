@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using PrintFlow.App.Resources;
 using PrintFlow.Domain.AiDesign.Authoring;
 using PrintFlow.Workflow.AiDesign.Authoring;
+using PrintFlow.Workflow.AiDesign.Memorial;
 
 namespace PrintFlow.App.ViewModels.AiDesign;
 
@@ -60,7 +61,7 @@ public sealed class AiTemplateEditorViewModel : ObservableObject
     }
     private void Add(AiTemplateField definition)
     {
-        var input = new AiTemplateFieldInput(definition);
+        var input = new AiTemplateFieldInput(definition, product);
         input.PropertyChanged += FieldChanged; Fields.Add(input);
     }
     private void FieldChanged(object? sender, PropertyChangedEventArgs e) => Changed();
@@ -89,23 +90,33 @@ public sealed record AiTemplateOption<T>(T Value, string Label);
 
 public sealed class AiTemplateFieldInput : ObservableObject
 {
+    private readonly AiProductKind product;
     private string key;
     private string? defaultValue, slotId, dateLabel;
     private AiTemplateFieldKind kind;
     private AiTemplateSemantic semantic;
     private bool required;
-    public AiTemplateFieldInput(AiTemplateField definition)
+    public AiTemplateFieldInput(AiTemplateField definition, AiProductKind product)
     {
+        this.product = product;
         key = definition.Key; kind = definition.Kind; semantic = definition.Semantic; required = definition.Required;
         defaultValue = definition.DefaultValue; slotId = definition.SlotId; dateLabel = definition.DateLabel;
     }
-    public string Key { get => key; set => SetProperty(ref key, value); }
-    public AiTemplateFieldKind Kind { get => kind; set => SetProperty(ref kind, value); }
-    public AiTemplateSemantic Semantic { get => semantic; set => SetProperty(ref semantic, value); }
-    public bool Required { get => required; set => SetProperty(ref required, value); }
-    public string? DefaultValue { get => defaultValue; set => SetProperty(ref defaultValue, value); }
+    public string Key { get => key; set { if (SetProperty(ref key, value)) RefreshDefault(); } }
+    public AiTemplateFieldKind Kind { get => kind; set { if (SetProperty(ref kind, value)) RefreshDefault(); } }
+    public AiTemplateSemantic Semantic { get => semantic; set { if (SetProperty(ref semantic, value)) RefreshDefault(); } }
+    public bool Required { get => required; set { if (SetProperty(ref required, value)) RefreshDefault(); } }
+    private string? FixedDefault => MemorialLayoutModule.FixedPromptSpecification(product, new(Key, Kind, Required, Semantic: Semantic));
+    public bool IsDefaultReadOnly => FixedDefault is not null;
+    public string? DefaultValue { get => FixedDefault ?? defaultValue; set { if (!IsDefaultReadOnly) SetProperty(ref defaultValue, value); } }
     public string? SlotId { get => slotId; set => SetProperty(ref slotId, value); }
     public string? DateLabel { get => dateLabel; set => SetProperty(ref dateLabel, value); }
     public AiTemplateField ToDefinition() => new(Key, Kind, Required,
         string.IsNullOrEmpty(DefaultValue) ? null : DefaultValue, SlotId, DateLabel, Semantic);
+
+    private void RefreshDefault()
+    {
+        OnPropertyChanged(nameof(IsDefaultReadOnly));
+        OnPropertyChanged(nameof(DefaultValue));
+    }
 }

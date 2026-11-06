@@ -18,18 +18,21 @@ public sealed partial class AiPromptWorkbenchViewModel
     public IReadOnlyList<MemorialTextInput> MemorialText { get; private set; } = [];
     public bool IsMemorialLayoutAvailable => memorial is not null && MemorialLayoutEditor.Preset(Draft?.Product) is not null;
     public bool IsMemorialLayoutEditorOpen => layoutEditorDraft is not null;
+    public bool IsMemorialLayoutEditorStale => layoutEditorDraft is { } opened && Draft is { } current &&
+        !MatchesLayoutEditor(current, opened, ReviewDraft());
+    public string MemorialLayoutEditLabel => L(IsMemorialLayoutEditorStale ? "ReopenLayout" : "EditLayout");
     public bool CanPrepareMemorialLayout => IsMemorialLayoutAvailable && CanEdit && Draft is not null &&
+        (!IsMemorialLayoutEditorOpen || IsMemorialLayoutEditorStale) &&
         AiDetailedReview.GetFirstIncompleteStep(ReviewDraft()) == 5;
-    public bool CanSaveMemorialLayout => CanEdit && memorialLayoutDirty;
-    public bool CanConfirmMemorialLayout => CanEdit && IsMemorialLayoutAvailable && !HasUnsavedChanges &&
+    public bool CanSaveMemorialLayout => CanEdit && memorialLayoutDirty && !IsMemorialLayoutEditorStale;
+    public bool CanConfirmMemorialLayout => CanEdit && IsMemorialLayoutAvailable && !HasUnsavedChanges && !HasOutdatedMemorialSpecification &&
         Draft?.Layout is { ProductTemplateConfirmed: false } layout && CanConfirmLayout(Draft, layout);
     public bool CanPreviewLayout => CanEdit && HasCurrentConfirmedLayout;
-    private bool HasCurrentConfirmedLayout => IsMemorialLayoutAvailable && !HasUnsavedChanges &&
+    private bool HasCurrentConfirmedLayout => IsMemorialLayoutAvailable && !HasUnsavedChanges && !HasOutdatedMemorialSpecification &&
         Draft?.Layout is { ProductTemplateConfirmed: true } layout && CanConfirmLayout(Draft, layout);
     public string? MemorialCanvasLabel => (Draft?.Layout?.Canvas ?? MemorialLayoutEditor.Preset(Draft?.Product)) is { } canvas
         ? CanvasLabel(canvas) : null;
-    public string MemorialLayoutStatus => L(Draft?.Layout?.ProductTemplateConfirmed == true && !HasUnsavedChanges
-        ? "LayoutConfirmed" : "LayoutPending");
+    public string MemorialLayoutStatus => L(HasCurrentConfirmedLayout ? "LayoutConfirmed" : "LayoutPending");
     public string? MemorialLayoutIssues => Draft?.Layout is { } layout && Draft is { } value
         ? FormatLayoutIssues(MemorialLayoutModule.Validate(value, layout)) : null;
 
@@ -51,7 +54,9 @@ public sealed partial class AiPromptWorkbenchViewModel
         if (!CanPrepareMemorialLayout) return;
         await RunAsync(async () =>
         {
-            if ((await FlushCoreAsync(default)).IsFailure || Draft is not { } value ||
+            // This command deliberately replaces an outdated working layout, after the
+            // operator chooses to reopen it. Authoring changes can be saved independently.
+            if ((await FlushCoreAsync(default, saveLayout: false)).IsFailure || Draft is not { } value ||
                 AiDetailedReview.GetFirstIncompleteStep(value) != 5 ||
                 (value.Layout?.Canvas ?? MemorialLayoutEditor.Preset(value.Product)) is not { } canvas) return;
             var proposed = MemorialLayoutEditor.Propose(value, canvas, Photos, MemorialLayoutEdited);
@@ -78,8 +83,7 @@ public sealed partial class AiPromptWorkbenchViewModel
     private async Task<OperationResult<AiAuthoringDraft>> SaveMemorialLayoutCoreAsync(CancellationToken ct)
     {
         if (memorial is null || Draft is not { } current || layoutEditorDraft is not { } opened ||
-            current.Id != opened.Id || !MemorialLayoutModule.SameInputs(current, opened) ||
-            !MemorialLayoutModule.SameContent(current.Layout, opened.Layout) ||
+            !MatchesLayoutEditor(current, opened, current) ||
             (current.Layout?.Canvas ?? MemorialLayoutEditor.Preset(current.Product)) is not { } canvas)
         { Error = L("PlacementInputsChanged"); return Refused(); }
         var images = MemorialImages.Select(i => i.ToLayer()).OfType<MemorialImageLayer>().ToArray();
@@ -132,6 +136,10 @@ public sealed partial class AiPromptWorkbenchViewModel
     private static bool CanConfirmLayout(AiAuthoringDraft value, MemorialLayout layout) =>
         AiDetailedReview.GetFirstIncompleteStep(value) == 5 &&
         MemorialLayoutModule.Validate(value, layout).All(x => x.Key == "ProductTemplateUnconfirmed");
+
+    private static bool MatchesLayoutEditor(AiAuthoringDraft current, AiAuthoringDraft opened, AiAuthoringDraft inputs) =>
+        current.Id == opened.Id && MemorialLayoutModule.SameInputs(inputs, opened) &&
+        MemorialLayoutModule.SameContent(current.Layout, opened.Layout);
 
     private static bool ValidBounds(RectMm rect) => double.IsFinite(rect.X) && double.IsFinite(rect.Y) &&
         double.IsFinite(rect.Width) && double.IsFinite(rect.Height) && rect.Width > 0 && rect.Height > 0;

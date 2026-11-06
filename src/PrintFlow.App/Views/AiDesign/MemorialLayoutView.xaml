@@ -12,9 +12,15 @@
   <TextBlock Text="{x:Static r:AiMemorialLabels.LayoutHelp}" Margin="0,6,0,8"/>
   <TextBlock Text="{Binding MemorialLayoutStatus}" FontWeight="SemiBold"/>
   <TextBlock Text="{Binding MemorialLayoutIssues}" Margin="0,4" Foreground="#B42318"/>
-  <Button Content="{x:Static r:AiMemorialLabels.EditLayout}" Command="{Binding PrepareMemorialLayoutCommand}"
+  <TextBlock Text="{x:Static r:AiMemorialLabels.PlacementInputsChanged}" Foreground="#875800" Margin="0,4"
+             Visibility="{Binding IsMemorialLayoutEditorStale, Converter={StaticResource VisibleIf}}" AutomationProperties.LiveSetting="Polite"/>
+  <Button Content="{Binding MemorialLayoutEditLabel}" Command="{Binding PrepareMemorialLayoutCommand}"
           IsEnabled="{Binding CanPrepareMemorialLayout}" AutomationProperties.AutomationId="Memorial.EditLayout"/>
   <StackPanel Visibility="{Binding IsMemorialLayoutEditorOpen, Converter={StaticResource VisibleIf}}">
+   <StackPanel>
+    <StackPanel.Style><Style TargetType="StackPanel"><Style.Triggers>
+     <DataTrigger Binding="{Binding IsMemorialLayoutEditorStale}" Value="True"><Setter Property="IsEnabled" Value="False"/></DataTrigger>
+    </Style.Triggers></Style></StackPanel.Style>
    <TextBlock Text="{x:Static r:AiMemorialLabels.MmHelp}" Margin="0,6"/>
    <ItemsControl ItemsSource="{Binding MemorialImages}">
     <ItemsControl.ItemTemplate><DataTemplate>
@@ -53,6 +59,7 @@
      </StackPanel>
     </DataTemplate></ItemsControl.ItemTemplate>
    </ItemsControl>
+   </StackPanel>
    <WrapPanel>
     <Button Content="{x:Static r:AiMemorialLabels.SaveLayout}" Command="{Binding SaveMemorialLayoutCommand}" IsEnabled="{Binding CanSaveMemorialLayout}" AutomationProperties.AutomationId="Memorial.SaveLayout"/>
     <Button Content="{x:Static r:AiMemorialLabels.DiscardLayout}" Command="{Binding DiscardMemorialLayoutCommand}"/>

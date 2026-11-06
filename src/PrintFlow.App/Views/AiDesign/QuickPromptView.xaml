@@ -5,6 +5,7 @@
  <UserControl.Resources>
   <views:PreviewPayloadConverter x:Key="Preview"/>
   <r:PromptHistoryPreviewConverter x:Key="HistoryPreview"/>
+  <BooleanToVisibilityConverter x:Key="VisibleIf"/>
   <Style TargetType="Button"><Setter Property="Padding" Value="9,7"/><Setter Property="Margin" Value="0,4,6,4"/></Style>
   <Style TargetType="TextBox"><Setter Property="Padding" Value="7"/><Setter Property="Margin" Value="0,4,0,10"/></Style>
   <Style x:Key="Panel" TargetType="Border"><Setter Property="Padding" Value="12"/><Setter Property="CornerRadius" Value="8"/><Setter Property="BorderThickness" Value="1"/><Setter Property="BorderBrush" Value="#C4D9D4"/><Setter Property="Background" Value="{DynamicResource PF.Brush.Canvas}"/></Style>
@@ -49,7 +50,13 @@
      <StackPanel>
       <TextBlock Text="{x:Static r:AiPromptLabels.AiPrompt_NoDate}" TextWrapping="Wrap" Margin="0,0,0,10"/>
       <ItemsControl ItemsSource="{Binding QuickFields}"><ItemsControl.ItemTemplate><DataTemplate>
-       <StackPanel><TextBlock Text="{Binding Label}" TextWrapping="Wrap"/><TextBox Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="{Binding Label}" AcceptsReturn="True" TextWrapping="Wrap" MaxHeight="110" VerticalScrollBarVisibility="Auto"/></StackPanel>
+       <StackPanel>
+        <TextBlock Text="{Binding Label}" TextWrapping="Wrap"/>
+        <TextBlock Text="{x:Static r:AiMemorialLabels.FixedSpecification}" FontSize="12" Opacity="0.75" TextWrapping="Wrap"
+                   Visibility="{Binding IsReadOnly, Converter={StaticResource VisibleIf}}"/>
+        <TextBox Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="{Binding IsReadOnly}" AutomationProperties.Name="{Binding Label}"
+                 AcceptsReturn="True" TextWrapping="Wrap" MaxHeight="110" VerticalScrollBarVisibility="Auto"/>
+       </StackPanel>
       </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
       <TextBlock Text="{x:Static r:AiPromptLabels.AiPrompt_Photos}" FontWeight="SemiBold" Margin="0,8,0,8"/>
       <ItemsControl ItemsSource="{Binding Photos}"><ItemsControl.ItemTemplate><DataTemplate>

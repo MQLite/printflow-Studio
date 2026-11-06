@@ -10,6 +10,7 @@ public static class AiMemorialLabels
     public static string ProofReduced => Strings.Resolve("AiMemorial_ProofReduced");
     public static string LayoutHelp => Strings.Resolve("AiMemorial_" + nameof(LayoutHelp));
     public static string EditLayout => Strings.Resolve("AiMemorial_" + nameof(EditLayout));
+    public static string FixedSpecification => Strings.Resolve("AiMemorial_" + nameof(FixedSpecification));
     public static string MmHelp => Strings.Resolve("AiMemorial_" + nameof(MmHelp));
     public static string LayerRole => Strings.Resolve("AiMemorial_" + nameof(LayerRole));
     public static string Left => Strings.Resolve("AiMemorial_" + nameof(Left));

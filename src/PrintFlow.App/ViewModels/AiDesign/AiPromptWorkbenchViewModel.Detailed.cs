@@ -56,7 +56,7 @@ public sealed partial class AiPromptWorkbenchViewModel
     }
     private async Task SwitchModeAsync(AiAuthoringMode mode) => await RunAsync(async () =>
     {
-        if ((await FlushCoreAsync(default)).IsFailure) return;
+        if ((await FlushCoreAsync(default, saveLayout: false)).IsFailure) return;
         if (Draft!.Mode == mode) return;
         long capturedEpoch = epoch, generation = editGeneration;
         var result = await ApplyCoreAsync(new AiAuthoringEdit.SwitchMode(mode), default);
@@ -79,7 +79,7 @@ public sealed partial class AiPromptWorkbenchViewModel
     {
         var value = Draft!; var fields = new Dictionary<string, string>(value.Fields, StringComparer.Ordinal);
         foreach (var input in Fields)
-            if (fields.ContainsKey(input.Key) || input.Value != input.InitialValue) fields[input.Key] = input.Value;
+            if (!input.IsReadOnly && (fields.ContainsKey(input.Key) || input.Value != input.InitialValue)) fields[input.Key] = input.Value;
         var rules = value.Preservation.ToDictionary(x => x.AssetId);
         foreach (var input in PreservationChecks.Where(x => x.IsEdited)) rules[input.Asset.Id] = input.Rule;
         return value with { Fields = fields, Preservation = rules.Values.ToArray(), FinalDocument = Document,
@@ -145,7 +145,8 @@ public sealed partial class AiPromptWorkbenchViewModel
         long requestedEpoch = epoch; var requestedDraft = Draft?.Id;
         await RunAsync(async () =>
         {
-            if (!IsCurrent(requestedEpoch) || Draft?.Id != requestedDraft || (await FlushCoreAsync(default)).IsFailure) return;
+            if (!IsCurrent(requestedEpoch) || Draft?.Id != requestedDraft ||
+                (await FlushCoreAsync(default, saveLayout: false)).IsFailure) return;
             long generation = editGeneration;
             if (rule is not null && !Draft!.Preservation.Contains(rule) && (await ApplyCoreAsync(new AiAuthoringEdit.SetPreservation(rule), default)).IsFailure) return;
             if (!IsCurrent(requestedEpoch) || generation != editGeneration) return;

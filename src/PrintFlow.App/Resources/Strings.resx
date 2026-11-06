@@ -1583,6 +1583,9 @@
   <data name="Session_BackgroundRemovalMode_LogosStamps" xml:space="preserve"><value>Logos / Stamps</value></data>
   <data name="AiMemorial_LayoutHelp" xml:space="preserve"><value>Review the source images and exact text first. Choose which images are placed in the design, then save and confirm the placement. To use a local background, add it as a reference in step 2, review its permissions in step 3, and select the Background role here.</value></data>
   <data name="AiMemorial_EditLayout" xml:space="preserve"><value>Edit layout</value></data>
+  <data name="AiMemorial_ReopenLayout" xml:space="preserve"><value>Reopen layout with current inputs</value></data>
+  <data name="AiMemorial_FixedSpecification" xml:space="preserve"><value>Fixed by the product layout</value></data>
+  <data name="AiMemorial_OutdatedPromptSpecification" xml:space="preserve"><value>This draft has an older size entry. Generate the prompt again to use the fixed product specification.</value></data>
   <data name="AiMemorial_MmHelp" xml:space="preserve"><value>All measurements are in millimetres. Image height follows its source proportions.</value></data>
   <data name="AiMemorial_LayerRole" xml:space="preserve"><value>Layer role</value></data>
   <data name="AiMemorial_Left" xml:space="preserve"><value>Left</value></data>
@@ -1619,7 +1622,7 @@
   <data name="AiMemorial_LayoutConfirmed" xml:space="preserve"><value>Layout confirmed</value></data>
   <data name="AiMemorial_LayoutPending" xml:space="preserve"><value>Layout needs confirmation</value></data>
   <data name="AiMemorial_SourceUnavailable" xml:space="preserve"><value>A verified source image could not be read. Reopen the draft or select the intended image again.</value></data>
-  <data name="AiMemorial_PlacementInputsChanged" xml:space="preserve"><value>Text, images or permissions changed. Discard the old placement edits and open the layout again.</value></data>
+  <data name="AiMemorial_PlacementInputsChanged" xml:space="preserve"><value>Text, images or permissions changed. Finish reviewing those inputs, then reopen the layout. Reopening replaces unsaved placement edits.</value></data>
   <data name="AiMemorial_InvalidPlacement" xml:space="preserve"><value>Enter finite positions and positive dimensions. Review the placement and source sizes.</value></data>
   <data name="AiMemorial_TextDoesNotFit" xml:space="preserve"><value>The literal text does not fit. Enlarge its box, choose flat placement or adjust the font size.</value></data>
   <data name="AiMemorial_MissingGlyph" xml:space="preserve"><value>The installed font cannot draw all characters. Choose a suitable font.</value></data>

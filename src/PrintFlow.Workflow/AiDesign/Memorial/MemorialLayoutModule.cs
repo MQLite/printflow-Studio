@@ -11,6 +11,18 @@ public static class MemorialLayoutModule
     public static MemorialCanvas TshirtPreset { get; } = new(280, 390, null, null);
     public static string DateLabelKey(AiTemplateField field) => "date-label:" + AiAuthoringConfirmationRules.TextKey(field);
 
+    // Reserve only the preset's optional specification fields; custom literal and date fields
+    // (including an imported field with a reused name) keep their normal authoring behavior.
+    public static string? FixedPromptSpecification(AiProductKind product, AiTemplateField field) =>
+        field is not { Kind: AiTemplateFieldKind.Text, Required: false, Semantic: AiTemplateSemantic.FreeText } ? null :
+        (product, field.Key) switch
+        {
+            (AiProductKind.MemorialBadge, "画布外圆") => FormattableString.Invariant($"{BadgePreset.OuterDiameterMm}mm"),
+            (AiProductKind.MemorialBadge, "内容安全区") => FormattableString.Invariant($"{BadgePreset.SafeDiameterMm}mm"),
+            (AiProductKind.MemorialTshirt, "设计规格") => FormattableString.Invariant($"{TshirtPreset.WidthMm}×{TshirtPreset.HeightMm}mm"),
+            _ => null,
+        };
+
     /// <summary>Literal layer inputs. Date labels share the date field's content confirmation, not an unchecked literal.</summary>
     public static IReadOnlyDictionary<string, string> TextInputs(AiAuthoringDraft draft)
     {

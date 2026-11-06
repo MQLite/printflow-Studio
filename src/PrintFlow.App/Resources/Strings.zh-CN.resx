@@ -1573,6 +1573,9 @@
   <data name="Session_BackgroundRemovalMode_LogosStamps" xml:space="preserve"><value>图标印章</value></data>
   <data name="AiMemorial_LayoutHelp" xml:space="preserve"><value>先核对来源图片和精确文字，再选择排入成品的图片，保存并确认位置。使用本地背景时，先在第 2 步添加参考图，在第 3 步核对权限，再在此选择「背景」。</value></data>
   <data name="AiMemorial_EditLayout" xml:space="preserve"><value>编辑版式</value></data>
+  <data name="AiMemorial_ReopenLayout" xml:space="preserve"><value>按当前内容重新打开版式</value></data>
+  <data name="AiMemorial_FixedSpecification" xml:space="preserve"><value>由产品版式固定</value></data>
+  <data name="AiMemorial_OutdatedPromptSpecification" xml:space="preserve"><value>这份草稿含有旧版尺寸。请重新生成提示词，以使用产品的固定规格。</value></data>
   <data name="AiMemorial_MmHelp" xml:space="preserve"><value>尺寸单位为毫米。图片高度随来源比例调整。</value></data>
   <data name="AiMemorial_LayerRole" xml:space="preserve"><value>图层用途</value></data>
   <data name="AiMemorial_Left" xml:space="preserve"><value>左</value></data>
@@ -1609,7 +1612,7 @@
   <data name="AiMemorial_LayoutConfirmed" xml:space="preserve"><value>已确认版式</value></data>
   <data name="AiMemorial_LayoutPending" xml:space="preserve"><value>版式待确认</value></data>
   <data name="AiMemorial_SourceUnavailable" xml:space="preserve"><value>无法读取已核验的来源图片。请重新打开草稿或重新选择对应图片。</value></data>
-  <data name="AiMemorial_PlacementInputsChanged" xml:space="preserve"><value>文字、图片或权限已变更。请放弃旧排版编辑，再重新打开版式。</value></data>
+  <data name="AiMemorial_PlacementInputsChanged" xml:space="preserve"><value>文字、图片或权限已变更。完成核对后，请重新打开版式；重新打开会替换未保存的排版编辑。</value></data>
   <data name="AiMemorial_InvalidPlacement" xml:space="preserve"><value>请输入有效坐标和正数尺寸，并检查排版与来源尺寸。</value></data>
   <data name="AiMemorial_TextDoesNotFit" xml:space="preserve"><value>原文无法放入文字框。请加大文字框、改为平排或调整字号。</value></data>
   <data name="AiMemorial_MissingGlyph" xml:space="preserve"><value>当前字体无法绘出全部字符。请换用合适的已安装字体。</value></data>

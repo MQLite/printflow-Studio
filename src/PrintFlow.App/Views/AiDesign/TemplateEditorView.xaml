@@ -1,7 +1,7 @@
 <UserControl x:Class="PrintFlow.App.Views.AiDesign.TemplateEditorView"
  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
  xmlns:r="clr-namespace:PrintFlow.App.Views.AiDesign">
- <UserControl.Resources><Style TargetType="TextBox"><Setter Property="Padding" Value="6"/></Style></UserControl.Resources>
+ <UserControl.Resources><Style TargetType="TextBox"><Setter Property="Padding" Value="6"/></Style><BooleanToVisibilityConverter x:Key="VisibleIf"/></UserControl.Resources>
  <Grid>
   <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
   <TextBlock Text="{x:Static r:AiPromptLabels.AiPrompt_EditTemplate}" FontSize="22" FontWeight="SemiBold" Margin="0,0,0,12"/>
@@ -21,7 +21,11 @@
           <StackPanel Width="150" Margin="0,0,8,8"><TextBlock Text="{x:Static r:AiPromptLabels.AiPrompt_Semantic}"/><ComboBox ItemsSource="{Binding DataContext.Semantics, RelativeSource={RelativeSource AncestorType=UserControl}}" SelectedValue="{Binding Semantic}" SelectedValuePath="Value" DisplayMemberPath="Label" AutomationProperties.Name="{x:Static r:AiPromptLabels.AiPrompt_Semantic}"/></StackPanel>
          </WrapPanel>
          <WrapPanel>
-          <StackPanel Width="150" Margin="0,0,8,8"><TextBlock Text="{x:Static r:AiPromptLabels.AiPrompt_Default}"/><TextBox Text="{Binding DefaultValue, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="{x:Static r:AiPromptLabels.AiPrompt_Default}"/></StackPanel>
+          <StackPanel Width="150" Margin="0,0,8,8">
+           <TextBlock Text="{x:Static r:AiPromptLabels.AiPrompt_Default}"/>
+           <TextBox Text="{Binding DefaultValue, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="{Binding IsDefaultReadOnly}" AutomationProperties.Name="{x:Static r:AiPromptLabels.AiPrompt_Default}"/>
+           <TextBlock Text="{x:Static r:AiMemorialLabels.FixedSpecification}" FontSize="12" TextWrapping="Wrap" Visibility="{Binding IsDefaultReadOnly, Converter={StaticResource VisibleIf}}"/>
+          </StackPanel>
           <StackPanel Width="150" Margin="0,0,8,8"><TextBlock Text="{x:Static r:AiPromptLabels.AiPrompt_Slot}"/><TextBox Text="{Binding SlotId, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="{x:Static r:AiPromptLabels.AiPrompt_Slot}"/></StackPanel>
           <StackPanel Width="150" Margin="0,0,8,8"><TextBlock Text="{x:Static r:AiPromptLabels.AiPrompt_DateLabel}"/><TextBox Text="{Binding DateLabel, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="{x:Static r:AiPromptLabels.AiPrompt_DateLabel}"/></StackPanel>
          </WrapPanel>
