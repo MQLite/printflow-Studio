@@ -41,7 +41,6 @@ public sealed partial class HomeViewModel : ObservableObject, IEntryScreenLifeti
     public bool CanOpenPromptWorkbench => _aiNavigation is not null && CanStartImport && !IsImporting;
     public IAsyncRelayCommand OpenPromptWorkbenchCommand { get; }
     public string ContinueHeading => Strings.Resolve("Home_GuidedContinue");
-    public string EnvironmentDetailsLabel => Strings.Resolve("Home_GuidedEnvironmentDetails");
     public IEnumerable<RecentSessionRow> ContinueSessions => RecentSessions.Where(x => x.CanContinueProcessing || x.HasOpenCorrection);
     public IEnumerable<RecentSessionRow> HistorySessions => RecentSessions.Where(x => !x.CanContinueProcessing && !x.HasOpenCorrection);
     public bool HasContinueSessions => ContinueSessions.Any();

@@ -8,8 +8,7 @@ using PrintFlow.App.ViewModels;
 namespace PrintFlow.App.Views;
 
 /// <summary>
-/// Home. The code-behind exists only for drag-and-drop, which WPF exposes as events rather
-/// than as bindable state, and for one layout proportion XAML cannot express.
+/// Home. The code-behind connects drop events, readiness observations and keyboard focus.
 /// </summary>
 /// <remarks>
 /// It reads the dropped paths and hands them straight to the view model's command; it makes no
@@ -18,20 +17,6 @@ namespace PrintFlow.App.Views;
 /// </remarks>
 public partial class HomeView : UserControl
 {
-    /// <summary>
-    /// The most of the screen the part above the lists may take before it scrolls on its own
-    /// (SCRUM-11152).
-    /// </summary>
-    /// <remarks>
-    /// With every disclosure open, the readiness summary, startup warnings, import box and a
-    /// failure notice together outgrow a 1000×700 window, and the Recovery list below would be
-    /// squeezed to nothing. Capping the upper part keeps both halves reachable by scrolling.
-    /// Layout only: it decides nothing and binds nothing.
-    /// </remarks>
-    // The sample's two-line page heading also needs room; reserve enough height for
-    // recovery rows even when every upper disclosure is expanded.
-    private const double UpperShare = 0.39;
-
     private HomeViewModel? _subscribedHome;
     private EventHandler? _observationChanged;
     private long _subscription;
@@ -96,9 +81,6 @@ public partial class HomeView : UserControl
         _subscribedHome = null;
         _observationChanged = null;
     }
-
-    private void OnLayoutSizeChanged(object sender, SizeChangedEventArgs e) =>
-        Upper.MaxHeight = e.NewSize.Height * UpperShare;
 
     private static string[] DroppedPaths(DragEventArgs e) =>
         e.Data.GetDataPresent(DataFormats.FileDrop)

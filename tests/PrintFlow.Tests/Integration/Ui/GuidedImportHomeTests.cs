@@ -83,16 +83,20 @@ public sealed class GuidedImportHomeTests
     }
 
     [Fact]
-    public async Task Import_is_primary_and_above_workstation_information()
+    public async Task Import_is_primary_and_diagnostics_appears_as_a_small_header_link()
     {
         using HomeScreenHarness h = new();
         await h.Home.RefreshCommand.ExecuteAsync(null);
         WpfRendering.RenderExpectingNoBindingErrors(() => new HomeView { DataContext = h.Home }, new Size(1000, 700), tree =>
         {
             var choose = Find<Button>(tree, "Home.ChooseFile");
-            var readiness = Find<TextBlock>(tree, "Home.Readiness.Status");
-            choose.TransformToAncestor(tree.Root).Transform(new Point()).Y
-                .ShouldBeLessThan(readiness.TransformToAncestor(tree.Root).Transform(new Point()).Y);
+            var diagnostics = Find<Button>(tree, "Home.ShowEnvironment");
+            diagnostics.FontSize.ShouldBeLessThan(choose.FontSize);
+            diagnostics.TransformToAncestor(tree.Root).Transform(new Point()).Y
+                .ShouldBeLessThan(choose.TransformToAncestor(tree.Root).Transform(new Point()).Y);
+            diagnostics.ContentTemplate.ShouldNotBeNull();
+            var text = (TextBlock)diagnostics.ContentTemplate.LoadContent();
+            text.TextDecorations.ShouldContain(TextDecorations.Underline.Single());
             choose.IsEnabled.ShouldBeTrue();
             return true;
         });

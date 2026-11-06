@@ -1333,9 +1333,9 @@
   <data name="Home_ReadinessTechnicalCheck" xml:space="preserve"><value>Check identifier: {0} · {1}</value></data>
   <data name="Home_StartupDetails" xml:space="preserve"><value>Startup details</value></data>
   <data name="Home_StartupPresetVerified" xml:space="preserve"><value>The production setup file was verified at startup. This does not confirm that the workstation is ready now.</value></data>
-  <data name="Home_StartupPresetNotVerified" xml:space="preserve"><value>Startup could not verify the production setup file. Choose “View workstation checks” for details.</value></data>
+  <data name="Home_StartupPresetNotVerified" xml:space="preserve"><value>Startup could not verify the production setup file. Open “Environment diagnostics” for details.</value></data>
   <data name="Home_ViewWorkstationChecks" xml:space="preserve">
-    <value>View workstation checks</value>
+    <value>Environment diagnostics</value>
   </data>
   <data name="Home_DiagnosticRetentionWarning" xml:space="preserve">
     <value>Automatic cleanup of diagnostic records did not finish; it will be retried at the next startup. This notice does not mean the workstation passed its checks.</value>
@@ -1355,7 +1355,6 @@
   <data name="Home_GuidedAiUnavailable" xml:space="preserve"><value>Save and copy prompts here. Automatic generation and composition are not available yet.</value></data>
   <data name="Home_GuidedCancelImport" xml:space="preserve"><value>Stop waiting for import</value></data>
   <data name="Home_GuidedContinue" xml:space="preserve"><value>Continue a task</value></data>
-  <data name="Home_GuidedEnvironmentDetails" xml:space="preserve"><value>Workstation details and checks</value></data>
   <data name="Home_GuidedImportCancelled" xml:space="preserve"><value>Import waiting cancelled. If a task was already created, find it in recent tasks; your original file is unchanged.</value></data>
   <data name="Home_GuidedImporting" xml:space="preserve"><value>Importing one image. Your original file is kept unchanged.</value></data>
   <data name="WorkflowSelection_GuidedCancelled" xml:space="preserve"><value>Selection waiting cancelled. Reopen the task to read its current saved state.</value></data>

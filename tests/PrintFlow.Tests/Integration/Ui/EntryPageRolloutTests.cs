@@ -74,7 +74,7 @@ public sealed class EntryPageRolloutTests
 
     [Theory]
     [MemberData(nameof(Viewports))]
-    public async Task Home_keeps_readiness_outside_import_scroll_and_continue_reachable(string language, int width, int height)
+    public async Task Home_keeps_diagnostics_in_the_header_and_continue_reachable(string language, int width, int height)
     {
         using OperatorCultureScope culture = new(language);
         using HomeScreenHarness h = new();
@@ -86,11 +86,12 @@ public sealed class EntryPageRolloutTests
         WpfRendering.RenderExpectingNoBindingErrors(() => new HomeView { DataContext = h.Home }, size, tree =>
         {
             var upper = Find<ScrollViewer>(tree, "Home.Upper");
-            var readiness = Find<TextBlock>(tree, "Home.Readiness.Status");
-            GuidedSessionShellTests.Ancestors(readiness).ShouldNotContain(upper);
-            InViewport(readiness, tree.Root);
+            var diagnostics = Find<Button>(tree, "Home.ShowEnvironment");
+            GuidedSessionShellTests.Ancestors(diagnostics).ShouldNotContain(upper);
+            tree.OfType<TextBlock>().ShouldNotContain(text => AutomationProperties.GetAutomationId(text) == "Home.Readiness.Status");
+            InViewport(diagnostics, tree.Root);
             Reachable(Find<Button>(tree, "Home.ChooseFile"), tree.Root);
-            Reachable(Find<Button>(tree, "Home.ShowEnvironment"), tree.Root);
+            Reachable(diagnostics, tree.Root);
             Reachable(Find<Button>(tree, "Home.ResumeSession"), tree.Root);
             var hint = tree.OfType<TextBlock>().Single(t => t.Text == h.Home.ImportHint);
             hint.FontSize.ShouldBeGreaterThanOrEqualTo(16);
@@ -133,7 +134,7 @@ public sealed class EntryPageRolloutTests
     [InlineData(984, 661)]
     [InlineData(1280, 720)]
     [InlineData(1920, 1080)]
-    public async Task Blocking_reason_survives_expanding_details_and_both_entry_regions_remain_reachable(int width, int height)
+    public async Task A_blocked_diagnostic_does_not_push_import_or_continue_out_of_reach(int width, int height)
     {
         using OperatorCultureScope culture = new("zh-CN");
         using HomeScreenHarness h = new();
@@ -145,22 +146,14 @@ public sealed class EntryPageRolloutTests
         Capture(() => new HomeView { DataContext = h.Home }, size, "home-blocked");
         WpfRendering.RenderExpectingNoBindingErrors(() => new HomeView { DataContext = h.Home }, size, tree =>
         {
-            var reason = Find<TextBlock>(tree, "Home.Readiness.Reason");
-            reason.Text.ShouldBe(h.Home.Readiness.ReasonText);
-            GuidedSessionProjectionTests.Shown(reason).ShouldBeTrue();
-            InViewport(reason, tree.Root);
+            var diagnostics = Find<Button>(tree, "Home.ShowEnvironment");
+            diagnostics.Command.ShouldBeSameAs(h.Home.ShowEnvironmentCommand);
+            AutomationProperties.GetHelpText(diagnostics).ShouldBe(h.Home.Readiness.StatusText);
+            InViewport(diagnostics, tree.Root);
             var import = Find<Button>(tree, "Home.ChooseFile");
             var upper = Find<ScrollViewer>(tree, "Home.Upper");
             var initial = import.TransformToAncestor(upper).TransformBounds(new Rect(import.RenderSize));
             initial.Bottom.ShouldBeLessThanOrEqualTo(upper.ViewportHeight + 0.5, "the import action is visible before scrolling even with a blocking reason");
-            var details = tree.OfType<Expander>().Single(e => Equals(e.Header, h.Home.EnvironmentDetailsLabel));
-            double collapsed = details.ActualHeight;
-            details.IsExpanded = true; Settle(tree.Root);
-            details.ActualHeight.ShouldBeGreaterThan(collapsed + 40, "the deferred details must actually be displayed before checking reachability");
-            var expandedContent = (ScrollViewer)details.Content;
-            expandedContent.ViewportHeight.ShouldBeGreaterThan(0);
-            GuidedSessionProjectionTests.Shown(expandedContent).ShouldBeTrue();
-            InViewport(reason, tree.Root);
             Reachable(Find<Button>(tree, "Home.ChooseFile"), tree.Root);
             Reachable(Find<Button>(tree, "Home.ResumeSession"), tree.Root);
             return true;
@@ -174,7 +167,7 @@ public sealed class EntryPageRolloutTests
     [InlineData("en-US", 984, 661)]
     [InlineData("en-US", 1280, 720)]
     [InlineData("en-US", 1920, 1080)]
-    public async Task Expanded_readiness_and_recovery_do_not_clip_either_abandon_confirmation_action(string language, int width, int height)
+    public async Task Expanded_startup_details_and_recovery_do_not_clip_either_abandon_confirmation_action(string language, int width, int height)
     {
         using OperatorCultureScope culture = new(language);
         using HomeScreenHarness h = new();

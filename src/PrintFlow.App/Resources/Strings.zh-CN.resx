@@ -1323,9 +1323,9 @@
   <data name="Home_ReadinessTechnicalCheck" xml:space="preserve"><value>检查标识：{0} · {1}</value></data>
   <data name="Home_StartupDetails" xml:space="preserve"><value>启动详情</value></data>
   <data name="Home_StartupPresetVerified" xml:space="preserve"><value>生产设置文件在启动时已通过校验；这不代表工作站现在可以处理。</value></data>
-  <data name="Home_StartupPresetNotVerified" xml:space="preserve"><value>启动时未能校验生产设置文件。请选择“查看工作站检查”查看详情。</value></data>
+  <data name="Home_StartupPresetNotVerified" xml:space="preserve"><value>启动时未能校验生产设置文件。请打开「环境诊断」查看详情。</value></data>
   <data name="Home_ViewWorkstationChecks" xml:space="preserve">
-    <value>查看工作站检查</value>
+    <value>环境诊断</value>
   </data>
   <data name="Home_DiagnosticRetentionWarning" xml:space="preserve">
     <value>诊断记录清理未完成，下次启动时会重试。此提示不表示工作站已通过检查。</value>
@@ -1345,7 +1345,6 @@
   <data name="Home_GuidedAiUnavailable" xml:space="preserve"><value>可保存、复制设计提示词；自动生图与排版合成暂不可用。</value></data>
   <data name="Home_GuidedCancelImport" xml:space="preserve"><value>取消本次导入等待</value></data>
   <data name="Home_GuidedContinue" xml:space="preserve"><value>继续待处理任务</value></data>
-  <data name="Home_GuidedEnvironmentDetails" xml:space="preserve"><value>环境详情与检查</value></data>
   <data name="Home_GuidedImportCancelled" xml:space="preserve"><value>已取消导入等待。若任务已创建，可在最近任务中找到；原文件保持不变。</value></data>
   <data name="Home_GuidedImporting" xml:space="preserve"><value>正在导入一张图片，原文件保持不变。</value></data>
   <data name="WorkflowSelection_GuidedCancelled" xml:space="preserve"><value>已取消选择等待。重新打开任务可查看当前已保存的状态。</value></data>
