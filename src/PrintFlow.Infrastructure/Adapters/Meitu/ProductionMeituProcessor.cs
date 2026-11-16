@@ -1,5 +1,4 @@
 using System.IO;
-using System.Security.Cryptography;
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Sessions;
@@ -113,6 +112,21 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
                 }));
         }
 
+        if (request.Operation == MeituOperation.RemoveBackground &&
+            !Enum.IsDefined(request.BackgroundRemovalMode))
+        {
+            return OperationResult.Fail<AdapterOutput>(OperationFailure.Create(
+                FailureCode.PreconditionNotMet,
+                $"Unknown background-removal recogniser '{request.BackgroundRemovalMode}'; no Meitu input was produced.",
+                isRetryable: false,
+                context: new Dictionary<string, string>
+                {
+                    ["requestedMode"] = request.BackgroundRemovalMode.ToString(),
+                    ["inputSent"] = "false",
+                    ["adapterId"] = AdapterId,
+                }));
+        }
+
         // The refusal is deliberately first. Unspecified is the value the normal Session route
         // supplies until C2B adds reviewed-content/operator authority, and it must produce zero
         // Meitu interaction rather than becoming automatic selection anywhere below.
@@ -218,7 +232,24 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
             .ConfigureAwait(false);
         if (exported.IsFailure)
         {
-            return OperationResult.Fail<AdapterOutput>(exported.Failure);
+            OperationFailure failure = exported.Failure;
+            // A size rejection follows a confirmed export of a settled, decoded image.
+            // Meitu can still be showing its save confirmation and holding our working copy.
+            if (failure.MessageKey == MeituEnhancementOutputRule.ShrunkOutputMessageKey &&
+                request.Stop.RequestedMode is null && !cancellationToken.IsCancellationRequested)
+            {
+                string rejectedOutputCleanup = await ReturnToNeutralStateAsync(
+                    enhanced.Value.Target, cancellationToken, outputValidated: false).ConfigureAwait(false);
+                failure = failure with
+                {
+                    Context = new Dictionary<string, string>(failure.Context)
+                    {
+                        ["meituCleanup"] = rejectedOutputCleanup,
+                    },
+                };
+            }
+
+            return OperationResult.Fail<AdapterOutput>(failure);
         }
 
         string cleanup = await ReturnToNeutralStateAsync(enhanced.Value.Target, cancellationToken)
@@ -246,10 +277,26 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
             request.Input,
             request.BackgroundRemovalDecision,
             request.Stop,
-            cancellationToken).ConfigureAwait(false);
+            cancellationToken,
+            request.BackgroundRemovalMode).ConfigureAwait(false);
         if (removed.IsFailure)
         {
             return OperationResult.Fail<AdapterOutput>(removed.Failure);
+        }
+
+        if (removed.Value.Mode != request.BackgroundRemovalMode)
+        {
+            return OperationResult.Fail<AdapterOutput>(OperationFailure.Create(
+                FailureCode.PreconditionNotMet,
+                $"The observed recogniser '{removed.Value.Mode}' does not match requested " +
+                $"'{request.BackgroundRemovalMode}'; no cutout was exported.",
+                isRetryable: false,
+                context: new Dictionary<string, string>
+                {
+                    ["requestedMode"] = request.BackgroundRemovalMode.ToString(),
+                    ["observedMode"] = removed.Value.Mode.ToString(),
+                    ["adapterId"] = AdapterId,
+                }));
         }
 
         OperationResult<MeituExportedOutput> exported = await ExportBackgroundRemovalResultAsync(
@@ -267,7 +314,7 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
         return OperationResult.Ok(new AdapterOutput(
             exported.Value.File,
             _clock.GetUtcNow() - startedAt,
-            $"meitu:remove-background; decision {request.BackgroundRemovalDecision}; " +
+            $"meitu:remove-background; decision {request.BackgroundRemovalDecision}; mode {removed.Value.Mode}; " +
             $"source {Describe(sourceBefore)}; output {Describe(exported.Value.Facts)}; " +
             $"format {exported.Value.Evidence.ConfirmedFormatValue}; " +
             $"transparent pixels {alpha.TransparentPixelCount}/{alpha.PixelCount}; " +
@@ -359,7 +406,7 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
             return OperationResult.Fail<MeituObservedResultExport>(baseline.Failure);
         }
 
-        OperationResult<Unit> executable = VerifyExecutableIdentity(baseline.Value);
+        OperationResult<Unit> executable = VerifyExecutableAvailability(baseline.Value);
         if (executable.IsFailure)
         {
             return OperationResult.Fail<MeituObservedResultExport>(executable.Failure);
@@ -533,9 +580,8 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
                 "authority. Nothing was exported.");
         }
 
-        // Busy and completion are non-nullable observations on the outcome. Requiring the
-        // operation-specific phases again prevents a manually fabricated/stale completion
-        // record from becoming export authority.
+        // Instant cached results may have no observed Busy. They require independent native
+        // recognizer/history evidence; a completion panel alone never grants export authority.
         OperationResult<MeituBaseline> baseline = _baselines.GetVerifiedBaseline();
         if (baseline.IsFailure || baseline.Value.BackgroundRemoval is not { } signature)
         {
@@ -546,8 +592,23 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
                     "The verified preset carries no Background Removal signature. Nothing was exported.");
         }
 
-        if (MeituBackgroundRemovalRule.Classify(signature, backgroundRemoval.Busy.Observation) !=
-                MeituBackgroundRemovalPhase.Busy ||
+        bool processingObserved = backgroundRemoval.Busy is { } busy &&
+            MeituBackgroundRemovalRule.Classify(signature, busy.Observation) == MeituBackgroundRemovalPhase.Busy;
+        bool reapplyObserved = backgroundRemoval.ReappliedRecognition is { } reapply &&
+            MeituRecognitionReapplyRule.IsValid(reapply, backgroundRemoval.Target.Process.ProcessId,
+                backgroundRemoval.ObservedDocumentIdentity, signature) &&
+            reapply.After == backgroundRemoval.Completion &&
+            reapply.Before.Observation.WindowTitle == backgroundRemoval.Target.Window.Title &&
+            reapply.After.Observation.WindowTitle == backgroundRemoval.Target.Window.Title &&
+            (backgroundRemoval.Mode switch
+            {
+                BackgroundRemovalMode.Automatic => true,
+                BackgroundRemovalMode.PortraitPets => reapply.RecognizerIndex == 1,
+                BackgroundRemovalMode.Products => reapply.RecognizerIndex == 2,
+                BackgroundRemovalMode.LogosStamps => reapply.RecognizerIndex == 3,
+                _ => false,
+            });
+        if ((!processingObserved && !reapplyObserved) ||
             MeituBackgroundRemovalRule.Classify(signature, backgroundRemoval.Completion.Observation) !=
                 MeituBackgroundRemovalPhase.Complete ||
             !string.Equals(
@@ -557,7 +618,7 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
         {
             return OperationResult.Fail<MeituExportedOutput>(
                 FailureCode.MeituUnknownState,
-                "Background Removal export requires current-run Busy, positive completion and exact " +
+                "Background Removal export requires current-run Busy or verified native reapplication, positive completion and exact " +
                 "post-completion identity correlation. Nothing was exported.");
         }
 
@@ -769,10 +830,8 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
     /// (Epic 11300 Part B2B §24, §26).
     /// </summary>
     /// <remarks>
-    /// Returns a description instead of a result because there is no caller-visible decision to
-    /// make: the output already exists and is already validated, so the only question is what to
-    /// write down. What the caller must not be able to do is treat a tidy-up problem as a
-    /// processing problem, and a method that cannot fail cannot be misread that way.
+    /// Returns a description for diagnostics. The output's validation outcome has already been
+    /// decided, and a cleanup problem does not replace it.
     ///
     /// The order matters. Meitu's post-save surface disables the editor while it is up, so the
     /// document cannot be closed until it is dismissed — and the close is what makes the next
@@ -782,33 +841,50 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
     /// a blocking modal and stops without touching it, and that is what gets reported here.
     /// </remarks>
     private async Task<string> ReturnToNeutralStateAsync(
-        MeituTarget target, CancellationToken cancellationToken)
+        MeituTarget target, CancellationToken cancellationToken, bool outputValidated = true)
     {
+        string outputStatus = outputValidated ? "The output is valid" : "The output was rejected";
         try
         {
+            cancellationToken.ThrowIfCancellationRequested();
             OperationResult<bool> dismissed = await _driver
                 .DismissExportResultSurfaceAsync(target, cancellationToken).ConfigureAwait(false);
             if (dismissed.IsFailure)
             {
                 return $"WARNING: Meitu's save-confirmation surface could not be dismissed " +
-                       $"({dismissed.Failure.Code}). The output is valid; the next attempt must not " +
+                       $"({dismissed.Failure.Code}). {outputStatus}; the next attempt must not " +
                        "proceed until an operator has cleared it.";
             }
 
-            OperationResult<MeituTarget> closed = await _driver
-                .CloseDocumentAsync(target, cancellationToken).ConfigureAwait(false);
+            // The output-stability wait and the dismissed result surface can hand focus
+            // back to PrintFlow. Reacquire this attempt's exact editor before its guarded
+            // close, otherwise a valid export leaves a loaded document blocking cutout.
+            OperationResult<MeituTarget> activated = await _driver
+                .ActivateAsync(target, cancellationToken).ConfigureAwait(false);
+            if (activated.IsFailure)
+            {
+                return $"WARNING: the document is still loaded ({activated.Failure.Code}: " +
+                       $"{activated.Failure.TechnicalDetail}). {outputStatus}; Meitu could not " +
+                       "be reacquired for cleanup.";
+            }
 
-            return closed.IsSuccess
-                ? "the editor was returned to its signed empty state"
-                : $"WARNING: the document is still loaded ({closed.Failure.Code}: " +
-                  $"{closed.Failure.TechnicalDetail}). The output is valid; Meitu is not in a state the " +
-                  "next attempt may blindly proceed against.";
+            OperationResult<MeituTarget> closed = await _driver
+                .CloseDocumentAsync(activated.Value, cancellationToken).ConfigureAwait(false);
+
+            if (closed.IsSuccess)
+            {
+                ExternalAppFocusHandoff.MarkEmptyEditor(closed.Value.Window);
+                return "the editor was returned to its signed empty state";
+            }
+
+            return $"WARNING: the document is still loaded ({closed.Failure.Code}: " +
+                   $"{closed.Failure.TechnicalDetail}). {outputStatus}; Meitu is not in a state the " +
+                   "next attempt may blindly proceed against.";
         }
         catch (OperationCanceledException)
         {
-            // §34: cancellation after the output exists must not discard it. The result is
-            // already validated; only the tidying is abandoned.
-            return "WARNING: cleanup was cancelled. The output is valid; the document may still be loaded.";
+            // Cancellation during cleanup leaves the export's validation outcome intact.
+            return $"WARNING: cleanup was cancelled. {outputStatus}; the document may still be loaded.";
         }
     }
 
@@ -824,7 +900,7 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
             return OperationResult.Fail<MeituReadiness>(baseline.Failure);
         }
 
-        OperationResult<Unit> identity = VerifyExecutableIdentity(baseline.Value);
+        OperationResult<Unit> identity = VerifyExecutableAvailability(baseline.Value);
         if (identity.IsFailure)
         {
             return OperationResult.Fail<MeituReadiness>(identity.Failure);
@@ -863,7 +939,7 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
             return OperationResult.Fail<MeituReadiness>(baseline.Failure);
         }
 
-        OperationResult<Unit> identity = VerifyExecutableIdentity(baseline.Value);
+        OperationResult<Unit> identity = VerifyExecutableAvailability(baseline.Value);
         if (identity.IsFailure)
         {
             return OperationResult.Fail<MeituReadiness>(identity.Failure);
@@ -1056,7 +1132,8 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
         WorkspaceFileRef workingCopy,
         BackgroundRemovalDecision modeDecision,
         IAutomationStopSignal stop,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        BackgroundRemovalMode mode = BackgroundRemovalMode.Automatic)
     {
         ArgumentNullException.ThrowIfNull(opened);
 
@@ -1074,7 +1151,8 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
                 workingCopy.FileName,
                 modeDecision,
                 stop,
-                cancellationToken)
+                cancellationToken,
+                mode)
             .ConfigureAwait(false);
 
         return run.IsFailure
@@ -1290,50 +1368,33 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
         }
     }
 
-    /// <summary>
-    /// Confirms the accepted executable is present and is the accepted binary (§7).
-    /// </summary>
+    /// <summary>Confirms the configured executable is present and readable without pinning its version.</summary>
     /// <remarks>
-    /// A path match alone would accept any binary that happened to be sitting at the accepted
-    /// location. Hashing is what makes "this is the Meitu Epic 11000 signed off" a checked fact
-    /// rather than an assumption about a directory name.
+    /// Runtime process ownership and recognised interface states remain the automation boundary.
     /// </remarks>
-    private static OperationResult<Unit> VerifyExecutableIdentity(MeituBaseline baseline)
+    private static OperationResult<Unit> VerifyExecutableAvailability(MeituBaseline baseline)
     {
         if (!File.Exists(baseline.ExecutablePath))
         {
             return OperationResult.Fail<Unit>(
                 FailureCode.MeituNotInstalled,
-                $"The accepted Meitu executable is not present at '{baseline.ExecutablePath}'.");
+                $"The configured Meitu executable is not present at '{baseline.ExecutablePath}'.");
         }
 
-        Sha256 actual;
         try
         {
             using FileStream stream = new(
                 baseline.ExecutablePath, FileMode.Open, FileAccess.Read, FileShare.Read,
                 bufferSize: 1 << 20, useAsync: false);
-            actual = Sha256.FromBytes(SHA256.HashData(stream));
+            _ = stream.ReadByte();
+            return OperationResult.Ok();
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
             return OperationResult.Fail<Unit>(
                 FailureCode.MeituNotInstalled,
-                $"The accepted Meitu executable could not be read: {ex.Message}");
+                $"The configured Meitu executable could not be read: {ex.Message}");
         }
-
-        return actual.Equals(baseline.ExecutableSha256)
-            ? OperationResult.Ok()
-            : OperationResult.Fail<Unit>(OperationFailure.Create(
-                FailureCode.MeituNotInstalled,
-                $"The binary at '{baseline.ExecutablePath}' hashes to {actual}, not the accepted " +
-                $"{baseline.ExecutableSha256}. A Meitu upgrade requires preset revalidation before automation resumes.",
-                isRetryable: false,
-                context: new Dictionary<string, string>
-                {
-                    ["expectedSha256"] = baseline.ExecutableSha256.ToString(),
-                    ["actualSha256"] = actual.ToString(),
-                }));
     }
 
     /// <summary>Attaches a window capture to a failure, without letting the capture replace it.</summary>

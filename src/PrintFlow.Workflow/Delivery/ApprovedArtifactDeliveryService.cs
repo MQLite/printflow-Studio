@@ -10,7 +10,7 @@ using PrintFlow.Workflow.Services;
 namespace PrintFlow.Workflow.Delivery;
 
 /// <summary>Serializes exact approved authority with durable external publication.</summary>
-public sealed class ApprovedArtifactDeliveryService : IApprovedArtifactDeliveryService
+public sealed partial class ApprovedArtifactDeliveryService : IApprovedArtifactDeliveryService
 {
     private readonly ISessionRepository _sessions;
     private readonly IDeliveryRepository _deliveries;
@@ -131,6 +131,8 @@ public sealed class ApprovedArtifactDeliveryService : IApprovedArtifactDeliveryS
              !string.Equals(previous.RequestBinding?.RequestedFileName ?? previous.Delivery.RequestedFileName,
                  request.FileName, StringComparison.Ordinal)))
             return Outcome(request, DeliveryCode.RequestConflict, detail: "RequestId already names a different selection.");
+        if (byRequest.Value?.PendingRename is not null)
+            return Outcome(request, DeliveryCode.NeedsReconciliation, byRequest.Value.Delivery.DeliveryId);
         string folder = byRequest.Value?.Delivery.RequestedFolder ?? request.Folder;
         string finalLeaf = byRequest.Value?.Delivery.RequestedFileName ?? request.FileName;
         DeliveryFileResult<IDeliveryFileGuard> opened = _files.Open(sourcePath, artifact.ApprovedSha256,
@@ -305,6 +307,9 @@ public sealed class ApprovedArtifactDeliveryService : IApprovedArtifactDeliveryS
         OperationResult<DeliveryJournalEntry?> reread = await _deliveries.FindByIdAsync(deliveryId, cancellationToken);
         if (reread.IsFailure || reread.Value is null)
             return Outcome(invocation, DeliveryCode.PersistenceFailed, deliveryId);
+        if (reread.Value.PendingRename is not null)
+            return await RenameUnderGateAsync(reread.Value, null, cancellationToken);
+        seed = reread.Value.Delivery;
         OperationResult<SessionAggregate?> loaded = await _sessions.LoadAsync(seed.Artifact.SessionId, cancellationToken);
         if (loaded.IsFailure || loaded.Value is null)
             return Outcome(invocation, DeliveryCode.PersistenceFailed, deliveryId);
@@ -331,6 +336,18 @@ public sealed class ApprovedArtifactDeliveryService : IApprovedArtifactDeliveryS
                 "Delivery record unavailable.");
         DeliveryRecord seed = found.Value.Delivery;
         using IDisposable sessionGate = await SessionCompletionGate.EnterAsync(seed.Artifact.SessionId, cancellationToken);
+        found = await _deliveries.FindByIdAsync(deliveryId, cancellationToken);
+        if (found.IsFailure || found.Value is null)
+            return Observe(seed, DeliveryAvailability.Uncertain, "Delivery record unavailable.");
+        seed = found.Value.Delivery;
+        if (found.Value.PendingRename is not null)
+        {
+            DeliveryOutcome recovered = await RenameUnderGateAsync(found.Value, null, cancellationToken);
+            return new(deliveryId, seed.RequestId, seed.Artifact,
+                recovered.Code is DeliveryCode.Delivered or DeliveryCode.AlreadyDelivered
+                    ? DeliveryAvailability.VerifiedNow : DeliveryAvailability.Unavailable,
+                _time.GetUtcNow(), recovered.FinalPath ?? seed.FinalPath, recovered.Detail);
+        }
         OperationResult<SessionAggregate?> loaded = await _sessions.LoadAsync(seed.Artifact.SessionId, cancellationToken);
         ArtifactResolution resolved = loaded.IsSuccess && loaded.Value is not null
             ? ApprovedArtifactResolver.Resolve(loaded.Value, seed.Artifact)
@@ -371,14 +388,24 @@ public sealed class ApprovedArtifactDeliveryService : IApprovedArtifactDeliveryS
         OperationResult<DeliveryJournalEntry?> refreshed = await _deliveries.FindByIdAsync(prior.DeliveryId, cancellationToken);
         if (refreshed.IsFailure || refreshed.Value?.Delivery.Status != "Delivered")
             return Outcome(invocation, DeliveryCode.NotDelivered, prior.DeliveryId);
+        if (refreshed.Value.PendingRename is not null)
+            return Outcome(invocation, DeliveryCode.NeedsReconciliation, prior.DeliveryId);
         prior = refreshed.Value.Delivery;
         // A recorded successor wins before checking the old path, even when it is absent now.
         OperationResult<DeliveryJournalEntry?> successor = await _deliveries.FindSuccessorAsync(prior.DeliveryId, cancellationToken);
         if (successor.IsFailure) return Outcome(invocation, DeliveryCode.PersistenceFailed, prior.DeliveryId);
         if (successor.Value is not null)
         {
-            DeliveryRequest existing = invocation with { Folder = successor.Value.Delivery.RequestedFolder,
-                FileName = successor.Value.Delivery.RequestedFileName };
+            OperationResult<DeliveryJournalEntry?> bound = await _deliveries.FindByRequestAsync(request.RequestId, cancellationToken);
+            if (bound.IsFailure) return Outcome(invocation, DeliveryCode.PersistenceFailed, prior.DeliveryId);
+            DeliveryRecord recorded = successor.Value.Delivery;
+            if (bound.Value is { } other && other.Delivery.DeliveryId != recorded.DeliveryId)
+                return Outcome(invocation, DeliveryCode.RequestConflict, prior.DeliveryId);
+            DeliveryRequest existing = invocation with
+            {
+                Folder = bound.Value?.RequestBinding?.RequestedFolder ?? recorded.RequestedFolder,
+                FileName = bound.Value?.RequestBinding?.RequestedFileName ?? recorded.RequestedFileName,
+            };
             return await DeliverUnderGateAsync(existing, prior.DeliveryId, progress, cancellationToken);
         }
         OperationResult<SessionAggregate?> loaded = await _sessions.LoadAsync(prior.Artifact.SessionId, cancellationToken);
@@ -422,6 +449,10 @@ public sealed class ApprovedArtifactDeliveryService : IApprovedArtifactDeliveryS
             seed.FinalFileId is null || seed.FinalCreationUtc is null)
             return new(DeliveryAvailability.Uncertain, null, "No verified delivered evidence.");
         using IDisposable sessionGate = await SessionCompletionGate.EnterAsync(seed.Artifact.SessionId, cancellationToken);
+        found = await _deliveries.FindByIdAsync(deliveryId, cancellationToken);
+        if (found.IsFailure || found.Value is not { PendingRename: null } current)
+            return new(DeliveryAvailability.Uncertain, null, "Check the saved file to resolve its current location.");
+        seed = current.Delivery;
         OperationResult<SessionAggregate?> loaded = await _sessions.LoadAsync(seed.Artifact.SessionId, cancellationToken);
         ArtifactResolution resolved = loaded.IsSuccess && loaded.Value is not null
             ? ApprovedArtifactResolver.Resolve(loaded.Value, seed.Artifact)
@@ -641,11 +672,11 @@ public sealed class ApprovedArtifactDeliveryService : IApprovedArtifactDeliveryS
     private static DeliveryState ToState(DeliveryJournalEntry entry)
     {
         DeliveryRecord d = entry.Delivery;
-        byte[] bytes = SHA256.HashData(Encoding.UTF8.GetBytes($"{d.DeliveryId:D}|{d.Status}|{entry.Attempt?.State}|{d.VerifiedAtUtc:O}"));
+        byte[] bytes = SHA256.HashData(Encoding.UTF8.GetBytes($"{d.DeliveryId:D}|{d.Status}|{entry.Attempt?.State}|{d.VerifiedAtUtc:O}|{d.FinalPath}|{entry.PendingRename?.Id:D}"));
         return new(d.DeliveryId, d.RequestId, d.Artifact, d.ReviewId, d.RequestedFolder,
             d.RequestedFileName, d.ResolvedFolder, d.FinalPath, d.Status, entry.Attempt?.State,
             entry.Attempt?.AttemptId, d.VerifiedAtUtc, d.ReplacementOfDeliveryId,
-            new Guid(bytes.AsSpan(0, 16)));
+            new Guid(bytes.AsSpan(0, 16)), PendingRenameFileName: entry.PendingRename?.FileName);
     }
 
     private static DeliveryCode RefusalCode(ArtifactRefusal refusal) =>

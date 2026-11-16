@@ -37,6 +37,17 @@ public interface IEnvironmentGate
 }
 
 /// <summary>
+/// Prepares external applications for an explicitly requested processing step. Production
+/// gates may launch the accepted applications and run bounded readiness checks here.
+/// The caller must still verify under its workstation lease before invoking an adapter.
+/// </summary>
+public interface IPreparingEnvironmentGate : IEnvironmentGate
+{
+    Task<OperationResult<Unit>> PrepareAsync(
+        AdapterExecutionMode mode, CancellationToken cancellationToken);
+}
+
+/// <summary>
 /// Production gate extension used after an operation has atomically acquired the workstation
 /// lease. The explicit capability lets reinspection recognise its own owner without weakening
 /// any other workstation check.

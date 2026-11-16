@@ -660,16 +660,12 @@ public sealed class LocalisationResourceTests
     {
         string english = ValueOf(NeutralResx, "Environment_RestartRequired");
         english.ShouldContain("restart PrintFlow", Case.Insensitive);
-        english.ShouldContain("Photoshop", Case.Insensitive);
-        english.ShouldContain("Meitu", Case.Insensitive);
-        english.ShouldContain("action file", Case.Insensitive);
+        english.ShouldContain("optional", Case.Insensitive);
 
         string chinese = ValueOf(ChineseResx, "Environment_RestartRequired");
         chinese.ShouldContain("重启");
         chinese.ShouldContain("PrintFlow");
-        chinese.ShouldContain("Photoshop");
-        chinese.ShouldContain("美图秀秀");
-        chinese.ShouldContain("动作文件");
+        chinese.ShouldContain("不是处理前提");
     }
 
     /// <summary>
@@ -691,7 +687,7 @@ public sealed class LocalisationResourceTests
         english.ShouldNotContain("verifies everything", Case.Insensitive);
 
         ValueOf(ChineseResx, "Environment_RefreshScope")
-            .ShouldContain("已认可的安装文件要重启 PrintFlow 才会重新读取");
+            .ShouldContain("诊断结果不会限制开始处理");
     }
 
     /// <summary>

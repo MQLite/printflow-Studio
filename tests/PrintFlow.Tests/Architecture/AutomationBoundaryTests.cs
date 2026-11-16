@@ -327,7 +327,9 @@ public sealed class AutomationBoundaryTests
             nameof(IMeituUiDriver.RunBackgroundRemovalAsync))!;
 
         method.GetParameters().Select(parameter => parameter.Name).ShouldBe(
-            ["target", "expectedWorkingCopyFileName", "modeDecision", "stop", "cancellationToken"]);
+            ["target", "expectedWorkingCopyFileName", "modeDecision", "stop", "cancellationToken", "mode"]);
+        method.GetParameters().Single(parameter => parameter.Name == "mode").ParameterType
+            .ShouldBe(typeof(PrintFlow.Domain.Sessions.BackgroundRemovalMode));
         method.GetParameters().ShouldNotContain(parameter =>
             parameter.Name!.Contains("path", StringComparison.OrdinalIgnoreCase) ||
             parameter.Name.Contains("coordinate", StringComparison.OrdinalIgnoreCase) ||

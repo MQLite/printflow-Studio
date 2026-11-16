@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using PrintFlow.Domain.AiDesign.Authoring;
 using PrintFlow.Domain.Files;
+using PrintFlow.Workflow.AiDesign.Memorial;
 
 namespace PrintFlow.Workflow.AiDesign.Authoring;
 
@@ -40,7 +41,8 @@ public static class AiAuthoringSnapshots
 
     public static AiAuthoringDraft Draft(AiAuthoringDraft draft)
     {
-        if (draft is null || draft.Id == Guid.Empty || draft.Revision < 0 || draft.SchemaVersion != 1 ||
+        if (draft is null || draft.Id == Guid.Empty || draft.Revision < 0 || draft.SchemaVersion is not (1 or 2) ||
+            draft.SchemaVersion == 1 && draft.Layout is not null ||
             !Enum.IsDefined(draft.Product) || !Enum.IsDefined(draft.Mode) || draft.Assets is null || draft.Slots is null ||
             draft.Bindings is null || draft.Preservation is null || (draft.ParentDraftId.HasValue != draft.ParentDraftRevision.HasValue) ||
             draft.ParentDraftId == Guid.Empty || draft.ParentDraftRevision < 0) throw Invalid();
@@ -58,15 +60,22 @@ public static class AiAuthoringSnapshots
             slots.Select(x => x.SlotId).Distinct(StringComparer.Ordinal).Count() != slots.Length ||
             bindings.Any(x => x is null || !slots.Any(s => s.SlotId == x.SlotId) || !assets.Any(a => a.Id == x.AssetId)) ||
             bindings.Select(x => x.SlotId).Distinct(StringComparer.Ordinal).Count() != bindings.Length ||
-            preservation.Any(x => x is null || !assets.Any(a => a.Id == x.AssetId))) throw Invalid();
+            preservation.Any(x => x is null || !assets.Any(a => a.Id == x.AssetId)) ||
+            preservation.Select(x => x.AssetId).Distinct().Count() != preservation.Length) throw Invalid();
         var initial = Document(draft.InitialDocument); var final = Document(draft.FinalDocument);
         if (initial.Parts.Concat(final.Parts).OfType<AiImagePart>().Any(x => !slots.Any(s => s.SlotId == x.SlotId))) throw Invalid();
-        return draft with
+        var frozen = draft with
         {
+            SchemaVersion = 2, Layout = draft.Layout is null ? null : MemorialLayoutModule.Freeze(draft.Layout),
             TemplateSnapshot = content, Fields = Dictionary(draft.Fields), Confirmations = Dictionary(draft.Confirmations),
             InitialDocument = initial, FinalDocument = final, Assets = Array.AsReadOnly(assets), Slots = Array.AsReadOnly(slots),
             Bindings = Array.AsReadOnly(bindings), Preservation = Array.AsReadOnly(preservation)
         };
+        // A persisted flag alone cannot certify geometry. Keep invalid drafts editable,
+        // but do not expose their layout as confirmed, including through history reads.
+        if (frozen.Layout is { ProductTemplateConfirmed: true } layout && MemorialLayoutModule.Validate(frozen, layout).Count > 0)
+            frozen = frozen with { Layout = layout with { ProductTemplateConfirmed = false } };
+        return frozen;
     }
 
     public static AiTemplateLibrary Library(AiTemplateLibrary library)

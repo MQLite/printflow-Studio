@@ -111,6 +111,55 @@ public sealed class PresetMeituBaselineProviderTests : IDisposable
         baseline.Value.WelcomeMarkers.ShouldBe(["图片编辑", "抠图"], ignoreOrder: true);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void The_installed_active_Meitu_version_replaces_a_historical_executable_path(bool launcherPath)
+    {
+        (string evidencePath, Sha256 evidenceHash) = WriteEvidence("图片编辑 entry", "抠图 entry");
+        string current = Write(@"XiuXiu\2.0.0\XiuXiu.exe", "current synthetic executable");
+        Write(@"XiuXiu\3.0.0\XiuXiu.exe", "inactive synthetic executable");
+        Write(@"XiuXiu\Config.ini", "[Main]\nVersion=2.0.0\n");
+        string configured = Path.Combine(_workspace.Root, launcherPath ? @"XiuXiu\XiuXiu.exe" : @"XiuXiu\1.0.0\XiuXiu.exe");
+        string contract = System.Text.Json.JsonSerializer.Serialize(new
+        {
+            executablePath = configured,
+            executableSha256 = new string('1', 64),
+            acceptedVersion = "1.0.0",
+        });
+        string manifest = WriteManifest(evidencePath, evidenceHash, contract);
+        PresetMeituBaselineProvider provider = new(manifest, HashOf(manifest));
+
+        MeituBaseline baseline = provider.GetVerifiedBaseline().Value;
+
+        baseline.ExecutablePath.ShouldBe(current);
+        baseline.WelcomeMarkers.ShouldContain("图片编辑");
+
+        Write(@"XiuXiu\Config.ini", "[Main]\nVersion=3.0.0\n");
+        provider.GetVerifiedBaseline().Value.ExecutablePath.ShouldBe(
+            Path.Combine(_workspace.Root, @"XiuXiu\3.0.0\XiuXiu.exe"));
+    }
+
+    [Theory]
+    [InlineData("../outside")]
+    [InlineData("C:\\outside")]
+    [InlineData("not-a-version")]
+    public void Installation_configuration_cannot_redirect_Meitu_outside_its_installation(string version)
+    {
+        (string evidencePath, Sha256 evidenceHash) = WriteEvidence("图片编辑 entry", "抠图 entry");
+        string configured = Write(@"XiuXiu\1.0.0\XiuXiu.exe", "synthetic executable");
+        Write(@"XiuXiu\Config.ini", "[Main]\nVersion=" + version + "\n");
+        string contract = System.Text.Json.JsonSerializer.Serialize(new
+        {
+            executablePath = configured,
+            executableSha256 = new string('1', 64),
+        });
+        string manifest = WriteManifest(evidencePath, evidenceHash, contract);
+        PresetMeituBaselineProvider provider = new(manifest, HashOf(manifest));
+
+        provider.GetVerifiedBaseline().Value.ExecutablePath.ShouldBe(configured);
+    }
+
     /// <summary>
     /// Evidence that records markers but no title carries no usable start-page signature.
     /// </summary>

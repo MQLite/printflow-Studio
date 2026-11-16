@@ -10,7 +10,15 @@ namespace PrintFlow.Infrastructure.Delivery;
 /// <summary>Verified local NTFS delivery operations; unsupported guards fail closed.</summary>
 public sealed class WindowsDeliveryFileSystem : IDeliveryFileSystem
 {
-    public DeliveryFileResult<string> ValidateLeaf(string candidate, ArtifactKind kind)
+    public DeliveryFileResult<string> ValidateLeaf(string candidate, ArtifactKind kind) => ValidateFileLeaf(candidate, kind);
+
+    private static ImageFormat FormatOf(ArtifactKind kind) =>
+        kind == ArtifactKind.ApprovedAssetPng ? ImageFormat.Png : ImageFormat.Tiff;
+
+    private static DeliveryFileResult<string> ValidateFileLeaf(string candidate, ArtifactKind kind) =>
+        ValidateImageLeaf(candidate, FormatOf(kind));
+
+    private static DeliveryFileResult<string> ValidateImageLeaf(string candidate, ImageFormat format)
     {
         if (string.IsNullOrWhiteSpace(candidate) || candidate is "." or ".." ||
             candidate.EndsWith(' ') || candidate.EndsWith('.') || candidate.Length > 240 ||
@@ -23,14 +31,18 @@ public sealed class WindowsDeliveryFileSystem : IDeliveryFileSystem
             or "COM5" or "COM6" or "COM7" or "COM8" or "COM9" or "LPT1" or "LPT2" or "LPT3"
             or "LPT4" or "LPT5" or "LPT6" or "LPT7" or "LPT8" or "LPT9")
             return DeliveryFileResult<string>.Fail(DeliveryCode.InvalidName, "Windows reserves this file name.");
-        string extension = Path.GetExtension(candidate);
-        if (extension.Length == 0)
-            candidate += kind == ArtifactKind.ApprovedAssetPng ? ".png" : ".tif";
-        else if (kind == ArtifactKind.ApprovedAssetPng && !extension.Equals(".png", StringComparison.OrdinalIgnoreCase) ||
-                 kind == ArtifactKind.ApprovedPrintTiff &&
-                 !extension.Equals(".tif", StringComparison.OrdinalIgnoreCase) &&
-                 !extension.Equals(".tiff", StringComparison.OrdinalIgnoreCase))
-            return DeliveryFileResult<string>.Fail(DeliveryCode.InvalidName, "File extension must match the approved image format.");
+        string extension = Path.GetExtension(candidate).ToLowerInvariant();
+        string defaultExtension = format switch
+        {
+            ImageFormat.Png => ".png",
+            ImageFormat.Jpeg => ".jpg",
+            ImageFormat.Tiff => ".tif",
+            _ => string.Empty,
+        };
+        if (defaultExtension.Length == 0 || extension.Length > 0 && extension != defaultExtension &&
+            (format, extension) is not ((ImageFormat.Jpeg, ".jpeg") or (ImageFormat.Tiff, ".tiff")))
+            return DeliveryFileResult<string>.Fail(DeliveryCode.InvalidName, "File extension must match the image format.");
+        if (extension.Length == 0) candidate += defaultExtension;
         return DeliveryFileResult<string>.Ok(candidate);
     }
 
@@ -51,9 +63,27 @@ public sealed class WindowsDeliveryFileSystem : IDeliveryFileSystem
     public DeliveryFileResult<IDeliveryFileGuard> Open(
         string sourcePath, Sha256 expectedSourceHash, long expectedSourceLength,
         string requestedFolder, string finalLeaf, ArtifactKind kind,
+        IReadOnlyList<string> protectedRoots, string? protectedOriginalPath) => OpenCore(sourcePath, expectedSourceHash,
+            expectedSourceLength, requestedFolder, finalLeaf, FormatOf(kind), protectedRoots, protectedOriginalPath);
+
+    public DeliveryFileResult<IDeliveryFileGuard> OpenImageCopy(
+        string sourcePath, FileFacts source, string folder, string leaf, IReadOnlyList<string> protectedRoots) =>
+        OpenCore(sourcePath, source.Sha256, source.ByteLength, folder, leaf, source.Format, protectedRoots, null);
+
+    public DeliveryFileResult<IDeliveryDestinationGuard> OpenForRenameRecovery(string folder, string leaf, ArtifactKind kind,
+        IReadOnlyList<string> protectedRoots)
+    {
+        DeliveryFileResult<IDeliveryFileGuard> opened = OpenCore(null, default, 0, folder, leaf, FormatOf(kind), protectedRoots, null);
+        return opened.IsSuccess ? DeliveryFileResult<IDeliveryDestinationGuard>.Ok(opened.Value!) :
+            DeliveryFileResult<IDeliveryDestinationGuard>.Fail(opened.Code, opened.Detail!);
+    }
+
+    private static DeliveryFileResult<IDeliveryFileGuard> OpenCore(
+        string? sourcePath, Sha256 expectedSourceHash, long expectedSourceLength,
+        string requestedFolder, string finalLeaf, ImageFormat format,
         IReadOnlyList<string> protectedRoots, string? protectedOriginalPath)
     {
-        DeliveryFileResult<string> leaf = ValidateLeaf(finalLeaf, kind);
+        DeliveryFileResult<string> leaf = ValidateImageLeaf(finalLeaf, format);
         if (!leaf.IsSuccess || leaf.Value != finalLeaf)
             return DeliveryFileResult<IDeliveryFileGuard>.Fail(DeliveryCode.InvalidName,
                 leaf.IsSuccess ? $"Confirm the effective file name '{leaf.Value}' before saving." : leaf.Detail!);
@@ -107,13 +137,17 @@ public sealed class WindowsDeliveryFileSystem : IDeliveryFileSystem
             }
             // Source ancestry is checked and held independently. A resolved file name cannot
             // be smuggled in through a symlink while the source handle is in use.
-            HoldChain(Path.GetDirectoryName(Path.GetFullPath(sourcePath))!, held);
-            SafeFileHandle sourceHandle = WindowsDeliveryNative.OpenSource(sourcePath);
-            source = new FileStream(sourceHandle, FileAccess.Read);
-            DeliveryFileIdentity sourceIdentity = WindowsDeliveryNative.Identity(source.SafeFileHandle);
-            if (source.Length != expectedSourceLength || Hash(source) != expectedSourceHash)
-                return FailGuard(held, source, DeliveryCode.SourceChanged,
-                    "Approved source bytes no longer match the reviewed result.");
+            DeliveryFileIdentity? sourceIdentity = null;
+            if (sourcePath is not null)
+            {
+                HoldChain(Path.GetDirectoryName(Path.GetFullPath(sourcePath))!, held);
+                SafeFileHandle sourceHandle = WindowsDeliveryNative.OpenSource(sourcePath);
+                source = new FileStream(sourceHandle, FileAccess.Read);
+                sourceIdentity = WindowsDeliveryNative.Identity(source.SafeFileHandle);
+                if (source.Length != expectedSourceLength || Hash(source) != expectedSourceHash)
+                    return FailGuard(held, source, DeliveryCode.SourceChanged,
+                        "Approved source bytes no longer match the reviewed result.");
+            }
             if (Path.Combine(resolved, finalLeaf).Length >= 32000)
                 return FailGuard(held, source, DeliveryCode.InvalidName, "The full destination path is too long.");
             IDeliveryFileGuard guard = new Guard(held, directory, source,
@@ -223,6 +257,7 @@ public sealed class WindowsDeliveryFileSystem : IDeliveryFileSystem
         private FileStream? _source;
         private FileStream? _stage;
         private FileStream? _final;
+        private readonly DeliveryFileIdentity? _sourceIdentity;
         private readonly Sha256 _expectedSourceHash;
         private readonly long _expectedSourceLength;
         private bool _published;
@@ -230,12 +265,12 @@ public sealed class WindowsDeliveryFileSystem : IDeliveryFileSystem
         private bool _disposed;
 
         public Guard(List<SafeFileHandle> directories, SafeFileHandle directory,
-            FileStream source, DeliveryFileIdentity sourceIdentity,
+            FileStream? source, DeliveryFileIdentity? sourceIdentity,
             Sha256 expectedSourceHash, long expectedSourceLength,
             string folder, string leaf, DeliveryFileIdentity directoryIdentity)
         {
             _directories = directories; _directory = directory; _source = source;
-            SourceIdentity = sourceIdentity; _expectedSourceHash = expectedSourceHash;
+            _sourceIdentity = sourceIdentity; _expectedSourceHash = expectedSourceHash;
             _expectedSourceLength = expectedSourceLength; ResolvedFolder = folder;
             FinalPath = Path.Combine(folder, leaf); VolumeId = directoryIdentity.VolumeId;
             DirectoryId = directoryIdentity.FileId;
@@ -247,7 +282,7 @@ public sealed class WindowsDeliveryFileSystem : IDeliveryFileSystem
         public string VolumeId { get; }
         public string DirectoryId { get; }
         public string DestinationKey { get; }
-        public DeliveryFileIdentity SourceIdentity { get; }
+        public DeliveryFileIdentity SourceIdentity => _sourceIdentity ?? throw new InvalidOperationException("No source is held.");
 
         public DeliveryFileResult<bool> VerifySource()
         {
@@ -272,6 +307,7 @@ public sealed class WindowsDeliveryFileSystem : IDeliveryFileSystem
             try
             {
                 _final?.Dispose();
+                _final = null;
                 SafeFileHandle finalHandle = WindowsDeliveryNative.OpenFinal(FinalPath, _stage is not null);
                 _final = new FileStream(finalHandle, FileAccess.Read);
                 DeliveryFileIdentity identity = WindowsDeliveryNative.Identity(_final.SafeFileHandle);
@@ -286,6 +322,51 @@ public sealed class WindowsDeliveryFileSystem : IDeliveryFileSystem
             { return new(DeliveryFilePresence.Absent, null, null, null); }
             catch (Exception ex) when (ex is Win32Exception or IOException or UnauthorizedAccessException or NotSupportedException)
             { return new(DeliveryFilePresence.Unavailable, null, null, null, DeliveryCode.Unavailable, ex.Message); }
+        }
+
+        public string? ReadHeldFileName()
+        {
+            if (_final is null || _final.SafeFileHandle.IsClosed) return null;
+            try { return Path.GetFileName(WindowsDeliveryNative.ResolvedPath(_final.SafeFileHandle)); }
+            catch (Exception ex) when (ex is Win32Exception or NotSupportedException) { return null; }
+        }
+
+        public async Task<DeliveryFileResult<DeliveryFileIdentity>> RenameFinalNoReplaceAsync(string newLeaf, ArtifactKind kind,
+            DeliveryFileIdentity identity, Sha256 hash, long length, Func<Task<DeliveryFileResult<bool>>> recordIntent)
+        {
+            DeliveryFileResult<string> leaf = ValidateFileLeaf(newLeaf, kind);
+            if (_disposed || _source is null || !leaf.IsSuccess || leaf.Value != newLeaf)
+                return DeliveryFileResult<DeliveryFileIdentity>.Fail(DeliveryCode.InvalidName, "Invalid rename destination.");
+            try
+            {
+                _final?.Dispose();
+                _final = new FileStream(WindowsDeliveryNative.OpenFinal(FinalPath, false, forRename: true), FileAccess.Read);
+                SafeFileHandle handle = _final.SafeFileHandle;
+                if (WindowsDeliveryNative.Identity(handle) != identity || _final.Length != length || Hash(_final) != hash)
+                    return DeliveryFileResult<DeliveryFileIdentity>.Fail(DeliveryCode.DeliveredFileChanged,
+                        "Saved file differs from its verified object or bytes.");
+                // Hold delete authority before writing the intent. Recovery cannot observe the
+                // old name as stable and abort a rename that is still about to run.
+                DeliveryFileResult<bool> recorded = await recordIntent().ConfigureAwait(false);
+                if (!recorded.IsSuccess)
+                    return DeliveryFileResult<DeliveryFileIdentity>.Fail(recorded.Code, recorded.Detail!);
+                WindowsDeliveryNative.RenameNoReplace(handle, _directory, newLeaf);
+                try
+                {
+                    if (Path.GetFileName(WindowsDeliveryNative.ResolvedPath(handle)) != newLeaf)
+                        return DeliveryFileResult<DeliveryFileIdentity>.Fail(DeliveryCode.NeedsReconciliation,
+                            "The held file did not report the requested name after renaming.");
+                    return DeliveryFileResult<DeliveryFileIdentity>.Ok(WindowsDeliveryNative.Identity(handle));
+                }
+                catch (Exception ex) when (ex is Win32Exception or NotSupportedException)
+                { return DeliveryFileResult<DeliveryFileIdentity>.Fail(DeliveryCode.NeedsReconciliation, ex.Message); }
+            }
+            catch (Win32Exception ex) when (ex.NativeErrorCode is 80 or 183)
+            { return DeliveryFileResult<DeliveryFileIdentity>.Fail(DeliveryCode.Collision, ex.Message); }
+            catch (Win32Exception ex) when (ex.NativeErrorCode is 2 or 3)
+            { return DeliveryFileResult<DeliveryFileIdentity>.Fail(DeliveryCode.DeliveredFileMissing, ex.Message); }
+            catch (Exception ex) when (ex is Win32Exception or IOException or UnauthorizedAccessException or NotSupportedException)
+            { return DeliveryFileResult<DeliveryFileIdentity>.Fail(DeliveryCode.Unavailable, ex.Message); }
         }
 
         public DeliveryFileResult<DeliveryFileIdentity> CreateStaging(string stagingLeaf)

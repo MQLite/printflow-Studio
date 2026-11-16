@@ -1,6 +1,7 @@
 using PrintFlow.Domain.AiDesign;
 using PrintFlow.Domain.AiDesign.Authoring;
 using PrintFlow.Domain.Results;
+using PrintFlow.Workflow.AiDesign.Memorial;
 
 namespace PrintFlow.Workflow.AiDesign.Authoring;
 
@@ -27,12 +28,23 @@ public sealed partial class AiAuthoringModule(IAiAuthoringDraftStore store, AiTe
         {
             if (edit is AiAuthoringEdit.ReplaceDocument replacement)
                 edit = replacement with { Document = AiAuthoringSnapshots.Document(replacement.Document) };
+            if (edit is AiAuthoringEdit.SetLayout pendingLayout)
+                edit = pendingLayout with { Layout = MemorialLayoutModule.Freeze(pendingLayout.Layout) };
             var read = await store.ReadAsync(id, ct); if (read.IsFailure) return read;
             var draft = read.Value;
             if (draft.Revision != expectedRevision) return Fail("Draft is stale.");
             AiAuthoringDraft next;
             switch (edit)
             {
+                case AiAuthoringEdit.SetLayout placement:
+                    var layout = placement.Layout;
+                    bool changed = !MemorialLayoutModule.SameContent(draft.Layout, layout);
+                    if (changed) layout = layout with { ProductTemplateConfirmed = false };
+                    var layoutIssues = MemorialLayoutModule.Validate(draft, layout);
+                    if (layoutIssues.Any(x => x.Key is "TextMismatch" or "DuplicateText" or "PreservationConflict") ||
+                        layout.ProductTemplateConfirmed && layoutIssues.Count > 0) return Fail("The layout has unresolved text, geometry or preservation issues.");
+                    next = draft with { Layout = layout };
+                    break;
                 case AiAuthoringEdit.SetDateInterpretation interpretation:
                     if (interpretation.Format is null || interpretation.Format.Length > 0 && !AiDetailedReview.DateFormats.Contains(interpretation.Format, StringComparer.Ordinal) ||
                         !draft.TemplateSnapshot.Fields.Any(x => x.Key == interpretation.FieldKey && AiAuthoringConfirmationRules.IsDate(x))) return Fail("Choose an explicit supported date format.");
@@ -83,6 +95,9 @@ public sealed partial class AiAuthoringModule(IAiAuthoringDraftStore store, AiTe
                     if (field.Value is null || !draft.TemplateSnapshot.Fields.Any(x => x.Kind != AiTemplateFieldKind.ImageReference && (x.Key == field.Key ||
                         AiAuthoringConfirmationRules.IsDate(x) && (AiTemplateMetadata.LabelKey(draft.TemplateSnapshot, x) == field.Key || AiTemplateMetadata.FormatKey(draft.TemplateSnapshot, x) == field.Key))))
                         return Fail("Unknown authoring field.");
+                    if (draft.TemplateSnapshot.Fields.Any(x => x.Key == field.Key &&
+                        MemorialLayoutModule.FixedPromptSpecification(draft.Product, x) is { } fixedValue && field.Value != fixedValue))
+                        return Fail("The product layout defines this specification.");
                     var fields = new Dictionary<string, string>(draft.Fields, StringComparer.Ordinal) { [field.Key] = field.Value };
                     next = draft with { Fields = fields, NeedsFieldReconcile = draft.NeedsFieldReconcile || draft.IsManuallyEdited };
                     break;
@@ -91,8 +106,12 @@ public sealed partial class AiAuthoringModule(IAiAuthoringDraftStore store, AiTe
                     break;
                 case AiAuthoringEdit.Recompose recompose:
                     if (draft.IsManuallyEdited && !recompose.PreservePrevious) return Fail("Preserve the manual draft before recomposing.");
-                    var composition = PromptDocumentComposer.Compose(draft.TemplateSnapshot, draft.Fields);
-                    next = draft with { FinalDocument = composition.Document, IsManuallyEdited = false, NeedsFieldReconcile = false };
+                    var composedFields = new Dictionary<string, string>(draft.Fields, StringComparer.Ordinal);
+                    foreach (var definition in draft.TemplateSnapshot.Fields)
+                        if (MemorialLayoutModule.FixedPromptSpecification(draft.Product, definition) is { } specification)
+                            composedFields[definition.Key] = specification;
+                    var composition = PromptDocumentComposer.Compose(draft.TemplateSnapshot, composedFields);
+                    next = draft with { Fields = composedFields, FinalDocument = composition.Document, IsManuallyEdited = false, NeedsFieldReconcile = false };
                     break;
                 case AiAuthoringEdit.SwitchMode mode:
                     next = draft with { Mode = mode.Mode };
@@ -127,6 +146,9 @@ public sealed partial class AiAuthoringModule(IAiAuthoringDraftStore store, AiTe
             }
             // Every prior successful state already has an immutable snapshot. Publish the new
             // pointer only after the next snapshot exists; a failed save cannot erase the old one.
+            if (next.Layout is not null && (!MemorialLayoutModule.SameInputs(draft, next) ||
+                edit is not AiAuthoringEdit.SetLayout && !MemorialLayoutModule.SameContent(draft.Layout, next.Layout)))
+                next = next with { Layout = next.Layout with { ProductTemplateConfirmed = false } };
             next = AiAuthoringSnapshots.Draft(AiAuthoringConfirmationRules.Refresh(next));
             var active = ActiveAssets(next);
             if (active.Count > AiDesignAttachmentLimits.MaximumFiles || active.Any(x => x.ByteLength > AiDesignAttachmentLimits.ImageBytes || !IsImageMetadata(x)) ||
@@ -182,8 +204,10 @@ public sealed partial class AiAuthoringModule(IAiAuthoringDraftStore store, AiTe
 
     private static AiAuthoringDraft WithTemplate(AiAuthoringDraft draft, AiTemplateDefinition template)
     {
-        var fields = template.Content.Fields.Where(x => x.Kind != AiTemplateFieldKind.ImageReference && x.DefaultValue is not null)
-            .ToDictionary(x => x.Key, x => x.DefaultValue!, StringComparer.Ordinal);
+        var fields = template.Content.Fields.Where(x => x.Kind != AiTemplateFieldKind.ImageReference)
+            .Select(x => (x.Key, Value: MemorialLayoutModule.FixedPromptSpecification(template.Content.Product, x) ?? x.DefaultValue))
+            .Where(x => x.Value is not null)
+            .ToDictionary(x => x.Key, x => x.Value!, StringComparer.Ordinal);
         var slots = template.Content.Fields.Where(x => x.Kind == AiTemplateFieldKind.ImageReference)
             .Select(x => new AiReferenceSlot(x.SlotId!, x.Key, x.Required)).ToArray();
         var composition = PromptDocumentComposer.Compose(template.Content, fields);
@@ -191,7 +215,7 @@ public sealed partial class AiAuthoringModule(IAiAuthoringDraftStore store, AiTe
         {
             Template = template.Reference, TemplateSnapshot = template.Content, Product = template.Content.Product,
             Fields = fields, Slots = slots, Bindings = [], InitialDocument = composition.Document, FinalDocument = composition.Document,
-            IsManuallyEdited = false, NeedsFieldReconcile = false, Confirmations = new Dictionary<string, string>()
+            IsManuallyEdited = false, NeedsFieldReconcile = false, Confirmations = new Dictionary<string, string>(), Layout = null
         });
     }
 

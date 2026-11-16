@@ -130,6 +130,7 @@ public sealed class FlexibleSizeRenderingTests
                 harness, Source(harness, $"i-{culture.Name}.png", 2000, 1000));
             await UseA4Async(presetReview);
             await ChooseBranchAsync(presetReview);
+            await presetReview.ContinueWithSizeCommand.ExecuteAsync(null);
             await presetReview.RunStepCommand.ExecuteAsync(null);
             presetReview.HasPreparationAttemptAudit.ShouldBeTrue();
             Render(presetReview);
@@ -149,6 +150,7 @@ public sealed class FlexibleSizeRenderingTests
                 harness, Source(harness, $"k-{culture.Name}.png", 2000, 1000));
             await UseA4Async(another);
             await ChooseBranchAsync(another);
+            await another.ContinueWithSizeCommand.ExecuteAsync(null);
             await another.RunStepCommand.ExecuteAsync(null);
             await another.ApproveCommand.ExecuteAsync(null);
             await another.CompleteCommand.ExecuteAsync(null);

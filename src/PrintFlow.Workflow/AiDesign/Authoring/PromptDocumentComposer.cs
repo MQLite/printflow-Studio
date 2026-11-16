@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.RegularExpressions;
 using PrintFlow.Domain.AiDesign.Authoring;
+using PrintFlow.Workflow.AiDesign.Memorial;
 
 namespace PrintFlow.Workflow.AiDesign.Authoring;
 
@@ -9,6 +10,43 @@ public static partial class PromptDocumentComposer
     // Only the template is parsed. Substituted operator text, including {{...}}, is opaque.
     [GeneratedRegex(@"\{\{([^{}\r\n]+)\}\}", RegexOptions.CultureInvariant)]
     private static partial Regex VariablePattern();
+
+    public static bool HasOutdatedProductSpecification(AiAuthoringDraft draft)
+    {
+        var fixedValues = draft.TemplateSnapshot.Fields
+            .Select(definition => (definition.Key, Value: MemorialLayoutModule.FixedPromptSpecification(draft.Product, definition)))
+            .Where(entry => entry.Value is not null)
+            .ToDictionary(entry => entry.Key, entry => entry.Value!, StringComparer.Ordinal);
+        if (fixedValues.Count == 0) return false;
+        if (fixedValues.Any(entry => draft.Fields.TryGetValue(entry.Key, out string? saved) && saved != entry.Value)) return true;
+        if (draft.IsManuallyEdited) return false;
+
+        // The old editor could restore the form value after composing a different size.
+        // Compare generated specification-only lines without treating a changed name or date
+        // as a changed product size, or inspecting manually authored prose.
+        static string[] Lines(string text) => text.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
+        var savedLines = draft.FinalDocument.Parts.OfType<AiTextPart>().SelectMany(part => Lines(part.Text)).ToHashSet(StringComparer.Ordinal);
+        foreach (string line in Lines(draft.TemplateSnapshot.Body))
+        {
+            MatchCollection matches = VariablePattern().Matches(line);
+            if (!matches.Any(match => fixedValues.ContainsKey(match.Groups[1].Value))) continue;
+            if (matches.All(match => fixedValues.ContainsKey(match.Groups[1].Value)))
+            {
+                string expected = VariablePattern().Replace(line, match => fixedValues[match.Groups[1].Value]);
+                if (!savedLines.Contains(expected)) return true;
+                continue;
+            }
+
+            // A custom template can mix a size with editable text. If that generated prompt
+            // is stale, regenerate it explicitly rather than guessing which part changed.
+            var current = Compose(draft.TemplateSnapshot, draft.Fields).Document;
+            return !current.Parts.Select(Content).SequenceEqual(draft.FinalDocument.Parts.Select(Content));
+        }
+        return false;
+
+        static (string? Text, string? Slot) Content(AiPromptPart part) =>
+            part is AiTextPart text ? (text.Text, null) : (null, ((AiImagePart)part).SlotId);
+    }
 
     public static AiPromptComposition Compose(AiTemplateContent template, IReadOnlyDictionary<string, string> fields)
     {
@@ -87,7 +125,8 @@ public static partial class PromptDocumentComposer
         return new(new AiPromptDocument(parts.AsReadOnly()), issues.AsReadOnly());
 
         string? Value(AiTemplateField field) =>
-            values.TryGetValue(field.Key, out string? value) ? value : field.DefaultValue;
+            MemorialLayoutModule.FixedPromptSpecification(template.Product, field) ??
+            (values.TryGetValue(field.Key, out string? value) ? value : field.DefaultValue);
 
         void FlushText()
         {

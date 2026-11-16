@@ -59,7 +59,7 @@ public enum WorkstationVerificationCheck
     /// <summary>What the preset records about Meitu's and Photoshop's own UI language (§10).</summary>
     ExternalApplicationUiLanguage,
 
-    /// <summary>The accepted Meitu binary is present at its path with its exact digest (§12).</summary>
+    /// <summary>The configured Meitu executable is present and readable, without a version pin.</summary>
     MeituExecutable,
 
     /// <summary>The accepted Photoshop binary is present with its exact digest and versions (§13).</summary>

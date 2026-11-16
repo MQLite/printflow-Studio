@@ -1,5 +1,11 @@
 using System.Globalization;
+using System.Windows;
+using System.Windows.Automation;
+using System.Windows.Automation.Peers;
+using System.Windows.Automation.Provider;
+using System.Windows.Controls;
 using PrintFlow.App.ViewModels;
+using PrintFlow.App.Views;
 using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Sessions;
@@ -29,6 +35,51 @@ namespace PrintFlow.Tests.Integration.Ui;
 [Collection(SqliteCollection.Name)]
 public sealed class ReturnAndTrimControlsUiTests
 {
+    [Fact]
+    public async Task A_retained_noise_toggle_provider_cannot_edit_a_later_screen_context()
+    {
+        using HomeScreenHarness harness = new();
+        SessionViewModel session = await AtTrimAsync(harness, opaqueSource: false);
+        RenderResult<bool> rendered = WpfRendering.Render(
+            () => new SessionScreenView { DataContext = session }, new Size(1280, 900), tree =>
+            {
+                CheckBox checkbox = tree.OfType<CheckBox>().Single(control =>
+                    AutomationProperties.GetAutomationId(control) == "Session.Trim.IgnoreSmallNoise");
+                AutomationPeer peer = UIElementAutomationPeer.CreatePeerForElement(checkbox)!;
+                IToggleProvider retained = (IToggleProvider)peer.GetPattern(PatternInterface.Toggle)!;
+                checkbox.IsChecked.ShouldBe(true);
+                SessionActionScope.SetContext(tree.Root, "replacement-screen");
+                retained.Toggle();
+                checkbox.IsChecked.ShouldBe(true, "a provider captured before navigation must be inert");
+                ((IToggleProvider)peer.GetPattern(PatternInterface.Toggle)!).Toggle();
+                return checkbox.IsChecked == false;
+            });
+        rendered.BindingErrors.ShouldBeEmpty();
+        rendered.Facts.ShouldBeTrue("a freshly acquired provider still supports accessibility");
+    }
+
+    [Fact]
+    public async Task The_default_noise_filter_can_be_disabled_from_the_trim_screen_and_reopened()
+    {
+        using HomeScreenHarness harness = new();
+        SessionViewModel session = await AtTrimAsync(harness, opaqueSource: false);
+        session.IgnoreSmallTrimNoise.ShouldBeTrue();
+        session.IgnoreSmallTrimNoise = false;
+        await session.ApplyTrimMarginCommand.ExecuteAsync(null);
+        session.Notice.ShouldBeNull();
+
+        SessionId id = harness.Navigation.WorkflowSelectionFor!.Id;
+        (await harness.Sessions.LoadAsync(id, CancellationToken.None)).Value.IgnoreSmallTrimNoise.ShouldBeFalse();
+        SessionViewModel reopened = harness.Session(new RecordingNavigation());
+        reopened.Open((await harness.Sessions.LoadAsync(id, CancellationToken.None)).Value);
+        await reopened.PreviewsLoaded;
+        reopened.IgnoreSmallTrimNoise.ShouldBeFalse();
+
+        await reopened.RunStepCommand.ExecuteAsync(null);
+        await reopened.PreviewsLoaded;
+        (await LoadAsync(harness, id)).Attempts.Single(a => a.Step == StepKind.Trim).IgnoreSmallTrimNoise.ShouldBe(false);
+    }
+
     // -----------------------------------------------------------------------------
     // §24: the return control appears only where it is legal, with real targets
     // -----------------------------------------------------------------------------

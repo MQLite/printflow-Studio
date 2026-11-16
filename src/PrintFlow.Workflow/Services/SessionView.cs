@@ -230,7 +230,7 @@ public sealed record PrintPreparationAttemptView(
     public bool RequiresShrink => Mode == PrintPreparationMode.ProportionalShrink;
 
     internal static PrintPreparationAttemptView From(
-        PhotoshopPreparation preparation, AdapterExecutionMode processingMode)
+        PhotoshopPreparation preparation, AdapterExecutionMode processingMode, bool isPresetTarget)
     {
         FitWithinBoundsPreparation? bounds = preparation as FitWithinBoundsPreparation;
         TargetEdgePreparation? target = preparation as TargetEdgePreparation;
@@ -266,9 +266,9 @@ public sealed record PrintPreparationAttemptView(
             bounds?.Plan.Mode,
             preparation.PhotoshopEdge,
             preparation.PhotoshopEdgeValueMm,
-            target?.Plan.Projection.SelectedTargetEdge,
-            target?.Plan.Projection.RequestedMillimetres,
-            target?.Plan.Selection.PresetOverridden ?? false,
+            isPresetTarget ? null : target?.Plan.Projection.SelectedTargetEdge,
+            isPresetTarget ? null : target?.Plan.Projection.RequestedMillimetres,
+            !isPresetTarget && target?.Plan.Selection.PresetOverridden == true,
             target?.Plan.Projection.Direction,
             preparation.ResizePolicy,
             target?.IsAuthorisedEnlargement ?? false,
@@ -393,15 +393,16 @@ public sealed record FlexibleSizeView(
         TargetEdgePrintPreparationPlan? targetEdge = snapshot.UsableTargetEdgePlan;
         FlexibleSizeSelection? selection =
             usable is not null || targetEdge is not null ? snapshot.SizeSelection : null;
+        bool isPresetTarget = targetEdge is not null && snapshot.IsPresetTarget;
 
         return new FlexibleSizeView(
             presetRecommendations,
-            selection?.Mode,
+            isPresetTarget ? OperatorSizingMode.PresetFit : selection?.Mode,
             selection?.Recommendation?.Preset,
             selection?.Recommendation?.Kind,
             selection?.Recommendation?.MaxWidthMm,
             selection?.Recommendation?.MaxHeightMm,
-            selection?.PresetOverridden ?? false,
+            !isPresetTarget && selection?.PresetOverridden == true,
             targetEdge?.Projection.SelectedTargetEdge,
             targetEdge?.Projection.RequestedMillimetres,
             targetEdge?.Projection.PhotoshopTargetEdge ?? usable?.PhotoshopEdge,
@@ -409,7 +410,7 @@ public sealed record FlexibleSizeView(
             targetEdge?.Projection.ProjectedPixelHeight ?? usable?.ProjectedPixelHeight,
             targetEdge?.Projection.Direction,
             targetEdge?.Projection.ProjectedScale.Percentage,
-            targetEdge?.PresetLimitExceeded ?? false,
+            !isPresetTarget && targetEdge?.PresetLimitExceeded == true,
             targetEdge?.SourceCapacityExceeded ?? false,
             snapshot.NeedsEnlargementAuthority,
             snapshot.HasUsableEnlargementAuthority,
@@ -631,6 +632,9 @@ public sealed record SessionView(
 {
     public IReadOnlyList<SessionHistoryView> History { get; init; } = [];
 
+    public bool IgnoreSmallTrimNoise { get; init; } = true;
+    public bool CurrentTrimIgnoresSmallNoise { get; init; }
+
     /// <summary>The actual pre-trim input of the approved trim promoted to the current PNG.</summary>
     public ArtefactView? ApprovedPngReviewInput
     {
@@ -651,6 +655,8 @@ public sealed record SessionView(
 
     /// <summary>Post-completion maintenance outcome; failure leaves State = Completed.</summary>
     public SessionCleanupResult? CompletionCleanup { get; init; }
+    public BackgroundRemovalMode BackgroundRemovalMode { get; init; } = BackgroundRemovalMode.Automatic;
+    public BackgroundRemovalMode BackgroundRemovalAttemptMode { get; init; } = BackgroundRemovalMode.Automatic;
 
     /// <summary>The exact terminal attempt represented by the current failure surface.</summary>
     public AttemptId? CurrentFailureAttemptId { get; init; }
@@ -973,7 +979,7 @@ public sealed record SessionView(
             // two answer different questions, and a review that borrowed the pending one would
             // rewrite what the operator is told about a result every time the session's next-run
             // plan moved (Part B1A.2B §19).
-            ResolveAttemptPreparation(current, attempts, processingMode),
+            ResolveAttemptPreparation(current, attempts, outputs, processingMode),
 
             // The flexible-size seam, assembled from the same snapshot predicates everything else
             // reads. Nothing here is a second opinion: the UI is told what was decided and what
@@ -1000,6 +1006,11 @@ public sealed record SessionView(
             RootRevisionId = revisions.FirstOrDefault(r => r.IsRoot)?.Id,
             PdfInspection = attempts.LastOrDefault(a => a.PdfInspection is not null)?.PdfInspection,
             CurrentFailureAttemptId = ErrorDetailsSelection.Current(snapshot.CurrentStep, attempts)?.Id,
+            BackgroundRemovalMode = usable?.Mode ?? BackgroundRemovalMode.Automatic,
+            BackgroundRemovalAttemptMode = producingAuthority?.Mode ?? BackgroundRemovalMode.Automatic,
+            IgnoreSmallTrimNoise = snapshot.IgnoreSmallTrimNoise,
+            CurrentTrimIgnoresSmallNoise = current is not null &&
+                attempts.FirstOrDefault(attempt => attempt.OutputRevisionId == current.RevisionId)?.IgnoreSmallTrimNoise == true,
         };
     }
 
@@ -1022,6 +1033,7 @@ public sealed record SessionView(
     private static PrintPreparationAttemptView? ResolveAttemptPreparation(
         ArtefactView? current,
         IReadOnlyList<ProcessingAttempt> attempts,
+        IReadOnlyList<PrintOutput> outputs,
         AdapterExecutionMode processingMode)
     {
         if (current is not { IsCurrentStepResult: true } result)
@@ -1034,7 +1046,10 @@ public sealed record SessionView(
             if (attempt.OutputRevisionId == result.RevisionId &&
                 attempt.Preparation is { } preparation)
             {
-                return PrintPreparationAttemptView.From(preparation, processingMode);
+                bool isPresetTarget = preparation is TargetEdgePreparation &&
+                    outputs.Any(output => output.Id.Value == result.RevisionId.Value &&
+                        output.Dimensions.Preset != SizePreset.Custom);
+                return PrintPreparationAttemptView.From(preparation, processingMode, isPresetTarget);
             }
         }
 
@@ -1217,7 +1232,7 @@ public sealed record SessionView(
     /// already defines (including the fall-through past skipped steps). Neither case restates
     /// a workflow rule here.
     /// </remarks>
-    private static ArtefactView? ResolveArtefact(WorkflowSnapshot snapshot, IReadOnlyList<Revision> revisions)
+    internal static ArtefactView? ResolveArtefact(WorkflowSnapshot snapshot, IReadOnlyList<Revision> revisions)
     {
         if (revisions.Count == 0)
         {

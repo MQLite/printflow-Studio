@@ -523,7 +523,7 @@ public sealed class HomeReadinessSummaryTests
     [InlineData("zh-CN", 1000, 700)]
     [InlineData("en", 1920, 1040)]
     [InlineData("zh-CN", 1920, 1040)]
-    public async Task The_summary_wraps_its_button_is_keyboard_reachable_and_recovery_stays_reachable(
+    public async Task Diagnostics_link_is_keyboard_reachable_and_startup_warnings_and_recovery_stay_visible(
         string language, double width, double height)
     {
         using OperatorCultureScope culture = new(language);
@@ -543,8 +543,8 @@ public sealed class HomeReadinessSummaryTests
                 Button readiness = tree.OfType<Button>().Single(b => AutomationProperties.GetAutomationId(b) == "Home.ShowEnvironment");
                 Expander startup = tree.OfType<Expander>().Single(e => AutomationProperties.GetAutomationId(e) == "Home.StartupDetails");
                 Rect button = Bounds(readiness, tree.Root);
-                TextBlock[] summaryText = tree.OfType<TextBlock>()
-                    .Where(t => AutomationProperties.GetAutomationId(t).StartsWith("Home.Readiness.", StringComparison.Ordinal) && Shown(t))
+                TextBlock[] warnings = tree.OfType<TextBlock>()
+                    .Where(t => AutomationProperties.GetAutomationId(t) is "Home.Startup.PresetWarning" or "Home.Startup.RetentionWarning")
                     .ToArray();
                 ScrollViewer scroller = tree.OfType<ScrollViewer>().Single(s => AutomationProperties.GetAutomationId(s) == "Home.Lists");
                 Button lastRecovery = tree.OfType<Button>()
@@ -565,9 +565,9 @@ public sealed class HomeReadinessSummaryTests
                     readiness.IsEnabled,
                     readiness.IsDefault,
                     StartupCollapsed = !startup.IsExpanded,
-                    Wrapped = summaryText.All(t => t.TextWrapping == TextWrapping.Wrap),
-                    Clipped = summaryText.Where(t => t.DesiredSize.Width > t.ActualWidth + 0.5).Select(t => t.Text).ToArray(),
-                    SummaryLines = summaryText.Length,
+                    WarningsInView = warnings.Length == 2 && warnings.All(warning => Shown(warning) &&
+                        !GuidedSessionShellTests.Ancestors(warning).Contains(upper) &&
+                        Bounds(warning, tree.Root).Bottom <= viewport.Height),
                     RecoveryReachable = recovery.Top >= 0 && recovery.Bottom <= scroller.ViewportHeight + 0.5,
                     ChooseFileReachable = chooseBounds.Top >= -0.5 && chooseBounds.Bottom <= upper.ViewportHeight + 0.5,
                     ScrollerHeight = scroller.ViewportHeight,
@@ -580,9 +580,7 @@ public sealed class HomeReadinessSummaryTests
         rendered.Facts.IsEnabled.ShouldBeTrue();
         rendered.Facts.IsDefault.ShouldBeFalse("Enter must not open anything implicitly");
         rendered.Facts.StartupCollapsed.ShouldBeTrue();
-        rendered.Facts.Wrapped.ShouldBeTrue();
-        rendered.Facts.Clipped.ShouldBeEmpty();
-        rendered.Facts.SummaryLines.ShouldBeGreaterThanOrEqualTo(3, "status, reason and time are all shown for a blocked reading");
+        rendered.Facts.WarningsInView.ShouldBeTrue("startup warnings remain readable without opening diagnostics or scrolling the import region");
         rendered.Facts.RecoveryReachable.ShouldBeTrue("the last recovery action is reachable after scrolling");
         rendered.Facts.ChooseFileReachable.ShouldBeTrue("the import button is reachable after scrolling the upper part");
         rendered.Facts.ScrollerHeight.ShouldBeGreaterThan(120, "the lists keep a usable area below the summary");
@@ -593,8 +591,8 @@ public sealed class HomeReadinessSummaryTests
     /// The tallest the upper part of Home gets at the smallest supported viewport (review F4).
     /// </summary>
     /// <remarks>
-    /// A blocked reading with its technical details open, the preset and retention warnings,
-    /// Startup details open, and a failure notice with its Error details open, above two jobs in
+    /// A blocked reading, the preset and retention warnings, Startup details open, and a failure
+    /// notice with its Error details open, above two jobs in
     /// Recovery needed. Every expander is opened, then the recovery list is scrolled to its end:
     /// the last recovery action and the notice's code must both still be reachable.
     /// </remarks>
@@ -632,8 +630,7 @@ public sealed class HomeReadinessSummaryTests
                 FrameworkElement code = tree.OfType<FrameworkElement>()
                     .Single(e => AutomationProperties.GetAutomationId(e) == "NoticeErrorDetails.Code");
                 ScrollViewer upper = tree.OfType<ScrollViewer>().Single(s => AutomationProperties.GetAutomationId(s) == "Home.Upper");
-                code.BringIntoView();
-                Settle(tree.Root);
+                ScrollToNoticeCode(upper, code, tree.Root);
                 Rect codeBounds = Bounds(code, upper);
                 return new
                 {
@@ -656,9 +653,19 @@ public sealed class HomeReadinessSummaryTests
                         foreach (Expander e in tree.OfType<Expander>()) e.IsExpanded = true;
                         Settle(tree.Root);
                         tree.OfType<ScrollViewer>().Single(s => AutomationProperties.GetAutomationId(s) == "Home.Lists").ScrollToEnd();
-                        tree.OfType<FrameworkElement>().Single(e => AutomationProperties.GetAutomationId(e) == "NoticeErrorDetails.Code").BringIntoView();
                         Settle(tree.Root);
+                        var upper = tree.OfType<ScrollViewer>().Single(s => AutomationProperties.GetAutomationId(s) == "Home.Upper");
+                        var code = tree.OfType<FrameworkElement>().Single(e => AutomationProperties.GetAutomationId(e) == "NoticeErrorDetails.Code");
+                        ScrollToNoticeCode(upper, code, tree.Root);
                     });
+    }
+
+    private static void ScrollToNoticeCode(ScrollViewer upper, FrameworkElement code, FrameworkElement root)
+    {
+        // Offscreen controls have no focused window. Drive the same scroll offset a user can
+        // reach with the scrollbar, then measure the code against the viewport.
+        upper.ScrollToVerticalOffset(upper.VerticalOffset + Bounds(code, upper).Top);
+        Settle(root);
     }
 
     /// <summary>

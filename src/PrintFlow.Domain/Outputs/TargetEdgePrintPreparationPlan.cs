@@ -174,21 +174,19 @@ public sealed record TargetEdgePrintPreparationPlan
     /// the single edge in <see cref="Projection"/>. Sending both would be the non-proportional
     /// stretch the accepted contract prohibits.
     /// <para>
-    /// The preset is always <see cref="SizePreset.Custom"/>, including for an override: once the
-    /// operator has replaced a recommendation with their own edge, the result is no longer that
-    /// named size. Which recommendation was overridden is recorded on <see cref="Selection"/>,
-    /// where it stays legible as an override rather than as the preset itself (§6).
+    /// The preset is Custom for an operator-entered edge. A target derived from a named preset
+    /// retains that preset in the recorded dimensions.
     /// </para>
     /// </remarks>
-    public PrintDimensions AsRecordedDimensions()
+    public PrintDimensions AsRecordedDimensions(SizePreset preset = SizePreset.Custom)
     {
         double requested = (double)Projection.RequestedMillimetres;
         double derivedWidth = PrintDimensions.MillimetresFromPixels(Projection.ProjectedPixelWidth);
         double derivedHeight = PrintDimensions.MillimetresFromPixels(Projection.ProjectedPixelHeight);
 
         return Projection.PhotoshopTargetEdge == LimitingEdge.Width
-            ? PrintDimensions.FromMillimetres(requested, derivedHeight, SizePreset.Custom)
-            : PrintDimensions.FromMillimetres(derivedWidth, requested, SizePreset.Custom);
+            ? PrintDimensions.FromMillimetres(requested, derivedHeight, preset)
+            : PrintDimensions.FromMillimetres(derivedWidth, requested, preset);
     }
 
     public bool IsExecutableWith(EnlargementAuthority? authority) =>

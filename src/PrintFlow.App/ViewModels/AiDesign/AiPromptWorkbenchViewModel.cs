@@ -8,6 +8,7 @@ using PrintFlow.Domain.AiDesign;
 using PrintFlow.Domain.AiDesign.Authoring;
 using PrintFlow.Domain.Results;
 using PrintFlow.Workflow.AiDesign.Authoring;
+using PrintFlow.Workflow.AiDesign.Memorial;
 using PrintFlow.Workflow.Ports;
 
 namespace PrintFlow.App.ViewModels.AiDesign;
@@ -20,10 +21,12 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
     private readonly IAiAuthoringAssetPreview preview;
     private readonly IFilePicker picker;
     private readonly IAiPromptClipboard clipboard;
+    private readonly AiMemorialServices? memorial;
     private readonly SemaphoreSlim operations = new(1, 1);
     private long epoch, editGeneration;
     private bool active, busy;
     private AiAuthoringDraft? draft;
+    private bool hasOutdatedMemorialSpecification;
     private AiPromptDocument document = new([]);
     private string? error, status;
     private AiTemplateRef? pendingTemplate;
@@ -31,7 +34,18 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
     private bool changePending;
     private AiTemplateEditorViewModel? templateEditor;
 
-    public AiAuthoringDraft? Draft { get => draft; private set => SetProperty(ref draft, value); }
+    public AiAuthoringDraft? Draft
+    {
+        get => draft;
+        private set
+        {
+            bool changedOwner = draft?.Id != value?.Id;
+            hasOutdatedMemorialSpecification = value is not null && PromptDocumentComposer.HasOutdatedProductSpecification(value);
+            if (!SetProperty(ref draft, value)) return;
+            if (changedOwner) { ResetMemorialLayoutEditor(); ResetMemorialResult(); }
+            else NotifyMemorial();
+        }
+    }
     public AiPromptDocument Document
     {
         get => document;
@@ -52,10 +66,11 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
     public AiPromptPhotoSlot? ExpandedPhoto { get; private set; }
     public AiTemplateEditorViewModel? TemplateEditor { get => templateEditor; private set => SetProperty(ref templateEditor, value); }
     public bool IsChangePending { get => changePending; private set => SetProperty(ref changePending, value); }
-    public bool IsBusy { get => busy; private set { SetProperty(ref busy, value); OnPropertyChanged(nameof(CanEdit)); } }
+    public bool IsBusy { get => busy; private set { SetProperty(ref busy, value); OnPropertyChanged(nameof(CanEdit)); NotifyMemorial(); } }
     public bool CanEdit => !IsBusy && !isClosing;
     public bool HasUnsavedChanges => Draft is not null && (!Document.Parts.SequenceEqual(Draft.FinalDocument.Parts) ||
-        Fields.Any(x => x.Value != Draft.Fields.GetValueOrDefault(x.Key, x.InitialValue)) || HasUnsavedPreservationChanges);
+        Fields.Any(x => !x.IsReadOnly && x.Value != Draft.Fields.GetValueOrDefault(x.Key, x.InitialValue)) || HasUnsavedPreservationChanges || memorialLayoutDirty);
+    private bool HasOutdatedMemorialSpecification => hasOutdatedMemorialSpecification;
     public string? Error { get => error; private set => SetProperty(ref error, value); }
     public string? Status { get => status; private set => SetProperty(ref status, value); }
     public string? PromptNotice
@@ -63,6 +78,7 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
         get
         {
             if (Draft is null) return null;
+            if (HasOutdatedMemorialSpecification) return L("OutdatedPromptSpecification");
             if (Draft.IsManuallyEdited || !Document.Parts.SequenceEqual(Draft.FinalDocument.Parts)) return Strings.AiPrompt_ManualNotice;
             var values = Fields.ToDictionary(x => x.Key, x => x.Value, StringComparer.Ordinal);
             var composed = PromptDocumentComposer.Compose(Draft.TemplateSnapshot, values).Document;
@@ -90,10 +106,12 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
     public IAsyncRelayCommand CloseTemplateCommand { get; }
 
     public AiPromptWorkbenchViewModel(AiAuthoringModule module, AiTemplateCatalog catalog, IAiAuthoringAssetPreview preview,
-        IFilePicker picker, IAiPromptClipboard clipboard, IAiDraftLeavePrompt? leavePrompt = null, INavigationService? navigation = null)
+        IFilePicker picker, IAiPromptClipboard clipboard, IAiDraftLeavePrompt? leavePrompt = null, INavigationService? navigation = null,
+        AiMemorialServices? memorial = null)
     {
         this.module = module; this.catalog = catalog; this.preview = preview; this.picker = picker; this.clipboard = clipboard;
         this.leavePrompt = leavePrompt; this.navigation = navigation;
+        this.memorial = memorial;
         ReturnHomeCommand = new AsyncRelayCommand(async () => { if (this.navigation is not null) await this.navigation.GoHomeAsync(default); });
         ShowSavedDraftsCommand = new AsyncRelayCommand(async () => await RunAsync(async () => { await ListSavedDraftsCoreAsync(default); }, default));
         OpenSavedDraftCommand = new AsyncRelayCommand<AiSavedDraftChoice>(OpenSavedDraftAsync);
@@ -101,6 +119,8 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
         { if (Draft is null && navigation is not null) await navigation.GoHomeAsync(default); else if (Draft is not null) IsSavedDraftsVisible = false; });
         InitializeTemplateCommands();
         InitializeDetailedCommands();
+        InitializeMemorialLayoutCommands();
+        InitializeMemorialResultCommands();
         ComposeCommand = new AsyncRelayCommand(() => ComposeAsync(false, default));
         CopyCommand = new AsyncRelayCommand(CopyAsync);
         SaveDraftCommand = new AsyncRelayCommand(async () => { await FlushAsync(default); });
@@ -147,33 +167,42 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
             if (result.IsFailure) { await ShowRecoveryAfterOpenFailureAsync(ct); return; }
             if (!IsCurrent(opening)) return;
             ClearPending(); TemplateEditor = null; History = []; OnPropertyChanged(nameof(History));
+            ResetMemorialLayoutEditor(); ResetMemorialResult();
             await PresentAsync(result.Value, ct);
         }, ct);
     }
 
-    public void Deactivate() { active = false; epoch++; ClearPending(); }
+    public void Deactivate()
+    {
+        active = false; epoch++; ClearPending();
+        CancelMemorialTaskCommand.Execute(null);
+        ResetMemorialLayoutEditor(); ResetMemorialResult();
+    }
     private bool IsCurrent(long capturedEpoch) => active && epoch == capturedEpoch;
     private void Edited()
     {
-        editGeneration++; Status = null; ClearPending(); OnPropertyChanged(nameof(HasUnsavedChanges)); OnPropertyChanged(nameof(PromptNotice)); NotifyDetailed();
+        editGeneration++; Status = null; ClearPending(); ClearMemorialConversion();
+        OnPropertyChanged(nameof(HasUnsavedChanges)); OnPropertyChanged(nameof(PromptNotice)); NotifyDetailed();
     }
     internal void PreservationEdited() => Edited();
     private void FieldEdited(object? sender, PropertyChangedEventArgs e) { if (e.PropertyName == nameof(AiPromptFieldInput.Value)) Edited(); }
     private void ClearPending() { IsChangePending = false; pendingTemplate = null; pendingRestore = null; }
     private static OperationResult<AiAuthoringDraft> Refused() => OperationResult.Fail<AiAuthoringDraft>(FailureCode.PreconditionNotMet, "Draft is unavailable or changed; retry the action.");
 
-    public async Task<OperationResult<AiAuthoringDraft>> FlushAsync(CancellationToken ct)
+    public Task<OperationResult<AiAuthoringDraft>> FlushAsync(CancellationToken ct) => FlushAsync(ct, saveLayout: true);
+
+    private async Task<OperationResult<AiAuthoringDraft>> FlushAsync(CancellationToken ct, bool saveLayout)
     {
         var result = Refused();
-        await RunAsync(async () => { result = await FlushCoreAsync(ct); }, ct);
+        await RunAsync(async () => { result = await FlushCoreAsync(ct, saveLayout); }, ct);
         return result;
     }
-    private async Task<OperationResult<AiAuthoringDraft>> FlushCoreAsync(CancellationToken ct)
+    private async Task<OperationResult<AiAuthoringDraft>> FlushCoreAsync(CancellationToken ct, bool saveLayout = true)
     {
         if (Draft is null || !active) return Refused();
         long generation = editGeneration, capturedEpoch = epoch;
         var capturedDocument = Document;
-        var fields = Fields.Select(x => (x.Key, x.Value, x.InitialValue)).ToArray();
+        var fields = Fields.Where(x => !x.IsReadOnly).Select(x => (x.Key, x.Value, x.InitialValue)).ToArray();
         var rules = PreservationChecks.Where(x => x.IsEdited).Select(x => x.Rule).ToArray();
         if (!Draft.FinalDocument.Parts.SequenceEqual(capturedDocument.Parts))
         {
@@ -196,9 +225,14 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
             var saved = await ApplyCoreAsync(new AiAuthoringEdit.SetPreservation(rule), ct);
             if (saved.IsFailure) return saved;
         }
+        if (saveLayout && memorialLayoutDirty)
+        {
+            var saved = await SaveMemorialLayoutCoreAsync(ct);
+            if (saved.IsFailure) return saved;
+        }
         OnPropertyChanged(nameof(HasUnsavedChanges));
         if (!IsCurrent(capturedEpoch) || generation != editGeneration) { Error = Strings.AiPrompt_Changed; return Refused(); }
-        RefreshExport(); Status = Strings.AiPrompt_Saved;
+        RefreshExport(); Status = memorialLayoutDirty ? null : Strings.AiPrompt_Saved;
         NotifyDetailed();
         return OperationResult.Ok(Draft);
     }
@@ -236,7 +270,9 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
         Fields.Clear();
         foreach (var definition in value.TemplateSnapshot.Fields.Where(x => x.Kind != AiTemplateFieldKind.ImageReference))
         {
-            var input = new AiPromptFieldInput(definition, value.Fields.GetValueOrDefault(definition.Key, ""));
+            string? specification = MemorialLayoutModule.FixedPromptSpecification(value.Product, definition);
+            var input = new AiPromptFieldInput(definition, specification ?? value.Fields.GetValueOrDefault(definition.Key, ""),
+                isReadOnly: specification is not null);
             input.PropertyChanged += FieldEdited; Fields.Add(input);
             if (definition.Kind == AiTemplateFieldKind.OptionalDateLine)
             {
@@ -268,6 +304,7 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
             if (loaded.IsSuccess) photo.Preview = loaded.Value;
             else photo.PreviewError = Strings.AiPrompt_PreviewFailed;
         }
+        NotifyMemorial();
     }
     private void RefreshExport()
     {
@@ -293,7 +330,8 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
     }
 }
 
-public sealed class AiPromptFieldInput(AiTemplateField definition, string initialValue, bool isDateFormat = false, string? dateFieldKey = null) : ObservableObject
+public sealed class AiPromptFieldInput(AiTemplateField definition, string initialValue, bool isDateFormat = false,
+    string? dateFieldKey = null, bool isReadOnly = false) : ObservableObject
 {
     private string value = initialValue;
     public string Key => definition.Key;
@@ -306,8 +344,9 @@ public sealed class AiPromptFieldInput(AiTemplateField definition, string initia
     };
     public string InitialValue { get; } = initialValue;
     public bool IsDateFormat => isDateFormat;
+    public bool IsReadOnly => isReadOnly;
     public string? DateFieldKey => dateFieldKey;
-    public string Value { get => value; set => SetProperty(ref this.value, value); }
+    public string Value { get => value; set { if (!IsReadOnly) SetProperty(ref this.value, value); } }
 }
 
 public sealed class AiPromptPhotoSlot(AiReferenceSlot slot, AiDesignAttachment? asset, IReadOnlyList<AiDesignAttachment> available) : ObservableObject

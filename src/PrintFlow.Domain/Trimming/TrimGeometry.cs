@@ -22,9 +22,9 @@ namespace PrintFlow.Domain.Trimming;
 /// </para>
 /// </remarks>
 /// <param name="ContentBounds">
-/// The smallest rectangle containing every source pixel whose alpha is greater than zero,
-/// <i>before</i> any operator safety margin — exactly what <see cref="AlphaBounds.Compute"/>
-/// returned. Never touched by margins, display scaling or print sizing.
+/// The detected content rectangle under the producing attempt's recorded noise policy,
+/// before operator safety margins. Historical exact-alpha trims use <see cref="AlphaBounds.Compute"/>.
+/// Never touched by margins, display scaling or print sizing.
 /// </param>
 /// <param name="AppliedBounds">
 /// The rectangle actually cropped to: <paramref name="ContentBounds"/> grown by the attempt's

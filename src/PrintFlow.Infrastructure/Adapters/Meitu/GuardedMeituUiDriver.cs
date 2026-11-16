@@ -23,7 +23,7 @@ namespace PrintFlow.Infrastructure.Adapters.Meitu;
 /// What the ordering guarantees is that PrintFlow never acts on an assumption it has not just
 /// checked, and that the check is inside the seam rather than left to each caller.
 /// </remarks>
-public sealed class GuardedMeituUiDriver : IMeituUiDriver
+public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
 {
     private readonly IExternalAppWindowLocator _locator;
     private readonly IUiElementProvider _elements;
@@ -112,6 +112,7 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
             expectedWorkingCopyFileName,
             observedDocumentIdentity);
 
+        observation = ObserveBackgroundRemovalResultControl(target, observation);
         await Task.CompletedTask.ConfigureAwait(false);
         return OperationResult.Ok(MeituStateClassifier.Classify(baseline.Value, observation));
     }
@@ -258,7 +259,8 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
         OperationResult<IReadOnlyList<UiElementRef>> found = _elements.FindAll(
             window,
             new UiElementQuery(
-                UiControlKind.Any, Name: signature.Name.Length > 0 ? signature.Name : null));
+                UiControlKind.Any, Name: signature.Name.Length > 0 && !signature.HasVersionedSaveCloseIcon
+                    ? signature.Name : null));
         if (found.IsFailure)
         {
             return OperationResult.Fail<UiElementRef>(found.Failure);
@@ -801,6 +803,9 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
             return editor;
         }
 
+        editor = await ClearEmptyEditorEnhancementAsync(editor.Value, cancellationToken).ConfigureAwait(false);
+        if (editor.IsFailure) return editor;
+
         OperationResult<Unit> requested = await InvokeKnownElementAsync(
             editor.Value, KnownMeituElement.EditorOpenControl, cancellationToken).ConfigureAwait(false);
         if (requested.IsFailure)
@@ -830,6 +835,44 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
         // never choose by title alone or carry an arbitrary same-process window forward.
         return await WaitForOpenedDocumentWindowAsync(editor.Value, cancellationToken)
             .ConfigureAwait(false);
+    }
+
+    private async Task<OperationResult<MeituTarget>> ClearEmptyEditorEnhancementAsync(
+        MeituTarget target, CancellationToken cancellationToken)
+    {
+        OperationResult<MeituBaseline> baseline = _baselines.GetVerifiedBaseline();
+        if (baseline.IsFailure) return OperationResult.Fail<MeituTarget>(baseline.Failure);
+        if (baseline.Value.Enhancement is not { } enhancement) return OperationResult.Ok(target);
+        OperationResult<MeituStateSnapshot> state = await InspectStateAsync(target, null, cancellationToken)
+            .ConfigureAwait(false);
+        if (state.IsFailure) return OperationResult.Fail<MeituTarget>(state.Failure);
+        if (state.Value.State != MeituStartingState.KnownEditorEmpty)
+            return OperationResult.Fail<MeituTarget>(FailureCode.MeituUnknownState,
+                "Meitu is no longer the signed empty editor. No file was opened.");
+        if (MeituEnhancementRule.Classify(enhancement, state.Value.Observation) == MeituEnhancementPhase.Unobserved)
+            return OperationResult.Ok(target);
+
+        // Clear a retained module while there is no document. Waiting until after Open is
+        // too late: Meitu can auto-enhance and resize that file even if the module is then
+        // deselected. One signed toggle here cannot change any document or Working bytes.
+        OperationResult<Unit> toggled = await InvokeKnownElementAsync(
+            target, KnownMeituElement.EditorEnhancementAction, cancellationToken).ConfigureAwait(false);
+        if (toggled.IsFailure) return OperationResult.Fail<MeituTarget>(toggled.Failure);
+        DateTimeOffset deadline = _clock.GetUtcNow() + _options.DialogTimeout;
+        while (true)
+        {
+            state = await InspectStateAsync(target, null, cancellationToken).ConfigureAwait(false);
+            if (state.IsFailure) return OperationResult.Fail<MeituTarget>(state.Failure);
+            if (state.Value.State != MeituStartingState.KnownEditorEmpty)
+                return OperationResult.Fail<MeituTarget>(FailureCode.MeituUnknownState,
+                    "The editor changed while clearing its retained module. No file was opened.");
+            if (MeituEnhancementRule.Classify(enhancement, state.Value.Observation) == MeituEnhancementPhase.Unobserved)
+                return OperationResult.Ok(target);
+            if (_clock.GetUtcNow() >= deadline)
+                return OperationResult.Fail<MeituTarget>(FailureCode.MeituUnknownState,
+                    "The retained Enhancement module did not clear. No file was opened and the toggle was not repeated.");
+            await Task.Delay(_options.PollInterval, _clock, cancellationToken).ConfigureAwait(false);
+        }
     }
 
     /// <summary>
@@ -1474,7 +1517,9 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
     private async Task<OperationResult<MeituTarget>> WaitForEmptyEditorWindowAsync(
         MeituTarget target, CancellationToken cancellationToken)
     {
-        DateTimeOffset deadline = _clock.GetUtcNow() + _options.DialogTimeout;
+        // Opening the editor loads a separate application window, including on cold start.
+        // Give it the launch budget; the picker gets its own dialog budget only afterwards.
+        DateTimeOffset deadline = _clock.GetUtcNow() + _options.LaunchTimeout;
 
         while (true)
         {
@@ -1511,7 +1556,7 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
                 return OperationResult.Fail<MeituTarget>(
                     FailureCode.MeituOpenInputFailed,
                     $"No window of Meitu process {target.Process.ProcessId} reached the signed empty-editor " +
-                    $"state within {_options.DialogTimeout.TotalSeconds:0} s; nothing further was invoked " +
+                    $"state within {_options.LaunchTimeout.TotalSeconds:0} s; nothing further was invoked " +
                     "and nothing was typed.");
             }
 
@@ -2539,11 +2584,18 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
         string expectedWorkingCopyFileName,
         BackgroundRemovalDecision modeDecision,
         IAutomationStopSignal stop,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        BackgroundRemovalMode mode = BackgroundRemovalMode.Automatic)
     {
         ArgumentNullException.ThrowIfNull(target);
         ArgumentNullException.ThrowIfNull(stop);
         ArgumentException.ThrowIfNullOrWhiteSpace(expectedWorkingCopyFileName);
+
+        if (!Enum.IsDefined(mode))
+        {
+            return OperationResult.Fail<MeituBackgroundRemovalOutcome>(
+                FailureCode.PreconditionNotMet, "The requested background recognizer is undefined. No input was sent.");
+        }
 
         OperationResult<MeituBackgroundRemovalSignature> signature = BackgroundRemovalSignature();
         if (signature.IsFailure)
@@ -2626,7 +2678,7 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
             MeituBackgroundRemovalPhase.Busy,
             _options.BackgroundRemovalBusyTimeout,
             stop,
-            cancellationToken).ConfigureAwait(false);
+            cancellationToken, allowCompletedEntry: true).ConfigureAwait(false);
         if (busy.IsFailure)
         {
             return OperationResult.Fail<MeituBackgroundRemovalOutcome>(busy.Failure);
@@ -2646,9 +2698,23 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
             return OperationResult.Fail<MeituBackgroundRemovalOutcome>(completion.Failure);
         }
 
+        var selected = await SelectBackgroundRecognizerAsync(
+            invoked.Value, expectedWorkingCopyFileName, identity, signature.Value, mode,
+            stop, cancellationToken).ConfigureAwait(false);
+        if (selected.IsFailure)
+        {
+            return OperationResult.Fail<MeituBackgroundRemovalOutcome>(selected.Failure);
+        }
+
+        completion = OperationResult.Ok(selected.Value.Completion);
+
         // §13. The cutout exists inside Meitu and nothing has been written. A stop from here
         // means do not export — the 调整 return below is navigation, not output.
         stop.ReportPhase(ExternalOperationPhase.CompletedBeforeExport);
+        if (StopBeforeExport(stop) is { } stoppedBeforeReturn)
+        {
+            return OperationResult.Fail<MeituBackgroundRemovalOutcome>(stoppedBeforeReturn);
+        }
 
         OperationResult<MeituTarget> returned = await InvokeBackgroundRemovalReturnAsync(
             invoked.Value, signature.Value, cancellationToken).ConfigureAwait(false);
@@ -2657,11 +2723,15 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
             return OperationResult.Fail<MeituBackgroundRemovalOutcome>(returned.Failure);
         }
 
-        OperationResult<MeituTarget> reacquired = await ReacquireEditorAsync(
-            returned.Value, expectedWorkingCopyFileName, identity, cancellationToken).ConfigureAwait(false);
+        OperationResult<MeituTarget> reacquired = await WaitForBackgroundRemovalReturnAsync(
+            returned.Value, expectedWorkingCopyFileName, identity, signature.Value, stop, cancellationToken).ConfigureAwait(false);
         if (reacquired.IsFailure)
         {
             return OperationResult.Fail<MeituBackgroundRemovalOutcome>(reacquired.Failure);
+        }
+        if (StopBeforeExport(stop) is { } stoppedBeforeIdentity)
+        {
+            return OperationResult.Fail<MeituBackgroundRemovalOutcome>(stoppedBeforeIdentity);
         }
 
         OperationResult<MeituStateSnapshot> after = await ConfirmWorkingCopyIdentityAsync(
@@ -2701,11 +2771,11 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
             settled.Value,
             identity,
             modeDecision,
-            signature.Value.ObservedAutomaticModeName,
+            RecognitionModeName(mode),
             before.Value,
-            busy.Value,
+            selected.Value.Busy,
             completion.Value,
-            after.Value));
+            after.Value) { Mode = mode, ReappliedRecognition = selected.Value.Evidence });
     }
 
     private async Task<OperationResult<MeituTarget>> InvokeBackgroundRemovalAsync(
@@ -2838,7 +2908,8 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
         MeituBackgroundRemovalPhase wanted,
         TimeSpan timeout,
         IAutomationStopSignal stop,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        bool allowCompletedEntry = false)
     {
         DateTimeOffset deadline = _clock.GetUtcNow() + timeout;
         MeituBackgroundRemovalPhase last = MeituBackgroundRemovalPhase.Unobserved;
@@ -2896,9 +2967,11 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
                     return OperationResult.Fail<MeituStateSnapshot>(stopped);
                 }
 
-                if (last == wanted)
+                bool instantEntryResult = allowCompletedEntry && wanted == MeituBackgroundRemovalPhase.Busy &&
+                    last == MeituBackgroundRemovalPhase.Complete;
+                if (last == wanted || instantEntryResult)
                 {
-                    if (wanted == MeituBackgroundRemovalPhase.Busy)
+                    if (wanted == MeituBackgroundRemovalPhase.Busy && !instantEntryResult)
                     {
                         return snapshot;
                     }
@@ -2923,7 +2996,8 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
                         readInterrupted = true;
                         last = MeituBackgroundRemovalPhase.Unobserved;
                     }
-                    else if (MeituBackgroundRemovalRule.Classify(signature, full.Value.Observation) == wanted)
+                    else if (MeituBackgroundRemovalRule.Classify(signature, full.Value.Observation) ==
+                        (instantEntryResult ? MeituBackgroundRemovalPhase.Complete : wanted))
                     {
                         return full;
                     }
@@ -2962,7 +3036,12 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
                             "A Meitu-owned modal appeared during Background Removal. It was not " +
                             "dismissed and no further input was produced.");
                     }
-                    else if (full.Value.State == MeituStartingState.Unknown)
+                    else if (full.Value.State == MeituStartingState.Unknown &&
+                        !(wanted == MeituBackgroundRemovalPhase.Busy &&
+                          string.Equals(full.Value.Observation.WindowTitle, target.Window.Title, StringComparison.Ordinal) &&
+                          signature.Completion.RequiredMarkers.Count(marker =>
+                              full.Value.Observation.VisibleTexts.Any(text =>
+                                  text.Contains(marker, StringComparison.Ordinal))) >= 3))
                     {
                         return OperationResult.Fail<MeituStateSnapshot>(OperationFailure.Create(
                             FailureCode.MeituUnknownState,
@@ -2977,6 +3056,10 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
                                 ["operatorActionRequired"] = "true",
                             }));
                     }
+                    // On entry, Meitu paints the signed cutout controls before its Busy overlay.
+                    // Three corroborating result markers on this same unblocked editor license
+                    // read-only waiting within the existing Busy deadline, never completion.
+                    // Once Busy has been observed, an Unknown screen still stops immediately.
                 }
             }
 
@@ -3053,6 +3136,7 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
         [
             .. signature.Busy.RequiredMarkers,
             .. signature.Completion.RequiredMarkers,
+            "应用到背景",
         ];
         OperationResult<IReadOnlyList<string>> texts =
             _elements.ReadMatchingTextSnapshot(window.Value.Handle, markers);
@@ -3068,6 +3152,7 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
             window.Value.IsEnabled,
             expectedWorkingCopyFileName,
             observedDocumentIdentity);
+        observation = ObserveBackgroundRemovalResultControl(target, observation);
         MeituBackgroundRemovalPhase phase = MeituBackgroundRemovalRule.Classify(signature, observation);
         MeituStartingState state = !window.Value.IsEnabled || dialogs.Value.Count > 0
             ? MeituStartingState.KnownModal

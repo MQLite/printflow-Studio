@@ -6,6 +6,7 @@ using Microsoft.Win32.SafeHandles;
 using PrintFlow.Infrastructure.Automation;
 using PrintFlow.Infrastructure.Delivery;
 using PrintFlow.Infrastructure.Workspace;
+using PrintFlow.Workflow.Delivery;
 
 namespace PrintFlow.Infrastructure.AiDesign;
 
@@ -14,26 +15,29 @@ public static class AiDesignOwnedStagingFiles
 {
     public enum RequestPurpose { RequestAuthority, AttachmentSequence, BridgeQueue }
 
-    internal static OwnedFile CreateAuthoring(string workspaceRoot, Guid? draftId, Guid? versionId)
+    internal static OwnedFile CreateAuthoring(string workspaceRoot, Guid? draftId, Guid? versionId, Guid? reviewId = null)
     {
-        string root = AuthoringDirectory(workspaceRoot, draftId);
+        string root = AuthoringDirectory(workspaceRoot, draftId, reviewId);
         if (versionId == Guid.Empty) throw new IOException("Authoring version identity required.");
         PrepareDirectory(root);
         string destination = versionId is null ? "current.json" : $"revision-{versionId:N}.json";
         return OwnedFile.Create(root, System.IO.Path.Combine(root, $".authoring-{Guid.NewGuid():N}.tmp"), System.IO.Path.Combine(root, destination));
     }
 
-    internal static string AuthoringDirectory(string workspaceRoot, Guid? draftId)
+    internal static string AuthoringDirectory(string workspaceRoot, Guid? draftId, Guid? reviewId = null)
     {
-        if (draftId == Guid.Empty) throw new IOException("Authoring draft identity required.");
+        if (draftId == Guid.Empty || reviewId == Guid.Empty || reviewId is not null && draftId is null)
+            throw new IOException("Authoring identity required.");
         string root = System.IO.Path.Combine(ValidRoot(workspaceRoot), "AiDesign", "Authoring");
+        if (reviewId is { } renderId)
+            return System.IO.Path.Combine(root, "Reviews", draftId!.Value.ToString("D"), renderId.ToString("D"));
         return draftId is null ? System.IO.Path.Combine(root, "Templates")
             : System.IO.Path.Combine(root, "Drafts", draftId.Value.ToString("D"));
     }
 
-    internal static IDisposable PinAuthoringDirectory(string workspaceRoot, Guid? draftId)
+    internal static IDisposable PinAuthoringDirectory(string workspaceRoot, Guid? draftId, Guid? reviewId = null)
     {
-        string root = AuthoringDirectory(workspaceRoot, draftId); PrepareDirectory(root);
+        string root = AuthoringDirectory(workspaceRoot, draftId, reviewId); PrepareDirectory(root);
         return PinnedParents.Open(root, System.IO.Path.Combine(root, ".lock"));
     }
 
@@ -373,5 +377,90 @@ public static class AiDesignOwnedStagingFiles
         }
         public Task PublishSnapshotAsync(CancellationToken ct) => Snapshot.MoveWithinBatchAsync(ct);
         public void MarkReadOnly() => Snapshot.MarkReadOnly();
+    }
+
+    /// <summary>Creates a managed render's two files with held ownership; its seal commits last.</summary>
+    internal sealed class MemorialRenderBatch : IDisposable
+    {
+        private readonly PinnedParents _workspace;
+        private readonly List<SafeFileHandle> _directories = [];
+        private FileStream? _png, _seal;
+        private bool _published;
+
+        public MemorialRenderBatch(string workspaceRoot, Guid draftId, Guid renderId)
+        {
+            if (draftId == Guid.Empty || renderId == Guid.Empty) throw new IOException("Render identity required.");
+            string folder = ValidRoot(workspaceRoot);
+            _workspace = PinnedParents.Open(folder, System.IO.Path.Combine(folder, ".render-anchor"));
+            try
+            {
+                foreach (string leaf in new[] { "AiDesign", "Authoring", "Renders", draftId.ToString("D"), renderId.ToString("D") })
+                {
+                    folder = System.IO.Path.Combine(folder, leaf);
+                    PrepareDirectory(folder);
+                    _directories.Add(Native(() => WindowsDeliveryNative.OpenDirectory(folder)));
+                }
+                _png = Create(folder);
+                _seal = Create(folder);
+            }
+            catch { Dispose(); throw; }
+        }
+
+        public Stream Png => _png ?? throw new InvalidOperationException("Render PNG writer is closed.");
+        public Stream Seal => _seal ?? throw new InvalidOperationException("Render seal writer is closed.");
+        public DeliveryFileIdentity PngIdentity => Native(() => WindowsDeliveryNative.Identity(_png!.SafeFileHandle));
+
+        public void Publish(CancellationToken ct)
+        {
+            if (_published || _png is null || _seal is null) throw new InvalidOperationException("Render batch is closed.");
+            _png.Flush(true); _seal.Flush(true);
+            ct.ThrowIfCancellationRequested();
+            SetReadOnly(_png); SetReadOnly(_seal);
+            SafeFileHandle parent = _directories[^1];
+            Native(() => { WindowsDeliveryNative.RenameNoReplace(_png.SafeFileHandle, parent, "render.png"); return true; });
+            ct.ThrowIfCancellationRequested();
+            Native(() => { WindowsDeliveryNative.RenameNoReplace(_seal.SafeFileHandle, parent, "identity.json"); return true; });
+            _published = true;
+        }
+
+        private static FileStream Create(string folder)
+        {
+            var handle = Native(() => WindowsDeliveryNative.OpenStage(System.IO.Path.Combine(folder, $".render-{Guid.NewGuid():N}.tmp"), true));
+            try { _ = Identity.Read(handle); return new(handle, FileAccess.ReadWrite, 65536, isAsync: false); }
+            catch { handle.Dispose(); throw; }
+        }
+
+        private static void SetReadOnly(FileStream file)
+        {
+            _ = Identity.Read(file.SafeFileHandle);
+            SetAttributes(file.SafeFileHandle, FileAttributes.ReadOnly);
+        }
+
+        public void Dispose()
+        {
+            // Keep the seal unreadable to readers until its corresponding PNG is available.
+            Finish(_png); _png = null;
+            Finish(_seal); _seal = null;
+            for (int i = _directories.Count - 1; i >= 0; i--) _directories[i].Dispose();
+            _directories.Clear(); _workspace.Dispose();
+        }
+
+        private void Finish(FileStream? stream)
+        {
+            if (stream is null) return;
+            using (stream)
+            {
+                if (_published) return;
+                try
+                {
+                    var handle = stream.SafeFileHandle;
+                    _ = Identity.Read(handle);
+                    SetAttributes(handle, FileAttributes.Normal);
+                    WindowsDeliveryNative.DeleteHeldFile(handle);
+                }
+                catch (Exception ex) when (ex is IOException or Win32Exception or NotSupportedException)
+                { /* Refused cleanup preserves the original failure and never adopts a pathname. */ }
+            }
+        }
     }
 }

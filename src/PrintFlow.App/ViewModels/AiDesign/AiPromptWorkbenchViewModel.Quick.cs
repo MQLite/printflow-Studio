@@ -10,7 +10,7 @@ public sealed partial class AiPromptWorkbenchViewModel
 {
     private async Task ComposeAsync(bool preserveManual, CancellationToken ct) => await RunAsync(async () =>
     {
-        if ((await FlushCoreAsync(ct)).IsFailure) return;
+        if ((await FlushCoreAsync(ct, saveLayout: false)).IsFailure) return;
         if (Draft!.IsManuallyEdited && !preserveManual) { IsChangePending = true; return; }
         long capturedEpoch = epoch, generation = editGeneration;
         var result = await ApplyCoreAsync(new AiAuthoringEdit.Recompose(preserveManual), ct);
@@ -20,7 +20,8 @@ public sealed partial class AiPromptWorkbenchViewModel
 
     private async Task CopyAsync() => await RunAsync(async () =>
     {
-        if ((await FlushCoreAsync(default)).IsFailure) return;
+        if (HasOutdatedMemorialSpecification) { Error = L("OutdatedPromptSpecification"); return; }
+        if ((await FlushCoreAsync(default, saveLayout: false)).IsFailure) return;
         try { clipboard.SetText(module.Export(Draft!).Text); Status = Strings.AiPrompt_Copied; }
         catch (Exception ex) when (ex is ExternalException or InvalidOperationException)
         { Error = Strings.AiPrompt_CopyFailed; }
@@ -28,7 +29,7 @@ public sealed partial class AiPromptWorkbenchViewModel
 
     private async Task PickSlotImageAsync(string? slotId)
     {
-        if (slotId is null || (await FlushAsync(default)).IsFailure || Draft is null) return;
+        if (slotId is null || (await FlushAsync(default, saveLayout: false)).IsFailure || Draft is null) return;
         var selectedDraft = Draft; long capturedEpoch = epoch, generation = editGeneration;
         if (!selectedDraft.Slots.Any(x => x.SlotId == slotId) || !selectedDraft.FinalDocument.Parts.OfType<AiImagePart>().Any(x => x.SlotId == slotId)) return;
         string? path = picker.PickSingleFile(Strings.AiPrompt_ChoosePhoto, "Images|*.png;*.jpg;*.jpeg;*.webp");
@@ -43,7 +44,7 @@ public sealed partial class AiPromptWorkbenchViewModel
 
     private async Task EditAsync(AiAuthoringEdit edit) => await RunAsync(async () =>
     {
-        if ((await FlushCoreAsync(default)).IsFailure) return;
+        if ((await FlushCoreAsync(default, saveLayout: false)).IsFailure) return;
         long capturedEpoch = epoch, generation = editGeneration;
         var result = await ApplyCoreAsync(edit, default);
         if (result.IsSuccess && IsCurrent(capturedEpoch) && generation == editGeneration) await PresentAsync(result.Value, default);

@@ -181,7 +181,7 @@ public sealed class ManualCropStepTests
         List<ProcessingAttempt> attempts = [.. aggregate.Attempts.Where(a => a.Step == StepKind.Trim)];
         attempts.Count.ShouldBe(2);
 
-        ProcessingAttempt automatic = attempts.Single(a => a.AdapterId == "internal-alpha-trim-v1");
+        ProcessingAttempt automatic = attempts.Single(a => a.AdapterId == "internal-alpha-trim-v2");
         automatic.Status.ShouldBe(AttemptStatus.Failed);
         automatic.Failure!.Code.ShouldBe(FailureCode.ManualCropRequired);
         automatic.OutputRevisionId.ShouldBeNull();
@@ -461,7 +461,7 @@ public sealed class ManualCropStepTests
 
         // The failed deterministic attempt is still there too, under all of it (§20).
         aggregate.Attempts.ShouldContain(x =>
-            x.AdapterId == "internal-alpha-trim-v1" && x.Failure!.Code == FailureCode.ManualCropRequired);
+            x.AdapterId == "internal-alpha-trim-v2" && x.Failure!.Code == FailureCode.ManualCropRequired);
 
         // Distinct attempts, each writing into its own directory: B cannot have overwritten A.
         List<ProcessingAttempt> manualAttempts =

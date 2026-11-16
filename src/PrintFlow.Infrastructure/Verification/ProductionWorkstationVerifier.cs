@@ -576,7 +576,8 @@ public sealed class ProductionWorkstationVerifier :
             WorkstationVerificationCheck.MeituExecutable,
             requirements.Meitu,
             FailureCode.MeituNotInstalled,
-            "Meitu"),
+            "Meitu",
+            pinBinaryVersion: false),
         VerifyExecutable(
             WorkstationVerificationCheck.PhotoshopExecutable,
             requirements.Photoshop,
@@ -669,8 +670,13 @@ public sealed class ProductionWorkstationVerifier :
         WorkstationVerificationCheck check,
         AcceptedExecutable accepted,
         FailureCode notInstalled,
-        string application)
+        string application,
+        bool pinBinaryVersion = true)
     {
+        if (!pinBinaryVersion)
+        {
+            accepted = accepted with { Path = MeituExecutablePathResolver.Resolve(accepted.Path) };
+        }
         FileIdentityFacts observed = _artifacts.ReadFile(accepted.Path);
 
         if (!observed.Exists)
@@ -686,6 +692,15 @@ public sealed class ProductionWorkstationVerifier :
                 check, WorkstationCheckKind.Immutable, notInstalled, accepted.Sha256.ToString(), "(unreadable)",
                 $"The {application} executable at its accepted path could not be read, so its " +
                 "identity cannot be established.");
+        }
+
+        if (!pinBinaryVersion)
+        {
+            return WorkstationCheckResult.Passed(
+                check, WorkstationCheckKind.Immutable,
+                $"{accepted.Path} (product {observed.ProductVersion ?? "unrecorded"}; file {observed.FileVersion ?? "unrecorded"})",
+                $"The configured {application} executable is present and readable. Its version and " +
+                "binary digest are informational; compatibility is checked against the running interface.");
         }
 
         // Versions before the digest, deliberately: an operator reading "reports 21.0, accepted

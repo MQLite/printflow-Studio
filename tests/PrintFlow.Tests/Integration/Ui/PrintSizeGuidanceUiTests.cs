@@ -38,7 +38,7 @@ public sealed class PrintSizeGuidanceUiTests
     [InlineData(SizePreset.A3Portrait, 4000, 2000, "zh-CN", LimitingEdge.Width)] // box, landscape source in a portrait box
     [InlineData(SizePreset.A4, 2000, 4000, "en", LimitingEdge.Height)] // long edge, portrait: height limits
     [InlineData(SizePreset.A5, 4000, 2000, "zh-CN", LimitingEdge.Height)] // short edge, landscape: height limits
-    [InlineData(SizePreset.A3Landscape, 300, 200, "en", LimitingEdge.None)] // already within the limits
+    [InlineData(SizePreset.A3Landscape, 300, 200, "en", LimitingEdge.Width)] // enlargement needs confirmation
     [InlineData(SizePreset.A3Landscape, 7200, 5600, "zh-CN", LimitingEdge.Width)] // same proportions as the box: the model reports Width
     public async Task A_preset_summary_matches_the_plan_in_millimetres_and_names_what_decided_it(
         SizePreset preset, int width, int height, string language, LimitingEdge intended)
@@ -52,14 +52,14 @@ public sealed class PrintSizeGuidanceUiTests
 
         SessionView view = await LoadAsync(h, screen);
         PrintDimensionsPreflight facts = view.Preflight.ShouldNotBeNull();
-        screen.Preflight.ShouldBe(facts);
+        (screen.Preflight.ShouldNotBeNull() with { EnlargementOfferId = facts.EnlargementOfferId }).ShouldBe(facts);
         screen.IsDraftPreflight.ShouldBeFalse();
 
         // The preflight is the plan's projection: same pixels, same edge, same decision.
-        facts.OutputPixelWidth.ShouldBe(view.ProjectedPixelWidth!.Value);
-        facts.OutputPixelHeight.ShouldBe(view.ProjectedPixelHeight!.Value);
-        facts.GoverningEdge.ShouldBe(view.LimitingEdge!.Value);
-        view.LimitingEdge.ShouldBe(intended, "the fixture exercises the case it is named for");
+        facts.OutputPixelWidth.ShouldBe(view.Sizing.ProjectedPixelWidth!.Value);
+        facts.OutputPixelHeight.ShouldBe(view.Sizing.ProjectedPixelHeight!.Value);
+        facts.GoverningEdge.ShouldBe(view.Sizing.ResolvedLimitingEdge!.Value);
+        facts.GoverningEdge.ShouldBe(intended, "the fixture exercises the case it is named for");
         facts.Governor.ShouldBe(view.PreparationMode == PrintPreparationMode.ResolutionOnly
             ? PrintSizeGovernor.WithinLimits : PrintSizeGovernor.LimitReached);
         facts.SelectedTargetEdge.ShouldBeNull();
@@ -68,7 +68,7 @@ public sealed class PrintSizeGuidanceUiTests
         summary.ShouldStartWith(string.Format(OperatorCulture.Current, Strings.Session_SizeSummaryCurrent,
             facts.PhysicalWidthMm, facts.PhysicalHeightMm));
         summary.ShouldContain(MillimetresOfRow(screen), Case.Sensitive, "the sentence and the unchanged technical row agree");
-        summary.ShouldContain(view.LimitingEdge switch
+        summary.ShouldContain(facts.GoverningEdge switch
         {
             LimitingEdge.Width => Strings.Session_SizeGovernorLimitWidth,
             LimitingEdge.Height => Strings.Session_SizeGovernorLimitHeight,
@@ -571,8 +571,8 @@ public sealed class PrintSizeGuidanceUiTests
         screen.CanChooseFlexibleSize.ShouldBeTrue();
         AssertLanguage(screen.PresetModeHelp, language);
         AssertLanguage(screen.CustomModeHelp, language);
-        screen.PresetModeHelp.ShouldContain(language == "en" ? "maximum" : "上限");
-        screen.PresetModeHelp.ShouldContain(language == "en" ? "never enlarged" : "不会被放大");
+        screen.PresetModeHelp.ShouldContain(language == "en" ? "size limit" : "上限");
+        screen.PresetModeHelp.ShouldContain(language == "en" ? "your approval" : "须先确认");
         screen.CustomModeHelp.ShouldContain(screen.CustomSizeLabel);
         foreach (TargetEdgeChoice choice in screen.TargetEdgeChoices)
             screen.CustomModeHelp.ShouldContain(choice.Label, Case.Sensitive, "every existing edge choice is named");

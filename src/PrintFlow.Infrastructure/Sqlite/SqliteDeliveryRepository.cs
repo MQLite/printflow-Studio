@@ -75,7 +75,7 @@ public sealed class SqliteDeliveryRepository(SqliteConnectionFactory factory) : 
     {
         using SqliteConnection c = factory.Open();
         using SqliteTransaction tx = c.BeginTransaction();
-        DeliveryJournalEntry? sameRequest = Find(c, tx, "RequestId", proposed.RequestId.ToString("D"));
+        DeliveryJournalEntry? sameRequest = Find(c, tx, "RequestId", proposed.RequestId.ToString("D"), includeRenames: false);
         if (sameRequest is not null)
         {
             if (!SameRequest(sameRequest.Delivery, proposed))
@@ -115,6 +115,9 @@ public sealed class SqliteDeliveryRepository(SqliteConnectionFactory factory) : 
         if (!AuthorityRecorded(c, tx, proposed))
             return OperationResult.Fail<DeliveryJournalEntry>(FailureCode.PreconditionNotMet,
                 "The exact approved review and artifact are no longer current in the delivery transaction.");
+        if (RenameOwnsDestination(c, tx, proposed.DestinationKey))
+            return OperationResult.Fail<DeliveryJournalEntry>(FailureCode.PreconditionNotMet,
+                "A pending rename already owns the destination.");
         DeliveryJournalEntry? sameDestination = Find(c, tx, "DestinationKey", proposed.DestinationKey);
         if (proposed.ReplacementOfDeliveryId is null && sameDestination is not null)
         {
@@ -131,7 +134,7 @@ public sealed class SqliteDeliveryRepository(SqliteConnectionFactory factory) : 
                 return OperationResult.Fail<DeliveryJournalEntry>(FailureCode.PreconditionNotMet,
                     "Destination is already owned by another active delivery request.");
         }
-        long ordinal = ScalarLong(c, tx, "SELECT COALESCE(MAX(IntentOrdinal),0)+1 FROM ArtifactDelivery;");
+        long ordinal = NextDestinationOrdinal(c, tx);
         proposed = proposed with { IntentOrdinal = ordinal };
         using (SqliteCommand command = Command(c, tx, """
             INSERT INTO ArtifactDelivery
@@ -187,6 +190,9 @@ public sealed class SqliteDeliveryRepository(SqliteConnectionFactory factory) : 
             tx.Commit();
             return OperationResult.Ok(active);
         }
+        if (RenameOwnsDestination(c, tx, destinationKey))
+            return OperationResult.Fail<DeliveryAttemptRecord>(FailureCode.PreconditionNotMet,
+                "A pending rename already owns the destination.");
         Guid attemptId = Guid.NewGuid();
         DeliveryAttemptRecord next = new(attemptId, deliveryId, (entry.Attempt?.AttemptNumber ?? 0) + 1,
             destinationKey, DeliveryAttemptState.Intent, ".printflow-" + attemptId.ToString("N") + ".partial",
@@ -409,15 +415,76 @@ public sealed class SqliteDeliveryRepository(SqliteConnectionFactory factory) : 
         return Convert.ToInt64(command.ExecuteScalar(), CultureInfo.InvariantCulture) == 1;
     }
 
-    private static DeliveryJournalEntry? Find(SqliteConnection c, SqliteTransaction? tx, string column, string value)
+    public Task<OperationResult<bool>> BeginRenameAsync(DeliveryRecord expected, DeliveryRename rename) => Run(() =>
     {
-        using SqliteCommand command = Command(c, tx,
-            $"SELECT DeliveryId FROM ArtifactDelivery WHERE {column}=$value ORDER BY IntentOrdinal DESC LIMIT 1;");
-        Add(command, "$value", value);
-        return command.ExecuteScalar() is string id ? ReadEntry(c, tx, Guid.Parse(id)) : null;
+        using SqliteConnection c = factory.Open();
+        using SqliteTransaction tx = c.BeginTransaction();
+        if (ReadEntry(c, tx, expected.DeliveryId) is not { PendingRename: null, Delivery: { Status: "Delivered" } current } ||
+            current != expected || !AuthorityRecorded(c, tx, current)) return OperationResult.Ok(false);
+        using SqliteCommand command = Command(c, tx, """
+            INSERT OR IGNORE INTO DeliveryRename(RenameId,DeliveryId,FileName,FinalPath,DestinationKey,State)
+            SELECT $id,$delivery,$name,$path,$key,'Pending'
+            WHERE NOT EXISTS (SELECT 1 FROM DeliveryAttempt WHERE DestinationKey=$key
+                AND State IN ('Intent','Staging','ReadyToPublish','NeedsReconciliation'));
+            """);
+        Add(command, "$id", rename.Id);
+        Add(command, "$delivery", expected.DeliveryId);
+        Add(command, "$name", rename.FileName);
+        Add(command, "$path", rename.FinalPath);
+        Add(command, "$key", rename.DestinationKey);
+        bool written = command.ExecuteNonQuery() == 1;
+        tx.Commit();
+        return OperationResult.Ok(written);
+    });
+
+    private static bool RenameOwnsDestination(SqliteConnection c, SqliteTransaction tx, string key)
+    {
+        using SqliteCommand pending = Command(c, tx,
+            "SELECT 1 FROM DeliveryRename WHERE State='Pending' AND DestinationKey=$key;");
+        Add(pending, "$key", key);
+        return pending.ExecuteScalar() is not null;
     }
 
-    private static DeliveryJournalEntry? ReadEntry(SqliteConnection c, SqliteTransaction? tx, Guid id)
+    public Task<OperationResult<bool>> EndRenameAsync(DeliveryRename rename, DateTimeOffset? finalCreationUtc) => Run(() =>
+    {
+        using SqliteConnection c = factory.Open();
+        using SqliteTransaction tx = c.BeginTransaction();
+        using SqliteCommand command = Command(c, tx, """
+            UPDATE DeliveryRename SET State=$state,FinalCreationUtc=$created,CommitOrdinal=$ordinal
+            WHERE RenameId=$id AND DeliveryId=$delivery AND State='Pending';
+            """);
+        Add(command, "$state", finalCreationUtc is null ? "Aborted" : "Committed");
+        Add(command, "$created", finalCreationUtc is { } created ? Iso(created) : null);
+        Add(command, "$ordinal", finalCreationUtc is null ? null : NextDestinationOrdinal(c, tx));
+        Add(command, "$id", rename.Id);
+        Add(command, "$delivery", rename.DeliveryId);
+        bool changed = command.ExecuteNonQuery() == 1;
+        tx.Commit();
+        return OperationResult.Ok(changed);
+    });
+
+    private static long NextDestinationOrdinal(SqliteConnection c, SqliteTransaction tx) => ScalarLong(c, tx, """
+        SELECT MAX(COALESCE((SELECT MAX(IntentOrdinal) FROM ArtifactDelivery),0),
+                   COALESCE((SELECT MAX(CommitOrdinal) FROM DeliveryRename),0))+1;
+        """);
+
+    private static DeliveryJournalEntry? Find(SqliteConnection c, SqliteTransaction? tx, string column, string value,
+        bool includeRenames = true)
+    {
+        string predicate = column == "DestinationKey" ? """
+            COALESCE((SELECT r.DestinationKey FROM DeliveryRename r WHERE r.DeliveryId=d.DeliveryId
+                AND r.State='Committed' ORDER BY r.rowid DESC LIMIT 1), d.DestinationKey)
+            """ : column;
+        string order = column == "DestinationKey" ? """
+            COALESCE((SELECT MAX(r.CommitOrdinal) FROM DeliveryRename r WHERE r.DeliveryId=d.DeliveryId), d.IntentOrdinal)
+            """ : "IntentOrdinal";
+        using SqliteCommand command = Command(c, tx,
+            $"SELECT DeliveryId FROM ArtifactDelivery d WHERE {predicate}=$value ORDER BY {order} DESC LIMIT 1;");
+        Add(command, "$value", value);
+        return command.ExecuteScalar() is string id ? ReadEntry(c, tx, Guid.Parse(id), includeRenames) : null;
+    }
+
+    private static DeliveryJournalEntry? ReadEntry(SqliteConnection c, SqliteTransaction? tx, Guid id, bool includeRenames = true)
     {
         using SqliteCommand command = Command(c, tx, "SELECT * FROM ArtifactDelivery WHERE DeliveryId=$id;");
         Add(command, "$id", id);
@@ -446,7 +513,28 @@ public sealed class SqliteDeliveryRepository(SqliteConnectionFactory factory) : 
             "SELECT AttemptId FROM DeliveryAttempt WHERE DeliveryId=$id ORDER BY AttemptNumber DESC LIMIT 1;");
         Add(latest, "$id", id);
         DeliveryAttemptRecord? attempt = latest.ExecuteScalar() is string aid ? ReadAttempt(c, tx, Guid.Parse(aid)) : null;
-        return new DeliveryJournalEntry(delivery, attempt);
+        if (!includeRenames || delivery.Status != "Delivered") return new DeliveryJournalEntry(delivery, attempt);
+        using SqliteCommand renames = Command(c, tx, """
+            SELECT RenameId,FileName,FinalPath,DestinationKey,FinalCreationUtc FROM DeliveryRename
+            WHERE DeliveryId=$id AND State IN ('Pending','Committed') ORDER BY rowid DESC LIMIT 2;
+            """);
+        Add(renames, "$id", id);
+        using SqliteDataReader changes = renames.ExecuteReader();
+        DeliveryRename? pending = null;
+        while (changes.Read())
+        {
+            var rename = new DeliveryRename(Guid.Parse(S(changes, "RenameId")), id, S(changes, "FileName"),
+                S(changes, "FinalPath"), S(changes, "DestinationKey"));
+            if (Date(changes, "FinalCreationUtc") is not { } creation)
+            {
+                pending = rename;
+                continue;
+            }
+            var original = new DeliveryRequestBinding(delivery.RequestedFolder, delivery.RequestedFileName);
+            return new DeliveryJournalEntry(delivery with { RequestedFileName = rename.FileName, FinalPath = rename.FinalPath,
+                DestinationKey = rename.DestinationKey, FinalCreationUtc = creation }, attempt, original, pending);
+        }
+        return new DeliveryJournalEntry(delivery, attempt, PendingRename: pending);
     }
 
     private static DeliveryAttemptRecord? ReadAttempt(SqliteConnection c, SqliteTransaction? tx, Guid id)

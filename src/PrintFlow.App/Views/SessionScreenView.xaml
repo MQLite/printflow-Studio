@@ -103,6 +103,41 @@
 
 
 
+        <DataTemplate x:Key="SavedFileActionsTemplate">
+            <StackPanel>
+                <WrapPanel Margin="0,6,0,0">
+                    <local:SessionActionButton Content="{Binding RenameSavedLabel}" Command="{Binding BeginRenameCommand}"
+                            AutomationProperties.AutomationId="Session.FinalSave.BeginRename"
+                            AutomationProperties.Name="{Binding RenameSavedLabel}"
+                            Visibility="{Binding CanBeginRename, Converter={StaticResource BoolToVisibility}}" />
+                    <local:SessionActionButton Content="{Binding SaveAnotherCopyLabel}" Command="{Binding BeginCopyCommand}"
+                            AutomationProperties.AutomationId="Session.FinalSave.BeginCopy"
+                            AutomationProperties.Name="{Binding SaveAnotherCopyLabel}"
+                            Visibility="{Binding CanBeginCopy, Converter={StaticResource BoolToVisibility}}" />
+                    <local:SessionActionButton Content="{Binding CancelSaveEditLabel}" Command="{Binding CancelSaveEditCommand}"
+                            AutomationProperties.Name="{Binding CancelSaveEditLabel}"
+                            IsEnabled="{Binding IsSaveDraftEditable}"
+                            Visibility="{Binding ShowsCopyDraft, Converter={StaticResource BoolToVisibility}}" />
+                </WrapPanel>
+                <StackPanel Margin="0,6,0,0" Visibility="{Binding ShowsRenameDraft, Converter={StaticResource BoolToVisibility}}">
+                    <TextBlock Text="{Binding SaveFileNameLabel}" Style="{StaticResource MetadataLabel}" />
+                    <local:SessionTextBox Text="{Binding RenameFileNameText, UpdateSourceTrigger=PropertyChanged}"
+                            IsEnabled="{Binding CanEditRename}" AutomationProperties.Name="{Binding SaveFileNameLabel}"
+                            AutomationProperties.AutomationId="Session.FinalSave.RenameFileName" />
+                    <TextBlock Text="{Binding RenameDraftNotice}" TextWrapping="Wrap" />
+                    <WrapPanel>
+                        <local:ReviewApprovalButton Content="{Binding ApplyRenameLabel}" Command="{Binding ApplyRenameCommand}"
+                                TargetIdentity="{Binding RenameIdentity}" IsEnabled="{Binding CanApplyRename}"
+                                AutomationProperties.Name="{Binding ApplyRenameLabel}"
+                                AutomationProperties.AutomationId="Session.FinalSave.ApplyRename" />
+                        <local:SessionActionButton Content="{Binding CancelSaveEditLabel}" Command="{Binding CancelSaveEditCommand}"
+                                AutomationProperties.Name="{Binding CancelSaveEditLabel}"
+                                IsEnabled="{Binding CanEditRename}" />
+                    </WrapPanel>
+                </StackPanel>
+            </StackPanel>
+        </DataTemplate>
+
         <!-- Final review and save section (SCRUM-11145); instantiated only while it applies. -->
         <DataTemplate x:Key="FinalSaveTemplate">
             <Border BorderBrush="{DynamicResource PF.Brush.Border}" Background="{DynamicResource PF.Brush.Surface}" BorderThickness="1" CornerRadius="10" Padding="16" Margin="0,0,0,14"
@@ -130,7 +165,7 @@
                         <local:SessionComboBox ItemsSource="{Binding FinalSaveTargets}"
                                   SelectedItem="{Binding SelectedFinalSaveTarget, Mode=TwoWay}"
                                   TextSearch.TextPath="Label" HorizontalContentAlignment="Stretch"
-                                  IsEnabled="{Binding IsSaveDraftEditable}"
+                                  IsEnabled="{Binding CanSelectSaveResult}"
                                   AutomationProperties.AutomationId="Session.FinalSave.Target"
                                   AutomationProperties.Name="{Binding FinalSaveTargetLabel}">
                             <local:SessionComboBox.ItemTemplate>
@@ -160,7 +195,7 @@
                                   SelectedItem="{Binding SelectedFinalSaveRecord, Mode=TwoWay}"
                                   HorizontalContentAlignment="Stretch"
                                   TextSearch.TextPath="Label"
-                                  IsEnabled="{Binding IsSaveDraftEditable}"
+                                  IsEnabled="{Binding CanSelectFinalSaveRecord}"
                                   AutomationProperties.AutomationId="Session.FinalSave.Record"
                                   AutomationProperties.Name="{Binding FinalSaveRecordsLabel}">
                             <local:SessionComboBox.ItemTemplate>
@@ -212,6 +247,7 @@
                                  AutomationProperties.Name="{Binding SavedPathLabel}" />
                     </StackPanel>
 
+                    <ContentControl Content="{Binding}" ContentTemplate="{StaticResource SavedFileActionsTemplate}" Focusable="False" IsTabStop="False" />
                     <WrapPanel Margin="0,10,0,0">
                         <WrapPanel.Resources>
                             <Style TargetType="Button" BasedOn="{StaticResource RecommendedAction}">
@@ -281,7 +317,7 @@
                         <local:SessionComboBox ItemsSource="{Binding FinalSaveTargets}"
                                   SelectedItem="{Binding SelectedFinalSaveTarget, Mode=TwoWay}"
                                   TextSearch.TextPath="Label" HorizontalContentAlignment="Stretch"
-                                  IsEnabled="{Binding IsSaveDraftEditable}"
+                                  IsEnabled="{Binding CanSelectSaveResult}"
                                   AutomationProperties.AutomationId="Session.FinalSave.Target"
                                   AutomationProperties.Name="{Binding FinalSaveTargetLabel}">
                             <local:SessionComboBox.ItemTemplate>
@@ -313,7 +349,7 @@
                                   SelectedItem="{Binding SelectedFinalSaveRecord, Mode=TwoWay}"
                                   HorizontalContentAlignment="Stretch"
                                   TextSearch.TextPath="Label"
-                                  IsEnabled="{Binding IsSaveDraftEditable}"
+                                  IsEnabled="{Binding CanSelectFinalSaveRecord}"
                                   AutomationProperties.AutomationId="Session.FinalSave.Record"
                                   AutomationProperties.Name="{Binding FinalSaveRecordsLabel}">
                             <local:SessionComboBox.ItemTemplate>
@@ -371,6 +407,7 @@
                                  AutomationProperties.Name="{Binding SavedPathLabel}" />
                     </StackPanel>
 
+                    <ContentControl Content="{Binding}" ContentTemplate="{StaticResource SavedFileActionsTemplate}" Focusable="False" IsTabStop="False" />
                     <WrapPanel Margin="0,10,0,0">
                         <WrapPanel.Resources>
                             <Style TargetType="Button" BasedOn="{StaticResource RecommendedAction}">
@@ -635,6 +672,9 @@
                     <Setter Property="BorderBrush" Value="#9BAFC0" />
                     <Setter Property="BorderThickness" Value="1" />
                     <Style.Triggers>
+                        <DataTrigger Binding="{Binding ShowsGuidedCustomSizeAction}" Value="True">
+                            <Setter Property="KeyboardNavigation.TabIndex" Value="0" />
+                        </DataTrigger>
                         <Trigger Property="IsFocused" Value="True">
                             <Setter Property="BorderBrush" Value="{DynamicResource PF.Brush.Primary}" />
                             <Setter Property="BorderThickness" Value="2" />
@@ -1323,6 +1363,13 @@
                                        AutomationProperties.AutomationId="Session.RecoveryGuidance.Preserved" />
                             <TextBlock Text="{Binding GuidedRecoveryNext}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,8,0,0"
                                        AutomationProperties.AutomationId="Session.RecoveryGuidance.Next" />
+                            <local:SessionActionButton Content="{Binding SaveManualHandoffCopyLabel}"
+                                    Command="{Binding SaveManualHandoffCopyCommand}"
+                                    IsEnabled="{Binding CanSaveManualHandoffCopy}"
+                                    Visibility="{Binding ShowsManualHandoffCopy, Converter={StaticResource BoolToVisibility}}"
+                                    AutomationProperties.AutomationId="Session.SaveManualHandoffCopy"
+                                    AutomationProperties.Name="{Binding SaveManualHandoffCopyLabel}"
+                                    HorizontalAlignment="Left" Margin="0,8,0,0" />
                         </StackPanel>
                     </ui:Card>
                     <TextBlock Text="{Binding GuidedCorrectionReview}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,0,0,12"
@@ -1465,6 +1512,49 @@
                                Visibility="{Binding IsCorrectionIdenticalToSent, Converter={StaticResource BoolToVisibility}}" />
 
 
+                    <!-- Read-only completion facts do not depend on save eligibility. -->
+                    <ContentControl Focusable="False" IsTabStop="False">
+                        <ContentControl.Style><Style TargetType="ContentControl">
+                            <Setter Property="Content" Value="{x:Null}" />
+                            <Style.Triggers><DataTrigger Binding="{Binding GuidedPage}" Value="Completed">
+                                <Setter Property="Content" Value="{Binding}" />
+                                <Setter Property="ContentTemplate" Value="{StaticResource CompletedSummaryTemplate}" />
+                            </DataTrigger></Style.Triggers>
+                        </Style></ContentControl.Style>
+                    </ContentControl>
+                    <!--
+                        Final review and save (SCRUM-11145). Present only for a final review, an
+                        approved final result or its recorded saves. Every state is stated in
+                        words; paths are selectable text; technical identities stay in details.
+                        No button here is a default button, and approving or saving buttons use
+                        the fresh-gesture input guard bound to the exact target and draft.
+                    -->
+                    <local:SessionExpander
+                                           IsExpanded="{Binding ExpandsGuidedFinalSave, Mode=OneWay}"
+                                           Visibility="{Binding HasFinalSave, Converter={StaticResource BoolToVisibility}}"
+                                           AutomationProperties.AutomationId="Session.FinalSave.Options">
+                        <local:SessionExpander.Style><Style TargetType="local:SessionExpander" BasedOn="{StaticResource PF.Disclosure}">
+                            <Setter Property="Header" Value="{Binding FinalSaveHeading}" />
+                            <Style.Triggers><DataTrigger Binding="{Binding GuidedPage}" Value="Completed">
+                                <Setter Property="Header" Value="{Binding GuidedCompletionHeading}" />
+                            </DataTrigger></Style.Triggers>
+                        </Style></local:SessionExpander.Style>
+                    <ContentControl Focusable="False" IsTabStop="False">
+                        <ContentControl.Style>
+                            <Style TargetType="ContentControl">
+                                <Setter Property="Content" Value="{x:Null}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasFinalSave}" Value="True">
+                                        <Setter Property="Content" Value="{Binding}" />
+                                        <Setter Property="ContentTemplate" Value="{StaticResource FinalSaveTemplate}" />
+                                    </DataTrigger>
+                                    <MultiDataTrigger><MultiDataTrigger.Conditions><Condition Binding="{Binding HasFinalSave}" Value="True" /><Condition Binding="{Binding GuidedPage}" Value="Save" /></MultiDataTrigger.Conditions><Setter Property="ContentTemplate" Value="{StaticResource WpfUiSaveTemplate}" /></MultiDataTrigger>
+<MultiDataTrigger><MultiDataTrigger.Conditions><Condition Binding="{Binding HasFinalSave}" Value="True" /><Condition Binding="{Binding GuidedPage}" Value="Completed" /></MultiDataTrigger.Conditions><Setter Property="ContentTemplate" Value="{StaticResource WpfUiCompletedTemplate}" /></MultiDataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ContentControl.Style>
+                    </ContentControl>
+                    </local:SessionExpander>
                     <!--
                         What to check (SCRUM-11149). Read-only guidance for the result under review:
                         the checks, what Approve and Reject do, and where to get help. Collapsed while
@@ -1522,49 +1612,6 @@
                         </StackPanel>
                     </Border>
 
-                    <!--
-                        Final review and save (SCRUM-11145). Present only for a final review, an
-                        approved final result or its recorded saves. Every state is stated in
-                        words; paths are selectable text; technical identities stay in details.
-                        No button here is a default button, and approving or saving buttons use
-                        the fresh-gesture input guard bound to the exact target and draft.
-                    -->
-                    <!-- Read-only completion facts do not depend on save eligibility. -->
-                    <ContentControl Focusable="False" IsTabStop="False">
-                        <ContentControl.Style><Style TargetType="ContentControl">
-                            <Setter Property="Content" Value="{x:Null}" />
-                            <Style.Triggers><DataTrigger Binding="{Binding GuidedPage}" Value="Completed">
-                                <Setter Property="Content" Value="{Binding}" />
-                                <Setter Property="ContentTemplate" Value="{StaticResource CompletedSummaryTemplate}" />
-                            </DataTrigger></Style.Triggers>
-                        </Style></ContentControl.Style>
-                    </ContentControl>
-                    <local:SessionExpander
-                                           IsExpanded="{Binding ExpandsGuidedFinalSave, Mode=OneWay}"
-                                           Visibility="{Binding HasFinalSave, Converter={StaticResource BoolToVisibility}}"
-                                           AutomationProperties.AutomationId="Session.FinalSave.Options">
-                        <local:SessionExpander.Style><Style TargetType="local:SessionExpander" BasedOn="{StaticResource PF.Disclosure}">
-                            <Setter Property="Header" Value="{Binding FinalSaveHeading}" />
-                            <Style.Triggers><DataTrigger Binding="{Binding GuidedPage}" Value="Completed">
-                                <Setter Property="Header" Value="{Binding GuidedCompletionHeading}" />
-                            </DataTrigger></Style.Triggers>
-                        </Style></local:SessionExpander.Style>
-                    <ContentControl Focusable="False" IsTabStop="False">
-                        <ContentControl.Style>
-                            <Style TargetType="ContentControl">
-                                <Setter Property="Content" Value="{x:Null}" />
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding HasFinalSave}" Value="True">
-                                        <Setter Property="Content" Value="{Binding}" />
-                                        <Setter Property="ContentTemplate" Value="{StaticResource FinalSaveTemplate}" />
-                                    </DataTrigger>
-                                    <MultiDataTrigger><MultiDataTrigger.Conditions><Condition Binding="{Binding HasFinalSave}" Value="True" /><Condition Binding="{Binding GuidedPage}" Value="Save" /></MultiDataTrigger.Conditions><Setter Property="ContentTemplate" Value="{StaticResource WpfUiSaveTemplate}" /></MultiDataTrigger>
-<MultiDataTrigger><MultiDataTrigger.Conditions><Condition Binding="{Binding HasFinalSave}" Value="True" /><Condition Binding="{Binding GuidedPage}" Value="Completed" /></MultiDataTrigger.Conditions><Setter Property="ContentTemplate" Value="{StaticResource WpfUiCompletedTemplate}" /></MultiDataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </ContentControl.Style>
-                    </ContentControl>
-                    </local:SessionExpander>
                     <!-- Keep all per-size facts reachable without consuming the image area. -->
                     <ContentControl Focusable="False" IsTabStop="False">
                         <ContentControl.Style>
@@ -1671,6 +1718,12 @@
                             Visibility="{Binding ShowsGuidedBackgroundDecision, Converter={StaticResource BoolToVisibility}}">
                         <StackPanel>
                             <TextBlock Text="{Binding BackgroundRemovalHeading}" FontSize="15" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding BackgroundRemovalModeHeading}" Margin="0,10,0,4" />
+                            <ComboBox ItemsSource="{Binding BackgroundRemovalModes}"
+                                      DisplayMemberPath="Label" SelectedValuePath="Mode"
+                                      SelectedValue="{Binding SelectedBackgroundRemovalMode, Mode=TwoWay}"
+                                      AutomationProperties.Name="{Binding BackgroundRemovalModeHeading}"
+                                      IsEnabled="{Binding CanBeginAutomaticSelection}" />
                             <TextBlock Text="{Binding BackgroundRemovalHint}"
                                        TextWrapping="Wrap"
                                        Opacity="0.7"
@@ -1724,7 +1777,7 @@
                                        TextWrapping="Wrap"
                                        FontWeight="SemiBold"
                                        Margin="0,10,0,0"
-                                       Visibility="{Binding IsAutomaticSelectionAuthorised, Converter={StaticResource BoolToVisibility}}" />
+                                       Visibility="{Binding HasRecordedBackgroundRemovalAuthorisation, Converter={StaticResource BoolToVisibility}}" />
 
                             <!-- Readiness, from CanRunBackgroundRemoval and nothing else (§8). -->
                             <TextBlock Text="{Binding BackgroundRemovalRunnableNotice}"
@@ -1830,11 +1883,20 @@
 
 
 
+                            <local:SessionCheckBox Content="{Binding IgnoreSmallTrimNoiseLabel}"
+                                      Style="{StaticResource PF.Input.CheckBox}"
+                                      IsChecked="{Binding IgnoreSmallTrimNoise, Mode=TwoWay}"
+                                      AutomationProperties.AutomationId="Session.Trim.IgnoreSmallNoise"
+                                      AutomationProperties.Name="{Binding IgnoreSmallTrimNoiseLabel}"
+                                      Margin="0,12,0,0" />
+                            <TextBlock Text="{Binding TrimNoiseHint}" TextWrapping="Wrap" Opacity="0.65" Margin="0,4,0,0" />
+
                             <!-- The persisted decision, so it says what Run Step would do (§18). -->
                             <StackPanel Orientation="Horizontal" Margin="0,10,0,0" Opacity="0.8">
                                 <TextBlock Text="{Binding TrimCurrentLabel}" Opacity="0.75" Margin="0,0,8,0" />
                                 <TextBlock Text="{Binding PendingTrimSummary}" TextWrapping="Wrap" />
                             </StackPanel>
+                            <TextBlock Text="{Binding PendingTrimNoiseSummary}" TextWrapping="Wrap" Opacity="0.8" Margin="0,4,0,0" />
                         </StackPanel>
                     </Border>
 
@@ -1899,13 +1961,17 @@
                                     <StackPanel Margin="0,8,0,0">
 
                                         <TextBlock Text="{Binding TargetEdgeLabel}" Opacity="0.6" Margin="0,0,0,4" />
+                                        <!-- The confirmation lives in the fixed footer. Keep it next in
+                                             the tab order while leaving the preview and footer links reachable. -->
                                         <local:SessionComboBox Style="{StaticResource PF.Input.ComboBox}" ItemsSource="{Binding TargetEdgeChoices}"
+                                                  TabIndex="1"
                                                   SelectedItem="{Binding SelectedTargetEdgeChoice}"
                                                   AutomationProperties.AutomationId="Session.PrintDimensions.TargetEdge"
                                                   AutomationProperties.Name="{Binding TargetEdgeLabel}"
                                                   DisplayMemberPath="Label" />
                                         <TextBlock Text="{Binding TargetSizeMmLabel}" Opacity="0.6" Margin="0,0,0,4" />
                                         <local:SessionTextBox Style="{StaticResource PF.Input.TextBox}" AutomationProperties.AutomationId="Session.PrintDimensions.TargetMillimetres"
+                                                 TabIndex="2"
                                                  AutomationProperties.Name="{Binding TargetSizeMmLabel}"
                                                  Text="{Binding CustomMillimetresText, UpdateSourceTrigger=PropertyChanged}" />
                                     </StackPanel>
@@ -2323,6 +2389,9 @@
                                        Margin="0,8,0,0"
                                        Visibility="{Binding HasTrimParameters, Converter={StaticResource BoolToVisibility}}" />
 
+                            <TextBlock Text="{Binding CurrentTrimNoiseSummary}" TextWrapping="Wrap" Opacity="0.8"
+                                       Visibility="{Binding HasTrimParameters, Converter={StaticResource BoolToVisibility}}" />
+
                             <StackPanel Margin="0,8,0,0" AutomationProperties.AutomationId="Session.ManualCropReviewMetadata"
                                         Visibility="{Binding HasManualCropGeometry, Converter={StaticResource BoolToVisibility}}">
                                 <TextBlock Text="{Binding ManualCropHeading}" FontWeight="SemiBold" />
@@ -2575,6 +2644,7 @@
 <local:SessionActionButton Style="{StaticResource RecommendedAction}" Content="{Binding ConfirmCustomSizeLabel}"
                                             Command="{Binding ConfirmCustomSizeCommand}"
                                             IsEnabled="{Binding CanConfirmGuidedCustomSize}"
+                                            TabIndex="3"
                                             AutomationProperties.AutomationId="Session.PrintDimensions.ConfirmSize"
                                             HorizontalAlignment="Left"
                                             Padding="14,6"

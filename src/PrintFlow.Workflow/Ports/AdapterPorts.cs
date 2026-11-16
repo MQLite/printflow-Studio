@@ -33,6 +33,7 @@ public sealed record MeituRequest(
     WorkspaceDirRef WorkingDirectory,
     WorkspaceFileRef ExpectedOutput)
 {
+    public BackgroundRemovalMode BackgroundRemovalMode { get; init; } = BackgroundRemovalMode.Automatic;
     /// <summary>
     /// The channel through which the operator's Stop or Take Over reaches this run, and through
     /// which the run reports how far it has got (Epic 11300 Part D2A §4, §9).

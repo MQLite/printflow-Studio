@@ -43,7 +43,8 @@ public sealed record DeliveryState(
     string RequestedFolder, string RequestedFileName, string ResolvedFolder, string FinalPath,
     string Status, DeliveryAttemptState? AttemptState, Guid? AttemptId,
     DateTimeOffset? VerifiedAtUtc, Guid? ReplacementOfDeliveryId,
-    Guid StateVersion, DeliveryAvailability Availability = DeliveryAvailability.NotChecked);
+    Guid StateVersion, DeliveryAvailability Availability = DeliveryAvailability.NotChecked,
+    string? PendingRenameFileName = null);
 
 public sealed record DeliveryOffer(ApprovedArtifact Artifact, Guid OfferVersion);
 
@@ -84,6 +85,9 @@ public interface IApprovedArtifactDeliveryService
     Task<DeliveryOutcome> ReplaceMissingAsync(MissingDeliveryReplacementRequest request,
         IProgress<DeliveryProgress>? progress, CancellationToken cancellationToken);
     Task<SelectionLeaseResult> AcquireDeliveredSelectionAsync(Guid deliveryId, CancellationToken cancellationToken);
+    Task<DeliveryOutcome> RenameDeliveredAsync(Guid deliveryId, string expectedPath, string fileName,
+        CancellationToken cancellationToken) => Task.FromResult(new DeliveryOutcome(
+            Guid.Empty, default, Guid.Empty, DeliveryCode.UnsupportedDestination, deliveryId));
 
     /// <summary>Reads the remembered last successful destination; no file-system access.</summary>
     Task<OperationResult<DeliveryDestinationPreferenceView?>> GetLastSuccessfulDestinationAsync(
@@ -116,5 +120,6 @@ public sealed record DeliveryAttemptRecord(
     DateTimeOffset StartedAtUtc, DateTimeOffset? FinishedAtUtc);
 
 public sealed record DeliveryRequestBinding(string RequestedFolder, string RequestedFileName);
+public sealed record DeliveryRename(Guid Id, Guid DeliveryId, string FileName, string FinalPath, string DestinationKey);
 public sealed record DeliveryJournalEntry(DeliveryRecord Delivery, DeliveryAttemptRecord? Attempt,
-    DeliveryRequestBinding? RequestBinding = null);
+    DeliveryRequestBinding? RequestBinding = null, DeliveryRename? PendingRename = null);

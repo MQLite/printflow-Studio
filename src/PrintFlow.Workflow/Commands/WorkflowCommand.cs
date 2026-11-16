@@ -302,7 +302,7 @@ public abstract record WorkflowCommand
     /// command cannot carry a margin the domain would reject (§11).
     /// </para>
     /// </remarks>
-    public sealed record SetTrimParameters(TrimMargin Margin) : WorkflowCommand;
+    public sealed record SetTrimParameters(TrimMargin Margin, bool IgnoreSmallNoise = true) : WorkflowCommand;
 
     /// <summary>
     /// Record the operator's explicit authority for Meitu's automatic selection over the
@@ -335,7 +335,8 @@ public abstract record WorkflowCommand
     public sealed record SetBackgroundRemovalDecision(
         BackgroundRemovalDecision Decision,
         RevisionId ReviewedRevisionId,
-        Sha256 DisplayedHash) : WorkflowCommand;
+        Sha256 DisplayedHash,
+        BackgroundRemovalMode Mode = BackgroundRemovalMode.Automatic) : WorkflowCommand;
 
     /// <summary>Go back to an earlier step, invalidating everything derived from it.</summary>
     public sealed record ReturnToStep(StepKind Target) : WorkflowCommand;

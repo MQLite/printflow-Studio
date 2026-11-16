@@ -7,7 +7,8 @@ namespace PrintFlow.Infrastructure.AiDesign.Authoring;
 
 /// <summary>One locked CAS publication: immutable version first, then a fixed atomic current pointer.</summary>
 internal sealed class AuthoringVersionedFileStore<T>(string workspaceRoot, Guid? draftId,
-    Func<T, T> freeze, Func<T, long> revision, Func<T, long, T> withRevision, Func<T>? initialize = null)
+    Func<T, T> freeze, Func<T, long> revision, Func<T, long, T> withRevision, Func<T>? initialize = null,
+    Guid? reviewId = null, Func<T, T, bool>? sameIdentity = null)
 {
     private const int MaxSnapshotBytes = 4 * 1024 * 1024;
     private static readonly JsonSerializerOptions Json = new(FileAiDesignRequestStore.JsonOptions);
@@ -19,7 +20,7 @@ internal sealed class AuthoringVersionedFileStore<T>(string workspaceRoot, Guid?
         try
         {
             ct.ThrowIfCancellationRequested();
-            using var parents = AiDesignOwnedStagingFiles.PinAuthoringDirectory(workspaceRoot, draftId);
+            using var parents = AiDesignOwnedStagingFiles.PinAuthoringDirectory(workspaceRoot, draftId, reviewId);
             await using var gate = await LockAsync(ct);
             var current = await ReadCurrentAsync(ct) ?? throw new IOException("Saved authoring data is missing.");
             List<T> values = []; HashSet<Guid> seen = [];
@@ -47,12 +48,13 @@ internal sealed class AuthoringVersionedFileStore<T>(string workspaceRoot, Guid?
         try
         {
             ct.ThrowIfCancellationRequested();
-            using var parents = AiDesignOwnedStagingFiles.PinAuthoringDirectory(workspaceRoot, draftId);
+            using var parents = AiDesignOwnedStagingFiles.PinAuthoringDirectory(workspaceRoot, draftId, reviewId);
             await using var gate = await LockAsync(ct);
             var current = await ReadCurrentAsync(ct);
             if (current is null)
             {
-                if (initialize is null) throw new IOException("Saved authoring data is missing.");
+                if (initialize is null)
+                    return OperationResult.Fail<T>(reviewId is null ? FailureCode.PersistenceError : FailureCode.OutputMissing, "Saved authoring data is missing.");
                 var value = freeze(initialize());
                 await PublishAsync(value, null, ct);
                 return OperationResult.Ok(value);
@@ -68,7 +70,7 @@ internal sealed class AuthoringVersionedFileStore<T>(string workspaceRoot, Guid?
         {
             value = freeze(value); // Detach all collections before waiting for the lock.
             ct.ThrowIfCancellationRequested();
-            using var parents = AiDesignOwnedStagingFiles.PinAuthoringDirectory(workspaceRoot, draftId);
+            using var parents = AiDesignOwnedStagingFiles.PinAuthoringDirectory(workspaceRoot, draftId, reviewId);
             await using var gate = await LockAsync(ct);
             var current = await ReadCurrentAsync(ct);
             if (current is null && initialize is not null)
@@ -78,7 +80,8 @@ internal sealed class AuthoringVersionedFileStore<T>(string workspaceRoot, Guid?
                 current = (new Pointer(1, revision(initial), initialId), initial);
             }
             if (expectedRevision is null ? current is not null || revision(value) != 0 :
-                current is null || current.Value.Pointer.Revision != expectedRevision || revision(value) != expectedRevision)
+                current is null || current.Value.Pointer.Revision != expectedRevision || revision(value) != expectedRevision ||
+                sameIdentity is not null && !sameIdentity(current.Value.Value, value))
                 return OperationResult.Fail<T>(FailureCode.PreconditionNotMet, "Authoring data is missing, already exists or is stale.");
             long nextRevision = expectedRevision is null ? 0 : checked(expectedRevision.Value + 1);
             value = freeze(withRevision(value, nextRevision));
@@ -88,7 +91,25 @@ internal sealed class AuthoringVersionedFileStore<T>(string workspaceRoot, Guid?
         catch (Exception ex) when (IsBoundaryFailure(ex)) { return BoundaryFailure(ex); }
     }
 
-    private string DirectoryPath => AiDesignOwnedStagingFiles.AuthoringDirectory(workspaceRoot, draftId);
+    public async Task<OperationResult<TResult>> WithCurrentRevisionAsync<TResult>(long expectedRevision,
+        Func<T, Task<OperationResult<TResult>>> publish, CancellationToken ct)
+    {
+        try
+        {
+            ct.ThrowIfCancellationRequested();
+            using var parents = AiDesignOwnedStagingFiles.PinAuthoringDirectory(workspaceRoot, draftId, reviewId);
+            await using var gate = await LockAsync(ct);
+            var current = await ReadCurrentAsync(ct);
+            if (current is null || current.Value.Pointer.Revision != expectedRevision)
+                return OperationResult.Fail<TResult>(FailureCode.PreconditionNotMet, "Authoring draft is missing or stale.");
+            ct.ThrowIfCancellationRequested();
+            return await publish(current.Value.Value);
+        }
+        catch (Exception ex) when (IsBoundaryFailure(ex))
+        { return OperationResult.Fail<TResult>(ex is OperationCanceledException ? FailureCode.Cancelled : FailureCode.PersistenceError, "Authoring publication could not complete."); }
+    }
+
+    private string DirectoryPath => AiDesignOwnedStagingFiles.AuthoringDirectory(workspaceRoot, draftId, reviewId);
 
     private async Task<FileStream> LockAsync(CancellationToken ct)
     {
@@ -131,12 +152,12 @@ internal sealed class AuthoringVersionedFileStore<T>(string workspaceRoot, Guid?
     private async Task<Guid> PublishAsync(T value, Guid? previousVersionId, CancellationToken ct)
     {
         Guid id = Guid.NewGuid();
-        using var staged = AiDesignOwnedStagingFiles.CreateAuthoring(workspaceRoot, draftId, id);
+        using var staged = AiDesignOwnedStagingFiles.CreateAuthoring(workspaceRoot, draftId, id, reviewId);
         await JsonSerializer.SerializeAsync(staged.Output, new Version(1, id, previousVersionId, value), Json, ct);
         if (staged.Output.Length > MaxSnapshotBytes) throw new IOException("Authoring snapshot is too large.");
         // Retain creation identity until the pointer commits. A caught failure may roll back
         // exactly this uncommitted version; successful or unknown historical files are never removed.
-        using var pointer = AiDesignOwnedStagingFiles.CreateAuthoring(workspaceRoot, draftId, null);
+        using var pointer = AiDesignOwnedStagingFiles.CreateAuthoring(workspaceRoot, draftId, null, reviewId);
         await JsonSerializer.SerializeAsync(pointer.Output, new Pointer(1, revision(value), id), Json, ct);
         await AiDesignOwnedStagingFiles.PublishAuthoringAsync(staged, pointer, ct);
         return id;

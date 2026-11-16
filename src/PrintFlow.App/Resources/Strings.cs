@@ -20,6 +20,10 @@ namespace PrintFlow.App.Resources;
 /// </remarks>
 internal static class Strings
 {
+    internal static string Session_TrimIgnoreNoise => Get(nameof(Session_TrimIgnoreNoise));
+    internal static string Session_TrimNoiseHint => Get(nameof(Session_TrimNoiseHint));
+    internal static string Session_TrimNoiseIgnored => Get(nameof(Session_TrimNoiseIgnored));
+    internal static string Session_TrimNoisePreserved => Get(nameof(Session_TrimNoisePreserved));
     internal static string AiDetail_Detailed => Get(nameof(AiDetail_Detailed));
     internal static string AiDetail_FirstPending => Get(nameof(AiDetail_FirstPending));
     internal static string AiDetail_Step1 => Get(nameof(AiDetail_Step1));
@@ -1263,6 +1267,12 @@ internal static string Session_PdfPrepared => Get(nameof(Session_PdfPrepared));
     internal static string FinalSave_NameInvalid => Get(nameof(FinalSave_NameInvalid));
     internal static string FinalSave_NameWrongType => Get(nameof(FinalSave_NameWrongType));
     internal static string FinalSave_ConfirmAndSave => Get(nameof(FinalSave_ConfirmAndSave));
+    internal static string FinalSave_RenameSaved => Get(nameof(FinalSave_RenameSaved));
+    internal static string FinalSave_ApplyRename => Get(nameof(FinalSave_ApplyRename));
+    internal static string FinalSave_CancelEdit => Get(nameof(FinalSave_CancelEdit));
+    internal static string FinalSave_RenameCollision => Get(nameof(FinalSave_RenameCollision));
+    internal static string FinalSave_RenameFailed => Get(nameof(FinalSave_RenameFailed));
+    internal static string FinalSave_RenameNeedsCheck => Get(nameof(FinalSave_RenameNeedsCheck));
     internal static string FinalSave_SaveApproved => Get(nameof(FinalSave_SaveApproved));
     internal static string FinalSave_RetrySave => Get(nameof(FinalSave_RetrySave));
     internal static string FinalSave_CheckAgain => Get(nameof(FinalSave_CheckAgain));

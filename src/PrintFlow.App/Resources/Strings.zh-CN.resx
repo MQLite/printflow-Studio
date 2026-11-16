@@ -250,6 +250,9 @@
   <data name="Failure_OutputUnreadable" xml:space="preserve">
     <value>PrintFlow 所需的文件存在，但无法完整读取，因此未被使用。PrintFlow 不会更改你的原始文件。</value>
   </data>
+  <data name="Failure_MeituEnhancementShrunkOutput" xml:space="preserve">
+    <value>美图秀秀导出的高清图比原图小。PrintFlow 保留了原图供后续打印。</value>
+  </data>
   <data name="Failure_OutputValidationFailed" xml:space="preserve">
     <value>有文件未通过 PrintFlow 的检查，因此未被采用。PrintFlow 不会更改你的原始文件。</value>
   </data>
@@ -263,7 +266,7 @@
     <value>文件在显示后发生了变化，该决定未生效。请重新执行该步骤。</value>
   </data>
   <data name="Failure_EnvironmentNotVerified" xml:space="preserve">
-    <value>本工作站尚未通过自动处理环境校验。</value>
+    <value>本步骤所需配置暂不可用，请查看错误详情。</value>
   </data>
   <data name="Failure_AdapterUnavailable" xml:space="preserve">
     <value>所需的程序不可用或正被其他任务使用，或者操作意外中止。PrintFlow 不会更改你的原始文件。</value>
@@ -290,7 +293,7 @@
     <value>该图片没有可用于裁切的透明区域，需要手动裁切。</value>
   </data>
   <data name="Failure_MeituNotInstalled" xml:space="preserve">
-    <value>未在本机找到已批准的美图程序，或版本与批准的版本不一致。请检查工作站配置。</value>
+    <value>找不到或无法读取美图秀秀程序，请检查安装位置。</value>
   </data>
   <data name="Failure_MeituLaunchFailed" xml:space="preserve">
     <value>美图未能启动或未能就绪。</value>
@@ -381,7 +384,7 @@
   <data name="Session_DimensionsNotSet" xml:space="preserve"><value>尚未设置</value></data>
   <data name="Session_PresetsLabel" xml:space="preserve"><value>预设尺寸</value></data>
   <data name="Session_PresetHint" xml:space="preserve">
-    <value>预设填入的是最大尺寸，确认前可以修改。图片保持原比例，由宽度或高度的上限决定是否缩小。</value>
+    <value>使用预设时，图片会保持原比例，调整到先达到上限的一边。需要放大时，须先确认。</value>
   </data>
   <data name="Session_SizeHeading" xml:space="preserve"><value>印刷尺寸</value></data>
   <data name="Session_UsePreset" xml:space="preserve"><value>使用预设</value></data>
@@ -546,7 +549,11 @@
   <data name="Session_TrimRightLabel" xml:space="preserve"><value>右</value></data>
   <data name="Session_TrimBottomLabel" xml:space="preserve"><value>下</value></data>
   <data name="Session_TrimLeftLabel" xml:space="preserve"><value>左</value></data>
-  <data name="Session_TrimApply" xml:space="preserve"><value>应用边距</value></data>
+  <data name="Session_TrimApply" xml:space="preserve"><value>应用裁边设置</value></data>
+  <data name="Session_TrimIgnoreNoise" xml:space="preserve"><value>忽略极淡孤立噪点</value></data>
+  <data name="Session_TrimNoiseHint" xml:space="preserve"><value>保留与主体相连的柔和边缘。关闭后保留所有非透明像素。</value></data>
+  <data name="Session_TrimNoiseIgnored" xml:space="preserve"><value>已忽略极淡孤立噪点</value></data>
+  <data name="Session_TrimNoisePreserved" xml:space="preserve"><value>已保留所有非透明像素</value></data>
   <data name="Session_TrimMarginInvalid" xml:space="preserve">
     <value>边距无效。请输入大于或等于零的整数像素值。</value>
   </data>
@@ -568,23 +575,23 @@
   <!-- Background removal, reviewed-content authority (Epic 11300 Part C2B2 §3, §9, §11, §14). -->
   <data name="Session_BackgroundRemovalHeading" xml:space="preserve"><value>去除背景</value></data>
   <data name="Session_BackgroundRemovalHint" xml:space="preserve">
-    <value>美图会自动判定上方图片的前景主体。运行该步骤前，请先针对此图片授权。</value>
+    <value>请选择识别模式，运行该步骤前，请先针对此图片确认授权。</value>
   </data>
-  <data name="Session_BackgroundRemovalAuthorise" xml:space="preserve"><value>对此图片使用自动选择</value></data>
+  <data name="Session_BackgroundRemovalAuthorise" xml:space="preserve"><value>对此图片使用所选识别模式</value></data>
   <data name="Session_BackgroundRemovalConfirmQuestion" xml:space="preserve">
-    <value>美图将自行判定此图片的前景主体。请在审核通过前检查结果。此授权仅适用于上方显示的图片，不适用于其后续版本。</value>
+    <value>美图将使用“{0}”识别此图片的前景主体。请在审核通过前检查结果。此授权仅适用于上方显示的图片，不适用于其后续版本。</value>
   </data>
-  <data name="Session_BackgroundRemovalConfirm" xml:space="preserve"><value>确认使用自动选择</value></data>
+  <data name="Session_BackgroundRemovalConfirm" xml:space="preserve"><value>确认使用所选模式</value></data>
   <data name="Session_BackgroundRemovalCancel" xml:space="preserve"><value>取消本次确认</value></data>
   <data name="Session_BackgroundRemovalAuthorised" xml:space="preserve">
-    <value>已对此图片授权自动选择 · 版本 {0}</value>
+    <value>已对此图片授权{1} · 版本 {0}</value>
   </data>
   <data name="Session_BackgroundRemovalNotAuthorised" xml:space="preserve">
-    <value>尚未授权。对此图片授权自动选择后，方可使用“运行步骤”。</value>
+    <value>请针对此图片确认所选识别模式，然后运行步骤。</value>
   </data>
   <data name="Session_BackgroundRemovalRunnable" xml:space="preserve"><value>可以运行去除背景。</value></data>
   <data name="Session_BackgroundRemovalAttemptAudit" xml:space="preserve">
-    <value>去除背景：自动选择 — 已针对已审图片版本 {0} 授权</value>
+    <value>去除背景：{1} — 已针对已审图片版本 {0} 授权</value>
   </data>
   <data name="Session_Stop" xml:space="preserve"><value>停止</value></data>
   <data name="Session_StopHint" xml:space="preserve">
@@ -634,7 +641,7 @@
     <value>当前工作文件夹不是本工作站校验时使用的那一个。</value>
   </data>
   <data name="EnvironmentCheck_ProductionRevalidation" xml:space="preserve">
-    <value>本次安装尚未通过重新验证。PrintFlow、Windows、美图或 Photoshop 升级后，必须重新运行环境检查与标准测试集并全部通过，才能恢复生产作业。</value>
+    <value>历史验证记录与当前安装不一致。此项仅供诊断参考，不影响开始处理。</value>
   </data>
   <data name="EnvironmentCheck_OperatingSystem" xml:space="preserve">
     <value>本机的 Windows 版本与已校验的工作站不一致。</value>
@@ -652,7 +659,7 @@
     <value>预设中登记的美图秀秀或 Photoshop 界面语言，仅供参考。</value>
   </data>
   <data name="EnvironmentCheck_MeituExecutable" xml:space="preserve">
-    <value>美图秀秀与已认可的生产基线不一致。</value>
+    <value>找不到或无法读取配置的美图秀秀程序，请检查安装位置。</value>
   </data>
   <data name="EnvironmentCheck_PhotoshopExecutable" xml:space="preserve">
     <value>Photoshop 与已认可的生产基线不一致。</value>
@@ -671,10 +678,10 @@
   <data name="EnvironmentCheck_PhotoshopColourSettings" xml:space="preserve"><value>Photoshop 色彩设置与已认可的预设不一致。</value></data>
   <data name="EnvironmentCheck_PhotoshopTestImageRoundTrip" xml:space="preserve"><value>上一次测试图像检查未完成。请点“安全恢复并重新检查”，PrintFlow 会先确认 Photoshop 的当前状态。</value></data>
   <data name="Environment_Verified" xml:space="preserve">
-    <value>本工作站已通过生产环境校验。</value>
+    <value>环境诊断项目已通过。</value>
   </data>
   <data name="Environment_NotVerified" xml:space="preserve">
-    <value>生产工作站环境校验未通过。</value>
+    <value>发现环境诊断差异，不影响开始处理。</value>
   </data>
   <data name="Environment_Advisories" xml:space="preserve">
     <value>提示（不影响生产处理）</value>
@@ -729,10 +736,10 @@
   <data name="EnvironmentCheckName_PhotoshopColourSettings" xml:space="preserve"><value>Photoshop 色彩设置</value></data>
   <data name="EnvironmentCheckName_PhotoshopTestImageRoundTrip" xml:space="preserve"><value>Photoshop 测试图像</value></data>
   <data name="Environment_Heading" xml:space="preserve">
-    <value>生产就绪状态</value>
+    <value>环境诊断（可选）</value>
   </data>
   <data name="Environment_Hint" xml:space="preserve">
-    <value>检查这台工作站能否开始生产。安全恢复只处理 PrintFlow 测试图像，不会更改你的工作文件或应用设置。</value>
+    <value>用于排查本机配置和应用状态，不是开始处理的前提。诊断未运行或未通过时仍可开始处理；具体问题会在对应步骤提示。</value>
   </data>
   <data name="Environment_Open" xml:space="preserve">
     <value>生产就绪状态</value>
@@ -770,10 +777,10 @@
     <value>检查项</value>
   </data>
   <data name="Environment_BlockingHeading" xml:space="preserve">
-    <value>正在阻止生产处理</value>
+    <value>需要留意的诊断结果</value>
   </data>
   <data name="Environment_NoBlockingFailures" xml:space="preserve">
-    <value>没有任何项目阻止生产处理。</value>
+    <value>没有发现需要留意的诊断结果。</value>
   </data>
   <data name="Environment_AdvisoriesPresent" xml:space="preserve">
     <value>提示：有</value>
@@ -794,18 +801,18 @@
   <data name="Environment_LiveCheckNotRun" xml:space="preserve"><value>前置检查未通过，本项未运行。请先处理未通过的检查项，再重新检查。</value></data>
   <data name="Environment_CheckNotRun" xml:space="preserve"><value>本项检查未运行，没有观察结果。</value></data>
   <data name="Environment_UnlistedCheck" xml:space="preserve"><value>未列出的检查项</value></data>
-  <data name="Environment_NotConfirmedNotRun" xml:space="preserve"><value>生产工作站环境尚未确认：有必需检查未运行。</value></data>
+  <data name="Environment_NotConfirmedNotRun" xml:space="preserve"><value>部分诊断项目尚未运行，可直接开始处理。</value></data>
   <data name="Environment_Blocking" xml:space="preserve">
-    <value>必须满足</value>
+    <value>诊断项目</value>
   </data>
   <data name="Environment_Advisory" xml:space="preserve">
     <value>仅供参考</value>
   </data>
   <data name="Environment_RestartRequired" xml:space="preserve">
-    <value>如果已认可的 PrintFlow 工作站记录、Photoshop 安装、美图秀秀安装或已校验的动作文件被替换或更新，请先重启 PrintFlow，然后再使用生产模式。</value>
+    <value>更新程序后请重启 PrintFlow 以加载最新代码和配置。环境诊断不是处理前提。</value>
   </data>
   <data name="Environment_RefreshScope" xml:space="preserve">
-    <value>“刷新状态”只读取状态，不会恢复测试图像，也不会重新检查应用。已认可的安装文件要重启 PrintFlow 才会重新读取。</value>
+    <value>“刷新状态”只读取诊断状态。诊断结果不会限制开始处理。</value>
   </data>
   <data name="Failure_PsdCompositeMissing" xml:space="preserve"><value>无法验证此 PSD 的兼容合成图。请在 Photoshop 中启用“最大兼容性”另存副本，再导入该副本。</value></data>
   <data name="Failure_PsdPreparationFailed" xml:space="preserve"><value>Photoshop 未能从此 PSD 生成通过验证的栅格图。原始文件已保留，请检查失败原因后重试。</value></data>
@@ -824,6 +831,13 @@
   <data name="Session_PdfPending" xml:space="preserve"><value>原始文件：PDF（保持不变）。请先以 300 PPI 准备单页图像，再检查页面及实际尺寸。暂不支持多页或加密 PDF。PDF 文件仅作为视觉设计稿输入：源文件中已有的专色或白墨分色不会作为生产通道保留。</value></data>
   <data name="Session_PdfPrepared" xml:space="preserve"><value>单页 PDF 已准备好供检查。原始 PDF 保持不变，显示的 PNG 是以 300 PPI 生成的受管整页栅格图。请确认第 1 页及其尺寸：{0:0.##} × {1:0.##} 毫米（{2} × {3} 像素）。</value></data>
   <data name="Session_SubmitManualResult" xml:space="preserve"><value>提交手动处理结果</value></data>
+  <data name="Session_SaveManualHandoffCopy" xml:space="preserve"><value>另存当前图片</value></data>
+  <data name="Session_ManualHandoffCopySaved" xml:space="preserve"><value>图片副本已保存到 {0}</value></data>
+  <data name="Session_ManualHandoffCopyCollision" xml:space="preserve"><value>该名称已被占用。请选择其他文件名或文件夹。</value></data>
+  <data name="Session_ManualHandoffCopyInvalidName" xml:space="preserve"><value>请输入有效的文件名，并使用与图片格式相符的扩展名。</value></data>
+  <data name="Session_ManualHandoffCopyUnsupportedFolder" xml:space="preserve"><value>请在本地 NTFS 磁盘上选择 PrintFlow 存储目录以外的文件夹。</value></data>
+  <data name="Session_ManualHandoffCopyUnconfirmed" xml:space="preserve"><value>无法确认副本是否已保存。请检查所选文件夹后再重试。</value></data>
+  <data name="Session_ManualHandoffCopyFailed" xml:space="preserve"><value>无法保存图片副本。请检查图片和目标文件夹后重试。</value></data>
   <data name="Session_ManualProcessingResult" xml:space="preserve"><value>手动处理结果</value></data>
   <data name="Session_ManualCutoutFilter" xml:space="preserve"><value>透明 PNG (*.png)|*.png</value></data>
   <data name="Session_ManualEnhancementFilter" xml:space="preserve"><value>栅格图像 (*.png;*.jpg;*.jpeg)|*.png;*.jpg;*.jpeg</value></data>
@@ -1084,6 +1098,12 @@
   <data name="FinalSave_NameInvalid" xml:space="preserve"><value>请输入普通文件名，不能包含 \ / : * ? " &lt; &gt; |，也不能以点或空格结尾。</value></data>
   <data name="FinalSave_NameWrongType" xml:space="preserve"><value>此结果为 {0} 文件，文件名必须以 {1} 结尾。</value></data>
   <data name="FinalSave_ConfirmAndSave" xml:space="preserve"><value>确认结果并保存</value></data>
+  <data name="FinalSave_RenameSaved" xml:space="preserve"><value>重命名已保存文件</value></data>
+  <data name="FinalSave_ApplyRename" xml:space="preserve"><value>确认重命名</value></data>
+  <data name="FinalSave_CancelEdit" xml:space="preserve"><value>取消</value></data>
+  <data name="FinalSave_RenameCollision" xml:space="preserve"><value>此文件夹已有同名文件，请换一个名称。</value></data>
+  <data name="FinalSave_RenameFailed" xml:space="preserve"><value>无法核实或重命名文件，请先检查已保存的文件再试。</value></data>
+  <data name="FinalSave_RenameNeedsCheck" xml:space="preserve"><value>重命名结果待核实，请检查已保存的文件以确认当前名称。</value></data>
   <data name="FinalSave_SaveApproved" xml:space="preserve"><value>保存已审核结果</value></data>
   <data name="FinalSave_RetrySave" xml:space="preserve"><value>重试保存</value></data>
   <data name="FinalSave_CheckAgain" xml:space="preserve"><value>核实这次保存</value></data>
@@ -1258,7 +1278,7 @@
   <data name="Session_GuidanceHelpNoAdjustTrim" xml:space="preserve"><value>此结果无法调整裁切边缘。如有内容被裁掉，请选择“{0}”，之后可以重新尝试。</value></data>
   <data name="Session_GuidanceHelpTiff" xml:space="preserve"><value>不确定？请先请有经验的同事查看再决定。在 PrintFlow 之外修改的 TIFF 无法导入。</value></data>
   <data name="Session_GuidanceHelpTiffReturn" xml:space="preserve"><value>如需先修改印刷尺寸，请使用下方“{0}”。</value></data>
-  <data name="Session_SizeHelpPreset" xml:space="preserve"><value>需要标准尺寸时，选择预设。预设是尺寸上限，不是最终印刷尺寸。大图片会缩小到上限以内，小图片不会被放大；图片保持原比例。</value></data>
+  <data name="Session_SizeHelpPreset" xml:space="preserve"><value>选择预设后，图片会按原比例调整到先达到上限的一边。小图需要放大时，须先确认。</value></data>
   <data name="Session_SizeHelpCustom" xml:space="preserve"><value>某一边需要准确尺寸时，选择“{0}”。请选择“{1}”、“{2}”或“{3}”（图片较长的一边），再输入毫米数。另一边按原比例计算；需要放大时，仍须你单独授权。</value></data>
   <data name="Session_SizeSummaryDraft" xml:space="preserve"><value>按当前设置，整张图片（含透明边缘）的印刷尺寸预计约为 {0:0.0} × {1:0.0} 毫米。</value></data>
   <data name="Session_SizeSummaryCurrent" xml:space="preserve"><value>按已选尺寸，整张图片（含透明边缘）的印刷尺寸约为 {0:0.0} × {1:0.0} 毫米。</value></data>
@@ -1291,28 +1311,28 @@
   <data name="FailureNotice_PsdPreparationFailed" xml:space="preserve"><value>Photoshop 未能从此 PSD 生成通过验证的栅格图，原始文件已保留。</value></data>
   <data name="FailureNotice_PdfPreparationFailed" xml:space="preserve"><value>PDF 准备失败，未生成通过验证的栅格图。</value></data>
   <!-- SCRUM-11152: Home readiness summary and startup details. -->
-  <data name="Home_ReadinessHeading" xml:space="preserve"><value>工作站检查</value></data>
-  <data name="Home_ReadinessNotChecked" xml:space="preserve"><value>本次启动后尚未检查。</value></data>
-  <data name="Home_ReadinessNotCheckedHint" xml:space="preserve"><value>请选择“查看工作站检查”检查本工作站。之前运行的检查结果不会沿用。</value></data>
+  <data name="Home_ReadinessHeading" xml:space="preserve"><value>环境诊断（可选）</value></data>
+  <data name="Home_ReadinessNotChecked" xml:space="preserve"><value>尚未运行环境诊断。</value></data>
+  <data name="Home_ReadinessNotCheckedHint" xml:space="preserve"><value>可直接开始处理；需要排查问题时再查看工作站检查。</value></data>
   <data name="Home_ReadinessChecking" xml:space="preserve"><value>正在检查工作站……</value></data>
   <data name="Home_ReadinessCheckingHint" xml:space="preserve"><value>请选择“查看工作站检查”查看该检查。</value></data>
   <data name="Home_ReadinessReady" xml:space="preserve"><value>上次检查通过。</value></data>
-  <data name="Home_ReadinessReadyHint" xml:space="preserve"><value>这是上次记录的检查结果。每个自动步骤仍会重新检查工作站。</value></data>
-  <data name="Home_ReadinessBlocked" xml:space="preserve"><value>暂时不能自动处理。</value></data>
+  <data name="Home_ReadinessReadyHint" xml:space="preserve"><value>这是诊断记录。执行步骤时会确认所需应用、图片和当前界面。</value></data>
+  <data name="Home_ReadinessBlocked" xml:space="preserve"><value>诊断发现环境差异。</value></data>
   <data name="Home_ReadinessFirstReason" xml:space="preserve"><value>原因：{0}。{1}</value></data>
-  <data name="Home_ReadinessLiveCheckPending" xml:space="preserve"><value>原因：美图秀秀和 Photoshop 的检查目前没有有效结果。请选择“查看工作站检查”，然后选择“{0}”。</value></data>
-  <data name="Home_ReadinessBlockedHint" xml:space="preserve"><value>请点“查看工作站检查”，查看全部阻塞原因；需要时请熟练同事或主管帮忙。</value></data>
-  <data name="Home_ReadinessNotConfirmed" xml:space="preserve"><value>需要重新检查工作站。</value></data>
+  <data name="Home_ReadinessLiveCheckPending" xml:space="preserve"><value>应用诊断尚无结果，不影响开始处理。如需排查，可查看工作站检查并选择“{0}”。</value></data>
+  <data name="Home_ReadinessBlockedHint" xml:space="preserve"><value>诊断结果不阻止处理。可直接开始任务，或查看工作站检查排查差异。</value></data>
+  <data name="Home_ReadinessNotConfirmed" xml:space="preserve"><value>环境诊断尚未完成。</value></data>
   <data name="Home_ReadinessUnfinishedReason" xml:space="preserve"><value>上一次检查未完成，因此不会把更早的结果显示为当前结果。</value></data>
   <data name="Home_ReadinessNoReason" xml:space="preserve"><value>上一次检查未给出原因。请选择“查看工作站检查”查看详情。</value></data>
-  <data name="Home_ReadinessNotConfirmedHint" xml:space="preserve"><value>请选择“查看工作站检查”重新检查。请熟练同事或主管帮忙。</value></data>
+  <data name="Home_ReadinessNotConfirmedHint" xml:space="preserve"><value>可直接开始处理；需要时再查看工作站检查。</value></data>
   <data name="Home_ReadinessCheckedAt" xml:space="preserve"><value>检查时间：{0}</value></data>
   <data name="Home_ReadinessTechnicalCheck" xml:space="preserve"><value>检查标识：{0} · {1}</value></data>
   <data name="Home_StartupDetails" xml:space="preserve"><value>启动详情</value></data>
   <data name="Home_StartupPresetVerified" xml:space="preserve"><value>生产设置文件在启动时已通过校验；这不代表工作站现在可以处理。</value></data>
-  <data name="Home_StartupPresetNotVerified" xml:space="preserve"><value>启动时未能校验生产设置文件。请选择“查看工作站检查”查看详情。</value></data>
+  <data name="Home_StartupPresetNotVerified" xml:space="preserve"><value>启动时未能校验生产设置文件。请打开「环境诊断」查看详情。</value></data>
   <data name="Home_ViewWorkstationChecks" xml:space="preserve">
-    <value>查看工作站检查</value>
+    <value>环境诊断</value>
   </data>
   <data name="Home_DiagnosticRetentionWarning" xml:space="preserve">
     <value>诊断记录清理未完成，下次启动时会重试。此提示不表示工作站已通过检查。</value>
@@ -1332,7 +1352,6 @@
   <data name="Home_GuidedAiUnavailable" xml:space="preserve"><value>可保存、复制设计提示词；自动生图与排版合成暂不可用。</value></data>
   <data name="Home_GuidedCancelImport" xml:space="preserve"><value>取消本次导入等待</value></data>
   <data name="Home_GuidedContinue" xml:space="preserve"><value>继续待处理任务</value></data>
-  <data name="Home_GuidedEnvironmentDetails" xml:space="preserve"><value>环境详情与检查</value></data>
   <data name="Home_GuidedImportCancelled" xml:space="preserve"><value>已取消导入等待。若任务已创建，可在最近任务中找到；原文件保持不变。</value></data>
   <data name="Home_GuidedImporting" xml:space="preserve"><value>正在导入一张图片，原文件保持不变。</value></data>
   <data name="WorkflowSelection_GuidedCancelled" xml:space="preserve"><value>已取消选择等待。重新打开任务可查看当前已保存的状态。</value></data>
@@ -1402,9 +1421,9 @@
   <data name="Home_RecentNextHandedOff" xml:space="preserve"><value>打开移交详情，查看当前允许的后续操作。</value></data>
   <data name="Home_RecentNextHistory" xml:space="preserve"><value>请打开处理详情，核实当前文件。仅有保存记录，不能确认文件现在仍在。</value></data>
   <data name="Environment_Unchecked" xml:space="preserve"><value>尚未检查</value></data>
-  <data name="Environment_ObservationUnchecked" xml:space="preserve"><value>尚未检查，不能确认可以生产。请先查看环境报告。</value></data>
-  <data name="Environment_ObservationBlocked" xml:space="preserve"><value>有必要检查未运行。请处理下方阻塞原因；历史结果不能作为当前生产许可。</value></data>
-  <data name="Environment_ObservationCurrent" xml:space="preserve"><value>本次报告对应下方检查结果。每次生产请求仍会重新核验，不代表以后一直就绪。</value></data>
+  <data name="Environment_ObservationUnchecked" xml:space="preserve"><value>尚未运行环境诊断，可直接开始处理。</value></data>
+  <data name="Environment_ObservationBlocked" xml:space="preserve"><value>部分诊断项目未运行。可查看下方原因，也可直接返回任务开始处理。</value></data>
+  <data name="Environment_ObservationCurrent" xml:space="preserve"><value>本报告仅用于排查环境差异。执行步骤时会确认所需应用、图片和当前界面。</value></data>
   <data name="Environment_EvidenceNever" xml:space="preserve"><value>尚无成功的实时检查历史。</value></data>
   <data name="Environment_EvidenceExpired" xml:space="preserve"><value>历史检查证据已失效。上次成功：{0}。不能据此确认当前就绪。</value></data>
   <data name="Environment_EvidenceDeferred" xml:space="preserve"><value>当前未重新观察应用状态。历史成功时间：{0}；不能据此开始生产。</value></data>
@@ -1553,4 +1572,90 @@
   <data name="AiPrompt_DraftsEmpty" xml:space="preserve"><value>暂无可打开的提示词草稿。</value></data>
   <data name="AiPrompt_DraftReadFailed" xml:space="preserve"><value>无法打开这份草稿，本次编辑仍保留。请检查存储与文件访问后，再次选择该草稿。</value></data>
   <data name="AiPrompt_NewDraftFailed" xml:space="preserve"><value>无法创建新草稿。可在下方打开已有草稿，或返回首页检查存储与文件访问。</value></data>
+  <data name="Session_BackgroundRemovalModeHeading" xml:space="preserve"><value>识别模式</value></data>
+  <data name="Session_BackgroundRemovalMode_Automatic" xml:space="preserve"><value>自动选择</value></data>
+  <data name="Session_BackgroundRemovalMode_PortraitPets" xml:space="preserve"><value>人像宠物</value></data>
+  <data name="Session_BackgroundRemovalMode_Products" xml:space="preserve"><value>商品货物</value></data>
+  <data name="Session_BackgroundRemovalMode_LogosStamps" xml:space="preserve"><value>图标印章</value></data>
+  <data name="AiMemorial_LayoutHelp" xml:space="preserve"><value>先核对来源图片和精确文字，再选择排入成品的图片，保存并确认位置。使用本地背景时，先在第 2 步添加参考图，在第 3 步核对权限，再在此选择「背景」。</value></data>
+  <data name="AiMemorial_EditLayout" xml:space="preserve"><value>编辑版式</value></data>
+  <data name="AiMemorial_ReopenLayout" xml:space="preserve"><value>按当前内容重新打开版式</value></data>
+  <data name="AiMemorial_FixedSpecification" xml:space="preserve"><value>由产品版式固定</value></data>
+  <data name="AiMemorial_OutdatedPromptSpecification" xml:space="preserve"><value>这份草稿含有旧版尺寸。请重新生成提示词，以使用产品的固定规格。</value></data>
+  <data name="AiMemorial_MmHelp" xml:space="preserve"><value>尺寸单位为毫米。图片高度随来源比例调整。</value></data>
+  <data name="AiMemorial_LayerRole" xml:space="preserve"><value>图层用途</value></data>
+  <data name="AiMemorial_Left" xml:space="preserve"><value>左</value></data>
+  <data name="AiMemorial_Top" xml:space="preserve"><value>上</value></data>
+  <data name="AiMemorial_Width" xml:space="preserve"><value>宽</value></data>
+  <data name="AiMemorial_Height" xml:space="preserve"><value>高</value></data>
+  <data name="AiMemorial_Font" xml:space="preserve"><value>已安装字体</value></data>
+  <data name="AiMemorial_FontSize" xml:space="preserve"><value>字号（毫米）</value></data>
+  <data name="AiMemorial_TextPlacement" xml:space="preserve"><value>文字形状</value></data>
+  <data name="AiMemorial_Radius" xml:space="preserve"><value>半径（毫米）</value></data>
+  <data name="AiMemorial_SaveLayout" xml:space="preserve"><value>保存排版</value></data>
+  <data name="AiMemorial_DiscardLayout" xml:space="preserve"><value>放弃版式编辑</value></data>
+  <data name="AiMemorial_ConfirmLayout" xml:space="preserve"><value>确认已保存的版式</value></data>
+  <data name="AiMemorial_Preview" xml:space="preserve"><value>生成预览 · 96 DPI</value></data>
+  <data name="AiMemorial_Convert" xml:space="preserve"><value>制作另一种成品</value></data>
+  <data name="AiMemorial_ConfirmConversion" xml:space="preserve"><value>创建独立草稿</value></data>
+  <data name="AiMemorial_Cancel" xml:space="preserve"><value>取消</value></data>
+  <data name="AiMemorial_CancelTask" xml:space="preserve"><value>停止当前操作</value></data>
+  <data name="AiMemorial_MaterialHelp" xml:space="preserve"><value>以 300 DPI 生成独立设计素材。导出前请核对这份确切的结果。</value></data>
+  <data name="AiMemorial_RenderMaterial" xml:space="preserve"><value>生成设计素材 PNG</value></data>
+  <data name="AiMemorial_LoadResults" xml:space="preserve"><value>读取已保存结果</value></data>
+  <data name="AiMemorial_CompareSource" xml:space="preserve"><value>对照来源版本</value></data>
+  <data name="AiMemorial_Historical" xml:space="preserve"><value>此结果来自其他草稿修订，或当前草稿有未保存改动。可查看此结果。</value></data>
+  <data name="AiMemorial_ReviewHelp" xml:space="preserve"><value>逐项对照来源和结果。核对记录只适用于这张确切的图片。</value></data>
+  <data name="AiMemorial_Accept" xml:space="preserve"><value>接受这份设计素材</value></data>
+  <data name="AiMemorial_Accepted" xml:space="preserve"><value>已接受设计素材，仍需印刷核对。</value></data>
+  <data name="AiMemorial_Export" xml:space="preserve"><value>另存设计素材 PNG…</value></data>
+  <data name="AiMemorial_ManualHandoff" xml:space="preserve"><value>另存已接受的 PNG，再在既有导入流程中手动选择。设计核对不等于生产批准。</value></data>
+  <data name="AiMemorial_ProofTitle" xml:space="preserve"><value>来源与结果</value></data>
+  <data name="AiMemorial_Checkerboard" xml:space="preserve"><value>棋盘底</value></data>
+  <data name="AiMemorial_Black" xml:space="preserve"><value>黑底</value></data>
+  <data name="AiMemorial_White" xml:space="preserve"><value>白底</value></data>
+  <data name="AiMemorial_Guide" xml:space="preserve"><value>徽章安全区辅助线</value></data>
+  <data name="AiMemorial_LayoutConfirmed" xml:space="preserve"><value>已确认版式</value></data>
+  <data name="AiMemorial_LayoutPending" xml:space="preserve"><value>版式待确认</value></data>
+  <data name="AiMemorial_SourceUnavailable" xml:space="preserve"><value>无法读取已核验的来源图片。请重新打开草稿或重新选择对应图片。</value></data>
+  <data name="AiMemorial_PlacementInputsChanged" xml:space="preserve"><value>文字、图片或权限已变更。完成核对后，请重新打开版式；重新打开会替换未保存的排版编辑。</value></data>
+  <data name="AiMemorial_InvalidPlacement" xml:space="preserve"><value>请输入有效坐标和正数尺寸，并检查排版与来源尺寸。</value></data>
+  <data name="AiMemorial_TextDoesNotFit" xml:space="preserve"><value>原文无法放入文字框。请加大文字框、改为平排或调整字号。</value></data>
+  <data name="AiMemorial_MissingGlyph" xml:space="preserve"><value>当前字体无法绘出全部字符。请换用合适的已安装字体。</value></data>
+  <data name="AiMemorial_TextLayoutFailed" xml:space="preserve"><value>保存前请检查精确文字、字体与文字框。</value></data>
+  <data name="AiMemorial_OutsideArea" xml:space="preserve"><value>图层超出允许的画布或安全区，请调整位置或尺寸。</value></data>
+  <data name="AiMemorial_PlacementPermission" xml:space="preserve"><value>缺少来源图层，或排版超出已核对的权限。请检查来源用途和权限。</value></data>
+  <data name="AiMemorial_BadgeSize" xml:space="preserve"><value>徽章：外圆 {0:0.##} 毫米 · 安全区 {1:0.##} 毫米</value></data>
+  <data name="AiMemorial_ShirtSize" xml:space="preserve"><value>T 恤设计：{0:0.##} × {1:0.##} 毫米</value></data>
+  <data name="AiMemorial_RoleReference" xml:space="preserve"><value>仅作参考</value></data>
+  <data name="AiMemorial_RolePerson" xml:space="preserve"><value>人物</value></data>
+  <data name="AiMemorial_RoleOriginalDecor" xml:space="preserve"><value>原装饰</value></data>
+  <data name="AiMemorial_RoleGeneratedDecor" xml:space="preserve"><value>新增装饰</value></data>
+  <data name="AiMemorial_RoleBackground" xml:space="preserve"><value>背景</value></data>
+  <data name="AiMemorial_TextFlat" xml:space="preserve"><value>平排</value></data>
+  <data name="AiMemorial_TextArc" xml:space="preserve"><value>上弧</value></data>
+  <data name="AiMemorial_SourceReference" xml:space="preserve"><value>参考图片</value></data>
+  <data name="AiMemorial_SourceVersion" xml:space="preserve"><value>来源版本</value></data>
+  <data name="AiMemorial_ConversionDetails" xml:space="preserve"><value>来源为已保存修订 {0}：{1}。目标：{2}。新草稿沿用选定图片和表单文字，手改提示词留在来源版本。请重新核对目标位置、比例、文字排版和安全区。</value></data>
+  <data name="AiMemorial_Cancelled" xml:space="preserve"><value>操作已取消。</value></data>
+  <data name="AiMemorial_RenderFailed" xml:space="preserve"><value>无法生成已核验结果。请检查保存的版式与来源图片后重试。</value></data>
+  <data name="AiMemorial_RenderReady" xml:space="preserve"><value>已核验的设计图片可查看。</value></data>
+  <data name="AiMemorial_ResultUnavailable" xml:space="preserve"><value>无法核验或显示这份已保存的结果。</value></data>
+  <data name="AiMemorial_ReviewUnavailable" xml:space="preserve"><value>无法保存或恢复核对记录。请重新读取这份结果并核对。</value></data>
+  <data name="AiMemorial_ExportFailed" xml:space="preserve"><value>PNG 未保存。请在受保护工作区之外选择新文件名，并确认结果仍是当前版本。</value></data>
+  <data name="AiMemorial_Exported" xml:space="preserve"><value>设计 PNG 已保存至 {0}。仍需印刷核对。</value></data>
+  <data name="AiMemorial_ConversionFailed" xml:space="preserve"><value>无法创建独立的成品草稿。请检查来源版本和图片权限。</value></data>
+  <data name="AiMemorial_ConversionReady" xml:space="preserve"><value>已创建独立成品草稿。生成前请核对新版式。</value></data>
+  <data name="AiMemorial_ResultLabel" xml:space="preserve"><value>{0} · 修订 {1} · {2} × {3} 像素 · {4}</value></data>
+  <data name="AiMemorial_PreviewKind" xml:space="preserve"><value>预览</value></data>
+  <data name="AiMemorial_MaterialKind" xml:space="preserve"><value>设计素材</value></data>
+  <data name="AiMemorial_CheckPerson" xml:space="preserve"><value>人物、面部和原有细节完整沿用</value></data>
+  <data name="AiMemorial_CheckDecor" xml:space="preserve"><value>原装饰完整</value></data>
+  <data name="AiMemorial_CheckText" xml:space="preserve"><value>姓名、日期和标签与已核对的原文一致</value></data>
+  <data name="AiMemorial_CheckLayout" xml:space="preserve"><value>排版和安全区符合要求</value></data>
+  <data name="AiMemorial_CheckTransparency" xml:space="preserve"><value>在不同预览底色下核对透明区域</value></data>
+  <data name="AiMemorial_EnlargeProof" xml:space="preserve"><value>放大检查预览…</value></data>
+  <data name="AiMemorial_Zoom" xml:space="preserve"><value>缩放</value></data>
+  <data name="AiMemorial_Background" xml:space="preserve"><value>预览底色</value></data>
+  <data name="AiMemorial_ProofReduced" xml:space="preserve"><value>显示图片已缩小。保存的 PNG 保留上方所示的完整像素尺寸。</value></data>
 </root>

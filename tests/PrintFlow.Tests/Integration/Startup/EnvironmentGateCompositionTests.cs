@@ -58,7 +58,7 @@ public sealed class EnvironmentGateCompositionTests
     /// (§11, §14).
     /// </summary>
     [Fact]
-    public void The_registered_gate_allows_fake_and_refuses_production_here()
+    public void The_registered_gate_allows_processing_even_when_diagnostics_fail()
     {
         using TempApplication application = new();
         using ServiceProvider services = Compose(application);
@@ -68,9 +68,8 @@ public sealed class EnvironmentGateCompositionTests
         gate.Verify(AdapterExecutionMode.Fake).IsSuccess.ShouldBeTrue();
 
         OperationResult<PrintFlow.Domain.Results.Unit> production = gate.Verify(AdapterExecutionMode.Production);
-        production.IsFailure.ShouldBeTrue(
-            "the synthetic layout is not the accepted production workstation.");
-        production.Failure.Code.ShouldBe(FailureCode.EnvironmentNotVerified);
+        production.IsSuccess.ShouldBeTrue();
+        services.GetRequiredService<IEnvironmentDiagnostics>().Read().Verified.ShouldBeFalse();
     }
 
     /// <summary>
@@ -98,9 +97,9 @@ public sealed class EnvironmentGateCompositionTests
         result.Status.Failure.ShouldBeNull();
         result.Services.ShouldNotBeNull();
 
-        // The gate is present and refusing; the shell is present and usable.
+        // Environment diagnostics do not prevent processing or opening the shell.
         result.Services!.GetRequiredService<IEnvironmentGate>()
-            .Verify(AdapterExecutionMode.Production).IsFailure.ShouldBeTrue();
+            .Verify(AdapterExecutionMode.Production).IsSuccess.ShouldBeTrue();
         result.Services.GetRequiredService<WorkflowSelectionViewModel>().Workflows.Count.ShouldBe(3);
     }
 
@@ -268,7 +267,7 @@ public sealed class EnvironmentGateCompositionTests
     /// constructed something.
     /// </remarks>
     [Fact]
-    public void Composing_for_production_does_not_authorise_production()
+    public void Composing_for_production_does_not_require_a_passing_environment_report()
     {
         using TempApplication application = new();
 
@@ -297,9 +296,8 @@ public sealed class EnvironmentGateCompositionTests
         OperationResult<PrintFlow.Domain.Results.Unit> production = services
             .GetRequiredService<IEnvironmentGate>().Verify(AdapterExecutionMode.Production);
 
-        production.IsFailure.ShouldBeTrue(
-            "having composed the adapters must never mean they may run.");
-        production.Failure.Code.ShouldBe(FailureCode.EnvironmentNotVerified);
+        production.IsSuccess.ShouldBeTrue();
+        services.GetRequiredService<IEnvironmentDiagnostics>().Read().Verified.ShouldBeFalse();
     }
 
     private static ServiceProvider Compose(TempApplication application)

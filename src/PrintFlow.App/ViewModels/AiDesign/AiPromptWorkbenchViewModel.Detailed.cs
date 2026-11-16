@@ -26,7 +26,6 @@ public sealed partial class AiPromptWorkbenchViewModel
     public IReadOnlyList<AiPreservationCheck> PreservationChecks { get; private set; } = [];
     public IEnumerable<AiPromptFieldInput> QuickFields => Fields.Where(x => !x.IsDateFormat);
     public bool IsDetailed => Draft?.Mode == AiAuthoringMode.Detailed;
-    public bool CanPreviewLayout => false;
     public bool ReconciliationNeeded => Draft is not null && AiAuthoringConfirmationRules.NeedsReconciliation(ReviewDraft());
     public bool HasUnsavedPreservationChanges => Draft is not null && PreservationChecks.Any(x => x.IsEdited && !Draft.Preservation.Contains(x.Rule));
     public int DetailedStep
@@ -34,7 +33,8 @@ public sealed partial class AiPromptWorkbenchViewModel
         get => detailedStep;
         set { if (value is >= 1 and <= 6 && SetProperty(ref detailedStep, value)) NotifyDetailed(); }
     }
-    public string DetailedSummary => Draft is null ? "" : Draft.TemplateSnapshot.Name + " · " + Strings.AiDetail_FirstPending + " " + AiDetailedReview.GetFirstIncompleteStep(ReviewDraft());
+    internal int FirstDetailedPendingStep => Draft is null ? 1 : HasCurrentConfirmedLayout ? 6 : AiDetailedReview.GetFirstIncompleteStep(ReviewDraft());
+    public string DetailedSummary => Draft is null ? "" : Draft.TemplateSnapshot.Name + " · " + Strings.AiDetail_FirstPending + " " + FirstDetailedPendingStep;
     public IReadOnlyList<string> DateFormats => AiDetailedReview.DateFormats;
     public bool IsStep1 => DetailedStep == 1;
     public bool IsStep2 => DetailedStep == 2;
@@ -56,7 +56,7 @@ public sealed partial class AiPromptWorkbenchViewModel
     }
     private async Task SwitchModeAsync(AiAuthoringMode mode) => await RunAsync(async () =>
     {
-        if ((await FlushCoreAsync(default)).IsFailure) return;
+        if ((await FlushCoreAsync(default, saveLayout: false)).IsFailure) return;
         if (Draft!.Mode == mode) return;
         long capturedEpoch = epoch, generation = editGeneration;
         var result = await ApplyCoreAsync(new AiAuthoringEdit.SwitchMode(mode), default);
@@ -79,7 +79,7 @@ public sealed partial class AiPromptWorkbenchViewModel
     {
         var value = Draft!; var fields = new Dictionary<string, string>(value.Fields, StringComparer.Ordinal);
         foreach (var input in Fields)
-            if (fields.ContainsKey(input.Key) || input.Value != input.InitialValue) fields[input.Key] = input.Value;
+            if (!input.IsReadOnly && (fields.ContainsKey(input.Key) || input.Value != input.InitialValue)) fields[input.Key] = input.Value;
         var rules = value.Preservation.ToDictionary(x => x.AssetId);
         foreach (var input in PreservationChecks.Where(x => x.IsEdited)) rules[input.Asset.Id] = input.Rule;
         return value with { Fields = fields, Preservation = rules.Values.ToArray(), FinalDocument = Document,
@@ -113,6 +113,7 @@ public sealed partial class AiPromptWorkbenchViewModel
     }
     private void NotifyDetailed()
     {
+        NotifyMemorial();
         OnPropertyChanged(nameof(ReconciliationNeeded)); OnPropertyChanged(nameof(DetailedSummary));
         foreach (string property in new[] { nameof(IsStep1), nameof(IsStep2), nameof(IsStep3), nameof(IsStep4), nameof(IsStep5), nameof(IsStep6) }) OnPropertyChanged(property);
         foreach (var check in TextChecks) check.Refresh();
@@ -144,7 +145,8 @@ public sealed partial class AiPromptWorkbenchViewModel
         long requestedEpoch = epoch; var requestedDraft = Draft?.Id;
         await RunAsync(async () =>
         {
-            if (!IsCurrent(requestedEpoch) || Draft?.Id != requestedDraft || (await FlushCoreAsync(default)).IsFailure) return;
+            if (!IsCurrent(requestedEpoch) || Draft?.Id != requestedDraft ||
+                (await FlushCoreAsync(default, saveLayout: false)).IsFailure) return;
             long generation = editGeneration;
             if (rule is not null && !Draft!.Preservation.Contains(rule) && (await ApplyCoreAsync(new AiAuthoringEdit.SetPreservation(rule), default)).IsFailure) return;
             if (!IsCurrent(requestedEpoch) || generation != editGeneration) return;
@@ -158,7 +160,7 @@ public sealed class AiDetailedStep(AiPromptWorkbenchViewModel owner, int number)
 {
     public int Number => number;
     public string Title => number switch { 1 => Strings.AiDetail_Step1, 2 => Strings.AiDetail_Step2, 3 => Strings.AiDetail_Step3, 4 => Strings.AiDetail_Step4, 5 => Strings.AiDetail_Step5, _ => Strings.AiDetail_Step6 };
-    public string Status => owner.DetailedStep == number ? Strings.AiDetail_Current : owner.Draft is not null && number < AiDetailedReview.GetFirstIncompleteStep(owner.ReviewDraft()) ? Strings.AiDetail_Confirmed : Strings.AiDetail_Pending;
+    public string Status => owner.DetailedStep == number ? Strings.AiDetail_Current : owner.Draft is not null && number < owner.FirstDetailedPendingStep ? Strings.AiDetail_Confirmed : Strings.AiDetail_Pending;
     internal void Refresh() => OnPropertyChanged(nameof(Status));
 }
 

@@ -149,9 +149,13 @@ public sealed class PrintDimensionsPreflightUiTests
         model.Preflight.EffectiveSourcePpiY.ShouldBe(1200);
         model.ApplyPresetCommand.Execute(model.SizePresets.Single(p => p.Preset == SizePreset.A4));
         await model.PreflightLoaded;
-        PrintDimensionsPreflight presetDraft = model.Preflight!;
+        PrintDimensionsPreflight presetDraft = model.Preflight.ShouldNotBeNull();
+        presetDraft.RequiresEnlargement.ShouldBeTrue();
+        presetDraft.EnlargementOfferId.ShouldBeNull();
         await model.SetMaximumBoundsCommand.ExecuteAsync(null);
-        model.Preflight.ShouldBe(presetDraft);
+        PrintDimensionsPreflight confirmed = model.Preflight.ShouldNotBeNull();
+        confirmed.EnlargementOfferId.ShouldNotBeNull();
+        (confirmed with { EnlargementOfferId = null }).ShouldBe(presetDraft);
         model.IsDraftPreflight.ShouldBeFalse();
     }
 
@@ -216,6 +220,9 @@ public sealed class PrintDimensionsPreflightUiTests
                     millimetres.IsKeyboardFocused.ShouldBeTrue();
                     millimetres.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next)).ShouldBeTrue();
                     confirm.IsKeyboardFocused.ShouldBeTrue();
+                    confirm.MoveFocus(new TraversalRequest(FocusNavigationDirection.Previous)).ShouldBeTrue();
+                    millimetres.IsKeyboardFocused.ShouldBeTrue();
+                    millimetres.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next)).ShouldBeTrue();
                     confirm.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next)).ShouldBeTrue();
                     confirm.IsKeyboardFocused.ShouldBeFalse();
                     return true;
@@ -302,7 +309,7 @@ public sealed class PrintDimensionsPreflightUiTests
         }, WpfRendering.ReviewViewport, Path.Combine(directory, $"{culture}-{name}.png"),
             tree =>
             {
-                Control<Border>(tree.Root, "Preflight").BringIntoView();
+                Control<FrameworkElement>(tree.Root, "Preflight").BringIntoView();
                 SharedReviewSurfaceTests.Settle(tree.Root);
             });
     }

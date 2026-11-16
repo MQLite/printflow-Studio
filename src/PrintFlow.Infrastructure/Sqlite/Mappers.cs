@@ -304,6 +304,24 @@ internal static class Mappers
             TrimBounds.FromEdges(al, at, ar, ab));
     }
 
+    public static string ToText(BackgroundRemovalMode value) => value switch
+    {
+        BackgroundRemovalMode.Automatic => "AUTOMATIC",
+        BackgroundRemovalMode.PortraitPets => "PORTRAIT_PETS",
+        BackgroundRemovalMode.Products => "PRODUCTS",
+        BackgroundRemovalMode.LogosStamps => "LOGOS_STAMPS",
+        _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
+    };
+
+    public static BackgroundRemovalMode ToBackgroundRemovalMode(string? text) => text switch
+    {
+        null or "AUTOMATIC" => BackgroundRemovalMode.Automatic,
+        "PORTRAIT_PETS" => BackgroundRemovalMode.PortraitPets,
+        "PRODUCTS" => BackgroundRemovalMode.Products,
+        "LOGOS_STAMPS" => BackgroundRemovalMode.LogosStamps,
+        _ => throw new InvalidOperationException($"Unknown BackgroundRemovalMode '{text}' in database."),
+    };
+
     public static string ToText(BackgroundRemovalDecision value) => value switch
     {
         BackgroundRemovalDecision.Unspecified => "UNSPECIFIED",
@@ -339,7 +357,7 @@ internal static class Mappers
     /// </para>
     /// </remarks>
     public static BackgroundRemovalAuthority? ToBackgroundRemovalAuthority(
-        string? decision, string? revisionId, string? reviewedSha)
+        string? decision, string? revisionId, string? reviewedSha, string? mode = null)
     {
         if (decision is null && revisionId is null && reviewedSha is null)
         {
@@ -356,7 +374,7 @@ internal static class Mappers
         return BackgroundRemovalAuthority.For(
             ToBackgroundRemovalDecision(decision),
             RevisionId.From(Guid.Parse(revisionId)),
-            Sha256.Parse(reviewedSha));
+            Sha256.Parse(reviewedSha), ToBackgroundRemovalMode(mode));
     }
 
     // ---------------------------------------------------------------------------------------
@@ -972,6 +990,7 @@ internal static class Mappers
 
         // Always written, unlike the attempt's copy: a session always has a pending trim
         // decision, and Tight is a decision rather than an absence (Epic 11200 Part C3 §10).
+        IgnoreSmallTrimNoise = session.IgnoreSmallTrimNoise,
         TrimMode = ToText(session.TrimMargin.Mode),
         TrimMarginTop = session.TrimMargin.Top,
         TrimMarginRight = session.TrimMargin.Right,
@@ -982,6 +1001,7 @@ internal static class Mappers
         // trim decision, and never has a background-removal authority until a human grants one
         // (Epic 11300 Part C2B1 §10).
         BackgroundRemovalDecision = session.BackgroundRemovalAuthority is { } bra ? ToText(bra.Decision) : null,
+        BackgroundRemovalMode = session.BackgroundRemovalAuthority is { } modeAuthority ? ToText(modeAuthority.Mode) : null,
         BackgroundRemovalRevisionId = session.BackgroundRemovalAuthority?.ReviewedRevisionId.ToString(),
         BackgroundRemovalReviewedSha = session.BackgroundRemovalAuthority?.ReviewedSha256.Value,
 
@@ -1100,6 +1120,7 @@ internal static class Mappers
             // A row written before migration 0002 has no trim columns at all, and reads back as
             // Tight — which is exactly what it ran with, because Tight was the only behaviour
             // before this slice (Epic 11200 Part C3 §10).
+            IgnoreSmallTrimNoise = row.IgnoreSmallTrimNoise ?? true,
             TrimMargin = ToTrimMargin(
                 row.TrimMode, row.TrimMarginTop, row.TrimMarginRight,
                 row.TrimMarginBottom, row.TrimMarginLeft) ?? TrimMargin.Tight,
@@ -1109,7 +1130,7 @@ internal static class Mappers
             // background removal on that session still needs an explicit decision (§7).
             BackgroundRemovalAuthority = ToBackgroundRemovalAuthority(
                 row.BackgroundRemovalDecision, row.BackgroundRemovalRevisionId,
-                row.BackgroundRemovalReviewedSha),
+                row.BackgroundRemovalReviewedSha, row.BackgroundRemovalMode),
 
             // A row written before migration 0005 was backfilled to LEGACY_EXACT_PAIR by that
             // migration, so a resumed pre-contract session reads back saying exactly what it was:
@@ -1308,6 +1329,7 @@ internal static class Mappers
 
         // Null for anything that is not a deterministic trim, which is the honest reading:
         // "this attempt had no trim margin", never "it used the default" (Part C3 §14, §17).
+        IgnoreSmallTrimNoise = attempt.IgnoreSmallTrimNoise,
         TrimMode = attempt.TrimParameters is { } margin ? ToText(margin.Mode) : null,
         TrimMarginTop = attempt.TrimParameters?.Top,
         TrimMarginRight = attempt.TrimParameters?.Right,
@@ -1318,6 +1340,7 @@ internal static class Mappers
         // reading: "this attempt had no reviewed-content authority", never "it used the default"
         // (Epic 11300 Part C2B1 §11).
         BackgroundRemovalDecision = attempt.BackgroundRemovalAuthority is { } bra ? ToText(bra.Decision) : null,
+        BackgroundRemovalMode = attempt.BackgroundRemovalAuthority is { } modeAuthority ? ToText(modeAuthority.Mode) : null,
         BackgroundRemovalRevisionId = attempt.BackgroundRemovalAuthority?.ReviewedRevisionId.ToString(),
         BackgroundRemovalReviewedSha = attempt.BackgroundRemovalAuthority?.ReviewedSha256.Value,
 
@@ -1496,12 +1519,13 @@ internal static class Mappers
             row.RetryOfAttemptId is string roa ? AttemptId.From(Guid.Parse(roa)) : null,
             row.RetrySequence)
         {
+            IgnoreSmallTrimNoise = row.IgnoreSmallTrimNoise,
             TrimParameters = ToTrimMargin(
                 row.TrimMode, row.TrimMarginTop, row.TrimMarginRight,
                 row.TrimMarginBottom, row.TrimMarginLeft),
             BackgroundRemovalAuthority = ToBackgroundRemovalAuthority(
                 row.BackgroundRemovalDecision, row.BackgroundRemovalRevisionId,
-                row.BackgroundRemovalReviewedSha),
+                row.BackgroundRemovalReviewedSha, row.BackgroundRemovalMode),
             AdapterNotes = row.AdapterNotes,
             ManualResultSourcePath = row.ManualResultSourcePath,
 

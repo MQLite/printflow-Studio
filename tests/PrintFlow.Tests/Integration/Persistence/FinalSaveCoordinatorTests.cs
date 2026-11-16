@@ -399,16 +399,106 @@ public sealed class FinalSaveCoordinatorTests
             (await coordinator.ReconcileAsync(prior, null, CancellationToken.None)).Code.ShouldBe(DeliveryCode.DeliveredFileMissing);
             File.Exists(Path.Combine(folder, "copy.tif")).ShouldBeFalse();
 
-            DeliveryOutcome replaced = await coordinator.SaveAnotherCopyAsync(prior, Guid.NewGuid(), null, CancellationToken.None);
+            Guid replacementRequest = Guid.NewGuid();
+            DeliveryOutcome replaced = await coordinator.SaveAnotherCopyAsync(prior, replacementRequest, null, CancellationToken.None);
             replaced.Code.ShouldBe(DeliveryCode.Delivered, replaced.Detail);
             replaced.DeliveryId.ShouldNotBe(prior);
             IReadOnlyList<DeliveryState> states = (await coordinator.Delivery.GetDeliveryStateAsync(
                 review.Id, saved.Artifact, CancellationToken.None)).Value;
             states.Count.ShouldBe(2);
             states.Single(s => s.DeliveryId == replaced.DeliveryId).ReplacementOfDeliveryId.ShouldBe(prior);
+            DeliveryOutcome moved = await FinalSaveFixtures.Delivery(h).RenameDeliveredAsync(replaced.DeliveryId!.Value,
+                replaced.FinalPath!, "replacement-renamed.tif", CancellationToken.None);
+            moved.Code.ShouldBe(DeliveryCode.Delivered, moved.Detail);
+            DeliveryOutcome replay = await coordinator.SaveAnotherCopyAsync(prior, replacementRequest, null, CancellationToken.None);
+            replay.Code.ShouldBe(DeliveryCode.AlreadyDelivered, replay.Detail);
+            replay.FinalPath.ShouldBe(moved.FinalPath);
+            Directory.GetFiles(folder).ShouldBe([moved.FinalPath!]);
             (await FinalSaveFixtures.LoadAsync(h, review.Id)).Reviews.Count(r => r.SubjectKind == ReviewSubjectKind.PrintOutput).ShouldBe(1);
         }
         finally { FinalSaveFixtures.Remove(folder); }
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Renaming_a_delivered_file_preserves_its_record_and_never_overwrites_a_collision(bool loseCommit)
+    {
+        using SessionServiceHarness h = new();
+        ISessionService workflow = FinalSaveFixtures.TiffService(h);
+        SessionView review = await FinalSaveFixtures.TiffAtFinalReviewAsync(h, workflow);
+        string folder = FinalSaveFixtures.NewFolder("rename");
+        try
+        {
+            var coordinator = new FinalSaveCoordinator(workflow, FinalSaveFixtures.Delivery(h), "tester");
+            FinalSaveResult saved = await coordinator.ConfirmAndSaveAsync(
+                FinalSaveFixtures.Confirm(review, folder, "before.tif"), null, CancellationToken.None);
+            Guid id = saved.Delivery!.DeliveryId!.Value;
+            string before = Path.Combine(folder, "before.tif");
+            string after = Path.Combine(folder, "after.tif");
+            byte[] bytes = File.ReadAllBytes(before);
+            File.WriteAllBytes(after, [7]);
+
+            var delivery = FinalSaveFixtures.Delivery(h);
+            (await delivery.RenameDeliveredAsync(id, before, "after.tif", CancellationToken.None)).Code.ShouldBe(DeliveryCode.Collision);
+            File.ReadAllBytes(before).ShouldBe(bytes);
+            File.ReadAllBytes(after).ShouldBe([7]);
+            File.Delete(after);
+
+            if (loseCommit) ExecuteSql("""
+                CREATE TRIGGER FailRenameCommit BEFORE UPDATE ON DeliveryRename WHEN NEW.State='Committed'
+                BEGIN SELECT RAISE(ABORT, 'simulated commit failure'); END;
+                """);
+            DeliveryOutcome renamed = await delivery.RenameDeliveredAsync(id, before, "after.tif", CancellationToken.None);
+            renamed.Code.ShouldBe(loseCommit ? DeliveryCode.NeedsReconciliation : DeliveryCode.Delivered, renamed.Detail);
+            Directory.GetFiles(folder).ShouldBe([after]);
+            File.ReadAllBytes(after).ShouldBe(bytes);
+            var reopened = FinalSaveFixtures.Delivery(h);
+            if (loseCommit)
+            {
+                ExecuteSql("DROP TRIGGER FailRenameCommit;");
+                (await reopened.GetDeliveryStateAsync(review.Id, saved.Artifact, CancellationToken.None)).Value
+                    .Single().PendingRenameFileName.ShouldBe("after.tif");
+                (DeliveryOffer? offer, _) = await reopened.GetOfferAsync(saved.Artifact!.Value, CancellationToken.None);
+                string managed = h.FileWorkspace.ResolveAbsolute(offer!.Artifact.File);
+                File.Move(managed, managed + ".unavailable");
+                (await reopened.CheckDeliveredFileAsync(id, CancellationToken.None)).FinalPath.ShouldBe(after);
+                File.Move(managed + ".unavailable", managed);
+            }
+            DeliveryState record = (await reopened.GetDeliveryStateAsync(review.Id, saved.Artifact, CancellationToken.None)).Value.Single();
+            record.DeliveryId.ShouldBe(id);
+            record.FinalPath.ShouldBe(after);
+            (await reopened.CheckDeliveredFileAsync(id, CancellationToken.None)).Availability.ShouldBe(DeliveryAvailability.VerifiedNow);
+            DeliveryOutcome changedCase = await reopened.RenameDeliveredAsync(id, after, "After.tif", CancellationToken.None);
+            changedCase.Code.ShouldBe(DeliveryCode.Delivered, changedCase.Detail);
+            Directory.GetFiles(folder).ShouldBe([Path.Combine(folder, "After.tif")]);
+
+            if (!loseCommit)
+            {
+                // The newer, now missing copy must not shadow the file subsequently renamed into its path.
+                FinalSaveResult other = await coordinator.SaveApprovedAsync(
+                    FinalSaveFixtures.SaveApproved(saved.Artifact!.Value, folder, "reused.tif"), null, CancellationToken.None);
+                other.Delivery!.Code.ShouldBe(DeliveryCode.Delivered, other.Delivery.Detail);
+                File.Delete(other.Delivery.FinalPath!);
+                DeliveryOutcome movedAgain = await reopened.RenameDeliveredAsync(id, changedCase.FinalPath!,
+                    "reused.tif", CancellationToken.None);
+                movedAgain.Code.ShouldBe(DeliveryCode.Delivered, movedAgain.Detail);
+                FinalSaveResult replay = await coordinator.SaveApprovedAsync(
+                    FinalSaveFixtures.SaveApproved(saved.Artifact.Value, folder, "reused.tif"), null, CancellationToken.None);
+                replay.Delivery!.Code.ShouldBe(DeliveryCode.AlreadyDelivered, replay.Delivery.Detail);
+                replay.Delivery.DeliveryId.ShouldBe(id);
+                Directory.GetFiles(folder).ShouldBe([movedAgain.FinalPath!]);
+            }
+        }
+        finally { FinalSaveFixtures.Remove(folder); }
+
+        void ExecuteSql(string sql)
+        {
+            using var connection = h.Database.Factory.Open();
+            using var command = connection.CreateCommand();
+            command.CommandText = sql;
+            command.ExecuteNonQuery();
+        }
     }
 
     private sealed class SynchronousProgress<T>(Action<T> report) : IProgress<T>

@@ -70,7 +70,7 @@ public sealed class TrimStepTests
         // The attempt records which algorithm ran, so a fake could never masquerade as this one.
         ProcessingAttempt attempt = aggregate.Attempts.Single(a => a.Step == StepKind.Trim);
         attempt.Status.ShouldBe(AttemptStatus.Succeeded);
-        attempt.AdapterId.ShouldBe("internal-alpha-trim-v1");
+        attempt.AdapterId.ShouldBe("internal-alpha-trim-v2");
         attempt.OutputRevisionId.ShouldBe(trimmed.Id);
 
         OperationResult<SessionView> approved = await service.ExecuteAsync(

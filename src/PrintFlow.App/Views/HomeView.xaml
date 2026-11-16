@@ -23,6 +23,24 @@
           <ResourceDictionary Source="/PrintFlow.App;component/Themes/WpfUiTheme.xaml" />
         </ResourceDictionary.MergedDictionaries>
         <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+        <Style x:Key="HomeStartupWarning" TargetType="HeaderedContentControl" BasedOn="{StaticResource PF.Notice.Warning}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="HeaderedContentControl">
+                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}"
+                                CornerRadius="{DynamicResource PF.Corner.Control}">
+                            <DockPanel>
+                                <Path DockPanel.Dock="Left" Data="{DynamicResource PF.Notice.Geometry}"
+                                      Width="20" Height="20" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,12,0"
+                                      Stroke="{TemplateBinding BorderBrush}" StrokeThickness="2" IsHitTestVisible="False" />
+                                <ContentPresenter VerticalAlignment="Center" />
+                            </DockPanel>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <!--
             The same converter the review surface uses, for the same reason: the one stream in
             the preview path belongs to the view layer, so no view model ever opens one
@@ -175,36 +193,61 @@
         <Border />
       </DockPanel>
     </Border>
-    <Grid Grid.Column="1" x:Name="LayoutRoot" Margin="{DynamicResource PF.Padding.Card}" SizeChanged="OnLayoutSizeChanged">
+    <Grid Grid.Column="1" Margin="{DynamicResource PF.Padding.Card}">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition>
                 <RowDefinition.Style>
                     <Style TargetType="RowDefinition">
-                        <Setter Property="Height" Value="3*" />
+                        <Setter Property="Height" Value="2*" />
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding Readiness.HasReason}" Value="True"><Setter Property="Height" Value="*" /></DataTrigger>
                             <DataTrigger Binding="{Binding IsConfirmingAbandon}" Value="True"><Setter Property="Height" Value="0" /></DataTrigger>
                         </Style.Triggers>
                     </Style>
                 </RowDefinition.Style>
             </RowDefinition>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="2*" />
+            <RowDefinition Height="3*" />
         </Grid.RowDefinitions>
 
-        <DockPanel Grid.Row="0" LastChildFill="True">
-
-            <HeaderedContentControl Style="{StaticResource PF.PageHeader}" Header="{Binding SampleTitle}" Margin="0,0,0,16">
+        <DockPanel Grid.Row="0" LastChildFill="True" Margin="0,0,0,16">
+            <views:SessionActionButton DockPanel.Dock="Right" Style="{StaticResource PF.Button.Secondary}"
+                        Content="{Binding EnvironmentLabel}" Command="{Binding ShowEnvironmentCommand}"
+                        AutomationProperties.AutomationId="Home.ShowEnvironment" AutomationProperties.Name="{Binding EnvironmentLabel}"
+                        AutomationProperties.HelpText="{Binding Readiness.StatusText}" ToolTip="{Binding Readiness.StatusText}"
+                        FontSize="13" MinHeight="32" Padding="8,4" Margin="8,0,0,0" VerticalAlignment="Top"
+                        Foreground="{DynamicResource PF.Brush.Primary}" Background="Transparent" BorderThickness="0" Cursor="Hand">
+                <views:SessionActionButton.ContentTemplate>
+                    <DataTemplate><TextBlock Text="{Binding}" TextDecorations="Underline" /></DataTemplate>
+                </views:SessionActionButton.ContentTemplate>
+            </views:SessionActionButton>
+            <HeaderedContentControl Style="{StaticResource PF.PageHeader}" Header="{Binding SampleTitle}">
               <TextBlock Text="{Binding SampleSubtitle}" TextWrapping="Wrap" />
             </HeaderedContentControl>
         </DockPanel>
 
-        <!-- SCRUM-11152: what Production Readiness last observed in this run, in words, with its
-             one way to that screen. The button only navigates; nothing here starts a check. -->
-        <!-- The upper section takes its content height up to the code-behind cap.
-             The remaining space belongs to Recovery/Recent, including when disclosures expand. -->
-        <ScrollViewer x:Name="Upper" Grid.Row="1" VerticalScrollBarVisibility="Auto" IsTabStop="False"
+        <!-- Startup warnings are actionable even when the operator never opens diagnostics. -->
+        <StackPanel Grid.Row="1">
+            <HeaderedContentControl Style="{StaticResource HomeStartupWarning}" Margin="0,0,0,8"
+                                    Visibility="{Binding HasPresetWarning, Converter={StaticResource BoolToVisibility}}">
+                <TextBlock Text="{Binding PresetDetailText}" TextWrapping="Wrap" FontWeight="SemiBold"
+                           AutomationProperties.AutomationId="Home.Startup.PresetWarning" />
+            </HeaderedContentControl>
+            <HeaderedContentControl Style="{StaticResource HomeStartupWarning}" Margin="0,0,0,8"
+                                    Visibility="{Binding HasRecoveryNotRunWarning, Converter={StaticResource BoolToVisibility}}">
+                <TextBlock Text="{Binding RecoveryNotRunText}" TextWrapping="Wrap" FontWeight="SemiBold"
+                           AutomationProperties.AutomationId="Home.Startup.RecoveryNotRun" />
+            </HeaderedContentControl>
+            <HeaderedContentControl Style="{StaticResource HomeStartupWarning}" Margin="0,0,0,8"
+                                    Visibility="{Binding HasRetentionWarning, Converter={StaticResource BoolToVisibility}}">
+                <TextBlock Text="{Binding RetentionWarningText}" TextWrapping="Wrap" FontWeight="SemiBold"
+                           AutomationProperties.AutomationId="Home.Startup.RetentionWarning" />
+            </HeaderedContentControl>
+        </StackPanel>
+
+        <!-- Import and the task lists share the space left after the heading and warnings.
+             Each scrolls independently when a disclosure expands. -->
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" IsTabStop="False"
                       AutomationProperties.AutomationId="Home.Upper">
         <StackPanel>
         <!-- The one way in. Dropping is handled on the whole screen, so the operator can
@@ -240,25 +283,6 @@
         <StackPanel Margin="0,8,0,14">
 
 
-            <!-- Startup warnings stay visible; only the counts that need no action fold away. -->
-            <HeaderedContentControl Style="{StaticResource PF.Notice.Warning}" Margin="0,8,0,0"
-                                    Visibility="{Binding HasPresetWarning, Converter={StaticResource BoolToVisibility}}">
-            <TextBlock Text="{Binding PresetDetailText}" TextWrapping="Wrap" FontWeight="SemiBold"
-                       AutomationProperties.AutomationId="Home.Startup.PresetWarning"
-                       Visibility="{Binding HasPresetWarning, Converter={StaticResource BoolToVisibility}}" />
-            </HeaderedContentControl>
-            <HeaderedContentControl Style="{StaticResource PF.Notice.Warning}" Margin="0,8,0,0"
-                                    Visibility="{Binding HasRecoveryNotRunWarning, Converter={StaticResource BoolToVisibility}}">
-            <TextBlock Text="{Binding RecoveryNotRunText}" TextWrapping="Wrap" FontWeight="SemiBold"
-                       AutomationProperties.AutomationId="Home.Startup.RecoveryNotRun"
-                       Visibility="{Binding HasRecoveryNotRunWarning, Converter={StaticResource BoolToVisibility}}" />
-            </HeaderedContentControl>
-            <HeaderedContentControl Style="{StaticResource PF.Notice.Warning}" Margin="0,8,0,0"
-                                    Visibility="{Binding HasRetentionWarning, Converter={StaticResource BoolToVisibility}}">
-            <TextBlock Text="{Binding RetentionWarningText}" TextWrapping="Wrap" FontWeight="SemiBold"
-                       AutomationProperties.AutomationId="Home.Startup.RetentionWarning"
-                       Visibility="{Binding HasRetentionWarning, Converter={StaticResource BoolToVisibility}}" />
-            </HeaderedContentControl>
             <Expander Style="{StaticResource PF.Disclosure}" Header="{Binding StartupDetailsLabel}" Margin="0,8,0,0"
                       AutomationProperties.AutomationId="Home.StartupDetails"
                       AutomationProperties.Name="{Binding StartupDetailsLabel}">
@@ -276,42 +300,6 @@
 
         </StackPanel>
         </ScrollViewer>
-
-        <Grid Grid.Row="2" Margin="0,8,0,0">
-            <ui:Card Style="{StaticResource PF.Card.Fluent}" Padding="14"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                <StackPanel>
-                    <TextBlock Text="{Binding Readiness.Heading}" Opacity="0.75" TextWrapping="Wrap"
-                               AutomationProperties.AutomationId="Home.Readiness.Heading" />
-                    <TextBlock Text="{Binding Readiness.StatusText}" FontSize="16" FontWeight="SemiBold"
-                               TextWrapping="Wrap" Margin="0,2,0,0"
-                               AutomationProperties.AutomationId="Home.Readiness.Status" />
-                    <TextBlock Text="{Binding Readiness.ReasonText}" TextWrapping="Wrap" Margin="0,4,0,0"
-                               AutomationProperties.AutomationId="Home.Readiness.Reason"
-                               Visibility="{Binding Readiness.HasReason, Converter={StaticResource BoolToVisibility}}" />
-                    <Expander Style="{StaticResource PF.Disclosure}" Header="{Binding EnvironmentDetailsLabel}"><ScrollViewer MaxHeight="110" VerticalScrollBarVisibility="Auto" IsTabStop="False"><StackPanel>
-                    <TextBlock Text="{Binding Readiness.CheckedAtText}" TextWrapping="Wrap" Opacity="0.8" Margin="0,2,0,0"
-                               AutomationProperties.AutomationId="Home.Readiness.CheckedAt"
-                               Visibility="{Binding Readiness.HasCheckedAt, Converter={StaticResource BoolToVisibility}}" />
-                    <TextBlock Text="{Binding Readiness.HintText}" TextWrapping="Wrap" Opacity="0.8" Margin="0,4,0,0"
-                               AutomationProperties.AutomationId="Home.Readiness.Hint" />
-                    <Expander Style="{StaticResource PF.Disclosure}" Header="{Binding Readiness.DetailsLabel}" Margin="0,4,0,0"
-                              AutomationProperties.AutomationId="Home.Readiness.Details"
-                              AutomationProperties.Name="{Binding Readiness.DetailsLabel}"
-                              Visibility="{Binding Readiness.HasTechnicalDetail, Converter={StaticResource BoolToVisibility}}">
-                        <TextBox Text="{Binding Readiness.TechnicalDetailText, Mode=OneWay}" IsReadOnly="True"
-                                 TextWrapping="Wrap" BorderThickness="0" Background="Transparent" Margin="0,2,0,0"
-                                 AutomationProperties.AutomationId="Home.Readiness.TechnicalDetail" />
-                    </Expander>
-
-                    </StackPanel></ScrollViewer></Expander>
-
-                </StackPanel><views:SessionActionButton Style="{StaticResource PF.Button.Secondary}" Content="{Binding EnvironmentLabel}"
-                            Command="{Binding ShowEnvironmentCommand}"
-                            AutomationProperties.AutomationId="Home.ShowEnvironment"
-                            AutomationProperties.Name="{Binding EnvironmentLabel}"
-                            Margin="16,0,0,0"
-                            Grid.Column="1" VerticalAlignment="Center" /></Grid></ui:Card>
-        </Grid>
 
         <DockPanel Grid.Row="3" Margin="0,12,0,0">
             <DockPanel DockPanel.Dock="Top" LastChildFill="True" Margin="0,0,0,8">

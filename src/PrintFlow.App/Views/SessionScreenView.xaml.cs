@@ -426,6 +426,13 @@ public partial class SessionScreenView : UserControl
         // landing across that boundary, while preserving valid focus within the same scope.
         FocusManager.SetFocusedElement(scope, OperatorStatusPanel);
         if (IsLoaded) OperatorStatusPanel.Focus();
+        // The save draft is built from the new review after its identity is published.
+        Dispatcher.BeginInvoke(new Action(() =>
+        {
+            if (_interactionActive && Model is { GuidedPage: GuidedSessionPage.Review } model &&
+                model.ReviewTargetIdentity == target && model.ExpandsGuidedFinalSave)
+                SessionDetailsScroll.ScrollToTop();
+        }), System.Windows.Threading.DispatcherPriority.Loaded);
     }
 
     private void OnUnloaded(object sender, RoutedEventArgs e)

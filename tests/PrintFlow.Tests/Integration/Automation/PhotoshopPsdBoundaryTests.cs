@@ -55,7 +55,7 @@ public sealed class PhotoshopPsdBoundaryTests
             {
                 PollInterval = TimeSpan.FromMilliseconds(2), TiffSettleTimeout = TimeSpan.FromMilliseconds(40),
                 AttachTimeout = TimeSpan.FromMilliseconds(20), OpenConfirmationTimeout = TimeSpan.FromMilliseconds(20),
-            }, TimeProvider.System) { PsdNative = native };
+            }, TimeProvider.System) { PsdNative = native, ToolNative = new StubPhotoshopToolNativeBridge() };
         var result = await adapter.PreparePsdAsync(new PsdPreparationRequest(
             WorkspaceFileRef.Create("Sessions/S/Working/A/input.psd", WorkspaceArea.Working),
             WorkspaceFileRef.Create("Sessions/S/Working/A/prepared.png", WorkspaceArea.Working)), cancel.Token);

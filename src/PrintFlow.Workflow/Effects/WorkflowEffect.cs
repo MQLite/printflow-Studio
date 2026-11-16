@@ -120,7 +120,7 @@ public abstract record WorkflowEffect
     /// when the attempt starts — that is the row that must never be rewritten when the operator
     /// changes their mind and re-runs (§15).
     /// </remarks>
-    public sealed record PersistTrimParameters(TrimMargin Margin) : WorkflowEffect;
+    public sealed record PersistTrimParameters(TrimMargin Margin, bool IgnoreSmallNoise = true) : WorkflowEffect;
 
     /// <summary>
     /// Persist the reviewed-content authority the next Background Removal attempt may run under

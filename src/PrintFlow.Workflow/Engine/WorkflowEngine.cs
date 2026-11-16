@@ -289,8 +289,8 @@ public sealed class WorkflowEngine : IWorkflowEngine
         }
 
         return WorkflowTransition.Accepted(
-            state with { TrimMargin = command.Margin },
-            new WorkflowEffect.PersistTrimParameters(command.Margin));
+            state with { TrimMargin = command.Margin, IgnoreSmallTrimNoise = command.IgnoreSmallNoise },
+            new WorkflowEffect.PersistTrimParameters(command.Margin, command.IgnoreSmallNoise));
     }
 
     /// <summary>
@@ -329,6 +329,13 @@ public sealed class WorkflowEngine : IWorkflowEngine
         if (!state.Definition.Contains(StepKind.BackgroundRemoval))
         {
             return NotInWorkflow(state, StepKind.BackgroundRemoval);
+        }
+
+        if (!Enum.IsDefined(command.Mode))
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.InvalidPayload,
+                $"'{command.Mode}' is not a supported background-removal recogniser.");
         }
 
         if (command.Decision != BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent)
@@ -379,7 +386,7 @@ public sealed class WorkflowEngine : IWorkflowEngine
         }
 
         BackgroundRemovalAuthority authority = BackgroundRemovalAuthority.For(
-            command.Decision, upstream.Id, upstream.Sha256);
+            command.Decision, upstream.Id, upstream.Sha256, command.Mode);
 
         return WorkflowTransition.Accepted(
             state with { BackgroundRemovalAuthority = authority },
@@ -1379,18 +1386,10 @@ public sealed class WorkflowEngine : IWorkflowEngine
     /// preset (Epic 11400 Part B1A.2D §3, §15, §17).
     /// </summary>
     /// <remarks>
-    /// The engine decides legality and stamps the reading; it cannot decide the millimetres,
-    /// because a snapshot carries neither the verified preset nor the source's pixels. So the
-    /// state it produces deliberately leaves <see cref="WorkflowSnapshot.Dimensions"/>,
-    /// <see cref="WorkflowSnapshot.SizeSelection"/> and
-    /// <see cref="WorkflowSnapshot.PrintPreparationPlan"/> for <c>SessionService</c> to attach in
-    /// the same act — the arrangement <see cref="SetPrintDimensions"/> already uses for the plan
-    /// (§17).
-    /// <para>
-    /// Ordinary preset use stays exactly what the accepted B1A.1 contract made it: the
-    /// recommendation becomes a fit box and <c>FitWithinBounds</c> selects the single edge.
-    /// <c>ScaleToTargetEdge</c> is never called for it (§17).
-    /// </para>
+    /// The engine decides legality and clears the previous sizing decision. SessionService
+    /// attaches the dimensions and plan from the verified preset and source pixels in the same
+    /// transaction. A preset that requires enlargement uses a target-edge plan and a separate
+    /// enlargement confirmation.
     /// </remarks>
     private static WorkflowTransition SetPresetFitSize(
         WorkflowSnapshot state, WorkflowCommand.SetPresetFitSize command, CommandContext context)
@@ -1421,9 +1420,7 @@ public sealed class WorkflowEngine : IWorkflowEngine
         return WorkflowTransition.Accepted(
             state.WithStep(confirmed) with
             {
-                // Ordinary preset use is a maximum-bound decision, so it is recorded under the
-                // reading it is made under. TargetEdgeV1 is what a custom edge produces, and the
-                // two are never interchangeable (§5).
+                // SessionService supplies the final semantics with the computed plan.
                 DimensionSemantics = PrintDimensionSemantics.MaxBoundsV1,
                 Dimensions = null,
                 SizeSelection = null,
@@ -2029,7 +2026,7 @@ public sealed class WorkflowEngine : IWorkflowEngine
                     pending.Projection.RequestedMillimetres),
             CommandKind.SelectWhiteUnderbaseBranch =>
                 new WorkflowCommand.SelectWhiteUnderbaseBranch(ProbeBranch, ProbeReason),
-            CommandKind.SetTrimParameters => new WorkflowCommand.SetTrimParameters(state.TrimMargin),
+            CommandKind.SetTrimParameters => new WorkflowCommand.SetTrimParameters(state.TrimMargin, state.IgnoreSmallTrimNoise),
 
             // Probed with the name the session already holds, never an invented one: nothing is
             // applied by a probe, so this asks "may the name be changed at all" without proposing

@@ -74,6 +74,8 @@ public sealed record WorkflowSnapshot(
     /// </remarks>
     public TrimMargin TrimMargin { get; init; } = TrimMargin.Tight;
 
+    public bool IgnoreSmallTrimNoise { get; init; } = true;
+
     /// <summary>
     /// The reviewed-content authority the next Background Removal attempt would run under
     /// (Epic 11300 Part C2B1 §4).
@@ -243,6 +245,10 @@ public sealed record WorkflowSnapshot(
         SizeSelection is not { Mode: OperatorSizingMode.PresetFit, Recommendation: { } held } ||
         ConfiguredRecommendations?.For(held.Preset) == held;
 
+    internal bool IsPresetTarget =>
+        DimensionSemantics == PrintDimensionSemantics.TargetEdgeV1 &&
+        Dimensions is { Preset: not SizePreset.Custom };
+
     /// <summary>
     /// The operator's current size decision in the flexible-size vocabulary
     /// (Epic 11400 Part B1A.2D §6).
@@ -303,6 +309,14 @@ public sealed record WorkflowSnapshot(
             if (DimensionSemantics != PrintDimensionSemantics.TargetEdgeV1 ||
                 TargetEdgePlan is not { } plan ||
                 UpstreamResultOf(StepKind.PhotoshopOutput) is not { } upstream)
+            {
+                return null;
+            }
+
+            if (IsPresetTarget &&
+                (plan.Selection.Recommendation is not { } recommendation ||
+                 recommendation.Preset != Dimensions!.Value.Preset ||
+                 ConfiguredRecommendations?.For(recommendation.Preset) != recommendation))
             {
                 return null;
             }
@@ -445,6 +459,7 @@ public sealed record WorkflowSnapshot(
             && Nullable.Equals(WhiteUnderbaseBranch, other.WhiteUnderbaseBranch)
             && ApprovedPrintOutputCount == other.ApprovedPrintOutputCount
             && TrimMargin.Equals(other.TrimMargin)
+            && IgnoreSmallTrimNoise == other.IgnoreSmallTrimNoise
             && Equals(BackgroundRemovalAuthority, other.BackgroundRemovalAuthority)
             && Nullable.Equals(DimensionSemantics, other.DimensionSemantics)
             && Equals(PrintPreparationPlan, other.PrintPreparationPlan)
@@ -467,6 +482,7 @@ public sealed record WorkflowSnapshot(
         hash.Add(WhiteUnderbaseBranch);
         hash.Add(ApprovedPrintOutputCount);
         hash.Add(TrimMargin);
+        hash.Add(IgnoreSmallTrimNoise);
         hash.Add(BackgroundRemovalAuthority);
         hash.Add(DimensionSemantics);
         hash.Add(PrintPreparationPlan);

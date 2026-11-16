@@ -58,7 +58,7 @@ public sealed class FlexibleSizeWorkflowTests
     {
         using SessionServiceHarness harness = new();
         ISessionService service = harness.CreateService();
-        SessionId id = await AtDimensionsAsync(harness, service, WideSource(harness));
+        SessionId id = await AtDimensionsAsync(harness, service, Source(harness, 4000, 2000));
 
         await Must(service.ExecuteAsync(
             id, new WorkflowCommand.SetPresetFitSize(preset), "tester", CancellationToken.None));
@@ -72,12 +72,7 @@ public sealed class FlexibleSizeWorkflowTests
         PrintPreparationPlan plan = after.Session.PrintPreparationPlan.ShouldNotBeNull();
         plan.LimitKind.ShouldBe(preset);
 
-        // 169.3 × 84.7 mm is inside both configured recommendations — under A4's 280 mm long edge
-        // and under A5's 135 mm short edge — so neither resamples, and neither is stretched up to
-        // its recommendation (post-final A5 correction §6).
-        plan.Mode.ShouldBe(PrintPreparationMode.ResolutionOnly);
-        plan.ProjectedPixelWidth.ShouldBe(2000);
-        plan.ProjectedPixelHeight.ShouldBe(1000);
+        plan.Mode.ShouldBe(PrintPreparationMode.ProportionalShrink);
 
         (double WidthMm, double HeightMm) nominal =
             PrintDimensions.NominalMillimetres(preset).ShouldNotBeNull();
@@ -100,6 +95,62 @@ public sealed class FlexibleSizeWorkflowTests
                 ? recommendation.MaxShortEdgeMm
                 : recommendation.MaxLongEdgeMm)
             .ShouldBe((decimal)configuredEdgeMm);
+    }
+
+    [Theory]
+    [InlineData(SizePreset.A3Portrait, 1004, 1357, LimitingEdge.Width, 280, 3307, 4470)]
+    [InlineData(SizePreset.A3Portrait, 476, 1727, LimitingEdge.Height, 400, 1302, 4724)]
+    [InlineData(SizePreset.A4, 2000, 1000, LimitingEdge.Width, 280, 3307, 1654)]
+    [InlineData(SizePreset.A5, 2000, 1000, LimitingEdge.Height, 135, 3188, 1594)]
+    public async Task A_small_image_fills_the_preset_only_after_explicit_enlargement_confirmation(
+        SizePreset preset, int width, int height, LimitingEdge edge, int millimetres,
+        int projectedWidth, int projectedHeight)
+    {
+        using SessionServiceHarness harness = new();
+        CountingPhotoshop photoshop = new(harness.FakePhotoshop);
+        ISessionService service = harness.CreateServiceWithPhotoshop(photoshop);
+        SessionId id = await AtDimensionsAsync(harness, service, Source(harness, width, height));
+        WorkflowCommand.SetPresetFitSize choose = new(preset);
+        PrintDimensionsPreflight draft = (await service.PreviewPrintDimensionsAsync(
+            id, choose, CancellationToken.None)).Value;
+        draft.RequiresEnlargement.ShouldBeTrue();
+        draft.GoverningEdge.ShouldBe(edge);
+        draft.OutputPixelWidth.ShouldBe(projectedWidth);
+        draft.OutputPixelHeight.ShouldBe(projectedHeight);
+
+        await Must(service.ExecuteAsync(id, choose, "tester", CancellationToken.None));
+        await Must(service.ExecuteAsync(id, new WorkflowCommand.SelectWhiteUnderbaseBranch(
+            WhiteUnderbaseBranch.W1_1px, "ordinary design"), "tester", CancellationToken.None));
+
+        // Reopen through a new service to prove the pending offer survives persistence.
+        service = harness.CreateServiceWithPhotoshop(photoshop);
+        SessionView pending = (await service.LoadAsync(id, CancellationToken.None)).Value;
+        pending.Sizing.NeedsEnlargementAuthority.ShouldBeTrue();
+        pending.CanRunPhotoshopOutput.ShouldBeFalse();
+        Guid offer = pending.Sizing.EnlargementOfferId.ShouldNotBeNull();
+        WorkflowCommand.StartStep start = new(StepKind.PhotoshopOutput);
+        (await service.ExecuteAsync(id, start, "tester", CancellationToken.None)).IsFailure.ShouldBeTrue();
+        photoshop.CallCount.ShouldBe(0);
+
+        await Must(service.AuthoriseCurrentEnlargementAsync(id, offer, "tester", CancellationToken.None));
+        SessionView result = (await service.ExecuteAsync(id, start, "tester", CancellationToken.None)).Value;
+        PrintPreparationAttemptView audit = result.AttemptPreparation.ShouldNotBeNull();
+        audit.Preset.ShouldBe(preset);
+        audit.RequestedTargetEdge.ShouldBeNull();
+        audit.PresetOverride.ShouldBeFalse();
+        SessionAggregate finished = await LoadAsync(harness, id);
+        TargetEdgePreparation preparation = finished.Attempts.Single(a => a.Step == StepKind.PhotoshopOutput)
+            .Preparation.ShouldBeOfType<TargetEdgePreparation>();
+        preparation.IsAuthorisedEnlargement.ShouldBeTrue();
+        preparation.PhotoshopEdge.ShouldBe(edge);
+        preparation.PhotoshopEdgeValueMm.ShouldBe(millimetres);
+        preparation.ProjectedPixelWidth.ShouldBe(projectedWidth);
+        preparation.ProjectedPixelHeight.ShouldBe(projectedHeight);
+        PrintDimensions recorded = finished.Outputs.Single().Dimensions;
+        recorded.Preset.ShouldBe(preset);
+        recorded.PixelWidth.ShouldBe(projectedWidth);
+        recorded.PixelHeight.ShouldBe(projectedHeight);
+        photoshop.CallCount.ShouldBe(1);
     }
 
     /// <summary>

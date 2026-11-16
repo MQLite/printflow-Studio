@@ -318,7 +318,7 @@ public sealed class RegressionTrimGeometryTests
         public async Task<TrimResult> RunProductAsync(TrimMargin margin)
         {
             OperationResult<TrimResult> result = await new DeterministicAlphaTrimProcessor(_files)
-                .TrimAsync(new TrimRequest(InputRef, OutputRef, margin), CancellationToken.None);
+                .TrimAsync(new TrimRequest(InputRef, OutputRef, margin, IgnoreSmallNoise: false), CancellationToken.None);
             result.IsSuccess.ShouldBeTrue(result.IsFailure ? result.Failure.ToString() : "");
             return result.Value;
         }

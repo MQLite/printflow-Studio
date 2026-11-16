@@ -23,6 +23,68 @@ namespace PrintFlow.Tests.Integration.Files;
 /// </remarks>
 public sealed class DeterministicTrimTests
 {
+    [Fact]
+    public async Task Detached_faint_residue_does_not_pin_the_crop_to_the_canvas_edges()
+    {
+        using TrimFixture fixture = new();
+        fixture.WriteInput(SyntheticImages.PngWithAlpha(120, 100, (x, y) =>
+        {
+            if (x is >= 20 and < 100 && y is >= 15 and < 85) return 200;
+            // A barely visible fringe attached to the artwork must survive.
+            if (x == 19 && y is >= 15 and < 20) return 1;
+            // The reported input has faint detached patches, not just single pixels.
+            if ((x is >= 0 and < 6 && y is >= 0 and < 6) ||
+                (x is >= 114 and < 120 && y is >= 94 and < 100)) return 1;
+            return 0;
+        }));
+
+        TrimResult result = await fixture.TrimAsync();
+
+        result.ContentBounds.ShouldBe(TrimBounds.FromEdges(19, 15, 100, 85));
+        result.AppliedBounds.ShouldBe(TrimBounds.FromEdges(19, 15, 100, 85));
+        byte[] output = SyntheticImages.ReadAlphaPlane(fixture.OutputPath, out int width, out int height);
+        width.ShouldBe(81);
+        height.ShouldBe(70);
+        output[0].ShouldBe((byte)1);
+        output[1].ShouldBe((byte)200);
+    }
+
+    [Fact]
+    public async Task Disabling_noise_filtering_retains_the_exact_previous_alpha_bounds()
+    {
+        using TrimFixture fixture = new();
+        fixture.WriteInput(SyntheticImages.PngWithAlpha(120, 100, (x, y) =>
+            x is >= 20 and < 100 && y is >= 15 and < 85 ? (byte)200 :
+            x == 0 && y == 0 ? (byte)1 : (byte)0));
+        byte[] original = File.ReadAllBytes(fixture.InputPath);
+
+        TrimResult filtered = await fixture.TrimAsync();
+        filtered.ContentBounds.ShouldBe(TrimBounds.FromEdges(20, 15, 100, 85));
+        TrimResult exact = await fixture.TrimAsync(ignoreSmallNoise: false);
+        exact.ContentBounds.ShouldBe(TrimBounds.FromEdges(0, 0, 100, 85));
+        File.ReadAllBytes(fixture.InputPath).ShouldBe(original);
+        byte[] output = SyntheticImages.ReadAlphaPlane(fixture.OutputPath, out _, out _);
+        output[0].ShouldBe((byte)1);
+    }
+
+    [Fact]
+    public async Task Noise_filtering_applies_margins_after_detection_and_does_not_rewrite_pixels()
+    {
+        using TrimFixture fixture = new();
+        fixture.WriteInput(SyntheticImages.PngWithAlpha(120, 100, (x, y) =>
+            x is >= 20 and < 100 && y is >= 15 and < 85 ? (byte)200 :
+            (x == 0 && y == 0) || (x == 18 && y == 13) ? (byte)1 : (byte)0));
+
+        TrimResult result = await fixture.TrimAsync(TrimMargin.Uniform(3));
+        result.ContentBounds.ShouldBe(TrimBounds.FromEdges(20, 15, 100, 85));
+        result.AppliedBounds.ShouldBe(TrimBounds.FromEdges(17, 12, 103, 88));
+        byte[] source = SyntheticImages.ReadAlphaPlane(fixture.InputPath, out int sourceWidth, out _);
+        byte[] output = SyntheticImages.ReadAlphaPlane(fixture.OutputPath, out int width, out int height);
+        for (int y = 0; y < height; y++)
+        for (int x = 0; x < width; x++)
+            output[y * width + x].ShouldBe(source[(y + 12) * sourceWidth + x + 17]);
+    }
+
     // -----------------------------------------------------------------------------
     // Case A: transparent border around opaque content
     // -----------------------------------------------------------------------------
@@ -335,7 +397,7 @@ public sealed class DeterministicTrimTests
     {
         using TrimFixture fixture = new();
 
-        fixture.Processor.ProcessorId.ShouldBe("internal-alpha-trim-v1");
+        fixture.Processor.ProcessorId.ShouldBe("internal-alpha-trim-v2");
     }
 
     /// <summary>A temp workspace holding one input file and the path its trim would write to.</summary>
@@ -369,10 +431,10 @@ public sealed class DeterministicTrimTests
 
         public void WriteInput(byte[] bytes) => File.WriteAllBytes(InputPath, bytes);
 
-        public async Task<TrimResult> TrimAsync(TrimMargin? margin = null)
+        public async Task<TrimResult> TrimAsync(TrimMargin? margin = null, bool ignoreSmallNoise = true)
         {
             OperationResult<TrimResult> result = await Processor.TrimAsync(
-                new TrimRequest(InputRef, OutputRef, margin ?? TrimMargin.Tight), CancellationToken.None);
+                new TrimRequest(InputRef, OutputRef, margin ?? TrimMargin.Tight, ignoreSmallNoise), CancellationToken.None);
 
             result.IsSuccess.ShouldBeTrue(result.IsFailure ? result.Failure.ToString() : "");
             return result.Value;

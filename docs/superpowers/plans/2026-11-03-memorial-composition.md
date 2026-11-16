@@ -10,6 +10,8 @@
 
 **Spec:** [已通过设计](../specs/2026-11-03-memorial-guided-design.md)；同时读取[主计划](2026-11-03-memorial-authoring-plan.md)与[A接口](2026-11-03-memorial-prompt-workbench.md)。
 
+2026-11-05 续接：[B3–B5 实施与验证记录](../../codex/memorial-authoring/SCRUM-11228-11230.md)。受管发布、转换和导出共用修订保护，作为同一集成提交记录；人工及生产验收继续保留。
+
 ## Global Constraints
 
 继承主计划全部约束。A完成后B才可实施。原样沿用表示来源素材与内容不被重新绘制，只允许明确的几何变换；等比重采样后的PNG字节可以不同，不能用输出字节不同就判断人物已被重绘。参考原图不具备可用素材时准确报缺口，不调用自动抠图或装饰拆层。
@@ -44,6 +46,8 @@ record MemorialRenderResult(MemorialRenderRef File, long DraftRevision, FileFact
 
 B1扩展Authoring schema至2，增加 `Layout:MemorialLayout?`，并在Workflow命令union增加 `SetLayout(MemorialLayout Layout)`，通过A的ApplyAsync及revision CAS保存；读取schema1时保持所有原文/照片与确认，Layout为空且待设置，不能自动确认。ParentDraftId/ParentDraftRevision继续使用A中已定义属性。`SetLayout`不能改变已核对的Text原文，只能调整样式/几何；不匹配Semantic对应字段时返回issue。
 
+B1实施接口补充（2026-11-03）：`MemorialImageLayer.SourceExtent:RectPx?`记录原点为0的完整源像素框，B3须对真实解码尺寸核验；`AllowEdgeExtension:bool`明确未受保护新增装饰的环带权限。`MemorialLayoutModule.TextInputs(draft)`返回冻结的精确文字字典；日期原文沿用`birth-date`/`death-date`等确认key，非空日期对应的非空标签另用`DateLabelKey(field)`（`date-label:<文字确认key>`）作为图层key，与该日期共用原文/标签/解释的内容确认。日期不显示时不输出其标签。B2须沿用此接口，不能从未经核对的常量绘制标签。不同几何/裁切的SetLayout先取消版式确认，随后同内容SetLayout才可明确确认；历史恢复也遵守几何变更失效规则。
+
 ```csharp
 // B1 pure geometry/permission module, no rendering or file work.
 IReadOnlyList<AiAuthoringIssue> MemorialLayoutModule.Validate(AiAuthoringDraft draft, MemorialLayout layout);
@@ -69,39 +73,45 @@ MemorialVersionModule消耗A的store和B4的asset-fork port；所有返回集合
 
 ### Task B1: 毫米版式、保护权限与规格
 
+2026-11-03 实施记录：[SCRUM-11226 / B1](../../codex/memorial-authoring/SCRUM-11226.md)。毫米版式、保留/几何独立权限、日期标签原文、schema1→2与CAS持久化已实现。独立审查5项Important已RED→GREEN修复；38项B1新用例，最终19组973项通过；locked restore与零警告/错误Release构建通过。本地交付，B2–B5未启动。
+
 **Files:** Create Domain `AiDesign/Memorial/{MemorialLayout,MemorialRenderPlan}.cs`; Create Workflow `AiDesign/Memorial/MemorialLayoutModule.cs`; Modify Authoring DTO/store的schema读取；Tests `Unit/AiDesign/Memorial/MemorialLayoutTests.cs`、`Integration/AiDesign/Authoring/AuthoringSchemaUpgradeTests.cs`。
 
 **Interfaces:** Consumes A草稿/规则；Produces B数据与Validate。精确预设：T恤 `280×390`，徽章 `86×86`、OuterDiameter=`86`、SafeDiameter=`72`；单侧环带`7`。数字必须有限且>0；安全直径≤外圆，徽章宽高等于外圆。
 
-- [ ] **Step 1 — RED tests:** `Badge_ring_is_7mm`、`Critical_bounds_must_fit_safe_circle`、`Medal_cannot_be_cropped_to_make_layout_fit`、`Unconfirmed_template_cannot_be_accepted`、`Schema1_keeps_manual_text_and_requires_layout`。断言：
+- [x] **Step 1 — RED tests:** `Badge_ring_is_7mm`、`Critical_bounds_must_fit_safe_circle`、`Medal_cannot_be_cropped_to_make_layout_fit`、`Unconfirmed_template_cannot_be_accepted`、`Schema1_keeps_manual_text_and_requires_layout`。断言：
   ```csharp
   ((86d - 72d) / 2).ShouldBe(7);
   outsideIssues.Select(i => i.Key).ShouldContain("OutsideSafeArea");
   croppedIssues.Select(i => i.Key).ShouldContain("PreservationConflict");
   migrated.FinalDocument.ShouldBe(original.FinalDocument);
   ```
-- [ ] **Step 2:** Run `dotnet test tests/PrintFlow.Tests/PrintFlow.Tests.csproj -c Release --filter "FullyQualifiedName~MemorialLayoutTests|FullyQualifiedName~AuthoringSchemaUpgradeTests"`；预期编译或行为失败。
-- [ ] **Step 3:** 用布局坐标验证：关键矩形四角均在36mm半径安全圆内；人物完整源框默认受保护，用户明确裁切后只接受被确认范围，不能自动猜人脸区域。原装饰整体变换需匹配其权限；复杂拆分保持未支持。只允许背景/明确允许的边缘装饰进入7mm环带。配置变化撤销布局确认，不撤销无变化文字内容确认。
-- [ ] **Step 4:** 几何、NaN/负数、边界相切、超长姓名、权限冲突及schema升级测试0失败；不改变旧Request schema。
-- [ ] **Step 5:** Commit `feat(memorial): validate protected layouts and product specifications`。
+- [x] **Step 2:** Run `dotnet test tests/PrintFlow.Tests/PrintFlow.Tests.csproj -c Release --filter "FullyQualifiedName~MemorialLayoutTests|FullyQualifiedName~AuthoringSchemaUpgradeTests"`；预期编译或行为失败。
+- [x] **Step 3:** 用布局坐标验证：关键矩形四角均在36mm半径安全圆内；人物完整源框默认受保护，用户明确裁切后只接受被确认范围，不能自动猜人脸区域。原装饰整体变换需匹配其权限；复杂拆分保持未支持。只允许背景/明确允许的边缘装饰进入7mm环带。配置变化撤销布局确认，不撤销无变化文字内容确认。
+- [x] **Step 4:** 几何、NaN/负数、边界相切、超长姓名、权限冲突及schema升级测试0失败；不改变旧Request schema。
+- [x] **Step 5:** Commit `feat(memorial): validate protected layouts and product specifications`。
 
 ### Task B2: 精确文字层与弧线排版
+
+2026-11-03 实施记录：[SCRUM-11227 / B2](../../codex/memorial-authoring/SCRUM-11227.md)。精确确认文字/日期标签、真实字体度量与缺字检查、塑形字形簇弧线、RTL段落与可复用毫米轮廓已实现。独立审查6项Important已RED→GREEN修复，44项新测试；最终20组1017项通过，locked restore与零警告/错误Release构建通过。1项极长文本扫描性能Minor延期；B3–B5未启动。
 
 **Files:** Create Infrastructure `AiDesign/Memorial/WpfMemorialTextLayout.cs`; Create Workflow `IMemorialTextLayout.cs`; Tests `Integration/AiDesign/Memorial/MemorialTextLayoutTests.cs`。
 
 **Interfaces:** Consumes A中Semantic、姓名/日期确认、B1 Canvas与显式styles；ProducesArrange返回的真实TextLine。Style的Key绑定语义字段，Text只能从该草稿对应已确认字段读取。WPF类型留在Infrastructure；使用系统已安装字体和WPF字体度量，不下载字体，不调用模型重写文字。
 
-- [ ] **Step 1 — RED tests:** `Name_macrons_apostrophe_and_case_survive_layout`、`Long_name_offers_layout_change_instead_of_truncation`、`Missing_glyph_blocks_confirmation`、`Arc_changes_positions_not_text`。断言：
+B2接入合同：`WpfMemorialTextLayout`的Infrastructure内部`Prepare(line)`返回冻结的毫米轮廓和只读字形簇来源/位置；B3须复用同一配置的适配器，不能另写一套文字测量/绘制逻辑。Domain仍只保存文字和style，不保存WPF对象或机器字体glyph编号。失败通过`OperationFailure.Context["issue"]`和`["field"]`定位。直线只采用原文显式换行，弧线目前为不超过π的单行上弧；用户指定字号不自动变化。默认2mm下限可配置，不代表实物可读性标准。RTL段落按Windows只读双向分类与显式方向标记处理；`GetStringTypeW`声明集中于既有`Automation/NativeMethods.cs`，不增加包。B3/B4在渲染/后台路径调用同步接口；极长文字的线性索引优化仍待后续处理。
+
+- [x] **Step 1 — RED tests:** `Name_macrons_apostrophe_and_case_survive_layout`、`Long_name_offers_layout_change_instead_of_truncation`、`Missing_glyph_blocks_confirmation`、`Arc_changes_positions_not_text`。断言：
   ```csharp
   nameLine.Text.ShouldBe("ʻĀna  DEMO 陈");
   arcLine.Text.ShouldBe(flatLine.Text);
   longNameFailure.IsSuccess.ShouldBeFalse();
   originalDate.ShouldBe("12/06/1039");
   ```
-- [ ] **Step 2:** Run `dotnet test tests/PrintFlow.Tests/PrintFlow.Tests.csproj -c Release --filter FullyQualifiedName~MemorialTextLayoutTests`；预期失败。
-- [ ] **Step 3:** 沿用A6日期解释与确认，不对原文大小写/Unicode做归一化。直线排版使用字体度量，弧线排版放置同一文字的glyph，连字/组合符作为塑形后的cluster处理，不能按UTF-16 char逐字拆。缺字、无法容纳、未核对文字返回issue。视觉模板字号/留白集中为可调整参数；达到可读性下限时让用户换行/改版式，不静默缩字或删字。
-- [ ] **Step 4:** 真实系统字体度量与glyph覆盖、组合字符、CJK/Latin混排、可选日期行和弧线测试0失败；具体可读性仍需后续真实成品验收，不能由像素图推定。
-- [ ] **Step 5:** Commit `feat(memorial): lay out verified literal text as editable layers`。
+- [x] **Step 2:** Run `dotnet test tests/PrintFlow.Tests/PrintFlow.Tests.csproj -c Release --filter FullyQualifiedName~MemorialTextLayoutTests`；预期失败。
+- [x] **Step 3:** 沿用A6日期解释与确认，不对原文大小写/Unicode做归一化。直线排版使用字体度量，弧线排版放置同一文字的glyph，连字/组合符作为塑形后的cluster处理，不能按UTF-16 char逐字拆。缺字、无法容纳、未核对文字返回issue。视觉模板字号/留白集中为可调整参数；达到可读性下限时让用户换行/改版式，不静默缩字或删字。
+- [x] **Step 4:** 真实系统字体度量与glyph覆盖、组合字符、CJK/Latin混排、可选日期行和弧线测试0失败；具体可读性仍需后续真实成品验收，不能由像素图推定。
+- [x] **Step 5:** Commit `feat(memorial): lay out verified literal text as editable layers`。
 
 ### Task B3: 原素材合成与受管PNG
 

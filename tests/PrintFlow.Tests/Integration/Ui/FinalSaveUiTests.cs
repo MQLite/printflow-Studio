@@ -113,6 +113,11 @@ public sealed class FinalSaveUiTests
             File.Exists(saved).ShouldBeTrue();
             screen.CanOpenContainingFolder.ShouldBeTrue();
             screen.CanSaveApproved.ShouldBeFalse("the same name and folder are already saved");
+            screen.SaveFileNameText = "accidental-copy.png";
+            screen.SaveFileNameText.ShouldBe("keep-extent.png");
+            screen.IsSaveDraftEditable.ShouldBeFalse();
+            await screen.SaveApprovedCommand.ExecuteAsync(null);
+            Directory.GetFiles(folder).ShouldBe([saved]);
             picker.Calls.ShouldBe(2, "only the explicit Change location opened a dialog");
             var counts = await FinalSaveFixtures.WorkCountsAsync(h, review.Id);
             counts.Promotions.ShouldBe(1);
@@ -130,6 +135,49 @@ public sealed class FinalSaveUiTests
             await screen.FinalSaveFactsLoaded;
             screen.NextStepText.ShouldBe(Strings.Session_NextCompleted);
             screen.FinalSaveStatus.ShouldContain(Path.GetFileName(saved));
+        }
+        finally { FinalSaveFixtures.Remove(folder); }
+    }
+
+    [Fact]
+    public async Task First_save_uses_the_entered_name_then_rename_and_copy_are_separate_actions()
+    {
+        using CultureScope culture = new("en");
+        using SessionServiceHarness h = new();
+        ISessionService workflow = h.CreateService();
+        SessionView review = await FinalSaveFixtures.PngAtFinalReviewAsync(h, workflow);
+        string folder = FinalSaveFixtures.NewFolder("ui-rename-copy");
+        try
+        {
+            var delivery = FinalSaveFixtures.Delivery(h);
+            var picker = new StubFolderPicker { Next = folder };
+            var screen = await OpenAsync(h, workflow, delivery, picker, new RecordingDeliveredFileShell(), review);
+            screen.ChangeLocationCommand.Execute(null);
+            screen.SaveFileNameText = "first";
+            await screen.ConfirmAndSaveCommand.ExecuteAsync(null);
+            await screen.FinalSaveFactsLoaded;
+            Directory.GetFiles(folder).ShouldBe([Path.Combine(folder, "first.png")]);
+
+            screen.BeginRenameCommand.Execute(null);
+            screen.RenameFileNameText = "renamed";
+            await screen.ApplyRenameCommand.ExecuteAsync(null);
+            await screen.FinalSaveFactsLoaded;
+            string renamed = Path.Combine(folder, "renamed.png");
+            Directory.GetFiles(folder).ShouldBe([renamed]);
+            screen.SaveFileNameText.ShouldBe("renamed.png");
+            screen.FinalSaveSavedPath.ShouldBe(renamed);
+
+            screen.BeginCopyCommand.Execute(null);
+            screen.CanSaveApproved.ShouldBeFalse();
+            screen.SaveFileNameText = "explicit-copy";
+            await screen.SaveApprovedCommand.ExecuteAsync(null);
+            await screen.FinalSaveFactsLoaded;
+            Directory.GetFiles(folder).Order().ShouldBe(new[] { Path.Combine(folder, "explicit-copy.png"), renamed }.Order());
+            screen.IsSaveDraftEditable.ShouldBeFalse();
+            screen.CanSelectSaveResult.ShouldBeTrue();
+            screen.CanSelectFinalSaveRecord.ShouldBeTrue();
+            screen.SelectedFinalSaveRecord = screen.FinalSaveRecords.Single(record => record.Label.Contains("renamed.png"));
+            screen.FinalSaveSavedPath.ShouldBe(renamed);
         }
         finally { FinalSaveFixtures.Remove(folder); }
     }
@@ -327,7 +375,7 @@ public sealed class FinalSaveUiTests
         string[] keys = typeof(Strings).GetProperties(System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)
             .Select(p => p.Name).Where(n => n.StartsWith("FinalSave_", StringComparison.Ordinal) ||
                                             n is "Session_NextFinalReview" or "Session_NextFinalReviewNeedsDraft" or "Session_NextCompletedNotSaved").ToArray();
-        keys.Length.ShouldBe(95); // 89 + the closeout's record list and not-refreshed history + SCRUM-11147 FinalSave_TrimAdjustOpen
+        keys.Length.ShouldBe(101);
         foreach (string key in keys)
         {
             string en = manager.GetString(key, CultureInfo.GetCultureInfo("en"))!;
@@ -747,6 +795,7 @@ public sealed class FinalSaveUiTests
                 await screen.SaveApprovedCommand.ExecuteAsync(null);
                 await screen.FinalSaveFactsLoaded;
                 screen.FinalSaveSavedPath.ShouldNotBeEmpty();
+                screen.BeginCopyCommand.Execute(null);
             }
             picker.Next = folder;
             screen.ChangeLocationCommand.Execute(null);
@@ -918,6 +967,7 @@ public sealed class FinalSaveUiTests
     public static TheoryData<string, string, double, double> RenderCases => new()
     {
         { "pending-no-folder", "en", 1000, 700 }, { "pending-no-folder", "zh-CN", 1000, 700 },
+        { "pending-customer-tiff", "zh-CN", 1000, 700 }, { "pending-direct-tiff", "zh-CN", 1000, 700 },
         { "collision", "en", 1000, 700 }, { "collision", "zh-CN", 1000, 700 },
         { "saved-tiff", "en", 1920, 1040 }, { "saved-tiff", "zh-CN", 1920, 1040 },
         { "saved-tiff", "zh-CN", 1000, 700 },
@@ -942,15 +992,21 @@ public sealed class FinalSaveUiTests
             Size viewport = new(width, height);
             var facts = WpfRendering.RenderExpectingNoBindingErrors(() => new SessionScreenView { DataContext = screen }, viewport, tree =>
             {
-                // E4 keeps optional save fields behind an explicit disclosure during review.
-                tree.OfType<Expander>().Single(e => AutomationProperties.GetAutomationId(e) == "Session.FinalSave.Options").IsExpanded = true;
-                tree.Root.UpdateLayout();
-                List<DependencyObject> expanded = [];
-                Collect(tree.Root, expanded);
-                tree = new RenderedTree(tree.Root, expanded);
                 Border panel = tree.OfType<Border>().Single(b => AutomationProperties.GetAutomationId(b) == "Session.FinalSave");
                 List<DependencyObject> inside = [];
                 Collect(panel, inside);
+                if (state.StartsWith("pending-", StringComparison.Ordinal))
+                {
+                    var name = inside.OfType<TextBox>().Single(t => AutomationProperties.GetAutomationId(t) == "Session.FinalSave.FileName");
+                    var location = inside.OfType<TextBox>().Single(t => AutomationProperties.GetAutomationId(t) == "Session.FinalSave.Folder");
+                    Shown(name, tree.Root).ShouldBeTrue();
+                    Shown(location, tree.Root).ShouldBeTrue();
+                    name.Text.ShouldBe(screen.SaveFileNameText);
+                    location.Text.ShouldBe(screen.SaveFolderText);
+                    var details = tree.OfType<ScrollViewer>().Single(s => s.Name == "SessionDetailsScroll");
+                    var locationBottom = location.TranslatePoint(new Point(0, location.ActualHeight), details);
+                    locationBottom.Y.ShouldBeLessThanOrEqualTo(details.ViewportHeight);
+                }
                 // E2: save submissions live in the fixed action bar; their identity/accessibility
                 // contracts are unchanged even though they are no longer children of the form.
                 var buttons = inside.OfType<Button>().Where(b => Shown(b, panel)).Concat(
@@ -1052,7 +1108,8 @@ public sealed class FinalSaveUiTests
     private static async Task<(SessionViewModel Screen, SessionViewModel Baseline)> ArrangeAsync(
         SessionServiceHarness h, string state, string folder)
     {
-        ISessionService workflow = state is "saved-tiff" or "history" or "save-failed" or "records" ? FinalSaveFixtures.TiffService(h) : h.CreateService();
+        ISessionService workflow = state is "saved-tiff" or "history" or "save-failed" or "records" or
+            "pending-customer-tiff" or "pending-direct-tiff" ? FinalSaveFixtures.TiffService(h) : h.CreateService();
         IApprovedArtifactDeliveryService delivery = FinalSaveFixtures.Delivery(h);
         var coordinator = new FinalSaveCoordinator(workflow, delivery, "tester");
         SessionView view;
@@ -1060,6 +1117,14 @@ public sealed class FinalSaveUiTests
         {
             case "pending-no-folder":
                 view = await FinalSaveFixtures.PngAtFinalReviewAsync(h, workflow);
+                break;
+            case "pending-customer-tiff":
+                SessionId customer = await KeepOriginalExtentPersistenceTests.AtTrim(h, workflow, WorkflowType.PrepareCustomerDesign);
+                await KeepOriginalExtentPersistenceTests.Execute(workflow, customer, new WorkflowCommand.KeepOriginalExtent());
+                view = await FinalSaveFixtures.NextTiffSizeAsync(workflow, customer, 200);
+                break;
+            case "pending-direct-tiff":
+                view = await FinalSaveFixtures.TiffAtFinalReviewAsync(h, workflow);
                 break;
             case "pending-remembered":
             case "collision":

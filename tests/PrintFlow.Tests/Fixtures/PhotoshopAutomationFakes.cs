@@ -10,6 +10,18 @@ namespace PrintFlow.Tests.Fixtures;
 // in this assembly, and an enclosing namespace wins over a compilation-unit alias.
 using Unit = PrintFlow.Domain.Results.Unit;
 
+internal sealed class StubPhotoshopToolNativeBridge : IPhotoshopToolNativeBridge
+{
+    internal List<string> SelectedPaths { get; } = [];
+    internal OperationFailure? Failure { get; set; }
+
+    public OperationResult<Unit> SelectMoveTool(string expectedDocumentFullPath, PhotoshopBaseline baseline)
+    {
+        SelectedPaths.Add(expectedDocumentFullPath);
+        return Failure is { } failure ? OperationResult.Fail<Unit>(failure) : OperationResult.Ok();
+    }
+}
+
 /// <summary>
 /// Scriptable stand-ins for the OS seams the Photoshop foundation sits on
 /// (Epic 11400 Part A §22).

@@ -73,8 +73,8 @@ public sealed class PhotoshopFinalGateWorkstationSmoke
 
         // A design with a transparent border, so the deterministic Trim has real work to do and the
         // Photoshop step consumes a trimmed Revision rather than the imported source.
-        string sourcePath = controlled.WriteSource(2400, 1600, static (x, y) =>
-            x is >= 200 and <= 2199 && y is >= 150 and <= 1449 ? byte.MaxValue : (byte)0);
+        string sourcePath = controlled.WriteSource(2400, 2100, static (x, y) =>
+            x is >= 200 and <= 2199 && y is >= 150 and <= 1949 ? byte.MaxValue : (byte)0);
 
         SessionId id = Accept(await service.ImportAsync(
             WorkflowType.PrepareCustomerDesign, sourcePath, controlled.OutputName, "qa",
@@ -104,7 +104,7 @@ public sealed class PhotoshopFinalGateWorkstationSmoke
         Accept(await service.ExecuteAsync(
             id, new WorkflowCommand.Approve(StepKind.Trim, trim.Sha256), "qa", CancellationToken.None));
 
-        // §10's preset-fit case: A5's configured long-edge recommendation, which shrinks these
+        // §10's preset-fit case: A5's configured short-edge recommendation, which shrinks these
         // pixels. The millimetres are not supplied — the command carries the preset and the
         // workflow resolves the recommendation from the verified manifest.
         Accept(await service.ExecuteAsync(

@@ -723,9 +723,15 @@ public sealed class StandardRegressionSetWorkstationSmoke(ITestOutputHelper outp
             "regression", CancellationToken.None));
         steps.Add("BackgroundRemoval approved");
 
+        // Frozen regression manifests specify exact alpha bounds; exercise the explicit
+        // preservation option rather than reinterpreting their historical expectations.
+        SessionView beforeTrim = Accept(await service.LoadAsync(id, CancellationToken.None));
+        Accept(await service.ExecuteAsync(id,
+            new WorkflowCommand.SetTrimParameters(beforeTrim.TrimMargin, IgnoreSmallNoise: false),
+            "regression", CancellationToken.None));
         SessionView trimmed = Accept(await service.ExecuteAsync(
             id, new WorkflowCommand.StartStep(StepKind.Trim), "regression", CancellationToken.None));
-        steps.Add("Trim (internal alpha bounds)");
+        steps.Add("Trim (exact alpha bounds; noise filtering disabled for frozen regression contract)");
 
         ArtefactView trimmedArtefact = trimmed.CurrentArtefact!;
         SessionAggregate afterTrim = (await repository.LoadAsync(id, CancellationToken.None)).Value!;
@@ -790,9 +796,15 @@ public sealed class StandardRegressionSetWorkstationSmoke(ITestOutputHelper outp
             "regression", CancellationToken.None));
         steps.Add("Enhancement and BackgroundRemoval skipped");
 
+        // Frozen regression manifests specify exact alpha bounds; exercise the explicit
+        // preservation option rather than reinterpreting their historical expectations.
+        SessionView beforeTrim = Accept(await service.LoadAsync(id, CancellationToken.None));
+        Accept(await service.ExecuteAsync(id,
+            new WorkflowCommand.SetTrimParameters(beforeTrim.TrimMargin, IgnoreSmallNoise: false),
+            "regression", CancellationToken.None));
         SessionView trimmed = Accept(await service.ExecuteAsync(
             id, new WorkflowCommand.StartStep(StepKind.Trim), "regression", CancellationToken.None));
-        steps.Add("Trim (internal alpha bounds)");
+        steps.Add("Trim (exact alpha bounds; noise filtering disabled for frozen regression contract)");
 
         ArtefactView produced = trimmed.CurrentArtefact!;
 

@@ -314,7 +314,7 @@ public sealed class ProductionCompositionTests
         services.GetRequiredService<IEnvironmentDiagnostics>().Read().Verified.ShouldBeFalse();
 
         services.GetRequiredService<IEnvironmentGate>()
-            .Verify(AdapterExecutionMode.Production).IsFailure.ShouldBeTrue();
+            .Verify(AdapterExecutionMode.Production).IsSuccess.ShouldBeTrue();
         services.GetRequiredService<IEnvironmentGate>()
             .Verify(AdapterExecutionMode.Fake).IsSuccess.ShouldBeTrue();
     }

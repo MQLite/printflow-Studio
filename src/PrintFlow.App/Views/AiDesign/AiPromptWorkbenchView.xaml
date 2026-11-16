@@ -14,7 +14,11 @@
    <DataTemplate x:Key="DetailedPage"><local:DetailedPromptView/></DataTemplate>
   </ResourceDictionary>
  </UserControl.Resources>
- <Grid Margin="20" IsEnabled="{Binding CanEdit}">
+ <DockPanel Margin="20">
+ <Button DockPanel.Dock="Bottom" Content="{x:Static r:AiMemorialLabels.CancelTask}" Command="{Binding CancelMemorialTaskCommand}"
+         Visibility="{Binding IsMemorialTaskRunning, Converter={StaticResource BoolVisibility}}"
+         HorizontalAlignment="Right" Margin="0,8,0,0" Padding="16,10" AutomationProperties.AutomationId="Memorial.StopTask"/>
+ <Grid IsEnabled="{Binding CanEdit}">
   <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
   <Grid Grid.RowSpan="3">
    <Grid.Style><Style TargetType="Grid"><Setter Property="IsEnabled" Value="False"/><Style.Triggers><MultiDataTrigger><MultiDataTrigger.Conditions>
@@ -82,4 +86,5 @@
    </DockPanel>
   </Border>
  </Grid>
+ </DockPanel>
 </UserControl>

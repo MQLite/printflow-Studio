@@ -49,6 +49,9 @@ public sealed record ProcessingSession(
     /// </remarks>
     public TrimMargin TrimMargin { get; init; } = TrimMargin.Tight;
 
+    /// <summary>Whether the next automatic trim ignores small detached alpha-1 residue.</summary>
+    public bool IgnoreSmallTrimNoise { get; init; } = true;
+
     /// <summary>
     /// The reviewed-content authority the next Background Removal attempt would run with
     /// (Epic 11300 Part C2B1 §4, §10).

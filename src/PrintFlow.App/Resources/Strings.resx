@@ -250,6 +250,9 @@
   <data name="Failure_OutputUnreadable" xml:space="preserve">
     <value>A file PrintFlow needed exists but could not be read completely, so it was not used. PrintFlow never changes your original file.</value>
   </data>
+  <data name="Failure_MeituEnhancementShrunkOutput" xml:space="preserve">
+    <value>Meitu exported a smaller image than the original. PrintFlow kept the original image for printing.</value>
+  </data>
   <data name="Failure_OutputValidationFailed" xml:space="preserve">
     <value>A file did not pass PrintFlow's checks, so it was not accepted. PrintFlow never changes your original file.</value>
   </data>
@@ -263,7 +266,7 @@
     <value>The file changed after it was shown, so the decision was not applied. Run the step again.</value>
   </data>
   <data name="Failure_EnvironmentNotVerified" xml:space="preserve">
-    <value>This workstation has not been verified for automated processing.</value>
+    <value>The configuration needed for this step is unavailable. See the error details.</value>
   </data>
   <data name="Failure_AdapterUnavailable" xml:space="preserve">
     <value>A program it needs was unavailable or in use by another job, or the operation stopped unexpectedly. PrintFlow never changes your original file.</value>
@@ -290,7 +293,7 @@
     <value>This image has no transparent area to trim to, so it must be cropped by hand.</value>
   </data>
   <data name="Failure_MeituNotInstalled" xml:space="preserve">
-    <value>The approved Meitu program was not found on this computer, or it is not the approved version. Please check the workstation setup.</value>
+    <value>Meitu could not be found or read. Please check its installation path.</value>
   </data>
   <data name="Failure_MeituLaunchFailed" xml:space="preserve">
     <value>Meitu could not be started or did not become ready.</value>
@@ -381,7 +384,7 @@
   <data name="Session_DimensionsNotSet" xml:space="preserve"><value>Not set</value></data>
   <data name="Session_PresetsLabel" xml:space="preserve"><value>Presets</value></data>
   <data name="Session_PresetHint" xml:space="preserve">
-    <value>A preset fills in its maximum bounds. You can still change the millimetres before confirming, and PrintFlow works out which edge governs from the image itself.</value>
+    <value>A preset fits the picture proportionally to its size limit. If the picture needs enlarging, PrintFlow asks you to confirm before processing it.</value>
   </data>
   <data name="Session_SizeHeading" xml:space="preserve"><value>Size</value></data>
   <data name="Session_UsePreset" xml:space="preserve"><value>Use preset</value></data>
@@ -545,7 +548,11 @@
   <data name="Session_TrimRightLabel" xml:space="preserve"><value>Right</value></data>
   <data name="Session_TrimBottomLabel" xml:space="preserve"><value>Bottom</value></data>
   <data name="Session_TrimLeftLabel" xml:space="preserve"><value>Left</value></data>
-  <data name="Session_TrimApply" xml:space="preserve"><value>Apply Margin</value></data>
+  <data name="Session_TrimApply" xml:space="preserve"><value>Apply Trim Settings</value></data>
+  <data name="Session_TrimIgnoreNoise" xml:space="preserve"><value>Ignore faint isolated specks</value></data>
+  <data name="Session_TrimNoiseHint" xml:space="preserve"><value>Keep soft edges connected to the artwork. Turn this off to retain every non-transparent pixel.</value></data>
+  <data name="Session_TrimNoiseIgnored" xml:space="preserve"><value>Faint isolated specks ignored</value></data>
+  <data name="Session_TrimNoisePreserved" xml:space="preserve"><value>All non-transparent pixels retained</value></data>
   <data name="Session_TrimMarginInvalid" xml:space="preserve">
     <value>Invalid margin. Enter a whole number of pixels that is zero or greater.</value>
   </data>
@@ -578,23 +585,23 @@
   <!-- Background removal, reviewed-content authority (Epic 11300 Part C2B2 §3, §9, §11, §14). -->
   <data name="Session_BackgroundRemovalHeading" xml:space="preserve"><value>Background removal</value></data>
   <data name="Session_BackgroundRemovalHint" xml:space="preserve">
-    <value>Meitu decides the foreground subject automatically for the image shown above. Authorise it for this image before running the step.</value>
+    <value>Choose a recognition mode, then authorise it for the image shown above before running the step.</value>
   </data>
-  <data name="Session_BackgroundRemovalAuthorise" xml:space="preserve"><value>Use Automatic Selection for this image</value></data>
+  <data name="Session_BackgroundRemovalAuthorise" xml:space="preserve"><value>Use this recognition mode for this image</value></data>
   <data name="Session_BackgroundRemovalConfirmQuestion" xml:space="preserve">
-    <value>Meitu will decide the foreground subject of this image on its own. Check the result before approving it. This applies to the image shown above only, not to later versions of it.</value>
+    <value>Meitu will recognise the foreground subject using {0}. Check the result before approving it. This applies to the image shown above only, not to later versions of it.</value>
   </data>
   <data name="Session_BackgroundRemovalConfirm" xml:space="preserve"><value>Confirm</value></data>
   <data name="Session_BackgroundRemovalCancel" xml:space="preserve"><value>Cancel</value></data>
   <data name="Session_BackgroundRemovalAuthorised" xml:space="preserve">
-    <value>Automatic Selection authorised for this image · Revision {0}</value>
+    <value>{1} authorised for this image · Revision {0}</value>
   </data>
   <data name="Session_BackgroundRemovalNotAuthorised" xml:space="preserve">
-    <value>Not authorised yet. Run Step becomes available once Automatic Selection is authorised for this image.</value>
+    <value>Confirm the selected recognition mode for this image before running the step.</value>
   </data>
   <data name="Session_BackgroundRemovalRunnable" xml:space="preserve"><value>Ready to run background removal.</value></data>
   <data name="Session_BackgroundRemovalAttemptAudit" xml:space="preserve">
-    <value>Background removal: Automatic Selection — authorised for reviewed Revision {0}</value>
+    <value>Background removal: {1} — authorised for reviewed Revision {0}</value>
   </data>
   <data name="Session_Stop" xml:space="preserve"><value>Stop</value></data>
   <data name="Session_StopHint" xml:space="preserve">
@@ -644,7 +651,7 @@
     <value>The working folder is not the one this workstation was verified with.</value>
   </data>
   <data name="EnvironmentCheck_ProductionRevalidation" xml:space="preserve">
-    <value>This installation has not been revalidated. After any PrintFlow, Windows, Meitu or Photoshop upgrade, the environment check and the standard test set must both be rerun and pass before production work may resume.</value>
+    <value>The historical validation record does not match this installation. This diagnostic finding does not prevent processing.</value>
   </data>
   <data name="EnvironmentCheck_OperatingSystem" xml:space="preserve">
     <value>This computer's Windows version does not match the verified workstation.</value>
@@ -662,7 +669,7 @@
     <value>The recorded interface language of Meitu or Photoshop, for reference.</value>
   </data>
   <data name="EnvironmentCheck_MeituExecutable" xml:space="preserve">
-    <value>Meitu does not match the accepted production baseline.</value>
+    <value>The configured Meitu program could not be found or read. Please check its installation path.</value>
   </data>
   <data name="EnvironmentCheck_PhotoshopExecutable" xml:space="preserve">
     <value>Photoshop does not match the accepted production baseline.</value>
@@ -681,10 +688,10 @@
   <data name="EnvironmentCheck_PhotoshopColourSettings" xml:space="preserve"><value>Photoshop colour settings do not match the accepted preset.</value></data>
   <data name="EnvironmentCheck_PhotoshopTestImageRoundTrip" xml:space="preserve"><value>The last test-image check did not finish. Choose Safe recovery and recheck; PrintFlow will first check Photoshop's current state.</value></data>
   <data name="Environment_Verified" xml:space="preserve">
-    <value>Workstation verified for production work.</value>
+    <value>Environment diagnostic checks passed.</value>
   </data>
   <data name="Environment_NotVerified" xml:space="preserve">
-    <value>Production workstation verification failed.</value>
+    <value>Environment differences were found. Processing is still available.</value>
   </data>
   <data name="Environment_Advisories" xml:space="preserve">
     <value>Notes (these do not stop production work)</value>
@@ -739,10 +746,10 @@
   <data name="EnvironmentCheckName_PhotoshopColourSettings" xml:space="preserve"><value>Photoshop colour settings</value></data>
   <data name="EnvironmentCheckName_PhotoshopTestImageRoundTrip" xml:space="preserve"><value>Photoshop test image</value></data>
   <data name="Environment_Heading" xml:space="preserve">
-    <value>Production readiness</value>
+    <value>Environment diagnostics (optional)</value>
   </data>
   <data name="Environment_Hint" xml:space="preserve">
-    <value>Check whether this workstation is ready for production. Safe recovery handles only PrintFlow test images and leaves your work and application settings unchanged.</value>
+    <value>Use these diagnostics to investigate local configuration and application state. Checks do not need to run or pass before processing; step-specific problems are reported when that step runs.</value>
   </data>
   <data name="Environment_Open" xml:space="preserve">
     <value>Production readiness</value>
@@ -780,10 +787,10 @@
     <value>Checks</value>
   </data>
   <data name="Environment_BlockingHeading" xml:space="preserve">
-    <value>Stopping production work</value>
+    <value>Diagnostic findings to review</value>
   </data>
   <data name="Environment_NoBlockingFailures" xml:space="preserve">
-    <value>Nothing is stopping production work.</value>
+    <value>No diagnostic findings need attention.</value>
   </data>
   <data name="Environment_AdvisoriesPresent" xml:space="preserve">
     <value>Advisories: present</value>
@@ -804,18 +811,18 @@
   <data name="Environment_LiveCheckNotRun" xml:space="preserve"><value>This check did not run because a prerequisite has not passed. Resolve the failed check first, then recheck.</value></data>
   <data name="Environment_CheckNotRun" xml:space="preserve"><value>This check did not run, so nothing was observed.</value></data>
   <data name="Environment_UnlistedCheck" xml:space="preserve"><value>Unlisted check</value></data>
-  <data name="Environment_NotConfirmedNotRun" xml:space="preserve"><value>Production workstation readiness is not confirmed: a required check did not run.</value></data>
+  <data name="Environment_NotConfirmedNotRun" xml:space="preserve"><value>Some diagnostic checks have not run. You can start processing.</value></data>
   <data name="Environment_Blocking" xml:space="preserve">
-    <value>Required</value>
+    <value>Diagnostic check</value>
   </data>
   <data name="Environment_Advisory" xml:space="preserve">
     <value>Advisory</value>
   </data>
   <data name="Environment_RestartRequired" xml:space="preserve">
-    <value>If an accepted PrintFlow workstation record, the Photoshop installation, the Meitu installation or the verified action file is replaced or updated, restart PrintFlow before using production mode.</value>
+    <value>Restart PrintFlow after updating the program to load the latest code and configuration. Environment diagnostics are optional.</value>
   </data>
   <data name="Environment_RefreshScope" xml:space="preserve">
-    <value>Refresh status only reads current status; it does not recover test images or run a fresh application check. Accepted installation files are not re-read until PrintFlow restarts.</value>
+    <value>Refresh status only reads diagnostic state. Diagnostic results do not restrict processing.</value>
   </data>
   <data name="Failure_PsdCompositeMissing" xml:space="preserve"><value>This PSD has no verified compatible composite. Save a copy in Photoshop with Maximize Compatibility enabled, then import that copy.</value></data>
   <data name="Failure_PsdPreparationFailed" xml:space="preserve"><value>Photoshop could not produce a verified raster from this PSD. The source is preserved; review the failure before retrying.</value></data>
@@ -834,6 +841,13 @@
   <data name="Session_PdfPending" xml:space="preserve"><value>Source: PDF (unchanged). Prepare its single page at 300 PPI, then review the page and physical dimensions before continuing. Multi-page and encrypted PDFs are unsupported. PDF files are treated as visual artwork inputs: existing spot-colour or white-ink separations in the source are not preserved as production channels.</value></data>
   <data name="Session_PdfPrepared" xml:space="preserve"><value>Single-page PDF prepared for review. Source: PDF (unchanged). The displayed PNG is the managed full-page raster at 300 PPI. Confirm page 1 and its dimensions: {0:0.##} × {1:0.##} mm ({2} × {3} pixels).</value></data>
   <data name="Session_SubmitManualResult" xml:space="preserve"><value>Submit Manual Result</value></data>
+  <data name="Session_SaveManualHandoffCopy" xml:space="preserve"><value>Save a copy of the current image</value></data>
+  <data name="Session_ManualHandoffCopySaved" xml:space="preserve"><value>Image copy saved to {0}</value></data>
+  <data name="Session_ManualHandoffCopyCollision" xml:space="preserve"><value>That name is already in use. Choose a different name or folder.</value></data>
+  <data name="Session_ManualHandoffCopyInvalidName" xml:space="preserve"><value>Choose a valid file name with an extension that matches the image format.</value></data>
+  <data name="Session_ManualHandoffCopyUnsupportedFolder" xml:space="preserve"><value>Choose a folder on a local NTFS drive outside PrintFlow storage.</value></data>
+  <data name="Session_ManualHandoffCopyUnconfirmed" xml:space="preserve"><value>PrintFlow could not confirm the copy. Check the chosen folder before trying again.</value></data>
+  <data name="Session_ManualHandoffCopyFailed" xml:space="preserve"><value>The image copy could not be saved. Check the image and the destination folder, then try again.</value></data>
   <data name="Session_ManualProcessingResult" xml:space="preserve"><value>Manual processing result</value></data>
   <data name="Session_ManualCutoutFilter" xml:space="preserve"><value>Transparent PNG (*.png)|*.png</value></data>
   <data name="Session_ManualEnhancementFilter" xml:space="preserve"><value>Raster image (*.png;*.jpg;*.jpeg)|*.png;*.jpg;*.jpeg</value></data>
@@ -1094,6 +1108,12 @@
   <data name="FinalSave_NameInvalid" xml:space="preserve"><value>Enter a plain file name without \ / : * ? " &lt; &gt; | and without a trailing dot or space.</value></data>
   <data name="FinalSave_NameWrongType" xml:space="preserve"><value>This result is a {0} file, so the name must end in {1}.</value></data>
   <data name="FinalSave_ConfirmAndSave" xml:space="preserve"><value>Confirm result and save</value></data>
+  <data name="FinalSave_RenameSaved" xml:space="preserve"><value>Rename saved file</value></data>
+  <data name="FinalSave_ApplyRename" xml:space="preserve"><value>Rename</value></data>
+  <data name="FinalSave_CancelEdit" xml:space="preserve"><value>Cancel</value></data>
+  <data name="FinalSave_RenameCollision" xml:space="preserve"><value>A file with that name already exists in this folder. Choose a different name.</value></data>
+  <data name="FinalSave_RenameFailed" xml:space="preserve"><value>Could not verify or rename the saved file. Check the saved file before trying again.</value></data>
+  <data name="FinalSave_RenameNeedsCheck" xml:space="preserve"><value>The rename could not be confirmed. Check the saved file to verify its current name.</value></data>
   <data name="FinalSave_SaveApproved" xml:space="preserve"><value>Save approved result</value></data>
   <data name="FinalSave_RetrySave" xml:space="preserve"><value>Retry save</value></data>
   <data name="FinalSave_CheckAgain" xml:space="preserve"><value>Check this save again</value></data>
@@ -1268,7 +1288,7 @@
   <data name="Session_GuidanceHelpNoAdjustTrim" xml:space="preserve"><value>Adjusting the edges is not available for this result. If something is cut off, choose {0}; you can then try again.</value></data>
   <data name="Session_GuidanceHelpTiff" xml:space="preserve"><value>Not sure? Ask a skilled colleague to look before you choose. A TIFF changed outside PrintFlow cannot be imported.</value></data>
   <data name="Session_GuidanceHelpTiffReturn" xml:space="preserve"><value> To change the print size first, use {0} below.</value></data>
-  <data name="Session_SizeHelpPreset" xml:space="preserve"><value>Choose a preset when a standard size is fine. A preset is a maximum, not the exact print size: a bigger picture is reduced to fit within it, a smaller one is never enlarged, and the proportions stay the same.</value></data>
+  <data name="Session_SizeHelpPreset" xml:space="preserve"><value>Choose a preset to fit the picture proportionally to its size limit. A smaller picture needs your approval before PrintFlow enlarges it.</value></data>
   <data name="Session_SizeHelpCustom" xml:space="preserve"><value>Choose {0} when one side must be an exact size. Pick that side ({1}, {2}, or {3} for the longer side of this picture) and enter it in millimetres. The other side follows the picture's proportions. If this needs the picture enlarged, you are asked first.</value></data>
   <data name="Session_SizeSummaryDraft" xml:space="preserve"><value>With these settings, the whole picture (including any see-through edges) would print at about {0:0.0} × {1:0.0} mm.</value></data>
   <data name="Session_SizeSummaryCurrent" xml:space="preserve"><value>With the chosen size, the whole picture (including any see-through edges) is set to print at about {0:0.0} × {1:0.0} mm.</value></data>
@@ -1301,28 +1321,28 @@
   <data name="FailureNotice_PsdPreparationFailed" xml:space="preserve"><value>Photoshop could not produce a verified raster from this PSD. The source is preserved.</value></data>
   <data name="FailureNotice_PdfPreparationFailed" xml:space="preserve"><value>PDF preparation failed. No validated raster is available.</value></data>
   <!-- SCRUM-11152: Home readiness summary and startup details. -->
-  <data name="Home_ReadinessHeading" xml:space="preserve"><value>Workstation check</value></data>
-  <data name="Home_ReadinessNotChecked" xml:space="preserve"><value>Not checked in this run.</value></data>
-  <data name="Home_ReadinessNotCheckedHint" xml:space="preserve"><value>Choose “View workstation checks” to check this workstation. A result from an earlier run is not used.</value></data>
+  <data name="Home_ReadinessHeading" xml:space="preserve"><value>Environment diagnostics (optional)</value></data>
+  <data name="Home_ReadinessNotChecked" xml:space="preserve"><value>Environment diagnostics have not run.</value></data>
+  <data name="Home_ReadinessNotCheckedHint" xml:space="preserve"><value>You can start processing. View workstation checks when you need to investigate a problem.</value></data>
   <data name="Home_ReadinessChecking" xml:space="preserve"><value>Checking the workstation…</value></data>
   <data name="Home_ReadinessCheckingHint" xml:space="preserve"><value>Choose “View workstation checks” to see the check.</value></data>
   <data name="Home_ReadinessReady" xml:space="preserve"><value>Passed at last check.</value></data>
-  <data name="Home_ReadinessReadyHint" xml:space="preserve"><value>This is a recorded observation. Each automatic step still uses its own workstation check.</value></data>
-  <data name="Home_ReadinessBlocked" xml:space="preserve"><value>Automatic processing is blocked.</value></data>
+  <data name="Home_ReadinessReadyHint" xml:space="preserve"><value>This is a diagnostic observation. Each step checks its required application, image and current interface.</value></data>
+  <data name="Home_ReadinessBlocked" xml:space="preserve"><value>Diagnostics found environment differences.</value></data>
   <data name="Home_ReadinessFirstReason" xml:space="preserve"><value>Reason: {0}. {1}</value></data>
-  <data name="Home_ReadinessLiveCheckPending" xml:space="preserve"><value>Reason: the Meitu and Photoshop check has no current result. Choose “View workstation checks”, then “{0}”.</value></data>
-  <data name="Home_ReadinessBlockedHint" xml:space="preserve"><value>Choose “View workstation checks” to see every check. Ask an experienced colleague or supervisor for help.</value></data>
-  <data name="Home_ReadinessNotConfirmed" xml:space="preserve"><value>Readiness needs to be checked again.</value></data>
+  <data name="Home_ReadinessLiveCheckPending" xml:space="preserve"><value>Application diagnostics have no result. Processing is still available. To investigate, view workstation checks and choose “{0}”.</value></data>
+  <data name="Home_ReadinessBlockedHint" xml:space="preserve"><value>Diagnostics do not block processing. Start your task or view workstation checks to investigate the differences.</value></data>
+  <data name="Home_ReadinessNotConfirmed" xml:space="preserve"><value>Environment diagnostics are incomplete.</value></data>
   <data name="Home_ReadinessUnfinishedReason" xml:space="preserve"><value>The last check did not finish, so no earlier result is shown as current.</value></data>
   <data name="Home_ReadinessNoReason" xml:space="preserve"><value>The last check did not name a reason. Choose “View workstation checks” for details.</value></data>
-  <data name="Home_ReadinessNotConfirmedHint" xml:space="preserve"><value>Choose “View workstation checks” to check again. Ask an experienced colleague or supervisor for help.</value></data>
+  <data name="Home_ReadinessNotConfirmedHint" xml:space="preserve"><value>You can start processing. View workstation checks when needed.</value></data>
   <data name="Home_ReadinessCheckedAt" xml:space="preserve"><value>Checked at {0}</value></data>
   <data name="Home_ReadinessTechnicalCheck" xml:space="preserve"><value>Check identifier: {0} · {1}</value></data>
   <data name="Home_StartupDetails" xml:space="preserve"><value>Startup details</value></data>
   <data name="Home_StartupPresetVerified" xml:space="preserve"><value>The production setup file was verified at startup. This does not confirm that the workstation is ready now.</value></data>
-  <data name="Home_StartupPresetNotVerified" xml:space="preserve"><value>Startup could not verify the production setup file. Choose “View workstation checks” for details.</value></data>
+  <data name="Home_StartupPresetNotVerified" xml:space="preserve"><value>Startup could not verify the production setup file. Open “Environment diagnostics” for details.</value></data>
   <data name="Home_ViewWorkstationChecks" xml:space="preserve">
-    <value>View workstation checks</value>
+    <value>Environment diagnostics</value>
   </data>
   <data name="Home_DiagnosticRetentionWarning" xml:space="preserve">
     <value>Automatic cleanup of diagnostic records did not finish; it will be retried at the next startup. This notice does not mean the workstation passed its checks.</value>
@@ -1342,7 +1362,6 @@
   <data name="Home_GuidedAiUnavailable" xml:space="preserve"><value>Save and copy prompts here. Automatic generation and composition are not available yet.</value></data>
   <data name="Home_GuidedCancelImport" xml:space="preserve"><value>Stop waiting for import</value></data>
   <data name="Home_GuidedContinue" xml:space="preserve"><value>Continue a task</value></data>
-  <data name="Home_GuidedEnvironmentDetails" xml:space="preserve"><value>Workstation details and checks</value></data>
   <data name="Home_GuidedImportCancelled" xml:space="preserve"><value>Import waiting cancelled. If a task was already created, find it in recent tasks; your original file is unchanged.</value></data>
   <data name="Home_GuidedImporting" xml:space="preserve"><value>Importing one image. Your original file is kept unchanged.</value></data>
   <data name="WorkflowSelection_GuidedCancelled" xml:space="preserve"><value>Selection waiting cancelled. Reopen the task to read its current saved state.</value></data>
@@ -1412,9 +1431,9 @@
   <data name="Home_RecentNextHandedOff" xml:space="preserve"><value>Open handoff details to see the currently supported ways to continue.</value></data>
   <data name="Home_RecentNextHistory" xml:space="preserve"><value>View the processing record. Open details to check the current file; saved history alone cannot confirm it.</value></data>
   <data name="Environment_Unchecked" xml:space="preserve"><value>Not checked yet</value></data>
-  <data name="Environment_ObservationUnchecked" xml:space="preserve"><value>Not checked yet. No report has been read; this does not confirm production readiness.</value></data>
-  <data name="Environment_ObservationBlocked" xml:space="preserve"><value>Some required checks did not run. Read the blockers below; historical results do not grant production permission.</value></data>
-  <data name="Environment_ObservationCurrent" xml:space="preserve"><value>This report describes the observation shown below. Every production request is checked again.</value></data>
+  <data name="Environment_ObservationUnchecked" xml:space="preserve"><value>Environment diagnostics have not run. You can start processing.</value></data>
+  <data name="Environment_ObservationBlocked" xml:space="preserve"><value>Some diagnostic checks did not run. Review the reasons below or return to your task and start processing.</value></data>
+  <data name="Environment_ObservationCurrent" xml:space="preserve"><value>This report helps investigate environment differences. Each step checks its required application, image and current interface.</value></data>
   <data name="Environment_EvidenceNever" xml:space="preserve"><value>No successful live-check history is recorded.</value></data>
   <data name="Environment_EvidenceExpired" xml:space="preserve"><value>Historical check evidence is no longer available. Last success: {0}. It cannot confirm current readiness.</value></data>
   <data name="Environment_EvidenceDeferred" xml:space="preserve"><value>Current state was not observed again. Historical success: {0}; this is not current production permission.</value></data>
@@ -1563,4 +1582,90 @@
   <data name="AiPrompt_DraftsEmpty" xml:space="preserve"><value>No saved prompt drafts are available.</value></data>
   <data name="AiPrompt_DraftReadFailed" xml:space="preserve"><value>The saved draft could not be opened. Your current edits are still here. Check storage and file access, then select the draft again.</value></data>
   <data name="AiPrompt_NewDraftFailed" xml:space="preserve"><value>A new draft could not be created. You can open an existing saved draft below, or return Home and check storage and file access.</value></data>
+  <data name="Session_BackgroundRemovalModeHeading" xml:space="preserve"><value>Recognition mode</value></data>
+  <data name="Session_BackgroundRemovalMode_Automatic" xml:space="preserve"><value>Automatic Selection</value></data>
+  <data name="Session_BackgroundRemovalMode_PortraitPets" xml:space="preserve"><value>Portraits / Pets</value></data>
+  <data name="Session_BackgroundRemovalMode_Products" xml:space="preserve"><value>Products / Goods</value></data>
+  <data name="Session_BackgroundRemovalMode_LogosStamps" xml:space="preserve"><value>Logos / Stamps</value></data>
+  <data name="AiMemorial_LayoutHelp" xml:space="preserve"><value>Review the source images and exact text first. Choose which images are placed in the design, then save and confirm the placement. To use a local background, add it as a reference in step 2, review its permissions in step 3, and select the Background role here.</value></data>
+  <data name="AiMemorial_EditLayout" xml:space="preserve"><value>Edit layout</value></data>
+  <data name="AiMemorial_ReopenLayout" xml:space="preserve"><value>Reopen layout with current inputs</value></data>
+  <data name="AiMemorial_FixedSpecification" xml:space="preserve"><value>Fixed by the product layout</value></data>
+  <data name="AiMemorial_OutdatedPromptSpecification" xml:space="preserve"><value>This draft has an older size entry. Generate the prompt again to use the fixed product specification.</value></data>
+  <data name="AiMemorial_MmHelp" xml:space="preserve"><value>All measurements are in millimetres. Image height follows its source proportions.</value></data>
+  <data name="AiMemorial_LayerRole" xml:space="preserve"><value>Layer role</value></data>
+  <data name="AiMemorial_Left" xml:space="preserve"><value>Left</value></data>
+  <data name="AiMemorial_Top" xml:space="preserve"><value>Top</value></data>
+  <data name="AiMemorial_Width" xml:space="preserve"><value>Width</value></data>
+  <data name="AiMemorial_Height" xml:space="preserve"><value>Height</value></data>
+  <data name="AiMemorial_Font" xml:space="preserve"><value>Installed font</value></data>
+  <data name="AiMemorial_FontSize" xml:space="preserve"><value>Size (mm)</value></data>
+  <data name="AiMemorial_TextPlacement" xml:space="preserve"><value>Text shape</value></data>
+  <data name="AiMemorial_Radius" xml:space="preserve"><value>Radius (mm)</value></data>
+  <data name="AiMemorial_SaveLayout" xml:space="preserve"><value>Save placement</value></data>
+  <data name="AiMemorial_DiscardLayout" xml:space="preserve"><value>Discard placement edits</value></data>
+  <data name="AiMemorial_ConfirmLayout" xml:space="preserve"><value>Confirm saved layout</value></data>
+  <data name="AiMemorial_Preview" xml:space="preserve"><value>Render preview · 96 DPI</value></data>
+  <data name="AiMemorial_Convert" xml:space="preserve"><value>Make the other product</value></data>
+  <data name="AiMemorial_ConfirmConversion" xml:space="preserve"><value>Create separate draft</value></data>
+  <data name="AiMemorial_Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="AiMemorial_CancelTask" xml:space="preserve"><value>Stop current action</value></data>
+  <data name="AiMemorial_MaterialHelp" xml:space="preserve"><value>Render a separate design material at 300 DPI. Review that exact result before exporting it.</value></data>
+  <data name="AiMemorial_RenderMaterial" xml:space="preserve"><value>Render design PNG</value></data>
+  <data name="AiMemorial_LoadResults" xml:space="preserve"><value>Load saved results</value></data>
+  <data name="AiMemorial_CompareSource" xml:space="preserve"><value>Compare the source version</value></data>
+  <data name="AiMemorial_Historical" xml:space="preserve"><value>This result is from a different draft revision or the current draft has unsaved changes. It is available for viewing.</value></data>
+  <data name="AiMemorial_ReviewHelp" xml:space="preserve"><value>Check each item against the displayed source and result. Your checks apply only to this exact image.</value></data>
+  <data name="AiMemorial_Accept" xml:space="preserve"><value>Accept this design material</value></data>
+  <data name="AiMemorial_Accepted" xml:space="preserve"><value>Design material accepted. Printing checks are still required.</value></data>
+  <data name="AiMemorial_Export" xml:space="preserve"><value>Save design PNG…</value></data>
+  <data name="AiMemorial_ManualHandoff" xml:space="preserve"><value>Save the accepted PNG and choose it manually in the existing import workflow. The design review does not approve printing.</value></data>
+  <data name="AiMemorial_ProofTitle" xml:space="preserve"><value>Source and result</value></data>
+  <data name="AiMemorial_Checkerboard" xml:space="preserve"><value>Checkerboard</value></data>
+  <data name="AiMemorial_Black" xml:space="preserve"><value>Black</value></data>
+  <data name="AiMemorial_White" xml:space="preserve"><value>White</value></data>
+  <data name="AiMemorial_Guide" xml:space="preserve"><value>Badge safety guide</value></data>
+  <data name="AiMemorial_LayoutConfirmed" xml:space="preserve"><value>Layout confirmed</value></data>
+  <data name="AiMemorial_LayoutPending" xml:space="preserve"><value>Layout needs confirmation</value></data>
+  <data name="AiMemorial_SourceUnavailable" xml:space="preserve"><value>A verified source image could not be read. Reopen the draft or select the intended image again.</value></data>
+  <data name="AiMemorial_PlacementInputsChanged" xml:space="preserve"><value>Text, images or permissions changed. Finish reviewing those inputs, then reopen the layout. Reopening replaces unsaved placement edits.</value></data>
+  <data name="AiMemorial_InvalidPlacement" xml:space="preserve"><value>Enter finite positions and positive dimensions. Review the placement and source sizes.</value></data>
+  <data name="AiMemorial_TextDoesNotFit" xml:space="preserve"><value>The literal text does not fit. Enlarge its box, choose flat placement or adjust the font size.</value></data>
+  <data name="AiMemorial_MissingGlyph" xml:space="preserve"><value>The installed font cannot draw all characters. Choose a suitable font.</value></data>
+  <data name="AiMemorial_TextLayoutFailed" xml:space="preserve"><value>Review the exact text, font, and text box before saving.</value></data>
+  <data name="AiMemorial_OutsideArea" xml:space="preserve"><value>A layer is outside its allowed canvas or safety area. Adjust its position or size.</value></data>
+  <data name="AiMemorial_PlacementPermission" xml:space="preserve"><value>A source is missing or its placement exceeds the confirmed permissions. Review the source roles and permissions.</value></data>
+  <data name="AiMemorial_BadgeSize" xml:space="preserve"><value>Badge: outer circle {0:0.##} mm · safety circle {1:0.##} mm</value></data>
+  <data name="AiMemorial_ShirtSize" xml:space="preserve"><value>T-shirt design: {0:0.##} × {1:0.##} mm</value></data>
+  <data name="AiMemorial_RoleReference" xml:space="preserve"><value>Reference only</value></data>
+  <data name="AiMemorial_RolePerson" xml:space="preserve"><value>Person</value></data>
+  <data name="AiMemorial_RoleOriginalDecor" xml:space="preserve"><value>Original decoration</value></data>
+  <data name="AiMemorial_RoleGeneratedDecor" xml:space="preserve"><value>New decoration</value></data>
+  <data name="AiMemorial_RoleBackground" xml:space="preserve"><value>Background</value></data>
+  <data name="AiMemorial_TextFlat" xml:space="preserve"><value>Flat</value></data>
+  <data name="AiMemorial_TextArc" xml:space="preserve"><value>Upper arc</value></data>
+  <data name="AiMemorial_SourceReference" xml:space="preserve"><value>Reference image</value></data>
+  <data name="AiMemorial_SourceVersion" xml:space="preserve"><value>Source version</value></data>
+  <data name="AiMemorial_ConversionDetails" xml:space="preserve"><value>From saved revision {0}: {1}. Target: {2}. The new draft carries over the selected images and structured text. Hand-edited prompt prose stays in the source. Confirm the target placement, scale, text layout and safe area.</value></data>
+  <data name="AiMemorial_Cancelled" xml:space="preserve"><value>Action cancelled.</value></data>
+  <data name="AiMemorial_RenderFailed" xml:space="preserve"><value>Could not create a verified result. Check the saved layout and source images, then try again.</value></data>
+  <data name="AiMemorial_RenderReady" xml:space="preserve"><value>Verified design image ready to view.</value></data>
+  <data name="AiMemorial_ResultUnavailable" xml:space="preserve"><value>The saved result could not be verified or displayed.</value></data>
+  <data name="AiMemorial_ReviewUnavailable" xml:space="preserve"><value>The review could not be saved or restored. Reload the exact result and check it again.</value></data>
+  <data name="AiMemorial_ExportFailed" xml:space="preserve"><value>The PNG was not saved. Choose a new filename outside the protected workspace, and make sure the result is still current.</value></data>
+  <data name="AiMemorial_Exported" xml:space="preserve"><value>Saved design PNG to {0}. Printing checks are still required.</value></data>
+  <data name="AiMemorial_ConversionFailed" xml:space="preserve"><value>Could not create the separate product draft. Check the source version and image permissions.</value></data>
+  <data name="AiMemorial_ConversionReady" xml:space="preserve"><value>Separate product draft created. Review its new layout before rendering.</value></data>
+  <data name="AiMemorial_ResultLabel" xml:space="preserve"><value>{0} · revision {1} · {2} × {3} px · {4}</value></data>
+  <data name="AiMemorial_PreviewKind" xml:space="preserve"><value>Preview</value></data>
+  <data name="AiMemorial_MaterialKind" xml:space="preserve"><value>Design material</value></data>
+  <data name="AiMemorial_CheckPerson" xml:space="preserve"><value>Person, face and original details are retained</value></data>
+  <data name="AiMemorial_CheckDecor" xml:space="preserve"><value>Original decoration is complete</value></data>
+  <data name="AiMemorial_CheckText" xml:space="preserve"><value>Name, dates and labels match the verified text</value></data>
+  <data name="AiMemorial_CheckLayout" xml:space="preserve"><value>Placement and safe area are correct</value></data>
+  <data name="AiMemorial_CheckTransparency" xml:space="preserve"><value>Transparent areas look correct on the preview backgrounds</value></data>
+  <data name="AiMemorial_EnlargeProof" xml:space="preserve"><value>Inspect larger preview…</value></data>
+  <data name="AiMemorial_Zoom" xml:space="preserve"><value>Zoom</value></data>
+  <data name="AiMemorial_Background" xml:space="preserve"><value>Preview background</value></data>
+  <data name="AiMemorial_ProofReduced" xml:space="preserve"><value>The display image was reduced. The saved PNG retains the full dimensions shown above.</value></data>
 </root>

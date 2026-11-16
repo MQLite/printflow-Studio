@@ -301,7 +301,7 @@ public static class MeituCardTargetRule
     {
         ImmutableArray<string>.Builder reasons = ImmutableArray.CreateBuilder<string>();
 
-        if (!string.Equals(candidate.Name, signature.Name, StringComparison.Ordinal))
+        if (!signature.MatchesName(candidate.Name))
         {
             reasons.Add($"name is '{candidate.Name}', not exactly '{signature.Name}'");
         }

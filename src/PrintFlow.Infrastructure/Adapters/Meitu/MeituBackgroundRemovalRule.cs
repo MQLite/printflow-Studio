@@ -28,14 +28,16 @@ public static class MeituBackgroundRemovalRule
             Matches(
                 signature.Completion.RequiredMarkers,
                 signature.Completion.MinimumRequiredMarkers,
-                observation);
+                observation,
+                allowApplyControl: true);
         return complete ? MeituBackgroundRemovalPhase.Complete : MeituBackgroundRemovalPhase.Unobserved;
     }
 
     private static bool Matches(
         System.Collections.Immutable.ImmutableArray<string> markers,
         int minimum,
-        MeituObservation observation)
+        MeituObservation observation,
+        bool allowApplyControl = false)
     {
         if (markers.IsDefaultOrEmpty || minimum <= 0 || minimum > markers.Length ||
             observation.VisibleTexts.IsDefaultOrEmpty)
@@ -44,7 +46,10 @@ public static class MeituBackgroundRemovalRule
         }
 
         int seen = markers.Count(marker => observation.VisibleTexts.Any(
-            text => text.Contains(marker, StringComparison.Ordinal)));
+            text => text.Contains(marker, StringComparison.Ordinal)) ||
+            (allowApplyControl && marker == "移除背景" &&
+             observation.BackgroundRemovalApplyControlObserved &&
+             observation.VisibleTexts.Any(text => text.Contains("应用到背景", StringComparison.Ordinal))));
         return seen >= minimum;
     }
 }

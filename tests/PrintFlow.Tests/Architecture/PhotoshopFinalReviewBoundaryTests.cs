@@ -154,23 +154,26 @@ public sealed class PhotoshopFinalReviewBoundaryTests
                 }
 
                 // Held mutations must not become an alternate spelling of a caller's delete.
-                // Existing Delivery owns its independent held staging operations; AI adds only
-                // this one exact Infrastructure source boundary, including the NativeHost scan.
+                // Delivery and AI's exact staging files retain their held-handle boundaries.
+                // Memorial export may use those helpers on its own newly created sibling only;
+                // it cannot invoke raw disposition/rename or pathname mutation APIs.
                 bool deliveryNativeBoundary=string.Equals(file,Path.Combine(ProjectDirectory("PrintFlow.Infrastructure"),
                     "Delivery","WindowsDeliveryNative.cs"),StringComparison.OrdinalIgnoreCase);
                 bool deliveryFileBoundary=string.Equals(file,Path.Combine(ProjectDirectory("PrintFlow.Infrastructure"),
                     "Delivery","WindowsDeliveryFileSystem.cs"),StringComparison.OrdinalIgnoreCase);
+                bool memorialExportBoundary=string.Equals(file,Path.Combine(ProjectDirectory("PrintFlow.Infrastructure"),
+                    "AiDesign","Memorial","FileMemorialMaterialExporter.cs"),StringComparison.OrdinalIgnoreCase);
                 if (!aiStagingBoundary && !deliveryNativeBoundary)
                 {
                     foreach(string nativeMutation in new[]{"NativeMethods.SetFileInformationByHandle(","NativeMethods.NtSetInformationFile("})
                         source.ShouldNotContain(nativeMutation,Case.Sensitive,$"{name} bypasses named held-file ownership with '{nativeMutation}'.");
                 }
-                if (!aiStagingBoundary && !deliveryFileBoundary)
+                if (!aiStagingBoundary && !deliveryFileBoundary && !memorialExportBoundary)
                 {
                     foreach(string heldMutation in new[]{"WindowsDeliveryNative.DeleteHeldFile(","WindowsDeliveryNative.RenameNoReplace("})
                         source.ShouldNotContain(heldMutation,Case.Sensitive,$"{name} bypasses named held-file ownership with '{heldMutation}'.");
                 }
-                if(aiStagingBoundary)
+                if(aiStagingBoundary || memorialExportBoundary)
                 {
                     foreach(string pathnameMutation in new[]{"File.Delete(","File.SetAttributes(","File.Move(","File.Replace(","Directory.Enumerate","Directory.Delete("})
                         source.ShouldNotContain(pathnameMutation,Case.Sensitive,$"AI staging must mutate the verified handle, never '{pathnameMutation}'.");

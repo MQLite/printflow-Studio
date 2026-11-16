@@ -17,7 +17,7 @@ namespace PrintFlow.Infrastructure.Adapters.Meitu;
 /// </remarks>
 public sealed record MeituAutomationOptions
 {
-    /// <summary>How long a launched Meitu has to reach an identifiable window in a recognised state.</summary>
+    /// <summary>How long Meitu or a newly requested editor has to reach a recognised window.</summary>
     public TimeSpan LaunchTimeout { get; init; } = TimeSpan.FromSeconds(60);
 
     /// <summary>How long an already-running Meitu has to present an identifiable window.</summary>

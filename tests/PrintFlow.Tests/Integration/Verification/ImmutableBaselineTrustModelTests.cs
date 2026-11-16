@@ -20,8 +20,9 @@ namespace PrintFlow.Tests.Integration.Verification;
 /// <para>
 /// The model is safe for production because the gate is not the last thing standing between a
 /// replaced file and an operation that uses it. The artefacts whose bytes can actually affect a
-/// production run — the two executables and the canonical Action file — are re-read and re-hashed
-/// by the adapters at operation time, on every run, independently of anything the gate cached.
+/// production run — Photoshop and the canonical Action file — are re-read and re-hashed
+/// by their adapters at operation time, independently of anything the gate cached. Meitu is
+/// checked for executable availability and recognised runtime state without pinning its version.
 /// Those proofs live beside the adapters that own them
 /// (<c>PhotoshopFoundationTests</c>, <c>ProductionMeituProcessorTests</c>,
 /// <c>PhotoshopW1ExecutionTests</c>); what is proved here is the gate half and the wording the
@@ -45,7 +46,6 @@ public sealed class ImmutableBaselineTrustModelTests
     [Theory]
     [InlineData(BaselineArtefact.Manifest)]
     [InlineData(BaselineArtefact.Evidence)]
-    [InlineData(BaselineArtefact.MeituExecutable)]
     [InlineData(BaselineArtefact.PhotoshopExecutable)]
     [InlineData(BaselineArtefact.ActionArtifact)]
     public void A_replaced_baseline_artefact_is_restart_bound_at_the_gate(BaselineArtefact artefact)
@@ -67,6 +67,20 @@ public sealed class ImmutableBaselineTrustModelTests
         VerifiedEnvironmentGate restarted = new(fixture.CreateVerifier());
         restarted.Verify(AdapterExecutionMode.Production).IsFailure.ShouldBeTrue(
             $"a restart is what makes replaced {artefact} bytes visible to the gate.");
+    }
+
+    [Fact]
+    public void A_Meitu_update_is_allowed_before_and_after_a_PrintFlow_restart()
+    {
+        using WorkstationVerificationFixture fixture = new();
+        VerifiedEnvironmentGate running = new(fixture.CreateVerifier());
+        running.Verify(AdapterExecutionMode.Production).IsSuccess.ShouldBeTrue();
+
+        WorkstationVerificationFixture.Corrupt(fixture.MeituPath);
+
+        running.Verify(AdapterExecutionMode.Production).IsSuccess.ShouldBeTrue();
+        new VerifiedEnvironmentGate(fixture.CreateVerifier()).Verify(AdapterExecutionMode.Production)
+            .IsSuccess.ShouldBeTrue();
     }
 
     /// <summary>
