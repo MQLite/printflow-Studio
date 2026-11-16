@@ -435,7 +435,7 @@ public sealed class PhotoshopWorkflowOutputTests : IDisposable
             w1,
             tiff,
             new ProductionTiffInspector(),
-            new FileSystemPhotoshopTiffFileProbe());
+            new FileSystemPhotoshopTiffFileProbe()) { ToolNative = new StubPhotoshopToolNativeBridge() };
 
         WorkspaceFileRef input = WorkspaceFileRef.Create(
             $"Sessions/S1/Working/A_1/{Path.GetFileName(documentPath)}", WorkspaceArea.Working);

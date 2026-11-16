@@ -105,7 +105,8 @@ public sealed class PhotoshopFoundationTests : IDisposable
         bool inForeground = true,
         IPhotoshopRuntimeFactReader? runtimeFacts = null,
         TimeProvider? clock = null,
-        PhotoshopAutomationOptions? options = null)
+        PhotoshopAutomationOptions? options = null,
+        IPhotoshopToolNativeBridge? tools = null)
     {
         clock ??= TimeProvider.System;
         options ??= FastOptions;
@@ -149,9 +150,10 @@ public sealed class PhotoshopFoundationTests : IDisposable
         ProductionPhotoshopOutputProcessor adapter = runtimeFacts is null
             ? new ProductionPhotoshopOutputProcessor(
                 baselines, locator, driver, new StubPhotoshopWorkspace(managed), options, clock)
+                { ToolNative = tools ?? new StubPhotoshopToolNativeBridge() }
             : new ProductionPhotoshopOutputProcessor(
                 baselines, locator, driver, new StubPhotoshopWorkspace(managed), options,
-                clock, runtimeFacts);
+                clock, runtimeFacts) { ToolNative = tools ?? new StubPhotoshopToolNativeBridge() };
 
         return new Harness(adapter, locator, controls, input, evidence, target, managed);
     }
@@ -505,7 +507,8 @@ public sealed class PhotoshopFoundationTests : IDisposable
     [Fact]
     public async Task A_wrong_document_is_refused_and_nothing_further_happens()
     {
-        Harness h = Build(BaselineForRealFile());
+        StubPhotoshopToolNativeBridge tools = new();
+        Harness h = Build(BaselineForRealFile(), tools: tools);
 
         WorkspaceFileRef managed = WorkspaceFileRef.Create(
             $"Sessions/S1/Working/{PhotoshopFakes.ExpectedFileName}", WorkspaceArea.Working);
@@ -529,6 +532,7 @@ public sealed class PhotoshopFoundationTests : IDisposable
         opened.Failure.Context["tiffWritten"].ShouldBe("false");
         opened.Failure.Context["observedDocument"].ShouldBe(
             @"C:\Users\admin\Downloads\" + managed.FileName);
+        tools.SelectedPaths.ShouldBeEmpty();
     }
 
     /// <summary>A stale document left over from a previous run never satisfies identity.</summary>
@@ -1278,5 +1282,66 @@ public sealed class PhotoshopFoundationTests : IDisposable
             AfterRead?.Invoke(ReadCalls);
             return result;
         }
+    }
+    [Fact]
+    public async Task A_modal_appearing_after_identity_confirmation_prevents_tool_selection()
+    {
+        StubPhotoshopToolNativeBridge tools = new();
+        Harness h = Build(BaselineForRealFile(), tools: tools);
+        WorkspaceFileRef managed = WorkspaceFileRef.Create(
+            $"Sessions/S1/Working/{PhotoshopFakes.ExpectedFileName}", WorkspaceArea.Working);
+        File.WriteAllBytes(Path.Combine(h.ManagedDirectory, managed.FileName), [1, 2, 3]);
+        StageOpenThenDocument(h, managed.FileName, identityFolder: h.ManagedDirectory);
+
+        OperationResult<PhotoshopOpenedDocument> opened = await h.Adapter.OpenManagedWorkingFileAsync(
+            managed, stage =>
+            {
+                if (stage == PrintFlow.Workflow.Ports.ReadinessProbeStage.IdentityConfirmed)
+                    h.Locator.OwnedDialogs.Add(PhotoshopFakes.Dialog(title: "Unexpected modal"));
+            }, CancellationToken.None);
+
+        opened.IsFailure.ShouldBeTrue();
+        opened.Failure.Code.ShouldBe(FailureCode.PhotoshopBlockingDialog);
+        tools.SelectedPaths.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task Open_selects_the_Move_tool_only_after_the_exact_Working_document_is_confirmed()
+    {
+        StubPhotoshopToolNativeBridge tools = new();
+        Harness h = Build(BaselineForRealFile(), tools: tools);
+        WorkspaceFileRef managed = WorkspaceFileRef.Create(
+            $"Sessions/S1/Working/{PhotoshopFakes.ExpectedFileName}", WorkspaceArea.Working);
+        string path = Path.Combine(h.ManagedDirectory, managed.FileName);
+        File.WriteAllBytes(path, [1, 2, 3]);
+        StageOpenThenDocument(h, managed.FileName, identityFolder: h.ManagedDirectory);
+
+        OperationResult<PhotoshopOpenedDocument> opened = await h.Adapter.OpenManagedWorkingFileAsync(
+            managed, CancellationToken.None);
+
+        opened.IsSuccess.ShouldBeTrue(opened.IsFailure ? opened.Failure.ToString() : string.Empty);
+        tools.SelectedPaths.ShouldBe([path]);
+    }
+
+    [Fact]
+    public async Task Unconfirmed_Move_tool_refuses_the_open_result_before_document_processing()
+    {
+        StubPhotoshopToolNativeBridge tools = new()
+        {
+            Failure = OperationFailure.Create(FailureCode.PhotoshopUnknownState,
+                "Photoshop still reports cropTool after selecting the Move tool."),
+        };
+        Harness h = Build(BaselineForRealFile(), tools: tools);
+        WorkspaceFileRef managed = WorkspaceFileRef.Create(
+            $"Sessions/S1/Working/{PhotoshopFakes.ExpectedFileName}", WorkspaceArea.Working);
+        File.WriteAllBytes(Path.Combine(h.ManagedDirectory, managed.FileName), [1, 2, 3]);
+        StageOpenThenDocument(h, managed.FileName, identityFolder: h.ManagedDirectory);
+
+        OperationResult<PhotoshopOpenedDocument> opened = await h.Adapter.OpenManagedWorkingFileAsync(
+            managed, CancellationToken.None);
+
+        opened.IsFailure.ShouldBeTrue();
+        opened.Failure.Code.ShouldBe(FailureCode.PhotoshopUnknownState);
+        opened.Failure.TechnicalDetail.ShouldBe(tools.Failure!.TechnicalDetail);
     }
 }

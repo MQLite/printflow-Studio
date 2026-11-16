@@ -358,7 +358,7 @@ public sealed class ExternalStateHygieneTests : IDisposable
             first.Driver,
             new StubPhotoshopWorkspace(first.ManagedDirectory),
             FastPhotoshop,
-            TimeProvider.System);
+            TimeProvider.System) { ToolNative = new StubPhotoshopToolNativeBridge() };
 
         OperationResult<PhotoshopReadiness> ready = await restarted.EnsureReadyAsync(CancellationToken.None);
 
@@ -738,7 +738,7 @@ public sealed class ExternalStateHygieneTests : IDisposable
 
         ProductionPhotoshopOutputProcessor adapter = new(
             baselines, locator, driver, new StubPhotoshopWorkspace(managed), FastPhotoshop,
-            TimeProvider.System);
+            TimeProvider.System) { ToolNative = new StubPhotoshopToolNativeBridge() };
 
         return new PhotoshopHarness(adapter, driver, locator, controls, input, target, managed);
     }

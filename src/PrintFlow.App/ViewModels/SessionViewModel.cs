@@ -696,7 +696,9 @@ public sealed partial class SessionViewModel : ObservableObject
         PrintFlow.Workflow.Delivery.FinalSaveCoordinator? finalSave = null,
         IDeliveryFolderPicker? folderPicker = null,
         PrintFlow.Workflow.Delivery.IDeliveredFileShell? fileShell = null,
-        PrintFlow.Workflow.Ports.ICorrectionFolderShell? correctionShell = null)
+        PrintFlow.Workflow.Ports.ICorrectionFolderShell? correctionShell = null,
+        ManualHandoffCopyService? manualHandoffCopy = null,
+        IManualHandoffCopyPicker? manualHandoffCopyPicker = null)
     {
         ArgumentNullException.ThrowIfNull(sessions);
         ArgumentNullException.ThrowIfNull(previews);
@@ -712,6 +714,8 @@ public sealed partial class SessionViewModel : ObservableObject
         _folderPicker = folderPicker;
         _fileShell = fileShell;
         _correctionShell = correctionShell;
+        _manualHandoffCopy = manualHandoffCopy;
+        _manualHandoffCopyPicker = manualHandoffCopyPicker;
         if (localisation is not null)
             System.Windows.WeakEventManager<PrintFlow.App.Localisation.ILocalisationService, EventArgs>.AddHandler(
                 localisation, nameof(PrintFlow.App.Localisation.ILocalisationService.LanguageChanged), OnOperatorLanguageChanged);
@@ -2127,6 +2131,7 @@ public sealed partial class SessionViewModel : ObservableObject
     {
         ArgumentNullException.ThrowIfNull(session);
         _openGeneration++;
+        _manualHandoffCopyAfterRun = null;
         if (_serviceOperationGeneration is not null || _finalSaveOperation is not null)
         {
             _serviceOperationGeneration = null;
@@ -2267,8 +2272,14 @@ public sealed partial class SessionViewModel : ObservableObject
 
     /// <summary>Ends automated processing and transfers the work to the operator.</summary>
     [RelayCommand]
-    private Task HandOffAsync(CancellationToken cancellationToken) =>
-        RunAsync(step => new WorkflowCommand.HandOff(step, HandedOffFromSessionReason), cancellationToken);
+    private Task HandOffAsync(CancellationToken cancellationToken)
+    {
+        if (!CanHandOff || IsBusy || _session?.CurrentStep is not { } step)
+            return Task.CompletedTask;
+        if (ManualResultEligibility.Supports(step.Step))
+            _manualHandoffCopyAfterRun = step.Step;
+        return RunAsync(new WorkflowCommand.HandOff(step.Step, HandedOffFromSessionReason), cancellationToken);
+    }
 
     // --- Stop and Take Over commands (Epic 11300 Part D2A §24–§27) -------------------------
 
@@ -2354,11 +2365,17 @@ public sealed partial class SessionViewModel : ObservableObject
         }
 
         Notice = null;
+        if (_serviceOperationGeneration == _openGeneration && _runtime.Step is { } step &&
+            ManualResultEligibility.Supports(step))
+        {
+            _manualHandoffCopyAfterRun = step;
+        }
         OperationResult<Unit> requested = _sessions.RequestStop(
             _session.Id, AutomationStopMode.TakeOver);
 
         if (requested.IsFailure)
         {
+            _manualHandoffCopyAfterRun = null;
             ShowActionFailure(requested.Failure, ActionFailureScreen.Current);
         }
     }
@@ -3436,8 +3453,12 @@ public sealed partial class SessionViewModel : ObservableObject
         {
             if (IsCurrent() && _serviceOperationGeneration == generation)
             {
+                StepKind? copyAfterRun = _manualHandoffCopyAfterRun;
+                _manualHandoffCopyAfterRun = null;
                 _serviceOperationGeneration = null;
                 IsBusy = false;
+                if (copyAfterRun is { } step && _session?.CurrentStep?.Step == step)
+                    await SaveManualHandoffCopyAsync(cancellationToken).ConfigureAwait(true);
             }
         }
     }

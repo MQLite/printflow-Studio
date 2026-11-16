@@ -102,6 +102,10 @@ public static class ServiceRegistration
         services.AddSingleton<ISessionRepository>(new SqliteSessionRepository(connectionFactory));
         services.AddSingleton<IDeliveryRepository>(new SqliteDeliveryRepository(connectionFactory));
         services.AddSingleton<IDeliveryFileSystem, PrintFlow.Infrastructure.Delivery.WindowsDeliveryFileSystem>();
+        services.AddSingleton(provider => new ManualHandoffCopyService(
+            provider.GetRequiredService<ISessionRepository>(), provider.GetRequiredService<IWorkspace>(),
+            provider.GetRequiredService<IDeliveryFileSystem>(),
+            [workspaceRootAbsolute, System.IO.Path.GetDirectoryName(connectionFactory.DatabasePath)!]));
         services.AddSingleton<IApprovedArtifactDeliveryService>(provider =>
             new ApprovedArtifactDeliveryService(
                 provider.GetRequiredService<ISessionRepository>(),
@@ -248,6 +252,7 @@ public static class ServiceRegistration
         services.AddSingleton<IAiDraftLeavePrompt, SystemAiDraftLeavePrompt>();
         services.AddTransient<AiPromptWorkbenchViewModel>();
         services.AddSingleton<IFilePicker, OpenFileDialogPicker>();
+        services.AddSingleton<IManualHandoffCopyPicker, SaveManualHandoffCopyDialog>();
         services.AddSingleton<IDiagnosticPackageDestinationPicker, SaveDiagnosticPackageDialog>();
         services.AddSingleton<IDeliveryFolderPicker, OpenFolderDialogPicker>();
         services.AddSingleton<ShellViewModel>();

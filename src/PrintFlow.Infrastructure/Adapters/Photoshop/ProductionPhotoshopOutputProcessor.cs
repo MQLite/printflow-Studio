@@ -51,6 +51,8 @@ public sealed partial class ProductionPhotoshopOutputProcessor :
     private readonly GuardedPhotoshopTiffSaver _tiff;
     private readonly IPhotoshopRuntimeFactReader? _runtimeFacts;
 
+    internal IPhotoshopToolNativeBridge ToolNative { get; init; } = new RotPhotoshopToolNativeBridge();
+
     public ProductionPhotoshopOutputProcessor(
         IPhotoshopBaselineProvider baselines,
         IExternalAppWindowLocator locator,
@@ -477,9 +479,29 @@ public sealed partial class ProductionPhotoshopOutputProcessor :
             return Capture<PhotoshopOpenedDocument>(ready.Value.Target, opened.Failure, "open-failed");
         }
 
-        return await ConfirmOpenedDocumentAsync(
+        OperationResult<PhotoshopOpenedDocument> confirmed = await ConfirmOpenedDocumentAsync(
             opened.Value, workingFile, absolutePath, otherDocumentsOpen, cancellationToken, observe)
             .ConfigureAwait(false);
+        if (confirmed.IsFailure) return confirmed;
+
+        // Photoshop retains the previous tool across file opens. Establish and read back the
+        // Move tool before any preparation or Action can inherit Crop/Paint Bucket state.
+        // Identity is already proven; the native call checks the exact path again before acting.
+        cancellationToken.ThrowIfCancellationRequested();
+        OperationResult<PhotoshopBaseline> baseline = _baselines.GetVerifiedBaseline();
+        if (baseline.IsFailure) return OperationResult.Fail<PhotoshopOpenedDocument>(baseline.Failure);
+        OperationResult<PhotoshopTarget> guarded = await _preparer.VerifyExactMutationTargetAsync(
+            confirmed.Value, baseline.Value, cancellationToken, probeDocumentIdentity: false).ConfigureAwait(false);
+        if (guarded.IsFailure) return OperationResult.Fail<PhotoshopOpenedDocument>(guarded.Failure);
+        cancellationToken.ThrowIfCancellationRequested();
+        OperationResult<Unit> selected = ToolNative.SelectMoveTool(absolutePath, baseline.Value);
+        if (selected.IsFailure)
+            return Capture<PhotoshopOpenedDocument>(confirmed.Value.Target, selected.Failure, "move-tool-unconfirmed");
+        cancellationToken.ThrowIfCancellationRequested();
+        OperationResult<Unit> continuity = VerifySoleProcessContinuity(guarded.Value, baseline.Value);
+        return continuity.IsFailure
+            ? OperationResult.Fail<PhotoshopOpenedDocument>(continuity.Failure)
+            : OperationResult.Ok(confirmed.Value with { Target = guarded.Value });
     }
 
     // A recognised frame can appear before Photoshop registers its automation object. This is

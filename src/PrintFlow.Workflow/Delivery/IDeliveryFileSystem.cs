@@ -55,6 +55,9 @@ public interface IDeliveryFileSystem
         string requestedFolder, string finalLeaf, ArtifactKind kind,
         IReadOnlyList<string> protectedRoots, string? protectedOriginalPath);
     DeliveryFileResult<string> ValidateLeaf(string candidate, ArtifactKind kind);
+    DeliveryFileResult<IDeliveryFileGuard> OpenImageCopy(
+        string sourcePath, FileFacts source, string folder, string leaf, IReadOnlyList<string> protectedRoots) =>
+        DeliveryFileResult<IDeliveryFileGuard>.Fail(DeliveryCode.UnsupportedDestination, "Image copying is unavailable.");
     DeliveryFileResult<IDeliveryDestinationGuard> OpenForRenameRecovery(string folder, string leaf, ArtifactKind kind,
         IReadOnlyList<string> protectedRoots) => DeliveryFileResult<IDeliveryDestinationGuard>.Fail(
             DeliveryCode.UnsupportedDestination, "Rename recovery is unavailable.");

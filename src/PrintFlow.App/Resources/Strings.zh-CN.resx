@@ -831,6 +831,13 @@
   <data name="Session_PdfPending" xml:space="preserve"><value>原始文件：PDF（保持不变）。请先以 300 PPI 准备单页图像，再检查页面及实际尺寸。暂不支持多页或加密 PDF。PDF 文件仅作为视觉设计稿输入：源文件中已有的专色或白墨分色不会作为生产通道保留。</value></data>
   <data name="Session_PdfPrepared" xml:space="preserve"><value>单页 PDF 已准备好供检查。原始 PDF 保持不变，显示的 PNG 是以 300 PPI 生成的受管整页栅格图。请确认第 1 页及其尺寸：{0:0.##} × {1:0.##} 毫米（{2} × {3} 像素）。</value></data>
   <data name="Session_SubmitManualResult" xml:space="preserve"><value>提交手动处理结果</value></data>
+  <data name="Session_SaveManualHandoffCopy" xml:space="preserve"><value>另存当前图片</value></data>
+  <data name="Session_ManualHandoffCopySaved" xml:space="preserve"><value>图片副本已保存到 {0}</value></data>
+  <data name="Session_ManualHandoffCopyCollision" xml:space="preserve"><value>该名称已被占用。请选择其他文件名或文件夹。</value></data>
+  <data name="Session_ManualHandoffCopyInvalidName" xml:space="preserve"><value>请输入有效的文件名，并使用与图片格式相符的扩展名。</value></data>
+  <data name="Session_ManualHandoffCopyUnsupportedFolder" xml:space="preserve"><value>请在本地 NTFS 磁盘上选择 PrintFlow 存储目录以外的文件夹。</value></data>
+  <data name="Session_ManualHandoffCopyUnconfirmed" xml:space="preserve"><value>无法确认副本是否已保存。请检查所选文件夹后再重试。</value></data>
+  <data name="Session_ManualHandoffCopyFailed" xml:space="preserve"><value>无法保存图片副本。请检查图片和目标文件夹后重试。</value></data>
   <data name="Session_ManualProcessingResult" xml:space="preserve"><value>手动处理结果</value></data>
   <data name="Session_ManualCutoutFilter" xml:space="preserve"><value>透明 PNG (*.png)|*.png</value></data>
   <data name="Session_ManualEnhancementFilter" xml:space="preserve"><value>栅格图像 (*.png;*.jpg;*.jpeg)|*.png;*.jpg;*.jpeg</value></data>

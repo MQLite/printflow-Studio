@@ -425,6 +425,7 @@ public partial class SessionViewModel
         _selectedFinalSaveTarget =
             (_finalSaveOperation is null && newlyOffered ? pending : null) ??
             FinalSaveTargets.FirstOrDefault(r => r.Key == keep) ?? pending ?? FinalSaveTargets.LastOrDefault();
+        OnPropertyChanged(nameof(ExpandsGuidedFinalSave));
         NotifyFinalSaveChanged();
         FinalSaveFactsLoaded = LoadFinalSaveFactsAsync(session, ++_finalSaveFactsGeneration);
     }

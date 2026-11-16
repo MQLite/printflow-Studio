@@ -1232,7 +1232,7 @@ public sealed record SessionView(
     /// already defines (including the fall-through past skipped steps). Neither case restates
     /// a workflow rule here.
     /// </remarks>
-    private static ArtefactView? ResolveArtefact(WorkflowSnapshot snapshot, IReadOnlyList<Revision> revisions)
+    internal static ArtefactView? ResolveArtefact(WorkflowSnapshot snapshot, IReadOnlyList<Revision> revisions)
     {
         if (revisions.Count == 0)
         {

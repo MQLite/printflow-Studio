@@ -12,7 +12,13 @@ public sealed class WindowsDeliveryFileSystem : IDeliveryFileSystem
 {
     public DeliveryFileResult<string> ValidateLeaf(string candidate, ArtifactKind kind) => ValidateFileLeaf(candidate, kind);
 
-    private static DeliveryFileResult<string> ValidateFileLeaf(string candidate, ArtifactKind kind)
+    private static ImageFormat FormatOf(ArtifactKind kind) =>
+        kind == ArtifactKind.ApprovedAssetPng ? ImageFormat.Png : ImageFormat.Tiff;
+
+    private static DeliveryFileResult<string> ValidateFileLeaf(string candidate, ArtifactKind kind) =>
+        ValidateImageLeaf(candidate, FormatOf(kind));
+
+    private static DeliveryFileResult<string> ValidateImageLeaf(string candidate, ImageFormat format)
     {
         if (string.IsNullOrWhiteSpace(candidate) || candidate is "." or ".." ||
             candidate.EndsWith(' ') || candidate.EndsWith('.') || candidate.Length > 240 ||
@@ -25,14 +31,18 @@ public sealed class WindowsDeliveryFileSystem : IDeliveryFileSystem
             or "COM5" or "COM6" or "COM7" or "COM8" or "COM9" or "LPT1" or "LPT2" or "LPT3"
             or "LPT4" or "LPT5" or "LPT6" or "LPT7" or "LPT8" or "LPT9")
             return DeliveryFileResult<string>.Fail(DeliveryCode.InvalidName, "Windows reserves this file name.");
-        string extension = Path.GetExtension(candidate);
-        if (extension.Length == 0)
-            candidate += kind == ArtifactKind.ApprovedAssetPng ? ".png" : ".tif";
-        else if (kind == ArtifactKind.ApprovedAssetPng && !extension.Equals(".png", StringComparison.OrdinalIgnoreCase) ||
-                 kind == ArtifactKind.ApprovedPrintTiff &&
-                 !extension.Equals(".tif", StringComparison.OrdinalIgnoreCase) &&
-                 !extension.Equals(".tiff", StringComparison.OrdinalIgnoreCase))
-            return DeliveryFileResult<string>.Fail(DeliveryCode.InvalidName, "File extension must match the approved image format.");
+        string extension = Path.GetExtension(candidate).ToLowerInvariant();
+        string defaultExtension = format switch
+        {
+            ImageFormat.Png => ".png",
+            ImageFormat.Jpeg => ".jpg",
+            ImageFormat.Tiff => ".tif",
+            _ => string.Empty,
+        };
+        if (defaultExtension.Length == 0 || extension.Length > 0 && extension != defaultExtension &&
+            (format, extension) is not ((ImageFormat.Jpeg, ".jpeg") or (ImageFormat.Tiff, ".tiff")))
+            return DeliveryFileResult<string>.Fail(DeliveryCode.InvalidName, "File extension must match the image format.");
+        if (extension.Length == 0) candidate += defaultExtension;
         return DeliveryFileResult<string>.Ok(candidate);
     }
 
@@ -54,22 +64,26 @@ public sealed class WindowsDeliveryFileSystem : IDeliveryFileSystem
         string sourcePath, Sha256 expectedSourceHash, long expectedSourceLength,
         string requestedFolder, string finalLeaf, ArtifactKind kind,
         IReadOnlyList<string> protectedRoots, string? protectedOriginalPath) => OpenCore(sourcePath, expectedSourceHash,
-            expectedSourceLength, requestedFolder, finalLeaf, kind, protectedRoots, protectedOriginalPath);
+            expectedSourceLength, requestedFolder, finalLeaf, FormatOf(kind), protectedRoots, protectedOriginalPath);
+
+    public DeliveryFileResult<IDeliveryFileGuard> OpenImageCopy(
+        string sourcePath, FileFacts source, string folder, string leaf, IReadOnlyList<string> protectedRoots) =>
+        OpenCore(sourcePath, source.Sha256, source.ByteLength, folder, leaf, source.Format, protectedRoots, null);
 
     public DeliveryFileResult<IDeliveryDestinationGuard> OpenForRenameRecovery(string folder, string leaf, ArtifactKind kind,
         IReadOnlyList<string> protectedRoots)
     {
-        DeliveryFileResult<IDeliveryFileGuard> opened = OpenCore(null, default, 0, folder, leaf, kind, protectedRoots, null);
+        DeliveryFileResult<IDeliveryFileGuard> opened = OpenCore(null, default, 0, folder, leaf, FormatOf(kind), protectedRoots, null);
         return opened.IsSuccess ? DeliveryFileResult<IDeliveryDestinationGuard>.Ok(opened.Value!) :
             DeliveryFileResult<IDeliveryDestinationGuard>.Fail(opened.Code, opened.Detail!);
     }
 
     private static DeliveryFileResult<IDeliveryFileGuard> OpenCore(
         string? sourcePath, Sha256 expectedSourceHash, long expectedSourceLength,
-        string requestedFolder, string finalLeaf, ArtifactKind kind,
+        string requestedFolder, string finalLeaf, ImageFormat format,
         IReadOnlyList<string> protectedRoots, string? protectedOriginalPath)
     {
-        DeliveryFileResult<string> leaf = ValidateFileLeaf(finalLeaf, kind);
+        DeliveryFileResult<string> leaf = ValidateImageLeaf(finalLeaf, format);
         if (!leaf.IsSuccess || leaf.Value != finalLeaf)
             return DeliveryFileResult<IDeliveryFileGuard>.Fail(DeliveryCode.InvalidName,
                 leaf.IsSuccess ? $"Confirm the effective file name '{leaf.Value}' before saving." : leaf.Detail!);

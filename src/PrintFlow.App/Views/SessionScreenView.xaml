@@ -1363,6 +1363,13 @@
                                        AutomationProperties.AutomationId="Session.RecoveryGuidance.Preserved" />
                             <TextBlock Text="{Binding GuidedRecoveryNext}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,8,0,0"
                                        AutomationProperties.AutomationId="Session.RecoveryGuidance.Next" />
+                            <local:SessionActionButton Content="{Binding SaveManualHandoffCopyLabel}"
+                                    Command="{Binding SaveManualHandoffCopyCommand}"
+                                    IsEnabled="{Binding CanSaveManualHandoffCopy}"
+                                    Visibility="{Binding ShowsManualHandoffCopy, Converter={StaticResource BoolToVisibility}}"
+                                    AutomationProperties.AutomationId="Session.SaveManualHandoffCopy"
+                                    AutomationProperties.Name="{Binding SaveManualHandoffCopyLabel}"
+                                    HorizontalAlignment="Left" Margin="0,8,0,0" />
                         </StackPanel>
                     </ui:Card>
                     <TextBlock Text="{Binding GuidedCorrectionReview}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,0,0,12"
@@ -1505,6 +1512,49 @@
                                Visibility="{Binding IsCorrectionIdenticalToSent, Converter={StaticResource BoolToVisibility}}" />
 
 
+                    <!-- Read-only completion facts do not depend on save eligibility. -->
+                    <ContentControl Focusable="False" IsTabStop="False">
+                        <ContentControl.Style><Style TargetType="ContentControl">
+                            <Setter Property="Content" Value="{x:Null}" />
+                            <Style.Triggers><DataTrigger Binding="{Binding GuidedPage}" Value="Completed">
+                                <Setter Property="Content" Value="{Binding}" />
+                                <Setter Property="ContentTemplate" Value="{StaticResource CompletedSummaryTemplate}" />
+                            </DataTrigger></Style.Triggers>
+                        </Style></ContentControl.Style>
+                    </ContentControl>
+                    <!--
+                        Final review and save (SCRUM-11145). Present only for a final review, an
+                        approved final result or its recorded saves. Every state is stated in
+                        words; paths are selectable text; technical identities stay in details.
+                        No button here is a default button, and approving or saving buttons use
+                        the fresh-gesture input guard bound to the exact target and draft.
+                    -->
+                    <local:SessionExpander
+                                           IsExpanded="{Binding ExpandsGuidedFinalSave, Mode=OneWay}"
+                                           Visibility="{Binding HasFinalSave, Converter={StaticResource BoolToVisibility}}"
+                                           AutomationProperties.AutomationId="Session.FinalSave.Options">
+                        <local:SessionExpander.Style><Style TargetType="local:SessionExpander" BasedOn="{StaticResource PF.Disclosure}">
+                            <Setter Property="Header" Value="{Binding FinalSaveHeading}" />
+                            <Style.Triggers><DataTrigger Binding="{Binding GuidedPage}" Value="Completed">
+                                <Setter Property="Header" Value="{Binding GuidedCompletionHeading}" />
+                            </DataTrigger></Style.Triggers>
+                        </Style></local:SessionExpander.Style>
+                    <ContentControl Focusable="False" IsTabStop="False">
+                        <ContentControl.Style>
+                            <Style TargetType="ContentControl">
+                                <Setter Property="Content" Value="{x:Null}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasFinalSave}" Value="True">
+                                        <Setter Property="Content" Value="{Binding}" />
+                                        <Setter Property="ContentTemplate" Value="{StaticResource FinalSaveTemplate}" />
+                                    </DataTrigger>
+                                    <MultiDataTrigger><MultiDataTrigger.Conditions><Condition Binding="{Binding HasFinalSave}" Value="True" /><Condition Binding="{Binding GuidedPage}" Value="Save" /></MultiDataTrigger.Conditions><Setter Property="ContentTemplate" Value="{StaticResource WpfUiSaveTemplate}" /></MultiDataTrigger>
+<MultiDataTrigger><MultiDataTrigger.Conditions><Condition Binding="{Binding HasFinalSave}" Value="True" /><Condition Binding="{Binding GuidedPage}" Value="Completed" /></MultiDataTrigger.Conditions><Setter Property="ContentTemplate" Value="{StaticResource WpfUiCompletedTemplate}" /></MultiDataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ContentControl.Style>
+                    </ContentControl>
+                    </local:SessionExpander>
                     <!--
                         What to check (SCRUM-11149). Read-only guidance for the result under review:
                         the checks, what Approve and Reject do, and where to get help. Collapsed while
@@ -1562,49 +1612,6 @@
                         </StackPanel>
                     </Border>
 
-                    <!--
-                        Final review and save (SCRUM-11145). Present only for a final review, an
-                        approved final result or its recorded saves. Every state is stated in
-                        words; paths are selectable text; technical identities stay in details.
-                        No button here is a default button, and approving or saving buttons use
-                        the fresh-gesture input guard bound to the exact target and draft.
-                    -->
-                    <!-- Read-only completion facts do not depend on save eligibility. -->
-                    <ContentControl Focusable="False" IsTabStop="False">
-                        <ContentControl.Style><Style TargetType="ContentControl">
-                            <Setter Property="Content" Value="{x:Null}" />
-                            <Style.Triggers><DataTrigger Binding="{Binding GuidedPage}" Value="Completed">
-                                <Setter Property="Content" Value="{Binding}" />
-                                <Setter Property="ContentTemplate" Value="{StaticResource CompletedSummaryTemplate}" />
-                            </DataTrigger></Style.Triggers>
-                        </Style></ContentControl.Style>
-                    </ContentControl>
-                    <local:SessionExpander
-                                           IsExpanded="{Binding ExpandsGuidedFinalSave, Mode=OneWay}"
-                                           Visibility="{Binding HasFinalSave, Converter={StaticResource BoolToVisibility}}"
-                                           AutomationProperties.AutomationId="Session.FinalSave.Options">
-                        <local:SessionExpander.Style><Style TargetType="local:SessionExpander" BasedOn="{StaticResource PF.Disclosure}">
-                            <Setter Property="Header" Value="{Binding FinalSaveHeading}" />
-                            <Style.Triggers><DataTrigger Binding="{Binding GuidedPage}" Value="Completed">
-                                <Setter Property="Header" Value="{Binding GuidedCompletionHeading}" />
-                            </DataTrigger></Style.Triggers>
-                        </Style></local:SessionExpander.Style>
-                    <ContentControl Focusable="False" IsTabStop="False">
-                        <ContentControl.Style>
-                            <Style TargetType="ContentControl">
-                                <Setter Property="Content" Value="{x:Null}" />
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding HasFinalSave}" Value="True">
-                                        <Setter Property="Content" Value="{Binding}" />
-                                        <Setter Property="ContentTemplate" Value="{StaticResource FinalSaveTemplate}" />
-                                    </DataTrigger>
-                                    <MultiDataTrigger><MultiDataTrigger.Conditions><Condition Binding="{Binding HasFinalSave}" Value="True" /><Condition Binding="{Binding GuidedPage}" Value="Save" /></MultiDataTrigger.Conditions><Setter Property="ContentTemplate" Value="{StaticResource WpfUiSaveTemplate}" /></MultiDataTrigger>
-<MultiDataTrigger><MultiDataTrigger.Conditions><Condition Binding="{Binding HasFinalSave}" Value="True" /><Condition Binding="{Binding GuidedPage}" Value="Completed" /></MultiDataTrigger.Conditions><Setter Property="ContentTemplate" Value="{StaticResource WpfUiCompletedTemplate}" /></MultiDataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </ContentControl.Style>
-                    </ContentControl>
-                    </local:SessionExpander>
                     <!-- Keep all per-size facts reachable without consuming the image area. -->
                     <ContentControl Focusable="False" IsTabStop="False">
                         <ContentControl.Style>

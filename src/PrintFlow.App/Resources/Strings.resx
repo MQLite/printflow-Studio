@@ -841,6 +841,13 @@
   <data name="Session_PdfPending" xml:space="preserve"><value>Source: PDF (unchanged). Prepare its single page at 300 PPI, then review the page and physical dimensions before continuing. Multi-page and encrypted PDFs are unsupported. PDF files are treated as visual artwork inputs: existing spot-colour or white-ink separations in the source are not preserved as production channels.</value></data>
   <data name="Session_PdfPrepared" xml:space="preserve"><value>Single-page PDF prepared for review. Source: PDF (unchanged). The displayed PNG is the managed full-page raster at 300 PPI. Confirm page 1 and its dimensions: {0:0.##} × {1:0.##} mm ({2} × {3} pixels).</value></data>
   <data name="Session_SubmitManualResult" xml:space="preserve"><value>Submit Manual Result</value></data>
+  <data name="Session_SaveManualHandoffCopy" xml:space="preserve"><value>Save a copy of the current image</value></data>
+  <data name="Session_ManualHandoffCopySaved" xml:space="preserve"><value>Image copy saved to {0}</value></data>
+  <data name="Session_ManualHandoffCopyCollision" xml:space="preserve"><value>That name is already in use. Choose a different name or folder.</value></data>
+  <data name="Session_ManualHandoffCopyInvalidName" xml:space="preserve"><value>Choose a valid file name with an extension that matches the image format.</value></data>
+  <data name="Session_ManualHandoffCopyUnsupportedFolder" xml:space="preserve"><value>Choose a folder on a local NTFS drive outside PrintFlow storage.</value></data>
+  <data name="Session_ManualHandoffCopyUnconfirmed" xml:space="preserve"><value>PrintFlow could not confirm the copy. Check the chosen folder before trying again.</value></data>
+  <data name="Session_ManualHandoffCopyFailed" xml:space="preserve"><value>The image copy could not be saved. Check the image and the destination folder, then try again.</value></data>
   <data name="Session_ManualProcessingResult" xml:space="preserve"><value>Manual processing result</value></data>
   <data name="Session_ManualCutoutFilter" xml:space="preserve"><value>Transparent PNG (*.png)|*.png</value></data>
   <data name="Session_ManualEnhancementFilter" xml:space="preserve"><value>Raster image (*.png;*.jpg;*.jpeg)|*.png;*.jpg;*.jpeg</value></data>

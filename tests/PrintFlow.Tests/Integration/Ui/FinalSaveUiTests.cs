@@ -967,6 +967,7 @@ public sealed class FinalSaveUiTests
     public static TheoryData<string, string, double, double> RenderCases => new()
     {
         { "pending-no-folder", "en", 1000, 700 }, { "pending-no-folder", "zh-CN", 1000, 700 },
+        { "pending-customer-tiff", "zh-CN", 1000, 700 }, { "pending-direct-tiff", "zh-CN", 1000, 700 },
         { "collision", "en", 1000, 700 }, { "collision", "zh-CN", 1000, 700 },
         { "saved-tiff", "en", 1920, 1040 }, { "saved-tiff", "zh-CN", 1920, 1040 },
         { "saved-tiff", "zh-CN", 1000, 700 },
@@ -991,15 +992,21 @@ public sealed class FinalSaveUiTests
             Size viewport = new(width, height);
             var facts = WpfRendering.RenderExpectingNoBindingErrors(() => new SessionScreenView { DataContext = screen }, viewport, tree =>
             {
-                // E4 keeps optional save fields behind an explicit disclosure during review.
-                tree.OfType<Expander>().Single(e => AutomationProperties.GetAutomationId(e) == "Session.FinalSave.Options").IsExpanded = true;
-                tree.Root.UpdateLayout();
-                List<DependencyObject> expanded = [];
-                Collect(tree.Root, expanded);
-                tree = new RenderedTree(tree.Root, expanded);
                 Border panel = tree.OfType<Border>().Single(b => AutomationProperties.GetAutomationId(b) == "Session.FinalSave");
                 List<DependencyObject> inside = [];
                 Collect(panel, inside);
+                if (state.StartsWith("pending-", StringComparison.Ordinal))
+                {
+                    var name = inside.OfType<TextBox>().Single(t => AutomationProperties.GetAutomationId(t) == "Session.FinalSave.FileName");
+                    var location = inside.OfType<TextBox>().Single(t => AutomationProperties.GetAutomationId(t) == "Session.FinalSave.Folder");
+                    Shown(name, tree.Root).ShouldBeTrue();
+                    Shown(location, tree.Root).ShouldBeTrue();
+                    name.Text.ShouldBe(screen.SaveFileNameText);
+                    location.Text.ShouldBe(screen.SaveFolderText);
+                    var details = tree.OfType<ScrollViewer>().Single(s => s.Name == "SessionDetailsScroll");
+                    var locationBottom = location.TranslatePoint(new Point(0, location.ActualHeight), details);
+                    locationBottom.Y.ShouldBeLessThanOrEqualTo(details.ViewportHeight);
+                }
                 // E2: save submissions live in the fixed action bar; their identity/accessibility
                 // contracts are unchanged even though they are no longer children of the form.
                 var buttons = inside.OfType<Button>().Where(b => Shown(b, panel)).Concat(
@@ -1101,7 +1108,8 @@ public sealed class FinalSaveUiTests
     private static async Task<(SessionViewModel Screen, SessionViewModel Baseline)> ArrangeAsync(
         SessionServiceHarness h, string state, string folder)
     {
-        ISessionService workflow = state is "saved-tiff" or "history" or "save-failed" or "records" ? FinalSaveFixtures.TiffService(h) : h.CreateService();
+        ISessionService workflow = state is "saved-tiff" or "history" or "save-failed" or "records" or
+            "pending-customer-tiff" or "pending-direct-tiff" ? FinalSaveFixtures.TiffService(h) : h.CreateService();
         IApprovedArtifactDeliveryService delivery = FinalSaveFixtures.Delivery(h);
         var coordinator = new FinalSaveCoordinator(workflow, delivery, "tester");
         SessionView view;
@@ -1109,6 +1117,14 @@ public sealed class FinalSaveUiTests
         {
             case "pending-no-folder":
                 view = await FinalSaveFixtures.PngAtFinalReviewAsync(h, workflow);
+                break;
+            case "pending-customer-tiff":
+                SessionId customer = await KeepOriginalExtentPersistenceTests.AtTrim(h, workflow, WorkflowType.PrepareCustomerDesign);
+                await KeepOriginalExtentPersistenceTests.Execute(workflow, customer, new WorkflowCommand.KeepOriginalExtent());
+                view = await FinalSaveFixtures.NextTiffSizeAsync(workflow, customer, 200);
+                break;
+            case "pending-direct-tiff":
+                view = await FinalSaveFixtures.TiffAtFinalReviewAsync(h, workflow);
                 break;
             case "pending-remembered":
             case "collision":

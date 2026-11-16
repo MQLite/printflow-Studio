@@ -373,6 +373,7 @@ public sealed class PhotoshopPsdSettleDeterminismTests
                 new StubPhotoshopWorkspace(_temp.Root), _options, _clock)
             {
                 PsdNative = native,
+                ToolNative = new StubPhotoshopToolNativeBridge(),
                 PsdOutputInspector = Inspector,
             };
             return await adapter.PreparePsdAsync(

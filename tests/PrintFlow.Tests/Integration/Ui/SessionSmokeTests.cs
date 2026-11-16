@@ -10,6 +10,7 @@ using PrintFlow.App.Navigation;
 using PrintFlow.App.ViewModels;
 using PrintFlow.App.Views;
 using PrintFlow.Domain.Attempts;
+using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Revisions;
@@ -36,9 +37,8 @@ namespace PrintFlow.Tests.Integration.Ui;
 /// <i>not</i> substituted: the whole graph comes from <see cref="ApplicationStartup"/> — the
 /// same configuration load, directory creation, migration run, preset verification, crash
 /// recovery and <c>ServiceRegistration</c> the shipped application performs — and navigation is
-/// the real <see cref="NavigationService"/> resolving real screens from the container. Only the
-/// two things a test cannot have are stood in for: the single-instance guard, and the modal
-/// file dialog.
+/// the real <see cref="NavigationService"/> resolving real screens from the container. The
+/// single-instance guard and modal file dialogs are substituted.
 /// </para>
 /// <para>
 /// The remaining manual step is looking at the window, which
@@ -1017,13 +1017,22 @@ public sealed class SessionSmokeTests
             StartupResult startup = await new ApplicationStartup(
                     guard,
                     layout.ConfigurationFilePath,
-                    services => services.AddSingleton<IFilePicker>(picker))
+                    services =>
+                    {
+                        services.AddSingleton<IFilePicker>(picker);
+                        services.AddSingleton<IManualHandoffCopyPicker, CancelManualHandoffCopyPicker>();
+                    })
                 .RunAsync(CancellationToken.None);
 
             startup.Status.CanShowShell.ShouldBeTrue(
                 startup.Status.Failure?.ToString() ?? "startup refused to show the shell");
 
             return new SmokeApplication(layout, guard, startup, picker);
+        }
+
+        private sealed class CancelManualHandoffCopyPicker : IManualHandoffCopyPicker
+        {
+            public string? PickDestination(string suggestedFileName, ImageFormat format) => null;
         }
 
         /// <summary>

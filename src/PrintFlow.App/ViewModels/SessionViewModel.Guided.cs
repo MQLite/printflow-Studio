@@ -35,7 +35,8 @@ public sealed partial class SessionViewModel
             GuidedSessionPage.Recovery or GuidedSessionPage.Failure => new(4, System.Windows.GridUnitType.Star),
         _ => new(2, System.Windows.GridUnitType.Star),
     };
-    public bool ExpandsGuidedFinalSave => GuidedPage != GuidedSessionPage.Review;
+    public bool ExpandsGuidedFinalSave => GuidedPage != GuidedSessionPage.Review ||
+        FinalSaveTargets.Any(row => row.Target.PendingReview is not null);
     public string GuidedProcessingApplication => UsesPhotoshop ? "Photoshop"
         : _runtime.DrivesExternalApplication ? Strings.Resolve("Session_GuidedMeitu") : "PrintFlow";
     public string GuidedProcessingState => _runtime.State switch
@@ -178,6 +179,9 @@ public sealed partial class SessionViewModel
         NotifyUtilities();
         NotifyGuidedCompletion();
         NotifyGuidedRecovery();
+        OnPropertyChanged(nameof(SaveManualHandoffCopyLabel));
+        OnPropertyChanged(nameof(ShowsManualHandoffCopy));
+        OnPropertyChanged(nameof(CanSaveManualHandoffCopy));
         OnPropertyChanged(nameof(ShowsGuidedProcessing));
         OnPropertyChanged(nameof(ShowsManualCropEntry));
         OnPropertyChanged(nameof(ShowsManualCropEntryNotice));
