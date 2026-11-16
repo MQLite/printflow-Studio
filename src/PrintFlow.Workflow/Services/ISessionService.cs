@@ -41,6 +41,11 @@ public interface ISessionService
         string? operatorName,
         CancellationToken cancellationToken);
 
+    Task<OperationResult<SessionView>> ImportVerifiedWorkResultAsync(Guid requestId, string sourceAbsolutePath,
+        string outputName, Sha256 expectedHash, CancellationToken cancellationToken) =>
+        Task.FromResult(OperationResult.Fail<SessionView>(
+            FailureCode.AdapterUnavailable, "Verified Work result import is unavailable."));
+
     /// <summary>Applies one command to an existing session.</summary>
     Task<OperationResult<SessionView>> ExecuteAsync(
         SessionId id, WorkflowCommand command, string? operatorName, CancellationToken cancellationToken);

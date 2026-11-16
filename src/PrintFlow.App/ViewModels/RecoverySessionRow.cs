@@ -10,6 +10,8 @@ namespace PrintFlow.App.ViewModels;
 /// <summary>Formatting only: every action flag comes from the service recovery read model.</summary>
 public sealed class RecoverySessionRow(RecoveryItem item) : ObservableObject
 {
+    internal bool Matches(RecoveryItem current) => (item with { Actions = current.Actions }) == current && item.Actions.SequenceEqual(current.Actions);
+
     internal void RefreshLanguage() => OnPropertyChanged(string.Empty);
     public SessionId Id => item.Id;
     public string DisplayName => item.OutputName.Value;

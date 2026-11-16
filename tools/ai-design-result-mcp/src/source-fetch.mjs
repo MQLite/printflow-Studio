@@ -32,13 +32,15 @@ export function validateSourceUrl(file, allowedSources) {
   let url;
   try { url = new URL(file.download_url); } catch { throw new Error('invalid source URL'); }
   if (url.protocol !== 'https:' || url.username || url.password || url.hash || isIP(url.hostname)) throw new Error('source URL denied');
-  const match = allowedSources?.find(x => url.origin === x.origin && url.pathname.startsWith(x.pathPrefix));
+  const match = allowedSources?.find(x => url.origin === x.origin && (x.workRawFile === true
+    ? /^\/files\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/raw$/.test(url.pathname)
+    : x.exact === true ? url.pathname === x.pathPrefix : url.pathname.startsWith(x.pathPrefix)));
   if (!match || !match.pathPrefix?.startsWith('/') || url.pathname.includes('..') || /%(?:2f|5c|2e)/i.test(url.pathname)) throw new Error('source URL denied');
   return url;
 }
 
 export function validateSourceResponse(status, headers, receivedLength) {
-  if (status !== 200) throw new Error('source response denied');
+  if (status !== 200) throw new Error(`source response denied (${status})`);
   const encoding = headers['content-encoding'];
   if (encoding !== undefined && (typeof encoding !== 'string' || encoding.trim().toLowerCase() !== 'identity')) throw new Error('source encoding denied');
   const declared = headers['content-length'];

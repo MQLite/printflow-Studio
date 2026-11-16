@@ -21,7 +21,7 @@
   -->
 
   <PropertyGroup>
-    <PrintFlowVersion>0.1.1</PrintFlowVersion>
+    <PrintFlowVersion>0.1.2</PrintFlowVersion>
   </PropertyGroup>
 
 </Project>

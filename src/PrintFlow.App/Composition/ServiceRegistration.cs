@@ -250,7 +250,18 @@ public static class ServiceRegistration
         services.AddSingleton<AiMemorialServices>();
         services.AddSingleton<IAiPromptClipboard, SystemAiPromptClipboard>();
         services.AddSingleton<IAiDraftLeavePrompt, SystemAiDraftLeavePrompt>();
+        services.AddSingleton<IWorkConversationLauncher, WorkConversationLauncher>();
+        services.AddSingleton<WorkTaskTracker>();
+        services.AddSingleton<IWorkResultProgressReader>(p => p.GetRequiredService<WorkTaskTracker>());
+        services.AddSingleton<IWorkTaskQuery>(p => new FileWorkTaskQuery(new FileAiDesignRequestStore(workspaceRootAbsolute),
+            p.GetRequiredService<ISessionService>(), p.GetRequiredService<IWorkResultProgressReader>()));
+        services.AddSingleton(p => new LoopbackWorkResultImport(workspaceRootAbsolute,
+            p.GetRequiredService<IFileInspector>(), p.GetRequiredService<ISessionService>(), p.GetRequiredService<WorkTaskTracker>()));
+        services.AddSingleton<IAiDesignWorkResultImport>(p => p.GetRequiredService<LoopbackWorkResultImport>());
+        services.AddSingleton<IAiDesignTextSubmission>(p => new ChromeWorkTextSubmission(workspaceRootAbsolute,
+            p.GetRequiredService<LoopbackWorkResultImport>(), p.GetRequiredService<WorkTaskTracker>()));
         services.AddTransient<AiPromptWorkbenchViewModel>();
+        services.AddTransient<AiWorkTasksViewModel>();
         services.AddSingleton<IFilePicker, OpenFileDialogPicker>();
         services.AddSingleton<IManualHandoffCopyPicker, SaveManualHandoffCopyDialog>();
         services.AddSingleton<IDiagnosticPackageDestinationPicker, SaveDiagnosticPackageDialog>();

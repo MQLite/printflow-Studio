@@ -13,7 +13,7 @@ namespace PrintFlow.Infrastructure.AiDesign;
 /// <summary>Creation-issued authority for this operation's exact staging files, never retention or production disposal.</summary>
 public static class AiDesignOwnedStagingFiles
 {
-    public enum RequestPurpose { RequestAuthority, AttachmentSequence, BridgeQueue }
+    public enum RequestPurpose { RequestAuthority, AttachmentSequence, BridgeQueue, WorkResultTicket }
 
     internal static OwnedFile CreateAuthoring(string workspaceRoot, Guid? draftId, Guid? versionId, Guid? reviewId = null)
     {
@@ -73,6 +73,7 @@ public static class AiDesignOwnedStagingFiles
             RequestPurpose.RequestAuthority => (".request-", "request.json"),
             RequestPurpose.AttachmentSequence => (".sequence-", ".attachment-sequence"),
             RequestPurpose.BridgeQueue => (".bridge-queue-", "bridge-queue.local.json"),
+            RequestPurpose.WorkResultTicket => (".work-result-", LoopbackWorkResultImport.TicketFileName),
             _ => throw new IOException("Unknown staging purpose.")
         };
         PrepareDirectory(root);
@@ -85,8 +86,23 @@ public static class AiDesignOwnedStagingFiles
         return OwnedFile.Create(root, System.IO.Path.Combine(root, $".connection-{Guid.NewGuid():N}.tmp"), System.IO.Path.Combine(root, "connection.local.json"));
     }
 
+    internal static OwnedFile CreateReturnedWorkResult(string workspaceRoot, Guid requestId, Guid objectVersion, bool png)
+    {
+        string root = RequestRoot(workspaceRoot, requestId);
+        PrepareDirectory(root);
+        string destination = ReturnedWorkResultName(objectVersion, png);
+        return OwnedFile.Create(root, System.IO.Path.Combine(root, $".return-{Guid.NewGuid():N}.tmp"),
+            System.IO.Path.Combine(root, destination));
+    }
+
+    internal static string ReturnedWorkResultName(Guid objectVersion, bool png) =>
+        $"returned-{objectVersion:N}.{(png ? "png" : "jpg")}";
+
     public static AttachmentBatch BeginAttachments(string workspaceRoot, Guid requestId)
         => AttachmentBatch.Begin(RequestRoot(workspaceRoot, requestId));
+
+    internal static string AttachmentName(int order, string extension, Guid? workRequestId = null) =>
+        workRequestId is { } id ? $"attachment-{order:D2}-{id:N}{extension}" : $"attachment-{order:D2}{extension}";
 
     private static string RequestRoot(string workspaceRoot, Guid requestId)
     {
@@ -323,12 +339,14 @@ public static class AiDesignOwnedStagingFiles
         private AttachmentBatch(string root) => _requestRoot = root;
         internal static AttachmentBatch Begin(string root) { PrepareDirectory(root); return new(root); }
 
-        public Attachment Create(int order, string extension)
+        public Attachment Create(int order, string extension) => Create(order, extension, null);
+
+        internal Attachment Create(int order, string extension, Guid? workRequestId)
         {
             if (_finished) throw new InvalidOperationException("Attachment batch is finished.");
             if (order <= 0 || extension is not (".png" or ".jpg" or ".jpeg" or ".webp" or ".pdf" or ".txt" or ".md" or ".csv" or ".docx" or ".xlsx" or ".pptx"))
                 throw new IOException("Invalid attachment staging identity.");
-            Guid id = Guid.NewGuid(); string name = $"attachment-{order:D2}{extension}";
+            Guid id = Guid.NewGuid(); string name = AttachmentName(order, extension, workRequestId);
             string folder = System.IO.Path.Combine(_requestRoot, "Attachments", id.ToString("N"));
             PrepareDirectory(folder);
             var snapshot = OwnedFile.Create(folder, System.IO.Path.Combine(folder, "snapshot.tmp"), System.IO.Path.Combine(folder, name));

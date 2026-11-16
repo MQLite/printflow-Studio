@@ -5,6 +5,7 @@ using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Results;
 using PrintFlow.App.ViewModels.AiDesign;
 using PrintFlow.App.Resources;
+using PrintFlow.Workflow.AiDesign;
 
 namespace PrintFlow.App.Navigation;
 
@@ -22,6 +23,7 @@ public sealed class NavigationService : INavigationService, IUtilityTaskNavigati
 {
     private readonly IServiceProvider _services;
     private SessionViewModel? _utilitySource;
+    private bool _openingWorkResult;
     public bool HasSourceTask => _utilitySource is not null;
     public bool IsCurrentUtility(object requester) => ReferenceEquals(Current, requester) &&
         requester is SettingsViewModel or EnvironmentReadinessViewModel;
@@ -52,11 +54,17 @@ public sealed class NavigationService : INavigationService, IUtilityTaskNavigati
         return true;
     }
 
-    public NavigationService(IServiceProvider services)
+    public NavigationService(IServiceProvider services, WorkTaskTracker? workTracker = null)
     {
         ArgumentNullException.ThrowIfNull(services);
 
         _services = services;
+        if (workTracker is not null) workTracker.ResultImported += OnWorkResultImported;
+    }
+
+    private void OnWorkResultImported(SessionId id)
+    {
+        if (Current is HomeViewModel home) home.OnWorkResultImported(id);
     }
 
     /// <inheritdoc />
@@ -94,6 +102,11 @@ public sealed class NavigationService : INavigationService, IUtilityTaskNavigati
         _utilitySource = null;
         ArgumentNullException.ThrowIfNull(session);
 
+        OpenSession(session);
+    }
+
+    private void OpenSession(SessionView session)
+    {
         SessionViewModel view = _services.GetRequiredService<SessionViewModel>();
         view.Open(session);
         Show(view);
@@ -143,14 +156,66 @@ public sealed class NavigationService : INavigationService, IUtilityTaskNavigati
         return source is not IAiAuthoringCloseGuard guard || await guard.RequestCloseAsync(ct) && ReferenceEquals(Current, source);
     }
 
+    public async Task<OperationResult<Unit>> OpenWorkResultAsync(Guid requestId, CancellationToken ct)
+    {
+        var source = Current;
+        if (_openingWorkResult || source is not (AiPromptWorkbenchViewModel or AiWorkTasksViewModel) || ct.IsCancellationRequested)
+            return OperationResult.Ok();
+
+        var draftId = (source as AiPromptWorkbenchViewModel)?.Draft?.Id;
+        bool IsCurrentSource() => ReferenceEquals(Current, source) &&
+            (source is not AiPromptWorkbenchViewModel bench || bench.Draft?.Id == draftId);
+
+        _openingWorkResult = true;
+        try
+        {
+            var query = _services.GetRequiredService<IWorkTaskQuery>();
+            var task = await query.FindAsync(requestId, ct);
+            if (ct.IsCancellationRequested || !IsCurrentSource()) return OperationResult.Ok();
+            if (task.IsFailure) return OperationResult.Fail<Unit>(task.Failure);
+            if (task.Value is not { Stage: WorkTaskStage.Imported, ImportedSessionId: { } id })
+                return OperationResult.Fail<Unit>(FailureCode.PreconditionNotMet, "There is no imported Work result.");
+
+            var session = await _services.GetRequiredService<ISessionService>().LoadAsync(id, ct);
+            if (ct.IsCancellationRequested || !IsCurrentSource()) return OperationResult.Ok();
+            if (session.IsFailure) return OperationResult.Fail<Unit>(session.Failure);
+            if (!await CanLeaveAuthoringAsync(ct) || ct.IsCancellationRequested || !IsCurrentSource())
+                return OperationResult.Ok();
+
+            _utilitySource = null;
+            OpenSession(session.Value);
+            return OperationResult.Ok();
+        }
+        catch (OperationCanceledException) when (ct.IsCancellationRequested) { return OperationResult.Ok(); }
+        finally { _openingWorkResult = false; }
+    }
+
+    public async Task GoToAiWorkTasksAsync(Guid? returnDraftId, CancellationToken ct)
+    {
+        if (Current is not AiPromptWorkbenchViewModel source || !await CanLeaveAuthoringAsync(ct) ||
+            ct.IsCancellationRequested || !ReferenceEquals(Current, source)) return;
+        var tasks = _services.GetRequiredService<AiWorkTasksViewModel>();
+        Show(tasks);
+        await tasks.OpenAsync(source.Draft?.Id ?? returnDraftId);
+    }
+
     public async Task GoToPromptWorkbenchAsync(Guid? draftId, CancellationToken ct)
     {
-        if (Current is not HomeViewModel home || !home.CanOpenPromptWorkbench) return;
+        var source = Current;
+        if (source is HomeViewModel { CanOpenPromptWorkbench: false } ||
+            source is not (HomeViewModel or AiWorkTasksViewModel)) return;
         var vm = _services.GetRequiredService<AiPromptWorkbenchViewModel>();
-        await vm.OpenAsync(draftId, ct);
-        if (!ReferenceEquals(Current, home) || !home.CanOpenPromptWorkbench) { vm.Deactivate(); return; }
+        try { await vm.OpenAsync(draftId, ct); }
+        catch (OperationCanceledException) when (ct.IsCancellationRequested) { vm.Deactivate(); return; }
+        if (ct.IsCancellationRequested || !ReferenceEquals(Current, source) || source is HomeViewModel { CanOpenPromptWorkbench: false })
+        { vm.Deactivate(); return; }
         if ((vm.Draft is null || vm.Error is not null) && !(vm.IsSavedDraftsVisible && vm.SavedDrafts.Count > 0))
-        { home.Notice = vm.Error ?? Strings.AiPrompt_SaveFailed; vm.Deactivate(); return; }
+        {
+            if (source is HomeViewModel home) home.Notice = vm.Error ?? Strings.AiPrompt_SaveFailed;
+            if (source is AiWorkTasksViewModel tasks) tasks.ShowError(vm.Error ?? Strings.AiPrompt_SaveFailed);
+            vm.Deactivate();
+            return;
+        }
         _utilitySource = null;
         Show(vm);
     }

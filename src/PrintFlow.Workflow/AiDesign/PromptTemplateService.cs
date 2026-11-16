@@ -5,6 +5,8 @@ namespace PrintFlow.Workflow.AiDesign;
 
 public sealed class PromptTemplateService
 {
+    public const string WorkbenchTemplate = "workbench";
+
     public OperationResult<AiDesignPrompt> Compose(string templateId, IReadOnlyDictionary<string,string> fields, IReadOnlyList<AiDesignAttachment> attachments, string language)
     {
         bool zh = language.StartsWith("zh", StringComparison.OrdinalIgnoreCase);
@@ -26,10 +28,10 @@ public sealed class PromptTemplateService
     }
     public OperationResult<Unit> Validate(AiDesignPrompt prompt, IReadOnlyList<AiDesignAttachment> attachments)
     {
-        if (Fields(prompt.TemplateId) is null || prompt.TemplateVersion != 1 || string.IsNullOrWhiteSpace(prompt.Text))
+        if ((prompt.TemplateId != WorkbenchTemplate && Fields(prompt.TemplateId) is null) || prompt.TemplateVersion != 1 || string.IsNullOrWhiteSpace(prompt.Text))
             return OperationResult.Fail<Unit>(FailureCode.PreconditionNotMet, "Invalid AI prompt template or final text.");
         string required = prompt.TemplateId == "text-print" ? "text" : "subject";
-        if (!prompt.Fields.TryGetValue(required, out var value) || string.IsNullOrWhiteSpace(value))
+        if (prompt.TemplateId != WorkbenchTemplate && (!prompt.Fields.TryGetValue(required, out var value) || string.IsNullOrWhiteSpace(value)))
             return OperationResult.Fail<Unit>(FailureCode.PreconditionNotMet, "Required AI field: " + required);
         if (attachments.Select(a => a.Id).Distinct().Count() != attachments.Count || attachments.Select(a => a.UploadName).Distinct(StringComparer.Ordinal).Count() != attachments.Count
             || prompt.AttachmentReferences.Distinct().Count() != prompt.AttachmentReferences.Count

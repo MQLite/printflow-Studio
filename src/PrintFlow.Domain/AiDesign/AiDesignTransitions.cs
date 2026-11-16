@@ -6,6 +6,14 @@ public static class AiDesignTransitions
 {
     public static bool IsRunning(AiDesignState state) => state is >= AiDesignState.Queued and <= AiDesignState.Importing;
     public static bool CanStop(AiDesignState state) => state is >= AiDesignState.Queued and <= AiDesignState.Validating;
+    public static bool CanResumeWorkResult(AiDesignRequest request) =>
+        ((request.State == AiDesignState.PromptOnly &&
+            request.Failure?.Code is "TrialResultHandoffUnavailable" or "WorkResultPending") ||
+            request.State == AiDesignState.Interrupted) &&
+        request.LastSuccessfulStage == AiDesignState.Submitted &&
+        request.AttemptId != Guid.Empty && request.SubmissionReservedAtUtc is not null &&
+        request.WorkConversationId is { } conversation && conversation != Guid.Empty &&
+        request.Candidate is null && request.ImportedSessionId is null;
     public static OperationResult<AiDesignRequest> Apply(AiDesignRequest r, AiDesignEvent change, DateTimeOffset now)
     {
         AiDesignRequest? next = null;
@@ -22,7 +30,7 @@ public static class AiDesignTransitions
                     return Reject("New attempt identity required.");
                 next = r with { State = AiDesignState.Queued, AttemptId = q.AttemptId, Token = q.Token,
                     OwnerProcessId = q.OwnerProcessId, OwnerProcessStartUtcTicks = q.OwnerProcessStartUtcTicks, ConnectionId = q.ConnectionId,
-                    UploadReceipts = [], SubmissionReservedAtUtc = null, TabId = null, ConversationId = null, Download = null,
+                    UploadReceipts = [], SubmissionReservedAtUtc = null, TabId = null, ConversationId = null, WorkConversationId = null, Download = null,
                     Candidate = null, RetainedCandidates = r.Candidate is null ? r.RetainedCandidates : r.RetainedCandidates.Append(r.Candidate).ToArray(),
                     Failure = null, DeadlineUtc = now.AddMinutes(r.Attachments.Count > 0 ? 5 : 10) };
                 break;
@@ -44,8 +52,8 @@ public static class AiDesignTransitions
                             && u.ConversationId == s.ConversationId && u.Status == AiDesignUploadStatus.Uploaded))))) return Reject("All required attachments must be uploaded before one submit reservation.");
                 next = r with { SubmissionReservedAtUtc = now, TabId = s.TabId, ConversationId = s.ConversationId };
                 break;
-            case AiDesignEvent.SubmitConfirmed when r.State is AiDesignState.Queued or AiDesignState.Uploading && r.SubmissionReservedAtUtc is not null:
-                next = r with { State = AiDesignState.Submitted, DeadlineUtc = now.AddMinutes(10) };
+            case AiDesignEvent.SubmitConfirmed submitted when r.State is AiDesignState.Queued or AiDesignState.Uploading && r.SubmissionReservedAtUtc is not null:
+                next = r with { State = AiDesignState.Submitted, WorkConversationId = submitted.WorkConversationId, DeadlineUtc = now.AddMinutes(10) };
                 break;
             case AiDesignEvent.GenerationStarted when r.State == AiDesignState.Submitted:
                 next = r with { State = AiDesignState.Generating };
@@ -71,13 +79,20 @@ public static class AiDesignTransitions
             case AiDesignEvent.ImportCompleted i when r.State == AiDesignState.Importing && i.SessionId.Value != Guid.Empty:
                 next = r with { State = AiDesignState.Imported, ImportedSessionId = i.SessionId, Token = NewToken(), OwnerProcessId = null, OwnerProcessStartUtcTicks = null };
                 break;
+            case AiDesignEvent.ReturnedWorkResultImported i when CanResumeWorkResult(r) &&
+                i.WorkConversationId == r.WorkConversationId && i.Candidate.File.RequestId == r.RequestId &&
+                i.SessionId.Value == r.RequestId:
+                next = r with { State = AiDesignState.Imported, ImportedSessionId = i.SessionId,
+                    Candidate = i.Candidate, Failure = null, Token = NewToken() };
+                break;
             case AiDesignEvent.Failed f when IsRunning(r.State) || r.State == AiDesignState.PromptReady:
                 if (string.IsNullOrWhiteSpace(f.Code) || (f.ImportFailure && r.State != AiDesignState.Importing)) return Reject("Failure stage mismatch.");
                 next = r with { State = r.State == AiDesignState.Importing ? AiDesignState.ImportFailed : AiDesignState.PromptOnly,
                     ImportedSessionId = f.SessionId ?? r.ImportedSessionId, Token = NewToken(), DeadlineUtc = null,
                     Failure = new(f.Code, r.State, [], r.LastSuccessfulStage), OwnerProcessId = null, OwnerProcessStartUtcTicks = null };
                 break;
-            case AiDesignEvent.StopAccepted when CanStop(r.State):
+            case AiDesignEvent.StopAccepted when CanStop(r.State) ||
+                (CanResumeWorkResult(r) && r.Failure?.Code is "WorkResultPending" or "Interrupted"):
                 next = r with { State = AiDesignState.Cancelled, Token = NewToken(), DeadlineUtc = null,
                     Failure = new("Cancelled", r.State, [], r.LastSuccessfulStage), OwnerProcessId = null, OwnerProcessStartUtcTicks = null };
                 break;

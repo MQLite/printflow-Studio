@@ -2,6 +2,7 @@ import { open, readFile, rm } from 'node:fs/promises';
 import { isAbsolute, resolve } from 'node:path';
 import { ResultStore } from './store.mjs';
 import { startServer } from './server.mjs';
+import { startStudioPipe } from './studio-pipe.mjs';
 import { pollUntilReady } from './monitor.mjs';
 
 function args(argv) {
@@ -21,7 +22,7 @@ async function configuration(path) {
 }
 async function control(baseUrl, bearer, path, method, data) {
   const response = await fetch(`${baseUrl}${path}`, {
-    method,
+    method, redirect: 'error', signal: AbortSignal.timeout(10_000),
     headers: { authorization: `Bearer ${bearer}`, 'content-type': 'application/json' },
     body: JSON.stringify(data ?? {})
   });
@@ -34,10 +35,31 @@ export async function main(argv) {
   const config = await configuration(values.config);
   const baseUrl = `http://127.0.0.1:${config.port ?? 32179}`;
   if (action === 'serve') {
+    const probe = config.sourceProbe;
+    if (probe && (!probe.requestId || !probe.attemptId || !isAbsolute(probe.output ?? '') ||
+        !probe.output.endsWith('.local.json'))) throw new Error('invalid source probe');
+    const observeSource = probe && (async facts => {
+      if (facts.requestId !== probe.requestId || facts.attemptId !== probe.attemptId) return false;
+      const output = await open(probe.output, 'wx', 0o600);
+      try { await output.writeFile(JSON.stringify(facts)); await output.sync(); }
+      finally { await output.close(); }
+      return true;
+    });
     const store = await ResultStore.open(config.storageRoot);
-    const server = await startServer({ store, ...config, writerBearer: config.writerBearer, controlBearer: config.controlBearer, readBearer: config.readBearer });
+    const audit = config.sourceAudit;
+    const reportSourceFailure = audit && (facts => {
+      if (facts.requestId === audit.requestId && facts.attemptId === audit.attemptId)
+        process.stderr.write(`Work result: ${facts.code}\n`);
+    });
+    const server = await startServer({ store, ...config, observeSource, reportSourceFailure });
+    const studio = config.studioPipe ? await startStudioPipe({ ...config, store, pipeName: config.studioPipe }).catch(async error => {
+      await server.close();
+      await store.close();
+      throw error;
+    }) : null;
     process.stdout.write(`Local MCP receiver listening on 127.0.0.1:${server.port}/mcp\n`);
     await new Promise(resolve => { process.once('SIGINT', resolve); process.once('SIGTERM', resolve); });
+    await studio?.close();
     await server.close();
     await store.close();
     return;
@@ -56,6 +78,19 @@ export async function main(argv) {
     process.stdout.write(`Attempt enrolled; private tickets saved to ${resolve(values.out)}\n`);
     return;
   }
+  if (action === 'bind-source') {
+    if (!values.evidence?.endsWith('.local.json') || !isAbsolute(values.evidence))
+      throw new Error('absolute --evidence *.local.json required');
+    const input = await open(values.evidence, 'r');
+    let evidence;
+    try {
+      if ((await input.stat()).size > 4096) throw new Error('source evidence too large');
+      evidence = JSON.parse(await input.readFile('utf8'));
+    } finally { await input.close(); }
+    const binding = await control(baseUrl, config.controlBearer, '/control/source-binding', 'POST', evidence);
+    process.stdout.write('Independent source bound; receiver state: ' + binding.state + '\n');
+    return;
+  }
   if (action === 'cancel') {
     if (!values.request || !values.attempt) throw new Error('request and attempt required');
     await control(baseUrl, config.controlBearer, `/control/attempts/${encodeURIComponent(values.request)}/${encodeURIComponent(values.attempt)}/cancel`, 'POST');
@@ -69,7 +104,7 @@ export async function main(argv) {
     process.stdout.write(receipt ? `Verified candidate: ${receipt.imagePath}\n` : 'No verified result within the foreground polling interval.\n');
     return;
   }
-  throw new Error('usage: serve|enroll|cancel|monitor --config ABSOLUTE_PATH [options]');
+  throw new Error('usage: serve|enroll|bind-source|cancel|monitor --config ABSOLUTE_PATH [options]');
 }
 
 if (process.argv[1] && import.meta.url === new URL(`file:///${process.argv[1].replaceAll('\\', '/')}`).href) {

@@ -20,6 +20,9 @@
         AutomationProperties.Name="{Binding Title}">
 
     <Window.Resources>
+        <DataTemplate DataType="{x:Type aivm:AiWorkTasksViewModel}">
+            <aiview:AiWorkTasksView />
+        </DataTemplate>
         <DataTemplate DataType="{x:Type aivm:AiPromptWorkbenchViewModel}">
             <aiview:AiPromptWorkbenchView />
         </DataTemplate>

@@ -44,6 +44,8 @@ public sealed partial class RecentSessionRow : ObservableObject
         HasOpenCorrection = item.HasOpenCorrection;
     }
 
+    internal bool Matches(SessionListItem item) => _item == item;
+
     internal void RefreshLanguage()
     {
         OnPropertyChanged(nameof(Workflow));

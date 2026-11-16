@@ -5,6 +5,7 @@ using PrintFlow.App.Navigation;
 using PrintFlow.App.Resources;
 using PrintFlow.App.Startup;
 using PrintFlow.App.ViewModels;
+using PrintFlow.Workflow.AiDesign;
 
 namespace PrintFlow.App;
 
@@ -25,6 +26,7 @@ public partial class App : Application
 {
     private readonly ApplicationStartup _startup = ApplicationStartup.ForInstalledLayout();
     private ServiceProvider? _services;
+    private readonly CancellationTokenSource _shutdown = new();
 
     protected override async void OnStartup(StartupEventArgs e)
     {
@@ -75,11 +77,31 @@ public partial class App : Application
         // Home is reachable only from here — after the guard was claimed, migrations applied and
         // recovery completed. There is no other caller that can put a screen on the window
         // (Part 3C2 §2).
-        await _services!.GetRequiredService<INavigationService>().GoHomeAsync(CancellationToken.None);
+        var services = _services!;
+        var navigation = services.GetRequiredService<INavigationService>();
+        await navigation.GoHomeAsync(CancellationToken.None);
+        if (e.Args is ["--resume-work-result", var configuration])
+        {
+            var home = navigation.Current;
+            var imported = await services.GetRequiredService<IAiDesignWorkResultImport>()
+                .ResumeAsync(configuration, _shutdown.Token);
+            if (_shutdown.IsCancellationRequested) return;
+            if (imported.IsSuccess && ReferenceEquals(home, navigation.Current))
+                navigation.GoToSession(imported.Value);
+            else if (imported.IsFailure)
+                MessageBox.Show(imported.Failure.TechnicalDetail, Strings.App_Title, MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        else
+        {
+            var receiver = services.GetRequiredService<IAiDesignWorkResultImport>();
+            var shutdown = _shutdown.Token;
+            _ = Task.Run(() => receiver.ResumePendingAsync(shutdown));
+        }
     }
 
     protected override void OnExit(ExitEventArgs e)
     {
+        _shutdown.Cancel();
         _services?.Dispose();
         _services = null;
 

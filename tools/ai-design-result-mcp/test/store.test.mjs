@@ -45,6 +45,92 @@ test('unbound source is received_unverified and cannot be read as Ready', async 
   await assert.rejects(store.readBlob('req2', 'a2', receipt.objectVersion, tickets.readTicket));
 });
 
+test('the current Studio attempt can accept its returned original without an independent source lookup', async t => {
+  const { store } = await fixture(t);
+  const ids = { requestId: 'studio-return', attemptId: 'first' };
+  const conversation = '6afb6da3-9354-83ec-979d-3ed4f321fdcc';
+  const tickets = await store.enroll({ ...ids, requireWorkConversation: true, referenceSha256: [sha(jpeg)] });
+  const status = (ticket, id) => store.status(ids.requestId, ids.attemptId, ticket, id);
+  assert.equal((await status(tickets.readTicket, conversation)).state, 'pending');
+  await assert.rejects(store.receive({ ...ids, uploadTicket: tickets.uploadTicket, file: file('reference') }, async () => jpeg));
+  const upload = await store.receive({ ...ids, uploadTicket: tickets.uploadTicket, file: file('new-original') }, async () => png);
+  assert.equal((await status(tickets.readTicket)).state, 'received_unverified');
+  await assert.rejects(status(tickets.uploadTicket, conversation));
+  await assert.rejects(status(tickets.readTicket, 'invalid'));
+
+  const accepted = await status(tickets.readTicket, conversation);
+  assert.equal(accepted.state, 'Ready');
+  assert.equal(accepted.workConversationId, conversation);
+  assert.equal(accepted.workReturnAccepted, true);
+  assert.equal(accepted.sourceVerified, false);
+  assert.equal(accepted.objectVersion, upload.objectVersion);
+  assert.deepEqual(await store.readBlob(ids.requestId, ids.attemptId, accepted.objectVersion, tickets.readTicket), png);
+  assert.deepEqual(await status(tickets.readTicket, conversation), accepted);
+  await assert.rejects(status(tickets.readTicket, 'f56bda1a-8be7-40b2-9c61-4beca8aa729d'));
+});
+
+test('binding a pending observation requires the independently verified original digest', async t => {
+  const { store } = await fixture(t);
+  const ids = { requestId: 'observe1', attemptId: 'a1' };
+  const tickets = await store.enroll(ids);
+  const original = { ...ids, expectedFileId: 'chosen', expectedSha256: sha(png), expectedByteLength: png.length };
+  await store.bindObservedSource(original);
+  await assert.rejects(store.bindObservedSource({ ...original, expectedFileId: 'different' }));
+  const upload = { ...ids, uploadTicket: tickets.uploadTicket, file: file('chosen') };
+  await assert.rejects(store.receive(upload, async () => jpeg));
+  assert.equal((await store.status(ids.requestId, ids.attemptId, tickets.readTicket)).state, 'pending');
+  const reissued = { ...upload, file: file('reissued') };
+  await assert.rejects(store.receive(reissued, async () => png));
+  await store.bindObservedSource({ ...original, allowReissuedFileId: true });
+  await assert.rejects(store.receive(reissued, async () => jpeg));
+  assert.equal((await store.receive(reissued, async () => png)).state, 'Ready');
+});
+
+test('a quarantined upload is promoted only by matching independent evidence', async t => {
+  const { store } = await fixture(t);
+  const ids = { requestId: 'late-bind', attemptId: 'a1' };
+  const tickets = await store.enroll({ ...ids, requireWorkConversation: true });
+  const upload = { ...ids, uploadTicket: tickets.uploadTicket, file: file('reissued') };
+  const quarantined = await store.receive(upload, async () => png);
+  const workConversationId = '193d972b-e554-4cc2-8a66-915b7a30cb69';
+  const evidence = { ...ids, expectedFileId: 'original', expectedSha256: sha(png),
+    expectedByteLength: png.length, workConversationId, allowReissuedFileId: true };
+  await assert.rejects(store.bindObservedSource({ ...evidence, workConversationId: undefined }));
+  await assert.rejects(store.bindObservedSource({ ...evidence, expectedSha256: sha(jpeg) }));
+  await assert.rejects(store.bindObservedSource({ ...evidence, allowReissuedFileId: false }));
+  assert.equal((await store.status(ids.requestId, ids.attemptId, tickets.readTicket)).state, 'received_unverified');
+  await store.bindObservedSource(evidence);
+  const ready = await store.status(ids.requestId, ids.attemptId, tickets.readTicket);
+  assert.deepEqual(ready, { ...quarantined, state: 'Ready', sourceVerified: true, workConversationId });
+  assert.deepEqual(await store.readBlob(ids.requestId, ids.attemptId, ready.objectVersion, tickets.readTicket), png);
+  await store.bindObservedSource(evidence);
+  await assert.rejects(store.bindObservedSource({ ...evidence, workConversationId: '20fd1697-52d9-4305-a4b5-46d5beac2388' }));
+  await store.cancel(ids.requestId, ids.attemptId);
+  await assert.rejects(store.bindObservedSource(evidence));
+});
+
+test('attachment bytes cannot be accepted as an attempt result, even with a fresh file ID', async t => {
+  const { store } = await fixture(t);
+  const ids = { requestId: 'reference', attemptId: 'a1' };
+  const tickets = await store.enroll({ ...ids, referenceSha256: [sha(png).toUpperCase()] });
+  const upload = { ...ids, uploadTicket: tickets.uploadTicket, file: file('new-id') };
+  await assert.rejects(store.receive(upload, async () => png));
+  assert.equal((await store.status(ids.requestId, ids.attemptId, tickets.readTicket)).state, 'pending');
+});
+
+test('unverified file IDs cannot block the independently bound owner', async t => {
+  const { store } = await fixture(t);
+  const first = await store.enroll({ requestId: 'unverified-owner', attemptId: 'a1' });
+  const owner = await store.enroll({ requestId: 'verified-owner', attemptId: 'a1', expectedFileId: 'shared' });
+  const upload = { attemptId: 'a1', file: file('shared') };
+  assert.equal((await store.receive({ ...upload, requestId: first.requestId, uploadTicket: first.uploadTicket }, async () => png)).state,
+    'received_unverified');
+  assert.equal((await store.receive({ ...upload, requestId: owner.requestId, uploadTicket: owner.uploadTicket }, async () => png)).state,
+    'Ready');
+  await assert.rejects(store.bindObservedSource({ requestId: first.requestId, attemptId: 'a1',
+    expectedFileId: 'shared', expectedSha256: sha(png), expectedByteLength: png.length }));
+});
+
 test('wrong ticket, attempt, and bound source never publish', async t => {
   const { store } = await fixture(t);
   const tickets = await store.enroll({ requestId: 'req3', attemptId: 'a3', expectedFileId: 'file3' });

@@ -2,7 +2,64 @@
 
 Date: 2026-10-05 (Pacific/Auckland). Scope: PF-AIDESIGN-v1, design revision 0.2.
 
-Current status: Chrome is explicitly authorized. The user replaced browser-control downloads with external storage plus program monitoring/reading. Effective scope is spec revision 0.6 Section 0. The local MCP receiver is implemented; Google Drive is connected by the user and a real remote synthetic probe passed. Actual Work transfer remains NOT RUN because Chrome control is blocked before submission. Historical observations below retain their original dates and do not override this checkpoint.
+Current scope is spec revision 0.6, section 0. The operator selected Chrome and requested external result storage with independent program verification. The trials below distinguish cold submission, Work-to-Drive transfer and the private MCP path.
+
+## Work result receiver over a private MCP tunnel — 2026-11-09 (Pacific/Auckland)
+
+The personal workspace's PrintFlow Studio tunnel authenticated using a one-day key limited to Tunnels. The Windows client reported ready and the loopback receiver was listening. Tunnel telemetry recorded HTTP 200 for `server/discover` and `tools/list`. After the operator connected the plugin, its `save_image_result` tool became available.
+
+A call with the local synthetic blue-triangle PNG reached the receiver through the tunnel and returned `Image result rejected.` The receiver had no approved HTTPS file origins and the diagnostic attempt was revoked. No successful image transfer was recorded. The Work-generated file test, independent binding to the generating request, and Studio import remain open.
+
+## Studio cold-start attachment troubleshooting — 2026-11-11 (Pacific/Auckland)
+
+Windows confirmed Chrome started as a child of the trial Studio process from a zero-process baseline. Four subsequent attachment trial records stopped before any upload receipt or submit reservation. The first two reproduced an older extension rejecting attachments and a new tab defaulting to Chat. Reloading the extension and selecting Work allowed the next attempt to reach the Work editor.
+
+The editor stored the six prompt lines as six paragraphs. Reading its root `innerText` added a display newline between paragraphs, while the per-paragraph text had the same SHA-256 as the Studio prompt. The next retry restored that exact unsent draft in a fresh Work tab. The updated extension compares the paragraph text and accepts an exact restored prompt when the composer has no attachments. All 13 extension tests passed, including checks for intentional blank lines and a different restored draft.
+
+At 12:32 NZDT, after the operator reloaded the extension and exited Chrome, Windows showed that Studio launched the new Chrome browser process. The new request recorded two matching upload receipts and one submit reservation. The resulting Work conversation showed one user message with both `attachment-01.png` and `attachment-02.png` listed under Sources. Both were copies of the same synthetic triangle PNG. Work identified the two triangles and asked for a person photo because the prompt still used the memorial shirt template. The response completed without generating an image. This run passed cold launch, attachment upload and single submission. Image generation and automatic return to Studio remain open.
+
+At 16:05 NZDT, Windows observed zero Chrome and native-host processes before Studio launched Chrome for the revised red-triangle prompt. The extension reported `WorkPromptRejected` before recording any attachment upload receipt or submit reservation. The final editor contained eight paragraphs, including an intentional blank line. The paragraph text and saved prompt had matching SHA-256 values. The trial extension now waits up to 2.5 seconds for an exact match in the live editor after one insertion attempt. All 14 extension tests passed, including a regression test for delayed editor content. The updated build still needs a live retry.
+
+At 16:13 NZDT, the retry reached the first upload. Work displayed a ready file labelled `attachment-01(1).png` for the requested `attachment-01.png`. The extension reported `WorkUploadFailed` with zero upload receipts, zero submit reservations and no conversation ID. The trial now includes the request ID in each uploaded name and uses those same names for the structured image references in the submitted prompt. The original draft and its copyable prompt retain their existing names. The 306 .NET AI Design tests and 15 extension tests passed. Live acceptance of the new names is pending.
+
+At 16:24 NZDT, the updated Studio launched Chrome as its child process from a zero-process baseline. The new request listed two request-specific filenames. Work restored the unsent prompt with the prior filenames into the new tab, and the extension stopped with `WorkComposerChanged` before either upload or a submit reservation. The restored synthetic test prompt was cleared from the Work composer. A refresh confirmed the Work editor remained empty. The saved Studio draft was preserved for the next attempt.
+
+At 16:26 NZDT, after Chrome and the native host exited, one Studio action started Chrome as a child of Studio. Both request-specific filenames were acknowledged before a single submit reservation. The matching Work conversation contained one user message, listed both exact filenames under Sources, and completed with one generated image. Visual inspection confirmed a red triangle on a white square. No result file was written for the local request. The trial recorded `TrialResultHandoffUnavailable` after the confirmed submit. The local MCP receiver was listening, but no tunnel process was observed and automatic import into Studio remains open.
+
+## Original image return and Studio import — 2026-11-11 (Pacific/Auckland)
+
+The renewed private MCP tunnel passed its runtime key check and returned HTTP 200 from its loopback readiness endpoint. Work returned the existing red-triangle PNG to the same request through `save_image_result`. A separate Work command read the original PNG and computed its size and SHA-256 before the successful return. Work issued a different file ID for the successful call, so the receiver verified the exact byte length and digest against the original and issued a Ready receipt. The returned PNG measured 1254 × 1254 and 941,073 bytes. Its SHA-256 was `37ab5ea6963c456745ae0e6d7ec88916c681dd5903c4792149495c7064eddf83`.
+
+The trial Studio started with the existing request's result configuration and automatically imported the image when the receipt became Ready. The request recorded Imported. A read-only SQLite check found one Prepare Design Asset session at Original Confirmation, one root Import revision and a managed source copy with the same digest. There was no new generation. This validates resuming an existing request. Automatically preparing the result handoff for future Generate Image actions remains open.
+
+## New-request return integration — 2026-11-11 (Pacific/Auckland)
+
+The isolated Work trial now enrolls a return before publishing a Chrome submission, then waits for that request and attempt. Studio communicates with the independent receiver using a Windows named pipe, with no HTTP client in the product. An uploaded reference, an unverified receipt, a mismatched conversation and a locally stopped request cannot enter the verified import path. A confirmed request is recoverable after Studio exits without another Work submission.
+
+Local verification: 326 .NET tests (AI Design, delivery coordination, and installer boundaries), 45 receiver and extension tests, and a cross-runtime Windows named pipe smoke test. The smoke test enrolled with a current-user .NET client, bound a separately verified synthetic PNG, then read the exact version and bytes from the real Node receiver. The prior real red-triangle image was rehashed locally and still matches the size and SHA-256 above.
+
+Fresh live Work acceptance is open: the installed Work plugin must be available to the new conversation, and a trusted controller still has to independently bind the generated original. The local fixtures do not verify unattended Work invocation or provenance. See the [trial runbook](WORK_RESULT_TRIAL.md).
+
+## Studio cold-start pure-text acceptance — 2026-11-09 (Pacific/Auckland)
+
+**Passed for cold launch and one Work submission.** Before the operator clicked once, Windows reported zero Chrome processes, zero native host processes and no request records in the trial workspace. At 15:59:23 NZDT, Windows showed that the running trial Studio process was the direct parent of the new Chrome browser process. The browser command line selected the registered Default profile and the bridge launch page, and the native heartbeat matched the connection recorded for the request.
+
+Studio persisted one request, one attempt, one submit reservation and one Work conversation identity. In that exact Chrome tab, the conversation showed one user message with the unchanged pure-text prompt, a Work composer, a completed response and one generated image. The local trial record retains Submitted as the last successful stage. The generated image stayed in Work because this trial ends at submission; attachment upload and automatic return to Studio still require separate acceptance.
+
+## Chrome native bridge and real Work → Drive trials — 2026-11-09 (Pacific/Auckland)
+
+Effective output scope remains design revision 0.6, section 0. The following observations supersede the October Chrome control blocker. The browser and the original Work outputs were accessed through the supported Chrome session.
+
+- Native bridge: clean isolated Chrome 157.0.8103.38 profile, actual unpacked extension ID, current-user native host registration preview and write, real extension action → .NET host protocol 1 / version 1.0.0, advancing heartbeat, then extension unload and matching rollback. No host key, owned registration files or running host process remained. The unverified Work adapter correctly reported unavailable. 501 Architecture/native bridge tests passed.
+- The earlier pure-text and mixed synthetic Work conversations already contained their generated results. In the mixed generation, the reference PNG and short TXT each became ready before the one original generation submission. Both result transfers used the exact named generated PNG from Library and the dedicated Drive folder; one transfer request each. No generation replay, browser-control download, sharing change, customer material or account data was involved.
+- The observed Work tool activity included Library recovery and Drive upload. A separate authenticated Drive listing verified one exact object in the intended folder per trial. The authenticated raw source was then passed privately to the production HTTPS reader, the official local MCP client, and the foreground monitor. Both complete files decoded as 1254 × 1254 PNG. Their independent SHA-256 matched the hash obtained by the Work command on the original Library bytes.
+
+| Trial | Bytes | Original and independent SHA-256 |
+| --- | ---: | --- |
+| Pure text | 779835 | `37db1e92625c97c7ebdb1df9cede0e1f13a1ca8ab0e57b8c087d6ef9391dcfae` |
+| Mixed reference image + TXT | 743066 | `d86b4971271ce0d6c2b09ded9fd185a91250ac33e00536b004776f5df4335b3c` |
+
+The sanitized selector and transfer observations are in `extensions/printflow-work/fixtures/work-drive-observed-20261109.json`. Connector Drive object identity is stable for these observations; Drive's upstream version is not asserted. The local receiver's probe receipt is not a product ProcessingSession. The checks establish Work-to-Drive transfer feasibility and preserve the fallback for unknown page, upload and receiver states. Product page upload/submit, source binding to the Studio request, cancellation, program-owned Drive authentication/version monitoring and the Studio entry point remain separate implementation and acceptance work. Keep product automation unavailable until those readiness checks exist.
 
 ## Connected Drive probe and pre-submission Chrome blocker — 2026-10-05 17:39 NZDT
 

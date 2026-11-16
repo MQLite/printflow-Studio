@@ -25,8 +25,6 @@ public sealed partial class AiPromptWorkbenchViewModel
         (!IsMemorialLayoutEditorOpen || IsMemorialLayoutEditorStale) &&
         AiDetailedReview.GetFirstIncompleteStep(ReviewDraft()) == 5;
     public bool CanSaveMemorialLayout => CanEdit && memorialLayoutDirty && !IsMemorialLayoutEditorStale;
-    public bool CanConfirmMemorialLayout => CanEdit && IsMemorialLayoutAvailable && !HasUnsavedChanges && !HasOutdatedMemorialSpecification &&
-        Draft?.Layout is { ProductTemplateConfirmed: false } layout && CanConfirmLayout(Draft, layout);
     public bool CanPreviewLayout => CanEdit && HasCurrentConfirmedLayout;
     private bool HasCurrentConfirmedLayout => IsMemorialLayoutAvailable && !HasUnsavedChanges && !HasOutdatedMemorialSpecification &&
         Draft?.Layout is { ProductTemplateConfirmed: true } layout && CanConfirmLayout(Draft, layout);
@@ -39,14 +37,12 @@ public sealed partial class AiPromptWorkbenchViewModel
     public IAsyncRelayCommand PrepareMemorialLayoutCommand { get; private set; } = null!;
     public IAsyncRelayCommand SaveMemorialLayoutCommand { get; private set; } = null!;
     public IRelayCommand DiscardMemorialLayoutCommand { get; private set; } = null!;
-    public IAsyncRelayCommand ConfirmMemorialLayoutCommand { get; private set; } = null!;
 
     private void InitializeMemorialLayoutCommands()
     {
         PrepareMemorialLayoutCommand = new AsyncRelayCommand(PrepareMemorialLayoutAsync);
         SaveMemorialLayoutCommand = new AsyncRelayCommand(async () => { if (CanSaveMemorialLayout) await FlushAsync(default); });
         DiscardMemorialLayoutCommand = new RelayCommand(ResetMemorialLayoutEditor);
-        ConfirmMemorialLayoutCommand = new AsyncRelayCommand(ConfirmMemorialLayoutAsync);
     }
 
     private async Task PrepareMemorialLayoutAsync()
@@ -65,7 +61,7 @@ public sealed partial class AiPromptWorkbenchViewModel
             layoutEditorDraft = value;
             MemorialImages = proposed.Images;
             MemorialText = proposed.Text;
-            memorialLayoutDirty = value.Layout is null || !proposed.Text.Select(t => (t.Key, t.Text)).SequenceEqual(value.Layout.Text.Select(t => (t.Key, t.Text))) ||
+            memorialLayoutDirty = value.Layout is not { ProductTemplateConfirmed: true } || !proposed.Text.Select(t => (t.Key, t.Text)).SequenceEqual(value.Layout.Text.Select(t => (t.Key, t.Text))) ||
                 !proposed.Images.Select(i => i.ToLayer()).OfType<MemorialImageLayer>().SequenceEqual(value.Layout.Images);
             if (memorialLayoutDirty) Edited();
             NotifyMemorialLayoutEditor();
@@ -103,34 +99,19 @@ public sealed partial class AiPromptWorkbenchViewModel
                 (string.IsNullOrEmpty(field) ? "" : " · " + field);
             return Refused();
         }
-        var layout = new MemorialLayout(canvas, images, text.Value, false);
+        var layout = new MemorialLayout(canvas, images, text.Value, true);
         var issues = MemorialLayoutModule.Validate(current, layout);
-        if (issues.Any(x => x.Key != "ProductTemplateUnconfirmed"))
+        if (issues.Count != 0)
         { Error = FormatLayoutIssues(issues); return Refused(); }
-        var saved = await ApplyCoreAsync(new AiAuthoringEdit.SetLayout(layout), ct);
+        var saved = await ApplyCoreAsync(new AiAuthoringEdit.SetLayout(layout, ValidateAndFinalize: true), ct);
         if (saved.IsSuccess && IsCurrent(capturedEpoch) && generation == editGeneration)
         {
             layoutEditorDraft = saved.Value;
             memorialLayoutDirty = false;
             NotifyMemorialLayoutEditor();
+            NotifyDetailed();
         }
         return saved;
-    }
-
-    private async Task ConfirmMemorialLayoutAsync()
-    {
-        if (!CanConfirmMemorialLayout || Draft is not { Layout: { } layout } current) return;
-        long capturedEpoch = epoch, generation = editGeneration;
-        await RunAsync(async () =>
-        {
-            if (!IsCurrent(capturedEpoch) || Draft != current || generation != editGeneration || HasUnsavedChanges) return;
-            var saved = await ApplyCoreAsync(new AiAuthoringEdit.SetLayout(layout with { ProductTemplateConfirmed = true }), default);
-            if (saved.IsSuccess && IsCurrent(capturedEpoch) && generation == editGeneration)
-            {
-                if (layoutEditorDraft is not null) layoutEditorDraft = saved.Value;
-                NotifyDetailed();
-            }
-        }, default);
     }
 
     private static bool CanConfirmLayout(AiAuthoringDraft value, MemorialLayout layout) =>

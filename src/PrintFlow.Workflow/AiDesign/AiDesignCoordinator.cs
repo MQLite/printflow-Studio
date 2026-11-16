@@ -76,7 +76,8 @@ public sealed class AiDesignCoordinator(IAiDesignRequestStore store, IAiDesignCh
         if (result.IsFailure)
         {
             var latest = await store.ReadAsync(requestId, CancellationToken.None);
-            var failed = latest.IsSuccess ? await store.ChangeAsync(latest.Value.Fence, new AiDesignEvent.Failed("EnqueueFailed"), CancellationToken.None) : latest;
+            string failure = result.Failure.TechnicalDetail == "WorkReceiverUnavailable" ? "WorkReceiverUnavailable" : "EnqueueFailed";
+            var failed = latest.IsSuccess ? await store.ChangeAsync(latest.Value.Fence, new AiDesignEvent.Failed(failure), CancellationToken.None) : latest;
             Release(requestId); return await Project(failed, CancellationToken.None);
         }
         _ = MonitorAsync(requestId, _lifetime.Token);

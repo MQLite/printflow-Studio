@@ -30,8 +30,10 @@ public sealed class VerifiedAiAttachmentReader
                 asset.Snapshot.RequestId != ownerId || asset.Order <= 0 || asset.UploadName is null || asset.Purpose is null ||
                 !Sha256.TryParse(asset.Sha256.Value, out _)) throw new IOException("Invalid attachment manifest.");
             string ext = Path.GetExtension(asset.UploadName).ToLowerInvariant();
+            bool validName = asset.UploadName == AiDesignOwnedStagingFiles.AttachmentName(asset.Order, ext) ||
+                asset.UploadName == AiDesignOwnedStagingFiles.AttachmentName(asset.Order, ext, ownerId);
             if (!FileAiDesignAttachments.Types.TryGetValue(ext, out string? media) || media != asset.MediaType ||
-                asset.UploadName != $"attachment-{asset.Order:D2}{ext}" || asset.Snapshot.RelativePath != $"Attachments/{asset.Id:N}/{asset.UploadName}" ||
+                !validName || asset.Snapshot.RelativePath != $"Attachments/{asset.Id:N}/{asset.UploadName}" ||
                 asset.ByteLength <= 0 || asset.ByteLength > FileAiDesignAttachments.Limit(media)) throw new IOException("Attachment manifest mismatch.");
             string folder = Path.Combine(_workspaceRoot, "AiDesign", "Requests", ownerId.ToString("D"), "Attachments", asset.Id.ToString("N"));
             // Pin from volume root down, refusing each reparse target before opening the next.

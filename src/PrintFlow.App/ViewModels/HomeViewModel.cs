@@ -7,6 +7,7 @@ using PrintFlow.App.Localisation;
 using PrintFlow.App.Resources;
 using PrintFlow.App.Startup;
 using PrintFlow.Domain.Results;
+using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Sessions;
 using PrintFlow.Workflow.Commands;
 using PrintFlow.Workflow.Engine;
@@ -41,8 +42,10 @@ public sealed partial class HomeViewModel : ObservableObject, IEntryScreenLifeti
     public bool CanOpenPromptWorkbench => _aiNavigation is not null && CanStartImport && !IsImporting;
     public IAsyncRelayCommand OpenPromptWorkbenchCommand { get; }
     public string ContinueHeading => Strings.Resolve("Home_GuidedContinue");
-    public IEnumerable<RecentSessionRow> ContinueSessions => RecentSessions.Where(x => x.CanContinueProcessing || x.HasOpenCorrection);
-    public IEnumerable<RecentSessionRow> HistorySessions => RecentSessions.Where(x => !x.CanContinueProcessing && !x.HasOpenCorrection);
+    private readonly ObservableCollection<RecentSessionRow> _continueSessions = [], _historySessions = [];
+    private bool _updatingRecent;
+    public IEnumerable<RecentSessionRow> ContinueSessions => _continueSessions;
+    public IEnumerable<RecentSessionRow> HistorySessions => _historySessions;
     public bool HasContinueSessions => ContinueSessions.Any();
     public bool HasNoContinueSessions => !HasContinueSessions;
     public bool HasHistorySessions => HistorySessions.Any();
@@ -57,7 +60,31 @@ public sealed partial class HomeViewModel : ObservableObject, IEntryScreenLifeti
         NotifyPromptEntry();
     }
 
-    partial void OnIsBusyChanged(bool value) { OnPropertyChanged(nameof(CanStartImport)); NotifyPromptEntry(); }
+    partial void OnIsBusyChanged(bool value)
+    {
+        OnPropertyChanged(nameof(CanStartImport));
+        NotifyPromptEntry();
+        if (!value) TryRefreshForWorkResult();
+    }
+
+    partial void OnPendingAbandonChanged(AbandonConfirmation? value)
+    {
+        if (value is null) TryRefreshForWorkResult();
+    }
+
+    public void OnWorkResultImported(SessionId sessionId)
+    {
+        if (!_active || !_observedWorkImports.Add(sessionId)) return;
+        _workRefreshPending = true;
+        TryRefreshForWorkResult();
+    }
+
+    private void TryRefreshForWorkResult()
+    {
+        if (!_workRefreshPending || _refreshesInFlight != 0 || ListActionsBlocked) return;
+        _workRefreshPending = false;
+        WorkResultRefresh = RefreshObservedAsync(default, automatic: true);
+    }
     private void NotifyPromptEntry() { OnPropertyChanged(nameof(CanOpenPromptWorkbench)); OpenPromptWorkbenchCommand.NotifyCanExecuteChanged(); }
 
     [RelayCommand]
@@ -82,7 +109,10 @@ public sealed partial class HomeViewModel : ObservableObject, IEntryScreenLifeti
     private CancellationTokenSource? _thumbnails;
 
     // A slow earlier refresh must never replace the rows from a later visit or Refresh action.
-    private int _refreshGeneration;
+    private int _refreshGeneration, _refreshesInFlight;
+    private readonly HashSet<SessionId> _observedWorkImports = [];
+    private bool _workRefreshPending;
+    internal Task WorkResultRefresh { get; private set; } = Task.CompletedTask;
 
     /// <summary>
     /// The workflow a session is imported under before the operator chooses.
@@ -131,6 +161,7 @@ public sealed partial class HomeViewModel : ObservableObject, IEntryScreenLifeti
         ArgumentNullException.ThrowIfNull(startupStatus);
         ArgumentNullException.ThrowIfNull(readiness);
 
+        RecentSessions.CollectionChanged += (_, _) => { if (!_updatingRecent) SyncRecentSections(); };
         _sessions = sessions;
         _previews = previews;
         _navigation = navigation;
@@ -328,54 +359,99 @@ public sealed partial class HomeViewModel : ObservableObject, IEntryScreenLifeti
 
     /// <summary>Reloads Recent Processing from persistence.</summary>
     [RelayCommand]
-    private async Task RefreshAsync(CancellationToken cancellationToken)
+    private Task RefreshAsync(CancellationToken cancellationToken) => RefreshObservedAsync(cancellationToken, automatic: false);
+
+    private async Task RefreshObservedAsync(CancellationToken ct, bool automatic)
     {
         if (!_active) return;
+        _refreshesInFlight++;
+        try { await RefreshCoreAsync(ct, automatic); }
+        finally
+        {
+            _refreshesInFlight--;
+            TryRefreshForWorkResult();
+        }
+    }
+
+    private bool CanPublishRefresh(int generation, bool automatic)
+    {
+        if (generation != _refreshGeneration) return false;
+        if (!automatic || !ListActionsBlocked) return true;
+        _workRefreshPending = true;
+        return false;
+    }
+
+    private async Task RefreshCoreAsync(CancellationToken cancellationToken, bool automatic)
+    {
         int generation = ++_refreshGeneration;
         // The list is about to be rebuilt from current facts: a confirmation opened against the
         // old rows no longer describes them (SCRUM-11154 F-V4).
-        PendingAbandon = null;
+        if (!automatic) PendingAbandon = null;
         ReadReadiness();
         var recovery = await _sessions.ListRecoveryAsync(cancellationToken).ConfigureAwait(true);
-        if (generation != _refreshGeneration) return;
+        if (!CanPublishRefresh(generation, automatic)) return;
         if (recovery.IsFailure)
         {
-            Notice = Describe(Strings.Home_RecoveryUnavailable, recovery.Failure);
+            if (!automatic) Notice = Describe(Strings.Home_RecoveryUnavailable, recovery.Failure);
             return;
         }
-        RecoverySessions.Clear();
-        foreach (RecoveryItem item in recovery.Value) RecoverySessions.Add(new RecoverySessionRow(item));
+
+        OperationResult<IReadOnlyList<SessionListItem>> listed =
+            await _sessions.ListRecentAsync(cancellationToken).ConfigureAwait(true);
+        if (!CanPublishRefresh(generation, automatic)) return;
+        if (automatic && listed.IsFailure) return;
+
+        var recoveryRows = RecoverySessions.ToDictionary(row => row.Id);
+        SyncRows(RecoverySessions, recovery.Value.Select(item =>
+            recoveryRows.TryGetValue(item.Id, out var row) && row.Matches(item) ? row : new RecoverySessionRow(item)).ToArray());
         OnPropertyChanged(nameof(HasRecoverySessions));
         OnPropertyChanged(nameof(StartupSummary));
         OnPropertyChanged(nameof(RecoveryPendingText));
         OnPropertyChanged(nameof(HasNoRecentSessions));
 
-        OperationResult<IReadOnlyList<SessionListItem>> listed =
-            await _sessions.ListRecentAsync(cancellationToken).ConfigureAwait(true);
-        if (generation != _refreshGeneration) return;
-
-        RecentSessions.Clear();
-
         if (listed.IsFailure)
         {
+            RecentSessions.Clear();
             Notice = Describe(Strings.Home_RecentUnavailable, listed.Failure);
             OnPropertyChanged(nameof(HasNoRecentSessions));
             return;
         }
 
-        foreach (SessionListItem item in listed.Value)
-        {
-            if (!recovery.Value.Any(entry => entry.Id == item.Id)) RecentSessions.Add(new RecentSessionRow(item));
-        }
-
+        var recentRows = RecentSessions.ToDictionary(row => row.Id);
+        var recovering = RecoverySessions.Select(row => row.Id).ToHashSet();
+        var rows = listed.Value.Where(item => !recovering.Contains(item.Id))
+            .Select(item => recentRows.TryGetValue(item.Id, out var row) && row.Matches(item) ? row : new RecentSessionRow(item))
+            .ToArray();
+        _updatingRecent = true;
+        try { SyncRows(RecentSessions, rows); }
+        finally { _updatingRecent = false; }
+        SyncRecentSections();
         OnPropertyChanged(nameof(HasNoRecentSessions));
+        ThumbnailsLoaded = StartThumbnailLoad(automatic ? rows.Where(row => !row.HasThumbnail).ToArray() : rows);
+    }
 
-        OnPropertyChanged(nameof(ContinueSessions));
-        OnPropertyChanged(nameof(HistorySessions));
+    private void SyncRecentSections()
+    {
+        static bool InProgress(RecentSessionRow row) => row.CanContinueProcessing || row.HasOpenCorrection;
+        SyncRows(_continueSessions, RecentSessions.Where(InProgress).ToArray());
+        SyncRows(_historySessions, RecentSessions.Where(row => !InProgress(row)).ToArray());
         OnPropertyChanged(nameof(HasContinueSessions));
         OnPropertyChanged(nameof(HasNoContinueSessions));
         OnPropertyChanged(nameof(HasHistorySessions));
-        ThumbnailsLoaded = StartThumbnailLoad([.. RecentSessions]);
+    }
+
+    // Keep unchanged item containers and their focus when an automatic refresh adds a row.
+    private static void SyncRows<T>(ObservableCollection<T> displayed, IReadOnlyList<T> current) where T : class
+    {
+        for (int index = 0; index < current.Count; index++)
+        {
+            var item = current[index];
+            if (index < displayed.Count && ReferenceEquals(displayed[index], item)) continue;
+            int previous = displayed.IndexOf(item);
+            if (previous >= 0) displayed.Move(previous, index);
+            else displayed.Insert(index, item);
+        }
+        while (displayed.Count > current.Count) displayed.RemoveAt(displayed.Count - 1);
     }
 
     /// <summary>
@@ -518,8 +594,8 @@ public sealed partial class HomeViewModel : ObservableObject, IEntryScreenLifeti
     private async Task ConfirmAbandonAsync(AbandonConfirmation? confirmation, CancellationToken cancellationToken)
     {
         if (confirmation is null || !ReferenceEquals(confirmation, PendingAbandon) || IsBusy) return;
-        PendingAbandon = null;
         IsBusy = true;
+        PendingAbandon = null;
         try
         {
             Notice = null;

@@ -6,6 +6,7 @@ using PrintFlow.Tests.Fixtures;
 using PrintFlow.Domain.AiDesign;
 using PrintFlow.Tests.Unit.AiDesign;
 using PrintFlow.Domain.Results;
+using PrintFlow.Workflow.AiDesign;
 using AiUnit=PrintFlow.Domain.Results.Unit;
 
 namespace PrintFlow.Tests.Integration.AiDesign;
@@ -13,6 +14,65 @@ namespace PrintFlow.Tests.Integration.AiDesign;
 public sealed class NativeHostBoundaryTests
 {
     internal const string Origin="chrome-extension://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/";
+    [Fact]
+    public async Task Work_launch_streams_one_attachment_at_a_time_after_the_page_is_bound()
+    {
+        using TempWorkspace root = new(); using TempWorkspace installation = new();
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        var ct = timeout.Token;
+        var config = new AiDesignBridgeConfiguration(1, "1.0.0", Origin, root.Root, root.Root,
+            AiDesignBridgeConfiguration.TextSubmissionTrialContract, "Default");
+        await using var session = new NativeHostSession(config, Origin, installation.Root);
+        var store = new FileAiDesignRequestStore(root.Root);
+        var hello = NativeMessageCodecTests.Message(payload: new { hostVersion = "1.0.0", workspaceIdentity = store.WorkspaceIdentity,
+            workContractHash = config.VerifiedWorkContractHash, launchNonce = new string('A', 32) });
+        (await session.HandleAsync(hello, ct)).IsSuccess.ShouldBeTrue();
+        var draft = AiDesignTransitionsTests.Draft();
+        var files = new[] { new SelectedAiDesignFile(root.CreateSourceFile("a.png", [1]), "reference"),
+            new SelectedAiDesignFile(root.CreateSourceFile("b.png", [2]), "reference") };
+        var attachments = (await new FileAiDesignAttachments(root.Root).SnapshotAsync(draft.RequestId, files, [], ct)).Value;
+        var request = (await store.CreateAsync(draft.RequestId, new(draft.Prompt, attachments), ct)).Value;
+        using var browser = new AiDesignBrowserLease(installation.Root).TryAcquire(request.RequestId).Value;
+        using var owner = System.Diagnostics.Process.GetCurrentProcess();
+        request = (await store.ChangeAsync(request.Fence, new AiDesignEvent.Queued(Guid.NewGuid(), AiDesignTransitions.NewToken(),
+            owner.Id, owner.StartTime.ToUniversalTime().Ticks, session.ConnectionId), ct)).Value;
+        (await new FileAiDesignChannel(config, installation.Root, expectedLaunchNonce: new string('A', 32)).EnqueueAsync(request, ct)).IsSuccess.ShouldBeTrue();
+
+        var frames = System.Threading.Channels.Channel.CreateUnbounded<NativeMessageEnvelope>();
+        var pump = session.PumpAsync((frame, _) =>
+        {
+            frames.Writer.TryWrite(frame).ShouldBeTrue();
+            return Task.FromResult(OperationResult.Ok());
+        }, ct);
+        Task<OperationResult<NativeMessageEnvelope>> Send(string kind, object payload) => session.HandleAsync(
+            new(1, Guid.NewGuid(), request.RequestId, request.AttemptId, request.StateVersion, request.Token, kind,
+                JsonSerializer.SerializeToElement(payload)), ct);
+        try
+        {
+            (await frames.Reader.ReadAsync(ct)).Kind.ShouldBe("Request");
+            (await Send("Progress", new { stage = "UploadStarted", tabId = "17", conversationId = "test-page" })).IsSuccess.ShouldBeTrue();
+            foreach (var attachment in attachments)
+            {
+                (await frames.Reader.ReadAsync(ct)).Kind.ShouldBe("Ack");
+                (await frames.Reader.ReadAsync(ct)).Kind.ShouldBe("AttachmentChunk");
+                var complete = await frames.Reader.ReadAsync(ct);
+                complete.Kind.ShouldBe("AttachmentComplete");
+                complete.Payload.GetProperty("attachmentId").GetGuid().ShouldBe(attachment.Id);
+                request = (await store.ReadAsync(request.RequestId, ct)).Value;
+                (await Send("Progress", new { stage = "SubmitReady", tabId = "17", conversationId = "test-page" })).IsFailure.ShouldBeTrue();
+                (await Send("UploadReceipt", new { attachmentId = attachment.Id, conversationId = "test-page", evidenceKey = "incorrect" })).IsFailure.ShouldBeTrue();
+                (await Send("UploadReceipt", new { attachmentId = attachment.Id, conversationId = "test-page", evidenceKey = "ready:" + attachment.UploadName })).IsSuccess.ShouldBeTrue();
+            }
+            request = (await store.ReadAsync(request.RequestId, ct)).Value;
+            (await Send("Progress", new { stage = "SubmitReady", tabId = "17", conversationId = "test-page" })).IsSuccess.ShouldBeTrue();
+            (await frames.Reader.ReadAsync(ct)).Kind.ShouldBe("SubmitPermit");
+        }
+        finally
+        {
+            await timeout.CancelAsync();
+            try { await pump; } catch (OperationCanceledException) when (ct.IsCancellationRequested) { }
+        }
+    }
     [Fact]
     public async Task Live_port_rejects_each_stale_authority_field_and_unverified_page_events()
     {

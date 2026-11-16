@@ -39,7 +39,8 @@ public sealed partial class AiAuthoringModule(IAiAuthoringDraftStore store, AiTe
                 case AiAuthoringEdit.SetLayout placement:
                     var layout = placement.Layout;
                     bool changed = !MemorialLayoutModule.SameContent(draft.Layout, layout);
-                    if (changed) layout = layout with { ProductTemplateConfirmed = false };
+                    if (placement.ValidateAndFinalize || changed)
+                        layout = layout with { ProductTemplateConfirmed = placement.ValidateAndFinalize };
                     var layoutIssues = MemorialLayoutModule.Validate(draft, layout);
                     if (layoutIssues.Any(x => x.Key is "TextMismatch" or "DuplicateText" or "PreservationConflict") ||
                         layout.ProductTemplateConfirmed && layoutIssues.Count > 0) return Fail("The layout has unresolved text, geometry or preservation issues.");
@@ -169,7 +170,9 @@ public sealed partial class AiAuthoringModule(IAiAuthoringDraftStore store, AiTe
         catch (ArgumentException) { return Fail("Invalid authoring edit."); }
     }
 
-    public AiPromptExport Export(AiAuthoringDraft draft)
+    public AiPromptExport Export(AiAuthoringDraft draft) => Export(draft, asset => asset.UploadName);
+
+    public static AiPromptExport Export(AiAuthoringDraft draft, Func<AiDesignAttachment, string> uploadName)
     {
         draft = AiAuthoringSnapshots.Draft(draft);
         var text = new System.Text.StringBuilder(); var issues = new List<AiAuthoringIssue>();
@@ -184,7 +187,7 @@ public sealed partial class AiAuthoringModule(IAiAuthoringDraftStore store, AiTe
                 var asset = binding is null ? null : draft.Assets.SingleOrDefault(x => x.Id == binding.AssetId);
                 if (asset is not null && IsImageMetadata(asset))
                 {
-                    text.Append(role).Append('：').Append(asset.UploadName);
+                    text.Append(role).Append('：').Append(uploadName(asset));
                     required[asset.Id] = asset;
                 }
                 else

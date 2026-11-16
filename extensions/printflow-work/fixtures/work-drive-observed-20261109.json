@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "observedDate": "2026-11-09",
+  "timezone": "Pacific/Auckland",
+  "browser": "Chrome/157.0.8103.38",
+  "automationEnabled": false,
+  "observations": {
+    "conversationComposer": {
+      "role": "textbox",
+      "accessibleName": "Work with ChatGPT"
+    },
+    "attachments": {
+      "entryName": "Add files and more",
+      "localUploadName": "Add photos & files Upload from computer",
+      "readyEvidence": [
+        "Named upload progress indicator disappears",
+        "Matching attachment chip and remove control present",
+        "Send enabled after both synthetic attachments are ready"
+      ],
+      "uploadReceiptAndLateFailureCases": "T07 pending"
+    },
+    "submit": {
+      "role": "button",
+      "name": "Send",
+      "clicksPerGeneration": 1
+    },
+    "generatedOutput": {
+      "readySignals": [
+        "Response complete",
+        "Named PNG output",
+        "Generated image 1"
+      ],
+      "distinctFrom": [
+        "Input reference PNG",
+        "Input requirements TXT"
+      ]
+    },
+    "outputTransfer": {
+      "connector": "Google Drive",
+      "source": "Exact generated output recovered from Library",
+      "matchedOriginalSha256": true,
+      "independentRead": "Authenticated Drive object to local MCP receiver and foreground monitor",
+      "browserDownloads": 0,
+      "driveUpstreamVersionVerified": false,
+      "studioSessionImported": false
+    }
+  },
+  "trials": [
+    {
+      "kind": "text-only",
+      "bytes": 779835,
+      "width": 1254,
+      "height": 1254
+    },
+    {
+      "kind": "reference-png-and-requirements-txt",
+      "bytes": 743066,
+      "width": 1254,
+      "height": 1254
+    }
+  ]
+}

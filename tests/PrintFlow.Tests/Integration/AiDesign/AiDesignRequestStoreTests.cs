@@ -11,6 +11,24 @@ namespace PrintFlow.Tests.Integration.AiDesign;
 public sealed class AiDesignRequestStoreTests
 {
     [Fact]
+    public async Task Work_draft_reference_round_trips_and_legacy_requests_still_load()
+    {
+        using TempWorkspace files = new();
+        var store = new FileAiDesignRequestStore(files.Root);
+        var draft = AiDesignTransitionsTests.Draft();
+        var reference = new WorkDraftReference(Guid.NewGuid(), "Memorial template");
+        var created = (await store.CreateAsync(draft.RequestId, new(draft.Prompt, [], reference), default)).Value;
+        await store.ChangeAsync(created.Fence, new AiDesignEvent.Queued(Guid.NewGuid(), "token", 1, 1, Guid.NewGuid()), default);
+        (await store.ReadAsync(draft.RequestId, default)).Value.WorkDraft.ShouldBe(reference);
+
+        string path = Path.Combine(store.RequestsRoot, draft.RequestId.ToString("D"), "request.json");
+        var node = System.Text.Json.Nodes.JsonNode.Parse(await File.ReadAllTextAsync(path))!.AsObject();
+        node.Remove("workDraft").ShouldBeTrue();
+        await File.WriteAllTextAsync(path, node.ToJsonString());
+        (await store.ReadAsync(draft.RequestId, default)).Value.WorkDraft.ShouldBeNull();
+    }
+
+    [Fact]
     public async Task Structural_corruption_is_rejected_without_mutating_authority()
     {
         using TempWorkspace files = new(); var store = new FileAiDesignRequestStore(files.Root); var d = AiDesignTransitionsTests.Draft();

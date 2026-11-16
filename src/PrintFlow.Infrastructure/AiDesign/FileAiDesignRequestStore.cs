@@ -34,7 +34,7 @@ public sealed class FileAiDesignRequestStore : IAiDesignRequestStore
         var r = new AiDesignRequest { RequestId = id, WorkspaceIdentity = WorkspaceIdentity,
             Prompt = AiDesignTransitions.FreezePrompt(draft.Prompt), Attachments = draft.Attachments.ToArray(), Token = AiDesignTransitions.NewToken(),
             NextAttachmentOrder = draft.Attachments.Count == 0 ? 1 : draft.Attachments.Max(a => a.Order) + 1,
-            CreatedAtUtc = now, UpdatedAtUtc = now };
+            CreatedAtUtc = now, UpdatedAtUtc = now, WorkDraft = draft.WorkDraft };
         await WriteAsync(r, ct); return OperationResult.Ok(r);
     });
     public Task<OperationResult<AiDesignRequest>> ReadAsync(Guid id, CancellationToken ct) => Guard(async () =>
@@ -47,7 +47,47 @@ public sealed class FileAiDesignRequestStore : IAiDesignRequestStore
         var next = AiDesignTransitions.Apply(r, change, _clock.GetUtcNow());
         if (next.IsSuccess) await WriteAsync(next.Value, ct); return next;
     });
-    public async Task<OperationResult<IReadOnlyList<AiDesignRequest>>> ListAsync(CancellationToken ct)
+    internal Task<OperationResult<AiDesignRequest>> ImportReturnedWorkResultAsync(AiDesignFence expected,
+        Func<CancellationToken, Task<OperationResult<AiDesignEvent.ReturnedWorkResultImported>>> import, CancellationToken ct) => Guard(async () =>
+    {
+        await using var gate = await LockAsync(expected.RequestId, ct);
+        var request = await ReadCoreAsync(expected.RequestId, ct);
+        if (!Matches(request, expected) || !AiDesignTransitions.CanResumeWorkResult(request))
+            return Fail("Work result import is no longer current.");
+        var imported = await import(ct);
+        if (imported.IsFailure) return OperationResult.Fail<AiDesignRequest>(imported.Failure);
+        var next = AiDesignTransitions.Apply(request, imported.Value, _clock.GetUtcNow());
+        if (next.IsSuccess) await WriteAsync(next.Value, CancellationToken.None);
+        return next;
+    });
+    public Task<OperationResult<IReadOnlyList<AiDesignRequest>>> ListAsync(CancellationToken ct) => ListCoreAsync(takeLock: true, ct);
+
+    // Request authorities are atomically replaced. UI reads can see a committed snapshot while
+    // the import holds the mutation lock for verification, without seeing any staged file.
+    internal Task<OperationResult<IReadOnlyList<AiDesignRequest>>> ListSnapshotsAsync(CancellationToken ct) =>
+        ListCoreAsync(takeLock: false, ct);
+
+    internal bool HasWorkResultTicket(Guid requestId)
+    {
+        try
+        {
+            string path = Path.Combine(DirectoryFor(requestId), LoopbackWorkResultImport.TicketFileName);
+            ReparsePointGuard.RefuseAncestry(path);
+            return File.Exists(path);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { return false; }
+    }
+
+    internal async Task<OperationResult<AiDesignRequest?>> FindSnapshotAsync(Guid id, CancellationToken ct)
+    {
+        try { return OperationResult.Ok<AiDesignRequest?>(await ReadCoreAsync(id, ct)); }
+        catch (FileNotFoundException) { return OperationResult.Ok<AiDesignRequest?>(null); }
+        catch (DirectoryNotFoundException) { return OperationResult.Ok<AiDesignRequest?>(null); }
+        catch (Exception ex) when (IsBoundaryFailure(ex))
+        { return OperationResult.Fail<AiDesignRequest?>(FailureCode.PersistenceError, "AI request authority unavailable."); }
+    }
+
+    private async Task<OperationResult<IReadOnlyList<AiDesignRequest>>> ListCoreAsync(bool takeLock, CancellationToken ct)
     {
         try
         {
@@ -58,13 +98,20 @@ public sealed class FileAiDesignRequestStore : IAiDesignRequestStore
             {
                 ct.ThrowIfCancellationRequested();
                 if (Guid.TryParseExact(Path.GetFileName(path), "D", out var id) && File.Exists(Authority(id)))
-                { await using var gate = await LockAsync(id, ct); results.Add(await ReadCoreAsync(id, ct)); }
+                {
+                    await using var gate = takeLock ? await LockAsync(id, ct) : null;
+                    results.Add(await ReadCoreAsync(id, ct));
+                }
             }
             return OperationResult.Ok<IReadOnlyList<AiDesignRequest>>(results);
         }
         catch (Exception ex) when (IsBoundaryFailure(ex)) { return OperationResult.Fail<IReadOnlyList<AiDesignRequest>>(FailureCode.PersistenceError, "AI request listing unavailable."); }
     }
-    public Task<OperationResult<AiDesignRequest>> SubmitOnceAsync(AiDesignFence expected, Func<CancellationToken, Task<OperationResult<Unit>>> click, CancellationToken ct) => Guard(async () =>
+    public Task<OperationResult<AiDesignRequest>> SubmitOnceAsync(AiDesignFence expected, Func<CancellationToken, Task<OperationResult<Unit>>> click, CancellationToken ct) =>
+        SubmitOnceAsync(expected, async (_, token) => { var result = await click(token); return result.IsSuccess ? OperationResult.Ok<Guid?>(null) : OperationResult.Fail<Guid?>(result.Failure); }, ct);
+
+    /// <summary>Provides the newly persisted reservation to the browser transport while the submit lock is held.</summary>
+    public Task<OperationResult<AiDesignRequest>> SubmitOnceAsync(AiDesignFence expected, Func<AiDesignRequest, CancellationToken, Task<OperationResult<Guid?>>> click, CancellationToken ct) => Guard(async () =>
     {
         await using var gate = await LockAsync(expected.RequestId, ct); var r = await ReadCoreAsync(expected.RequestId, ct);
         if (!Matches(r, expected)) return Fail("Stale AI submit fence.");
@@ -73,11 +120,11 @@ public sealed class FileAiDesignRequestStore : IAiDesignRequestStore
             : Fail("Submission already reserved; never replay.");
         if (reservation.IsFailure) return reservation;
         r = reservation.Value; await WriteAsync(r, ct);
-        bool confirmed;
+        OperationResult<Guid?> outcome;
         using var bound = CancellationTokenSource.CreateLinkedTokenSource(ct); bound.CancelAfter(TimeSpan.FromSeconds(15));
-        try { confirmed = (await click(bound.Token).WaitAsync(bound.Token)).IsSuccess; }
-        catch (Exception ex) when (ex is not OutOfMemoryException) { confirmed = false; }
-        var result = AiDesignTransitions.Apply(r, confirmed ? new AiDesignEvent.SubmitConfirmed() : new AiDesignEvent.Interrupted(), _clock.GetUtcNow());
+        try { outcome = await click(r, bound.Token).WaitAsync(bound.Token); }
+        catch (Exception ex) when (ex is not OutOfMemoryException) { outcome = OperationResult.Fail<Guid?>(FailureCode.AdapterUnavailable, "SubmitUnconfirmed"); }
+        var result = AiDesignTransitions.Apply(r, outcome.IsSuccess ? new AiDesignEvent.SubmitConfirmed(outcome.Value) : new AiDesignEvent.Interrupted(), _clock.GetUtcNow());
         if (result.IsSuccess) await WriteAsync(result.Value, CancellationToken.None); return result;
     });
     public Task<OperationResult<AiDesignRequest>> EditDraftAsync(AiDesignFence expected,
@@ -118,6 +165,7 @@ public sealed class FileAiDesignRequestStore : IAiDesignRequestStore
     }
     private static bool ValidShape(AiDesignRequest r)
     {
+        if (r.WorkDraft is { } work && (work.DraftId == Guid.Empty || string.IsNullOrWhiteSpace(work.Title))) return false;
         if (r.Prompt is null || r.Prompt.Fields is null || r.Prompt.AttachmentReferences is null || r.Attachments is null
             || r.UploadReceipts is null || r.RetainedCandidates is null || string.IsNullOrWhiteSpace(r.Prompt.TemplateId)
             || string.IsNullOrWhiteSpace(r.Prompt.Text) || r.Prompt.HandoffInstructions is null || r.NextAttachmentOrder < 1
@@ -141,6 +189,7 @@ public sealed class FileAiDesignRequestStore : IAiDesignRequestStore
         await staged.PublishAsync(ct);
     }
     private static bool ValidDraft(Guid id, AiDesignDraft draft) => !string.IsNullOrWhiteSpace(draft.Prompt.Text)
+        && (draft.WorkDraft is not { } work || (work.DraftId != Guid.Empty && !string.IsNullOrWhiteSpace(work.Title)))
         && draft.Attachments.All(a => a.Snapshot.RequestId == id && a.Id != Guid.Empty && a.Order > 0)
         && draft.Attachments.Select(a => a.Id).Distinct().Count() == draft.Attachments.Count
         && draft.Attachments.Select(a => a.Order).Distinct().Count() == draft.Attachments.Count

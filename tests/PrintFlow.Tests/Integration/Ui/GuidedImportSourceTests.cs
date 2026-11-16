@@ -94,14 +94,14 @@ public sealed class GuidedImportSourceTests
     }
 
     [Fact]
-    public async Task Unavailable_ai_is_information_and_all_local_routes_still_reach_their_original_step()
+    public async Task Work_connection_notice_keeps_all_local_routes_reachable()
     {
         using OperatorCultureScope culture = new("zh-CN");
         using HomeScreenHarness h = new();
         WpfRendering.RenderExpectingNoBindingErrors(() => new HomeView { DataContext = h.Home }, new Size(1000, 700), tree =>
         {
             var notice = GuidedImportHomeTests.Find<TextBlock>(tree, "Home.AiUnavailable");
-            notice.Text.ShouldContain("暂不可用");
+            notice.Text.ShouldContain("自动生图需要先配置 Work 连接");
             tree.OfType<Button>().ShouldNotContain(b => AutomationProperties.GetAutomationId(b).StartsWith("AI.", StringComparison.Ordinal));
             GuidedImportHomeTests.Find<Button>(tree, "Home.ChooseFile").IsEnabled.ShouldBeTrue();
             return true;

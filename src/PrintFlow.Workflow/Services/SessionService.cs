@@ -222,15 +222,48 @@ public sealed partial class SessionService : ISessionService
         _runs.RequestStop(id, mode);
 
     /// <inheritdoc />
-    public async Task<OperationResult<SessionView>> ImportAsync(
+    public Task<OperationResult<SessionView>> ImportAsync(
         WorkflowType workflowType, string sourceAbsolutePath, string? outputName, string? operatorName,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken) => ImportCoreAsync(
+            SessionId.From(_idGenerator.NewId()), workflowType, sourceAbsolutePath, outputName, operatorName,
+            expectedHash: null, cancellationToken);
+
+    public async Task<OperationResult<SessionView>> ImportVerifiedWorkResultAsync(Guid requestId, string sourceAbsolutePath,
+        string outputName, Sha256 expectedHash, CancellationToken cancellationToken)
+    {
+        if (requestId == Guid.Empty || !Sha256.TryParse(expectedHash.Value, out _))
+            return OperationResult.Fail<SessionView>(FailureCode.PreconditionNotMet, "Work result identity is required.");
+
+        var id = SessionId.From(requestId);
+        using var lease = await SessionCompletionGate.EnterAsync(id, cancellationToken);
+        var found = await _repository.LoadAsync(id, cancellationToken);
+        if (found.IsFailure) return OperationResult.Fail<SessionView>(found.Failure);
+        if (found.Value is { } saved)
+        {
+            var snapshot = saved.Snapshot;
+            if (snapshot?.OriginalSourcePath == sourceAbsolutePath &&
+                saved.Revisions.Any(revision => revision.Id == snapshot.RootRevisionId && revision.Sha256 == expectedHash))
+                return await LoadAsync(id, cancellationToken);
+            return OperationResult.Fail<SessionView>(FailureCode.PreconditionNotMet, "Work result conflicts with the existing session.");
+        }
+
+        var source = await _fileInspector.InspectAsync(sourceAbsolutePath, cancellationToken);
+        if (source.IsFailure) return OperationResult.Fail<SessionView>(source.Failure);
+        if (source.Value.Sha256 != expectedHash)
+            return OperationResult.Fail<SessionView>(FailureCode.RevisionIntegrityMismatch, "Work result bytes changed before import.");
+
+        return await ImportCoreAsync(id, WorkflowType.PrepareAsset, sourceAbsolutePath, outputName, null,
+            expectedHash, cancellationToken);
+    }
+
+    private async Task<OperationResult<SessionView>> ImportCoreAsync(
+        SessionId id, WorkflowType workflowType, string sourceAbsolutePath, string? outputName, string? operatorName,
+        Sha256? expectedHash, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(sourceAbsolutePath);
 
         OutputName name = OutputName.Sanitise(outputName ?? StemOf(sourceAbsolutePath));
 
-        SessionId id = SessionId.From(_idGenerator.NewId());
         CommandContext context = CommandContext.Create(_timeProvider, _idGenerator, operatorName);
 
         OperationResult<WorkspaceDirRef> created = _workspace.CreateSession(id, context.NowUtc);
@@ -261,13 +294,13 @@ public sealed partial class SessionService : ISessionService
         ProcessingAttempt runningAttempt = ProcessingAttempt.Start(
             context.NewAttemptId, id, StepKind.Import, null, OperationKind.Import, "internal-import-v1", context.NowUtc);
 
-        SessionMutation opening = new(
-            session, started.State.Steps, [], [], [runningAttempt], [], [], null, null);
-
-        OperationResult<Unit> committedOpening = await _repository.CommitAsync(opening, cancellationToken);
-        if (committedOpening.IsFailure)
+        if (expectedHash is null)
         {
-            return OperationResult.Fail<SessionView>(committedOpening.Failure);
+            SessionMutation opening = new(
+                session, started.State.Steps, [], [], [runningAttempt], [], [], null, null);
+            OperationResult<Unit> committedOpening = await _repository.CommitAsync(opening, cancellationToken);
+            if (committedOpening.IsFailure)
+                return OperationResult.Fail<SessionView>(committedOpening.Failure);
         }
 
         OperationResult<(WorkspaceFileRef Source, FileFacts Facts)> established;
@@ -304,10 +337,13 @@ public sealed partial class SessionService : ISessionService
 
         if (established.IsFailure)
         {
+            if (expectedHash is not null) return OperationResult.Fail<SessionView>(established.Failure);
             return await FailImportAsync(session, started.State, closing, runningAttempt, established.Failure, cancellationToken);
         }
 
         (WorkspaceFileRef importedSource, FileFacts sourceFacts) = established.Value;
+        if (expectedHash is { } verified && sourceFacts.Sha256 != verified)
+            return OperationResult.Fail<SessionView>(FailureCode.RevisionIntegrityMismatch, "The copied Work result does not match its receipt.");
 
         RevisionId revisionId = RevisionId.From(_idGenerator.NewId());
         Revision rootRevision = Revision.Create(
