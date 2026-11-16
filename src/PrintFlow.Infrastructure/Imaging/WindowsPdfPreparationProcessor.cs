@@ -56,10 +56,7 @@ public sealed class WindowsPdfPreparationProcessor(IWorkspace workspace, IFileIn
                 return Refuse(FailureCode.PdfUnreadable, "The PDF contains no usable page.");
             CheckStop();
             inspection = document.InspectSinglePage();
-            if (inspection.PageWidth is not > 0 || inspection.PageHeight is not > 0 ||
-                inspection.PixelWidth is not (> 0 and <= 32768) || inspection.PixelHeight is not (> 0 and <= 32768) ||
-                (long)inspection.PixelWidth * inspection.PixelHeight > 80_000_000 ||
-                inspection.RotationDegrees is not (0 or 90 or 180 or 270))
+            if (!HasSupportedPageGeometry(inspection))
                 return Refuse(FailureCode.PdfPreparationFailed, "Page geometry exceeds the supported 300-PPI raster bounds.");
             CheckStop();
             request.Stop.ReportPhase(ExternalOperationPhase.OperationRequested);
@@ -99,6 +96,12 @@ public sealed class WindowsPdfPreparationProcessor(IWorkspace workspace, IFileIn
                 $"PDF preparation stopped ({ex.HResult:X8}): {ex.Message[..Math.Min(ex.Message.Length, 600)]}", opened);
         }
     }
+
+    internal static bool HasSupportedPageGeometry(PdfInspection inspection) =>
+        inspection.PageWidth is > 0 && inspection.PageHeight is > 0 &&
+        inspection.PixelWidth is > 0 and <= 32768 && inspection.PixelHeight is > 0 and <= 32768 &&
+        (long)inspection.PixelWidth * inspection.PixelHeight <= 80_000_000 &&
+        inspection.RotationDegrees is 0 or 90 or 180 or 270;
 
     internal static bool ValidateRaster(string path, FileFacts facts, PdfInspection inspection)
     {

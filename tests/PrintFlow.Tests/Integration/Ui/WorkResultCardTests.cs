@@ -15,6 +15,7 @@ using PrintFlow.Workflow.Services;
 
 namespace PrintFlow.Tests.Integration.Ui;
 
+[Collection(SqliteCollection.Name)]
 public sealed class WorkResultCardTests
 {
     [Fact]

@@ -1,7 +1,7 @@
 import { lstat, mkdir, open, readFile, realpath, rename, rm } from 'node:fs/promises';
 import { createHash, randomBytes, randomUUID, timingSafeEqual } from 'node:crypto';
 import { isAbsolute, join, resolve } from 'node:path';
-import { inspectImage } from './image-validation.mjs';
+import { inspectWorkResult, PDF_MEDIA_TYPE } from './image-validation.mjs';
 
 const idPattern = /^[A-Za-z0-9_-]{1,100}$/;
 const digest = value => createHash('sha256').update(value).digest('hex');
@@ -125,10 +125,12 @@ export class ResultStore {
       return null;
     }
   }
-  async enroll({ requestId, attemptId, expectedFileId, referenceSha256 = [], requireWorkConversation = false }) {
+  async enroll({ requestId, attemptId, expectedFileId, referenceSha256 = [], requireWorkConversation = false, returnMediaType }) {
     const key = requestKey(requestId);
     if (typeof requireWorkConversation !== 'boolean' || (requireWorkConversation && expectedFileId !== undefined))
       throw new Error('independent conversation binding required');
+    if (returnMediaType !== undefined && (returnMediaType !== PDF_MEDIA_TYPE || !requireWorkConversation))
+      throw new Error('invalid Work result format');
     if (expectedFileId !== undefined) validSourceFileId(expectedFileId);
     if (!Array.isArray(referenceSha256) || referenceSha256.length > 8 ||
         referenceSha256.some(value => typeof value !== 'string' || !/^[a-f0-9]{64}$/i.test(value)))
@@ -140,10 +142,10 @@ export class ResultStore {
       const uploadTicket = ticket(), readTicket = ticket();
       await atomicJson(this.#path(requestId, attemptId), {
         requestId, attemptId, expectedFileId: expectedFileId ?? null, referenceSha256: referenceSha256.map(value => value.toLowerCase()), requireWorkConversation,
-        uploadHash: digest(uploadTicket), readHash: digest(readTicket), state: 'pending'
+        uploadHash: digest(uploadTicket), readHash: digest(readTicket), state: 'pending', returnMediaType
       });
       await atomicJson(this.#activePath(requestId), { requestId, attemptId });
-      return { requestId, attemptId, uploadTicket, readTicket };
+      return { requestId, attemptId, uploadTicket, readTicket, returnMediaType };
     });
   }
   async cancel(requestId, attemptId) {
@@ -195,16 +197,17 @@ export class ResultStore {
       }
     });
   }
-  async receive({ requestId, attemptId, uploadTicket, file }, fetchFile) {
+  async receive({ requestId, attemptId, uploadTicket, file, returnMediaType }, fetchFile) {
     const key = requestKey(requestId);
     await this.#requireCurrent(requestId, attemptId);
     const before = await this.#read(requestId, attemptId);
     if (!matchTicket(before.uploadHash, uploadTicket) || before.state === 'cancelled') throw new Error('upload unauthorized');
+    if (before.returnMediaType !== returnMediaType) throw new Error('Work result format mismatch');
     if (!file || typeof file.download_url !== 'string' || !validSourceFileId(file.file_id)) throw new Error('invalid file');
     if (before.expectedFileId && !before.allowReissuedFileId && before.expectedFileId !== file.file_id)
       throw new Error('source identity mismatch');
     const bytes = await fetchFile(file);
-    const facts = await inspectImage(bytes);
+    const facts = await inspectWorkResult(bytes, returnMediaType);
     return this.#serialized(key, async () => {
       await this.#requireCurrent(requestId, attemptId);
       const row = await this.#read(requestId, attemptId);
@@ -275,8 +278,9 @@ export class ResultStore {
       const row = await this.#read(requestId, attemptId);
       if (row.state !== 'Ready' || !matchTicket(row.readHash, readTicket) || row.receipt.objectVersion !== version) throw new Error('blob unauthorized');
       const bytes = await ordinaryFile(join(this.root, 'blobs', row.receipt.objectId));
-      const facts = await inspectImage(bytes);
-      if (facts.sha256 !== row.receipt.sha256 || facts.byteLength !== row.receipt.byteLength) throw new Error('stored blob changed');
+      const facts = await inspectWorkResult(bytes, row.returnMediaType);
+      if (facts.sha256 !== row.receipt.sha256 || facts.byteLength !== row.receipt.byteLength ||
+          facts.mediaType !== row.receipt.mediaType) throw new Error('stored blob changed');
       return bytes;
     });
   }

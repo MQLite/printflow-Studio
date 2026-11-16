@@ -83,6 +83,8 @@ public sealed class LoopbackWorkResultImportTests
     [InlineData("no-receiver")]
     [InlineData("old-attempt")]
     [InlineData("wrong-request")]
+    [InlineData("multiple-pages")]
+    [InlineData("wrong-format")]
     public async Task Work_receipt_progress_precedes_persisted_import(string scenario)
     {
         using var harness = new SessionServiceHarness();
@@ -100,7 +102,9 @@ public sealed class LoopbackWorkResultImportTests
             pipeName = "PrintFlow-WorkTest", controlBearer = "local-control-bearer", readBearer = "local-read-bearer",
             workspaceRoot = harness.Workspace.Root
         }));
-        var source = harness.WriteSourcePng();
+        bool wrongFormat = scenario == "wrong-format";
+        var source = wrongFormat ? harness.WriteSourcePng() : harness.Workspace.CreateSourceFile("final.pdf",
+            PdfFixtures.Read(scenario == "multiple-pages" ? "two" : "single"));
         var facts = (await harness.FileInspector.InspectAsync(source, default)).Value;
         var version = Guid.NewGuid();
         var image = await File.ReadAllBytesAsync(source);
@@ -113,7 +117,7 @@ public sealed class LoopbackWorkResultImportTests
             workReturnAccepted = ready && scenario == "automatic-return",
             workConversationId = ready ? conversation : (Guid?)null,
             sourceFileId = "platform-image", objectId = version, objectVersion = version,
-            byteLength = image.Length, sha256 = facts.Sha256.Value, mediaType = "image/png",
+            byteLength = image.Length, sha256 = facts.Sha256.Value, mediaType = wrongFormat ? "image/png" : "application/pdf",
             width = facts.PixelWidth, height = facts.PixelHeight
         });
         var transport = new HandoffTransport(request.RequestId, attempt, version, image, Receipt("pending"), Receipt("received_unverified"), Receipt("Ready", true));
@@ -122,6 +126,8 @@ public sealed class LoopbackWorkResultImportTests
         var enrolled = await importer.EnrollAsync(configPath, request, default);
         enrolled.Value.ShouldBe("local-upload-ticket");
         var prompt = WorkResultPrompt.Append(request, enrolled.Value);
+        prompt.ShouldContain("save_final_pdf");
+        prompt.ShouldNotContain("Generate exactly one image");
         prompt.ShouldContain("local-upload-ticket");
         prompt.ShouldNotContain("local-read-ticket");
         (await store.ReadAsync(request.RequestId, default)).Value.Prompt.Text.ShouldBe(request.Prompt.Text);
@@ -158,14 +164,15 @@ public sealed class LoopbackWorkResultImportTests
         await resumed.ResumePendingAsync(scenario == "no-receiver" ? null : configPath, default);
         transport.Enrollments.ShouldBe(1);
         bool imported = scenario is "import" or "automatic-return";
-        transport.BlobReads.ShouldBe(imported ? 1 : 0);
+        transport.BlobReads.ShouldBe(imported || scenario == "multiple-pages" ? 1 : 0);
         var completed = (await store.ReadAsync(request.RequestId, default)).Value;
         completed.State.ShouldBe(stopped ? AiDesignState.Cancelled : imported ? AiDesignState.Imported : AiDesignState.Interrupted);
         completed.WorkConversationId.ShouldBe(conversation);
         if (!imported)
         {
             completed.Candidate.ShouldBeNull();
-            observations.Events.ShouldNotContain(x => x.Stage == WorkResultStage.Imported || x.Stage == WorkResultStage.Validating);
+            observations.Events.ShouldNotContain(x => x.Stage == WorkResultStage.Imported);
+            if (scenario != "multiple-pages") observations.Events.ShouldNotContain(x => x.Stage == WorkResultStage.Validating);
             if (scenario == "stop-before-restart") observations.Events.ShouldBeEmpty();
             if (scenario == "no-receiver") observations.Events.ShouldHaveSingleItem().Problem.ShouldBe(WorkResultProblem.ReceiverUnavailable);
             (await sessions.ListRecentAsync(default)).Value.ShouldBeEmpty();
@@ -173,6 +180,8 @@ public sealed class LoopbackWorkResultImportTests
         else
         {
             completed.Candidate!.Facts.Sha256.ShouldBe(facts.Sha256);
+            completed.Candidate.Facts.Format.ShouldBe(PrintFlow.Domain.Files.ImageFormat.Pdf);
+            completed.Candidate.File.RelativePath.ShouldEndWith(".pdf");
             observations.Events.Select(x => x.Stage).ShouldBe(new[] { WorkResultStage.AwaitingReturn,
                 WorkResultStage.AwaitingVerification, WorkResultStage.Validating, WorkResultStage.Imported });
             observations.Events[^1].ImportedSessionId.ShouldBe(completed.ImportedSessionId);
@@ -210,8 +219,9 @@ public sealed class LoopbackWorkResultImportTests
                 message.Bearer.ShouldBe("local-control-bearer");
                 message.ReferenceSha256.ShouldBeEmpty();
                 message.ReadTicket.ShouldBeNull();
+                message.ReturnMediaType.ShouldBe("application/pdf");
                 return Task.FromResult(JsonSerializer.SerializeToUtf8Bytes(new { requestId = request, attemptId = attempt,
-                    readTicket = "local-read-ticket", uploadTicket = "local-upload-ticket" }));
+                    readTicket = "local-read-ticket", uploadTicket = "local-upload-ticket", returnMediaType = message.ReturnMediaType }));
             }
 
             message.Bearer.ShouldBe("local-read-bearer");

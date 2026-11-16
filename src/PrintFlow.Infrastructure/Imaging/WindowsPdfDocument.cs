@@ -1,5 +1,6 @@
 using System.IO;
 using PrintFlow.Domain.Files;
+using PrintFlow.Workflow.Ports;
 using Windows.Data.Pdf;
 using Windows.Graphics.Imaging;
 using Windows.Storage.Streams;
@@ -14,6 +15,7 @@ internal interface IPdfDocument : IDisposable
     bool IsEncrypted { get; }
     PdfInspection InspectSinglePage();
     Task<bool> RenderAsync(string output, CancellationToken cancellationToken);
+    Task<DecodedPreview> RenderThumbnailAsync(int maximumEdge, CancellationToken cancellationToken);
 }
 
 internal interface IPdfDocumentAuthority
@@ -67,17 +69,8 @@ internal sealed class WindowsPdfDocumentAuthority : IPdfDocumentAuthority
         {
             var inspection = _inspection ?? throw new InvalidOperationException("Inspect before render.");
             using var rendered = new InMemoryRandomAccessStream();
-            Interlocked.Increment(ref owner._renderCalls);
-            await _page!.RenderToStreamAsync(rendered, new PdfPageRenderOptions
-            {
-                DestinationWidth = checked((uint)inspection.PixelWidth!.Value),
-                DestinationHeight = checked((uint)inspection.PixelHeight!.Value),
-                BackgroundColor = Windows.UI.Color.FromArgb(0, 0, 0, 0),
-                BitmapEncoderId = BitmapEncoder.PngEncoderId,
-                IsIgnoringHighContrast = true,
-                // The entire default visible page; never artwork bounds or a second crop rule.
-            }).AsTask(cancellationToken);
-            rendered.Seek(0);
+            await RenderPageAsync(rendered, inspection.PixelWidth!.Value, inspection.PixelHeight!.Value,
+                Windows.UI.Color.FromArgb(0, 0, 0, 0), cancellationToken);
             var decoder = await BitmapDecoder.CreateAsync(rendered).AsTask(cancellationToken);
             if (decoder.PixelWidth != inspection.PixelWidth || decoder.PixelHeight != inspection.PixelHeight)
                 throw new InvalidDataException("The renderer did not honour the requested full-page dimensions.");
@@ -98,6 +91,39 @@ internal sealed class WindowsPdfDocumentAuthority : IPdfDocumentAuthority
                 decoder.PixelHeight, PdfInspection.ProductionDpi, PdfInspection.ProductionDpi, pixels);
             await encoder.FlushAsync().AsTask(cancellationToken);
             return transparency;
+        }
+
+        public async Task<DecodedPreview> RenderThumbnailAsync(int maximumEdge, CancellationToken cancellationToken)
+        {
+            var inspection = _inspection ?? throw new InvalidOperationException("Inspect before render.");
+            int sourceWidth = inspection.PixelWidth!.Value;
+            int sourceHeight = inspection.PixelHeight!.Value;
+            double scale = Math.Min(1, (double)maximumEdge / Math.Max(sourceWidth, sourceHeight));
+            int width = Math.Max(1, (int)Math.Round(scale * sourceWidth));
+            int height = Math.Max(1, (int)Math.Round(scale * sourceHeight));
+
+            using var rendered = new InMemoryRandomAccessStream();
+            await RenderPageAsync(rendered, width, height, Windows.UI.Color.FromArgb(255, 255, 255, 255), cancellationToken);
+            using var input = rendered.AsStreamForRead();
+            using var payload = new MemoryStream();
+            await input.CopyToAsync(payload, cancellationToken);
+            return new DecodedPreview(width, height, sourceWidth, sourceHeight, false, payload.ToArray());
+        }
+
+        private async Task RenderPageAsync(IRandomAccessStream output, int width, int height,
+            Windows.UI.Color background, CancellationToken cancellationToken)
+        {
+            Interlocked.Increment(ref owner._renderCalls);
+            await _page!.RenderToStreamAsync(output, new PdfPageRenderOptions
+            {
+                DestinationWidth = checked((uint)width),
+                DestinationHeight = checked((uint)height),
+                BackgroundColor = background,
+                BitmapEncoderId = BitmapEncoder.PngEncoderId,
+                IsIgnoringHighContrast = true,
+                // The entire default visible page; never artwork bounds or a second crop rule.
+            }).AsTask(cancellationToken);
+            output.Seek(0);
         }
 
         private static PdfPageBox Box(Windows.Foundation.Rect box) => new(box.X, box.Y, box.Width, box.Height);

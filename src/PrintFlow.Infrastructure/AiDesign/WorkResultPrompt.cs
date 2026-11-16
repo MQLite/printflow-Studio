@@ -16,7 +16,7 @@ public static class WorkResultPrompt
             {request.Prompt.Text}
 
             PrintFlow Studio delivery:
-            Generate exactly one image for this request. After generation completes, use PrintFlow Studio's save_image_result tool exactly once with the new original PNG or JPEG file object from this response. Use the actual file, not a reference attachment, preview, screenshot, URL, or re-encoded image. If the original file or tool is unavailable, report that return was unavailable; do not send another file.
+            Review your work, then deliver the final result as a single-page PDF. Use PrintFlow Studio's save_final_pdf tool once with the finished PDF file.
             request_id: {request.RequestId:D}
             attempt_id: {request.AttemptId:D}
             upload_ticket: {ticket}

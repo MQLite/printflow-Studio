@@ -32,9 +32,10 @@ export async function startStudioPipe({ pipeName, store, controlBearer, readBear
         let payload;
         try {
           const request = JSON.parse(input.toString('utf8'));
-          const { operation, bearer, requestId, attemptId, readTicket, objectVersion, referenceSha256, workConversationId } = request;
+          const { operation, bearer, requestId, attemptId, readTicket, objectVersion, referenceSha256, workConversationId, returnMediaType } = request;
           if (operation === 'enroll' && matches(controlBearer, bearer)) {
-            const value = await store.enroll({ requestId, attemptId, referenceSha256, requireWorkConversation: true });
+            const value = await store.enroll({ requestId, attemptId, referenceSha256, requireWorkConversation: true,
+              returnMediaType: returnMediaType ?? undefined });
             payload = Buffer.from(JSON.stringify(value));
           } else if (operation === 'cancel' && matches(controlBearer, bearer)) {
             payload = Buffer.from(JSON.stringify(await store.cancel(requestId, attemptId)));

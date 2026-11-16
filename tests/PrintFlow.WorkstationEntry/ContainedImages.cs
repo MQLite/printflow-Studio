@@ -35,8 +35,8 @@ public sealed class ContainedPreviewDecoder(OwnedPaths paths, IWorkspace workspa
     public int ThumbnailEdge => inner.ThumbnailEdge;
     public async Task<OperationResult<DecodedPreview>> DecodeAsync(WorkspaceFileRef file, CancellationToken cancellationToken)
     { using NativePathLease held = paths.Read(workspace.ResolveAbsolute(file), "workspace"); return await inner.DecodeAsync(file, cancellationToken); }
-    public async Task<OperationResult<DecodedPreview>> DecodeThumbnailAsync(WorkspaceFileRef file, CancellationToken cancellationToken)
-    { using NativePathLease held = paths.Read(workspace.ResolveAbsolute(file), "workspace"); return await inner.DecodeThumbnailAsync(file, cancellationToken); }
+    public async Task<OperationResult<DecodedPreview>> DecodeThumbnailAsync(WorkspaceFileRef file, ImageFormat format, CancellationToken cancellationToken)
+    { using NativePathLease held = paths.Read(workspace.ResolveAbsolute(file), "workspace"); return await inner.DecodeThumbnailAsync(file, format, cancellationToken); }
 }
 
 public sealed class ContainedTiffDecoder(OwnedPaths paths, IWorkspace workspace) : ITiffReviewDecoder

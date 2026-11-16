@@ -5,6 +5,7 @@ using PrintFlow.Domain.AiDesign;
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Results;
 using PrintFlow.Infrastructure.AiDesign.Authoring;
+using PrintFlow.Infrastructure.Imaging;
 using PrintFlow.Infrastructure.Workspace;
 using PrintFlow.Workflow.AiDesign;
 using PrintFlow.Workflow.Ports;
@@ -43,7 +44,9 @@ public sealed partial class LoopbackWorkResultImport(string workspaceRoot, IFile
     private async Task<OperationResult<SessionView>> ImportAsync(Options options, bool automatic, CancellationToken cancellationToken)
     {
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(automatic ? TimeSpan.FromMinutes(12) : TimeSpan.FromMinutes(3));
+        bool awaitingFinalPdf = automatic && options.ExpectedMediaType == FinalPdfMediaType;
+        if (!awaitingFinalPdf)
+            deadline.CancelAfter(automatic ? TimeSpan.FromMinutes(12) : TimeSpan.FromMinutes(3));
         var ct = deadline.Token;
         AiDesignRequest? observed = null;
         WorkResultObservation? last = null;
@@ -98,12 +101,22 @@ public sealed partial class LoopbackWorkResultImport(string workspaceRoot, IFile
                             return Fail("Work result import is no longer current.");
                         Report(current, receipt.State == "pending" ? WorkResultStage.AwaitingReturn : WorkResultStage.AwaitingVerification);
                     }
-                    await Task.Delay(TimeSpan.FromSeconds(1), ct);
+                    await Task.Delay(TimeSpan.FromSeconds(awaitingFinalPdf ? 2 : 1), ct);
                 }
             } while (IsWaiting(receipt));
 
             bool IsWaiting(Receipt value) => value.State == "pending" ||
                 (automatic && value.State == "received_unverified");
+            ImageFormat format = receipt.MediaType switch
+            {
+                "image/png" when !awaitingFinalPdf => ImageFormat.Png,
+                "image/jpeg" when !awaitingFinalPdf => ImageFormat.Jpeg,
+                FinalPdfMediaType when awaitingFinalPdf => ImageFormat.Pdf,
+                _ => ImageFormat.Unknown
+            };
+            bool validDimensions = format == ImageFormat.Pdf
+                ? receipt.Width is null && receipt.Height is null
+                : receipt.Width is > 0 && receipt.Height is > 0 && (long)receipt.Width.Value * receipt.Height.Value <= 64_000_000;
             if (receipt.State != "Ready" || !(receipt.SourceVerified || automatic && receipt.WorkReturnAccepted) ||
                 string.IsNullOrWhiteSpace(receipt.SourceFileId) ||
                 ((requiresConversation || receipt.WorkConversationId is not null) &&
@@ -113,11 +126,10 @@ public sealed partial class LoopbackWorkResultImport(string workspaceRoot, IFile
                 receipt.ByteLength is <= 0 or > MaxImageBytes || !Sha256.TryParse(receipt.Sha256, out var hash) ||
                 (!automatic && (!Sha256.TryParse(options.SourceSha256, out var expectedHash) || hash != expectedHash)) ||
                 current.Attachments.Any(attachment => attachment.Sha256 == hash) ||
-                receipt.Width <= 0 || receipt.Height <= 0 || (long)receipt.Width * receipt.Height > 64_000_000 ||
-                receipt.MediaType is not ("image/png" or "image/jpeg"))
+                format == ImageFormat.Unknown || !validDimensions)
             {
                 await ReportProblemAsync(WorkResultProblem.ValidationFailed);
-                return Fail("The MCP receipt does not identify a verified original image.");
+                return Fail("The Work receipt does not match the expected result.");
             }
 
             var updated = await _requests.ImportReturnedWorkResultAsync(current.Fence, async token =>
@@ -131,12 +143,11 @@ public sealed partial class LoopbackWorkResultImport(string workspaceRoot, IFile
                     return OperationResult.Fail<AiDesignEvent.ReturnedWorkResultImported>(FailureCode.RevisionIntegrityMismatch,
                         "The MCP image hash does not match its receipt.");
 
-                bool png = receipt.MediaType == "image/png";
-                string name = AiDesignOwnedStagingFiles.ReturnedWorkResultName(receipt.ObjectVersion, png);
+                string name = AiDesignOwnedStagingFiles.ReturnedWorkResultName(receipt.ObjectVersion, format);
                 string path = Path.Combine(_requests.RequestsRoot, current.RequestId.ToString("D"), name);
                 if (!File.Exists(path))
                 {
-                    using var staged = AiDesignOwnedStagingFiles.CreateReturnedWorkResult(workspaceRoot, current.RequestId, receipt.ObjectVersion, png);
+                    using var staged = AiDesignOwnedStagingFiles.CreateReturnedWorkResult(workspaceRoot, current.RequestId, receipt.ObjectVersion, format);
                     await staged.Output.WriteAsync(bytes, token);
                     await staged.MoveWithinBatchAsync(token);
                     staged.Release();
@@ -145,11 +156,12 @@ public sealed partial class LoopbackWorkResultImport(string workspaceRoot, IFile
                 var facts = await inspector.InspectAsync(path, token);
                 if (facts.IsFailure) return OperationResult.Fail<AiDesignEvent.ReturnedWorkResultImported>(facts.Failure);
                 if (facts.Value.Sha256 != hash || facts.Value.ByteLength != receipt.ByteLength ||
-                    facts.Value.Format != (png ? ImageFormat.Png : ImageFormat.Jpeg) ||
+                    facts.Value.Format != format ||
                     facts.Value.PixelWidth != receipt.Width || facts.Value.PixelHeight != receipt.Height ||
+                    (format == ImageFormat.Pdf && !await IsProcessablePdfAsync(path, token)) ||
                     await ReadPipeAsync<Receipt>(options.PipeName, status, token) != receipt)
                     return OperationResult.Fail<AiDesignEvent.ReturnedWorkResultImported>(FailureCode.RevisionIntegrityMismatch,
-                        "The Work result bytes or receipt changed.");
+                        "The Work result or receipt is invalid or has changed.");
 
                 var imported = await sessions.ImportVerifiedWorkResultAsync(current.RequestId, path, options.OutputName, hash, token);
                 if (imported.IsFailure) return OperationResult.Fail<AiDesignEvent.ReturnedWorkResultImported>(imported.Failure);
@@ -178,11 +190,27 @@ public sealed partial class LoopbackWorkResultImport(string workspaceRoot, IFile
         }
     }
 
+    private static async Task<bool> IsProcessablePdfAsync(string path, CancellationToken cancellationToken)
+    {
+        try
+        {
+            using var input = VerifiedAiAttachmentReader.OpenRegular(path);
+            using var document = await new WindowsPdfDocumentAuthority().OpenAsync(input, cancellationToken);
+            return !document.IsEncrypted && document.PageCount == 1 &&
+                WindowsPdfPreparationProcessor.HasSupportedPageGeometry(document.InspectSinglePage());
+        }
+        catch (Exception ex) when (ex is not (OperationCanceledException or OutOfMemoryException or StackOverflowException))
+        {
+            return false;
+        }
+    }
+
     private static OperationResult<SessionView> Fail(string detail) =>
         OperationResult.Fail<SessionView>(FailureCode.AdapterUnavailable, detail);
 
     private sealed record Options(Guid RequestId, Guid AttemptId, Guid WorkConversationId, string PipeName,
-        string SourceFileId, string SourceSha256, string ReadBearer, string ReadTicket, string OutputName, bool AllowReissuedFileId)
+        string SourceFileId, string SourceSha256, string ReadBearer, string ReadTicket, string OutputName, bool AllowReissuedFileId,
+        string? ExpectedMediaType = null)
     {
         public bool Valid() => RequestId != Guid.Empty && AttemptId != Guid.Empty && WorkConversationId != Guid.Empty &&
             WorkResultPipe.IsName(PipeName) && SourceFileId is { Length: > 0 and <= 512 } && Sha256.TryParse(SourceSha256, out _) &&
@@ -191,6 +219,6 @@ public sealed partial class LoopbackWorkResultImport(string workspaceRoot, IFile
     }
 
     private sealed record Receipt(int SchemaVersion, Guid RequestId, Guid AttemptId, string State, string SourceFileId,
-        Guid ObjectId, Guid ObjectVersion, int ByteLength, string Sha256, string MediaType, int Width, int Height, bool SourceVerified,
+        Guid ObjectId, Guid ObjectVersion, int ByteLength, string Sha256, string MediaType, int? Width, int? Height, bool SourceVerified,
         Guid? WorkConversationId, bool WorkReturnAccepted);
 }

@@ -24,8 +24,9 @@ public sealed class WorkTaskRow(WorkTaskSnapshot snapshot) : ObservableObject
     public bool CanContinue => Snapshot.Stage == WorkTaskStage.Imported && Snapshot.ImportedSessionId is not null;
     public bool CanViewWork => Snapshot.WorkConversationId is { } id && id != Guid.Empty;
     public string Placeholder => Strings.Resolve(CanContinue ? "WorkTask_NoPreview" : "WorkTask_Protected");
-    public string? ImageFacts => Snapshot.Format is { } format && Snapshot.PixelWidth is { } width && Snapshot.PixelHeight is { } height
-        ? $"{(format == ImageFormat.Jpeg ? "JPEG" : format.ToString().ToUpperInvariant())} · {width} × {height}" : null;
+    public string? ImageFacts => Snapshot.Format == ImageFormat.Pdf ? "PDF" :
+        Snapshot.Format is { } format && Snapshot.PixelWidth is { } width && Snapshot.PixelHeight is { } height
+            ? $"{format.ToString().ToUpperInvariant()} · {width} × {height}" : null;
     public string? Problem => Snapshot.Failure is { } failure ? Strings.Resolve(failure switch
     {
         WorkTaskFailure.UploadFailed => "AiPrompt_WorkUploadFailed",

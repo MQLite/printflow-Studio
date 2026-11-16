@@ -64,7 +64,8 @@ export async function fetchSourceFile(file, config) {
       method: 'GET',
       lookup: pinnedLookup(selected),
       signal: deadline,
-      headers: { accept: 'image/png, image/jpeg', 'accept-encoding': 'identity' },
+      headers: { accept: config.returnMediaType === 'application/pdf' ? 'application/pdf' : 'image/png, image/jpeg',
+        'accept-encoding': 'identity' },
       timeout: 120_000
     }, res => {
       try { validateSourceResponse(res.statusCode, res.headers); }

@@ -1681,14 +1681,14 @@
   <data name="WorkTask_NoPreview" xml:space="preserve"><value>暂无预览</value></data>
   <data name="WorkTask_Protected" xml:space="preserve"><value>核验后显示预览</value></data>
   <data name="WorkTask_Submitting" xml:space="preserve"><value>正在发送到 Work</value></data>
-  <data name="WorkTask_AwaitingReturn" xml:space="preserve"><value>等待 Work 回传</value></data>
+  <data name="WorkTask_AwaitingReturn" xml:space="preserve"><value>等待 Work 回传最终结果</value></data>
   <data name="WorkTask_AwaitingVerification" xml:space="preserve"><value>已回传，待核验</value></data>
   <data name="WorkTask_Validating" xml:space="preserve"><value>核验中</value></data>
   <data name="WorkTask_Imported" xml:space="preserve"><value>已导入</value></data>
   <data name="WorkTask_SubmittedOnly" xml:space="preserve"><value>已提交，未配置回传</value></data>
   <data name="WorkTask_Cancelled" xml:space="preserve"><value>已停止接收</value></data>
   <data name="WorkTask_NeedsAttention" xml:space="preserve"><value>需处理</value></data>
-  <data name="WorkTask_ValidationFailed" xml:space="preserve"><value>Studio 未能核验回传图片。</value></data>
+  <data name="WorkTask_ValidationFailed" xml:space="preserve"><value>Studio 未能核验回传文件。最终 PDF 必须可读、未加密且只有一页。</value></data>
   <data name="WorkTask_TimedOut" xml:space="preserve"><value>等待结束前未收到通过核验的图片。</value></data>
   <data name="WorkTask_ResultUnavailable" xml:space="preserve"><value>无法载入已导入的处理任务。</value></data>
   <data name="WorkTask_LoadFailed" xml:space="preserve"><value>无法载入 AI 任务。</value></data>

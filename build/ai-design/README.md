@@ -28,8 +28,8 @@ For the opted-in trial only, use the actual unpacked extension ID and the profil
 ./build/ai-design/Register-NativeHost.ps1 -Browser Chrome -ExtensionId '<actual ID>' -HostPath '<absolute trial native host exe>' -WorkspaceRoot '<absolute trial workspace>' -DownloadRoot '<existing isolated directory>' -EnableTextSubmissionTrial -ChromeProfileDirectory '<actual profile directory>' -ValidateOnly
 ```
 
-After successful preview, use the same command without `-ValidateOnly` to register. Load or reload the corresponding unpacked extension before exiting Chrome. For an attachment trial, open a saved Studio draft with a synthetic reference image. Verify that Chrome has exited and click **自动生图** once. Observe the ready file chip, one exact prompt in a new Work conversation, and the submitted status in Studio. The trial ends at confirmed submission. Automatic image return requires a separate verified result connection.
+After successful preview, use the same command without `-ValidateOnly` to register. Load or reload the corresponding unpacked extension before exiting Chrome. For an attachment trial, open a saved Studio draft with a synthetic reference image. Verify that Chrome has exited and click **自动生图** once. Observe the ready file chip, one exact prompt in a new Work conversation, and the submitted status in Studio. Automatic final PDF return requires the receiver setup below and a matching native host build.
 
-The ordinary registration keeps the Work contract unverified. Trial mode uses a distinct contract hash and fixed extension launch page. Live attachment acceptance and the image return path require separate evidence. Remove the trial's matching registration with the documented rollback after Chrome has exited.
+The ordinary registration keeps the Work contract unverified. Trial mode uses a distinct contract hash and fixed extension launch page. Remove the trial's matching registration with the documented rollback after Chrome has exited.
 
-See the [Studio image return trial](../../docs/codex/printflow-ai-design-backlog/WORK_RESULT_TRIAL.md) for local setup and acceptance.
+See the [Studio final PDF return trial](../../docs/codex/printflow-ai-design-backlog/WORK_RESULT_TRIAL.md) for local setup and acceptance.

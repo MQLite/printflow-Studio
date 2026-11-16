@@ -1685,20 +1685,20 @@
   <data name="AiPrompt_WorkActive" xml:space="preserve"><value>The previous Work request is still active. Check its progress in Chrome.</value></data>
   <data name="AiPrompt_WorkUnconfirmed" xml:space="preserve"><value>Studio could not confirm that Work received the request. Check the Chrome conversation before trying again.</value></data>
   <data name="WorkTask_Title" xml:space="preserve"><value>AI task</value></data>
-  <data name="WorkTask_Result" xml:space="preserve"><value>Work image return</value></data>
+  <data name="WorkTask_Result" xml:space="preserve"><value>Work result</value></data>
   <data name="WorkTask_ViewWork" xml:space="preserve"><value>View Work</value></data>
   <data name="WorkTask_Continue" xml:space="preserve"><value>Continue processing</value></data>
   <data name="WorkTask_NoPreview" xml:space="preserve"><value>Preview unavailable</value></data>
   <data name="WorkTask_Protected" xml:space="preserve"><value>Preview after verification</value></data>
   <data name="WorkTask_Submitting" xml:space="preserve"><value>Sending to Work</value></data>
-  <data name="WorkTask_AwaitingReturn" xml:space="preserve"><value>Waiting for Work to return an image</value></data>
-  <data name="WorkTask_AwaitingVerification" xml:space="preserve"><value>Image returned · awaiting verification</value></data>
-  <data name="WorkTask_Validating" xml:space="preserve"><value>Verifying image</value></data>
-  <data name="WorkTask_Imported" xml:space="preserve"><value>Image imported</value></data>
+  <data name="WorkTask_AwaitingReturn" xml:space="preserve"><value>Waiting for the final result from Work</value></data>
+  <data name="WorkTask_AwaitingVerification" xml:space="preserve"><value>Result returned · awaiting verification</value></data>
+  <data name="WorkTask_Validating" xml:space="preserve"><value>Checking the returned file</value></data>
+  <data name="WorkTask_Imported" xml:space="preserve"><value>Result imported</value></data>
   <data name="WorkTask_SubmittedOnly" xml:space="preserve"><value>Submitted · image return is not configured</value></data>
   <data name="WorkTask_Cancelled" xml:space="preserve"><value>Receiving stopped</value></data>
   <data name="WorkTask_NeedsAttention" xml:space="preserve"><value>Needs attention</value></data>
-  <data name="WorkTask_ValidationFailed" xml:space="preserve"><value>Studio could not verify the returned image.</value></data>
+  <data name="WorkTask_ValidationFailed" xml:space="preserve"><value>Studio could not verify the returned file. A final PDF must be readable, unencrypted, and have one page.</value></data>
   <data name="WorkTask_TimedOut" xml:space="preserve"><value>No verified image arrived before the wait ended.</value></data>
   <data name="WorkTask_ResultUnavailable" xml:space="preserve"><value>The imported processing session could not be loaded.</value></data>
   <data name="WorkTask_LoadFailed" xml:space="preserve"><value>AI tasks could not be loaded.</value></data>

@@ -9,6 +9,7 @@ import { ResultStore } from '../src/store.mjs';
 
 const png = await sharp({ create: { width: 3, height: 2, channels: 4, background: '#234567' } }).png().toBuffer();
 const jpeg = await sharp({ create: { width: 3, height: 2, channels: 3, background: '#234567' } }).jpeg().toBuffer();
+const pdf = await readFile(new URL('../../../tests/PrintFlow.Tests/Fixtures/Pdf/single.pdf', import.meta.url));
 const file = id => ({ download_url: `https://files.example.test/files/${id}`, file_id: id, mime_type: 'image/png', file_name: 'result.png' });
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');
 async function fixture(t) {
@@ -43,6 +44,32 @@ test('unbound source is received_unverified and cannot be read as Ready', async 
   assert.equal(receipt.state, 'received_unverified');
   assert.equal(receipt.sourceVerified, false);
   await assert.rejects(store.readBlob('req2', 'a2', receipt.objectVersion, tickets.readTicket));
+});
+
+test('a final PDF attempt rejects intermediate images without occupying the result slot', async t => {
+  const { store } = await fixture(t);
+  const ids = { requestId: 'final-pdf', attemptId: 'first' };
+  const conversation = '6afb6da3-9354-83ec-979d-3ed4f321fdcc';
+  const tickets = await store.enroll({ ...ids, requireWorkConversation: true, returnMediaType: 'application/pdf' });
+  assert.equal(tickets.returnMediaType, 'application/pdf');
+  const upload = (sourceId, bytes, returnMediaType) => store.receive({
+    ...ids, uploadTicket: tickets.uploadTicket, file: file(sourceId), returnMediaType
+  }, async () => bytes);
+  await assert.rejects(upload('intermediate', png));
+  await assert.rejects(upload('fake-pdf', png, 'application/pdf'));
+  assert.equal((await store.status(ids.requestId, ids.attemptId, tickets.readTicket, conversation)).state, 'pending');
+
+  const receipt = await upload('final-one', pdf, 'application/pdf');
+  assert.equal(receipt.mediaType, 'application/pdf');
+  assert.equal(receipt.width, null);
+  assert.equal(receipt.height, null);
+  assert.equal(receipt.sha256, sha(pdf));
+  const ready = await store.status(ids.requestId, ids.attemptId, tickets.readTicket, conversation);
+  assert.equal(ready.state, 'Ready');
+  assert.equal(ready.workReturnAccepted, true);
+  assert.deepEqual(await store.readBlob(ids.requestId, ids.attemptId, ready.objectVersion, tickets.readTicket), pdf);
+  assert.deepEqual(await upload('final-one', pdf, 'application/pdf'), ready);
+  await assert.rejects(upload('another-final', pdf, 'application/pdf'));
 });
 
 test('the current Studio attempt can accept its returned original without an independent source lookup', async t => {

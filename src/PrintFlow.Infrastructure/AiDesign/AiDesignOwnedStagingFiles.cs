@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Win32.SafeHandles;
+using PrintFlow.Domain.Files;
 using PrintFlow.Infrastructure.Automation;
 using PrintFlow.Infrastructure.Delivery;
 using PrintFlow.Infrastructure.Workspace;
@@ -86,17 +87,26 @@ public static class AiDesignOwnedStagingFiles
         return OwnedFile.Create(root, System.IO.Path.Combine(root, $".connection-{Guid.NewGuid():N}.tmp"), System.IO.Path.Combine(root, "connection.local.json"));
     }
 
-    internal static OwnedFile CreateReturnedWorkResult(string workspaceRoot, Guid requestId, Guid objectVersion, bool png)
+    internal static OwnedFile CreateReturnedWorkResult(string workspaceRoot, Guid requestId, Guid objectVersion, ImageFormat format)
     {
         string root = RequestRoot(workspaceRoot, requestId);
         PrepareDirectory(root);
-        string destination = ReturnedWorkResultName(objectVersion, png);
+        string destination = ReturnedWorkResultName(objectVersion, format);
         return OwnedFile.Create(root, System.IO.Path.Combine(root, $".return-{Guid.NewGuid():N}.tmp"),
             System.IO.Path.Combine(root, destination));
     }
 
-    internal static string ReturnedWorkResultName(Guid objectVersion, bool png) =>
-        $"returned-{objectVersion:N}.{(png ? "png" : "jpg")}";
+    internal static string ReturnedWorkResultName(Guid objectVersion, ImageFormat format)
+    {
+        string extension = format switch
+        {
+            ImageFormat.Png => "png",
+            ImageFormat.Jpeg => "jpg",
+            ImageFormat.Pdf => "pdf",
+            _ => throw new IOException("Unsupported Work return format.")
+        };
+        return $"returned-{objectVersion:N}.{extension}";
+    }
 
     public static AttachmentBatch BeginAttachments(string workspaceRoot, Guid requestId)
         => AttachmentBatch.Begin(RequestRoot(workspaceRoot, requestId));

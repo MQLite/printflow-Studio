@@ -428,6 +428,9 @@ public sealed class PdfPreparationWorkflowTests
                 }
                 return alpha;
             }
+            public Task<DecodedPreview> RenderThumbnailAsync(int maximumEdge, CancellationToken cancellationToken) =>
+                inner.RenderThumbnailAsync(maximumEdge, cancellationToken);
+
             public void Dispose() => inner.Dispose();
         }
     }

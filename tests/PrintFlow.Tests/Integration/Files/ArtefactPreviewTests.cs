@@ -27,6 +27,28 @@ namespace PrintFlow.Tests.Integration.Files;
 [Collection(SqliteCollection.Name)]
 public sealed class ArtefactPreviewTests
 {
+    [Fact]
+    public async Task Returned_pdf_has_a_thumbnail_before_preparation()
+    {
+        using SessionServiceHarness harness = new();
+        var service = harness.CreateService();
+        string path = Path.ChangeExtension(harness.WriteSourcePng(), ".pdf");
+        await File.WriteAllBytesAsync(path, PdfFixtures.Read("single"));
+        var facts = (await harness.FileInspector.InspectAsync(path, default)).Value;
+        var imported = (await service.ImportVerifiedWorkResultAsync(
+            Guid.NewGuid(), path, "Work PDF", facts.Sha256, default)).Value;
+
+        var result = await harness.Previews.GetRecentThumbnailAsync(imported.Id, default);
+
+        result.IsSuccess.ShouldBeTrue(result.IsFailure ? result.Failure.TechnicalDetail : null);
+        var root = imported.CurrentArtefact!.RevisionId;
+        result.Value.RevisionId.ShouldBe(root);
+        var size = SyntheticImages.DecodeDimensions(result.Value.Payload);
+        Math.Max(size.Item1, size.Item2).ShouldBe(harness.PreviewDecoder.ThumbnailEdge);
+        (await harness.Previews.GetPreviewAsync(imported.Id, root, default)).IsFailure.ShouldBeTrue();
+        (await service.LoadAsync(imported.Id, default)).Value.CurrentStep!.Step.ShouldBe(StepKind.OriginalConfirmation);
+    }
+
     // -----------------------------------------------------------------------------
     // §22: the seam
     // -----------------------------------------------------------------------------

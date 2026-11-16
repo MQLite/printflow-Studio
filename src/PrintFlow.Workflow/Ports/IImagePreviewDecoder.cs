@@ -86,11 +86,11 @@ public interface IImagePreviewDecoder
     /// Decodes <paramref name="file"/> reduced to <see cref="ThumbnailEdge"/>. Reads only.
     /// </summary>
     /// <remarks>
-    /// The same read-only operation as <see cref="DecodeAsync"/> with a smaller bound — not a
-    /// different kind of image and not a cached one. Nothing is stored: a thumbnail is decoded
+    /// A smaller bound than <see cref="DecodeAsync"/>, with direct rendering for single-page PDF.
+    /// Nothing is stored: a thumbnail is decoded
     /// when a list asks for it and released when the list lets go, exactly as every other
     /// preview is (Epic 11200 Part C1 §6).
     /// </remarks>
     Task<OperationResult<DecodedPreview>> DecodeThumbnailAsync(
-        WorkspaceFileRef file, CancellationToken cancellationToken);
+        WorkspaceFileRef file, ImageFormat format, CancellationToken cancellationToken);
 }

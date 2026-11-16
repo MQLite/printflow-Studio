@@ -13,6 +13,7 @@ public sealed partial class LoopbackWorkResultImport
 {
     public const string ConfigurationVariable = "PRINTFLOW_WORK_RESULT_CONFIG";
     internal const string TicketFileName = "work-result-ticket.local.json";
+    private const string FinalPdfMediaType = "application/pdf";
 
     internal async Task<OperationResult<string>> EnrollAsync(string configPath, AiDesignRequest request, CancellationToken ct)
     {
@@ -20,15 +21,17 @@ public sealed partial class LoopbackWorkResultImport
         {
             var receiver = await LoadReceiverAsync(configPath, ct);
             var enroll = new WorkResultPipeRequest("enroll", receiver.ControlBearer, request.RequestId, request.AttemptId,
-                ReferenceSha256: request.Attachments.Select(attachment => attachment.Sha256.Value).Distinct().ToArray());
+                ReferenceSha256: request.Attachments.Select(attachment => attachment.Sha256.Value).Distinct().ToArray(),
+                ReturnMediaType: FinalPdfMediaType);
             var tickets = await ReadPipeAsync<Enrollment>(receiver.PipeName, enroll, ct);
             if (tickets.RequestId != request.RequestId || tickets.AttemptId != request.AttemptId ||
+                tickets.ReturnMediaType != FinalPdfMediaType ||
                 !WorkResultPrompt.IsTicket(tickets.UploadTicket) || !WorkResultPrompt.IsTicket(tickets.ReadTicket))
                 throw new IOException("Work result enrollment mismatch.");
             using var staged = AiDesignOwnedStagingFiles.CreateRequest(workspaceRoot, request.RequestId,
                 AiDesignOwnedStagingFiles.RequestPurpose.WorkResultTicket);
             await JsonSerializer.SerializeAsync(staged.Output,
-                new ReadTicket(request.RequestId, request.AttemptId, receiver.PipeName, tickets.ReadTicket),
+                new ReadTicket(request.RequestId, request.AttemptId, receiver.PipeName, tickets.ReadTicket, tickets.ReturnMediaType),
                 FileAiDesignRequestStore.JsonOptions, ct);
             await staged.PublishAsync(ct);
             return OperationResult.Ok(tickets.UploadTicket);
@@ -49,14 +52,16 @@ public sealed partial class LoopbackWorkResultImport
             var ticket = await ReadLocalAsync<ReadTicket>(path, ct);
             var receiver = await LoadReceiverAsync(configPath, ct);
             if (ticket.RequestId != request.RequestId || ticket.AttemptId != request.AttemptId ||
-                ticket.PipeName != receiver.PipeName || !WorkResultPrompt.IsTicket(ticket.Ticket))
+                ticket.PipeName != receiver.PipeName || !WorkResultPrompt.IsTicket(ticket.Ticket) ||
+                ticket.ReturnMediaType is not (null or FinalPdfMediaType))
             {
                 progress?.Report(WorkResultObservation.From(request, WorkResultStage.NeedsAttention, WorkResultProblem.ValidationFailed));
                 return Fail("The local Work result ticket is stale.");
             }
 
+            string outputName = ticket.ReturnMediaType == FinalPdfMediaType ? "Work final PDF" : "Work image";
             return await ImportAsync(new Options(request.RequestId, request.AttemptId, conversation, receiver.PipeName,
-                "", "", receiver.ReadBearer, ticket.Ticket, "Work image", false), automatic: true, ct);
+                "", "", receiver.ReadBearer, ticket.Ticket, outputName, false, ticket.ReturnMediaType), automatic: true, ct);
         }
         catch (Exception ex) when (IsReceiverFailure(ex) || ex is OperationCanceledException)
         {
@@ -170,6 +175,6 @@ public sealed partial class LoopbackWorkResultImport
         UnauthorizedAccessException or ArgumentException or FormatException or System.ComponentModel.Win32Exception;
 
     private sealed record ReceiverOptions(string PipeName, string ControlBearer, string ReadBearer, string WorkspaceRoot);
-    private sealed record Enrollment(Guid RequestId, Guid AttemptId, string UploadTicket, string ReadTicket);
-    private sealed record ReadTicket(Guid RequestId, Guid AttemptId, string PipeName, string Ticket);
+    private sealed record Enrollment(Guid RequestId, Guid AttemptId, string UploadTicket, string ReadTicket, string? ReturnMediaType);
+    private sealed record ReadTicket(Guid RequestId, Guid AttemptId, string PipeName, string Ticket, string? ReturnMediaType);
 }

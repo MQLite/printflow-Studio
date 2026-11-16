@@ -1,3 +1,4 @@
+using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Revisions;
@@ -110,7 +111,7 @@ public sealed class ArtefactPreviewService : IArtefactPreviewService
         }
 
         OperationResult<DecodedPreview> decoded =
-            await _decoder.DecodeThumbnailAsync(revision.File, cancellationToken);
+            await _decoder.DecodeThumbnailAsync(revision.File, revision.Facts.Format, cancellationToken);
         return Present(revision, decoded);
     }
 
@@ -120,17 +121,9 @@ public sealed class ArtefactPreviewService : IArtefactPreviewService
     /// <remarks>
     /// The imported original, as this product can draw it. The root Revision is the operator's
     /// own file and the one fact about a session that never changes, which is exactly what a
-    /// recognisable list row needs; when the root is a PSD or a single-page PDF — containers the
-    /// review surface deliberately refuses and whose pixels only exist once a preparation step
-    /// has produced a managed raster — the raster derived directly from that root stands in for
-    /// it. Nothing else is considered: a later enhanced or trimmed result would make the same
-    /// job look like a different one from one visit to the next.
-    /// <para>
-    /// This chooses; it does not decode, does not create anything, and cannot fall back to a
-    /// file outside the aggregate it was handed. A session with no root Revision yet — an import
-    /// that failed — and one whose derived raster has not been produced both answer null, and
-    /// the row shows no picture rather than a wrong one.
-    /// </para>
+    /// recognisable list row needs. A single-page PDF can be rendered at thumbnail size before
+    /// preparation. If a managed raster already exists, it represents the PSD or PDF root.
+    /// Later enhanced and trimmed results are excluded so the job stays recognisable.
     /// </remarks>
     private static Revision? ThumbnailArtefactOf(SessionAggregate aggregate)
     {
@@ -148,12 +141,11 @@ public sealed class ArtefactPreviewService : IArtefactPreviewService
         return aggregate.Revisions
             .Where(candidate => candidate.SourceRevisionId == root.Id && IsDrawable(candidate))
             .OrderBy(candidate => candidate.CreatedAtUtc)
-            .FirstOrDefault();
+            .FirstOrDefault() ?? (root.Facts.Format == ImageFormat.Pdf && root.RetentionReleasedAtUtc is null ? root : null);
 
         static bool IsDrawable(Revision revision) =>
             revision.RetentionReleasedAtUtc is null &&
-            revision.Facts.Format is not (PrintFlow.Domain.Files.ImageFormat.Psd
-                or PrintFlow.Domain.Files.ImageFormat.Pdf);
+            revision.Facts.Format is not (ImageFormat.Psd or ImageFormat.Pdf);
     }
 
     /// <summary>Wraps a decoded payload in the Revision identity it came from, or reports why not.</summary>

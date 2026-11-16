@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import sharp from 'sharp';
@@ -9,12 +9,15 @@ import { ResultStore } from '../src/store.mjs';
 import { startServer } from '../src/server.mjs';
 
 const png = await sharp({ create: { width: 2, height: 2, channels: 3, background: 'red' } }).png().toBuffer();
+const pdf = await readFile(new URL('../../../tests/PrintFlow.Tests/Fixtures/Pdf/single.pdf', import.meta.url));
 const file = { download_url: 'https://files.example.test/files/f1', file_id: 'sediment://file_synthetic' };
 test('real MCP client lists file parameter contract and uploads only with writer auth', async t => {
   const root = await mkdtemp(join(tmpdir(), 'pf-mcp-http-'));
   t.after(() => rm(root, { recursive: true, force: true }));
   const store = await ResultStore.open(root);
-  const server = await startServer({ store, writerBearer: 'writer-secret', controlBearer: 'control-secret', readBearer: 'reader-secret', fileFetcher: async () => png, allowedSources: [{ origin: 'https://files.example.test', pathPrefix: '/files/' }], port: 0 });
+  const server = await startServer({ store, writerBearer: 'writer-secret', controlBearer: 'control-secret', readBearer: 'reader-secret',
+    fileFetcher: async source => source.file_id === 'final-pdf' ? pdf : png,
+    allowedSources: [{ origin: 'https://files.example.test', pathPrefix: '/files/' }], port: 0 });
   t.after(async () => { await server.close(); await store.close(); });
   const address = `http://127.0.0.1:${server.port}`;
   const noAuth = await fetch(`${address}/mcp`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' });
@@ -45,6 +48,18 @@ test('real MCP client lists file parameter contract and uploads only with writer
   assert.equal((await status.json()).objectVersion, reply.structuredContent.objectVersion);
   const forbidden = await fetch(`${address}/results/r1/a1`, { headers: { authorization: 'Bearer writer-secret', 'x-read-ticket': tickets.readTicket } });
   assert.equal(forbidden.status, 401);
+
+  const finalTool = listed.tools.find(x => x.name === 'save_final_pdf');
+  assert.deepEqual(finalTool._meta['openai/fileParams'], ['file']);
+  const pdfTickets = await store.enroll({ requestId: 'pdf', attemptId: 'a1', requireWorkConversation: true,
+    returnMediaType: 'application/pdf' });
+  const pdfReply = await client.callTool({ name: 'save_final_pdf', arguments: {
+    request_id: 'pdf', attempt_id: 'a1', upload_ticket: pdfTickets.uploadTicket,
+    file: { ...file, file_id: 'final-pdf', mime_type: 'application/pdf' }
+  } });
+  assert.equal(pdfReply.isError, undefined);
+  assert.equal(pdfReply.structuredContent.mediaType, 'application/pdf');
+  assert.equal(pdfReply.structuredContent.width, null);
 });
 
 test('example placeholder bearer values cannot start the local listener', async () => {

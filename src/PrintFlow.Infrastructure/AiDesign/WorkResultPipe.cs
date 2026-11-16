@@ -6,7 +6,8 @@ using System.Text.Json;
 namespace PrintFlow.Infrastructure.AiDesign;
 
 internal sealed record WorkResultPipeRequest(string Operation, string Bearer, Guid RequestId, Guid AttemptId,
-    string? ReadTicket = null, Guid? ObjectVersion = null, string[]? ReferenceSha256 = null, Guid? WorkConversationId = null);
+    string? ReadTicket = null, Guid? ObjectVersion = null, string[]? ReferenceSha256 = null,
+    Guid? WorkConversationId = null, string? ReturnMediaType = null);
 
 internal interface IWorkResultPipe
 {
