@@ -56,7 +56,7 @@ public static partial class PromptDocumentComposer
         var issues = new List<AiAuthoringIssue>();
         var text = new StringBuilder();
 
-        // Walk original template lines so omitting a date never consumes a newline inside a value.
+        // Walk original template lines so omissions never consume a newline inside a value.
         int start = 0;
         while (start < template.Body.Length)
         {
@@ -70,8 +70,11 @@ public static partial class PromptDocumentComposer
             var matches = VariablePattern().Matches(line);
             bool omitLine = matches.Any(match =>
                 definitions.TryGetValue(match.Groups[1].Value, out var field) &&
-                field.Kind == AiTemplateFieldKind.OptionalDateLine &&
-                string.IsNullOrWhiteSpace(Value(field)));
+                string.IsNullOrWhiteSpace(Value(field)) &&
+                (field.Kind == AiTemplateFieldKind.OptionalDateLine ||
+                    template.Product == AiProductKind.MemorialTshirt && matches.Count == 1 &&
+                    field.Kind == AiTemplateFieldKind.Text &&
+                    (!field.Required || field.Semantic == AiTemplateSemantic.Name)));
 
             if (!omitLine)
             {
