@@ -4,7 +4,7 @@ using PrintFlow.Domain.Ids;
 namespace PrintFlow.Workflow.AiDesign;
 
 public enum WorkResultStage { Submitting, AwaitingReturn, AwaitingVerification, Validating, Imported, NeedsAttention }
-public enum WorkResultProblem { TimedOut, ReceiverUnavailable, ValidationFailed, RecoveryDeferred }
+public enum WorkResultProblem { TimedOut, ReceiverUnavailable, ValidationFailed, RecoveryDeferred, ImageProcessingSettings }
 
 public sealed record WorkResultObservation(Guid RequestId, Guid AttemptId, long StateVersion,
     WorkResultStage Stage, SessionId? ImportedSessionId = null, WorkResultProblem? Problem = null)

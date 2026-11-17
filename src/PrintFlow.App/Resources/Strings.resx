@@ -1723,4 +1723,32 @@
   <data name="WorkTask_Loading" xml:space="preserve"><value>Loading AI tasks…</value></data>
   <data name="WorkTask_Reload" xml:space="preserve"><value>Refresh</value></data>
   <data name="WorkTask_RecoveryDeferred" xml:space="preserve"><value>Studio did not resume this older return automatically. Restart after other returns finish, or stop receiving.</value></data>
+  <data name="ImageProcessing_Heading" xml:space="preserve"><value>Image processing</value></data>
+  <data name="ImageProcessing_Hint" xml:space="preserve"><value>New tasks use the default methods saved here.</value></data>
+  <data name="ImageProcessing_Breadcrumb" xml:space="preserve"><value>Settings / Image processing</value></data>
+  <data name="ImageProcessing_Enhancement" xml:space="preserve"><value>Enhancement</value></data>
+  <data name="ImageProcessing_BackgroundRemoval" xml:space="preserve"><value>Remove background</value></data>
+  <data name="ImageProcessing_Crop" xml:space="preserve"><value>Trim edges</value></data>
+  <data name="ImageProcessing_IgnoreNoise" xml:space="preserve"><value>Ignore small specks</value></data>
+  <data name="ImageProcessing_Available" xml:space="preserve"><value>This version supports Meitu and automatic alpha trimming.</value></data>
+  <data name="ImageProcessing_Restore" xml:space="preserve"><value>Restore defaults</value></data>
+  <data name="ImageProcessing_Save" xml:space="preserve"><value>Save</value></data>
+  <data name="ImageProcessing_Back" xml:space="preserve"><value>Back</value></data>
+  <data name="ImageProcessing_LeaveQuestion" xml:space="preserve"><value>Save your changes to image processing?</value></data>
+  <data name="ImageProcessing_Discard" xml:space="preserve"><value>Discard</value></data>
+  <data name="ImageProcessing_KeepEditing" xml:space="preserve"><value>Keep editing</value></data>
+  <data name="ImageProcessing_InvalidDefaults" xml:space="preserve"><value>The saved image processing settings cannot be read. Open Settings → Image processing, restore defaults, then save.</value></data>
+  <data name="ImageProcessing_UnavailableDefaults" xml:space="preserve"><value>A saved image processing method is unavailable in this version. Choose an available method or restore defaults and save.</value></data>
+  <data name="ImageProcessing_Method_Meitu" xml:space="preserve"><value>Meitu</value></data>
+  <data name="ImageProcessing_Method_LightSharpen" xml:space="preserve"><value>Local light sharpening</value></data>
+  <data name="ImageProcessing_Method_AiUpscale" xml:space="preserve"><value>Local AI upscaling</value></data>
+  <data name="ImageProcessing_Method_OpenAiRestore" xml:space="preserve"><value>OpenAI photo restoration</value></data>
+  <data name="ImageProcessing_Method_SkipEnhancement" xml:space="preserve"><value>Skip enhancement</value></data>
+  <data name="ImageProcessing_Method_BiRefNet" xml:space="preserve"><value>Local BiRefNet</value></data>
+  <data name="ImageProcessing_Method_OpenAiCutout" xml:space="preserve"><value>OpenAI background removal</value></data>
+  <data name="ImageProcessing_Method_KeepBackground" xml:space="preserve"><value>Keep background</value></data>
+  <data name="ImageProcessing_Method_AlphaTrim" xml:space="preserve"><value>Automatic alpha trim</value></data>
+  <data name="ImageProcessing_Method_ManualCrop" xml:space="preserve"><value>Manual crop</value></data>
+  <data name="ImageProcessing_Method_KeepCanvas" xml:space="preserve"><value>Keep original canvas</value></data>
+  <data name="WorkTask_RepairImageProcessingSettings" xml:space="preserve"><value>Open Settings → Image processing, restore defaults and save, then restart PrintFlow Studio to resume receiving this result.</value></data>
 </root>

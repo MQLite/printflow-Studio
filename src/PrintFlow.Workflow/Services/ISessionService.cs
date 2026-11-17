@@ -41,6 +41,11 @@ public interface ISessionService
         string? operatorName,
         CancellationToken cancellationToken);
 
+    /// <summary>Imports a source for the Home workflow selector before the operator chooses a route.</summary>
+    Task<OperationResult<SessionView>> ImportForWorkflowSelectionAsync(
+        string sourceAbsolutePath, string? operatorName, CancellationToken cancellationToken) =>
+        ImportAsync(WorkflowType.PrepareAsset, sourceAbsolutePath, null, operatorName, cancellationToken);
+
     Task<OperationResult<SessionView>> ImportVerifiedWorkResultAsync(Guid requestId, string sourceAbsolutePath,
         string outputName, Sha256 expectedHash, CancellationToken cancellationToken) =>
         Task.FromResult(OperationResult.Fail<SessionView>(

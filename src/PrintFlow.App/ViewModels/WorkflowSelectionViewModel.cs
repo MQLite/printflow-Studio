@@ -427,7 +427,8 @@ public sealed partial class WorkflowSelectionViewModel : ObservableObject, IEntr
                 // roll one back, and the screen must not claim it did. SelectWorkflow never starts
                 // a step, so "No processing was started" holds; the code sits under Error details
                 // (SCRUM-11151).
-                ShowFailureNotice(Strings.WorkflowSelection_Refused, selected.Failure);
+                ShowFailureNotice(PrintFlow.Domain.Settings.ImageProcessingPolicy.IsDefaultsFailure(selected.Failure)
+                    ? DisplayNames.Failure(selected.Failure) : Strings.WorkflowSelection_Refused, selected.Failure);
                 return;
             }
 

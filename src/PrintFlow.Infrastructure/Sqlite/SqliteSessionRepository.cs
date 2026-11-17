@@ -604,6 +604,7 @@ public sealed class SqliteSessionRepository : ISessionRepository
                  DimensionsWidthMm, DimensionsHeightMm, DimensionsPixelWidth, DimensionsPixelHeight,
                  DimensionsPreset, WhiteUnderbaseBranch,
                  TrimMode, TrimMarginTop, TrimMarginRight, TrimMarginBottom, TrimMarginLeft, IgnoreSmallTrimNoise,
+                 ImageProcessingSelection, ImageProcessingDefaultsDeferred,
                  BackgroundRemovalDecision, BackgroundRemovalRevisionId, BackgroundRemovalReviewedSha, BackgroundRemovalMode,
                  DimensionSemantics,
                  PrintPlanSourceRevisionId, PrintPlanSourceSha256,
@@ -632,6 +633,7 @@ public sealed class SqliteSessionRepository : ISessionRepository
                  @DimensionsWidthMm, @DimensionsHeightMm, @DimensionsPixelWidth, @DimensionsPixelHeight,
                  @DimensionsPreset, @WhiteUnderbaseBranch,
                  @TrimMode, @TrimMarginTop, @TrimMarginRight, @TrimMarginBottom, @TrimMarginLeft, @IgnoreSmallTrimNoise,
+                 @ImageProcessingSelection, @ImageProcessingDefaultsDeferred,
                  @BackgroundRemovalDecision, @BackgroundRemovalRevisionId, @BackgroundRemovalReviewedSha, @BackgroundRemovalMode,
                  @DimensionSemantics,
                  @PrintPlanSourceRevisionId, @PrintPlanSourceSha256,
@@ -681,6 +683,8 @@ public sealed class SqliteSessionRepository : ISessionRepository
                 TrimMarginBottom = excluded.TrimMarginBottom,
                 TrimMarginLeft = excluded.TrimMarginLeft,
                 IgnoreSmallTrimNoise = excluded.IgnoreSmallTrimNoise,
+                ImageProcessingSelection = excluded.ImageProcessingSelection,
+                ImageProcessingDefaultsDeferred = excluded.ImageProcessingDefaultsDeferred,
 
                 -- The session pending background-removal authority, so it updates for the same
                 -- reason: it is what the next run would be allowed to do, and the operator may
@@ -901,6 +905,7 @@ public sealed class SqliteSessionRepository : ISessionRepository
                 (Id, SessionId, StepKind, InputRevisionId, Operation, AdapterId, StartedAtUtc, EndedAtUtc,
                  ResultStatus, OutputRevisionId, FailureCode, FailureDetailJson, RetryOfAttemptId, RetrySequence,
                  TrimMode, TrimMarginTop, TrimMarginRight, TrimMarginBottom, TrimMarginLeft, IgnoreSmallTrimNoise,
+                 ImageProcessingMethod, ImageProcessingInputSha256, ImageProcessingAlgorithmVersion,
                  BackgroundRemovalDecision, BackgroundRemovalRevisionId, BackgroundRemovalReviewedSha, BackgroundRemovalMode,
                   AdapterNotes, ManualResultSourcePath,
                  TrimContentLeft, TrimContentTop, TrimContentRight, TrimContentBottom,
@@ -930,6 +935,7 @@ public sealed class SqliteSessionRepository : ISessionRepository
                 (@Id, @SessionId, @StepKind, @InputRevisionId, @Operation, @AdapterId, @StartedAtUtc, @EndedAtUtc,
                  @ResultStatus, @OutputRevisionId, @FailureCode, @FailureDetailJson, @RetryOfAttemptId, @RetrySequence,
                  @TrimMode, @TrimMarginTop, @TrimMarginRight, @TrimMarginBottom, @TrimMarginLeft, @IgnoreSmallTrimNoise,
+                 @ImageProcessingMethod, @ImageProcessingInputSha256, @ImageProcessingAlgorithmVersion,
                  @BackgroundRemovalDecision, @BackgroundRemovalRevisionId, @BackgroundRemovalReviewedSha, @BackgroundRemovalMode,
                   @AdapterNotes, @ManualResultSourcePath,
                  @TrimContentLeft, @TrimContentTop, @TrimContentRight, @TrimContentBottom,

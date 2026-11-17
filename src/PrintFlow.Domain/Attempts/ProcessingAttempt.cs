@@ -132,6 +132,9 @@ public sealed record ProcessingAttempt(
     /// <summary>The producing attempt's noise policy; null denotes a historical exact-alpha trim.</summary>
     public bool? IgnoreSmallTrimNoise { get; init; }
 
+    /// <summary>Method and source facts recorded before work. Historical attempts retain their original evidence.</summary>
+    public ImageProcessingRunDetails? ImageProcessingDetails { get; init; }
+
     /// <summary>Records the trim margin this attempt is about to run with.</summary>
     public ProcessingAttempt WithTrimParameters(TrimMargin margin, bool? ignoreSmallNoise = null) =>
         this with { TrimParameters = margin, IgnoreSmallTrimNoise = ignoreSmallNoise };

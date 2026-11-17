@@ -5,7 +5,7 @@ using PrintFlow.Domain.Results;
 namespace PrintFlow.Workflow.AiDesign;
 
 public enum WorkTaskStage { Submitting, AwaitingReturn, AwaitingVerification, Validating, Imported, SubmittedOnly, Cancelled, NeedsAttention }
-public enum WorkTaskFailure { Unconfirmed, Setup, UploadFailed, ReceiverUnavailable, TimedOut, ValidationFailed, ResultUnavailable, RecoveryDeferred }
+public enum WorkTaskFailure { Unconfirmed, Setup, UploadFailed, ReceiverUnavailable, TimedOut, ValidationFailed, ResultUnavailable, RecoveryDeferred, ImageProcessingSettings }
 
 public sealed record WorkTaskSnapshot(Guid RequestId, Guid AttemptId, long StateVersion,
     Guid? DraftId, string? Title, DateTimeOffset UpdatedAtUtc, WorkTaskStage Stage, Guid? WorkConversationId = null,

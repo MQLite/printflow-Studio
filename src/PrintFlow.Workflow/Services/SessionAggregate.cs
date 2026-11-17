@@ -83,6 +83,8 @@ public sealed record SessionAggregate(
             // dropped it would silently re-trim at zero margin (Epic 11200 Part C3 §13).
             TrimMargin = Session.TrimMargin,
             IgnoreSmallTrimNoise = Session.IgnoreSmallTrimNoise,
+            ImageProcessingSelection = Session.ImageProcessingSelection,
+            ImageProcessingDefaultsDeferred = Session.ImageProcessingDefaultsDeferred,
 
             // Carried across for the same reason, and with the same caveat: what is restored is
             // the *pending* authority, not permission to run. Whether it still authorises

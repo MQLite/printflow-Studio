@@ -6,6 +6,8 @@ namespace PrintFlow.Infrastructure.Sqlite;
 
 internal sealed class SessionRow
 {
+    public string? ImageProcessingSelection { get; set; }
+    public bool ImageProcessingDefaultsDeferred { get; set; }
     public string Id { get; set; } = "";
     public string WorkflowType { get; set; } = "";
     public string OutputName { get; set; } = "";
@@ -195,6 +197,9 @@ internal sealed class RevisionRow
 
 internal sealed class AttemptRow
 {
+    public string? ImageProcessingMethod { get; set; }
+    public string? ImageProcessingInputSha256 { get; set; }
+    public string? ImageProcessingAlgorithmVersion { get; set; }
     public string Id { get; set; } = "";
     public string SessionId { get; set; } = "";
     public string StepKind { get; set; } = "";

@@ -165,7 +165,15 @@ public sealed class WorkflowEngine : IWorkflowEngine
         // so its result is carried across rather than discarded.
         WorkflowSnapshot reshaped = WorkflowSnapshot.Create(
             state.SessionId, command.Type, state.OutputName, context.NowUtc)
-            with { RequiresPsdPreparation = state.RequiresPsdPreparation, RequiresPdfPreparation = state.RequiresPdfPreparation };
+            with
+            {
+                RequiresPsdPreparation = state.RequiresPsdPreparation,
+                RequiresPdfPreparation = state.RequiresPdfPreparation,
+                ImageProcessingSelection = state.ImageProcessingSelection,
+                ImageProcessingDefaultsDeferred = state.ImageProcessingDefaultsDeferred,
+                TrimMargin = state.TrimMargin,
+                IgnoreSmallTrimNoise = state.IgnoreSmallTrimNoise,
+            };
 
         SessionStep? importBefore = state.Step(StepKind.Import);
         if (importBefore is not null && importBefore.CurrentRevisionId is not null)

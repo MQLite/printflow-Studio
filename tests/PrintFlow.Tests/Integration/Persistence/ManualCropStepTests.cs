@@ -236,6 +236,27 @@ public sealed class ManualCropStepTests
         manual.File.RelativePath.ShouldNotBe(root.File.RelativePath);
     }
 
+    [Fact]
+    public async Task A_manual_crop_refuses_replaced_source_bytes_before_recording_an_attempt()
+    {
+        using SessionServiceHarness harness = new();
+        ISessionService service = harness.CreateService();
+        SessionId id = await AtManualCropAsync(service, harness);
+        SessionAggregate before = (await harness.Repository.LoadAsync(id, default)).Value!;
+        Revision root = before.Revisions.Single(revision => revision.IsRoot);
+        string path = harness.FileWorkspace.ResolveAbsolute(root.File);
+        File.SetAttributes(path, FileAttributes.Normal);
+        await File.WriteAllBytesAsync(path, SyntheticImages.Png(
+            root.Facts.PixelWidth!.Value, root.Facts.PixelHeight!.Value, alpha: true));
+
+        var result = await service.ExecuteAsync(
+            id, new WorkflowCommand.SubmitManualCrop(StepKind.Trim, OperatorCrop), "tester", default);
+        result.IsFailure.ShouldBeTrue();
+        result.Failure.Code.ShouldBe(FailureCode.RevisionIntegrityMismatch);
+        var after = (await harness.Repository.LoadAsync(id, default)).Value!;
+        after.Attempts.Count.ShouldBe(before.Attempts.Count);
+    }
+
     // -----------------------------------------------------------------------------
     // §13: the guard
     // -----------------------------------------------------------------------------

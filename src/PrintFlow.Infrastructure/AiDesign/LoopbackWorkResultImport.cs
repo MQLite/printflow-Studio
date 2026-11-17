@@ -4,6 +4,7 @@ using System.Text.Json;
 using PrintFlow.Domain.AiDesign;
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Results;
+using PrintFlow.Domain.Settings;
 using PrintFlow.Infrastructure.AiDesign.Authoring;
 using PrintFlow.Infrastructure.Imaging;
 using PrintFlow.Infrastructure.Workspace;
@@ -170,7 +171,9 @@ public sealed partial class LoopbackWorkResultImport(string workspaceRoot, IFile
             }, ct);
             if (updated.IsFailure)
             {
-                await ReportProblemAsync(WorkResultProblem.ValidationFailed);
+                await ReportProblemAsync(ImageProcessingPolicy.IsDefaultsFailure(updated.Failure)
+                    ? WorkResultProblem.ImageProcessingSettings
+                    : WorkResultProblem.ValidationFailed);
                 return OperationResult.Fail<SessionView>(updated.Failure);
             }
             var loaded = await sessions.LoadAsync(updated.Value.ImportedSessionId!.Value, cancellationToken);

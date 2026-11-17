@@ -1713,4 +1713,32 @@
   <data name="WorkTask_Loading" xml:space="preserve"><value>正在加载 AI 任务…</value></data>
   <data name="WorkTask_Reload" xml:space="preserve"><value>刷新</value></data>
   <data name="WorkTask_RecoveryDeferred" xml:space="preserve"><value>Studio 未自动恢复这笔较早的回传。可等其它回传完成后重启 Studio，或停止接收。</value></data>
+  <data name="ImageProcessing_Heading" xml:space="preserve"><value>图像处理</value></data>
+  <data name="ImageProcessing_Hint" xml:space="preserve"><value>新任务将使用这里保存的默认方式。</value></data>
+  <data name="ImageProcessing_Breadcrumb" xml:space="preserve"><value>设置 / 图像处理</value></data>
+  <data name="ImageProcessing_Enhancement" xml:space="preserve"><value>清晰化</value></data>
+  <data name="ImageProcessing_BackgroundRemoval" xml:space="preserve"><value>去背景</value></data>
+  <data name="ImageProcessing_Crop" xml:space="preserve"><value>裁切边缘</value></data>
+  <data name="ImageProcessing_IgnoreNoise" xml:space="preserve"><value>忽略小杂点</value></data>
+  <data name="ImageProcessing_Available" xml:space="preserve"><value>当前版本支持美图和 Alpha 自动裁切。</value></data>
+  <data name="ImageProcessing_Restore" xml:space="preserve"><value>恢复默认</value></data>
+  <data name="ImageProcessing_Save" xml:space="preserve"><value>保存</value></data>
+  <data name="ImageProcessing_Back" xml:space="preserve"><value>返回</value></data>
+  <data name="ImageProcessing_LeaveQuestion" xml:space="preserve"><value>保存对图像处理设置的更改吗？</value></data>
+  <data name="ImageProcessing_Discard" xml:space="preserve"><value>放弃更改</value></data>
+  <data name="ImageProcessing_KeepEditing" xml:space="preserve"><value>继续编辑</value></data>
+  <data name="ImageProcessing_InvalidDefaults" xml:space="preserve"><value>无法读取已保存的图像处理设置。请打开「设置 → 图像处理」，恢复默认后保存。</value></data>
+  <data name="ImageProcessing_UnavailableDefaults" xml:space="preserve"><value>保存的图像处理方式在当前版本不可用。请选择可用方式，或恢复默认后保存。</value></data>
+  <data name="ImageProcessing_Method_Meitu" xml:space="preserve"><value>美图</value></data>
+  <data name="ImageProcessing_Method_LightSharpen" xml:space="preserve"><value>本地轻度锐化</value></data>
+  <data name="ImageProcessing_Method_AiUpscale" xml:space="preserve"><value>本地 AI 超分</value></data>
+  <data name="ImageProcessing_Method_OpenAiRestore" xml:space="preserve"><value>OpenAI 照片修复</value></data>
+  <data name="ImageProcessing_Method_SkipEnhancement" xml:space="preserve"><value>跳过清晰化</value></data>
+  <data name="ImageProcessing_Method_BiRefNet" xml:space="preserve"><value>本地 BiRefNet 抠图</value></data>
+  <data name="ImageProcessing_Method_OpenAiCutout" xml:space="preserve"><value>OpenAI 生成式去背景</value></data>
+  <data name="ImageProcessing_Method_KeepBackground" xml:space="preserve"><value>保留背景</value></data>
+  <data name="ImageProcessing_Method_AlphaTrim" xml:space="preserve"><value>Alpha 自动裁切</value></data>
+  <data name="ImageProcessing_Method_ManualCrop" xml:space="preserve"><value>手动框选</value></data>
+  <data name="ImageProcessing_Method_KeepCanvas" xml:space="preserve"><value>保留原画布</value></data>
+  <data name="WorkTask_RepairImageProcessingSettings" xml:space="preserve"><value>请打开「设置 → 图像处理」，恢复默认并保存，重启 PrintFlow Studio 后继续接收此结果。</value></data>
 </root>

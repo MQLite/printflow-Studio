@@ -228,6 +228,11 @@ public sealed partial class SessionService : ISessionService
             SessionId.From(_idGenerator.NewId()), workflowType, sourceAbsolutePath, outputName, operatorName,
             expectedHash: null, cancellationToken);
 
+    public Task<OperationResult<SessionView>> ImportForWorkflowSelectionAsync(
+        string sourceAbsolutePath, string? operatorName, CancellationToken cancellationToken) => ImportCoreAsync(
+            SessionId.From(_idGenerator.NewId()), WorkflowType.PrepareAsset, sourceAbsolutePath, null, operatorName,
+            expectedHash: null, cancellationToken, selectingWorkflow: true);
+
     public async Task<OperationResult<SessionView>> ImportVerifiedWorkResultAsync(Guid requestId, string sourceAbsolutePath,
         string outputName, Sha256 expectedHash, CancellationToken cancellationToken)
     {
@@ -258,12 +263,28 @@ public sealed partial class SessionService : ISessionService
 
     private async Task<OperationResult<SessionView>> ImportCoreAsync(
         SessionId id, WorkflowType workflowType, string sourceAbsolutePath, string? outputName, string? operatorName,
-        Sha256? expectedHash, CancellationToken cancellationToken)
+        Sha256? expectedHash, CancellationToken cancellationToken, bool selectingWorkflow = false)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(sourceAbsolutePath);
 
         OutputName name = OutputName.Sanitise(outputName ?? StemOf(sourceAbsolutePath));
 
+        OperationResult<(ImageProcessingPolicy? Policy, TrimMargin Margin)> defaults =
+            await ResolveImageProcessingDefaultsAsync(workflowType, cancellationToken).ConfigureAwait(false);
+        bool deferred = false;
+        if (defaults.IsFailure)
+        {
+            if (!selectingWorkflow || !ImageProcessingPolicy.IsDefaultsFailure(defaults.Failure))
+                return OperationResult.Fail<SessionView>(defaults.Failure);
+
+            // The Home import takes place before route selection. Keep that entry open for
+            // print-only use and require a valid configuration before an image route is chosen.
+            deferred = true;
+            workflowType = WorkflowType.GeneratePrintTiff;
+        }
+
+        (ImageProcessingPolicy? policy, TrimMargin startingMargin) =
+            deferred ? (null, TrimMargin.Tight) : defaults.Value;
         CommandContext context = CommandContext.Create(_timeProvider, _idGenerator, operatorName);
 
         OperationResult<WorkspaceDirRef> created = _workspace.CreateSession(id, context.NowUtc);
@@ -274,16 +295,22 @@ public sealed partial class SessionService : ISessionService
 
         WorkspaceDirRef workspaceDir = created.Value;
 
-        // The configured default, applied to this new job only. Read here rather than inside the
-        // domain constructors, so the value a session is created with is a decision this service
-        // made once and persisted, not a lookup the domain repeats (SCRUM-11118).
-        TrimMargin startingMargin = await ResolveDefaultTrimMarginAsync(cancellationToken)
-            .ConfigureAwait(false);
-
         ProcessingSession session = ProcessingSession.Start(id, workflowType, name, workspaceDir, context.NowUtc)
-            with { TrimMargin = startingMargin };
+            with
+            {
+                TrimMargin = startingMargin,
+                IgnoreSmallTrimNoise = policy?.IgnoreSmallTrimNoise ?? true,
+                ImageProcessingSelection = policy?.Selection,
+                ImageProcessingDefaultsDeferred = deferred,
+            };
         WorkflowSnapshot initialSnapshot = WorkflowSnapshot.Create(id, workflowType, name, context.NowUtc)
-            with { TrimMargin = startingMargin };
+            with
+            {
+                TrimMargin = session.TrimMargin,
+                IgnoreSmallTrimNoise = session.IgnoreSmallTrimNoise,
+                ImageProcessingSelection = session.ImageProcessingSelection,
+                ImageProcessingDefaultsDeferred = deferred,
+            };
 
         WorkflowTransition started = _engine.Apply(initialSnapshot, new WorkflowCommand.StartStep(StepKind.Import), context);
         if (started.IsRejected)
@@ -379,35 +406,29 @@ public sealed partial class SessionService : ISessionService
         return ViewOf(finished.State, [rootRevision], [], [succeededAttempt], []);
     }
 
-    /// <summary>
-    /// The trim safety margin a job imported now starts with (SCRUM-11118).
-    /// </summary>
-    /// <remarks>
-    /// Every unusable answer resolves to <see cref="TrimMargin.Tight"/> — no repository, a
-    /// persistence failure, no persisted row, a value that is not a whole number, and a
-    /// negative or zero one. That is the margin every trim has had since Epic 11200 Part B, so
-    /// the failure direction of a settings read is "behave exactly as before", never "start a
-    /// production job with a margin nobody chose".
-    /// <para>
-    /// A uniform margin, because the setting is one number. The per-edge form stays what it has
-    /// always been: a decision the operator makes on a specific image while looking at it, not
-    /// a default (Epic 11200 Part C3 §10).
-    /// </para>
-    /// </remarks>
-    private async Task<TrimMargin> ResolveDefaultTrimMarginAsync(CancellationToken cancellationToken)
+    private async Task<OperationResult<(ImageProcessingPolicy? Policy, TrimMargin Margin)>>
+        ResolveImageProcessingDefaultsAsync(WorkflowType workflow, CancellationToken cancellationToken)
     {
+        if (!WorkflowCatalog.For(workflow).Contains(StepKind.Trim))
+            return OperationResult.Ok<(ImageProcessingPolicy?, TrimMargin)>((null, TrimMargin.Tight));
         if (_settings is null)
-        {
-            return TrimMargin.Tight;
-        }
+            return OperationResult.Ok<(ImageProcessingPolicy?, TrimMargin)>((ImageProcessingPolicy.CompatibleDefault, TrimMargin.Tight));
 
-        OperationResult<SettingEntry?> persisted = await _settings
-            .ReadAsync(SettingKey.TrimSafetyMarginPixels, cancellationToken)
-            .ConfigureAwait(false);
+        var settings = await _settings.ReadAllAsync(cancellationToken).ConfigureAwait(false);
+        if (settings.IsFailure)
+            return OperationResult.Fail<(ImageProcessingPolicy?, TrimMargin)>(settings.Failure);
 
-        return persisted.IsSuccess && persisted.Value?.AsInteger() is { } pixels && pixels > 0
-            ? TrimMargin.Uniform(pixels)
-            : TrimMargin.Tight;
+        var policy = ImageProcessingPolicy.FromSettings(settings.Value);
+        if (policy.IsFailure)
+            return OperationResult.Fail<(ImageProcessingPolicy?, TrimMargin)>(policy.Failure);
+        if (!policy.Value.Selection.CanRunInCurrentBuild)
+            return OperationResult.Fail<(ImageProcessingPolicy?, TrimMargin)>(OperationFailure.Create(
+                FailureCode.AdapterUnavailable, "The selected image processing methods are not available in this build.",
+                messageKey: ImageProcessingPolicy.UnavailableDefaultsMessage));
+
+        int pixels = ImageProcessingPolicy.ReadTrimMarginPixels(settings.Value);
+        return OperationResult.Ok<(ImageProcessingPolicy?, TrimMargin)>(
+            (policy.Value, pixels == 0 ? TrimMargin.Tight : TrimMargin.Uniform(pixels)));
     }
 
     /// <inheritdoc />
@@ -600,6 +621,23 @@ public sealed partial class SessionService : ISessionService
         if (transition.IsRejected)
         {
             return OperationResult.Fail<SessionView>(MapRejection(transition.Rejection!));
+        }
+
+        if (command is WorkflowCommand.SelectWorkflow && snapshot.ImageProcessingDefaultsDeferred &&
+            transition.State.Definition.Contains(StepKind.Trim))
+        {
+            var defaults = await ResolveImageProcessingDefaultsAsync(transition.State.WorkflowType, cancellationToken)
+                .ConfigureAwait(false);
+            if (defaults.IsFailure)
+                return OperationResult.Fail<SessionView>(defaults.Failure);
+
+            transition = WorkflowTransition.Accepted(transition.State with
+            {
+                ImageProcessingSelection = defaults.Value.Policy!.Selection,
+                ImageProcessingDefaultsDeferred = false,
+                IgnoreSmallTrimNoise = defaults.Value.Policy.IgnoreSmallTrimNoise,
+                TrimMargin = defaults.Value.Margin,
+            }, transition.Effects);
         }
 
         ProducingWork? work = ProducingWorkOf(transition.Effects);
@@ -1558,6 +1596,7 @@ public sealed partial class SessionService : ISessionService
             // A trim adjustment is a decision about the exact pixels of the pre-trim source it
             // crops, so those bytes are re-verified before anything is committed (SCRUM-11147).
             WorkflowCommand.AdjustTrimFromReview => FindRevision(aggregate, snapshot.UpstreamRevisionOf(StepKind.Trim)),
+            WorkflowCommand.SubmitManualCrop crop => FindRevision(aggregate, snapshot.UpstreamRevisionOf(crop.Step)),
             WorkflowCommand.SubmitManualResult manual => FindRevision(aggregate, snapshot.UpstreamRevisionOf(manual.Step)),
 
             // The same input a manual import is checked against: U's bytes are re-verified before
@@ -2084,6 +2123,25 @@ public sealed partial class SessionService : ISessionService
             context.NewAttemptId, aggregate.Session.Id, work.Step, work.InputRevision,
             work.Operation, work.ProcessorId, context.NowUtc,
             retryOfAttemptId: retryOf, retrySequence: retrySequence);
+
+        ImageProcessingMethod? method = work.Operation switch
+        {
+            OperationKind.Enhance => ImageProcessingMethod.MeituEnhancement,
+            OperationKind.RemoveBackground => ImageProcessingMethod.MeituBackgroundRemoval,
+            OperationKind.Trim => ImageProcessingMethod.AlphaTrim,
+            OperationKind.ManualImport when work.Step == StepKind.Trim => ImageProcessingMethod.ManualCrop,
+            OperationKind.ManualResultImport => ImageProcessingMethod.ManualResult,
+            _ => null,
+        };
+        if (method is { } actualMethod && FindRevision(aggregate, work.InputRevision) is { } imageInput)
+        {
+            string? algorithmVersion = actualMethod is ImageProcessingMethod.AlphaTrim or ImageProcessingMethod.ManualCrop
+                ? work.ProcessorId : null;
+            runningAttempt = runningAttempt with
+            {
+                ImageProcessingDetails = new ImageProcessingRunDetails(actualMethod, imageInput.Sha256, algorithmVersion),
+            };
+        }
 
         if (work.ManualResultPath is { } selectedEvidence)
             runningAttempt = runningAttempt.WithManualResultSourcePath(selectedEvidence) with
@@ -3545,6 +3603,8 @@ public sealed partial class SessionService : ISessionService
             WhiteUnderbaseBranch = newSnapshot.WhiteUnderbaseBranch,
             TrimMargin = newSnapshot.TrimMargin,
             IgnoreSmallTrimNoise = newSnapshot.IgnoreSmallTrimNoise,
+            ImageProcessingSelection = newSnapshot.ImageProcessingSelection,
+            ImageProcessingDefaultsDeferred = newSnapshot.ImageProcessingDefaultsDeferred,
             BackgroundRemovalAuthority = newSnapshot.BackgroundRemovalAuthority,
 
             // Carried across with the dimensions they belong to, so the pair, its reading and the

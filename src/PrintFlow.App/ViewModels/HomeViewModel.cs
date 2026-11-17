@@ -115,19 +115,6 @@ public sealed partial class HomeViewModel : ObservableObject, IEntryScreenLifeti
     internal Task WorkResultRefresh { get; private set; } = Task.CompletedTask;
 
     /// <summary>
-    /// The workflow a session is imported under before the operator chooses.
-    /// </summary>
-    /// <remarks>
-    /// Import must record <i>some</i> workflow, because a session's steps are its workflow's
-    /// steps. Choosing here and confirming on the next screen is the engine's own supported
-    /// path: <c>SelectWorkflow</c> re-shapes the session onto the chosen definition and carries
-    /// the completed import across, and it stays legal until a derived Revision exists
-    /// (MVP design §6.1). The alternative — a half-created session with no workflow — would
-    /// need a state the domain deliberately does not have.
-    /// </remarks>
-    private const WorkflowType ProvisionalWorkflow = WorkflowType.PrepareAsset;
-
-    /// <summary>
     /// The reason recorded when a session is abandoned from Home.
     /// </summary>
     /// <remarks>
@@ -834,10 +821,8 @@ public sealed partial class HomeViewModel : ObservableObject, IEntryScreenLifeti
         try
         {
             Notice = null;
-            OperationResult<SessionView> imported = await _sessions.ImportAsync(
-                ProvisionalWorkflow,
+            OperationResult<SessionView> imported = await _sessions.ImportForWorkflowSelectionAsync(
                 sourceAbsolutePath,
-                outputName: null,
                 operatorName: Environment.UserName,
                 import.Token).ConfigureAwait(true);
 

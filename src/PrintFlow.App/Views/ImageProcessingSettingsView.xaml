@@ -1,0 +1,154 @@
+<UserControl x:Class="PrintFlow.App.Views.ImageProcessingSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             AutomationProperties.AutomationId="Screen.ImageProcessingSettings"
+             AutomationProperties.Name="{Binding ImageProcessingHeading}">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/PrintFlow.App;component/Themes/WpfUiTheme.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <BooleanToVisibilityConverter x:Key="VisibleWhenTrue" />
+            <Style x:Key="MethodItem" TargetType="ComboBoxItem">
+                <Setter Property="IsEnabled" Value="{Binding IsAvailable}" />
+            </Style>
+            <Style x:Key="MethodLabel" TargetType="TextBlock">
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+                <Setter Property="Margin" Value="0,0,12,0" />
+            </Style>
+            <Style x:Key="MethodSeparator" TargetType="Border">
+                <Setter Property="BorderBrush" Value="{DynamicResource PF.Brush.Border}" />
+                <Setter Property="BorderThickness" Value="0,0,0,1" />
+                <Setter Property="Margin" Value="0,10,0,10" />
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Margin="0,0,0,12">
+            <TextBlock Text="{Binding ImageProcessingBreadcrumb}" Foreground="{DynamicResource PF.Brush.Muted}" />
+            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                <ui:SymbolIcon Symbol="Image24" Style="{StaticResource PF.Icon}" Margin="0,0,10,0"
+                               VerticalAlignment="Center" Foreground="{DynamicResource PF.Brush.Primary}" />
+                <TextBlock Text="{Binding ImageProcessingHeading}" FontSize="{DynamicResource PF.Font.Title}"
+                           FontWeight="SemiBold" VerticalAlignment="Center" />
+            </StackPanel>
+            <TextBlock Text="{Binding ImageProcessingHint}" TextWrapping="Wrap" Margin="0,4,0,0" />
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <ScrollViewer.Style>
+                <Style TargetType="ScrollViewer">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                            <Setter Property="IsEnabled" Value="False" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ScrollViewer.Style>
+            <ui:Card VerticalAlignment="Top" Padding="20" Style="{DynamicResource PF.Card.Fluent}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*" MinWidth="110" />
+                        <ColumnDefinition Width="5*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Text="{Binding EnhancementMethodLabel}" Style="{StaticResource MethodLabel}" />
+                    <ComboBox Grid.Column="1" Style="{StaticResource PF.Input.ComboBox}"
+                              ItemsSource="{Binding EnhancementMethods}" DisplayMemberPath="Label"
+                              ItemContainerStyle="{StaticResource MethodItem}" SelectedValuePath="Method"
+                              SelectedValue="{Binding SelectedEnhancementMethod, Mode=TwoWay}"
+                              AutomationProperties.AutomationId="ImageProcessing.Enhancement"
+                              AutomationProperties.Name="{Binding EnhancementMethodLabel}" />
+
+                    <Border Grid.Row="1" Grid.ColumnSpan="2" Style="{StaticResource MethodSeparator}" />
+                    <TextBlock Grid.Row="2" Text="{Binding BackgroundRemovalMethodLabel}" Style="{StaticResource MethodLabel}" />
+                    <ComboBox Grid.Row="2" Grid.Column="1" Style="{StaticResource PF.Input.ComboBox}"
+                              ItemsSource="{Binding BackgroundRemovalMethods}" DisplayMemberPath="Label"
+                              ItemContainerStyle="{StaticResource MethodItem}" SelectedValuePath="Method"
+                              SelectedValue="{Binding SelectedBackgroundRemovalMethod, Mode=TwoWay}"
+                              AutomationProperties.AutomationId="ImageProcessing.BackgroundRemoval"
+                              AutomationProperties.Name="{Binding BackgroundRemovalMethodLabel}" />
+
+                    <Border Grid.Row="3" Grid.ColumnSpan="2" Style="{StaticResource MethodSeparator}" />
+                    <TextBlock Grid.Row="4" Text="{Binding CropMethodLabel}" Style="{StaticResource MethodLabel}" />
+                    <ComboBox Grid.Row="4" Grid.Column="1" Style="{StaticResource PF.Input.ComboBox}"
+                              ItemsSource="{Binding CropMethods}" DisplayMemberPath="Label"
+                              ItemContainerStyle="{StaticResource MethodItem}" SelectedValuePath="Method"
+                              SelectedValue="{Binding SelectedCropMethod, Mode=TwoWay}"
+                              AutomationProperties.AutomationId="ImageProcessing.Crop"
+                              AutomationProperties.Name="{Binding CropMethodLabel}" />
+
+                    <Border Grid.Row="5" Grid.ColumnSpan="2" Style="{StaticResource MethodSeparator}" />
+                    <TextBlock Grid.Row="6" Text="{Binding TrimMarginLabel}" Style="{StaticResource MethodLabel}" />
+                    <WrapPanel Grid.Row="6" Grid.Column="1">
+                        <TextBox Width="90" Margin="0,0,12,6" Style="{StaticResource PF.Input.TextBox}"
+                                 Text="{Binding TrimSafetyMarginPixels, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 AutomationProperties.AutomationId="Settings.TrimMargin"
+                                 AutomationProperties.Name="{Binding TrimMarginLabel}" />
+                        <CheckBox Margin="0,0,0,6" VerticalAlignment="Center"
+                                  Content="{Binding IgnoreSmallTrimNoiseLabel}"
+                                  IsChecked="{Binding IgnoreSmallTrimNoise, Mode=TwoWay}"
+                                  AutomationProperties.AutomationId="ImageProcessing.IgnoreSmallTrimNoise"
+                                  AutomationProperties.Name="{Binding IgnoreSmallTrimNoiseLabel}" />
+                    </WrapPanel>
+                    <Border Grid.Row="7" Grid.ColumnSpan="2" Style="{StaticResource MethodSeparator}" />
+                    <TextBlock Grid.Row="8" Grid.ColumnSpan="2" Text="{Binding ImageProcessingAvailableHint}"
+                               Foreground="{DynamicResource PF.Brush.Muted}" TextWrapping="Wrap" />
+                </Grid>
+            </ui:Card>
+        </ScrollViewer>
+
+        <StackPanel Grid.Row="2" Margin="0,12,0,0">
+            <TextBlock Text="{Binding ImageProcessingNotice}" TextWrapping="Wrap" Margin="0,0,0,6"
+                       AutomationProperties.AutomationId="ImageProcessing.Notice"
+                       AutomationProperties.LiveSetting="Polite" />
+            <Border Background="{DynamicResource PF.Brush.Selection}" CornerRadius="4" Padding="10" Margin="0,0,0,8"
+                    Visibility="{Binding IsImageProcessingLeavePending, Converter={StaticResource VisibleWhenTrue}}">
+                <StackPanel>
+                    <TextBlock Text="{Binding ImageProcessingLeaveQuestion}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                    <WrapPanel Margin="0,6,0,0">
+                        <Button Content="{Binding ImageProcessingContinueEditingLabel}"
+                                Command="{Binding KeepEditingImageProcessingCommand}"
+                                Style="{StaticResource PF.Button.Secondary}" Margin="0,0,8,0"
+                                AutomationProperties.AutomationId="ImageProcessing.KeepEditing" />
+                        <Button Content="{Binding ImageProcessingDiscardLabel}" Command="{Binding DiscardImageProcessingCommand}"
+                                Style="{StaticResource PF.Button.Secondary}"
+                                AutomationProperties.AutomationId="ImageProcessing.Discard" />
+                    </WrapPanel>
+                </StackPanel>
+            </Border>
+            <DockPanel LastChildFill="False">
+                <Button DockPanel.Dock="Left" Content="{Binding ImageProcessingBackLabel}"
+                        Command="{Binding BackFromImageProcessingCommand}" Style="{StaticResource PF.Button.Secondary}"
+                        AutomationProperties.AutomationId="ImageProcessing.Back" />
+                <Button DockPanel.Dock="Right" Content="{Binding ImageProcessingSaveLabel}"
+                        Command="{Binding SaveImageProcessingCommand}" Style="{StaticResource PF.Button.Primary}"
+                        AutomationProperties.AutomationId="ImageProcessing.Save" />
+                <Button DockPanel.Dock="Right" Margin="0,0,8,0" Content="{Binding ImageProcessingRestoreLabel}"
+                        Command="{Binding RestoreImageProcessingDefaultsCommand}" Style="{StaticResource PF.Button.Secondary}"
+                        AutomationProperties.AutomationId="ImageProcessing.RestoreDefaults" />
+            </DockPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>

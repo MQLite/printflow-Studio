@@ -1,6 +1,7 @@
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Outputs;
+using PrintFlow.Domain.Settings;
 using PrintFlow.Domain.Trimming;
 
 namespace PrintFlow.Domain.Sessions;
@@ -51,6 +52,12 @@ public sealed record ProcessingSession(
 
     /// <summary>Whether the next automatic trim ignores small detached alpha-1 residue.</summary>
     public bool IgnoreSmallTrimNoise { get; init; } = true;
+
+    /// <summary>Methods captured at import. A null value identifies a pre-configuration or print-only session.</summary>
+    public SessionImageProcessingSelection? ImageProcessingSelection { get; init; }
+
+    /// <summary>The Home import is waiting on repaired defaults before an image route can run.</summary>
+    public bool ImageProcessingDefaultsDeferred { get; init; }
 
     /// <summary>
     /// The reviewed-content authority the next Background Removal attempt would run with

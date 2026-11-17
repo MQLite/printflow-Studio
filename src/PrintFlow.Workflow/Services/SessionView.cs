@@ -5,6 +5,7 @@ using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Sessions;
+using PrintFlow.Domain.Settings;
 using PrintFlow.Domain.Trimming;
 using PrintFlow.Workflow.Engine;
 using PrintFlow.Workflow.Ports;
@@ -657,6 +658,7 @@ public sealed record SessionView(
     public SessionCleanupResult? CompletionCleanup { get; init; }
     public BackgroundRemovalMode BackgroundRemovalMode { get; init; } = BackgroundRemovalMode.Automatic;
     public BackgroundRemovalMode BackgroundRemovalAttemptMode { get; init; } = BackgroundRemovalMode.Automatic;
+    public SessionImageProcessingSelection? ImageProcessingSelection { get; init; }
 
     /// <summary>The exact terminal attempt represented by the current failure surface.</summary>
     public AttemptId? CurrentFailureAttemptId { get; init; }
@@ -1009,6 +1011,9 @@ public sealed record SessionView(
             BackgroundRemovalMode = usable?.Mode ?? BackgroundRemovalMode.Automatic,
             BackgroundRemovalAttemptMode = producingAuthority?.Mode ?? BackgroundRemovalMode.Automatic,
             IgnoreSmallTrimNoise = snapshot.IgnoreSmallTrimNoise,
+            ImageProcessingSelection = snapshot.Definition.Contains(StepKind.Trim)
+                ? snapshot.ImageProcessingSelection ?? SessionImageProcessingSelection.Compatible
+                : null,
             CurrentTrimIgnoresSmallNoise = current is not null &&
                 attempts.FirstOrDefault(attempt => attempt.OutputRevisionId == current.RevisionId)?.IgnoreSmallTrimNoise == true,
         };
