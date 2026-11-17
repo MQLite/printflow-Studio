@@ -22,6 +22,8 @@ public sealed class NativeHostProcessTransferTests
         var hostInfo=new ProcessStartInfo("dotnet"){UseShellExecute=false,CreateNoWindow=true,RedirectStandardInput=true,RedirectStandardOutput=true,RedirectStandardError=true};
         hostInfo.ArgumentList.Add(typeof(PrintFlow.AiDesignProbe.Program).Assembly.Location);
         foreach(var arg in new[]{"native-run",root.Root,installation.Root})hostInfo.ArgumentList.Add(arg);
+        string releasePath = Path.Combine(installation.Root, "release-first-chunk");
+        if (stop) hostInfo.ArgumentList.Add(releasePath);
         var nodeInfo=new ProcessStartInfo("node"){UseShellExecute=false,CreateNoWindow=true,RedirectStandardInput=true,RedirectStandardOutput=true,RedirectStandardError=true};
         nodeInfo.ArgumentList.Add(Path.Combine(FindRepository(),"extensions","printflow-work","tests","native-frame-receiver.mjs"));
         using var host=Process.Start(hostInfo)!;using var node=Process.Start(nodeInfo)!;using var timeout=new CancellationTokenSource(TimeSpan.FromSeconds(12));var ct=timeout.Token;
@@ -35,7 +37,8 @@ public sealed class NativeHostProcessTransferTests
             var r=(await store.ReadAsync(d.RequestId,ct)).Value;
             r=(await store.ChangeAsync(r.Fence,new AiDesignEvent.Queued(Guid.NewGuid(),AiDesignTransitions.NewToken(),Environment.ProcessId,Process.GetCurrentProcess().StartTime.ToUniversalTime().Ticks,ready.Payload.GetProperty("connectionId").GetGuid()),ct)).Value;
             var config=new AiDesignBridgeConfiguration(1,"1.0.0",NativeHostBoundaryTests.Origin,root.Root,root.Root,new string('A',64));
-            (await new FileAiDesignChannel(config,installation.Root).EnqueueAsync(r,ct)).IsSuccess.ShouldBeTrue();
+            var channel = new FileAiDesignChannel(config, installation.Root);
+            (await channel.EnqueueAsync(r,ct)).IsSuccess.ShouldBeTrue();
             int chunks=0;bool finished=false;
             while(!finished)
             {
@@ -44,11 +47,29 @@ public sealed class NativeHostProcessTransferTests
                 if(m.Kind=="AttachmentChunk")
                 {
                     chunks++;
-                    if(stop){(await store.ChangeAsync(r.Fence,new AiDesignEvent.StopAccepted(),ct)).IsSuccess.ShouldBeTrue();finished=true;}
+                    if (stop)
+                    {
+                        (await store.ChangeAsync(r.Fence, new AiDesignEvent.StopAccepted(), ct)).IsSuccess.ShouldBeTrue();
+
+                        // A new request proves the pump got past the stopped transfer before stdin closes.
+                        var draft = AiDesignTransitionsTests.Draft();
+                        var witness = (await store.CreateAsync(draft.RequestId, new(draft.Prompt, []), ct)).Value;
+                        var queue = new AiDesignEvent.Queued(Guid.NewGuid(), AiDesignTransitions.NewToken(),
+                            r.OwnerProcessId!.Value, r.OwnerProcessStartUtcTicks!.Value, r.ConnectionId!.Value);
+                        witness = (await store.ChangeAsync(witness.Fence, queue, ct)).Value;
+                        (await channel.EnqueueAsync(witness, ct)).IsSuccess.ShouldBeTrue();
+                        await File.WriteAllTextAsync(releasePath, "stopped", ct);
+
+                        var next = (await NativeMessageCodec.ReadAsync(host.StandardOutput.BaseStream, ct)).Value;
+                        next.ShouldNotBeNull();
+                        next.Kind.ShouldBe("Request");
+                        next.RequestId.ShouldBe(witness.RequestId);
+                        finished = true;
+                    }
                 }
                 if(m.Kind=="AttachmentComplete")finished=true;
             }
-            await Task.Delay(180,ct);host.StandardInput.Close();
+            host.StandardInput.Close();
             var remainder=new MemoryStream();await host.StandardOutput.BaseStream.CopyToAsync(remainder,ct);
             if(stop)remainder.Length.ShouldBe(0);else chunks.ShouldBe(3);
             node.StandardInput.Close();await host.WaitForExitAsync(ct);await node.WaitForExitAsync(ct);

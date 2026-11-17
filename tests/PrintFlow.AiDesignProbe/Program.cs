@@ -15,7 +15,13 @@ public static class Program
         {
             const string origin="chrome-extension://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/";
             var config=new AiDesignBridgeConfiguration(1,"1.0.0",origin,args[1],args[1],new string('A',64));
-            return await PrintFlow.NativeHost.Program.RunAsync(Console.OpenStandardInput(),new PacedOutput(Console.OpenStandardOutput()),config,origin,args[2],ct);
+            using Stream input = Console.OpenStandardInput();
+            using Stream stdout = Console.OpenStandardOutput();
+            if (args.Length == 3)
+                return await PrintFlow.NativeHost.Program.RunAsync(input, stdout, config, origin, args[2], ct);
+
+            using var gatedOutput = new FirstChunkGate(stdout, args[3]);
+            return await PrintFlow.NativeHost.Program.RunAsync(input, gatedOutput, config, origin, args[2], ct);
         }
         if(args[0] is "native-transfer" or "native-transfer-stop")
         {
@@ -74,15 +80,30 @@ public static class Program
         }
         return 3;
     }
-    // Synthetic stdout backpressure gives the parent a deterministic stop failure window.
-    private sealed class PacedOutput(Stream output):Stream
+    private sealed class FirstChunkGate(Stream output, string releasePath) : Stream
     {
+        private bool _released;
+
         public override bool CanRead=>false;public override bool CanSeek=>false;public override bool CanWrite=>true;
         public override long Length=>throw new NotSupportedException();public override long Position{get=>throw new NotSupportedException();set=>throw new NotSupportedException();}
         public override void Flush()=>output.Flush();public override Task FlushAsync(CancellationToken ct)=>output.FlushAsync(ct);
         public override void Write(byte[] b,int o,int c)=>output.Write(b,o,c);
-        public override async ValueTask WriteAsync(ReadOnlyMemory<byte> b,CancellationToken ct=default)
-        {await output.WriteAsync(b,ct);if(b.Length>4){await output.FlushAsync(ct);await Task.Delay(80,ct);}}
+        public override async ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken ct = default)
+        {
+            await output.WriteAsync(buffer, ct);
+            if (_released || buffer.Length == sizeof(uint))
+                return;
+
+            using var body = JsonDocument.Parse(buffer);
+            if (body.RootElement.GetProperty("kind").GetString() != "AttachmentChunk")
+                return;
+
+            // Deliver the first frame but hold the write open so the pump cannot authorize another frame.
+            await output.FlushAsync(ct);
+            while (!File.Exists(releasePath))
+                await Task.Delay(20, ct);
+            _released = true;
+        }
         public override int Read(byte[] b,int o,int c)=>throw new NotSupportedException();
         public override long Seek(long o,SeekOrigin s)=>throw new NotSupportedException();public override void SetLength(long n)=>throw new NotSupportedException();
     }
