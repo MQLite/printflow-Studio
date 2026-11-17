@@ -72,7 +72,8 @@ public static partial class PromptDocumentComposer
                 definitions.TryGetValue(match.Groups[1].Value, out var field) &&
                 string.IsNullOrWhiteSpace(Value(field)) &&
                 (field.Kind == AiTemplateFieldKind.OptionalDateLine ||
-                    template.Product == AiProductKind.MemorialTshirt && matches.Count == 1 &&
+                    (template.Product is AiProductKind.MemorialTshirt or AiProductKind.MemorialBadge) &&
+                    matches.Count == 1 &&
                     field.Kind == AiTemplateFieldKind.Text &&
                     (!field.Required || field.Semantic == AiTemplateSemantic.Name)));
 

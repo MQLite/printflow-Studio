@@ -19,14 +19,22 @@ namespace PrintFlow.Tests.Integration.Ui;
 [Collection(SqliteCollection.Name)]
 public sealed class AiQuickPromptTests
 {
-    [Fact]
-    public async Task Recompose_omits_cleared_tshirt_text_lines_and_retains_other_input()
+    [Theory]
+    [InlineData(AiProductKind.MemorialTshirt, "设计区域：280×390mm")]
+    [InlineData(AiProductKind.MemorialBadge, "画布外圆86mm，关键内容安全区72mm")]
+    public async Task Recompose_omits_cleared_memorial_text_lines_and_retains_other_input(
+        AiProductKind product, string expectedSpecification)
     {
         using var f = new PromptWorkbenchFixture();
         using TempWorkspace source = new();
         await f.Vm.OpenAsync(null, default);
+        var template = BuiltInAiTemplates.All.Single(x => x.Content.Product == product);
+        await f.Vm.SelectTemplateAsync(template.Reference, true, default);
         f.Picker.Pick = () => PromptWorkbenchFixture.Png(source.Root, 2);
         await f.Vm.PickSlotImageCommand.ExecuteAsync("person-photo");
+        using TempWorkspace layout = new();
+        f.Picker.Pick = () => PromptWorkbenchFixture.Png(layout.Root, 3);
+        await f.Vm.PickSlotImageCommand.ExecuteAsync("layout-reference");
         var name = f.Vm.Fields.Single(x => x.Key == "姓名");
         var notes = f.Vm.Fields.Single(x => x.Key == "补充要求");
         name.Value = "Test Name";
@@ -49,8 +57,7 @@ public sealed class AiQuickPromptTests
         copied.ShouldNotContain("{{");
         copied.ShouldNotContain("Only for the first composition");
         copied.ShouldContain("SUNRISE: 26 March 1962");
-        copied.ShouldContain("280×390mm");
-        f.Vm.AttachmentManifest.ShouldHaveSingleItem();
+        copied.ShouldContain(expectedSpecification);
 
         f.Vm.Fields.Single(x => x.Key == "出生日期行").Value = "";
         f.Vm.Fields.Single(x => x.Key == "离世日期行").Value = " ";
@@ -61,8 +68,10 @@ public sealed class AiQuickPromptTests
         copied.ShouldNotContain("SUNRISE");
         copied.ShouldNotContain("SUNSET");
         copied.ShouldNotContain("{{");
-        copied.ShouldContain("280×390mm");
-        f.Vm.AttachmentManifest.ShouldHaveSingleItem();
+        copied.ShouldContain(expectedSpecification);
+        copied.ShouldContain("人物参考：attachment-01.png");
+        copied.ShouldContain("版式参考：attachment-02.png");
+        f.Vm.AttachmentManifest.Count.ShouldBe(2);
     }
 
     [Fact]
