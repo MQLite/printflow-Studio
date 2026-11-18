@@ -613,10 +613,17 @@ public sealed class PhotoshopFoundationTests : IDisposable
     /// by a real run rather than granted by an unconditional return.
     /// </para>
     /// </remarks>
-    [Fact]
-    public async Task The_workflow_seam_stops_at_identity_and_produces_no_output()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task The_workflow_seam_stops_before_mutation_when_preconditions_fail(bool colourMismatch)
     {
-        Harness h = Build(BaselineForRealFile());
+        PhotoshopColourSettingsContract settings = new("sRGB", "CMYK", "Gray", "Spot");
+        Harness h = colourMismatch
+            ? Build(BaselineForRealFile() with { ColourSettings = settings },
+                runtimeFacts: new CallbackRuntimeFacts(_ => OperationResult.Ok(
+                    new PhotoshopRuntimeFacts(settings with { CmykWorkingSpace = "Different CMYK" }, []))))
+            : Build(BaselineForRealFile());
 
         WorkspaceFileRef input = WorkspaceFileRef.Create(
             "Sessions/S1/Working/A_WORKING.png", WorkspaceArea.Working);
@@ -645,6 +652,8 @@ public sealed class PhotoshopFoundationTests : IDisposable
             CancellationToken.None);
 
         generated.IsFailure.ShouldBeTrue();
+        if (colourMismatch)
+            generated.Failure.MessageKey.ShouldBe("EnvironmentCheck_PhotoshopColourSettings");
         generated.Failure.Context["adapterOutputConstructed"].ShouldBe("false");
         generated.Failure.Context["revisionCreated"].ShouldBe("false");
 

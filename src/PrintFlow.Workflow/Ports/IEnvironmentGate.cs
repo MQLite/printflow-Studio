@@ -59,6 +59,22 @@ public interface IWorkstationScopedEnvironmentGate : IEnvironmentGate
         IWorkstationAutomationLease workstationLease);
 }
 
+public enum WorkstationApplication
+{
+    Meitu,
+    Photoshop,
+}
+
+/// <summary>Prepares and verifies the desktop application selected by the current operation.</summary>
+public interface IApplicationEnvironmentGate : IEnvironmentGate
+{
+    Task<OperationResult<Unit>> PrepareForApplicationAsync(
+        AdapterExecutionMode mode, WorkstationApplication application, CancellationToken cancellationToken);
+
+    OperationResult<Unit> VerifyForApplication(
+        AdapterExecutionMode mode, WorkstationApplication application, IWorkstationAutomationLease workstationLease);
+}
+
 /// <summary>
 /// Production gate extension for work that uses the verified workstation configuration but does
 /// not control the shared Meitu/Photoshop automation domain.

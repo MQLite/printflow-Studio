@@ -51,6 +51,14 @@ internal interface IInternalProductionWorkstationVerifier
     WorkstationVerificationResult VerifyForInternalWork();
 }
 
+internal interface IApplicationProductionWorkstationVerifier
+{
+    WorkstationVerificationResult VerifyForApplication(WorkstationApplication application, IWorkstationAutomationLease? ownLease);
+
+    Task<WorkstationVerificationResult> RunLiveChecksForApplicationAsync(
+        WorkstationApplication application, CancellationToken cancellationToken);
+}
+
 /// <summary>
 /// The factual workstation verifier Epic 11500's environment gate will later consult.
 /// </summary>
@@ -70,7 +78,8 @@ internal interface IInternalProductionWorkstationVerifier
 /// </remarks>
 public sealed class ProductionWorkstationVerifier :
     IProductionWorkstationVerifier,
-    IInternalProductionWorkstationVerifier
+    IInternalProductionWorkstationVerifier,
+    IApplicationProductionWorkstationVerifier
 {
     private readonly string _manifestAbsolutePath;
     private readonly string _presetId;
@@ -91,11 +100,13 @@ public sealed class ProductionWorkstationVerifier :
 
     private readonly object _liveEvidenceSync = new();
     private WorkstationLiveEvidence? _liveEvidence;
+    private readonly Dictionary<WorkstationApplication, WorkstationLiveEvidence> _applicationEvidence = [];
     private long _liveEvidenceRevision;
     private WorkstationLiveEvidence? _lastSuccessfulLiveEvidence;
     private DateTimeOffset? _lastSuccessfulLiveAt;
     private DateTimeOffset? _latestAttemptAt;
     private ReadinessProbeDiagnostics? _latestProbe;
+    private ReadinessProbeDiagnostics? _latestPhotoshopProbe;
     private ReadinessProbeRecovery? _latestRecovery;
 
     private readonly Lazy<RootOfTrust> _rootOfTrust;
@@ -299,53 +310,62 @@ public sealed class ProductionWorkstationVerifier :
     WorkstationVerificationResult IInternalProductionWorkstationVerifier.VerifyForInternalWork() =>
         VerifyCore(ownLease: null, requireAutomationAvailability: false);
 
+    WorkstationVerificationResult IApplicationProductionWorkstationVerifier.VerifyForApplication(
+        WorkstationApplication application, IWorkstationAutomationLease? ownLease) =>
+        VerifyCore(ownLease, requireAutomationAvailability: true, application);
+
     private WorkstationVerificationResult VerifyCore(
         IWorkstationAutomationLease? ownLease,
-        bool requireAutomationAvailability)
+        bool requireAutomationAvailability,
+        WorkstationApplication? application = null)
     {
-        WorkstationVerificationResult automatic = VerifyAutomatic();
+        WorkstationVerificationResult automatic = VerifyAutomatic(application);
         if (_live is null || automatic.Preset is null || !automatic.Verified)
         {
-            return automatic with { Lifecycle = Lifecycle(observationDeferred: false) };
+            return application is null ? automatic with { Lifecycle = Lifecycle(observationDeferred: false) } : automatic;
         }
 
-        WorkstationLiveEvidence? evidence;
-        long evidenceRevision;
+        LiveEvidenceSnapshot observation;
         lock (_liveEvidenceSync)
         {
-            evidence = _liveEvidence;
-            evidenceRevision = _liveEvidenceRevision;
+            observation = new(_liveEvidenceRevision, _liveEvidence,
+                ReadEvidence(WorkstationApplication.Meitu), ReadEvidence(WorkstationApplication.Photoshop));
         }
-        WorkstationLiveVerification live = requireAutomationAvailability
-            ? _live.Reobserve(_rootOfTrust.Value.Requirements!, evidence, ownLease)
-            : _live.ReobserveForInternalWork(_rootOfTrust.Value.Requirements!, evidence);
-        ReadinessEvidenceLifecycle lifecycle;
+
+        WorkstationLiveEvidence? evidence = observation.For(application);
+        WorkstationRequirements requirements = _rootOfTrust.Value.Requirements!;
+        WorkstationLiveVerification live = application is { } selectedApplication
+            ? _live.ReobserveForApplication(requirements, evidence, ownLease, selectedApplication)
+            : requireAutomationAvailability
+                ? _live.Reobserve(requirements, evidence, ownLease)
+                : _live.ReobserveForInternalWork(requirements, evidence);
+        ReadinessEvidenceLifecycle? lifecycle;
         lock (_liveEvidenceSync)
         {
-            if (_liveEvidenceRevision != evidenceRevision)
+            if (live.Evidence is null && evidence is not null)
+            {
+                // Invalidate the certifications actually observed. A concurrent success for
+                // one application does not renew the other application's certification.
+                InvalidateEvidence(application, live, observation);
+            }
+            else if (live.Evidence is not null && _liveEvidenceRevision != observation.Revision)
             {
                 // An old observation neither clears a newer run nor grants admission using
                 // evidence a concurrent attempt invalidated. Keep its concrete failures, but
-                // withdraw any passing round-trip claim until a new passive observation.
-                if (live.Evidence is not null)
+                // withdraw the certification until a new passive observation.
+                WorkstationVerificationCheck finalCheck = application == WorkstationApplication.Meitu
+                    ? WorkstationVerificationCheck.MeituSafeStartingState
+                    : WorkstationVerificationCheck.PhotoshopTestImageRoundTrip;
+                live = live with
                 {
-                    live = live with
-                    {
-                        Checks = [.. live.Checks.Where(check =>
-                                check.Check != WorkstationVerificationCheck.PhotoshopTestImageRoundTrip),
-                            WorkstationCheckResult.Blocked(
-                                WorkstationVerificationCheck.PhotoshopTestImageRoundTrip,
-                                WorkstationCheckKind.Smoke, "Current live evidence",
-                                "Live evidence changed during this observation. A fresh observation is required before admission.")],
-                    };
-                }
+                    Checks = [.. live.Checks.Where(check => check.Check != finalCheck),
+                        WorkstationCheckResult.Blocked(
+                            finalCheck, finalCheck == WorkstationVerificationCheck.MeituSafeStartingState
+                                ? WorkstationCheckKind.Live : WorkstationCheckKind.Smoke, "Current live evidence",
+                            "Live evidence changed during this observation. A fresh observation is required before admission.")],
+                };
             }
-            else if (live.Evidence is null && _liveEvidence is not null)
-            {
-                _liveEvidence = null;
-                _liveEvidenceRevision++;
-            }
-            lifecycle = Lifecycle(live.ObservationDeferred);
+            lifecycle = application is null ? Lifecycle(live.ObservationDeferred) : null;
         }
 
         return WorkstationVerificationResult.From(
@@ -356,11 +376,18 @@ public sealed class ProductionWorkstationVerifier :
     }
 
     /// <inheritdoc />
-    public async Task<WorkstationVerificationResult> RunLiveChecksAsync(
-        CancellationToken cancellationToken)
+    public Task<WorkstationVerificationResult> RunLiveChecksAsync(CancellationToken cancellationToken) =>
+        RunLiveChecksCoreAsync(application: null, cancellationToken);
+
+    Task<WorkstationVerificationResult> IApplicationProductionWorkstationVerifier.RunLiveChecksForApplicationAsync(
+        WorkstationApplication application, CancellationToken cancellationToken) =>
+        RunLiveChecksCoreAsync(application, cancellationToken);
+
+    private async Task<WorkstationVerificationResult> RunLiveChecksCoreAsync(
+        WorkstationApplication? application, CancellationToken cancellationToken)
     {
         DateTimeOffset attemptedAt = _clock.GetUtcNow();
-        WorkstationVerificationResult automatic = VerifyAutomatic();
+        WorkstationVerificationResult automatic = VerifyAutomatic(application);
         if (_live is null)
         {
             return automatic;
@@ -371,33 +398,39 @@ public sealed class ProductionWorkstationVerifier :
         {
             live = new WorkstationLiveVerification(
                 ProductionLiveWorkstationVerifier.BlockedChecks(
-                    "Automatic workstation checks must pass before applications are launched."), null);
+                    "Automatic workstation checks must pass before applications are launched.", application), null);
         }
         else
         {
             ReadinessProbeDiagnostics? previousProbe;
-            lock (_liveEvidenceSync) previousProbe = _latestProbe;
-            live = await _live.RunAsync(_rootOfTrust.Value.Requirements!, previousProbe, cancellationToken)
-                .ConfigureAwait(false);
+            lock (_liveEvidenceSync) previousProbe = _latestPhotoshopProbe;
+            WorkstationRequirements requirements = _rootOfTrust.Value.Requirements!;
+            live = application is { } selectedApplication
+                ? await _live.RunForApplicationAsync(requirements, previousProbe, selectedApplication, cancellationToken).ConfigureAwait(false)
+                : await _live.RunAsync(requirements, previousProbe, cancellationToken).ConfigureAwait(false);
         }
 
-        ReadinessEvidenceLifecycle lifecycle;
+        ReadinessEvidenceLifecycle? lifecycle = null;
         lock (_liveEvidenceSync)
         {
-            _liveEvidence = live.Evidence;
-            _liveEvidenceRevision++;
+            StoreEvidence(application, live);
             if (live.Probe is not null)
+                _latestPhotoshopProbe = live.Probe;
+            if (application is null)
             {
-                _latestAttemptAt = attemptedAt;
-                _latestProbe = live.Probe;
+                if (live.Probe is not null)
+                {
+                    _latestAttemptAt = attemptedAt;
+                    _latestProbe = live.Probe;
+                }
+                _latestRecovery = live.Recovery;
+                if (live.Evidence is not null)
+                {
+                    _lastSuccessfulLiveEvidence = live.Evidence;
+                    _lastSuccessfulLiveAt = _clock.GetUtcNow();
+                }
+                lifecycle = Lifecycle(observationDeferred: false);
             }
-            _latestRecovery = live.Recovery;
-            if (live.Evidence is not null)
-            {
-                _lastSuccessfulLiveEvidence = live.Evidence;
-                _lastSuccessfulLiveAt = _clock.GetUtcNow();
-            }
-            lifecycle = Lifecycle(observationDeferred: false);
         }
         return WorkstationVerificationResult.From(
             automatic.Preset,
@@ -408,12 +441,76 @@ public sealed class ProductionWorkstationVerifier :
         };
     }
 
+    // Called under _liveEvidenceSync. A full success certifies both programs, while a
+    // result for one application cannot certify the full workstation.
+    private WorkstationLiveEvidence? ReadEvidence(WorkstationApplication? application) =>
+        application is { } selected ? _applicationEvidence.GetValueOrDefault(selected) : _liveEvidence;
+
+    private readonly record struct LiveEvidenceSnapshot(
+        long Revision, WorkstationLiveEvidence? Full, WorkstationLiveEvidence? Meitu, WorkstationLiveEvidence? Photoshop)
+    {
+        public WorkstationLiveEvidence? For(WorkstationApplication? application) => application switch
+        {
+            WorkstationApplication.Meitu => Meitu,
+            WorkstationApplication.Photoshop => Photoshop,
+            _ => Full,
+        };
+    }
+
+    private void StoreEvidence(WorkstationApplication? application, WorkstationLiveVerification result)
+    {
+        WorkstationLiveEvidence? evidence = result.Evidence;
+        if (evidence is null)
+        {
+            InvalidateEvidence(application, result);
+            return;
+        }
+
+        _liveEvidenceRevision++;
+        if (application is { } selected)
+        {
+            _applicationEvidence[selected] = evidence;
+            return;
+        }
+
+        _liveEvidence = evidence;
+        _applicationEvidence[WorkstationApplication.Meitu] = evidence;
+        _applicationEvidence[WorkstationApplication.Photoshop] = evidence;
+    }
+
+    private void InvalidateEvidence(WorkstationApplication? application, WorkstationLiveVerification result,
+        LiveEvidenceSnapshot? observation = null)
+    {
+        bool changed = _liveEvidence is { } full &&
+            (observation is null || ReferenceEquals(full, observation.Value.Full));
+        if (changed) _liveEvidence = null;
+
+        WorkstationCheckResult[] failures = result.Checks
+            .Where(check => check.Outcome == WorkstationCheckOutcome.Failed).ToArray();
+        bool leaseFailed = failures.Any(check => check.Check == WorkstationVerificationCheck.ExternalApplicationAutomationLock);
+        foreach (var candidate in Enum.GetValues<WorkstationApplication>())
+        {
+            if (ReadEvidence(candidate) is not { } current ||
+                (observation is { } snapshot && !ReferenceEquals(current, snapshot.For(candidate))))
+                continue;
+
+            if (leaseFailed || candidate == application ||
+                failures.Any(check => ProductionLiveWorkstationVerifier.ApplicationFor(check.Check) == candidate))
+            {
+                _applicationEvidence.Remove(candidate);
+                changed = true;
+            }
+        }
+
+        if (changed) _liveEvidenceRevision++;
+    }
+
     private ReadinessEvidenceLifecycle Lifecycle(bool observationDeferred)
     {
         lock (_liveEvidenceSync)
         {
-            var meitu = _lastSuccessfulLiveEvidence?.Meitu.Target.Process;
-            var photoshop = _lastSuccessfulLiveEvidence?.Photoshop.Target.Process;
+            var meitu = _lastSuccessfulLiveEvidence?.Meitu?.Target.Process;
+            var photoshop = _lastSuccessfulLiveEvidence?.Photoshop?.Target.Process;
             return new ReadinessEvidenceLifecycle(
                 _lastSuccessfulLiveAt,
                 meitu is not null ? new(meitu.ProcessId, meitu.ExecutablePath, meitu.StartedUtc) : null,
@@ -425,7 +522,7 @@ public sealed class ProductionWorkstationVerifier :
         }
     }
 
-    private WorkstationVerificationResult VerifyAutomatic()
+    private WorkstationVerificationResult VerifyAutomatic(WorkstationApplication? application)
     {
         RootOfTrust root = _rootOfTrust.Value;
         DateTimeOffset observedAt = _clock.GetUtcNow();
@@ -439,9 +536,11 @@ public sealed class ProductionWorkstationVerifier :
         }
 
         ImmutableArray<WorkstationCheckResult> baseline =
-            _baselineChecks ??= EvaluateSignedBaseline(requirements);
+            application is null
+                ? _baselineChecks ??= EvaluateSignedBaseline(requirements)
+                : EvaluateSignedBaseline(requirements, application);
 
-        List<WorkstationCheckResult> checks = [.. root.Checks, .. baseline, .. EvaluateCurrentState(requirements)];
+        List<WorkstationCheckResult> checks = [.. root.Checks, .. baseline, .. EvaluateCurrentState(requirements, application)];
 
         return WorkstationVerificationResult.From(requirements.Preset, checks, observedAt);
     }
@@ -569,31 +668,35 @@ public sealed class ProductionWorkstationVerifier :
     }
 
     /// <summary>The immutable half: OS identity and the three signed artefacts (§16).</summary>
-    private ImmutableArray<WorkstationCheckResult> EvaluateSignedBaseline(WorkstationRequirements requirements) =>
-    [
-        VerifyOperatingSystem(requirements.OperatingSystem),
-        VerifyExecutable(
-            WorkstationVerificationCheck.MeituExecutable,
-            requirements.Meitu,
-            FailureCode.MeituNotInstalled,
-            "Meitu",
-            pinBinaryVersion: false),
-        VerifyExecutable(
-            WorkstationVerificationCheck.PhotoshopExecutable,
-            requirements.Photoshop,
-            FailureCode.PhotoshopNotInstalled,
-            "Photoshop"),
-        VerifyActionArtifact(requirements.PhotoshopAction),
-    ];
+    private ImmutableArray<WorkstationCheckResult> EvaluateSignedBaseline(
+        WorkstationRequirements requirements, WorkstationApplication? application = null)
+    {
+        var checks = ImmutableArray.CreateBuilder<WorkstationCheckResult>();
+        checks.Add(VerifyOperatingSystem(requirements.OperatingSystem));
+        if (application != WorkstationApplication.Photoshop)
+        {
+            checks.Add(VerifyExecutable(WorkstationVerificationCheck.MeituExecutable,
+                requirements.Meitu, FailureCode.MeituNotInstalled, "Meitu", pinBinaryVersion: false));
+        }
+        if (application != WorkstationApplication.Meitu)
+        {
+            checks.Add(VerifyExecutable(WorkstationVerificationCheck.PhotoshopExecutable,
+                requirements.Photoshop, FailureCode.PhotoshopNotInstalled, "Photoshop"));
+            checks.Add(VerifyActionArtifact(requirements.PhotoshopAction));
+        }
+        return checks.ToImmutable();
+    }
 
     /// <summary>The dynamic half: re-observed on every call and never cached (§16).</summary>
-    private ImmutableArray<WorkstationCheckResult> EvaluateCurrentState(WorkstationRequirements requirements) =>
+    private ImmutableArray<WorkstationCheckResult> EvaluateCurrentState(
+        WorkstationRequirements requirements, WorkstationApplication? application) =>
     [
         VerifyWorkspaceRoot(requirements.Workspace),
         VerifyInteractiveSession(requirements.Session),
         VerifyDisplay(requirements.Display),
-        VerifyUiCulture(requirements.OperatingSystem, requirements.Meitu),
-        DescribeExternalApplicationUiLanguage(requirements.Meitu, requirements.Photoshop),
+        VerifyUiCulture(requirements.OperatingSystem, application == WorkstationApplication.Photoshop ? null : requirements.Meitu),
+        .. application is null ? [DescribeExternalApplicationUiLanguage(requirements.Meitu, requirements.Photoshop)]
+            : ImmutableArray<WorkstationCheckResult>.Empty,
 
         // Dynamic, and last, because it is the only check that asks about the application rather
         // than the machine: has this PrintFlow build, on this preset, on this Windows build,
@@ -995,7 +1098,7 @@ public sealed class ProductionWorkstationVerifier :
     /// says what PrintFlow renders, not what the applications it drives render, and the withdrawn
     /// Epic 11400 en-US limitation is not reintroduced here in either direction.
     /// </remarks>
-    private WorkstationCheckResult VerifyUiCulture(AcceptedOperatingSystem accepted, AcceptedExecutable meitu)
+    private WorkstationCheckResult VerifyUiCulture(AcceptedOperatingSystem accepted, AcceptedExecutable? meitu)
     {
         const WorkstationVerificationCheck check = WorkstationVerificationCheck.UiCulture;
         UiCultureFacts observed = _facts.ReadUiCulture();
@@ -1025,7 +1128,7 @@ public sealed class ProductionWorkstationVerifier :
 
         // Meitu follows the Windows user UI language, so the preset's own meituContract.uiLanguage
         // has to agree with the workstation culture or the accepted contract contradicts itself.
-        if (meitu.UiLanguage is { } meituLanguage &&
+        if (meitu?.UiLanguage is { } meituLanguage &&
             !string.Equals(meituLanguage, accepted.UiCulture, StringComparison.OrdinalIgnoreCase))
         {
             return WorkstationCheckResult.Failed(

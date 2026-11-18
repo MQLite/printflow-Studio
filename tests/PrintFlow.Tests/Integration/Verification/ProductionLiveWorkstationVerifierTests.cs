@@ -29,6 +29,145 @@ namespace PrintFlow.Tests.Integration.Verification;
 
 public sealed class ProductionLiveWorkstationVerifierTests
 {
+    [Fact]
+    public async Task Meitu_verification_does_not_discard_a_concurrent_Photoshop_invalidation()
+    {
+        using WorkstationVerificationFixture fixture = new();
+        FileWorkspace workspace = new(fixture.WorkspaceRoot);
+        ScriptedRuntimeFacts facts = new(MatchingSettings(), []);
+        ProductionLiveWorkstationVerifier live = new(new ScriptedMeitu(fixture.MeituPath),
+            new ScriptedPhotoshop(fixture.PhotoshopPath, workspace), facts, new RecordingLock(), workspace, fixture.Clock);
+        PausingReobserver paused = new(live);
+        var verifier = FullVerifier(fixture, paused, omitRevalidation: false);
+        IApplicationProductionWorkstationVerifier applications = verifier;
+        (await verifier.RunLiveChecksAsync(default)).Verified.ShouldBeTrue();
+
+        facts.Settings = MatchingSettings() with { CmykWorkingSpace = "Unverified CMYK" };
+        Task<WorkstationVerificationResult> observing = Task.Run(verifier.Verify);
+        try
+        {
+            await paused.Observed.Task.WaitAsync(TimeSpan.FromSeconds(10));
+            (await applications.RunLiveChecksForApplicationAsync(WorkstationApplication.Meitu, default)).Verified.ShouldBeTrue();
+            facts.Settings = MatchingSettings();
+        }
+        finally
+        {
+            paused.ReturnObservation.TrySetResult(true);
+        }
+
+        (await observing).Verified.ShouldBeFalse();
+        applications.VerifyForApplication(WorkstationApplication.Photoshop, ownLease: null).Verified.ShouldBeFalse();
+        applications.VerifyForApplication(WorkstationApplication.Meitu, ownLease: null).Verified.ShouldBeTrue();
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Invalidated_Photoshop_evidence_cannot_be_used_through_the_other_scope(bool diagnoseFirst)
+    {
+        using WorkstationVerificationFixture fixture = new();
+        FileWorkspace workspace = new(fixture.WorkspaceRoot);
+        ScriptedRuntimeFacts facts = new(MatchingSettings(), []);
+        RecordingLock authority = new();
+        ProductionLiveWorkstationVerifier live = new(new ScriptedMeitu(fixture.MeituPath),
+            new ScriptedPhotoshop(fixture.PhotoshopPath, workspace), facts, authority, workspace, fixture.Clock);
+        var verifier = FullVerifier(fixture, live, omitRevalidation: false);
+        IApplicationProductionWorkstationVerifier applications = verifier;
+        (await verifier.RunLiveChecksAsync(default)).Verified.ShouldBeTrue();
+
+        facts.Settings = MatchingSettings() with { CmykWorkingSpace = "Unverified CMYK" };
+        WorkstationVerificationResult failed = diagnoseFirst ? verifier.Verify() :
+            applications.VerifyForApplication(WorkstationApplication.Photoshop, ownLease: null);
+        failed.Verified.ShouldBeFalse();
+        facts.Settings = MatchingSettings();
+
+        WorkstationVerificationResult after = diagnoseFirst
+            ? applications.VerifyForApplication(WorkstationApplication.Photoshop, ownLease: null)
+            : verifier.Verify();
+        after.Verified.ShouldBeFalse("restored facts cannot revive invalidated Photoshop certification");
+        applications.VerifyForApplication(WorkstationApplication.Meitu, ownLease: null).Verified.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task Photoshop_readiness_checks_only_Photoshop_when_Meitu_is_absent()
+    {
+        using WorkstationVerificationFixture fixture = new();
+        WorkstationVerificationFixture.Remove(fixture.MeituPath);
+        FileWorkspace workspace = new(fixture.WorkspaceRoot);
+        ScriptedMeitu meitu = new(fixture.MeituPath);
+        ScriptedPhotoshop photoshop = new(fixture.PhotoshopPath, workspace);
+        ScriptedRuntimeFacts facts = new(MatchingSettings(), []);
+        RecordingLock authority = new();
+        ProductionLiveWorkstationVerifier live = new(meitu, photoshop, facts, authority, workspace, fixture.Clock);
+        VerifiedEnvironmentGate gate = new(FullVerifier(fixture, live, omitRevalidation: false));
+
+        var prepared = await gate.PrepareForApplicationAsync(
+            AdapterExecutionMode.Production, WorkstationApplication.Photoshop, default);
+        prepared.IsSuccess.ShouldBeTrue(prepared.IsFailure ? prepared.Failure.TechnicalDetail : null);
+        meitu.EnsureCalls.ShouldBe(0);
+        photoshop.CloseCalls.ShouldBe(1);
+        gate.Read().Checks.ShouldContain(check => check.CheckKey == "MeituExecutable" && check.IsBlocking);
+
+        using SessionServiceHarness workflow = new();
+        RecordingPsdProcessor adapter = new(workflow.FileWorkspace);
+        ISessionService sessions = workflow.CreateServiceWithPhotoshop(adapter, gate, automationLeases: authority);
+        string source = Path.Combine(workflow.Workspace.Root, "scoped-photoshop.psd");
+        File.WriteAllBytes(source, PsdInputPreparationTests.RgbCompositePsd());
+        var imported = await sessions.ImportAsync(WorkflowType.GeneratePrintTiff, source, null, "qa", default);
+        var sourcePrepared = await sessions.ExecuteAsync(imported.Value.Id,
+            new WorkflowCommand.StartStep(StepKind.OriginalConfirmation), "qa", default);
+        sourcePrepared.IsSuccess.ShouldBeTrue(sourcePrepared.IsFailure ? sourcePrepared.Failure.TechnicalDetail : null);
+        adapter.Calls.ShouldBe(1);
+        meitu.EnsureCalls.ShouldBe(0);
+
+        var acquired = await authority.TryAcquireAsync(enclosingLease: null, default);
+        try
+        {
+            gate.VerifyForApplication(AdapterExecutionMode.Production, WorkstationApplication.Photoshop, acquired.Value)
+                .IsSuccess.ShouldBeTrue();
+            facts.Settings = MatchingSettings() with { CmykWorkingSpace = "Unverified CMYK" };
+            var failed = gate.VerifyForApplication(AdapterExecutionMode.Production, WorkstationApplication.Photoshop, acquired.Value);
+            failed.Failure.MessageKey.ShouldBe("EnvironmentCheck_PhotoshopColourSettings");
+
+            facts.Settings = MatchingSettings();
+            WorkstationVerificationFixture.Corrupt(fixture.ActionPath);
+            var invalidAction = gate.VerifyForApplication(
+                AdapterExecutionMode.Production, WorkstationApplication.Photoshop, acquired.Value);
+            invalidAction.Failure.MessageKey.ShouldBe("EnvironmentCheck_PhotoshopActionArtifact");
+        }
+        finally
+        {
+            await acquired.Value.ReleaseAsync(default);
+        }
+    }
+
+    [Fact]
+    public async Task Meitu_readiness_keeps_its_own_checks_without_launching_Photoshop()
+    {
+        using WorkstationVerificationFixture fixture = new();
+        WorkstationVerificationFixture.Remove(fixture.PhotoshopPath);
+        FileWorkspace workspace = new(fixture.WorkspaceRoot);
+        ScriptedMeitu meitu = new(fixture.MeituPath);
+        ScriptedPhotoshop photoshop = new(fixture.PhotoshopPath, workspace);
+        RecordingLock authority = new();
+        ProductionLiveWorkstationVerifier live = new(
+            meitu, photoshop, new ScriptedRuntimeFacts(MatchingSettings(), []), authority, workspace, fixture.Clock);
+        VerifiedEnvironmentGate gate = new(FullVerifier(fixture, live, omitRevalidation: false));
+
+        var prepared = await gate.PrepareForApplicationAsync(
+            AdapterExecutionMode.Production, WorkstationApplication.Meitu, default);
+        prepared.IsSuccess.ShouldBeTrue(prepared.IsFailure ? prepared.Failure.TechnicalDetail : null);
+        meitu.EnsureCalls.ShouldBe(1);
+        photoshop.OpenCalls.ShouldBe(0);
+        gate.Read().Verified.ShouldBeFalse();
+
+        WorkstationVerificationFixture.Remove(fixture.MeituPath);
+        var denied = await gate.PrepareForApplicationAsync(
+            AdapterExecutionMode.Production, WorkstationApplication.Meitu, default);
+        denied.Failure.MessageKey.ShouldBe("EnvironmentCheck_MeituExecutable");
+        meitu.EnsureCalls.ShouldBe(1);
+    }
+
     [Theory]
     [InlineData("before-open")]
     [InlineData("identity")]
@@ -998,6 +1137,16 @@ public sealed class ProductionLiveWorkstationVerifierTests
         public Task<WorkstationLiveVerification> RunAsync(WorkstationRequirements requirements, CancellationToken cancellationToken) =>
             inner.RunAsync(requirements, cancellationToken);
 
+        public Task<WorkstationLiveVerification> RunForApplicationAsync(
+            WorkstationRequirements requirements, ReadinessProbeDiagnostics? previousProbe,
+            WorkstationApplication application, CancellationToken cancellationToken) =>
+            inner.RunForApplicationAsync(requirements, previousProbe, application, cancellationToken);
+
+        public WorkstationLiveVerification ReobserveForApplication(
+            WorkstationRequirements requirements, WorkstationLiveEvidence? evidence,
+            IWorkstationAutomationLease? ownLease, WorkstationApplication application) =>
+            inner.ReobserveForApplication(requirements, evidence, ownLease, application);
+
         public WorkstationLiveVerification Reobserve(WorkstationRequirements requirements, WorkstationLiveEvidence? evidence)
         {
             WorkstationLiveVerification observed = inner.Reobserve(requirements, evidence);
@@ -1069,13 +1218,14 @@ public sealed class ProductionLiveWorkstationVerifierTests
         PhotoshopColourSettingsContract settings,
         ImmutableArray<PhotoshopRuntimeDocument> documents) : IPhotoshopRuntimeFactReader
     {
+        public PhotoshopColourSettingsContract Settings { get; set; } = settings;
         public int Writes => 0;
         public int ReadCalls { get; private set; }
 
         public OperationResult<PhotoshopRuntimeFacts> Read(string acceptedExecutablePath)
         {
             ReadCalls++;
-            return OperationResult.Ok(new PhotoshopRuntimeFacts(settings, documents));
+            return OperationResult.Ok(new PhotoshopRuntimeFacts(Settings, documents));
         }
     }
 

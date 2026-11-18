@@ -2053,9 +2053,12 @@ public sealed partial class SessionService : ISessionService
                 "No workstation automation lease authority was composed for this external operation.");
         }
 
+        WorkstationApplication application = work.Adapter == AdapterKind.Meitu
+            ? WorkstationApplication.Meitu : WorkstationApplication.Photoshop;
+        IApplicationEnvironmentGate? applicationGate = _environmentGate as IApplicationEnvironmentGate;
         // Readiness owns its own bounded workstation lease. Run it before acquiring the
         // attempt's lease so a cold start can launch the applications without self-contention.
-        if (_environmentGate is IPreparingEnvironmentGate preparingGate)
+        if (applicationGate is not null || _environmentGate is IPreparingEnvironmentGate)
         {
             WorkstationAutomationLeaseObservation availability = await _automationLeases
                 .ObserveAsync(_enclosingAutomationLease, cancellationToken).ConfigureAwait(false);
@@ -2064,8 +2067,9 @@ public sealed partial class SessionService : ISessionService
             // includes an uninitialised authority: readiness must try its guarded acquisition.
             if (availability.Status is not (WorkstationAutomationLeaseStatus.Busy or WorkstationAutomationLeaseStatus.Owned))
             {
-                OperationResult<Unit> prepared = await preparingGate
-                    .PrepareAsync(adapterMode, cancellationToken).ConfigureAwait(false);
+                OperationResult<Unit> prepared = applicationGate is not null
+                    ? await applicationGate.PrepareForApplicationAsync(adapterMode, application, cancellationToken).ConfigureAwait(false)
+                    : await ((IPreparingEnvironmentGate)_environmentGate).PrepareAsync(adapterMode, cancellationToken).ConfigureAwait(false);
                 if (prepared.IsFailure)
                 {
                     return OperationResult.Fail<SessionView>(prepared.Failure);
@@ -2085,9 +2089,12 @@ public sealed partial class SessionService : ISessionService
         OperationResult<SessionView> result;
         try
         {
-            OperationResult<Unit> gate = _environmentGate is IWorkstationScopedEnvironmentGate scoped
-                ? scoped.Verify(adapterMode, lease)
-                : _environmentGate.Verify(adapterMode);
+            OperationResult<Unit> gate = _environmentGate switch
+            {
+                IApplicationEnvironmentGate scoped => scoped.VerifyForApplication(adapterMode, application, lease),
+                IWorkstationScopedEnvironmentGate scoped => scoped.Verify(adapterMode, lease),
+                _ => _environmentGate.Verify(adapterMode),
+            };
             result = gate.IsFailure
                 ? OperationResult.Fail<SessionView>(gate.Failure)
                 : await RunProducingStepWithinLeaseAsync(
