@@ -452,6 +452,36 @@ public sealed class InstallerBoundaryTests
             [.. root.GetProperty("requiredFiles").EnumerateArray().Select(e => e.GetString()!)]);
     }
 
+    [Fact]
+    public void The_offline_image_processing_payload_requires_only_the_selected_models_and_notices()
+    {
+        PayloadPolicy policy = ReadPayloadPolicy();
+
+        foreach (string path in new[]
+                 {
+                     "Models/real_esrgan_x2.onnx", "Models/birefnet-lite-1024.onnx",
+                     "Licenses/Real-ESRGAN.txt", "Licenses/BiRefNet.txt",
+                     "Licenses/ONNX-Runtime.txt", "Licenses/ONNX-Runtime-ThirdPartyNotices.txt",
+                     "Licenses/Magick.NET-Notice.txt", "Licenses/Magick.NET.txt",
+                     "Microsoft.ML.OnnxRuntime.dll", "onnxruntime.dll", "onnxruntime_providers_shared.dll",
+                     "Magick.NET.Core.dll", "Magick.NET-Q16-x64.dll", "Magick.Native-Q16-x64.dll",
+                     "msvcp140.dll", "msvcp140_1.dll", "vcruntime140.dll", "vcruntime140_1.dll",
+                 })
+        {
+            ShouldBeAllowed(policy, path);
+            policy.RequiredFiles.ShouldContain(path);
+        }
+
+        foreach (string path in new[]
+                 {
+                     "real_esrgan_x2.onnx", "Models/experimental.onnx", "Models/customer.png",
+                     "Models/backup/birefnet-lite-1024.onnx", "Licenses/operator-notes.txt",
+                 })
+        {
+            ShouldNotBeAllowed(policy, path);
+        }
+    }
+
     /// <summary>
     /// The same decision the stager makes, in the same order: an explicit deny wins, then the
     /// allowlist, then default deny.

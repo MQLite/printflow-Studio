@@ -34,14 +34,19 @@
     Packages under a different version without editing Version.props. Intended for the upgrade
     smoke, which needs an N and an N+1 built from the same source. Not for release builds.
 
+.PARAMETER OfflineAssetsDirectory
+    Directory with the pinned ONNX files under Models and the four x64 Visual C++ DLLs at the
+    root. See docs/printflow/scrum-11244-offline-packaging.md for their sources.
+
 .PARAMETER SkipPublish
-    Reuses an existing publish directory. For iterating on packaging only.
+    Reuses an existing publish directory and its local NuGet restore. For iterating on packaging only.
 #>
 [CmdletBinding()]
 param(
     [string] $OutputRoot,
     [string] $VersionOverride,
-    [switch] $SkipPublish
+    [switch] $SkipPublish,
+    [string] $OfflineAssetsDirectory
 )
 
 Set-StrictMode -Version Latest
@@ -132,7 +137,21 @@ Write-Host "PrintFlow Studio version: $Version"
 if ([string]::IsNullOrWhiteSpace($OutputRoot)) {
     $OutputRoot = Join-Path $RepositoryRoot 'artifacts\installer'
 }
-$ReleaseDir = Join-Path $OutputRoot $Version
+if ($Version -notmatch '\A[0-9]+\.[0-9]+\.[0-9]+\z') {
+    throw "Invalid installer version '$Version'; expected a three-part numeric version."
+}
+if ([string]::IsNullOrWhiteSpace($OfflineAssetsDirectory)) {
+    throw 'Supply -OfflineAssetsDirectory with the pinned models and x64 Visual C++ runtime files.'
+}
+$assetsRoot = (Get-Item -LiteralPath $OfflineAssetsDirectory).FullName
+if (-not (Test-Path -LiteralPath $assetsRoot -PathType Container)) {
+    throw "Offline assets path '$assetsRoot' must be a directory."
+}
+$ReleaseDir = [IO.Path]::GetFullPath((Join-Path $OutputRoot $Version))
+if ($assetsRoot.TrimEnd('\').Equals($ReleaseDir, [StringComparison]::OrdinalIgnoreCase) -or
+    $assetsRoot.StartsWith($ReleaseDir + '\', [StringComparison]::OrdinalIgnoreCase)) {
+    throw 'The offline assets directory must be outside the installer version output directory.'
+}
 $PublishDir = Join-Path $ReleaseDir 'publish'
 $PayloadDir = Join-Path $ReleaseDir 'payload'
 $SymbolsDir = Join-Path $ReleaseDir 'symbols'
@@ -210,8 +229,75 @@ if ($violations.Count -gt 0) {
            "defect in the publish, not something staging may drop:`n  " + ($violations -join "`n  "))
 }
 
+$infrastructureProject = Join-Path $RepositoryRoot 'src\PrintFlow.Infrastructure\PrintFlow.Infrastructure.csproj'
+# Read the paths from the restore rather than assuming the default global package cache.
+$packagePathsJson = & $DotNet msbuild $infrastructureProject -nologo `
+    '-getProperty:PkgMicrosoft_ML_OnnxRuntime,PkgMagick_NET-Q16-x64'
+if ($LASTEXITCODE -ne 0) { throw 'Could not read the restored image processing package paths.' }
+$packagePaths = (($packagePathsJson -join [Environment]::NewLine) | ConvertFrom-Json).Properties
+$onnxPackage = $packagePaths.PkgMicrosoft_ML_OnnxRuntime
+$magickPackage = $packagePaths.'PkgMagick_NET-Q16-x64'
+if ([string]::IsNullOrWhiteSpace($onnxPackage) -or [string]::IsNullOrWhiteSpace($magickPackage)) {
+    throw 'Restore the image processing packages before staging their license notices.'
+}
+# A reused publish must retain the restore that provided its shipped binaries.
+$deps = Get-Content -LiteralPath (Join-Path $PublishDir 'PrintFlow.App.deps.json') -Raw | ConvertFrom-Json
+$publishedLibraries = @($deps.libraries.PSObject.Properties.Name)
+foreach ($package in @($onnxPackage, $magickPackage)) {
+    $packageVersion = Split-Path -Path $package -Leaf
+    $packageId = Split-Path -Path (Split-Path -Path $package -Parent) -Leaf
+    if ("$packageId/$packageVersion" -notin $publishedLibraries) {
+        throw "Restored package '$packageId/$packageVersion' does not match the publish output. Run without -SkipPublish."
+    }
+}
+
+$licenseRoot = Join-Path $RepositoryRoot 'installer\licenses'
+$assetSources = [ordered] @{
+    'Licenses/Real-ESRGAN.txt' = Join-Path $licenseRoot 'Real-ESRGAN.txt'
+    'Licenses/BiRefNet.txt' = Join-Path $licenseRoot 'BiRefNet.txt'
+    'Licenses/Magick.NET.txt' = Join-Path $licenseRoot 'Magick.NET.txt'
+    'Licenses/Magick.NET-Notice.txt' = Join-Path $magickPackage 'Notice.txt'
+    'Licenses/ONNX-Runtime.txt' = Join-Path $onnxPackage 'LICENSE'
+    'Licenses/ONNX-Runtime-ThirdPartyNotices.txt' = Join-Path $onnxPackage 'ThirdPartyNotices.txt'
+}
+$expectedHashes = @{}
+foreach ($asset in $policy.externalAssets.PSObject.Properties) {
+    $assetSources[$asset.Name] = Join-Path $assetsRoot $asset.Name.Replace('/', '\')
+    $expectedHashes[$asset.Name] = $asset.Value
+}
+
+$externalAssets = [ordered] @{}
+foreach ($asset in $assetSources.GetEnumerator()) {
+    $relative = $asset.Key
+    if ($relative -notin $policy.requiredFiles -or
+        (Test-Glob $relative $policy.denyAlways) -or -not (Test-Glob $relative $policy.allow)) {
+        throw "External asset '$relative' must be both allowed and required by the payload policy."
+    }
+
+    $assetPath = $relative.Replace('/', '\')
+    $source = $asset.Value
+    $target = Join-Path $PayloadDir $assetPath
+    if (-not (Test-Path -LiteralPath $source -PathType Leaf)) {
+        throw "Required offline asset '$relative' is missing at '$source'."
+    }
+    if (Test-Path -LiteralPath $target) {
+        throw "External asset '$relative' also appears in the publish directory."
+    }
+
+    New-Item -ItemType Directory -Path (Split-Path -Parent $target) -Force | Out-Null
+    Copy-Item -LiteralPath $source -Destination $target
+    if ($expectedHashes.ContainsKey($relative)) {
+        $hash = (Get-FileHash -LiteralPath $target -Algorithm SHA256).Hash
+        if ($hash -ne $expectedHashes[$relative]) {
+            throw "Offline asset '$relative' does not match the payload policy SHA-256."
+        }
+        $externalAssets[$relative] = $hash
+    }
+    $staged.Add($relative)
+}
+
 foreach ($required in $policy.requiredFiles) {
-    if (-not (Test-Path (Join-Path $PayloadDir $required.Replace('/', '\')))) {
+    if (-not (Test-Path -LiteralPath (Join-Path $PayloadDir $required.Replace('/', '\')) -PathType Leaf)) {
         throw "Required payload file '$required' is missing from the staged payload."
     }
 }
@@ -268,6 +354,7 @@ $manifest = [ordered] @{
         fileCount     = $staged.Count
         droppedCount  = $dropped.Count
         files         = @($staged | Sort-Object)
+        externalAssets = $externalAssets
     }
     builtAtUtc     = (Get-Date).ToUniversalTime().ToString('o')
     builtOn        = $env:COMPUTERNAME

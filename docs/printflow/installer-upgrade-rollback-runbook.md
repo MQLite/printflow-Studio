@@ -630,10 +630,12 @@ of anything. Only a real run on the fixed workstation, reviewed by a person, is 
 ## 8. Building an installer (release engineering)
 
 ```powershell
-build\installer\Build-Installer.ps1
+build\installer\Build-Installer.ps1 -OfflineAssetsDirectory 'D:\offline-assets'
 ```
 
-Publishes Release / self-contained / win-x64, stages the payload through
+Prepare the pinned models and runtime files using the [offline packaging guide](scrum-11244-offline-packaging.md).
+
+The script publishes Release / self-contained / win-x64, stages the payload through
 `installer\payload-policy.json` (default deny), builds the MSI, and writes
 `artifacts\installer\<version>\` containing the `.msi`, `build-manifest.json` with its SHA-256 and
 full file list, and `symbols\` (a release record — not installed).
