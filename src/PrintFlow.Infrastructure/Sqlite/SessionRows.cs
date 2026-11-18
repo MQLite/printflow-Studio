@@ -4,7 +4,7 @@ namespace PrintFlow.Infrastructure.Sqlite;
 // target. Domain types are never used directly for I/O — Mappers.cs is the single place that
 // converts each row to and from its domain record (Epic 11100 Task 11108).
 
-internal sealed class SessionRow
+internal sealed record SessionRow
 {
     public string? ImageProcessingSelection { get; set; }
     public bool ImageProcessingDefaultsDeferred { get; set; }
@@ -147,7 +147,7 @@ internal sealed class SessionRow
     public int? EnlargementAuthorityProjectedPixelHeight { get; set; }
 }
 
-internal sealed class StepRow
+internal sealed record StepRow
 {
     public string SessionId { get; set; } = "";
     public string StepKind { get; set; } = "";

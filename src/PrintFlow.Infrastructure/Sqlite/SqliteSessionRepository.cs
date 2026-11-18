@@ -288,6 +288,11 @@ public sealed class SqliteSessionRepository : ISessionRepository
 
         try
         {
+            if (mutation.ImageProcessingGuard is { } guard &&
+                !await MatchesImageProcessingGuardAsync(connection, transaction, mutation.Session.Id, guard))
+                return OperationResult.Fail<Unit>(FailureCode.PreconditionNotMet,
+                    "The image processing selection, input or attempt has changed. Reload this task before continuing.");
+
             if (mutation.IsRetentionMaintenance)
             {
                 int eligible = await connection.ExecuteScalarAsync<int>(
@@ -589,6 +594,38 @@ public sealed class SqliteSessionRepository : ISessionRepository
     }
 
     // -------------------------------------------------------------------------------------
+    private static async Task<bool> MatchesImageProcessingGuardAsync(
+        SqliteConnection connection, SqliteTransaction transaction, SessionId session, ImageProcessingWriteGuard guard)
+    {
+        if (guard.Session.Id != session)
+            return false;
+
+        var expected = Mappers.ToRow(guard.Session);
+        var current = await connection.QuerySingleOrDefaultAsync<SessionRow>(
+            "SELECT * FROM ProcessingSession WHERE Id = @id;", new { id = session.ToString() }, transaction);
+        if (current is null || Mappers.ToRow(Mappers.ToDomain(current)) != expected)
+            return false;
+
+        var steps = await connection.QueryAsync<StepRow>(
+            "SELECT * FROM SessionStep WHERE SessionId = @id ORDER BY Ordinal;",
+            new { id = session.ToString() }, transaction);
+        if (!steps.SequenceEqual(guard.Steps.OrderBy(step => step.Ordinal)
+                .Select(step => Mappers.ToRow(session, step))))
+            return false;
+
+        if (guard.Input is { } input && await connection.ExecuteScalarAsync<int>(
+                """
+                SELECT COUNT(*) FROM Revision WHERE SessionId = @session AND Id = @id AND
+                    Sha256 = @sha AND RelativePath = @path AND IsValid = 1 AND RetentionReleasedAtUtc IS NULL;
+                """, new { session = session.ToString(), id = input.Id.ToString(),
+                    sha = input.Sha256.Value, path = input.File.RelativePath }, transaction) != 1)
+            return false;
+
+        return guard.RunningAttempt is not { } attempt || await connection.ExecuteScalarAsync<int>(
+            "SELECT COUNT(*) FROM ProcessingAttempt WHERE SessionId = @session AND Id = @id AND ResultStatus = 'RUNNING';",
+            new { session = session.ToString(), id = attempt.ToString() }, transaction) == 1;
+    }
+
     // Per-row writes. Every statement runs against the shared transaction so CommitAsync's
     // rollback covers all of them.
     // -------------------------------------------------------------------------------------

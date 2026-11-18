@@ -165,7 +165,8 @@ internal sealed class SessionServiceHarness : IDisposable
         IPhotoshopOutputProcessor? photoshop = null,
         IWorkstationAutomationLeaseManager? automationLeases = null,
         IWorkstationAutomationLease? enclosingAutomationLease = null,
-        IManualCropProcessor? manualCrop = null) => new SessionService(
+        IManualCropProcessor? manualCrop = null,
+        IEnumerable<IImageProcessingBackend>? imageProcessingBackends = null) => new SessionService(
         WorkflowEngine.Instance,
         repository ?? Repository,
         workspace ?? FileWorkspace,
@@ -183,7 +184,8 @@ internal sealed class SessionServiceHarness : IDisposable
         settings: Settings,
         diagnosticImages: (IDiagnosticImagePreviewDecoder)PreviewDecoder,
         enclosingAutomationLease: enclosingAutomationLease,
-        automationLeases: automationLeases ?? AutomationLeases);
+        automationLeases: automationLeases ?? AutomationLeases,
+        imageProcessingBackends: imageProcessingBackends);
 
     /// <summary>
     /// Builds a fresh <see cref="IStartupRecoveryService"/> against the same workspace and

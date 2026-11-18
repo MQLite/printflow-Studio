@@ -76,6 +76,19 @@ public sealed record WorkflowSnapshot(
     public TrimMargin TrimMargin { get; init; } = TrimMargin.Tight;
 
     public SessionImageProcessingSelection? ImageProcessingSelection { get; init; }
+
+    internal ImageProcessingMethod? ProcessingMethodFor(StepKind step)
+    {
+        SessionImageProcessingSelection selection = ImageProcessingSelection ?? SessionImageProcessingSelection.Compatible;
+        return step switch
+        {
+            StepKind.Enhancement or StepKind.BackgroundRemoval when selection.UseOpenAiCombined => ImageProcessingMethod.OpenAiCombined,
+            StepKind.Enhancement => selection.Enhancement,
+            StepKind.BackgroundRemoval => selection.BackgroundRemoval,
+            StepKind.Trim => selection.Crop,
+            _ => null,
+        };
+    }
     public bool ImageProcessingDefaultsDeferred { get; init; }
 
     public bool IgnoreSmallTrimNoise { get; init; } = true;

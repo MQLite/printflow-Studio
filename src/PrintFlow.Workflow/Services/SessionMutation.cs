@@ -35,6 +35,10 @@ public enum AutomationLockAction
 public sealed record AutomationLockChange(
     AutomationLockAction Action, SessionId SessionId, DateTimeOffset AtUtc, int ProcessId, string MachineName);
 
+public sealed record ImageProcessingWriteGuard(
+    ProcessingSession Session, IReadOnlyList<SessionStep> Steps,
+    Revision? Input = null, AttemptId? RunningAttempt = null);
+
 /// <summary>
 /// Everything one operator or system command needs written to metadata, as a single batch
 /// (Epic 11100 Task 11108, §32–§34).
@@ -65,6 +69,8 @@ public sealed record SessionMutation(
     public IReadOnlyList<RevisionReviewStateChange> RevisionReviewStateChanges { get; init; } = [];
 
     public IReadOnlyList<RevisionRetentionChange> RevisionRetentionChanges { get; init; } = [];
+
+    public ImageProcessingWriteGuard? ImageProcessingGuard { get; init; }
 
     /// <summary>
     /// Structured automation errors to append alongside the transition that produced them

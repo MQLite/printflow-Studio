@@ -1098,6 +1098,7 @@ public sealed partial class SessionViewModel : ObservableObject
     /// </remarks>
     public string? StoppingNotice => _runtime.State switch
     {
+        AutomationRuntimeState.StopRequested when _runtime.IsCancellableImageProcessing => Strings.Resolve("Session_GuidedStopping"),
         AutomationRuntimeState.StopRequested => UsesPhotoshop ? Strings.Session_PhotoshopStoppingNotice : Strings.Session_StoppingNotice,
         AutomationRuntimeState.TakeOverRequested => UsesPhotoshop ? Strings.Session_PhotoshopTakingOverNotice : Strings.Session_TakingOverNotice,
         _ => null,
@@ -1157,7 +1158,8 @@ public sealed partial class SessionViewModel : ObservableObject
     /// at the moment of choosing. Told separately, "stops this operation safely" and "leaves
     /// Meitu as it is" are each easy to read as the other.
     /// </remarks>
-    public string StopHint => UsesPhotoshop ? Strings.Session_PhotoshopStopHint
+    public string StopHint => _runtime.IsCancellableImageProcessing ? Strings.Resolve("Session_ImageProcessingStopHint")
+        : UsesPhotoshop ? Strings.Session_PhotoshopStopHint
         : $"{Strings.Session_StopHint} {Strings.Session_TakeOverHint}";
 
     public string TakeOverLabel => UsesPhotoshop ? Strings.Session_PhotoshopTakeOver : Strings.Session_TakeOver;
@@ -2633,7 +2635,8 @@ public sealed partial class SessionViewModel : ObservableObject
                 BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent,
                 displayed.RevisionId,
                 displayed.Sha256,
-                SelectedBackgroundRemovalMode),
+                SelectedBackgroundRemovalMode,
+                _session?.ImageProcessingExecution?.Method ?? PrintFlow.Domain.Settings.ImageProcessingMethod.MeituBackgroundRemoval),
             cancellationToken,
             _ => _cleanDraft = submittedDraft).ConfigureAwait(true);
     }
@@ -3521,6 +3524,7 @@ public sealed partial class SessionViewModel : ObservableObject
         OnPropertyChanged(nameof(CanTakeOverAutomation));
         OnPropertyChanged(nameof(IsStopping));
         OnPropertyChanged(nameof(StoppingNotice));
+        OnPropertyChanged(nameof(StopHint));
         StopAutomationCommand.NotifyCanExecuteChanged();
         BeginTakeOverCommand.NotifyCanExecuteChanged();
     }

@@ -1381,6 +1381,7 @@
   <data name="Session_GuidedPhaseWriting" xml:space="preserve"><value>Export was confirmed; the output may still be writing.</value></data>
   <data name="Session_GuidedProcessingWait" xml:space="preserve"><value>No reliable percentage is available. Please wait; a successful result still needs your review.</value></data>
   <data name="Session_GuidedStopping" xml:space="preserve"><value>Stopping this operation</value></data>
+  <data name="Session_ImageProcessingStopHint" xml:space="preserve"><value>Stop this run and discard any result it returns.</value></data>
   <data name="Session_GuidedTakingOver" xml:space="preserve"><value>Handing control to you</value></data>
   <data name="Session_GuidedPrintActual" xml:space="preserve"><value>Projected actual image: {0:0.##} × {1:0.##} mm</value></data>
   <data name="Session_GuidedPrintContract" xml:space="preserve"><value>Production requirement: {0} PPI · CMYK + W1. Validation and review still follow generation.</value></data>

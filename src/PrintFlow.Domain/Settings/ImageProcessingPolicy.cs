@@ -38,7 +38,8 @@ public sealed record SessionImageProcessingSelection(
     [JsonIgnore]
     public bool CanRunInCurrentBuild => this == Compatible;
 
-    internal bool HasValidMethods =>
+    [JsonIgnore]
+    public bool HasValidMethods =>
         Enhancement is ImageProcessingMethod.MeituEnhancement or ImageProcessingMethod.LightSharpen
             or ImageProcessingMethod.AiUpscale or ImageProcessingMethod.OpenAiRestore
             or ImageProcessingMethod.SkipEnhancement &&

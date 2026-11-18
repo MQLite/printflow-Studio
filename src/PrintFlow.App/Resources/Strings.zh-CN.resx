@@ -1371,6 +1371,7 @@
   <data name="Session_GuidedPhaseWriting" xml:space="preserve"><value>已确认导出，输出文件可能仍在写入。</value></data>
   <data name="Session_GuidedProcessingWait" xml:space="preserve"><value>当前无法提供可靠的百分比，请等待；处理成功后，仍须你检查并审核结果。</value></data>
   <data name="Session_GuidedStopping" xml:space="preserve"><value>正在停止本次处理</value></data>
+  <data name="Session_ImageProcessingStopHint" xml:space="preserve"><value>停止本次处理，丢弃这次运行返回的结果。</value></data>
   <data name="Session_GuidedTakingOver" xml:space="preserve"><value>正在交由你接管</value></data>
   <data name="Session_GuidedPrintActual" xml:space="preserve"><value>预计印刷尺寸：{0:0.##} × {1:0.##} 毫米</value></data>
   <data name="Session_GuidedPrintContract" xml:space="preserve"><value>TIFF 打印文件：{0} PPI（每英寸像素数）· CMYK 印刷色彩 · W1 白墨通道。生成后须校验、人工审核，再保存。</value></data>

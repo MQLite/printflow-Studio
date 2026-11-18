@@ -659,6 +659,7 @@ public sealed record SessionView(
     public BackgroundRemovalMode BackgroundRemovalMode { get; init; } = BackgroundRemovalMode.Automatic;
     public BackgroundRemovalMode BackgroundRemovalAttemptMode { get; init; } = BackgroundRemovalMode.Automatic;
     public SessionImageProcessingSelection? ImageProcessingSelection { get; init; }
+    public ImageProcessingExecutionView? ImageProcessingExecution { get; init; }
 
     /// <summary>The exact terminal attempt represented by the current failure surface.</summary>
     public AttemptId? CurrentFailureAttemptId { get; init; }

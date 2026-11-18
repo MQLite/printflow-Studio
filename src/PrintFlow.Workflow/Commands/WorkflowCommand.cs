@@ -4,6 +4,7 @@ using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Reviews;
 using PrintFlow.Domain.Sessions;
+using PrintFlow.Domain.Settings;
 using PrintFlow.Domain.Trimming;
 
 namespace PrintFlow.Workflow.Commands;
@@ -304,6 +305,9 @@ public abstract record WorkflowCommand
     /// </remarks>
     public sealed record SetTrimParameters(TrimMargin Margin, bool IgnoreSmallNoise = true) : WorkflowCommand;
 
+    public sealed record SetImageProcessingSelection(
+        StepKind Step, SessionImageProcessingSelection Selection) : WorkflowCommand;
+
     /// <summary>
     /// Record the operator's explicit authority for Meitu's automatic selection over the
     /// reviewed content Background Removal is about to consume (Epic 11300 Part C2B1 §5).
@@ -336,7 +340,8 @@ public abstract record WorkflowCommand
         BackgroundRemovalDecision Decision,
         RevisionId ReviewedRevisionId,
         Sha256 DisplayedHash,
-        BackgroundRemovalMode Mode = BackgroundRemovalMode.Automatic) : WorkflowCommand;
+        BackgroundRemovalMode Mode = BackgroundRemovalMode.Automatic,
+        ImageProcessingMethod Method = ImageProcessingMethod.MeituBackgroundRemoval) : WorkflowCommand;
 
     /// <summary>Go back to an earlier step, invalidating everything derived from it.</summary>
     public sealed record ReturnToStep(StepKind Target) : WorkflowCommand;
