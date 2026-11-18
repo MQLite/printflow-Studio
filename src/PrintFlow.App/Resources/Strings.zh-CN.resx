@@ -1782,4 +1782,24 @@
   <data name="ImageProcessing_ConfirmBackgroundHint" xml:space="preserve"><value>运行前，请为当前图像确认去背景方式。</value></data>
   <data name="ImageProcessing_AuthoriseBackgroundMethod" xml:space="preserve"><value>对此图像使用当前方式</value></data>
   <data name="ImageProcessing_ConfirmBackgroundQuestion" xml:space="preserve"><value>对此图像使用{0}？请复核结果后再批准。</value></data>
+  <data name="ImageProcessing_OpenAiCredentialHeading" xml:space="preserve"><value>OpenAI API 密钥</value></data>
+  <data name="ImageProcessing_OpenAiCredentialSave" xml:space="preserve"><value>保存 API 密钥</value></data>
+  <data name="ImageProcessing_OpenAiCredentialRemove" xml:space="preserve"><value>移除 API 密钥</value></data>
+  <data name="ImageProcessing_OpenAiConfigured" xml:space="preserve"><value>密钥已保存在 Windows 凭据管理器。首次请求时会验证密钥。</value></data>
+  <data name="ImageProcessing_OpenAiKeyMissing" xml:space="preserve"><value>请在图像处理设置中添加 OpenAI API 密钥。</value></data>
+  <data name="ImageProcessing_OpenAiKeyInvalid" xml:space="preserve"><value>请输入有效的 OpenAI API 密钥。</value></data>
+  <data name="ImageProcessing_OpenAiCredentialStore" xml:space="preserve"><value>Windows 凭据管理器无法访问密钥。请检查 Windows 用户会话或选择其他方式。</value></data>
+  <data name="ImageProcessing_OpenAiModelUnavailable" xml:space="preserve"><value>配置的 OpenAI Images 模型不可用。请检查部署设置。</value></data>
+  <data name="ImageProcessing_OpenAiUploadTitle" xml:space="preserve"><value>确认上传到 OpenAI</value></data>
+  <data name="ImageProcessing_OpenAiUploadQuestion" xml:space="preserve"><value>「{0}」会把任务中显示的图片上传到 OpenAI。即使请求超时，仍可能产生费用。是否继续本次上传？</value></data>
+  <data name="ImageProcessing_OpenAiConfirmationRequired" xml:space="preserve"><value>运行 OpenAI 方式时，请确认上传当前图片。</value></data>
+  <data name="ImageProcessing_OpenAiUnauthorised" xml:space="preserve"><value>OpenAI 未接受当前凭据。请更新 API 密钥或选择其他方式。</value></data>
+  <data name="ImageProcessing_OpenAiRateOrQuota" xml:space="preserve"><value>OpenAI 返回了限流或额度错误。重试前请检查用量和余额。</value></data>
+  <data name="ImageProcessing_OpenAiNetwork" xml:space="preserve"><value>OpenAI 请求未完成。重试前请检查网络和用量。</value></data>
+  <data name="ImageProcessing_OpenAiTimeout" xml:space="preserve"><value>OpenAI 未及时返回结果。发起新请求前请检查用量。</value></data>
+  <data name="ImageProcessing_OpenAiRejected" xml:space="preserve"><value>OpenAI 拒绝了图像编辑。请检查服务或选择其他方式。</value></data>
+  <data name="ImageProcessing_OpenAiUnsupportedInput" xml:space="preserve"><value>请选择有可见像素的 PNG 或 JPEG，文件不超过 20 MiB，每边不超过 8192 像素，总像素不超过 2400 万。</value></data>
+  <data name="ImageProcessing_OpenAiInvalidOutput" xml:space="preserve"><value>返回图片的 PNG 格式、尺寸或透明度无效，无法进入审核。请选择其他方式或重试。</value></data>
+  <data name="ImageProcessing_OpenAiWorkspace" xml:space="preserve"><value>无法读取或写入 OpenAI 图像工作文件。请检查工作区后重试。</value></data>
+  <data name="ImageProcessing_OpenAiCutoutHint" xml:space="preserve"><value>会把图片上传到 OpenAI，可能产生用量费用。生成式去背景可能重绘部分主体。</value></data>
 </root>

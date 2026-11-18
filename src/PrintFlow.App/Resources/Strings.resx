@@ -1792,4 +1792,24 @@
   <data name="ImageProcessing_ConfirmBackgroundHint" xml:space="preserve"><value>Confirm the background removal method for this image before running it.</value></data>
   <data name="ImageProcessing_AuthoriseBackgroundMethod" xml:space="preserve"><value>Use this method for this image</value></data>
   <data name="ImageProcessing_ConfirmBackgroundQuestion" xml:space="preserve"><value>Use {0} on this image? Check the result before approving it.</value></data>
+  <data name="ImageProcessing_OpenAiCredentialHeading" xml:space="preserve"><value>OpenAI API key</value></data>
+  <data name="ImageProcessing_OpenAiCredentialSave" xml:space="preserve"><value>Save API key</value></data>
+  <data name="ImageProcessing_OpenAiCredentialRemove" xml:space="preserve"><value>Remove API key</value></data>
+  <data name="ImageProcessing_OpenAiConfigured" xml:space="preserve"><value>A key is stored in Windows Credential Manager. It will be checked on the first request.</value></data>
+  <data name="ImageProcessing_OpenAiKeyMissing" xml:space="preserve"><value>Add an OpenAI API key in Image Processing settings.</value></data>
+  <data name="ImageProcessing_OpenAiKeyInvalid" xml:space="preserve"><value>Enter a valid OpenAI API key.</value></data>
+  <data name="ImageProcessing_OpenAiCredentialStore" xml:space="preserve"><value>Windows Credential Manager could not access the key. Check the Windows user session or choose another method.</value></data>
+  <data name="ImageProcessing_OpenAiModelUnavailable" xml:space="preserve"><value>The configured OpenAI Images model is unavailable. Check the deployment settings.</value></data>
+  <data name="ImageProcessing_OpenAiUploadTitle" xml:space="preserve"><value>Confirm upload to OpenAI</value></data>
+  <data name="ImageProcessing_OpenAiUploadQuestion" xml:space="preserve"><value>{0} will send the image shown in this task to OpenAI. Usage charges may apply even if the request times out. Continue with this upload?</value></data>
+  <data name="ImageProcessing_OpenAiConfirmationRequired" xml:space="preserve"><value>Confirm the upload of the current image when you run the OpenAI method.</value></data>
+  <data name="ImageProcessing_OpenAiUnauthorised" xml:space="preserve"><value>OpenAI rejected the credentials. Update the API key or choose another method.</value></data>
+  <data name="ImageProcessing_OpenAiRateOrQuota" xml:space="preserve"><value>OpenAI returned a rate or quota limit. Check your usage and balance before retrying.</value></data>
+  <data name="ImageProcessing_OpenAiNetwork" xml:space="preserve"><value>The OpenAI request did not complete. Check the network and usage before retrying.</value></data>
+  <data name="ImageProcessing_OpenAiTimeout" xml:space="preserve"><value>OpenAI did not respond in time. Check your usage before starting a new request.</value></data>
+  <data name="ImageProcessing_OpenAiRejected" xml:space="preserve"><value>OpenAI rejected the image edit. Check the service or choose another method.</value></data>
+  <data name="ImageProcessing_OpenAiUnsupportedInput" xml:space="preserve"><value>Choose a readable PNG or JPEG with visible pixels, up to 20 MiB, 8192 pixels per edge and 24 megapixels.</value></data>
+  <data name="ImageProcessing_OpenAiInvalidOutput" xml:space="preserve"><value>The returned image could not be reviewed because its PNG, dimensions or transparency were invalid. Choose another method or retry.</value></data>
+  <data name="ImageProcessing_OpenAiWorkspace" xml:space="preserve"><value>The OpenAI image working files could not be read or written. Check the workspace before retrying.</value></data>
+  <data name="ImageProcessing_OpenAiCutoutHint" xml:space="preserve"><value>Sends the image to OpenAI and may incur usage charges. Generative background removal can redraw parts of the subject.</value></data>
 </root>

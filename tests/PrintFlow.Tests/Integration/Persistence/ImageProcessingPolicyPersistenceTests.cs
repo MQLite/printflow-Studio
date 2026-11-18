@@ -107,7 +107,7 @@ public sealed class ImageProcessingPolicyPersistenceTests
 
         Must(MigrationRunner.Migrate(connection));
         Must(MigrationRunner.Migrate(connection));
-        MigrationRunner.NewestKnownVersion.ShouldBe(23);
+        MigrationRunner.NewestKnownVersion.ShouldBe(24);
         var session = Must(await new SqliteSessionRepository(database.Factory).LoadAsync(id, default)).ShouldNotBeNull();
         session.Session.TrimMargin.ShouldBe(TrimMargin.PerEdge(1, 2, 3, 4));
         session.Session.IgnoreSmallTrimNoise.ShouldBeFalse();

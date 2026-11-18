@@ -10,4 +10,8 @@ namespace PrintFlow.Domain.Attempts;
 public sealed record ImageProcessingRunDetails(
     ImageProcessingMethod Method,
     Sha256 InputSha256,
-    string? AlgorithmVersion = null);
+    string? AlgorithmVersion = null)
+{
+    public DateTimeOffset? UploadConfirmedAtUtc { get; init; }
+    public string? UploadConfirmedBy { get; init; }
+}

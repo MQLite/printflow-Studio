@@ -630,7 +630,7 @@ public sealed class MaximumBoundsBoundaryTests
         scripts.ShouldContain("0020_background_removal_mode.sql");
         scripts.ShouldContain("0021_trim_noise_policy.sql");
         scripts.ShouldContain("0022_delivery_rename.sql");
-        scripts.Last().ShouldBe("0023_image_processing_configuration.sql");
+        scripts.Last().ShouldBe("0024_image_upload_confirmation.sql");
     }
 
     // -------------------------------------------------------------------------------------

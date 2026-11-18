@@ -6,6 +6,7 @@ using PrintFlow.Domain.Reviews;
 using PrintFlow.Domain.Sessions;
 using PrintFlow.Domain.Settings;
 using PrintFlow.Domain.Trimming;
+using PrintFlow.Workflow.Ports;
 
 namespace PrintFlow.Workflow.Commands;
 
@@ -42,7 +43,7 @@ public abstract record WorkflowCommand
     public sealed record ConfirmOriginal(string? Notes = null) : WorkflowCommand;
 
     /// <summary>Begin an attempt for the given step.</summary>
-    public sealed record StartStep(StepKind Step) : WorkflowCommand;
+    public sealed record StartStep(StepKind Step, ImageUploadConfirmation? UploadConfirmation = null) : WorkflowCommand;
 
     /// <summary>Approve the result currently awaiting review, bound to the hash reviewed.</summary>
     public sealed record Approve(StepKind Step, Sha256 ReviewedHash, string? Notes = null) : WorkflowCommand;

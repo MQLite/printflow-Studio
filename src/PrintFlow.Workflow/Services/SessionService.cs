@@ -719,6 +719,9 @@ public sealed partial class SessionService : ISessionService
         if (correction is { Purpose: CorrectionPurpose.Import })
             work = work with { CorrectionRequestId = correction.RequestId, ExpectedSelectedHash = correction.SelectedHash };
 
+        if (command is WorkflowCommand.StartStep start)
+            work = work with { UploadConfirmation = start.UploadConfirmation };
+
         return await RunProducingStepAsync(aggregate, transition, context, work, cancellationToken);
     }
 
@@ -1087,6 +1090,7 @@ public sealed partial class SessionService : ISessionService
         /// <summary>The selected file's hash when it was checked; the importer refuses other bytes.</summary>
         public Sha256? ExpectedSelectedHash { get; init; }
         public ImageProcessingExecutionPlan? ImageProcessing { get; init; }
+        public ImageUploadConfirmation? UploadConfirmation { get; init; }
     }
 
     /// <summary>
@@ -2001,6 +2005,20 @@ public sealed partial class SessionService : ISessionService
         {
             if (plan.View.Unavailable is { } unavailable)
                 return OperationResult.Fail<SessionView>(unavailable);
+            var method = plan.View.Method;
+            if (ImageUploadConfirmation.IsOpenAiMethod(method))
+            {
+                var source = FindRevision(aggregate, work.InputRevision);
+                if (source is null || work.UploadConfirmation?.TryReserve(method, source.Id, source.Sha256) != true)
+                    return OperationResult.Fail<SessionView>(OperationFailure.Create(FailureCode.PreconditionNotMet,
+                        "Confirm the current input and operation before uploading to OpenAI Images.",
+                        messageKey: "ImageProcessing_OpenAiConfirmationRequired"));
+            }
+            else
+            {
+                work = work with { UploadConfirmation = null };
+            }
+
             work = work with { ImageProcessing = plan, ProcessorId = plan.View.AdapterId! };
         }
 
@@ -2184,7 +2202,11 @@ public sealed partial class SessionService : ISessionService
             string? algorithmVersion = work.ImageProcessing?.View.AlgorithmVersion;
             runningAttempt = runningAttempt with
             {
-                ImageProcessingDetails = new ImageProcessingRunDetails(actualMethod, imageInput.Sha256, algorithmVersion),
+                ImageProcessingDetails = new ImageProcessingRunDetails(actualMethod, imageInput.Sha256, algorithmVersion)
+                {
+                    UploadConfirmedAtUtc = work.UploadConfirmation is null ? null : context.NowUtc,
+                    UploadConfirmedBy = work.UploadConfirmation is null ? null : context.Operator,
+                },
             };
         }
 

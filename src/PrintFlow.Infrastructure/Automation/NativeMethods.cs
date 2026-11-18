@@ -21,6 +21,39 @@ namespace PrintFlow.Infrastructure.Automation;
 /// </remarks>
 internal static partial class NativeMethods
 {
+    // Windows per-user credential store for OpenAI Images.
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    internal struct WindowsCredential
+    {
+        public uint Flags;
+        public uint Type;
+        public string? TargetName;
+        public nint Comment;
+        public System.Runtime.InteropServices.ComTypes.FILETIME LastWritten;
+        public uint BlobSize;
+        public nint Blob;
+        public uint Persist;
+        public uint AttributeCount;
+        public nint Attributes;
+        public nint TargetAlias;
+        public nint UserName;
+    }
+
+    [DllImport("advapi32.dll", CharSet = CharSet.Unicode, ExactSpelling = true, SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool CredReadW(string target, uint type, uint flags, out nint credential);
+
+    [DllImport("advapi32.dll", CharSet = CharSet.Unicode, ExactSpelling = true, SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool CredWriteW(ref WindowsCredential credential, uint flags);
+
+    [DllImport("advapi32.dll", CharSet = CharSet.Unicode, ExactSpelling = true, SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool CredDeleteW(string target, uint type, uint flags);
+
+    [DllImport("advapi32.dll", ExactSpelling = true)]
+    internal static extern void CredFree(nint credential);
+
     // Local CPU inference checks free physical memory before loading a model.
     [LibraryImport("kernel32.dll")]
     internal static partial int GlobalMemoryStatusEx(ref MemoryStatus status);

@@ -7,6 +7,7 @@ using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Sessions;
 using PrintFlow.Domain.Settings;
 using PrintFlow.Workflow.Services;
+using PrintFlow.Workflow.Ports;
 
 namespace PrintFlow.App.ViewModels;
 
@@ -14,6 +15,7 @@ public sealed partial class SettingsViewModel
 {
     private readonly ISessionService _imageProcessingSessions;
     private ImageProcessingPolicy? _savedImageProcessing;
+    private readonly IOpenAiImageCredentials? _openAiCredentials;
     private string _savedImageMargin = "0";
     private TaskCompletionSource<bool>? _leaveImageSettings;
     private bool _imageSettingsReadable;
@@ -26,6 +28,55 @@ public sealed partial class SettingsViewModel
     [ObservableProperty] private ImageProcessingMethod? _selectedBackgroundRemovalMethod;
     [ObservableProperty] private ImageProcessingMethod? _selectedCropMethod;
     [ObservableProperty] private bool _ignoreSmallTrimNoise = true;
+
+    public bool ShowOpenAiCredentials => _openAiCredentials is not null;
+    public string OpenAiCredentialHeading => Strings.Resolve("ImageProcessing_OpenAiCredentialHeading");
+    public string OpenAiCredentialSaveLabel => Strings.Resolve("ImageProcessing_OpenAiCredentialSave");
+    public string OpenAiCredentialRemoveLabel => Strings.Resolve("ImageProcessing_OpenAiCredentialRemove");
+    public string OpenAiCredentialStatus
+    {
+        get
+        {
+            if (_openAiCredentials is null)
+                return string.Empty;
+            var result = _openAiCredentials.Read();
+            return result.IsFailure ? ImageProcessingMethodOption.UnavailableHint(result.Failure)
+                : Strings.Resolve(result.Value is null
+                    ? "ImageProcessing_OpenAiKeyMissing" : "ImageProcessing_OpenAiConfigured");
+        }
+    }
+
+    internal void SaveOpenAiCredential(string key)
+    {
+        if (_openAiCredentials is not null && CanBackFromImageProcessing())
+            ApplyOpenAiCredentialResult(_openAiCredentials.Save(key));
+    }
+
+    [RelayCommand(CanExecute = nameof(CanBackFromImageProcessing))]
+    private void RemoveOpenAiCredential()
+    {
+        if (_openAiCredentials is not null && CanBackFromImageProcessing())
+            ApplyOpenAiCredentialResult(_openAiCredentials.Delete());
+    }
+
+    private void ApplyOpenAiCredentialResult(OperationResult<Unit> result)
+    {
+        if (result.IsFailure)
+        {
+            ImageProcessingNotice = ImageProcessingMethodOption.UnavailableHint(result.Failure);
+            return;
+        }
+
+        var draft = ImageProcessingDraft();
+        string margin = TrimSafetyMarginPixels;
+        OnPropertyChanged(nameof(OpenAiCredentialStatus));
+        OnPropertyChanged(nameof(EnhancementMethods));
+        OnPropertyChanged(nameof(BackgroundRemovalMethods));
+        if (draft is not null)
+            ApplyImageProcessingDraft(draft, margin);
+        ImageProcessingNotice = draft is not null && UnavailableDefault(draft.Selection) is { } unavailable
+            ? DescribeUnavailableDefaults(unavailable) : null;
+    }
 
     public string ImageProcessingHeading => Strings.Resolve("ImageProcessing_Heading");
     public string ImageProcessingHint => Strings.Resolve("ImageProcessing_Hint");
@@ -210,6 +261,7 @@ public sealed partial class SettingsViewModel
         RestoreImageProcessingDefaultsCommand.NotifyCanExecuteChanged();
         SaveImageProcessingCommand.NotifyCanExecuteChanged();
         BackFromImageProcessingCommand.NotifyCanExecuteChanged();
+        RemoveOpenAiCredentialCommand.NotifyCanExecuteChanged();
         DiscardImageProcessingCommand.NotifyCanExecuteChanged();
         KeepEditingImageProcessingCommand.NotifyCanExecuteChanged();
     }

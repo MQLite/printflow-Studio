@@ -52,7 +52,8 @@ public sealed record ImageProcessingMethodOption(ImageProcessingMethod Method, s
         ImageProcessingMethod.LightSharpen => "ImageProcessing_SharpenHint",
         ImageProcessingMethod.AiUpscale => "ImageProcessing_UpscaleHint",
         ImageProcessingMethod.BiRefNet => "ImageProcessing_BiRefNetHint",
-        ImageProcessingMethod.OpenAiRestore or ImageProcessingMethod.OpenAiCutout or ImageProcessingMethod.OpenAiCombined =>
+        ImageProcessingMethod.OpenAiCutout => "ImageProcessing_OpenAiCutoutHint",
+        ImageProcessingMethod.OpenAiRestore or ImageProcessingMethod.OpenAiCombined =>
             "ImageProcessing_CloudHint",
         _ => "ImageProcessing_Ready",
     });

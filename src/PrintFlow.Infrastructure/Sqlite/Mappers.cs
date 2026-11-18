@@ -1339,6 +1339,8 @@ internal static class Mappers
         ImageProcessingMethod = attempt.ImageProcessingDetails?.Method.ToString(),
         ImageProcessingInputSha256 = attempt.ImageProcessingDetails?.InputSha256.Value,
         ImageProcessingAlgorithmVersion = attempt.ImageProcessingDetails?.AlgorithmVersion,
+        ImageUploadConfirmedAtUtc = ToTextOrNull(attempt.ImageProcessingDetails?.UploadConfirmedAtUtc),
+        ImageUploadConfirmedBy = attempt.ImageProcessingDetails?.UploadConfirmedBy,
         TrimMode = attempt.TrimParameters is { } margin ? ToText(margin.Mode) : null,
         TrimMarginTop = attempt.TrimParameters?.Top,
         TrimMarginRight = attempt.TrimParameters?.Right,
@@ -1808,7 +1810,11 @@ internal static class Mappers
             !Sha256.TryParse(row.ImageProcessingInputSha256, out Sha256 hash))
             throw new InvalidDataException("The persisted image processing attempt evidence is invalid.");
 
-        return new ImageProcessingRunDetails(method, hash, row.ImageProcessingAlgorithmVersion);
+        return new ImageProcessingRunDetails(method, hash, row.ImageProcessingAlgorithmVersion)
+        {
+            UploadConfirmedAtUtc = ToDateTimeOffsetOrNull(row.ImageUploadConfirmedAtUtc),
+            UploadConfirmedBy = row.ImageUploadConfirmedBy,
+        };
     }
 
     /// <summary>Reads a stored key, or null when the row predates or postdates this build's vocabulary.</summary>

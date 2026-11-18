@@ -8,6 +8,7 @@ using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
 using PrintFlow.Infrastructure.Adapters.Fake;
 using PrintFlow.Infrastructure.Adapters.Meitu;
+using PrintFlow.Infrastructure.Adapters.OpenAI;
 using PrintFlow.Infrastructure.Adapters.Photoshop;
 using PrintFlow.Infrastructure.Automation;
 using PrintFlow.Infrastructure.Configuration;
@@ -93,6 +94,13 @@ public static class ServiceRegistration
         services.AddSingleton<IImageProcessingBackend>(provider => new LocalBackgroundMatteBackend(
             provider.GetRequiredService<IWorkspace>(),
             System.IO.Path.Combine(AppContext.BaseDirectory, "Models", LocalBackgroundMatteBackend.ModelFileName)));
+
+        services.AddSingleton<IOpenAiImageCredentials, WindowsOpenAiImageCredentials>();
+        services.AddSingleton<IImageProcessingBackend>(provider => new OpenAiImageBackend(
+            provider.GetRequiredService<IWorkspace>(),
+            provider.GetRequiredService<IOpenAiImageCredentials>(),
+            configuration.OpenAiImages?.Model ?? OpenAiImageBackend.DefaultModel));
+        services.AddSingleton<IOpenAiUploadPrompt, SystemOpenAiUploadPrompt>();
 
         // The manual-crop counterpart, registered on exactly the same terms and for the same
         // reasons: in-process pixel work, no external application, no environment gate. It is

@@ -2,6 +2,7 @@ using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PrintFlow.App.Resources;
+using PrintFlow.App.Navigation;
 using PrintFlow.Domain.Sessions;
 using PrintFlow.Domain.Settings;
 using PrintFlow.Workflow.Commands;
@@ -11,6 +12,8 @@ namespace PrintFlow.App.ViewModels;
 
 public sealed partial class SessionViewModel
 {
+    private readonly IOpenAiUploadPrompt? _openAiUploadPrompt;
+
     [ObservableProperty] private ImageProcessingMethod? _draftImageProcessingMethod;
     [ObservableProperty] private bool _isChangingImageProcessingMethod;
 

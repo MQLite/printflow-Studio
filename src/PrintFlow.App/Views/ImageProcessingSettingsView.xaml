@@ -75,6 +75,8 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
                     <TextBlock Text="{Binding EnhancementMethodLabel}" Style="{StaticResource MethodLabel}" />
@@ -131,6 +133,24 @@
                                   AutomationProperties.AutomationId="ImageProcessing.IgnoreSmallTrimNoise"
                                   AutomationProperties.Name="{Binding IgnoreSmallTrimNoiseLabel}" />
                     </WrapPanel>
+                    <Border Grid.Row="7" Grid.ColumnSpan="2" Style="{StaticResource MethodSeparator}"
+                            Visibility="{Binding ShowOpenAiCredentials, Converter={StaticResource VisibleWhenTrue}}" />
+                    <TextBlock Grid.Row="8" Text="{Binding OpenAiCredentialHeading}" Style="{StaticResource MethodLabel}"
+                               Visibility="{Binding ShowOpenAiCredentials, Converter={StaticResource VisibleWhenTrue}}" />
+                    <StackPanel Grid.Row="8" Grid.Column="1"
+                                Visibility="{Binding ShowOpenAiCredentials, Converter={StaticResource VisibleWhenTrue}}">
+                        <TextBlock Text="{Binding OpenAiCredentialStatus}" Style="{StaticResource MethodHint}"
+                                   AutomationProperties.LiveSetting="Polite" />
+                        <PasswordBox x:Name="OpenAiKey" Margin="0,6,0,6" MaxLength="1024" Unloaded="ClearOpenAiKey"
+                                     AutomationProperties.Name="{Binding OpenAiCredentialHeading}"
+                                     AutomationProperties.AutomationId="ImageProcessing.OpenAiKey" />
+                        <WrapPanel>
+                            <Button Content="{Binding OpenAiCredentialSaveLabel}" Click="SaveOpenAiCredential"
+                                    Style="{StaticResource PF.Button.Secondary}" Margin="0,0,8,4" />
+                            <Button Content="{Binding OpenAiCredentialRemoveLabel}" Command="{Binding RemoveOpenAiCredentialCommand}"
+                                    Style="{StaticResource PF.Button.Secondary}" Margin="0,0,0,4" />
+                        </WrapPanel>
+                    </StackPanel>
                 </Grid>
             </ui:Card>
         </ScrollViewer>

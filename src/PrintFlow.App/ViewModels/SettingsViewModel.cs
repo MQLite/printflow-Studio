@@ -113,7 +113,8 @@ public sealed partial class SettingsViewModel : ObservableObject
         SettingsDefaults defaults,
         LocalDiagnosticLocations locations,
         ReadinessObservationAccessor observations,
-        ISessionService sessions)
+        ISessionService sessions,
+        IOpenAiImageCredentials? openAiCredentials = null)
     {
         ArgumentNullException.ThrowIfNull(settings);
         ArgumentNullException.ThrowIfNull(localisation);
@@ -131,6 +132,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         _locations = locations;
         _observations = observations;
         _imageProcessingSessions = sessions;
+        _openAiCredentials = openAiCredentials;
 
         foreach (OperatorLanguage language in OperatorLanguages.All)
         {

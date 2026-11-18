@@ -698,7 +698,8 @@ public sealed partial class SessionViewModel : ObservableObject
         PrintFlow.Workflow.Delivery.IDeliveredFileShell? fileShell = null,
         PrintFlow.Workflow.Ports.ICorrectionFolderShell? correctionShell = null,
         ManualHandoffCopyService? manualHandoffCopy = null,
-        IManualHandoffCopyPicker? manualHandoffCopyPicker = null)
+        IManualHandoffCopyPicker? manualHandoffCopyPicker = null,
+        IOpenAiUploadPrompt? openAiUploadPrompt = null)
     {
         ArgumentNullException.ThrowIfNull(sessions);
         ArgumentNullException.ThrowIfNull(previews);
@@ -716,6 +717,7 @@ public sealed partial class SessionViewModel : ObservableObject
         _correctionShell = correctionShell;
         _manualHandoffCopy = manualHandoffCopy;
         _manualHandoffCopyPicker = manualHandoffCopyPicker;
+        _openAiUploadPrompt = openAiUploadPrompt;
         if (localisation is not null)
             System.Windows.WeakEventManager<PrintFlow.App.Localisation.ILocalisationService, EventArgs>.AddHandler(
                 localisation, nameof(PrintFlow.App.Localisation.ILocalisationService.LanguageChanged), OnOperatorLanguageChanged);
@@ -2186,9 +2188,24 @@ public sealed partial class SessionViewModel : ObservableObject
     /// the refreshed session.
     /// </remarks>
     [RelayCommand]
-    private Task RunStepAsync(CancellationToken cancellationToken) =>
-        !CanRunSelectedImageMethod || HasUnconfirmedBackgroundRemovalMode ? Task.CompletedTask
-            : RunAsync(step => new WorkflowCommand.StartStep(step), cancellationToken);
+    private Task RunStepAsync(CancellationToken cancellationToken)
+    {
+        if (!CanRunStep || IsBusy || _session is not { CurrentStep: { } current } view)
+            return Task.CompletedTask;
+
+        ImageUploadConfirmation? confirmation = null;
+        if (view.ImageProcessingExecution is { } execution && ImageUploadConfirmation.IsOpenAiMethod(execution.Method))
+        {
+            if (view.CurrentArtefact is not { } input ||
+                _openAiUploadPrompt?.Confirm(ImageProcessingMethodOption.Name(execution.Method)) != true ||
+                !ReferenceEquals(_session, view) || cancellationToken.IsCancellationRequested)
+                return Task.CompletedTask;
+
+            confirmation = new ImageUploadConfirmation(execution.Method, input.RevisionId, input.Sha256);
+        }
+
+        return RunAsync(new WorkflowCommand.StartStep(current.Step, confirmation), cancellationToken);
+    }
 
     /// <summary>
     /// Approves the result currently on screen, bound to its exact hash (Part 3C3A §10).

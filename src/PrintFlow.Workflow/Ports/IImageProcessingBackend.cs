@@ -18,7 +18,10 @@ public sealed record ImageProcessingRequest(
     Sha256 InputSha256,
     WorkspaceFileRef Input,
     WorkspaceFileRef ExpectedOutput,
-    BackgroundRemovalAuthority? BackgroundRemovalAuthority);
+    BackgroundRemovalAuthority? BackgroundRemovalAuthority)
+{
+    public ImageUploadConfirmation? UploadConfirmation { get; init; }
+}
 
 /// <summary>A provider for non-desktop image processing. Null capability means the method is not implemented.</summary>
 public interface IImageProcessingBackend

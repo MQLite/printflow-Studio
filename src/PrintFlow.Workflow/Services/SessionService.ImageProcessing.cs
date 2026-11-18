@@ -34,12 +34,8 @@ public sealed partial class SessionService
         if (method == ImageProcessingMethod.ManualCrop)
             return new(new(method, _manualCrop.ProcessorId, _manualCrop.ProcessorId, false, null));
 
-        if (method is ImageProcessingMethod.OpenAiRestore or ImageProcessingMethod.OpenAiCutout or ImageProcessingMethod.OpenAiCombined)
-            return new(new(method, null, null, false, OperationFailure.Create(FailureCode.PreconditionNotMet,
-                "A cloud image operation requires explicit upload authority for this exact input and operation.",
-                messageKey: "ImageProcessing_MethodUnavailable")));
-
-        if (method is ImageProcessingMethod.LightSharpen or ImageProcessingMethod.AiUpscale or ImageProcessingMethod.BiRefNet)
+        // The combined backend can construct the request, while C2 owns the paired workflow.
+        if (method != ImageProcessingMethod.OpenAiCombined)
         {
             foreach (IImageProcessingBackend backend in _imageProcessingBackends)
             {
@@ -109,7 +105,10 @@ public sealed partial class SessionService
         WorkspaceFileRef output = SiblingOf(workingCopy, outputName);
         establishExpectedOutput(output);
         var request = new ImageProcessingRequest(plan.View.Method, work.Operation, plan.View.AlgorithmVersion!, source.Id, source.Sha256,
-            workingCopy, output, attempt.BackgroundRemovalAuthority);
+            workingCopy, output, attempt.BackgroundRemovalAuthority)
+        {
+            UploadConfirmation = work.UploadConfirmation,
+        };
         var result = await plan.Backend!.ProcessAsync(request, cancellationToken).ConfigureAwait(false);
         cancellationToken.ThrowIfCancellationRequested();
         if (result.IsFailure)
@@ -120,13 +119,20 @@ public sealed partial class SessionService
 
         var verifiedInput = await VerifyImageProcessingInputAsync(source, workingCopy, cancellationToken).ConfigureAwait(false);
         if (verifiedInput.IsFailure)
-            return OperationResult.Fail<StepWork>(verifiedInput.Failure);
+        {
+            OperationFailure failure = verifiedInput.Failure;
+            if (result.Value.ImageProcessingEvidence is { } evidence)
+                failure = failure with { Context = new Dictionary<string, string>(failure.Context.Concat(evidence)) };
+            return OperationResult.Fail<StepWork>(failure);
+        }
 
         var inspected = await _fileInspector.InspectPngOutputAsync(
             _workspace.ResolveAbsolute(output), cancellationToken).ConfigureAwait(false);
-        if (inspected.IsFailure || inspected.Value.Format != ImageFormat.Png || !inspected.Value.HasPixelDimensions)
-            return OperationResult.Fail<StepWork>(FailureCode.OutputValidationFailed,
-                "The assigned image processing output is not a readable PNG.");
+        if (inspected.IsFailure || inspected.Value.Format != ImageFormat.Png || !inspected.Value.HasPixelDimensions ||
+            (result.Value.ValidatedImageSha256 is { } validatedHash && inspected.Value.Sha256 != validatedHash))
+            return OperationResult.Fail<StepWork>(OperationFailure.Create(FailureCode.OutputValidationFailed,
+                "The assigned image processing output does not match a validated PNG.",
+                isRetryable: true, context: result.Value.ImageProcessingEvidence));
         return OperationResult.Ok(new StepWork(output, inspected.Value, result.Value.AdapterNotes));
     }
 

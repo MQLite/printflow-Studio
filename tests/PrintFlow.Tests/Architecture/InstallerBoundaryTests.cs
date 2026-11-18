@@ -302,9 +302,8 @@ public sealed class InstallerBoundaryTests
     /// Scoped to what an updater would actually need — an HTTP client, a download call, a
     /// scheduled task, a Run key, a package manager, or a custom action that could run any of
     /// them — rather than a general sweep for the word "update", which appears legitimately all
-    /// over a codebase that updates rows and view models. The product half of this repository has
-    /// never had a network client at all, and this test is what keeps that true through the one
-    /// change that would most plausibly introduce one.
+    /// over a codebase that updates rows and view models. Only the consent-gated OpenAI Images
+    /// adapter may use the HTTP primitives it needs to post an edit.
     /// </remarks>
     [Fact]
     public void Nothing_in_the_product_or_the_packaging_can_fetch_a_new_version()
@@ -322,11 +321,16 @@ public sealed class InstallerBoundaryTests
         foreach (string file in UpdaterBoundarySources())
         {
             string text = DeclarationsOf(file);
+            string relative = RepositoryRelative(file);
             foreach (string api in updaterApis)
             {
+                if (relative == @"src\PrintFlow.Infrastructure\Adapters\OpenAI\OpenAiImageBackend.cs" &&
+                    api is "HttpClient" or "HttpRequestMessage" or "System.Net.Http")
+                    continue;
+
                 if (text.Contains(api, StringComparison.OrdinalIgnoreCase))
                 {
-                    offenders.Add($"{RepositoryRelative(file)}: {api}");
+                    offenders.Add($"{relative}: {api}");
                 }
             }
         }

@@ -18,6 +18,8 @@ public sealed record AdapterOutput(WorkspaceFileRef ProducedFile, TimeSpan Elaps
     public PsdInspection? PsdInspection { get; init; }
     public PdfInspection? PdfInspection { get; init; }
     public FileFacts? ValidatedPdfRaster { get; init; }
+    public Sha256? ValidatedImageSha256 { get; init; }
+    public IReadOnlyDictionary<string, string>? ImageProcessingEvidence { get; init; }
 }
 
 public sealed record PsdPreparationRequest(WorkspaceFileRef Input, WorkspaceFileRef ExpectedOutput)

@@ -1243,7 +1243,8 @@ public sealed class WorkflowEngine : IWorkflowEngine
         }
 
         effects.Add(new WorkflowEffect.OpenForManualWork(command.Step, reason));
-        if (state.ProcessingMethodFor(command.Step) != ImageProcessingMethod.BiRefNet)
+        if (state.ProcessingMethodFor(command.Step) is not (ImageProcessingMethod.BiRefNet
+            or ImageProcessingMethod.OpenAiRestore or ImageProcessingMethod.OpenAiCutout or ImageProcessingMethod.OpenAiCombined))
             effects.Add(new WorkflowEffect.ReleaseAutomationLock());
 
         (WorkflowSnapshot handedOff, WorkflowEffect marked) = HandOffSession(state, reason, context);
