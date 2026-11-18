@@ -1732,7 +1732,19 @@
   <data name="ImageProcessing_UnavailableDefaults" xml:space="preserve"><value>保存的图像处理方式在当前版本不可用。请选择可用方式，或恢复默认后保存。</value></data>
   <data name="ImageProcessing_Method_Meitu" xml:space="preserve"><value>美图</value></data>
   <data name="ImageProcessing_Method_LightSharpen" xml:space="preserve"><value>本地轻度锐化</value></data>
-  <data name="ImageProcessing_Method_AiUpscale" xml:space="preserve"><value>本地 AI 超分</value></data>
+  <data name="ImageProcessing_Method_AiUpscale" xml:space="preserve"><value>本地 AI 超分（2×）</value></data>
+  <data name="ImageProcessing_SharpenHint" xml:space="preserve"><value>增强边缘清晰度，保留图像尺寸和透明度。</value></data>
+  <data name="ImageProcessing_UpscaleHint" xml:space="preserve"><value>在 CPU 上将宽高像素各放大 2 倍。请在审核时检查五官和文字有无变化。</value></data>
+  <data name="ImageProcessing_UpscaleModelMissing" xml:space="preserve"><value>缺少本地 2× 模型。请选择轻度锐化或跳过清晰化。</value></data>
+  <data name="ImageProcessing_UpscaleModelInvalid" xml:space="preserve"><value>无法验证本地 2× 模型。请选择轻度锐化或跳过清晰化。</value></data>
+  <data name="ImageProcessing_UpscaleLowMemory" xml:space="preserve"><value>2× 超分至少需要 1.5 GiB 可用系统内存。请释放内存、改用轻度锐化或跳过清晰化。</value></data>
+  <data name="ImageProcessing_UpscaleRunFailed" xml:space="preserve"><value>本地 2× 模型无法处理此图像。请重试、改用轻度锐化或跳过清晰化。</value></data>
+  <data name="ImageProcessing_UpscaleTooLarge" xml:space="preserve"><value>2× 超分要求每边不超过 1,024 像素，总像素不超过 262,144。请选择轻度锐化或跳过清晰化。</value></data>
+  <data name="ImageProcessing_SharpenTooLarge" xml:space="preserve"><value>轻度锐化要求每边不超过 8,192 像素，总像素不超过 2,400 万，文件不超过 128 MiB。可跳过清晰化以保留原图。</value></data>
+  <data name="ImageProcessing_UpscaleBitDepth" xml:space="preserve"><value>2× 超分支持每通道最多 8 位的图像。请选择轻度锐化或跳过清晰化以保留原有位深。</value></data>
+  <data name="ImageProcessing_LocalImageUnsupported" xml:space="preserve"><value>本地清晰化支持 RGB 或灰度 PNG、JPEG。请更换方式或跳过清晰化。</value></data>
+  <data name="ImageProcessing_LocalImageError" xml:space="preserve"><value>本地清晰化未能读取图像、保留色彩配置或生成有效结果。请更换方式或跳过清晰化。</value></data>
+  <data name="ImageProcessing_LocalRuntimeUnavailable" xml:space="preserve"><value>所需的 Windows x64 图像处理运行库不可用。请选择其他方式或跳过清晰化。</value></data>
   <data name="ImageProcessing_Method_OpenAiRestore" xml:space="preserve"><value>OpenAI 照片修复</value></data>
   <data name="ImageProcessing_Method_SkipEnhancement" xml:space="preserve"><value>跳过清晰化</value></data>
   <data name="ImageProcessing_Method_BiRefNet" xml:space="preserve"><value>本地 BiRefNet 抠图</value></data>

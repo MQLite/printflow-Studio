@@ -87,6 +87,9 @@ public static class ServiceRegistration
         // no external application, so it has no Fake/Production duality to choose between and
         // nothing about it is gated on the workstation environment (Epic 11200 Part B §17).
         services.AddSingleton<ITrimProcessor, DeterministicAlphaTrimProcessor>();
+        services.AddSingleton<IImageProcessingBackend>(provider => new LocalEnhancementBackend(
+            provider.GetRequiredService<IWorkspace>(),
+            System.IO.Path.Combine(AppContext.BaseDirectory, "Models", LocalEnhancementBackend.ModelFileName)));
 
         // The manual-crop counterpart, registered on exactly the same terms and for the same
         // reasons: in-process pixel work, no external application, no environment gate. It is

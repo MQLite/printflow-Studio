@@ -49,7 +49,9 @@ public sealed record ImageProcessingMethodOption(ImageProcessingMethod Method, s
         ImageProcessingMethod.SkipEnhancement or ImageProcessingMethod.KeepBackground => "ImageProcessing_SkipHint",
         ImageProcessingMethod.ManualCrop => "ImageProcessing_ManualCropHint",
         ImageProcessingMethod.KeepCanvas => "ImageProcessing_KeepCanvasHint",
-        ImageProcessingMethod.LightSharpen or ImageProcessingMethod.AiUpscale or ImageProcessingMethod.BiRefNet =>
+        ImageProcessingMethod.LightSharpen => "ImageProcessing_SharpenHint",
+        ImageProcessingMethod.AiUpscale => "ImageProcessing_UpscaleHint",
+        ImageProcessingMethod.BiRefNet =>
             "ImageProcessing_LocalHint",
         ImageProcessingMethod.OpenAiRestore or ImageProcessingMethod.OpenAiCutout or ImageProcessingMethod.OpenAiCombined =>
             "ImageProcessing_CloudHint",

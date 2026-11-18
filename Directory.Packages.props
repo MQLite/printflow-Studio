@@ -37,4 +37,9 @@
     <PackageVersion Include="Microsoft.Extensions.TimeProvider.Testing" Version="10.9.0" />
   </ItemGroup>
 
+  <ItemGroup Label="Local image processing">
+    <PackageVersion Include="Magick.NET-Q16-x64" Version="15.1.0" />
+    <PackageVersion Include="Microsoft.ML.OnnxRuntime" Version="1.32.0" />
+  </ItemGroup>
+
 </Project>

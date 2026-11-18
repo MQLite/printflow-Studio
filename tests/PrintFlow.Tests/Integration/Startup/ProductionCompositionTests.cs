@@ -4,6 +4,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 using PrintFlow.App.Composition;
 using PrintFlow.App.ViewModels;
+using PrintFlow.Domain.Settings;
 using PrintFlow.Infrastructure.Adapters.Fake;
 using PrintFlow.Infrastructure.Adapters.Meitu;
 using PrintFlow.Infrastructure.Adapters.Photoshop;
@@ -12,6 +13,7 @@ using PrintFlow.Infrastructure.Configuration;
 using PrintFlow.Infrastructure.Sqlite;
 using PrintFlow.Tests.Fixtures;
 using PrintFlow.Workflow.Ports;
+using PrintFlow.Workflow.Services;
 
 namespace PrintFlow.Tests.Integration.Startup;
 
@@ -37,6 +39,16 @@ namespace PrintFlow.Tests.Integration.Startup;
 [Collection(SqliteCollection.Name)]
 public sealed class ProductionCompositionTests
 {
+    [Fact]
+    public void Production_session_service_offers_local_sharpening_without_workstation_evidence()
+    {
+        using TempApplication application = new("Production");
+        using ServiceProvider services = Compose(application);
+        var sessions = services.GetRequiredService<ISessionService>();
+
+        sessions.GetImageProcessingUnavailable(ImageProcessingMethod.LightSharpen).ShouldBeNull();
+    }
+
     // ---------------------------------------------------------------- §2, §16 Composition
 
     /// <summary>Fake composes both fake adapters and nothing else (§2).</summary>

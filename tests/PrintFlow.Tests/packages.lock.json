@@ -59,6 +59,11 @@
         "resolved": "4.4.0",
         "contentHash": "gwJEfIGS7FhykvtZoscwXj/XwW+mJY6UbAZk+qtLKFUGWC95kfKXnj8VkxsZQnWBxJemM/q664rGLN5nf+OHZw=="
       },
+      "Magick.NET.Core": {
+        "type": "Transitive",
+        "resolved": "15.1.0",
+        "contentHash": "WIaemRN4tJvw5BNUfsO8/V3LojV5FOCojQ/sQ4ruXme1o2frRYfcvHPhKV5E6TbYoEdVEvtGX+8Wbut0F2lJHg=="
+      },
       "Microsoft.CodeCoverage": {
         "type": "Transitive",
         "resolved": "18.9.0",
@@ -76,6 +81,14 @@
         "type": "Transitive",
         "resolved": "10.0.11",
         "contentHash": "/a1aJz4m7ylhEDf25ugQChLQoN5XwoGjWw/BoR/ZWWKsO1v4DdJElS1uyngahz4B/eOzjFk1KNTkarRLE5wsIg=="
+      },
+      "Microsoft.ML.OnnxRuntime.Managed": {
+        "type": "Transitive",
+        "resolved": "1.32.0",
+        "contentHash": "ApCfJdeUnrO4v+9KWtxnm/Uk3UlzdbNqGb64uBXh85RToxYbW1COJM/avDj3INNTwfEE6LUIWaJIxov0YWNa1g==",
+        "dependencies": {
+          "System.Numerics.Tensors": "9.0.0"
+        }
       },
       "Microsoft.TestPlatform.ObjectModel": {
         "type": "Transitive",
@@ -121,6 +134,11 @@
         "type": "Transitive",
         "resolved": "6.0.1",
         "contentHash": "10J1D0h/lioojphfJ4Fuh5ZUThT/xOVHdV9roGBittKKNP2PMjrvibEdbVTGZcPra1399Ja3tqIJLyQrc5Wmhg=="
+      },
+      "System.Numerics.Tensors": {
+        "type": "Transitive",
+        "resolved": "9.0.0",
+        "contentHash": "hyJB4UlpAi19Xr9AXzu2NuagKC4lPfHObNMEAA0HmqFz2rX7wKgzeYzO/jM/eBHDhnUGFFEjk5cOoJaxqg5J4A=="
       },
       "WPF-UI.Abstractions": {
         "type": "Transitive",
@@ -170,8 +188,8 @@
       "printflow.aidesignprobe": {
         "type": "Project",
         "dependencies": {
-          "PrintFlow.Infrastructure": "[0.1.0, )",
-          "PrintFlow.NativeHost": "[0.1.0, )"
+          "PrintFlow.Infrastructure": "[0.1.5, )",
+          "PrintFlow.NativeHost": "[0.1.5, )"
         }
       },
       "printflow.app": {
@@ -180,9 +198,9 @@
           "CommunityToolkit.Mvvm": "[8.4.2, )",
           "Microsoft.Extensions.DependencyInjection": "[10.0.11, )",
           "Microsoft.Extensions.Logging.Abstractions": "[10.0.11, )",
-          "PrintFlow.Domain": "[0.1.0, )",
-          "PrintFlow.Infrastructure": "[0.1.0, )",
-          "PrintFlow.Workflow": "[0.1.0, )",
+          "PrintFlow.Domain": "[0.1.5, )",
+          "PrintFlow.Infrastructure": "[0.1.5, )",
+          "PrintFlow.Workflow": "[0.1.5, )",
           "WPF-UI": "[4.3.0, )"
         }
       },
@@ -193,27 +211,29 @@
         "type": "Project",
         "dependencies": {
           "Dapper": "[2.1.66, )",
+          "Magick.NET-Q16-x64": "[15.1.0, )",
           "Microsoft.Data.Sqlite": "[10.0.11, )",
-          "PrintFlow.Domain": "[0.1.0, )",
-          "PrintFlow.Workflow": "[0.1.0, )"
+          "Microsoft.ML.OnnxRuntime": "[1.32.0, )",
+          "PrintFlow.Domain": "[0.1.5, )",
+          "PrintFlow.Workflow": "[0.1.5, )"
         }
       },
       "printflow.nativehost": {
         "type": "Project",
         "dependencies": {
-          "PrintFlow.Infrastructure": "[0.1.0, )"
+          "PrintFlow.Infrastructure": "[0.1.5, )"
         }
       },
       "printflow.workflow": {
         "type": "Project",
         "dependencies": {
-          "PrintFlow.Domain": "[0.1.0, )"
+          "PrintFlow.Domain": "[0.1.5, )"
         }
       },
       "printflow.workstationentry": {
         "type": "Project",
         "dependencies": {
-          "PrintFlow.App": "[0.1.0, )"
+          "PrintFlow.App": "[0.1.5, )"
         }
       },
       "CommunityToolkit.Mvvm": {
@@ -227,6 +247,15 @@
         "requested": "[2.1.66, )",
         "resolved": "2.1.66",
         "contentHash": "/q77jUgDOS+bzkmk3Vy9SiWMaetTw+NOoPAV0xPBsGVAyljd5S6P+4RUW7R3ZUGGr9lDRyPKgAMj2UAOwvqZYw=="
+      },
+      "Magick.NET-Q16-x64": {
+        "type": "CentralTransitive",
+        "requested": "[15.1.0, )",
+        "resolved": "15.1.0",
+        "contentHash": "JoLBZ5fp6zkjdVkQuLLNOeEd/ke+8/6srqyGL3hmAh4mKwp/CiAQ/K0MKOF6zDrRQrBqD2SoQoNMm80JjVAiRQ==",
+        "dependencies": {
+          "Magick.NET.Core": "15.1.0"
+        }
       },
       "Microsoft.Data.Sqlite": {
         "type": "CentralTransitive",
@@ -255,6 +284,15 @@
         "contentHash": "Ljd0Uxoq5XpScD2Bg0nM/r3mwx7Ao5Uq24eo2ARxbGvqJ7Zht6rt2cJtwVRH4Cv+1ZVMdXz6TB43KbpmsxRrvQ==",
         "dependencies": {
           "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.11"
+        }
+      },
+      "Microsoft.ML.OnnxRuntime": {
+        "type": "CentralTransitive",
+        "requested": "[1.32.0, )",
+        "resolved": "1.32.0",
+        "contentHash": "3O3isLjl6ChjMvzZMt3in+uUymFxQK5+vd1UuSShmbUjHezHXgcze6KF5NquC/uPuL/++0CpI7qUBRrf+g1ezg==",
+        "dependencies": {
+          "Microsoft.ML.OnnxRuntime.Managed": "1.32.0"
         }
       },
       "WPF-UI": {

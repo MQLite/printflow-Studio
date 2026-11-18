@@ -1742,7 +1742,19 @@
   <data name="ImageProcessing_UnavailableDefaults" xml:space="preserve"><value>A saved image processing method is unavailable in this version. Choose an available method or restore defaults and save.</value></data>
   <data name="ImageProcessing_Method_Meitu" xml:space="preserve"><value>Meitu</value></data>
   <data name="ImageProcessing_Method_LightSharpen" xml:space="preserve"><value>Local light sharpening</value></data>
-  <data name="ImageProcessing_Method_AiUpscale" xml:space="preserve"><value>Local AI upscaling</value></data>
+  <data name="ImageProcessing_Method_AiUpscale" xml:space="preserve"><value>Local AI upscaling (2×)</value></data>
+  <data name="ImageProcessing_SharpenHint" xml:space="preserve"><value>Sharpens edges while keeping the image size and transparency.</value></data>
+  <data name="ImageProcessing_UpscaleHint" xml:space="preserve"><value>Doubles both pixel dimensions on the CPU. Review faces and lettering for changes.</value></data>
+  <data name="ImageProcessing_UpscaleModelMissing" xml:space="preserve"><value>The local 2× model is missing. Choose light sharpening or skip enhancement.</value></data>
+  <data name="ImageProcessing_UpscaleModelInvalid" xml:space="preserve"><value>The local 2× model could not be verified. Choose light sharpening or skip enhancement.</value></data>
+  <data name="ImageProcessing_UpscaleLowMemory" xml:space="preserve"><value>2× upscaling needs at least 1.5 GiB of free system memory. Free memory, choose light sharpening, or skip enhancement.</value></data>
+  <data name="ImageProcessing_UpscaleRunFailed" xml:space="preserve"><value>The local 2× model could not process this image. Retry, choose light sharpening, or skip enhancement.</value></data>
+  <data name="ImageProcessing_UpscaleTooLarge" xml:space="preserve"><value>2× upscaling supports images up to 1,024 pixels on either edge and 262,144 pixels total. Choose light sharpening or skip enhancement.</value></data>
+  <data name="ImageProcessing_SharpenTooLarge" xml:space="preserve"><value>Light sharpening supports images up to 8,192 pixels on either edge, 24 megapixels total, and 128 MiB. Skip enhancement to keep the original.</value></data>
+  <data name="ImageProcessing_UpscaleBitDepth" xml:space="preserve"><value>2× upscaling supports images up to 8 bits per channel. Choose light sharpening or skip enhancement to preserve the original bit depth.</value></data>
+  <data name="ImageProcessing_LocalImageUnsupported" xml:space="preserve"><value>Local enhancement supports RGB and grayscale PNG or JPEG files. Change the enhancement method or skip it.</value></data>
+  <data name="ImageProcessing_LocalImageError" xml:space="preserve"><value>Local enhancement could not read the image, preserve its colour profile, or produce a valid result. Change the enhancement method or skip it.</value></data>
+  <data name="ImageProcessing_LocalRuntimeUnavailable" xml:space="preserve"><value>The required Windows x64 image processing runtime is unavailable. Choose another method or skip enhancement.</value></data>
   <data name="ImageProcessing_Method_OpenAiRestore" xml:space="preserve"><value>OpenAI photo restoration</value></data>
   <data name="ImageProcessing_Method_SkipEnhancement" xml:space="preserve"><value>Skip enhancement</value></data>
   <data name="ImageProcessing_Method_BiRefNet" xml:space="preserve"><value>Local BiRefNet</value></data>
