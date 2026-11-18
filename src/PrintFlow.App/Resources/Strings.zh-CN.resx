@@ -1801,5 +1801,15 @@
   <data name="ImageProcessing_OpenAiUnsupportedInput" xml:space="preserve"><value>请选择有可见像素的 PNG 或 JPEG，文件不超过 20 MiB，每边不超过 8192 像素，总像素不超过 2400 万。</value></data>
   <data name="ImageProcessing_OpenAiInvalidOutput" xml:space="preserve"><value>返回图片的 PNG 格式、尺寸或透明度无效，无法进入审核。请选择其他方式或重试。</value></data>
   <data name="ImageProcessing_OpenAiWorkspace" xml:space="preserve"><value>无法读取或写入 OpenAI 图像工作文件。请检查工作区后重试。</value></data>
+  <data name="ImageProcessing_CombinedToggle" xml:space="preserve"><value>一次完成清晰化＋去背景</value></data>
+  <data name="ImageProcessing_CombinedHint" xml:space="preserve"><value>将已审核的图片上传到 OpenAI，可能产生费用。结果可能改变五官、文字或边缘。</value></data>
+  <data name="ImageProcessing_ContinueCombined" xml:space="preserve"><value>继续到合并处理</value></data>
+  <data name="ImageProcessing_RunCombined" xml:space="preserve"><value>运行合并处理</value></data>
+  <data name="ImageProcessing_KeepReviewedInput" xml:space="preserve"><value>保留已审核输入并继续裁切</value></data>
+  <data name="ImageProcessing_ReturnToSeparate" xml:space="preserve"><value>返回清晰化并改用分步处理</value></data>
+  <data name="ImageProcessing_CombinedReviewHeading" xml:space="preserve"><value>联合审核清晰化和去背景</value></data>
+  <data name="ImageProcessing_CombinedReviewDetails" xml:space="preserve"><value>对比输入图和结果的五官、文字与细节，检查主体是否被改变。</value></data>
+  <data name="ImageProcessing_CombinedReviewEdges" xml:space="preserve"><value>检查轮廓、发丝和浅色边缘，确认需要保留的主体完整可见。</value></data>
+  <data name="ImageProcessing_CombinedReviewReject" xml:space="preserve"><value>拒绝会丢弃本次结果。之后可重新确认上传并重试、保留已审核输入，或返回分步处理。</value></data>
   <data name="ImageProcessing_OpenAiCutoutHint" xml:space="preserve"><value>会把图片上传到 OpenAI，可能产生用量费用。生成式去背景可能重绘部分主体。</value></data>
 </root>

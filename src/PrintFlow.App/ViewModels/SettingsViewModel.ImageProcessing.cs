@@ -19,8 +19,7 @@ public sealed partial class SettingsViewModel
     private string _savedImageMargin = "0";
     private TaskCompletionSource<bool>? _leaveImageSettings;
     private bool _imageSettingsReadable;
-    private bool _useOpenAiCombined;
-
+    [ObservableProperty] private bool _useOpenAiCombined;
     [ObservableProperty] private bool _isEditingImageProcessing;
     [ObservableProperty] private bool _isImageProcessingLeavePending;
     [ObservableProperty] private string? _imageProcessingNotice;
@@ -70,6 +69,7 @@ public sealed partial class SettingsViewModel
         var draft = ImageProcessingDraft();
         string margin = TrimSafetyMarginPixels;
         OnPropertyChanged(nameof(OpenAiCredentialStatus));
+        OnPropertyChanged(nameof(OpenAiCombinedUnavailable));
         OnPropertyChanged(nameof(EnhancementMethods));
         OnPropertyChanged(nameof(BackgroundRemovalMethods));
         if (draft is not null)
@@ -81,6 +81,13 @@ public sealed partial class SettingsViewModel
     public string ImageProcessingHeading => Strings.Resolve("ImageProcessing_Heading");
     public string ImageProcessingHint => Strings.Resolve("ImageProcessing_Hint");
     public string ImageProcessingBreadcrumb => Strings.Resolve("ImageProcessing_Breadcrumb");
+    public string OpenAiCombinedToggleLabel => Strings.Resolve("ImageProcessing_CombinedToggle");
+    public string OpenAiCombinedLabel => ImageProcessingMethodOption.Name(ImageProcessingMethod.OpenAiCombined);
+    public string OpenAiCombinedHint => Strings.Resolve("ImageProcessing_CombinedHint");
+    public string? OpenAiCombinedUnavailable => UseOpenAiCombined &&
+        _imageProcessingSessions.GetImageProcessingUnavailable(ImageProcessingMethod.OpenAiCombined) is { } failure
+            ? ImageProcessingMethodOption.UnavailableHint(failure)
+            : null;
     public string EnhancementMethodLabel => Strings.Resolve("ImageProcessing_Enhancement");
     public string BackgroundRemovalMethodLabel => Strings.Resolve("ImageProcessing_BackgroundRemoval");
     public string CropMethodLabel => Strings.Resolve("ImageProcessing_Crop");
@@ -214,7 +221,7 @@ public sealed partial class SettingsViewModel
 
     private void ApplyImageProcessingDraft(ImageProcessingPolicy? policy, string margin)
     {
-        _useOpenAiCombined = policy?.Selection.UseOpenAiCombined ?? false;
+        UseOpenAiCombined = policy?.Selection.UseOpenAiCombined ?? false;
         SelectedEnhancementMethod = policy?.Selection.Enhancement;
         SelectedBackgroundRemovalMethod = policy?.Selection.BackgroundRemoval;
         SelectedCropMethod = policy?.Selection.Crop;
@@ -227,7 +234,7 @@ public sealed partial class SettingsViewModel
         SelectedEnhancementMethod is { } enhancement &&
         SelectedBackgroundRemovalMethod is { } backgroundRemoval &&
         SelectedCropMethod is { } crop
-            ? new(new SessionImageProcessingSelection(enhancement, backgroundRemoval, crop, _useOpenAiCombined),
+            ? new(new SessionImageProcessingSelection(enhancement, backgroundRemoval, crop, UseOpenAiCombined),
                 IgnoreSmallTrimNoise)
             : null;
 
@@ -248,6 +255,12 @@ public sealed partial class SettingsViewModel
     private bool CanRestoreImageProcessing() => CanBackFromImageProcessing() && _imageSettingsReadable;
     private bool CanBackFromImageProcessing() => CanApply() && IsEditingImageProcessing && !IsImageProcessingLeavePending;
     private bool CanRespondToImageProcessingLeave() => CanApply() && IsImageProcessingLeavePending;
+
+    partial void OnUseOpenAiCombinedChanged(bool value)
+    {
+        OnPropertyChanged(nameof(OpenAiCombinedUnavailable));
+        SaveImageProcessingCommand.NotifyCanExecuteChanged();
+    }
 
     partial void OnIsEditingImageProcessingChanged(bool value) => RefreshImageProcessingCommands();
     partial void OnIsImageProcessingLeavePendingChanged(bool value) => RefreshImageProcessingCommands();

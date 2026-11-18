@@ -2822,6 +2822,11 @@
                         AutomationProperties.AutomationId="Session.Skip"
                         AutomationProperties.Name="{Binding SkipLabel}"
                         Visibility="{Binding CanSkip, Converter={StaticResource BoolToVisibility}}" />
+<local:SessionActionButton Style="{StaticResource RecommendedAction}" Content="{Binding ReturnToSeparateProcessingLabel}"
+                        Command="{Binding ReturnToSeparateProcessingCommand}"
+                        AutomationProperties.AutomationId="Session.ReturnToSeparateProcessing"
+                        AutomationProperties.Name="{Binding ReturnToSeparateProcessingLabel}"
+                        Visibility="{Binding CanReturnToSeparateProcessing, Converter={StaticResource BoolToVisibility}}" />
 <local:SessionActionButton Style="{StaticResource RecommendedAction}" Content="{Binding KeepOriginalExtentLabel}"
                         ToolTip="{Binding KeepOriginalExtentHint}"
                         Command="{Binding KeepOriginalExtentCommand}"

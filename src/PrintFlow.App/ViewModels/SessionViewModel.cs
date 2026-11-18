@@ -819,10 +819,13 @@ public sealed partial class SessionViewModel : ObservableObject
 
     public string ConfirmOriginalLabel => Strings.Session_ConfirmOriginal;
 
-    public string RunStepLabel => _session is { OriginalSourceFormat: ImageFormat.Psd, CurrentStep.Step: StepKind.OriginalConfirmation }
-        ? Strings.Session_PreparePsd
-        : _session is { OriginalSourceFormat: ImageFormat.Pdf, CurrentStep.Step: StepKind.OriginalConfirmation }
-            ? Strings.Session_PreparePdf : Strings.Session_RunStep;
+    public string RunStepLabel => _session switch
+    {
+        { OriginalSourceFormat: ImageFormat.Psd, CurrentStep.Step: StepKind.OriginalConfirmation } => Strings.Session_PreparePsd,
+        { OriginalSourceFormat: ImageFormat.Pdf, CurrentStep.Step: StepKind.OriginalConfirmation } => Strings.Session_PreparePdf,
+        _ when IsCombinedBackgroundRemoval => Strings.Resolve("ImageProcessing_RunCombined"),
+        _ => Strings.Session_RunStep,
+    };
 
     public bool HasPdfSource => _session?.OriginalSourceFormat == ImageFormat.Pdf;
     public string PdfSourceNotice => !HasPdfSource || _session?.CurrentStep?.Step != StepKind.OriginalConfirmation ? string.Empty
@@ -895,8 +898,19 @@ public sealed partial class SessionViewModel : ObservableObject
             ? _navigation.GoToErrorDetailsAsync(_session.Id, attemptId, cancellationToken)
             : Task.CompletedTask;
 
-    public string SkipLabel => UsesCurrentImageWithoutProcessing && _session?.ImageProcessingExecution is { } execution
-        ? ImageProcessingMethodOption.Name(execution.Method) : Strings.Session_Skip;
+    private string? CombinedSkipReason => IsCombinedImageProcessing
+        ? ContinuesToCombinedProcessing ? WorkflowCommand.Skip.CombinedWithBackgroundRemoval
+            : WorkflowCommand.Skip.KeepReviewedInputAfterCombined
+        : null;
+
+    public string SkipLabel => CombinedSkipReason switch
+    {
+        WorkflowCommand.Skip.CombinedWithBackgroundRemoval => Strings.Resolve("ImageProcessing_ContinueCombined"),
+        WorkflowCommand.Skip.KeepReviewedInputAfterCombined => Strings.Resolve("ImageProcessing_KeepReviewedInput"),
+        _ when UsesCurrentImageWithoutProcessing && _session?.ImageProcessingExecution is { } execution =>
+            ImageProcessingMethodOption.Name(execution.Method),
+        _ => Strings.Session_Skip,
+    };
 
     public string KeepOriginalExtentLabel => Strings.Session_KeepOriginalExtent;
     public string KeepOriginalExtentHint => Strings.Session_KeepOriginalExtentHint;
@@ -904,8 +918,9 @@ public sealed partial class SessionViewModel : ObservableObject
 
     public string HandOffLabel => Strings.Session_HandOff;
 
-    public string ReviewHeading =>
-        IsProductionTiffReview ? Strings.Session_TiffReviewHeading : Strings.Session_ReviewHeading;
+    public string ReviewHeading => IsReviewRequired && IsCombinedBackgroundRemoval
+        ? Strings.Resolve("ImageProcessing_CombinedReviewHeading")
+        : IsProductionTiffReview ? Strings.Session_TiffReviewHeading : Strings.Session_ReviewHeading;
 
     public string RejectReasonLabel => Strings.Session_RejectReasonLabel;
 
@@ -2202,7 +2217,8 @@ public sealed partial class SessionViewModel : ObservableObject
                 !ReferenceEquals(_session, view) || cancellationToken.IsCancellationRequested)
                 return Task.CompletedTask;
 
-            confirmation = new ImageUploadConfirmation(execution.Method, input.RevisionId, input.Sha256);
+            confirmation = new ImageUploadConfirmation(execution.Method, input.RevisionId, input.Sha256,
+                current.CombinedUploadPositionId);
         }
 
         return RunAsync(new WorkflowCommand.StartStep(current.Step, confirmation), cancellationToken);
@@ -2291,7 +2307,7 @@ public sealed partial class SessionViewModel : ObservableObject
     /// </remarks>
     [RelayCommand]
     private Task SkipAsync(CancellationToken cancellationToken) =>
-        RunAsync(step => new WorkflowCommand.Skip(step), cancellationToken);
+        RunAsync(step => new WorkflowCommand.Skip(step, CombinedSkipReason), cancellationToken);
 
     [RelayCommand(CanExecute = nameof(CanKeepOriginalExtent))]
     private Task KeepOriginalExtentAsync(CancellationToken cancellationToken) =>
@@ -2585,7 +2601,8 @@ public sealed partial class SessionViewModel : ObservableObject
         CancelReturn();
         long generation = _openGeneration;
         await RunAsync(
-            new WorkflowCommand.ReturnToStep(intent.Target.Step), cancellationToken).ConfigureAwait(true);
+            new WorkflowCommand.ReturnToStep(intent.Target.Step, intent.UseStepByStepImageProcessing),
+            cancellationToken).ConfigureAwait(true);
         if (generation == _openGeneration && intent.EditSize && _session?.Sizing.CanSetCustomTargetEdgeSize == true)
         {
             _customPresetContext = intent.Preset is { } named ? SizePresets.FirstOrDefault(choice => choice.Preset == named) : null;
@@ -3777,6 +3794,7 @@ public sealed partial class SessionViewModel : ObservableObject
         OnPropertyChanged(nameof(IsReviewRequired));
 
         OnPropertyChanged(nameof(CanReturnToStep));
+        OnPropertyChanged(nameof(CanReturnToSeparateProcessing));
         OnPropertyChanged(nameof(CanBeginReturn));
         OnPropertyChanged(nameof(CanSetTrimParameters));
         OnPropertyChanged(nameof(PendingTrimSummary));

@@ -29,6 +29,9 @@ public sealed record SessionStep(
     int AttemptCount,
     DateTimeOffset EnteredStateAtUtc)
 {
+    /// <summary>Identifies the current opportunity to confirm a combined image upload.</summary>
+    public Guid? CombinedUploadPositionId { get; init; }
+
     /// <summary>A step is finished when it is Approved or Skipped (plan §8.2).</summary>
     public bool IsFinished => State is StepState.Approved or StepState.Skipped;
 
@@ -46,6 +49,7 @@ public sealed record SessionStep(
             CurrentRevisionId = null,
             CurrentRevisionSha256 = null,
             SkipReason = null,
+            CombinedUploadPositionId = null,
             EnteredStateAtUtc = atUtc,
         };
 }

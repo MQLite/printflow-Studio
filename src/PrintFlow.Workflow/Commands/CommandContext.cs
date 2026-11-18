@@ -13,7 +13,7 @@ namespace PrintFlow.Workflow.Commands;
 /// <param name="NowUtc">The instant to stamp on state changes. Always UTC.</param>
 /// <param name="Operator">Windows username, or <c>Operator</c> when unavailable (MVP design §4.1).</param>
 /// <param name="NewReviewId">A pre-allocated identifier for a review this command may record.</param>
-/// <param name="NewAttemptId">A pre-allocated identifier for an attempt this command may start.</param>
+/// <param name="NewAttemptId">A fresh identifier for an attempt or a pending combined upload.</param>
 public sealed record CommandContext(
     DateTimeOffset NowUtc,
     string Operator,

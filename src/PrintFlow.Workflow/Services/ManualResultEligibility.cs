@@ -23,5 +23,6 @@ public static class ManualResultEligibility
     public static bool CanSubmit(WorkflowSnapshot state) =>
         state.SessionState == SessionState.HandedOff &&
         state.CurrentStep is { } step && Supports(step.Step) &&
+        state.ProcessingMethodFor(step.Step) != ImageProcessingMethod.OpenAiCombined &&
         IsManualResultPosition(state) && state.UpstreamRevisionOf(step.Step) is not null;
 }

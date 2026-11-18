@@ -1196,6 +1196,7 @@ internal static class Mappers
         SkipReason = step.SkipReason,
         AttemptCount = step.AttemptCount,
         EnteredStateAtUtc = ToText(step.EnteredStateAtUtc),
+        CombinedUploadPositionId = step.CombinedUploadPositionId?.ToString("D"),
     };
 
     public static SessionStep ToDomain(StepRow row) => new(
@@ -1206,7 +1207,10 @@ internal static class Mappers
         row.CurrentRevisionSha is string sha ? Sha256.Parse(sha) : null,
         row.SkipReason,
         row.AttemptCount,
-        ToDateTimeOffset(row.EnteredStateAtUtc));
+        ToDateTimeOffset(row.EnteredStateAtUtc))
+    {
+        CombinedUploadPositionId = row.CombinedUploadPositionId is { } position ? Guid.Parse(position) : null,
+    };
 
     public static SnapshotRow ToRow(InputSnapshot snapshot) => new()
     {

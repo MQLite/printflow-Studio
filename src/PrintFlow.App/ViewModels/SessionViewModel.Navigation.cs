@@ -10,7 +10,8 @@ namespace PrintFlow.App.ViewModels;
 public sealed partial class SessionViewModel
 {
     private sealed record ReturnIntent(string Context, ReturnTargetRow Target,
-        SizePreset? Preset = null, TargetEdge? Edge = null, decimal? Millimetres = null, bool EditSize = false);
+        SizePreset? Preset = null, TargetEdge? Edge = null, decimal? Millimetres = null, bool EditSize = false,
+        bool UseStepByStepImageProcessing = false);
     private sealed record LeaveIntent(string Context, Func<CancellationToken, Task> Continue);
     private ReturnIntent? _returnIntent;
     private LeaveIntent? _leaveIntent;
@@ -88,14 +89,15 @@ public sealed partial class SessionViewModel
     }
 
     private void CaptureReturn(ReturnTargetRow target, SizePreset? preset = null, TargetEdge? edge = null,
-        decimal? millimetres = null, bool editSize = false)
+        decimal? millimetres = null, bool editSize = false, bool useStepByStepImageProcessing = false)
     {
         if (!CanInteractWithLivePage || IsBusy || _finalSaveOperation is not null ||
             _session?.ReturnTargets.Any(offered => offered.Step == target.Step) != true) return;
         RequestLeave(() =>
         {
             SelectedReturnTarget = target;
-            _returnIntent = new ReturnIntent(NavigationContext(_session), target, preset, edge, millimetres, editSize);
+            _returnIntent = new ReturnIntent(NavigationContext(_session), target, preset, edge, millimetres, editSize,
+                useStepByStepImageProcessing);
             IsConfirmingReturn = true;
             OnPropertyChanged(nameof(ReturnImpact));
             OnPropertyChanged(nameof(GuidedInteractionIdentity));

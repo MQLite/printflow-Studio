@@ -206,8 +206,9 @@ public sealed class OpenAiImageBackendTests
         File.WriteAllBytes(sourcePath, source);
         var revision = RevisionId.From(Guid.NewGuid());
         var sha = Sha256.FromBytes(System.Security.Cryptography.SHA256.HashData(source));
-        var consent = new ImageUploadConfirmation(method, revision, sha);
-        consent.TryReserve(method, revision, sha).ShouldBeTrue();
+        Guid? position = method == ImageProcessingMethod.OpenAiCombined ? Guid.NewGuid() : null;
+        var consent = new ImageUploadConfirmation(method, revision, sha, position);
+        consent.TryReserve(method, revision, sha, position).ShouldBeTrue();
         var request = new ImageProcessingRequest(method, OperationKind.RemoveBackground, Model, revision, sha,
             prepared, expected, BackgroundRemovalAuthority.For(
                 BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent, revision, sha))

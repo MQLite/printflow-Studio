@@ -808,10 +808,10 @@ public sealed class SqliteSessionRepository : ISessionRepository
             """
             INSERT INTO SessionStep
                 (SessionId, StepKind, Ordinal, State, CurrentRevisionId, CurrentRevisionSha,
-                 SkipReason, AttemptCount, EnteredStateAtUtc)
+                 SkipReason, AttemptCount, EnteredStateAtUtc, CombinedUploadPositionId)
             VALUES
                 (@SessionId, @StepKind, @Ordinal, @State, @CurrentRevisionId, @CurrentRevisionSha,
-                 @SkipReason, @AttemptCount, @EnteredStateAtUtc)
+                 @SkipReason, @AttemptCount, @EnteredStateAtUtc, @CombinedUploadPositionId)
             ON CONFLICT(SessionId, StepKind) DO UPDATE SET
                 Ordinal = excluded.Ordinal,
                 State = excluded.State,
@@ -819,7 +819,8 @@ public sealed class SqliteSessionRepository : ISessionRepository
                 CurrentRevisionSha = excluded.CurrentRevisionSha,
                 SkipReason = excluded.SkipReason,
                 AttemptCount = excluded.AttemptCount,
-                EnteredStateAtUtc = excluded.EnteredStateAtUtc;
+                EnteredStateAtUtc = excluded.EnteredStateAtUtc,
+                CombinedUploadPositionId = excluded.CombinedUploadPositionId;
             """;
         return connection.ExecuteAsync(sql, row, transaction);
     }

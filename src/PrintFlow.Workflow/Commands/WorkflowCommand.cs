@@ -107,6 +107,9 @@ public abstract record WorkflowCommand
         /// <summary>The default reason recorded when the operator gives none (MVP design §7.2).</summary>
         public const string DefaultReason = "File already satisfies this step";
 
+        public const string CombinedWithBackgroundRemoval = nameof(CombinedWithBackgroundRemoval);
+        public const string KeepReviewedInputAfterCombined = nameof(KeepReviewedInputAfterCombined);
+
         /// <summary>The reason actually recorded.</summary>
         public string EffectiveReason =>
             string.IsNullOrWhiteSpace(Reason) ? DefaultReason : Reason!.Trim();
@@ -345,7 +348,7 @@ public abstract record WorkflowCommand
         ImageProcessingMethod Method = ImageProcessingMethod.MeituBackgroundRemoval) : WorkflowCommand;
 
     /// <summary>Go back to an earlier step, invalidating everything derived from it.</summary>
-    public sealed record ReturnToStep(StepKind Target) : WorkflowCommand;
+    public sealed record ReturnToStep(StepKind Target, bool UseStepByStepImageProcessing = false) : WorkflowCommand;
 
     /// <summary>Finish the session. Legal only when every required condition is met.</summary>
     public sealed record Complete : WorkflowCommand;

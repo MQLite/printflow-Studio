@@ -158,6 +158,7 @@ internal sealed record StepRow
     public string? SkipReason { get; set; }
     public int AttemptCount { get; set; }
     public string EnteredStateAtUtc { get; set; } = "";
+    public string? CombinedUploadPositionId { get; set; }
 }
 
 internal sealed class SnapshotRow

@@ -686,9 +686,14 @@ public sealed partial class SessionService : ISessionService
             if (snapshot.Definition.Contains(StepKind.Trim) || state.Definition.Contains(StepKind.Trim))
                 mutation = mutation with
                 {
-                    ImageProcessingGuard = new(aggregate.Session, aggregate.Steps,
-                        command is WorkflowCommand.SetImageProcessingSelection selection
-                            ? FindRevision(aggregate, snapshot.UpstreamRevisionOf(selection.Step)) : null),
+                    ImageProcessingGuard = new(aggregate.Session, aggregate.Steps, command switch
+                    {
+                        WorkflowCommand.SetImageProcessingSelection selection =>
+                            FindRevision(aggregate, snapshot.UpstreamRevisionOf(selection.Step)),
+                        WorkflowCommand.Skip skip when IsCombinedSkip(skip) =>
+                            FindRevision(aggregate, snapshot.UpstreamRevisionOf(skip.Step)),
+                        _ => null,
+                    }),
                 };
 
             OperationResult<Unit> committed = await _repository.CommitAsync(mutation, cancellationToken);
@@ -1608,6 +1613,8 @@ public sealed partial class SessionService : ISessionService
             WorkflowCommand.Approve approve => FindRevision(aggregate, snapshot.Step(approve.Step)?.CurrentRevisionId),
             WorkflowCommand.Reject reject => FindRevision(aggregate, snapshot.Step(reject.Step)?.CurrentRevisionId),
             WorkflowCommand.StartStep start => FindRevision(aggregate, snapshot.UpstreamRevisionOf(start.Step)),
+            WorkflowCommand.Skip skip when IsCombinedSkip(skip) =>
+                FindRevision(aggregate, snapshot.UpstreamRevisionOf(skip.Step)),
             // Retaining the approved original is a decision about those exact bytes.
             WorkflowCommand.KeepOriginalExtent => FindRevision(aggregate, snapshot.UpstreamRevisionOf(StepKind.Trim)),
 
@@ -2009,7 +2016,8 @@ public sealed partial class SessionService : ISessionService
             if (ImageUploadConfirmation.IsOpenAiMethod(method))
             {
                 var source = FindRevision(aggregate, work.InputRevision);
-                if (source is null || work.UploadConfirmation?.TryReserve(method, source.Id, source.Sha256) != true)
+                Guid? positionId = aggregate.Steps.Single(step => step.Step == work.Step).CombinedUploadPositionId;
+                if (source is null || work.UploadConfirmation?.TryReserve(method, source.Id, source.Sha256, positionId) != true)
                     return OperationResult.Fail<SessionView>(OperationFailure.Create(FailureCode.PreconditionNotMet,
                         "Confirm the current input and operation before uploading to OpenAI Images.",
                         messageKey: "ImageProcessing_OpenAiConfirmationRequired"));
@@ -2237,7 +2245,7 @@ public sealed partial class SessionService : ISessionService
         // engine already refused to start the step without one — it is the same predicate, so
         // what is snapshotted is exactly what the engine validated and never a stale record that
         // happened to still be sitting on the session (§8).
-        if (work.Step == StepKind.BackgroundRemoval &&
+        if (work.Step == StepKind.BackgroundRemoval && method != ImageProcessingMethod.OpenAiCombined &&
             started.State.UsableBackgroundRemovalAuthority is { } authority)
         {
             runningAttempt = runningAttempt.WithBackgroundRemovalAuthority(authority);

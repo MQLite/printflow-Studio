@@ -1811,5 +1811,15 @@
   <data name="ImageProcessing_OpenAiUnsupportedInput" xml:space="preserve"><value>Choose a readable PNG or JPEG with visible pixels, up to 20 MiB, 8192 pixels per edge and 24 megapixels.</value></data>
   <data name="ImageProcessing_OpenAiInvalidOutput" xml:space="preserve"><value>The returned image could not be reviewed because its PNG, dimensions or transparency were invalid. Choose another method or retry.</value></data>
   <data name="ImageProcessing_OpenAiWorkspace" xml:space="preserve"><value>The OpenAI image working files could not be read or written. Check the workspace before retrying.</value></data>
+  <data name="ImageProcessing_CombinedToggle" xml:space="preserve"><value>Restore and remove the background in one OpenAI request</value></data>
+  <data name="ImageProcessing_CombinedHint" xml:space="preserve"><value>Uploads the reviewed image to OpenAI and may incur usage charges. The result may change faces, text, or edges.</value></data>
+  <data name="ImageProcessing_ContinueCombined" xml:space="preserve"><value>Continue to combined processing</value></data>
+  <data name="ImageProcessing_RunCombined" xml:space="preserve"><value>Run combined processing</value></data>
+  <data name="ImageProcessing_KeepReviewedInput" xml:space="preserve"><value>Keep reviewed input and continue to crop</value></data>
+  <data name="ImageProcessing_ReturnToSeparate" xml:space="preserve"><value>Return to enhancement and use separate methods</value></data>
+  <data name="ImageProcessing_CombinedReviewHeading" xml:space="preserve"><value>Review restoration and background removal</value></data>
+  <data name="ImageProcessing_CombinedReviewDetails" xml:space="preserve"><value>Compare the face, text and fine details with the input. Check for changes to the subject.</value></data>
+  <data name="ImageProcessing_CombinedReviewEdges" xml:space="preserve"><value>Check the outline, hair and light edges. Confirm that the intended foreground is visible.</value></data>
+  <data name="ImageProcessing_CombinedReviewReject" xml:space="preserve"><value>Reject to discard this result. You can retry with a new upload confirmation, keep the reviewed input, or return to separate methods.</value></data>
   <data name="ImageProcessing_OpenAiCutoutHint" xml:space="preserve"><value>Sends the image to OpenAI and may incur usage charges. Generative background removal can redraw parts of the subject.</value></data>
 </root>

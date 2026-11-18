@@ -31,9 +31,30 @@ public sealed partial class SessionViewModel
     public bool ShowsMeituRecognitionModes =>
         _session?.ImageProcessingExecution?.Method is null or ImageProcessingMethod.MeituBackgroundRemoval;
     public IReadOnlyList<ImageProcessingMethodOption> TaskImageProcessingMethods =>
-        _session?.CurrentStep is { } step ? ImageProcessingMethodOption.ForStep(step.Step, _sessions) : [];
+        _session?.CurrentStep is { } step ? ImageProcessingMethodOption.ForStep(step.Step, _sessions, includeCombined: true) : [];
+
+    private bool IsCombinedImageProcessing => _session?.ImageProcessingExecution?.Method == ImageProcessingMethod.OpenAiCombined;
+
+    private bool ContinuesToCombinedProcessing => IsCombinedImageProcessing &&
+        _session?.CurrentStep?.Step == StepKind.Enhancement;
+
+    private bool IsCombinedBackgroundRemoval => IsCombinedImageProcessing &&
+        _session?.CurrentStep?.Step == StepKind.BackgroundRemoval;
+
+    public bool CanReturnToSeparateProcessing => IsCombinedBackgroundRemoval && CanReturnToStep && !IsBusy &&
+        ReturnTargets.Any(target => target.Step == StepKind.Enhancement);
+
+    public string ReturnToSeparateProcessingLabel => Strings.Resolve("ImageProcessing_ReturnToSeparate");
+
+    [RelayCommand]
+    private void ReturnToSeparateProcessing()
+    {
+        if (CanReturnToSeparateProcessing)
+            CaptureReturn(ReturnTargets.Single(target => target.Step == StepKind.Enhancement), useStepByStepImageProcessing: true);
+    }
 
     private bool UsesCurrentImageWithoutProcessing =>
+        ContinuesToCombinedProcessing ||
         _session?.ImageProcessingExecution?.Method is ImageProcessingMethod.SkipEnhancement or ImageProcessingMethod.KeepBackground;
     private bool CanRunSelectedImageMethod =>
         !UsesCurrentImageWithoutProcessing && _session?.ImageProcessingExecution?.Unavailable is null;
@@ -53,6 +74,7 @@ public sealed partial class SessionViewModel
 
         selection = step.Step switch
         {
+            StepKind.Enhancement when method == ImageProcessingMethod.OpenAiCombined => selection with { UseOpenAiCombined = true },
             StepKind.Enhancement => selection with { Enhancement = method, UseOpenAiCombined = false },
             StepKind.BackgroundRemoval => selection with { BackgroundRemoval = method },
             StepKind.Trim => selection with { Crop = method },

@@ -71,7 +71,7 @@ public sealed class OpenAiImageBackend : IImageProcessingBackend, IDisposable
             request.Operation != (restore ? OperationKind.Enhance : OperationKind.RemoveBackground) ||
             request.AlgorithmVersion != _model ||
             request.Input.Area != WorkspaceArea.Working || request.ExpectedOutput.Area != WorkspaceArea.Working ||
-            (!restore && (request.BackgroundRemovalAuthority is not
+            (request.Method == ImageProcessingMethod.OpenAiCutout && (request.BackgroundRemovalAuthority is not
                 { Decision: BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent,
                     Mode: BackgroundRemovalMode.Automatic } authority ||
                 !authority.Authorises(request.InputRevision, request.InputSha256))))

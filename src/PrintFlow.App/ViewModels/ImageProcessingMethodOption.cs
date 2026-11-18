@@ -8,7 +8,8 @@ namespace PrintFlow.App.ViewModels;
 
 public sealed record ImageProcessingMethodOption(ImageProcessingMethod Method, string Label, string Description, bool IsAvailable)
 {
-    internal static IReadOnlyList<ImageProcessingMethodOption> ForStep(StepKind step, ISessionService sessions)
+    internal static IReadOnlyList<ImageProcessingMethodOption> ForStep(
+        StepKind step, ISessionService sessions, bool includeCombined = false)
     {
         ImageProcessingMethod[] methods = step switch
         {
@@ -19,6 +20,9 @@ public sealed record ImageProcessingMethodOption(ImageProcessingMethod Method, s
             StepKind.Trim => [ImageProcessingMethod.AlphaTrim, ImageProcessingMethod.ManualCrop, ImageProcessingMethod.KeepCanvas],
             _ => [],
         };
+        if (includeCombined && step == StepKind.Enhancement)
+            methods = [.. methods, ImageProcessingMethod.OpenAiCombined];
+
         return methods.Select(method =>
         {
             OperationFailure? unavailable = sessions.GetImageProcessingUnavailable(method);
@@ -53,8 +57,8 @@ public sealed record ImageProcessingMethodOption(ImageProcessingMethod Method, s
         ImageProcessingMethod.AiUpscale => "ImageProcessing_UpscaleHint",
         ImageProcessingMethod.BiRefNet => "ImageProcessing_BiRefNetHint",
         ImageProcessingMethod.OpenAiCutout => "ImageProcessing_OpenAiCutoutHint",
-        ImageProcessingMethod.OpenAiRestore or ImageProcessingMethod.OpenAiCombined =>
-            "ImageProcessing_CloudHint",
+        ImageProcessingMethod.OpenAiCombined => "ImageProcessing_CombinedHint",
+        ImageProcessingMethod.OpenAiRestore => "ImageProcessing_CloudHint",
         _ => "ImageProcessing_Ready",
     });
 }

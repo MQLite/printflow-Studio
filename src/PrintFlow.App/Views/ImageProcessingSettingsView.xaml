@@ -14,6 +14,13 @@
                 <Setter Property="ToolTip" Value="{Binding Description}" />
                 <Setter Property="AutomationProperties.HelpText" Value="{Binding Description}" />
             </Style>
+            <Style x:Key="SeparateMethodPicker" TargetType="StackPanel">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding UseOpenAiCombined}" Value="True">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
             <Style x:Key="MethodHint" TargetType="TextBlock">
                 <Setter Property="Foreground" Value="{DynamicResource PF.Brush.Muted}" />
                 <Setter Property="TextWrapping" Value="Wrap" />
@@ -77,10 +84,14 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
                     <TextBlock Text="{Binding EnhancementMethodLabel}" Style="{StaticResource MethodLabel}" />
-                    <StackPanel Grid.Column="1">
+                    <TextBlock Grid.Column="1" Text="{Binding OpenAiCombinedLabel}" TextWrapping="Wrap"
+                               Visibility="{Binding UseOpenAiCombined, Converter={StaticResource VisibleWhenTrue}}" />
+                    <StackPanel Grid.Column="1" Style="{StaticResource SeparateMethodPicker}">
                         <ComboBox x:Name="EnhancementMethod" Style="{StaticResource PF.Input.ComboBox}"
                                   ItemsSource="{Binding EnhancementMethods}" DisplayMemberPath="Label"
                                   ItemContainerStyle="{StaticResource MethodItem}" SelectedValuePath="Method"
@@ -94,7 +105,9 @@
 
                     <Border Grid.Row="1" Grid.ColumnSpan="2" Style="{StaticResource MethodSeparator}" />
                     <TextBlock Grid.Row="2" Text="{Binding BackgroundRemovalMethodLabel}" Style="{StaticResource MethodLabel}" />
-                    <StackPanel Grid.Row="2" Grid.Column="1">
+                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding OpenAiCombinedLabel}" TextWrapping="Wrap"
+                               Visibility="{Binding UseOpenAiCombined, Converter={StaticResource VisibleWhenTrue}}" />
+                    <StackPanel Grid.Row="2" Grid.Column="1" Style="{StaticResource SeparateMethodPicker}">
                         <ComboBox x:Name="BackgroundMethod" Style="{StaticResource PF.Input.ComboBox}"
                                   ItemsSource="{Binding BackgroundRemovalMethods}" DisplayMemberPath="Label"
                                   ItemContainerStyle="{StaticResource MethodItem}" SelectedValuePath="Method"
@@ -133,11 +146,24 @@
                                   AutomationProperties.AutomationId="ImageProcessing.IgnoreSmallTrimNoise"
                                   AutomationProperties.Name="{Binding IgnoreSmallTrimNoiseLabel}" />
                     </WrapPanel>
-                    <Border Grid.Row="7" Grid.ColumnSpan="2" Style="{StaticResource MethodSeparator}"
+                    <Border Grid.Row="7" Grid.ColumnSpan="2" Style="{StaticResource MethodSeparator}" />
+                    <StackPanel Grid.Row="8" Grid.ColumnSpan="2">
+                        <CheckBox IsChecked="{Binding UseOpenAiCombined, Mode=TwoWay}"
+                                  AutomationProperties.AutomationId="ImageProcessing.OpenAiCombined"
+                                  AutomationProperties.Name="{Binding OpenAiCombinedToggleLabel}">
+                            <TextBlock Text="{Binding OpenAiCombinedToggleLabel}" TextWrapping="Wrap" />
+                        </CheckBox>
+                        <StackPanel Visibility="{Binding UseOpenAiCombined, Converter={StaticResource VisibleWhenTrue}}">
+                            <TextBlock Text="{Binding OpenAiCombinedHint}" Style="{StaticResource MethodHint}" />
+                            <TextBlock Text="{Binding OpenAiCombinedUnavailable}" TextWrapping="Wrap"
+                                       AutomationProperties.LiveSetting="Polite" />
+                        </StackPanel>
+                    </StackPanel>
+                    <Border Grid.Row="9" Grid.ColumnSpan="2" Style="{StaticResource MethodSeparator}"
                             Visibility="{Binding ShowOpenAiCredentials, Converter={StaticResource VisibleWhenTrue}}" />
-                    <TextBlock Grid.Row="8" Text="{Binding OpenAiCredentialHeading}" Style="{StaticResource MethodLabel}"
+                    <TextBlock Grid.Row="10" Text="{Binding OpenAiCredentialHeading}" Style="{StaticResource MethodLabel}"
                                Visibility="{Binding ShowOpenAiCredentials, Converter={StaticResource VisibleWhenTrue}}" />
-                    <StackPanel Grid.Row="8" Grid.Column="1"
+                    <StackPanel Grid.Row="10" Grid.Column="1"
                                 Visibility="{Binding ShowOpenAiCredentials, Converter={StaticResource VisibleWhenTrue}}">
                         <TextBlock Text="{Binding OpenAiCredentialStatus}" Style="{StaticResource MethodHint}"
                                    AutomationProperties.LiveSetting="Polite" />

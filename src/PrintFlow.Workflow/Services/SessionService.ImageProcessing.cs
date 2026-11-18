@@ -34,14 +34,10 @@ public sealed partial class SessionService
         if (method == ImageProcessingMethod.ManualCrop)
             return new(new(method, _manualCrop.ProcessorId, _manualCrop.ProcessorId, false, null));
 
-        // The combined backend can construct the request, while C2 owns the paired workflow.
-        if (method != ImageProcessingMethod.OpenAiCombined)
+        foreach (IImageProcessingBackend backend in _imageProcessingBackends)
         {
-            foreach (IImageProcessingBackend backend in _imageProcessingBackends)
-            {
-                if (backend.GetCapability(method) is { } capability)
-                    return new(new(method, capability.AdapterId, capability.AlgorithmVersion, false, capability.Unavailable), backend);
-            }
+            if (backend.GetCapability(method) is { } capability)
+                return new(new(method, capability.AdapterId, capability.AlgorithmVersion, false, capability.Unavailable), backend);
         }
 
         return new(new(method, null, null, false, OperationFailure.Create(FailureCode.AdapterUnavailable,
@@ -87,6 +83,10 @@ public sealed partial class SessionService
             ? view with { Unavailable = GetImageProcessingUnavailable(method) }
             : view;
     }
+
+    private static bool IsCombinedSkip(WorkflowCommand.Skip command) =>
+        command.EffectiveReason is WorkflowCommand.Skip.CombinedWithBackgroundRemoval
+            or WorkflowCommand.Skip.KeepReviewedInputAfterCombined;
 
     private static ImageProcessingMethod? ManualImageProcessingMethod(StepKind step, OperationKind operation) => operation switch
     {
