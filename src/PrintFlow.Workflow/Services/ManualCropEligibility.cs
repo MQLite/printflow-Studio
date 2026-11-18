@@ -2,6 +2,7 @@ using PrintFlow.Domain.Attempts;
 using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Sessions;
+using PrintFlow.Domain.Settings;
 using PrintFlow.Workflow.Engine;
 
 namespace PrintFlow.Workflow.Services;
@@ -19,10 +20,8 @@ namespace PrintFlow.Workflow.Services;
 /// shape of bug where a disabled button is the only thing standing between an operator and an
 /// illegal state change.
 /// <para>
-/// The rule cannot live in <see cref="WorkflowEngine"/> because it is a question about attempt
-/// <i>history</i>, and a <see cref="WorkflowSnapshot"/> deliberately carries none. The engine
-/// therefore owns the state-machine half (session Active, Trim is current, the step state
-/// permits it) and this owns the historical half. Both run.
+/// The selected method can open manual cropping before any attempt. The Alpha fallback also
+/// needs attempt history, which is available here alongside the workflow state.
 /// </para>
 /// </remarks>
 public static class ManualCropEligibility
@@ -31,23 +30,8 @@ public static class ManualCropEligibility
     /// True exactly when an operator-selected crop is a legal next action.
     /// </summary>
     /// <remarks>
-    /// Three openings, and only three:
-    /// <list type="bullet">
-    ///   <item>the deterministic trim ran and reported <see cref="FailureCode.ManualCropRequired"/>
-    ///         — the original case, where no automatic crop is honest (§3);</item>
-    ///   <item>a manual crop was produced and the operator rejected it (§21);</item>
-    ///   <item>a manual crop was attempted and did not produce a file at all — a rectangle the
-    ///         processor refused, a write that failed.</item>
-    /// </list>
-    /// The last two are the same rule stated for the two ways a manual crop can end: once this
-    /// file is known to be one the deterministic trim cannot handle, the corrective path stays
-    /// manual. Sending the operator back through the alpha scan would make them press a button
-    /// that is guaranteed to refuse again before they could draw a second rectangle (§21).
-    /// <para>
-    /// Everything else is refused, including a Trim that failed for an unrelated reason, a Trim
-    /// awaiting an ordinary review, a successful Trim, a rejected <i>deterministic</i> trim, and
-    /// any step that is not Trim.
-    /// </para>
+    /// The manual method can start or retry between attempts. The Alpha method offers manual
+    /// cropping after a ManualCropRequired failure or a failed or rejected manual attempt.
     /// </remarks>
     public static bool IsEligible(WorkflowSnapshot state, IReadOnlyList<ProcessingAttempt> attempts)
     {
@@ -59,12 +43,20 @@ public static class ManualCropEligibility
             return false;
         }
 
-        if (state.CurrentStep is not { Step: StepKind.Trim } trim)
+        if (state.CurrentStep is not { Step: StepKind.Trim } trim ||
+            TransitionTable.Lookup(trim.State, CommandKind.SubmitManualCrop) != TransitionOutcome.Allowed)
         {
             return false;
         }
 
-        if (LatestEndedAttempt(attempts, StepKind.Trim) is not { } latest)
+        ImageProcessingMethod? method = state.ProcessingMethodFor(StepKind.Trim);
+        if (method == ImageProcessingMethod.ManualCrop)
+        {
+            return true;
+        }
+
+        if (method != ImageProcessingMethod.AlphaTrim ||
+            LatestEndedAttempt(attempts, StepKind.Trim) is not { } latest)
         {
             return false;
         }

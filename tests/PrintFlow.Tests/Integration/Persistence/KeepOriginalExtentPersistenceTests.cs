@@ -3,6 +3,7 @@ using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Sessions;
+using PrintFlow.Domain.Settings;
 using PrintFlow.Domain.Trimming;
 using PrintFlow.Tests.Fixtures;
 using PrintFlow.Workflow.Commands;
@@ -72,9 +73,11 @@ public sealed class KeepOriginalExtentPersistenceTests
 
     [Theory]
     [InlineData(WorkflowType.PrepareCustomerDesign, "waiting")]
+    [InlineData(WorkflowType.PrepareCustomerDesign, "selected")]
     [InlineData(WorkflowType.PrepareCustomerDesign, "review")]
     [InlineData(WorkflowType.PrepareCustomerDesign, "manual")]
     [InlineData(WorkflowType.PrepareAsset, "waiting")]
+    [InlineData(WorkflowType.PrepareAsset, "selected")]
     [InlineData(WorkflowType.PrepareAsset, "review")]
     [InlineData(WorkflowType.PrepareAsset, "manual")]
     public async Task Decision_survives_restart_and_downstream_consumes_original(WorkflowType workflow, string phase)
@@ -82,12 +85,19 @@ public sealed class KeepOriginalExtentPersistenceTests
         using SessionServiceHarness h = new();
         ISessionService service = h.CreateService();
         SessionId id = await AtTrim(h, service, workflow, phase == "manual");
+        bool selectedKeepCanvas = phase == "selected";
+        bool ranTrim = phase is "review" or "manual";
+        if (selectedKeepCanvas)
+        {
+            var selection = SessionImageProcessingSelection.Compatible with { Crop = ImageProcessingMethod.KeepCanvas };
+            await Execute(service, id, new WorkflowCommand.SetImageProcessingSelection(StepKind.Trim, selection));
+        }
         SessionView resumedBefore = await Must(h.CreateService().LoadAsync(id, CancellationToken.None));
         resumedBefore.CurrentStep!.Step.ShouldBe(StepKind.Trim);
         resumedBefore.OriginalExtentRetained.ShouldBeFalse();
         resumedBefore.CanKeepOriginalExtent.ShouldBeTrue();
-        resumedBefore.AvailableCommands.ShouldContain(CommandKind.StartStep);
-        if (phase != "waiting")
+        resumedBefore.AvailableCommands.Contains(CommandKind.StartStep).ShouldBe(!selectedKeepCanvas);
+        if (ranTrim)
         {
             SessionView offered = await RunTrim(service, id, phase == "manual");
             offered.CurrentStep!.State.ShouldBe(phase == "review" ? StepState.ReviewRequired : StepState.Failed);
@@ -103,13 +113,15 @@ public sealed class KeepOriginalExtentPersistenceTests
         SessionView resumed = await Must(service.LoadAsync(id, CancellationToken.None));
         resumed.OriginalExtentRetained.ShouldBeTrue();
         resumed.CanKeepOriginalExtent.ShouldBeFalse();
+        if (selectedKeepCanvas)
+            resumed.ImageProcessingSelection!.Crop.ShouldBe(ImageProcessingMethod.KeepCanvas);
         SessionAggregate after = await Load(h, id);
         after.Attempts.ShouldBe(before.Attempts);
         after.Revisions.ShouldBe(before.Revisions);
         after.Reviews.ShouldBe(before.Reviews);
         after.Steps.Single(s => s.Step == StepKind.Trim).SkipReason.ShouldBe(WorkflowCommand.KeepOriginalExtent.Reason);
         after.Steps.Single(s => s.Step == StepKind.Trim).CurrentRevisionId.ShouldBeNull();
-        after.Steps.Single(s => s.Step == StepKind.Trim).AttemptCount.ShouldBe(phase == "waiting" ? 0 : 1);
+        after.Steps.Single(s => s.Step == StepKind.Trim).AttemptCount.ShouldBe(ranTrim ? 1 : 0);
         after.Revisions.Count(r => r.Operation == OperationKind.Trim).ShouldBe(phase == "review" ? 1 : 0);
         if (phase != "review") after.Attempts.ShouldAllBe(a => a.TrimGeometry == null);
         Directory.GetFiles(h.Workspace.Root, "*", SearchOption.AllDirectories).Order().ShouldBe(files);

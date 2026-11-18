@@ -6,6 +6,7 @@ using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Reviews;
 using PrintFlow.Domain.Sessions;
+using PrintFlow.Domain.Settings;
 using PrintFlow.Domain.Trimming;
 using PrintFlow.Infrastructure.Adapters.Fake;
 using PrintFlow.Tests.Fixtures;
@@ -36,6 +37,45 @@ public sealed class ManualCropStepTests
     /// correct square. The synthetic no-alpha source is 12×10.
     /// </remarks>
     private static readonly TrimBounds OperatorCrop = TrimBounds.FromEdges(3, 2, 9, 7);
+
+    [Fact]
+    public async Task Selected_manual_crop_rejects_an_empty_rectangle_and_needs_no_prior_attempt()
+    {
+        using SessionServiceHarness harness = new();
+        ISessionService service = harness.CreateService();
+        SessionId id = await StartAtTrimAsync(service, harness.WriteOpaqueSourcePng());
+        var selection = SessionImageProcessingSelection.Compatible with { Crop = ImageProcessingMethod.ManualCrop };
+        await Must(service.ExecuteAsync(id, new WorkflowCommand.SetImageProcessingSelection(StepKind.Trim, selection),
+            "tester", default));
+
+        service = harness.CreateService();
+        SessionView waiting = (await service.LoadAsync(id, default)).Value;
+        waiting.CurrentStep!.State.ShouldBe(StepState.Waiting);
+        waiting.CanManualCrop.ShouldBeTrue();
+        waiting.AvailableCommands.ShouldNotContain(CommandKind.StartStep);
+        waiting.CanSetTrimParameters.ShouldBeFalse();
+
+        var empty = await service.ExecuteAsync(id, new WorkflowCommand.SubmitManualCrop(StepKind.Trim, default),
+            "tester", default);
+        empty.IsFailure.ShouldBeTrue();
+        (await harness.Repository.LoadAsync(id, default)).Value!.Attempts.Where(a => a.Step == StepKind.Trim)
+            .ShouldBeEmpty();
+
+        await Must(service.ExecuteAsync(id, new WorkflowCommand.SubmitManualCrop(StepKind.Trim, OperatorCrop),
+            "tester", default));
+        SessionAggregate aggregate = (await harness.Repository.LoadAsync(id, default)).Value!;
+        var attempt = aggregate.Attempts.Single(a => a.Step == StepKind.Trim);
+        attempt.Operation.ShouldBe(OperationKind.ManualImport);
+        attempt.Status.ShouldBe(AttemptStatus.Succeeded);
+        attempt.ImageProcessingDetails!.Method.ShouldBe(ImageProcessingMethod.ManualCrop);
+        var output = aggregate.Revisions.Single(r => r.Id == attempt.OutputRevisionId);
+        output.Facts.PixelWidth.ShouldBe(6);
+        output.Facts.PixelHeight.ShouldBe(5);
+        var reviewing = (await service.LoadAsync(id, default)).Value;
+        reviewing.CurrentStep!.State.ShouldBe(StepState.ReviewRequired);
+        reviewing.CanManualCrop.ShouldBeFalse();
+        reviewing.ImageProcessingExecution!.Method.ShouldBe(ImageProcessingMethod.ManualCrop);
+    }
 
     // -----------------------------------------------------------------------------
     // §28: the primary acceptance scenario

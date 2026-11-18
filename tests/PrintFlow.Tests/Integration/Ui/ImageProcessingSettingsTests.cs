@@ -100,6 +100,24 @@ public sealed class ImageProcessingSettingsTests
         reopened.SelectedCropMethod.ShouldBe(ImageProcessingMethod.AlphaTrim);
     }
 
+    [Theory]
+    [InlineData(ImageProcessingMethod.ManualCrop)]
+    [InlineData(ImageProcessingMethod.KeepCanvas)]
+    public async Task Operator_crop_methods_are_available_as_defaults_for_new_tasks(ImageProcessingMethod method)
+    {
+        using SettingsScreenHarness harness = new();
+        SettingsViewModel screen = await harness.OpenAsync();
+        await screen.OpenImageProcessingCommand.ExecuteAsync(null);
+        screen.SelectedCropMethod = method;
+        screen.SaveImageProcessingCommand.CanExecute(null).ShouldBeTrue();
+        await screen.SaveImageProcessingCommand.ExecuteAsync(null);
+
+        SettingsViewModel reopened = await harness.RestartAndOpenAsync();
+        await reopened.OpenImageProcessingCommand.ExecuteAsync(null);
+        reopened.SelectedCropMethod.ShouldBe(method);
+        (await harness.ImportAsync("new.png")).ImageProcessingSelection!.Crop.ShouldBe(method);
+    }
+
     [Fact]
     public async Task The_saved_method_applies_to_new_tasks_and_unavailable_saved_methods_can_be_replaced()
     {

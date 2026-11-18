@@ -2,15 +2,100 @@ using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Threading;
 using PrintFlow.App.ViewModels;
 using PrintFlow.App.Views;
+using PrintFlow.Domain.Files;
+using PrintFlow.Domain.Sessions;
+using PrintFlow.Domain.Settings;
+using PrintFlow.Domain.Trimming;
 using PrintFlow.Tests.Fixtures;
+using PrintFlow.Workflow.Commands;
+using static PrintFlow.Tests.Integration.Persistence.KeepOriginalExtentPersistenceTests;
 
 namespace PrintFlow.Tests.Integration.Ui;
 
 [Collection(SqliteCollection.Name)]
 public sealed class GuidedProcessingCropTests
 {
+    [Fact]
+    public async Task Alpha_crop_uses_the_configured_safety_margin_on_the_reviewable_png()
+    {
+        using SessionServiceHarness h = new();
+        await h.Settings.UpsertAsync([SettingEntry.Integer(SettingKey.TrimSafetyMarginPixels, 2)], default);
+        var service = h.CreateService();
+        var id = await AtTrim(h, service, WorkflowType.PrepareAsset);
+        var model = new SessionViewModel(service, h.Previews, h.TiffReviews, new RecordingNavigation());
+        model.Open((await service.LoadAsync(id, default)).Value);
+
+        model.ShowsGuidedTrimParameters.ShouldBeTrue();
+        model.RecommendedCommand.ShouldBeSameAs(model.RunStepCommand);
+        await model.RunStepCommand.ExecuteAsync(null);
+
+        var review = (await service.LoadAsync(id, default)).Value;
+        review.CurrentStep!.State.ShouldBe(StepState.ReviewRequired);
+        review.CurrentTrimGeometry!.ContentBounds.ShouldBe(TrimBounds.FromEdges(3, 2, 8, 7));
+        review.CurrentTrimGeometry.AppliedBounds.ShouldBe(TrimBounds.FromEdges(1, 0, 10, 9));
+        review.CurrentArtefact!.Facts.Format.ShouldBe(ImageFormat.Png);
+        review.CurrentArtefact.Facts.PixelWidth.ShouldBe(9);
+        review.CurrentArtefact.Facts.PixelHeight.ShouldBe(9);
+    }
+
+    [Theory]
+    [InlineData(ImageProcessingMethod.ManualCrop, "Session.BeginManualCrop")]
+    [InlineData(ImageProcessingMethod.KeepCanvas, "Session.KeepOriginalExtent")]
+    public async Task Selecting_a_crop_method_at_waiting_offers_its_action(ImageProcessingMethod method, string actionId)
+    {
+        using SessionServiceHarness h = new();
+        var service = h.CreateService();
+        var id = await AtTrim(h, service, WorkflowType.PrepareAsset, opaque: true);
+        var model = new SessionViewModel(service, h.Previews, h.TiffReviews, new RecordingNavigation());
+        model.Open((await service.LoadAsync(id, default)).Value);
+        await model.PreviewsLoaded;
+        model.DraftImageProcessingMethod = method;
+        model.ApplyImageProcessingMethodCommand.CanExecute(null).ShouldBeTrue();
+        await model.ApplyImageProcessingMethodCommand.ExecuteAsync(null);
+        await model.PreviewsLoaded;
+
+        model.GuidedPage.ShouldBe(GuidedSessionPage.Ready);
+        model.CurrentImageProcessingUnavailable.ShouldBeNull();
+        model.ShowsGuidedRunStep.ShouldBeFalse();
+        model.ShowsGuidedTrimParameters.ShouldBeFalse();
+        WpfRendering.RenderExpectingNoBindingErrors(() => new SessionScreenView { DataContext = model },
+            WpfRendering.ReviewViewport, tree =>
+            {
+                var action = GuidedSessionShellTests.Find<Button>(tree, actionId);
+                GuidedSessionProjectionTests.Shown(action).ShouldBeTrue();
+                action.IsEnabled.ShouldBeTrue();
+                action.Command.ShouldBeSameAs(model.RecommendedCommand);
+                Task completed = action.Dispatcher.InvokeAsync(async () =>
+                {
+                    if (method == ImageProcessingMethod.ManualCrop)
+                    {
+                        action.Command.Execute(null);
+                        model.GuidedPage.ShouldBe(GuidedSessionPage.Crop);
+                        model.CropPane!.SourcePixelWidth.ShouldBe(12);
+                        model.CanApplyManualCrop.ShouldBeFalse();
+                        model.TrySetCropSelection(new CropSurfaceLayout(12, 10, 12, 10, 12, 10, true, 1),
+                            3, 2, 9, 7).ShouldBeTrue();
+                        await model.ApplyManualCropCommand.ExecuteAsync(null);
+                        model.GuidedPage.ShouldBe(GuidedSessionPage.Review);
+                        model.CanApprove.ShouldBeTrue();
+                    }
+                    else
+                    {
+                        await model.KeepOriginalExtentCommand.ExecuteAsync(null);
+                        model.GuidedPage.ShouldBe(GuidedSessionPage.Save);
+                    }
+                }).Task.Unwrap().WaitAsync(TimeSpan.FromSeconds(20));
+                DispatcherFrame frame = new();
+                _ = completed.ContinueWith(_ => frame.Continue = false, TaskScheduler.Default);
+                Dispatcher.PushFrame(frame);
+                completed.GetAwaiter().GetResult();
+                return 0;
+            });
+    }
+
     [Theory]
     [InlineData(1000, 700)]
     [InlineData(1280, 720)]

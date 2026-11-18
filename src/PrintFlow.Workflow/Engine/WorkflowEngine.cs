@@ -329,6 +329,12 @@ public sealed class WorkflowEngine : IWorkflowEngine
                 "A trim margin can only be set while Trim is the current step; it describes the run that is about to happen.");
         }
 
+        if (state.ProcessingMethodFor(StepKind.Trim) != ImageProcessingMethod.AlphaTrim)
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.PreconditionNotMet, "Automatic trim parameters require the Alpha trim method.");
+        }
+
         if (!AcceptsTrimParameters(trim.State))
         {
             return WorkflowTransition.Rejected(
@@ -728,6 +734,12 @@ public sealed class WorkflowEngine : IWorkflowEngine
         SessionStep step = resolved.Step!;
         StepDefinition definition = resolved.Definition!;
 
+        if (command.Step == StepKind.Trim && state.ProcessingMethodFor(command.Step) != ImageProcessingMethod.AlphaTrim)
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.PreconditionNotMet, "Use the selected crop method's operator action.");
+        }
+
         if (!definition.ProducesRevision)
         {
             return WorkflowTransition.Rejected(
@@ -995,14 +1007,9 @@ public sealed class WorkflowEngine : IWorkflowEngine
     /// (Epic 11200 Part C2 §12, §13).
     /// </summary>
     /// <remarks>
-    /// <b>This is half of the eligibility rule, and deliberately the half a pure reducer can
-    /// answer.</b> A <see cref="WorkflowSnapshot"/> holds no attempt history, so the engine can
-    /// see that Trim is the current step and that it is Failed or RetryRequired, but not
-    /// <i>why</i>. The other half — that the failure really was
-    /// <c>ManualCropRequired</c>, or that the rejected result really was a manual crop — is
-    /// checked by <see cref="Services.ManualCropEligibility"/> in the application layer, which
-    /// does hold the attempts. Both must pass before a crop runs; neither is a UI concern
-    /// (Part C2 §3).
+    /// The engine checks the step, state, rectangle and upstream revision.
+    /// <see cref="Services.ManualCropEligibility"/> checks the selected method and any
+    /// attempt history needed for the Alpha fallback.
     /// <para>
     /// Structured exactly like <see cref="StartStep"/>, including the fresh working copy, so a
     /// manual crop is an ordinary producing attempt in every respect that matters to the audit
@@ -2226,9 +2233,8 @@ public sealed class WorkflowEngine : IWorkflowEngine
     /// the engine and again in the processor, when the real command is issued. It is never
     /// persisted and never cropped to: a probe applies nothing.
     /// <para>
-    /// A positive probe is necessary but not sufficient for the crop control to appear. The
-    /// screen reads <c>SessionView.CanManualCrop</c>, which also requires the attempt history
-    /// to show a genuine <c>ManualCropRequired</c> condition (Part C2 §3).
+    /// The screen reads <c>SessionView.CanManualCrop</c>, which also checks the selected
+    /// method and any relevant attempt history.
     /// </para>
     /// </remarks>
     private static readonly TrimBounds ProbeCrop = TrimBounds.Canvas(1, 1);

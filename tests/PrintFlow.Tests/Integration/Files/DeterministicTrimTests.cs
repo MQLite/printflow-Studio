@@ -85,6 +85,28 @@ public sealed class DeterministicTrimTests
             output[y * width + x].ShouldBe(source[(y + 12) * sourceWidth + x + 17]);
     }
 
+    [Theory]
+    [InlineData(1)]
+    [InlineData(255)]
+    public async Task White_artwork_keeps_its_colour_and_alpha_inside_the_safety_margin(byte artworkAlpha)
+    {
+        using TrimFixture fixture = new();
+        fixture.WriteInput(SyntheticImages.PngWithAlpha(12, 10,
+            (x, y) => x is >= 3 and < 8 && y is >= 2 and < 7 ? artworkAlpha : (byte)0,
+            colour: (255, 255, 255)));
+
+        TrimResult result = await fixture.TrimAsync(TrimMargin.Uniform(2));
+
+        result.ContentBounds.ShouldBe(TrimBounds.FromEdges(3, 2, 8, 7));
+        result.AppliedBounds.ShouldBe(TrimBounds.FromEdges(1, 0, 10, 9));
+        byte[] output = SyntheticImages.ReadBgra(fixture.OutputPath, out int width, out int height);
+        width.ShouldBe(9);
+        height.ShouldBe(9);
+        int firstArtworkPixel = (2 * width + 2) * 4;
+        output[firstArtworkPixel..(firstArtworkPixel + 4)].ShouldBe([255, 255, 255, artworkAlpha]);
+        output[3].ShouldBe((byte)0);
+    }
+
     // -----------------------------------------------------------------------------
     // Case A: transparent border around opaque content
     // -----------------------------------------------------------------------------

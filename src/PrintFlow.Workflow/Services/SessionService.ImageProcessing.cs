@@ -31,6 +31,8 @@ public sealed partial class SessionService
             return new(new(method, _meitu.AdapterId, null, true, null));
         if (method == ImageProcessingMethod.AlphaTrim)
             return new(new(method, _trim.ProcessorId, _trim.ProcessorId, false, null));
+        if (method == ImageProcessingMethod.ManualCrop)
+            return new(new(method, _manualCrop.ProcessorId, _manualCrop.ProcessorId, false, null));
 
         if (method is ImageProcessingMethod.OpenAiRestore or ImageProcessingMethod.OpenAiCutout or ImageProcessingMethod.OpenAiCombined)
             return new(new(method, null, null, false, OperationFailure.Create(FailureCode.PreconditionNotMet,
@@ -55,7 +57,7 @@ public sealed partial class SessionService
     {
         ImageProcessingMethod.MeituEnhancement => _meitu.GetConfigurationFailure(MeituOperation.Enhance),
         ImageProcessingMethod.MeituBackgroundRemoval => _meitu.GetConfigurationFailure(MeituOperation.RemoveBackground),
-        ImageProcessingMethod.SkipEnhancement or ImageProcessingMethod.KeepBackground => null,
+        ImageProcessingMethod.SkipEnhancement or ImageProcessingMethod.KeepBackground or ImageProcessingMethod.KeepCanvas => null,
         _ => PlanImageProcessing(method).View.Unavailable,
     };
 
@@ -81,6 +83,8 @@ public sealed partial class SessionService
         }
         if (state.ProcessingMethodFor(current.Step) is not { } method)
             return null;
+        if (method == ImageProcessingMethod.KeepCanvas)
+            return new(method, null, null, false, null);
         ImageProcessingExecutionView view = PlanImageProcessing(method).View;
         return method is ImageProcessingMethod.MeituEnhancement or ImageProcessingMethod.MeituBackgroundRemoval
             or ImageProcessingMethod.SkipEnhancement or ImageProcessingMethod.KeepBackground

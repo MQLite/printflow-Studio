@@ -435,6 +435,7 @@ public sealed partial class SessionService : ISessionService
         // Every authority-changing command shares the delivery/retention gate. Complete's
         // retention path calls its under-gate core, so this lease is acquired only once.
         bool preventQueuedImageCommand = command is WorkflowCommand.SetImageProcessingSelection or
+            WorkflowCommand.SubmitManualCrop or
             WorkflowCommand.StartStep { Step: StepKind.Enhancement or StepKind.BackgroundRemoval or StepKind.Trim };
         using IDisposable? completionLease = preventQueuedImageCommand
             ? await SessionCompletionGate.TryEnterAsync(id, cancellationToken)
@@ -548,17 +549,13 @@ public sealed partial class SessionService : ISessionService
                 { Code: FailureCode.PdfMultiplePages or FailureCode.PdfEncrypted or FailureCode.PdfUnreadable } refusal)
             return OperationResult.Fail<SessionView>(refusal);
 
-        // The half of manual-crop eligibility the pure engine cannot see, checked before the
-        // command reaches it. Button visibility is not a guard: a crop asked for against an
-        // unrelated Trim failure, or against a rejected deterministic trim, is refused here even
-        // if something managed to construct the command (Part C2 §13).
+        // Match the manual crop offer to the selected method and attempt history at execution.
         if (command is WorkflowCommand.SubmitManualCrop &&
             !ManualCropEligibility.IsEligible(snapshot, aggregate.Attempts))
         {
             return OperationResult.Fail<SessionView>(
                 FailureCode.PreconditionNotMet,
-                "A manual crop is legal only after a Trim attempt reported ManualCropRequired, or " +
-                "after an earlier manual crop was rejected.");
+                "Select the manual crop method or use the manual crop fallback when offered.");
         }
 
         // Adjusting a trim review: the attempt-history half, on the aggregate this command will
@@ -1995,7 +1992,11 @@ public sealed partial class SessionService : ISessionService
                 FailureCode.PreconditionNotMet, $"Step {work.Step} is not part of this workflow.");
         }
 
-        if (work.ManualResultPath is null && work.ManualCrop is null &&
+        if (work.ManualCrop is not null)
+        {
+            work = work with { ImageProcessing = PlanImageProcessing(ImageProcessingMethod.ManualCrop) };
+        }
+        else if (work.ManualResultPath is null &&
             PlanImageProcessing(started.State, work.Step) is { } plan)
         {
             if (plan.View.Unavailable is { } unavailable)
@@ -2180,8 +2181,7 @@ public sealed partial class SessionService : ISessionService
             ?? ManualImageProcessingMethod(work.Step, work.Operation);
         if (method is { } actualMethod && FindRevision(aggregate, work.InputRevision) is { } imageInput)
         {
-            string? algorithmVersion = work.ImageProcessing?.View.AlgorithmVersion ??
-                (actualMethod == ImageProcessingMethod.ManualCrop ? work.ProcessorId : null);
+            string? algorithmVersion = work.ImageProcessing?.View.AlgorithmVersion;
             runningAttempt = runningAttempt with
             {
                 ImageProcessingDetails = new ImageProcessingRunDetails(actualMethod, imageInput.Sha256, algorithmVersion),
@@ -2931,9 +2931,7 @@ public sealed partial class SessionService : ISessionService
                         $"Step {definition.Kind} is internal but has no deterministic processor.");
                 }
 
-                // A rectangle on the work means a human chose it, so the alpha scan is skipped
-                // entirely: the automatic path already refused this file, and re-running it
-                // would refuse again for the same reason (Part C2 §10, §21).
+                // A manual attempt uses the operator's rectangle as its content bounds.
                 if (work.ManualCrop is { } crop)
                 {
                     WorkspaceFileRef expectedOutput = SiblingOf(workingCopy.Value, ManualCropOutputFileName);

@@ -149,6 +149,7 @@ public static class TransitionTable
             CommandKind.StartStep,
             CommandKind.Skip,
             CommandKind.SetPrintDimensions,
+            CommandKind.SubmitManualCrop,
 
             // The three sizing routes sit in the same row because they are one decision made
             // three ways, and all three finish the same step. Which of them a session used is
@@ -225,6 +226,7 @@ public static class TransitionTable
             CommandKind.Retry,
             CommandKind.Skip,
             CommandKind.HandOff,
+            CommandKind.SubmitManualCrop,
         ],
     };
 

@@ -34,20 +34,22 @@ internal static class SyntheticImages
     /// interesting and could not accidentally produce the right answer. The alpha channel is
     /// the only thing that varies, so it is the only thing a passing test can be measuring.
     /// </remarks>
-    public static byte[] PngWithAlpha(int width, int height, Func<int, int, byte> alphaAt, double dpi = 300)
+    public static byte[] PngWithAlpha(int width, int height, Func<int, int, byte> alphaAt, double dpi = 300,
+        (byte R, byte G, byte B)? colour = null)
     {
         ArgumentNullException.ThrowIfNull(alphaAt);
 
         WriteableBitmap bitmap = new(width, height, dpi, dpi, PixelFormats.Bgra32, null);
         byte[] pixels = new byte[width * height * 4];
+        (byte red, byte green, byte blue) = colour ?? (0x80, 0x40, 0x20);
         for (int y = 0; y < height; y++)
         {
             for (int x = 0; x < width; x++)
             {
                 int i = ((y * width) + x) * 4;
-                pixels[i] = 0x20;
-                pixels[i + 1] = 0x40;
-                pixels[i + 2] = 0x80;
+                pixels[i] = blue;
+                pixels[i + 1] = green;
+                pixels[i + 2] = red;
                 pixels[i + 3] = alphaAt(x, y);
             }
         }

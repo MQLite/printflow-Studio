@@ -874,14 +874,6 @@
                        Margin="0,0,0,6"
                        Visibility="{Binding ShowsManualCropEntryNotice, Converter={StaticResource BoolToVisibility}}" />
 
-            <!--
-                Manual Crop (Part C2 §3). Its visibility is CanManualCrop, which the workflow
-                layer answers from the session state, the step state and the attempt history —
-                this file states no condition of its own, which is what "do not infer eligibility
-                in XAML" asks for. It is deliberately not bound to IsManualCropRequired: that
-                notice covers only the first of the two openings, and the second — offering
-                another crop after one was rejected — has no failure code to show (§21).
-            -->
             <local:SessionActionButton Content="{Binding BeginManualCropLabel}"
                     Command="{Binding BeginManualCropCommand}"
                     IsEnabled="{Binding CanInteractWithLivePage}"

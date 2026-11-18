@@ -34,6 +34,8 @@ public sealed partial class SessionViewModel
         _session?.ImageProcessingExecution?.Method is ImageProcessingMethod.SkipEnhancement or ImageProcessingMethod.KeepBackground;
     private bool CanRunSelectedImageMethod =>
         !UsesCurrentImageWithoutProcessing && _session?.ImageProcessingExecution?.Unavailable is null;
+    private bool CanConfirmSelectedKeepCanvas =>
+        CanKeepOriginalExtent && _session?.ImageProcessingExecution?.Method == ImageProcessingMethod.KeepCanvas;
 
     private bool CanApplyImageProcessingMethod() => CanChangeImageProcessingMethod &&
         DraftImageProcessingMethod is { } method && method != _session?.ImageProcessingExecution?.Method &&
