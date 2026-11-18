@@ -1768,7 +1768,16 @@
   <data name="ImageProcessing_Method_ManualResult" xml:space="preserve"><value>手动导入结果</value></data>
   <data name="ImageProcessing_ManualCropHint" xml:space="preserve"><value>在任务中手动框选裁切范围。</value></data>
   <data name="ImageProcessing_KeepCanvasHint" xml:space="preserve"><value>保留当前画布尺寸。</value></data>
-  <data name="ImageProcessing_LocalHint" xml:space="preserve"><value>在本工作站上处理图像。</value></data>
+  <data name="ImageProcessing_BiRefNetHint" xml:space="preserve"><value>在本工作站运行，保留原画布和颜色样本，并合成连续 Alpha 蒙版。</value></data>
+  <data name="ImageProcessing_BiRefNetModelMissing" xml:space="preserve"><value>缺少本地 BiRefNet 模型。请选择其他方式。已选择 BiRefNet 的任务可以转为手工处理。</value></data>
+  <data name="ImageProcessing_BiRefNetModelInvalid" xml:space="preserve"><value>无法验证本地 BiRefNet 模型。请选择其他方式。已选择 BiRefNet 的任务可以转为手工处理。</value></data>
+  <data name="ImageProcessing_BiRefNetRuntimeUnavailable" xml:space="preserve"><value>所需的 Windows x64 图像处理运行库不可用。请选择其他方式。已选择 BiRefNet 的任务可以转为手工处理。</value></data>
+  <data name="ImageProcessing_BiRefNetLowMemory" xml:space="preserve"><value>BiRefNet 至少需要 4 GiB 可用系统内存。请释放内存、选择其他方式或转为手工处理。</value></data>
+  <data name="ImageProcessing_BiRefNetRunFailed" xml:space="preserve"><value>本地 BiRefNet 模型无法处理此图像。请重试、选择其他方式或转为手工处理。</value></data>
+  <data name="ImageProcessing_BiRefNetTooLarge" xml:space="preserve"><value>BiRefNet 支持每边最多 8,192 像素、总计 2,400 万像素及 128 MiB 的文件。请选择其他方式或转为手工处理。</value></data>
+  <data name="ImageProcessing_BiRefNetUnsupported" xml:space="preserve"><value>本地 BiRefNet 支持每通道最多 16 位的 RGB 或灰度 PNG、JPEG。请选择其他方式或转为手工处理。</value></data>
+  <data name="ImageProcessing_BiRefNetImageError" xml:space="preserve"><value>BiRefNet 无法读取图像或保留颜色配置和像素。请选择其他方式或转为手工处理。</value></data>
+  <data name="ImageProcessing_BiRefNetInvalidMatte" xml:space="preserve"><value>BiRefNet 生成了无效蒙版，或未能分离前景和背景。请选择其他方式或转为手工处理。</value></data>
   <data name="ImageProcessing_CloudHint" xml:space="preserve"><value>将图像上传至 OpenAI，按使用量计费。</value></data>
   <data name="ImageProcessing_ConfirmBackgroundHint" xml:space="preserve"><value>运行前，请为当前图像确认去背景方式。</value></data>
   <data name="ImageProcessing_AuthoriseBackgroundMethod" xml:space="preserve"><value>对此图像使用当前方式</value></data>

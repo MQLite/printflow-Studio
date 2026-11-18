@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Runtime.InteropServices;
 using ImageMagick;
 using ImageMagick.Formats;
 using PrintFlow.Domain.Files;
@@ -20,7 +19,6 @@ public sealed class LocalEnhancementBackend : IImageProcessingBackend
     private const long MaximumFileBytes = 128L * 1024 * 1024;
     private readonly IWorkspace _workspace;
     private readonly RealEsrganUpscaler _upscaler;
-    private readonly Lazy<OperationFailure?> _imagingFailure = new(CheckImagingRuntime);
 
     public LocalEnhancementBackend(IWorkspace workspace, string modelPath)
         : this(workspace, new RealEsrganUpscaler(modelPath))
@@ -42,9 +40,9 @@ public sealed class LocalEnhancementBackend : IImageProcessingBackend
 
     public ImageProcessingCapability? GetCapability(ImageProcessingMethod method) => method switch
     {
-        ImageProcessingMethod.LightSharpen => new("local-magick-sharpen", VersionFor(method), _imagingFailure.Value),
+        ImageProcessingMethod.LightSharpen => new("local-magick-sharpen", VersionFor(method), LocalImageFiles.MagickRuntimeFailure),
         ImageProcessingMethod.AiUpscale => new("local-realesrgan-cpu", VersionFor(method),
-            _imagingFailure.Value ?? _upscaler.GetUnavailable()),
+            LocalImageFiles.MagickRuntimeFailure ?? _upscaler.GetUnavailable()),
         _ => null,
     };
 
@@ -64,7 +62,7 @@ public sealed class LocalEnhancementBackend : IImageProcessingBackend
         }
 
         bool upscale = request.Method == ImageProcessingMethod.AiUpscale;
-        if (_imagingFailure.Value is { } runtimeFailure)
+        if (LocalImageFiles.MagickRuntimeFailure is { } runtimeFailure)
             return OperationResult.Fail<AdapterOutput>(runtimeFailure);
 
         var stopwatch = Stopwatch.StartNew();
@@ -99,7 +97,7 @@ public sealed class LocalEnhancementBackend : IImageProcessingBackend
             stream.Position = 0;
             var info = new MagickImageInfo(stream, settings);
             if (upscale ? !RealEsrganUpscaler.Fits(info.Width, info.Height) :
-                !Fits(info.Width, info.Height, SharpenMaximumEdge, SharpenMaximumPixels))
+                !LocalImageFiles.Fits(info.Width, info.Height, SharpenMaximumEdge, SharpenMaximumPixels))
             {
                 return TooLarge(upscale);
             }
@@ -167,26 +165,8 @@ public sealed class LocalEnhancementBackend : IImageProcessingBackend
         image.Composite(original, CompositeOperator.CopyAlpha);
     }
 
-    private static void WriteCandidate(MagickImage image, string outputPath, uint depth, CancellationToken token)
-    {
-        token.ThrowIfCancellationRequested();
-        string temporary = outputPath + "." + Guid.NewGuid().ToString("N") + ".tmp";
-        image.Progress += (_, progress) => progress.Cancel = token.IsCancellationRequested;
-        try
-        {
-            using (FileStream output = new(temporary, FileMode.CreateNew, FileAccess.Write, FileShare.None))
-                image.Write(output, new PngWriteDefines { BitDepth = depth, PreserveiCCP = true });
-            token.ThrowIfCancellationRequested();
-            File.Move(temporary, outputPath);
-        }
-        finally
-        {
-            File.Delete(temporary);
-        }
-    }
-
-    internal static bool Fits(uint width, uint height, int maximumEdge, long maximumPixels) =>
-        width > 0 && height > 0 && width <= maximumEdge && height <= maximumEdge && (long)width * height <= maximumPixels;
+    private static void WriteCandidate(MagickImage image, string outputPath, uint depth, CancellationToken token) =>
+        LocalImageFiles.WriteCandidate(image, outputPath, new PngWriteDefines { BitDepth = depth, PreserveiCCP = true }, token);
 
     private static OperationResult<AdapterOutput> TooLarge(bool upscale) =>
         OperationResult.Fail<AdapterOutput>(OperationFailure.Create(FailureCode.PreconditionNotMet,
@@ -197,25 +177,4 @@ public sealed class LocalEnhancementBackend : IImageProcessingBackend
         OperationResult.Fail<AdapterOutput>(OperationFailure.Create(FailureCode.SourceFormatUnsupported,
             "Local enhancement accepts supported RGB or grayscale PNG and JPEG images.",
             messageKey: "ImageProcessing_LocalImageUnsupported"));
-
-    private static OperationFailure? CheckImagingRuntime()
-    {
-        if (RuntimeInformation.ProcessArchitecture == Architecture.X64)
-        {
-            try
-            {
-                _ = ImageMagick.MagickNET.Features;
-                return null;
-            }
-            catch (Exception error) when (error is DllNotFoundException or BadImageFormatException or
-                EntryPointNotFoundException or TypeInitializationException)
-            {
-                return OperationFailure.Create(FailureCode.AdapterUnavailable, error.Message,
-                    messageKey: "ImageProcessing_LocalRuntimeUnavailable");
-            }
-        }
-
-        return OperationFailure.Create(FailureCode.AdapterUnavailable, "Local enhancement requires the Windows x64 runtime.",
-            messageKey: "ImageProcessing_LocalRuntimeUnavailable");
-    }
 }

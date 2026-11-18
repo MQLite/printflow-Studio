@@ -21,6 +21,24 @@ namespace PrintFlow.Infrastructure.Automation;
 /// </remarks>
 internal static partial class NativeMethods
 {
+    // Local CPU inference checks free physical memory before loading a model.
+    [LibraryImport("kernel32.dll")]
+    internal static partial int GlobalMemoryStatusEx(ref MemoryStatus status);
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct MemoryStatus
+    {
+        public uint Length;
+        public uint MemoryLoad;
+        public ulong TotalPhysical;
+        public ulong AvailablePhysical;
+        public ulong TotalPageFile;
+        public ulong AvailablePageFile;
+        public ulong TotalVirtual;
+        public ulong AvailableVirtual;
+        public ulong AvailableExtendedVirtual;
+    }
+
     // Read-only OS bidi classification for memorial text paragraph direction.
     // Caller supplies exactly one output ushort per UTF-16 source code unit.
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true, SetLastError = true)]

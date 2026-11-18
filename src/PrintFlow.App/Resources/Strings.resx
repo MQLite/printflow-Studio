@@ -1778,7 +1778,16 @@
   <data name="ImageProcessing_Method_ManualResult" xml:space="preserve"><value>Manually imported result</value></data>
   <data name="ImageProcessing_ManualCropHint" xml:space="preserve"><value>Draw a crop box in the task.</value></data>
   <data name="ImageProcessing_KeepCanvasHint" xml:space="preserve"><value>Keep the current canvas dimensions.</value></data>
-  <data name="ImageProcessing_LocalHint" xml:space="preserve"><value>Processes images on this workstation.</value></data>
+  <data name="ImageProcessing_BiRefNetHint" xml:space="preserve"><value>Runs on this workstation. Keeps the original canvas and colour samples and adds a continuous Alpha mask.</value></data>
+  <data name="ImageProcessing_BiRefNetModelMissing" xml:space="preserve"><value>The local BiRefNet model is missing. Choose another method. Tasks already set to BiRefNet can be handed off for manual processing.</value></data>
+  <data name="ImageProcessing_BiRefNetModelInvalid" xml:space="preserve"><value>The local BiRefNet model could not be verified. Choose another method. Tasks already set to BiRefNet can be handed off for manual processing.</value></data>
+  <data name="ImageProcessing_BiRefNetRuntimeUnavailable" xml:space="preserve"><value>The Windows x64 image processing runtime is unavailable. Choose another method. Tasks already set to BiRefNet can be handed off for manual processing.</value></data>
+  <data name="ImageProcessing_BiRefNetLowMemory" xml:space="preserve"><value>BiRefNet needs at least 4 GiB of free system memory. Free memory, choose another method, or hand off for manual processing.</value></data>
+  <data name="ImageProcessing_BiRefNetRunFailed" xml:space="preserve"><value>The local BiRefNet model could not process this image. Retry, choose another method, or hand off for manual processing.</value></data>
+  <data name="ImageProcessing_BiRefNetTooLarge" xml:space="preserve"><value>BiRefNet supports up to 8,192 pixels per edge, 24 megapixels and 128 MiB. Choose another method or hand off for manual processing.</value></data>
+  <data name="ImageProcessing_BiRefNetUnsupported" xml:space="preserve"><value>Local BiRefNet supports RGB and grayscale PNG or JPEG files up to 16 bits per channel. Choose another method or hand off for manual processing.</value></data>
+  <data name="ImageProcessing_BiRefNetImageError" xml:space="preserve"><value>BiRefNet could not read the image or preserve its colour profile or pixels. Choose another method or hand off for manual processing.</value></data>
+  <data name="ImageProcessing_BiRefNetInvalidMatte" xml:space="preserve"><value>BiRefNet produced an invalid mask or could not separate foreground from background. Choose another method or hand off for manual processing.</value></data>
   <data name="ImageProcessing_CloudHint" xml:space="preserve"><value>Uploads the image to OpenAI and incurs usage charges.</value></data>
   <data name="ImageProcessing_ConfirmBackgroundHint" xml:space="preserve"><value>Confirm the background removal method for this image before running it.</value></data>
   <data name="ImageProcessing_AuthoriseBackgroundMethod" xml:space="preserve"><value>Use this method for this image</value></data>

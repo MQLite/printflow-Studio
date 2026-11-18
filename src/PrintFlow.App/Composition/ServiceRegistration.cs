@@ -90,6 +90,9 @@ public static class ServiceRegistration
         services.AddSingleton<IImageProcessingBackend>(provider => new LocalEnhancementBackend(
             provider.GetRequiredService<IWorkspace>(),
             System.IO.Path.Combine(AppContext.BaseDirectory, "Models", LocalEnhancementBackend.ModelFileName)));
+        services.AddSingleton<IImageProcessingBackend>(provider => new LocalBackgroundMatteBackend(
+            provider.GetRequiredService<IWorkspace>(),
+            System.IO.Path.Combine(AppContext.BaseDirectory, "Models", LocalBackgroundMatteBackend.ModelFileName)));
 
         // The manual-crop counterpart, registered on exactly the same terms and for the same
         // reasons: in-process pixel work, no external application, no environment gate. It is

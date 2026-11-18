@@ -51,8 +51,7 @@ public sealed record ImageProcessingMethodOption(ImageProcessingMethod Method, s
         ImageProcessingMethod.KeepCanvas => "ImageProcessing_KeepCanvasHint",
         ImageProcessingMethod.LightSharpen => "ImageProcessing_SharpenHint",
         ImageProcessingMethod.AiUpscale => "ImageProcessing_UpscaleHint",
-        ImageProcessingMethod.BiRefNet =>
-            "ImageProcessing_LocalHint",
+        ImageProcessingMethod.BiRefNet => "ImageProcessing_BiRefNetHint",
         ImageProcessingMethod.OpenAiRestore or ImageProcessingMethod.OpenAiCutout or ImageProcessingMethod.OpenAiCombined =>
             "ImageProcessing_CloudHint",
         _ => "ImageProcessing_Ready",

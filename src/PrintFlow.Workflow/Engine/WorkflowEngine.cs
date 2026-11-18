@@ -1236,7 +1236,8 @@ public sealed class WorkflowEngine : IWorkflowEngine
         }
 
         effects.Add(new WorkflowEffect.OpenForManualWork(command.Step, reason));
-        effects.Add(new WorkflowEffect.ReleaseAutomationLock());
+        if (state.ProcessingMethodFor(command.Step) != ImageProcessingMethod.BiRefNet)
+            effects.Add(new WorkflowEffect.ReleaseAutomationLock());
 
         (WorkflowSnapshot handedOff, WorkflowEffect marked) = HandOffSession(state, reason, context);
         effects.Add(marked);
@@ -1835,15 +1836,15 @@ public sealed class WorkflowEngine : IWorkflowEngine
                 "The session has no step left to return to, so there is no automation to re-enter.");
         }
 
-        // Only from a step that actually stopped. A handed-off session sitting on an Approved
+        // A local cutout may have been handed off before it could start. A session on an Approved
         // or ReviewRequired step has a result waiting for a decision, and re-entry must not
         // quietly discard it by resetting the step to Waiting.
-        if (current.State is not (StepState.Interrupted or StepState.Failed or StepState.RetryRequired))
+        if (!Services.ManualResultEligibility.IsManualResultPosition(state))
         {
             return WorkflowTransition.Rejected(
                 RejectionCode.IllegalStateTransition,
                 $"Step {current.Step} is {current.State}; returning to automation applies to a step " +
-                "whose attempt stopped without a result.");
+                "without a result ready for review.");
         }
 
         SessionStep reset = current with
@@ -1912,7 +1913,8 @@ public sealed class WorkflowEngine : IWorkflowEngine
                 $"Step {kind} is not the current step ({current?.Step.ToString() ?? "none"}).");
         }
 
-        if (TransitionTable.Lookup(step.State, command) != TransitionOutcome.Allowed)
+        bool handOffWaitingCutout = command == CommandKind.HandOff && Services.ManualResultEligibility.CanHandOffWaitingCutout(state);
+        if (TransitionTable.Lookup(step.State, command) != TransitionOutcome.Allowed && !handOffWaitingCutout)
         {
             return StepResolution.Refused(
                 RejectionCode.IllegalStateTransition,

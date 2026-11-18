@@ -30,6 +30,31 @@ namespace PrintFlow.Infrastructure.Workspace;
 /// </remarks>
 public sealed class FileWorkspace : IWorkspace
 {
+    // Commit an encoder's new working candidate without exposing a partially written file.
+    // Only this call's disposable staging sibling is eligible for cleanup.
+    internal static void WriteNewWorkingCandidate(string candidatePath, Action<Stream> encode, CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+        string temporary = candidatePath + "." + Guid.NewGuid().ToString("N") + ".tmp";
+        bool ownsTemporary = false;
+        try
+        {
+            using (var output = new FileStream(temporary, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+            {
+                ownsTemporary = true;
+                encode(output);
+            }
+            token.ThrowIfCancellationRequested();
+            File.Move(temporary, candidatePath, overwrite: false);
+            ownsTemporary = false;
+        }
+        finally
+        {
+            if (ownsTemporary)
+                File.Delete(temporary);
+        }
+    }
+
     private const string SessionsFolder = "Sessions";
 
     private readonly string _rootAbsolute;

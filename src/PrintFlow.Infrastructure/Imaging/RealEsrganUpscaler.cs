@@ -1,5 +1,4 @@
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using ImageMagick;
 using Microsoft.ML.OnnxRuntime;
@@ -7,7 +6,7 @@ using PrintFlow.Domain.Results;
 
 namespace PrintFlow.Infrastructure.Imaging;
 
-internal sealed partial class RealEsrganUpscaler
+internal sealed class RealEsrganUpscaler
 {
     internal const string AlgorithmVersion = "realesrgan-x2plus-7115ba92-ort-1.32.0-cpu-v1";
     private const string ModelSha256 = "7115BA92E8A1BFA63D68558EF006EF3D91273A068D321B1439F8BB1C9179002C";
@@ -18,7 +17,6 @@ internal sealed partial class RealEsrganUpscaler
 
     private readonly string _modelPath;
     private readonly Func<ulong> _availableMemory;
-    private readonly Lazy<OperationFailure?> _runtimeFailure = new(CheckRuntime);
     private readonly SemaphoreSlim _inferenceSlot = new(1);
     private readonly object _modelCheckLock = new();
     private (DateTime WriteTimeUtc, DateTime CreationTimeUtc, bool Verified)? _modelCheck;
@@ -26,13 +24,13 @@ internal sealed partial class RealEsrganUpscaler
     public RealEsrganUpscaler(string modelPath, Func<ulong>? availableMemory = null)
     {
         _modelPath = modelPath;
-        _availableMemory = availableMemory ?? AvailablePhysicalMemory;
+        _availableMemory = availableMemory ?? LocalInferenceRuntime.AvailablePhysicalMemory;
     }
 
     public static bool Fits(uint width, uint height) =>
-        LocalEnhancementBackend.Fits(width, height, MaximumInputEdge, MaximumInputPixels);
+        LocalImageFiles.Fits(width, height, MaximumInputEdge, MaximumInputPixels);
 
-    public OperationFailure? GetUnavailable() => CheckModel() ?? _runtimeFailure.Value;
+    public OperationFailure? GetUnavailable() => CheckModel() ?? LocalInferenceRuntime.CpuRuntimeFailure;
 
     public OperationResult<MagickImage> Run(MagickImage source, CancellationToken token)
     {
@@ -300,44 +298,4 @@ internal sealed partial class RealEsrganUpscaler
     private static OperationFailure InvalidModel(string? detail = null) =>
         OperationFailure.Create(FailureCode.AdapterUnavailable, detail ?? "The 2× ONNX model failed its pinned identity check.",
             messageKey: "ImageProcessing_UpscaleModelInvalid");
-
-    private static OperationFailure? CheckRuntime()
-    {
-        try
-        {
-            if (OrtEnv.Instance().GetAvailableProviders().Contains("CPUExecutionProvider", StringComparer.Ordinal))
-                return null;
-        }
-        catch (Exception error) when (error is TypeInitializationException or DllNotFoundException or
-            BadImageFormatException or EntryPointNotFoundException or OnnxRuntimeException)
-        {
-            return OperationFailure.Create(FailureCode.AdapterUnavailable, error.Message,
-                messageKey: "ImageProcessing_LocalRuntimeUnavailable");
-        }
-        return OperationFailure.Create(FailureCode.AdapterUnavailable, "ONNX Runtime's CPU execution provider is unavailable.",
-            messageKey: "ImageProcessing_LocalRuntimeUnavailable");
-    }
-
-    private static ulong AvailablePhysicalMemory()
-    {
-        var status = new MemoryStatus { Length = (uint)Marshal.SizeOf<MemoryStatus>() };
-        return GlobalMemoryStatusEx(ref status) != 0 ? status.AvailablePhysical : 0;
-    }
-
-    [LibraryImport("kernel32.dll")]
-    private static partial int GlobalMemoryStatusEx(ref MemoryStatus status);
-
-    [StructLayout(LayoutKind.Sequential)]
-    private struct MemoryStatus
-    {
-        public uint Length;
-        public uint MemoryLoad;
-        public ulong TotalPhysical;
-        public ulong AvailablePhysical;
-        public ulong TotalPageFile;
-        public ulong AvailablePageFile;
-        public ulong TotalVirtual;
-        public ulong AvailableVirtual;
-        public ulong AvailableExtendedVirtual;
-    }
 }
