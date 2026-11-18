@@ -4,12 +4,15 @@ using CommunityToolkit.Mvvm.Input;
 using PrintFlow.App.Resources;
 using PrintFlow.App.Settings;
 using PrintFlow.Domain.Results;
+using PrintFlow.Domain.Sessions;
 using PrintFlow.Domain.Settings;
+using PrintFlow.Workflow.Services;
 
 namespace PrintFlow.App.ViewModels;
 
 public sealed partial class SettingsViewModel
 {
+    private readonly ISessionService _imageProcessingSessions;
     private ImageProcessingPolicy? _savedImageProcessing;
     private string _savedImageMargin = "0";
     private TaskCompletionSource<bool>? _leaveImageSettings;
@@ -31,7 +34,6 @@ public sealed partial class SettingsViewModel
     public string BackgroundRemovalMethodLabel => Strings.Resolve("ImageProcessing_BackgroundRemoval");
     public string CropMethodLabel => Strings.Resolve("ImageProcessing_Crop");
     public string IgnoreSmallTrimNoiseLabel => Strings.Resolve("ImageProcessing_IgnoreNoise");
-    public string ImageProcessingAvailableHint => Strings.Resolve("ImageProcessing_Available");
     public string ImageProcessingRestoreLabel => Strings.Resolve("ImageProcessing_Restore");
     public string ImageProcessingSaveLabel => Strings.Resolve("ImageProcessing_Save");
     public string ImageProcessingBackLabel => Strings.Resolve("ImageProcessing_Back");
@@ -39,31 +41,12 @@ public sealed partial class SettingsViewModel
     public string ImageProcessingDiscardLabel => Strings.Resolve("ImageProcessing_Discard");
     public string ImageProcessingContinueEditingLabel => Strings.Resolve("ImageProcessing_KeepEditing");
 
-    public sealed record MethodOption(ImageProcessingMethod Method, string Label, bool IsAvailable);
-
-    public IReadOnlyList<MethodOption> EnhancementMethods => [
-        Option(ImageProcessingMethod.MeituEnhancement, "Meitu", true),
-        Option(ImageProcessingMethod.LightSharpen, "LightSharpen"),
-        Option(ImageProcessingMethod.AiUpscale, "AiUpscale"),
-        Option(ImageProcessingMethod.OpenAiRestore, "OpenAiRestore"),
-        Option(ImageProcessingMethod.SkipEnhancement, "SkipEnhancement"),
-    ];
-
-    public IReadOnlyList<MethodOption> BackgroundRemovalMethods => [
-        Option(ImageProcessingMethod.MeituBackgroundRemoval, "Meitu", true),
-        Option(ImageProcessingMethod.BiRefNet, "BiRefNet"),
-        Option(ImageProcessingMethod.OpenAiCutout, "OpenAiCutout"),
-        Option(ImageProcessingMethod.KeepBackground, "KeepBackground"),
-    ];
-
-    public IReadOnlyList<MethodOption> CropMethods => [
-        Option(ImageProcessingMethod.AlphaTrim, "AlphaTrim", true),
-        Option(ImageProcessingMethod.ManualCrop, "ManualCrop"),
-        Option(ImageProcessingMethod.KeepCanvas, "KeepCanvas"),
-    ];
-
-    private static MethodOption Option(ImageProcessingMethod method, string resource, bool available = false) =>
-        new(method, Strings.Resolve("ImageProcessing_Method_" + resource), available);
+    public IReadOnlyList<ImageProcessingMethodOption> EnhancementMethods =>
+        ImageProcessingMethodOption.ForStep(StepKind.Enhancement, _imageProcessingSessions);
+    public IReadOnlyList<ImageProcessingMethodOption> BackgroundRemovalMethods =>
+        ImageProcessingMethodOption.ForStep(StepKind.BackgroundRemoval, _imageProcessingSessions);
+    public IReadOnlyList<ImageProcessingMethodOption> CropMethods =>
+        ImageProcessingMethodOption.ForStep(StepKind.Trim, _imageProcessingSessions);
 
     [RelayCommand(CanExecute = nameof(CanOpenImageProcessing))]
     private async Task OpenImageProcessingAsync(CancellationToken cancellationToken)
@@ -91,8 +74,8 @@ public sealed partial class SettingsViewModel
             ApplyImageProcessingDraft(_savedImageProcessing, _savedImageMargin);
             if (policy.IsFailure)
                 ImageProcessingNotice = Strings.Resolve("ImageProcessing_InvalidDefaults");
-            else if (!policy.Value.Selection.CanRunInCurrentBuild)
-                ImageProcessingNotice = Strings.Resolve("ImageProcessing_UnavailableDefaults");
+            else if (UnavailableDefault(policy.Value.Selection) is { } unavailable)
+                ImageProcessingNotice = DescribeUnavailableDefaults(unavailable);
         }
         finally { IsBusy = false; }
     }
@@ -108,10 +91,12 @@ public sealed partial class SettingsViewModel
     [RelayCommand(CanExecute = nameof(CanSaveImageProcessing))]
     private async Task SaveImageProcessingAsync(CancellationToken cancellationToken)
     {
-        if (!CanSaveImageProcessing() || ImageProcessingDraft() is not { } policy) return;
-        if (!policy.Selection.CanRunInCurrentBuild)
+        if (!CanApply() || !IsEditingImageProcessing || !_imageSettingsReadable ||
+            ImageProcessingDraft() is not { Selection.HasValidMethods: true } policy)
+            return;
+        if (UnavailableDefault(policy.Selection) is { } unavailable)
         {
-            ImageProcessingNotice = Strings.Resolve("ImageProcessing_UnavailableDefaults");
+            ImageProcessingNotice = DescribeUnavailableDefaults(unavailable);
             return;
         }
         if (!TryReadPixels(TrimSafetyMarginPixels, out int margin))
@@ -197,7 +182,18 @@ public sealed partial class SettingsViewModel
 
     private bool CanOpenImageProcessing() => CanApply() && !IsEditingImageProcessing;
     private bool CanSaveImageProcessing() => CanApply() && IsEditingImageProcessing && _imageSettingsReadable &&
-        ImageProcessingDraft() is not null;
+        ImageProcessingDraft() is { Selection.HasValidMethods: true } draft && UnavailableDefault(draft.Selection) is null;
+
+    private OperationFailure? UnavailableDefault(SessionImageProcessingSelection selection) =>
+        (selection.UseOpenAiCombined
+            ? _imageProcessingSessions.GetImageProcessingUnavailable(ImageProcessingMethod.OpenAiCombined)
+            : _imageProcessingSessions.GetImageProcessingUnavailable(selection.Enhancement)
+                ?? _imageProcessingSessions.GetImageProcessingUnavailable(selection.BackgroundRemoval))
+        ?? _imageProcessingSessions.GetImageProcessingUnavailable(selection.Crop);
+
+    private static string DescribeUnavailableDefaults(OperationFailure failure) =>
+        Strings.Resolve(ImageProcessingPolicy.UnavailableDefaultsMessage) + " " +
+        ImageProcessingMethodOption.UnavailableHint(failure);
     private bool CanRestoreImageProcessing() => CanBackFromImageProcessing() && _imageSettingsReadable;
     private bool CanBackFromImageProcessing() => CanApply() && IsEditingImageProcessing && !IsImageProcessingLeavePending;
     private bool CanRespondToImageProcessingLeave() => CanApply() && IsImageProcessingLeavePending;

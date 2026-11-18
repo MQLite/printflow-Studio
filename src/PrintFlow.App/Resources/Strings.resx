@@ -1752,4 +1752,23 @@
   <data name="ImageProcessing_Method_ManualCrop" xml:space="preserve"><value>Manual crop</value></data>
   <data name="ImageProcessing_Method_KeepCanvas" xml:space="preserve"><value>Keep original canvas</value></data>
   <data name="WorkTask_RepairImageProcessingSettings" xml:space="preserve"><value>Open Settings → Image processing, restore defaults and save, then restart PrintFlow Studio to resume receiving this result.</value></data>
+  <data name="ImageProcessing_CurrentMethod" xml:space="preserve"><value>Current method: {0}</value></data>
+  <data name="ImageProcessing_ChangeTaskMethod" xml:space="preserve"><value>Change method for this task</value></data>
+  <data name="ImageProcessing_ApplyTaskMethod" xml:space="preserve"><value>Apply method</value></data>
+  <data name="ImageProcessing_MethodUnavailable" xml:space="preserve"><value>This method is not available in this version.</value></data>
+  <data name="ImageProcessing_DependencyUnavailable" xml:space="preserve"><value>A required component or model is unavailable.</value></data>
+  <data name="ImageProcessing_MeituUnavailable" xml:space="preserve"><value>Check that Meitu is installed and the workstation is configured for it.</value></data>
+  <data name="ImageProcessing_MeituHint" xml:space="preserve"><value>Uses the configured Meitu desktop application.</value></data>
+  <data name="ImageProcessing_AlphaHint" xml:space="preserve"><value>Finds the edges of the content on a transparent canvas.</value></data>
+  <data name="ImageProcessing_SkipHint" xml:space="preserve"><value>Continue with the current image after confirming in the task.</value></data>
+  <data name="ImageProcessing_Ready" xml:space="preserve"><value>Available on this workstation.</value></data>
+  <data name="ImageProcessing_Method_OpenAiCombined" xml:space="preserve"><value>OpenAI combined processing</value></data>
+  <data name="ImageProcessing_Method_ManualResult" xml:space="preserve"><value>Manually imported result</value></data>
+  <data name="ImageProcessing_ManualCropHint" xml:space="preserve"><value>Draw a crop box in the task.</value></data>
+  <data name="ImageProcessing_KeepCanvasHint" xml:space="preserve"><value>Keep the current canvas dimensions.</value></data>
+  <data name="ImageProcessing_LocalHint" xml:space="preserve"><value>Processes images on this workstation.</value></data>
+  <data name="ImageProcessing_CloudHint" xml:space="preserve"><value>Uploads the image to OpenAI and incurs usage charges.</value></data>
+  <data name="ImageProcessing_ConfirmBackgroundHint" xml:space="preserve"><value>Confirm the background removal method for this image before running it.</value></data>
+  <data name="ImageProcessing_AuthoriseBackgroundMethod" xml:space="preserve"><value>Use this method for this image</value></data>
+  <data name="ImageProcessing_ConfirmBackgroundQuestion" xml:space="preserve"><value>Use {0} on this image? Check the result before approving it.</value></data>
 </root>

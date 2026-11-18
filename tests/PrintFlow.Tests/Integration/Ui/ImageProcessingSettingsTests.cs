@@ -60,7 +60,7 @@ public sealed class ImageProcessingSettingsTests
                 enhancement.SelectedValue.ShouldBe(ImageProcessingMethod.MeituEnhancement);
                 background.SelectedValue.ShouldBe(ImageProcessingMethod.MeituBackgroundRemoval);
                 trim.SelectedValue.ShouldBe(ImageProcessingMethod.AlphaTrim);
-                enhancement.Items.Cast<SettingsViewModel.MethodOption>().Count(option => option.IsAvailable).ShouldBe(1);
+                enhancement.Items.Cast<ImageProcessingMethodOption>().Count(option => option.IsAvailable).ShouldBe(2);
                 foreach (string id in new[] { "ImageProcessing.Back", "ImageProcessing.RestoreDefaults", "ImageProcessing.Save" })
                 {
                     Button action = tree.OfType<Button>().Single(control => AutomationProperties.GetAutomationId(control) == id);
@@ -98,6 +98,44 @@ public sealed class ImageProcessingSettingsTests
         reopened.TrimSafetyMarginPixels.ShouldBe("12");
         reopened.IgnoreSmallTrimNoise.ShouldBeFalse();
         reopened.SelectedCropMethod.ShouldBe(ImageProcessingMethod.AlphaTrim);
+    }
+
+    [Fact]
+    public async Task The_saved_method_applies_to_new_tasks_and_unavailable_saved_methods_can_be_replaced()
+    {
+        using SettingsScreenHarness harness = new();
+        var before = await harness.ImportAsync("before.png");
+        SettingsViewModel screen = await harness.OpenAsync();
+        await screen.OpenImageProcessingCommand.ExecuteAsync(null);
+        screen.SelectedEnhancementMethod = ImageProcessingMethod.AiUpscale;
+        screen.SaveImageProcessingCommand.CanExecute(null).ShouldBeFalse();
+        screen.SelectedEnhancementMethod = ImageProcessingMethod.SkipEnhancement;
+        await screen.SaveImageProcessingCommand.ExecuteAsync(null);
+
+        var after = await harness.ImportAsync("after.png");
+        after.ImageProcessingSelection!.Enhancement.ShouldBe(ImageProcessingMethod.SkipEnhancement);
+        (await harness.Sessions.LoadAsync(before.Id, default)).Value.ImageProcessingSelection!
+            .Enhancement.ShouldBe(ImageProcessingMethod.MeituEnhancement);
+
+        ImageProcessingPolicy unavailable = ImageProcessingPolicy.CompatibleDefault with
+        {
+            Selection = SessionImageProcessingSelection.Compatible with { Enhancement = ImageProcessingMethod.AiUpscale },
+        };
+        await harness.Settings.UpsertAsync([unavailable.ToSetting()], default);
+        SettingsViewModel reopened = await harness.RestartAndOpenAsync();
+        await reopened.OpenImageProcessingCommand.ExecuteAsync(null);
+        reopened.SelectedEnhancementMethod.ShouldBe(ImageProcessingMethod.AiUpscale);
+        reopened.ImageProcessingNotice.ShouldNotBeNullOrWhiteSpace();
+        reopened.SaveImageProcessingCommand.CanExecute(null).ShouldBeFalse();
+        var task = await harness.ImportAsync("unavailable.png");
+        task.ImageProcessingSelection!.Enhancement.ShouldBe(ImageProcessingMethod.AiUpscale);
+        var confirmed = await harness.Sessions.ExecuteAsync(task.Id,
+            new WorkflowCommand.ConfirmOriginal(), "tester", default);
+        confirmed.Value.ImageProcessingExecution!.Unavailable.ShouldNotBeNull();
+        reopened.RestoreImageProcessingDefaultsCommand.Execute(null);
+        await reopened.SaveImageProcessingCommand.ExecuteAsync(null);
+        ImageProcessingPolicy.FromSettings((await harness.Settings.ReadAllAsync(default)).Value)
+            .Value.ShouldBe(ImageProcessingPolicy.CompatibleDefault);
     }
 
     [Fact]

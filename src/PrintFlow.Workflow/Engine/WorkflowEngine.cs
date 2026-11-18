@@ -290,7 +290,7 @@ public sealed class WorkflowEngine : IWorkflowEngine
         bool correctScope = command.Step switch
         {
             StepKind.Enhancement => updated.Crop == recorded.Crop && updated.BackgroundRemoval == recorded.BackgroundRemoval &&
-                ((!recorded.UseOpenAiCombined && !pairChanged) || updated.Enhancement == recorded.Enhancement),
+                (!updated.UseOpenAiCombined || updated.Enhancement == recorded.Enhancement),
             StepKind.BackgroundRemoval => !pairChanged && !recorded.UseOpenAiCombined &&
                 updated.Enhancement == recorded.Enhancement && updated.Crop == recorded.Crop,
             StepKind.Trim => !pairChanged &&

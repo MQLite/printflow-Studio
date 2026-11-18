@@ -1727,6 +1727,41 @@
                     </Border>
 
 </local:SessionExpander>
+                    <StackPanel Margin="0,8,0,4"
+                                Visibility="{Binding ShowsImageProcessingMethod, Converter={StaticResource BoolToVisibility}}">
+                        <TextBlock Text="{Binding CurrentImageProcessingMethod}" FontWeight="SemiBold"
+                                   TextWrapping="Wrap" AutomationProperties.AutomationId="Session.ImageProcessing.Method" />
+                        <TextBlock Text="{Binding CurrentImageProcessingUnavailable}" TextWrapping="Wrap"
+                                   Foreground="{DynamicResource PF.Brush.Muted}"
+                                   AutomationProperties.LiveSetting="Polite" />
+                        <local:SessionExpander Header="{Binding ChangeImageProcessingMethodLabel}"
+                                               Style="{StaticResource PF.Disclosure}"
+                                               IsExpanded="{Binding IsChangingImageProcessingMethod, Mode=TwoWay}"
+                                               Visibility="{Binding CanChangeImageProcessingMethod, Converter={StaticResource BoolToVisibility}}"
+                                               AutomationProperties.AutomationId="Session.ImageProcessing.Change">
+                            <StackPanel Margin="0,6,0,0">
+                                <local:SessionComboBox x:Name="TaskImageMethod" Style="{StaticResource PF.Input.ComboBox}"
+                                          ItemsSource="{Binding TaskImageProcessingMethods}" DisplayMemberPath="Label"
+                                          SelectedValuePath="Method" SelectedValue="{Binding DraftImageProcessingMethod, Mode=TwoWay}"
+                                          AutomationProperties.Name="{Binding ChangeImageProcessingMethodLabel}"
+                                          AutomationProperties.AutomationId="Session.ImageProcessing.Select">
+                                    <local:SessionComboBox.ItemContainerStyle>
+                                        <Style TargetType="ComboBoxItem">
+                                            <Setter Property="ToolTip" Value="{Binding Description}" />
+                                            <Setter Property="AutomationProperties.HelpText" Value="{Binding Description}" />
+                                        </Style>
+                                    </local:SessionComboBox.ItemContainerStyle>
+                                </local:SessionComboBox>
+                                <TextBlock Text="{Binding SelectedItem.Description, ElementName=TaskImageMethod}"
+                                           TextWrapping="Wrap" Foreground="{DynamicResource PF.Brush.Muted}" Margin="0,4,0,0" />
+                                <local:SessionActionButton Style="{StaticResource PF.Button.Secondary}"
+                                                           Content="{Binding ApplyImageProcessingMethodLabel}"
+                                                           Command="{Binding ApplyImageProcessingMethodCommand}"
+                                                           HorizontalAlignment="Left" Margin="0,8,0,0"
+                                                           AutomationProperties.AutomationId="Session.ImageProcessing.Apply" />
+                            </StackPanel>
+                        </local:SessionExpander>
+                    </StackPanel>
                     <!--
                         Background removal, reviewed-content authority (Epic 11300 Part C2B2
                         §3–§9). Visible exactly while CanAuthoriseAutomaticSelection is true,
@@ -1743,11 +1778,13 @@
                             Visibility="{Binding ShowsGuidedBackgroundDecision, Converter={StaticResource BoolToVisibility}}">
                         <StackPanel>
                             <TextBlock Text="{Binding BackgroundRemovalHeading}" FontSize="15" FontWeight="SemiBold" />
-                            <TextBlock Text="{Binding BackgroundRemovalModeHeading}" Margin="0,10,0,4" />
+                            <TextBlock Text="{Binding BackgroundRemovalModeHeading}" Margin="0,10,0,4"
+                                       Visibility="{Binding ShowsMeituRecognitionModes, Converter={StaticResource BoolToVisibility}}" />
                             <ComboBox ItemsSource="{Binding BackgroundRemovalModes}"
                                       DisplayMemberPath="Label" SelectedValuePath="Mode"
                                       SelectedValue="{Binding SelectedBackgroundRemovalMode, Mode=TwoWay}"
                                       AutomationProperties.Name="{Binding BackgroundRemovalModeHeading}"
+                                      Visibility="{Binding ShowsMeituRecognitionModes, Converter={StaticResource BoolToVisibility}}"
                                       IsEnabled="{Binding CanBeginAutomaticSelection}" />
                             <TextBlock Text="{Binding BackgroundRemovalHint}"
                                        TextWrapping="Wrap"

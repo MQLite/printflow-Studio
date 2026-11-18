@@ -11,7 +11,13 @@
             </ResourceDictionary.MergedDictionaries>
             <BooleanToVisibilityConverter x:Key="VisibleWhenTrue" />
             <Style x:Key="MethodItem" TargetType="ComboBoxItem">
-                <Setter Property="IsEnabled" Value="{Binding IsAvailable}" />
+                <Setter Property="ToolTip" Value="{Binding Description}" />
+                <Setter Property="AutomationProperties.HelpText" Value="{Binding Description}" />
+            </Style>
+            <Style x:Key="MethodHint" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="{DynamicResource PF.Brush.Muted}" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+                <Setter Property="Margin" Value="0,4,0,0" />
             </Style>
             <Style x:Key="MethodLabel" TargetType="TextBlock">
                 <Setter Property="VerticalAlignment" Value="Center" />
@@ -69,35 +75,48 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
                     <TextBlock Text="{Binding EnhancementMethodLabel}" Style="{StaticResource MethodLabel}" />
-                    <ComboBox Grid.Column="1" Style="{StaticResource PF.Input.ComboBox}"
-                              ItemsSource="{Binding EnhancementMethods}" DisplayMemberPath="Label"
-                              ItemContainerStyle="{StaticResource MethodItem}" SelectedValuePath="Method"
-                              SelectedValue="{Binding SelectedEnhancementMethod, Mode=TwoWay}"
-                              AutomationProperties.AutomationId="ImageProcessing.Enhancement"
-                              AutomationProperties.Name="{Binding EnhancementMethodLabel}" />
+                    <StackPanel Grid.Column="1">
+                        <ComboBox x:Name="EnhancementMethod" Style="{StaticResource PF.Input.ComboBox}"
+                                  ItemsSource="{Binding EnhancementMethods}" DisplayMemberPath="Label"
+                                  ItemContainerStyle="{StaticResource MethodItem}" SelectedValuePath="Method"
+                                  SelectedValue="{Binding SelectedEnhancementMethod, Mode=TwoWay}"
+                                  AutomationProperties.AutomationId="ImageProcessing.Enhancement"
+                                  AutomationProperties.Name="{Binding EnhancementMethodLabel}"
+                                  AutomationProperties.HelpText="{Binding SelectedItem.Description, ElementName=EnhancementMethod}" />
+                        <TextBlock Text="{Binding SelectedItem.Description, ElementName=EnhancementMethod}"
+                                   Style="{StaticResource MethodHint}" AutomationProperties.LiveSetting="Polite" />
+                    </StackPanel>
 
                     <Border Grid.Row="1" Grid.ColumnSpan="2" Style="{StaticResource MethodSeparator}" />
                     <TextBlock Grid.Row="2" Text="{Binding BackgroundRemovalMethodLabel}" Style="{StaticResource MethodLabel}" />
-                    <ComboBox Grid.Row="2" Grid.Column="1" Style="{StaticResource PF.Input.ComboBox}"
-                              ItemsSource="{Binding BackgroundRemovalMethods}" DisplayMemberPath="Label"
-                              ItemContainerStyle="{StaticResource MethodItem}" SelectedValuePath="Method"
-                              SelectedValue="{Binding SelectedBackgroundRemovalMethod, Mode=TwoWay}"
-                              AutomationProperties.AutomationId="ImageProcessing.BackgroundRemoval"
-                              AutomationProperties.Name="{Binding BackgroundRemovalMethodLabel}" />
+                    <StackPanel Grid.Row="2" Grid.Column="1">
+                        <ComboBox x:Name="BackgroundMethod" Style="{StaticResource PF.Input.ComboBox}"
+                                  ItemsSource="{Binding BackgroundRemovalMethods}" DisplayMemberPath="Label"
+                                  ItemContainerStyle="{StaticResource MethodItem}" SelectedValuePath="Method"
+                                  SelectedValue="{Binding SelectedBackgroundRemovalMethod, Mode=TwoWay}"
+                                  AutomationProperties.AutomationId="ImageProcessing.BackgroundRemoval"
+                                  AutomationProperties.Name="{Binding BackgroundRemovalMethodLabel}"
+                                  AutomationProperties.HelpText="{Binding SelectedItem.Description, ElementName=BackgroundMethod}" />
+                        <TextBlock Text="{Binding SelectedItem.Description, ElementName=BackgroundMethod}"
+                                   Style="{StaticResource MethodHint}" AutomationProperties.LiveSetting="Polite" />
+                    </StackPanel>
 
                     <Border Grid.Row="3" Grid.ColumnSpan="2" Style="{StaticResource MethodSeparator}" />
                     <TextBlock Grid.Row="4" Text="{Binding CropMethodLabel}" Style="{StaticResource MethodLabel}" />
-                    <ComboBox Grid.Row="4" Grid.Column="1" Style="{StaticResource PF.Input.ComboBox}"
-                              ItemsSource="{Binding CropMethods}" DisplayMemberPath="Label"
-                              ItemContainerStyle="{StaticResource MethodItem}" SelectedValuePath="Method"
-                              SelectedValue="{Binding SelectedCropMethod, Mode=TwoWay}"
-                              AutomationProperties.AutomationId="ImageProcessing.Crop"
-                              AutomationProperties.Name="{Binding CropMethodLabel}" />
+                    <StackPanel Grid.Row="4" Grid.Column="1">
+                        <ComboBox x:Name="CropMethod" Style="{StaticResource PF.Input.ComboBox}"
+                                  ItemsSource="{Binding CropMethods}" DisplayMemberPath="Label"
+                                  ItemContainerStyle="{StaticResource MethodItem}" SelectedValuePath="Method"
+                                  SelectedValue="{Binding SelectedCropMethod, Mode=TwoWay}"
+                                  AutomationProperties.AutomationId="ImageProcessing.Crop"
+                                  AutomationProperties.Name="{Binding CropMethodLabel}"
+                                  AutomationProperties.HelpText="{Binding SelectedItem.Description, ElementName=CropMethod}" />
+                        <TextBlock Text="{Binding SelectedItem.Description, ElementName=CropMethod}"
+                                   Style="{StaticResource MethodHint}" AutomationProperties.LiveSetting="Polite" />
+                    </StackPanel>
 
                     <Border Grid.Row="5" Grid.ColumnSpan="2" Style="{StaticResource MethodSeparator}" />
                     <TextBlock Grid.Row="6" Text="{Binding TrimMarginLabel}" Style="{StaticResource MethodLabel}" />
@@ -112,9 +131,6 @@
                                   AutomationProperties.AutomationId="ImageProcessing.IgnoreSmallTrimNoise"
                                   AutomationProperties.Name="{Binding IgnoreSmallTrimNoiseLabel}" />
                     </WrapPanel>
-                    <Border Grid.Row="7" Grid.ColumnSpan="2" Style="{StaticResource MethodSeparator}" />
-                    <TextBlock Grid.Row="8" Grid.ColumnSpan="2" Text="{Binding ImageProcessingAvailableHint}"
-                               Foreground="{DynamicResource PF.Brush.Muted}" TextWrapping="Wrap" />
                 </Grid>
             </ui:Card>
         </ScrollViewer>

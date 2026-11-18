@@ -423,11 +423,6 @@ public sealed partial class SessionService : ISessionService
         var policy = ImageProcessingPolicy.FromSettings(settings.Value);
         if (policy.IsFailure)
             return OperationResult.Fail<(ImageProcessingPolicy?, TrimMargin)>(policy.Failure);
-        if (!policy.Value.Selection.CanRunInCurrentBuild)
-            return OperationResult.Fail<(ImageProcessingPolicy?, TrimMargin)>(OperationFailure.Create(
-                FailureCode.AdapterUnavailable, "The selected image processing methods are not available in this build.",
-                messageKey: ImageProcessingPolicy.UnavailableDefaultsMessage));
-
         int pixels = ImageProcessingPolicy.ReadTrimMarginPixels(settings.Value);
         return OperationResult.Ok<(ImageProcessingPolicy?, TrimMargin)>(
             (policy.Value, pixels == 0 ? TrimMargin.Tight : TrimMargin.Uniform(pixels)));
@@ -2174,12 +2169,8 @@ public sealed partial class SessionService : ISessionService
             work.Operation, work.ProcessorId, context.NowUtc,
             retryOfAttemptId: retryOf, retrySequence: retrySequence);
 
-        ImageProcessingMethod? method = work.ImageProcessing?.View.Method ?? (work.Operation switch
-        {
-            OperationKind.ManualImport when work.Step == StepKind.Trim => ImageProcessingMethod.ManualCrop,
-            OperationKind.ManualResultImport => ImageProcessingMethod.ManualResult,
-            _ => null,
-        });
+        ImageProcessingMethod? method = work.ImageProcessing?.View.Method
+            ?? ManualImageProcessingMethod(work.Step, work.Operation);
         if (method is { } actualMethod && FindRevision(aggregate, work.InputRevision) is { } imageInput)
         {
             string? algorithmVersion = work.ImageProcessing?.View.AlgorithmVersion ??

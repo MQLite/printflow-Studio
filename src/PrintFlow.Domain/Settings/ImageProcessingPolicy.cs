@@ -34,10 +34,6 @@ public sealed record SessionImageProcessingSelection(
         ImageProcessingMethod.MeituEnhancement, ImageProcessingMethod.MeituBackgroundRemoval,
         ImageProcessingMethod.AlphaTrim);
 
-    // Provider dispatch and availability are introduced by the follow-on workflow tasks.
-    [JsonIgnore]
-    public bool CanRunInCurrentBuild => this == Compatible;
-
     [JsonIgnore]
     public bool HasValidMethods =>
         Enhancement is ImageProcessingMethod.MeituEnhancement or ImageProcessingMethod.LightSharpen
@@ -62,7 +58,7 @@ public sealed record ImageProcessingPolicy(
     public const string UnavailableDefaultsMessage = "ImageProcessing_UnavailableDefaults";
 
     public static bool IsDefaultsFailure(OperationFailure failure) =>
-        failure.MessageKey is InvalidDefaultsMessage or UnavailableDefaultsMessage;
+        failure.MessageKey == InvalidDefaultsMessage;
 
     // Names are persisted rather than enum ordinals. Required fields distinguish a damaged
     // setting from a deliberate selection whose value happens to be the enum's first member.

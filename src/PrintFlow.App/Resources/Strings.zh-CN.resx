@@ -1742,4 +1742,23 @@
   <data name="ImageProcessing_Method_ManualCrop" xml:space="preserve"><value>手动框选</value></data>
   <data name="ImageProcessing_Method_KeepCanvas" xml:space="preserve"><value>保留原画布</value></data>
   <data name="WorkTask_RepairImageProcessingSettings" xml:space="preserve"><value>请打开「设置 → 图像处理」，恢复默认并保存，重启 PrintFlow Studio 后继续接收此结果。</value></data>
+  <data name="ImageProcessing_CurrentMethod" xml:space="preserve"><value>本次方式：{0}</value></data>
+  <data name="ImageProcessing_ChangeTaskMethod" xml:space="preserve"><value>更改本任务的方式</value></data>
+  <data name="ImageProcessing_ApplyTaskMethod" xml:space="preserve"><value>应用方式</value></data>
+  <data name="ImageProcessing_MethodUnavailable" xml:space="preserve"><value>当前版本尚未提供此方式。</value></data>
+  <data name="ImageProcessing_DependencyUnavailable" xml:space="preserve"><value>所需的组件或模型不可用。</value></data>
+  <data name="ImageProcessing_MeituUnavailable" xml:space="preserve"><value>请检查是否已安装美图，并完成工作站配置。</value></data>
+  <data name="ImageProcessing_MeituHint" xml:space="preserve"><value>使用工作站已配置的美图桌面应用。</value></data>
+  <data name="ImageProcessing_AlphaHint" xml:space="preserve"><value>根据透明画布上的有效内容确定裁切边界。</value></data>
+  <data name="ImageProcessing_SkipHint" xml:space="preserve"><value>在任务中确认后沿用当前图像。</value></data>
+  <data name="ImageProcessing_Ready" xml:space="preserve"><value>本工作站可用。</value></data>
+  <data name="ImageProcessing_Method_OpenAiCombined" xml:space="preserve"><value>OpenAI 合并处理</value></data>
+  <data name="ImageProcessing_Method_ManualResult" xml:space="preserve"><value>手动导入结果</value></data>
+  <data name="ImageProcessing_ManualCropHint" xml:space="preserve"><value>在任务中手动框选裁切范围。</value></data>
+  <data name="ImageProcessing_KeepCanvasHint" xml:space="preserve"><value>保留当前画布尺寸。</value></data>
+  <data name="ImageProcessing_LocalHint" xml:space="preserve"><value>在本工作站上处理图像。</value></data>
+  <data name="ImageProcessing_CloudHint" xml:space="preserve"><value>将图像上传至 OpenAI，按使用量计费。</value></data>
+  <data name="ImageProcessing_ConfirmBackgroundHint" xml:space="preserve"><value>运行前，请为当前图像确认去背景方式。</value></data>
+  <data name="ImageProcessing_AuthoriseBackgroundMethod" xml:space="preserve"><value>对此图像使用当前方式</value></data>
+  <data name="ImageProcessing_ConfirmBackgroundQuestion" xml:space="preserve"><value>对此图像使用{0}？请复核结果后再批准。</value></data>
 </root>

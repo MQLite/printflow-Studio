@@ -67,6 +67,9 @@ public partial class SessionViewModel
             if (ShowsGuidedWhiteInk) return Strings.Session_NextWhiteInk;
             if (ShowsGuidedEnlargement) return FormatNext(Strings.Session_NextAction, ContinueWithSizeLabel);
             if (CanRunStep) return FormatNext(Strings.Session_NextAction, RunStepLabel);
+            if (UsesCurrentImageWithoutProcessing && CanSkip) return FormatNext(Strings.Session_NextAction, SkipLabel);
+            if (CanChangeImageProcessingMethod && CurrentImageProcessingUnavailable is not null)
+                return FormatNext(Strings.Session_NextAction, ChangeImageProcessingMethodLabel);
             // The status panel repeats what the save section says, so the two never disagree.
             if (FinalSaveNextText is { } saveText) return saveText;
             if (CanComplete) return FormatNext(Strings.Session_NextAction, CompleteLabel);
@@ -106,6 +109,7 @@ public partial class SessionViewModel
             if (ShowsGuidedAutomaticBegin) return BeginAutomaticSelectionCommand;
             if (CanConfirmOriginal) return ConfirmOriginalCommand;
             if (CanRunStep) return RunStepCommand;
+            if (UsesCurrentImageWithoutProcessing && CanSkip) return SkipCommand;
             if (_session?.CurrentStep is null && FinalSaveRecommendation is { } save) return save;
             if (CanComplete) return CompleteCommand;
             return null;

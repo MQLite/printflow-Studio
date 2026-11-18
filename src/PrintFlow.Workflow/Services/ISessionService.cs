@@ -2,6 +2,7 @@ using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Sessions;
+using PrintFlow.Domain.Settings;
 using PrintFlow.Workflow.Commands;
 using PrintFlow.Workflow.Ports;
 
@@ -18,6 +19,9 @@ namespace PrintFlow.Workflow.Services;
 /// </remarks>
 public interface ISessionService
 {
+    OperationFailure? GetImageProcessingUnavailable(ImageProcessingMethod method) =>
+        OperationFailure.Create(FailureCode.AdapterUnavailable, "Image processing capability is unavailable.");
+
     /// <summary>Unresolved interruptions, without Recent Processing's age or count limits.</summary>
     Task<OperationResult<IReadOnlyList<RecoveryItem>>> ListRecoveryAsync(CancellationToken cancellationToken);
 

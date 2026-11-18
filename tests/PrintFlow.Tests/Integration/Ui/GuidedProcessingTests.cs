@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using PrintFlow.App.ViewModels;
 using PrintFlow.App.Views;
 using PrintFlow.Domain.Sessions;
+using PrintFlow.Domain.Settings;
 using PrintFlow.Infrastructure.Adapters.Fake;
 using PrintFlow.Tests.Fixtures;
 using PrintFlow.Workflow.Ports;
@@ -13,6 +14,69 @@ namespace PrintFlow.Tests.Integration.Ui;
 [Collection(SqliteCollection.Name)]
 public sealed class GuidedProcessingTests
 {
+    [Theory]
+    [InlineData("en-US", "Current method: Meitu", "Change method for this task")]
+    [InlineData("zh-CN", "本次方式：美图", "更改本任务的方式")]
+    public async Task Current_method_and_keyboard_entry_follow_workflow_permissions(
+        string language, string methodLabel, string changeLabel)
+    {
+        using OperatorCultureScope culture = new(language);
+        using HomeScreenHarness h = new();
+        var model = await GuidedSessionProjectionTests.Open(h, WorkflowType.PrepareAsset);
+        await model.ConfirmOriginalCommand.ExecuteAsync(null);
+
+        async Task<(string Text, bool CanEdit)> RenderAsync()
+        {
+            var snapshot = h.Session(new RecordingNavigation());
+            snapshot.Open((await h.Sessions.LoadAsync(model.Id, default)).Value);
+            await snapshot.PreviewsLoaded;
+            return WpfRendering.RenderExpectingNoBindingErrors(
+                () => new SessionScreenView { DataContext = snapshot }, new Size(1000, 700), tree =>
+                {
+                    var method = GuidedSessionShellTests.Find<TextBlock>(tree, "Session.ImageProcessing.Method");
+                    var change = GuidedSessionShellTests.Find<Expander>(tree, "Session.ImageProcessing.Change");
+                    change.Header.ShouldBe(changeLabel);
+                    return (method.Text, GuidedSessionProjectionTests.Shown(change) && change.IsEnabled);
+                }).Facts;
+        }
+
+        (await RenderAsync()).ShouldBe((methodLabel, true));
+        await model.RunStepCommand.ExecuteAsync(null);
+        (await RenderAsync()).ShouldBe((methodLabel, false));
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Task_method_change_persists_only_this_task_and_can_explicitly_skip_enhancement(bool combined)
+    {
+        using HomeScreenHarness h = new();
+        if (combined)
+        {
+            var policy = ImageProcessingPolicy.CompatibleDefault with
+            {
+                Selection = SessionImageProcessingSelection.Compatible with { UseOpenAiCombined = true },
+            };
+            await h.Inner.Settings.UpsertAsync([policy.ToSetting()], default);
+        }
+        var model = await GuidedSessionProjectionTests.Open(h, WorkflowType.PrepareAsset);
+        await model.ConfirmOriginalCommand.ExecuteAsync(null);
+        var defaultsBefore = (await h.Inner.Settings.ReadAllAsync(default)).Value;
+
+        model.DraftImageProcessingMethod = ImageProcessingMethod.SkipEnhancement;
+        model.ApplyImageProcessingMethodCommand.CanExecute(null).ShouldBeTrue();
+        await model.ApplyImageProcessingMethodCommand.ExecuteAsync(null);
+        var persisted = (await h.Sessions.LoadAsync(model.Id, default)).Value;
+        persisted.ImageProcessingSelection!.Enhancement.ShouldBe(ImageProcessingMethod.SkipEnhancement);
+        persisted.ImageProcessingSelection.UseOpenAiCombined.ShouldBeFalse();
+        (await h.Inner.Settings.ReadAllAsync(default)).Value.ShouldBe(defaultsBefore);
+
+        model.CanRunStep.ShouldBeFalse();
+        model.CanSkip.ShouldBeTrue();
+        await model.SkipCommand.ExecuteAsync(null);
+        (await h.Sessions.LoadAsync(model.Id, default)).Value.CurrentStep!.Step.ShouldBe(StepKind.BackgroundRemoval);
+    }
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
@@ -31,6 +95,7 @@ public sealed class GuidedProcessingTests
             var snapshot = h.Session(new RecordingNavigation());
             snapshot.Open((await h.Sessions.LoadAsync(model.Id, default)).Value);
             await snapshot.PreviewsLoaded;
+            snapshot.CanChangeImageProcessingMethod.ShouldBeFalse();
             var rendered = WpfRendering.RenderExpectingNoBindingErrors(() => new SessionScreenView { DataContext = snapshot }, new Size(1000, 700), tree =>
             {
                 var progress = tree.OfType<ProgressBar>().FirstOrDefault(p => AutomationProperties.GetAutomationId(p) == "Session.Processing.Progress");
@@ -65,6 +130,7 @@ public sealed class GuidedProcessingTests
             await run;
         }
         model.GuidedPage.ShouldBe(takeOver ? GuidedSessionPage.Recovery : GuidedSessionPage.Failure);
+        if (!takeOver) model.CanChangeImageProcessingMethod.ShouldBeTrue();
         model.CanApprove.ShouldBeFalse();
         model.CanStopAutomation.ShouldBeFalse();
         if (takeOver) model.HasRetainedExternalState.ShouldBeTrue();

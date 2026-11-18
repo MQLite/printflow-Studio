@@ -11,6 +11,7 @@ using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Settings;
 using PrintFlow.Workflow.Ports;
+using PrintFlow.Workflow.Services;
 
 namespace PrintFlow.App.ViewModels;
 
@@ -111,7 +112,8 @@ public sealed partial class SettingsViewModel : ObservableObject
         INavigationService navigation,
         SettingsDefaults defaults,
         LocalDiagnosticLocations locations,
-        ReadinessObservationAccessor observations)
+        ReadinessObservationAccessor observations,
+        ISessionService sessions)
     {
         ArgumentNullException.ThrowIfNull(settings);
         ArgumentNullException.ThrowIfNull(localisation);
@@ -128,6 +130,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         _defaults = defaults;
         _locations = locations;
         _observations = observations;
+        _imageProcessingSessions = sessions;
 
         foreach (OperatorLanguage language in OperatorLanguages.All)
         {

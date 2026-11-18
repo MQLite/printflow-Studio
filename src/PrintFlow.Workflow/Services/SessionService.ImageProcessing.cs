@@ -22,10 +22,11 @@ public sealed partial class SessionService
     private sealed record ImageProcessingExecutionPlan(
         ImageProcessingExecutionView View, IImageProcessingBackend? Backend = null);
 
-    private ImageProcessingExecutionPlan? PlanImageProcessing(WorkflowSnapshot state, StepKind step)
+    private ImageProcessingExecutionPlan? PlanImageProcessing(WorkflowSnapshot state, StepKind step) =>
+        state.ProcessingMethodFor(step) is { } method ? PlanImageProcessing(method) : null;
+
+    private ImageProcessingExecutionPlan PlanImageProcessing(ImageProcessingMethod method)
     {
-        if (state.ProcessingMethodFor(step) is not { } method)
-            return null;
         if (method is ImageProcessingMethod.MeituEnhancement or ImageProcessingMethod.MeituBackgroundRemoval)
             return new(new(method, _meitu.AdapterId, null, true, null));
         if (method == ImageProcessingMethod.AlphaTrim)
@@ -33,7 +34,8 @@ public sealed partial class SessionService
 
         if (method is ImageProcessingMethod.OpenAiRestore or ImageProcessingMethod.OpenAiCutout or ImageProcessingMethod.OpenAiCombined)
             return new(new(method, null, null, false, OperationFailure.Create(FailureCode.PreconditionNotMet,
-                "A cloud image operation requires explicit upload authority for this exact input and operation.")));
+                "A cloud image operation requires explicit upload authority for this exact input and operation.",
+                messageKey: "ImageProcessing_MethodUnavailable")));
 
         if (method is ImageProcessingMethod.LightSharpen or ImageProcessingMethod.AiUpscale or ImageProcessingMethod.BiRefNet)
         {
@@ -45,8 +47,17 @@ public sealed partial class SessionService
         }
 
         return new(new(method, null, null, false, OperationFailure.Create(FailureCode.AdapterUnavailable,
-            $"There is no automatic processor for the selected method {method}.")));
+            $"There is no automatic processor for the selected method {method}.",
+            messageKey: "ImageProcessing_MethodUnavailable")));
     }
+
+    public OperationFailure? GetImageProcessingUnavailable(ImageProcessingMethod method) => method switch
+    {
+        ImageProcessingMethod.MeituEnhancement => _meitu.GetConfigurationFailure(MeituOperation.Enhance),
+        ImageProcessingMethod.MeituBackgroundRemoval => _meitu.GetConfigurationFailure(MeituOperation.RemoveBackground),
+        ImageProcessingMethod.SkipEnhancement or ImageProcessingMethod.KeepBackground => null,
+        _ => PlanImageProcessing(method).View.Unavailable,
+    };
 
     private ImageProcessingExecutionView? ImageProcessingViewOf(
         WorkflowSnapshot state, IReadOnlyList<ProcessingAttempt> attempts)
@@ -60,11 +71,29 @@ public sealed partial class SessionService
                 a.Step == current.Step && a.OutputRevisionId == output),
             _ => null,
         };
-        if (attempt?.ImageProcessingDetails is { } recorded)
-            return new(recorded.Method, attempt.AdapterId, recorded.AlgorithmVersion,
-                recorded.Method is ImageProcessingMethod.MeituEnhancement or ImageProcessingMethod.MeituBackgroundRemoval, null);
-        return PlanImageProcessing(state, current.Step)?.View;
+        if (attempt is not null)
+        {
+            ImageProcessingMethod? actual = attempt.ImageProcessingDetails?.Method
+                ?? ManualImageProcessingMethod(attempt.Step, attempt.Operation);
+            if (actual is { } recorded)
+                return new(recorded, attempt.AdapterId, attempt.ImageProcessingDetails?.AlgorithmVersion,
+                    recorded is ImageProcessingMethod.MeituEnhancement or ImageProcessingMethod.MeituBackgroundRemoval, null);
+        }
+        if (state.ProcessingMethodFor(current.Step) is not { } method)
+            return null;
+        ImageProcessingExecutionView view = PlanImageProcessing(method).View;
+        return method is ImageProcessingMethod.MeituEnhancement or ImageProcessingMethod.MeituBackgroundRemoval
+            or ImageProcessingMethod.SkipEnhancement or ImageProcessingMethod.KeepBackground
+            ? view with { Unavailable = GetImageProcessingUnavailable(method) }
+            : view;
     }
+
+    private static ImageProcessingMethod? ManualImageProcessingMethod(StepKind step, OperationKind operation) => operation switch
+    {
+        OperationKind.ManualImport when step == StepKind.Trim => ImageProcessingMethod.ManualCrop,
+        OperationKind.ManualResultImport => ImageProcessingMethod.ManualResult,
+        _ => null,
+    };
 
     private async Task<OperationResult<StepWork>> RunImageBackendAsync(
         ImageProcessingExecutionPlan plan, ProducingWork work, ProcessingAttempt attempt,

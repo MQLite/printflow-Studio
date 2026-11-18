@@ -70,7 +70,7 @@ internal sealed class SettingsScreenHarness : IDisposable
         ISettingsRepository? settings = null, IEnvironmentDiagnostics? diagnostics = null) =>
         new(settings ?? Settings, Localisation, diagnostics ?? Diagnostics, Navigation, Defaults,
             new LocalDiagnosticLocations(_harness.Database.Path,
-                System.IO.Path.Combine(_harness.Workspace.Root, "Evidence")), Observations);
+                System.IO.Path.Combine(_harness.Workspace.Root, "Evidence")), Observations, Sessions);
 
     /// <summary>Where each screen records its passive reading for Home (SCRUM-11152).</summary>
     public ReadinessObservationAccessor Observations { get; } = new();

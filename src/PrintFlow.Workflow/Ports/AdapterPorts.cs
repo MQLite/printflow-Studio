@@ -108,6 +108,9 @@ public sealed record PhotoshopRequest(
 /// </remarks>
 public interface IMeituProcessor
 {
+    /// <summary>Reports missing local configuration without launching the application.</summary>
+    OperationFailure? GetConfigurationFailure(MeituOperation operation) => null;
+
     /// <summary>Identifies the implementation; written to every attempt so a fake result is never mistaken for a production one.</summary>
     string AdapterId { get; }
 
