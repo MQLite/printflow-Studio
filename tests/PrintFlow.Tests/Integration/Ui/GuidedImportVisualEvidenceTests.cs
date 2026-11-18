@@ -119,7 +119,7 @@ public sealed class GuidedImportVisualEvidenceTests
         var proxy = (GuidedSessionInputTests.DeferredService)service; proxy.Inner = h.Sessions;
         var m = new HomeViewModel(service, h.Previews, h.Navigation, h.FilePicker, h.StartupStatus, h.Readiness);
         h.FilePicker.Path = h.WriteSourceFile("正在导入的合成图.png");
-        var gate = proxy.HoldNext(nameof(ISessionService.ImportAsync));
+        var gate = proxy.HoldNext(nameof(ISessionService.ImportForWorkflowSelectionAsync));
         Task running = m.ChooseFileCommand.ExecuteAsync(null); await gate.Started.Task.WaitAsync(TimeSpan.FromSeconds(10));
         try
         {

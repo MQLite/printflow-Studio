@@ -76,10 +76,10 @@ public sealed class RecoveryUtilityRolloutTests
             var back = Find<Button>(tree, "Settings.Back");
             ActionFits(apply, tree.Root, viewport);
             ActionFits(back, tree.Root, viewport);
+            ActionFits(Find<Button>(tree, "Settings.OpenImageProcessing"), tree.Root, viewport);
             Bounds(apply, tree.Root).Left.ShouldBeGreaterThan(Bounds(back, tree.Root).Right);
             foreach (string id in new[] { "Settings.OutputRoot", "Settings.ProductionDpi", "Settings.Preset", "Settings.PhotoshopColourSettings" })
                 Find<TextBox>(tree, id).IsReadOnly.ShouldBeTrue();
-            Find<TextBox>(tree, "Settings.TrimMargin").ActualHeight.ShouldBeGreaterThanOrEqualTo(42);
             tree.Root.TryFindResource("DefaultButtonStyle").ShouldNotBeNull();
         });
         Capture(() => new SettingsView { DataContext = preferences }, viewport, language, "settings");
@@ -89,6 +89,13 @@ public sealed class RecoveryUtilityRolloutTests
             tree.Root.Dispatcher.Invoke(DispatcherPriority.Background, new Action(() => { }));
             tree.Root.UpdateLayout();
             tree.OfType<ScrollViewer>().First().ScrollToBottom();
+        });
+        await preferences.OpenImageProcessingCommand.ExecuteAsync(null);
+        Check(() => new SettingsView { DataContext = preferences }, viewport, tree =>
+        {
+            Find<TextBox>(tree, "Settings.TrimMargin").ActualHeight.ShouldBeGreaterThanOrEqualTo(42);
+            ActionFits(Find<Button>(tree, "ImageProcessing.Save"), tree.Root, viewport);
+            ActionFits(Find<Button>(tree, "ImageProcessing.Back"), tree.Root, viewport);
         });
 
         using WorkstationVerificationFixture fixture = new();

@@ -14,11 +14,11 @@ namespace PrintFlow.Tests.Integration.Ui;
 public sealed class GuidedCompletionUtilityTests
 {
     [Theory]
-    [InlineData("unchecked", "尚未检查")]
+    [InlineData("unchecked", "尚未运行环境诊断")]
     [InlineData("blocked", "未运行")]
     [InlineData("stale", "已失效")]
     [InlineData("deferred", "未重新观察")]
-    [InlineData("checked", "本次报告")]
+    [InlineData("checked", "本报告仅用于排查")]
     public async Task Readiness_unchecked_blocked_stale_and_checked_are_distinct(string state, string expected)
     {
         using OperatorCultureScope culture = new("zh-CN");
@@ -72,7 +72,7 @@ public sealed class GuidedCompletionUtilityTests
         var facts = WpfRendering.RenderExpectingNoBindingErrors(() => new SettingsView { DataContext = settings }, new Size(1000, 700), tree =>
         {
             var advanced = tree.OfType<Expander>().FirstOrDefault(e => AutomationProperties.GetAutomationId(e) == "Settings.Advanced");
-            var common = new[] { "Settings.Language", "Settings.TrimMargin", "Settings.LogRetention" }.Select(id =>
+            var common = new[] { "Settings.Language", "Settings.OpenImageProcessing", "Settings.LogRetention" }.Select(id =>
             {
                 var field = tree.OfType<FrameworkElement>().Single(e => AutomationProperties.GetAutomationId(e) == id);
                 var scroll = GuidedSessionShellTests.Ancestors(field).OfType<ScrollViewer>().First();
@@ -90,6 +90,15 @@ public sealed class GuidedCompletionUtilityTests
         facts.AdvancedCollapsed.ShouldBeTrue();
         facts.Common.ShouldAllBe(x => x);
         facts.Production.ShouldBeTrue(); facts.Notice.ShouldBeTrue();
+
+        await settings.OpenImageProcessingCommand.ExecuteAsync(null);
+        var marginIsVisible = WpfRendering.RenderExpectingNoBindingErrors(() => new SettingsView { DataContext = settings },
+            WpfRendering.ReviewViewport, tree =>
+            {
+                var margin = tree.OfType<TextBox>().Single(e => AutomationProperties.GetAutomationId(e) == "Settings.TrimMargin");
+                return GuidedSessionProjectionTests.Shown(margin) && margin.ActualHeight > 0;
+            }).Facts;
+        marginIsVisible.ShouldBeTrue();
     }
 
     internal static Dictionary<string, string> ReadReadiness(EnvironmentReadinessViewModel model) =>

@@ -75,8 +75,12 @@ public sealed class AiDesignProcessTests
         {
             await Ready(ready, p);
             new AiDesignBrowserLease(files.Root).TryAcquire(Guid.NewGuid()).IsFailure.ShouldBeTrue();
-            p.Kill(true); await p.WaitForExitAsync();
-            var next = new AiDesignBrowserLease(files.Root).TryAcquire(Guid.NewGuid()); next.IsSuccess.ShouldBeTrue(); next.Value.Dispose();
+            p.Kill(true);
+            // Wait for the Windows process handle so the killed probe has finished releasing its file handle.
+            p.WaitForExit(5_000).ShouldBeTrue("the owned lease probe must terminate");
+            var next = new AiDesignBrowserLease(files.Root).TryAcquire(Guid.NewGuid());
+            next.IsSuccess.ShouldBeTrue(next.IsFailure ? next.Failure.TechnicalDetail : null);
+            next.Value.Dispose();
         }
         finally { Kill(p); }
     }
