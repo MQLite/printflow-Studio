@@ -2190,13 +2190,14 @@ public sealed partial class SessionViewModel : ObservableObject
     [RelayCommand]
     private Task RunStepAsync(CancellationToken cancellationToken)
     {
-        if (!CanRunStep || IsBusy || _session is not { CurrentStep: { } current } view)
+        if (!CanRunSelectedImageMethod || HasUnconfirmedBackgroundRemovalMode ||
+            _session is not { CurrentStep: { } current } view)
             return Task.CompletedTask;
 
         ImageUploadConfirmation? confirmation = null;
         if (view.ImageProcessingExecution is { } execution && ImageUploadConfirmation.IsOpenAiMethod(execution.Method))
         {
-            if (view.CurrentArtefact is not { } input ||
+            if (!CanRunStep || IsBusy || view.CurrentArtefact is not { } input ||
                 _openAiUploadPrompt?.Confirm(ImageProcessingMethodOption.Name(execution.Method)) != true ||
                 !ReferenceEquals(_session, view) || cancellationToken.IsCancellationRequested)
                 return Task.CompletedTask;
