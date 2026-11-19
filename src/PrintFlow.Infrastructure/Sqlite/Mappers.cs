@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.IO;
 using PrintFlow.Domain.Attempts;
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
@@ -6,6 +7,7 @@ using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Reviews;
 using PrintFlow.Domain.Sessions;
+using PrintFlow.Domain.Settings;
 using PrintFlow.Domain.Trimming;
 
 namespace PrintFlow.Infrastructure.Sqlite;
@@ -991,6 +993,8 @@ internal static class Mappers
         // Always written, unlike the attempt's copy: a session always has a pending trim
         // decision, and Tight is a decision rather than an absence (Epic 11200 Part C3 §10).
         IgnoreSmallTrimNoise = session.IgnoreSmallTrimNoise,
+        ImageProcessingSelection = session.ImageProcessingSelection?.Serialize(),
+        ImageProcessingDefaultsDeferred = session.ImageProcessingDefaultsDeferred,
         TrimMode = ToText(session.TrimMargin.Mode),
         TrimMarginTop = session.TrimMargin.Top,
         TrimMarginRight = session.TrimMargin.Right,
@@ -1121,6 +1125,8 @@ internal static class Mappers
             // Tight — which is exactly what it ran with, because Tight was the only behaviour
             // before this slice (Epic 11200 Part C3 §10).
             IgnoreSmallTrimNoise = row.IgnoreSmallTrimNoise ?? true,
+            ImageProcessingSelection = ToImageProcessingSelection(row.ImageProcessingSelection),
+            ImageProcessingDefaultsDeferred = row.ImageProcessingDefaultsDeferred,
             TrimMargin = ToTrimMargin(
                 row.TrimMode, row.TrimMarginTop, row.TrimMarginRight,
                 row.TrimMarginBottom, row.TrimMarginLeft) ?? TrimMargin.Tight,
@@ -1190,6 +1196,7 @@ internal static class Mappers
         SkipReason = step.SkipReason,
         AttemptCount = step.AttemptCount,
         EnteredStateAtUtc = ToText(step.EnteredStateAtUtc),
+        CombinedUploadPositionId = step.CombinedUploadPositionId?.ToString("D"),
     };
 
     public static SessionStep ToDomain(StepRow row) => new(
@@ -1200,7 +1207,10 @@ internal static class Mappers
         row.CurrentRevisionSha is string sha ? Sha256.Parse(sha) : null,
         row.SkipReason,
         row.AttemptCount,
-        ToDateTimeOffset(row.EnteredStateAtUtc));
+        ToDateTimeOffset(row.EnteredStateAtUtc))
+    {
+        CombinedUploadPositionId = row.CombinedUploadPositionId is { } position ? Guid.Parse(position) : null,
+    };
 
     public static SnapshotRow ToRow(InputSnapshot snapshot) => new()
     {
@@ -1330,6 +1340,11 @@ internal static class Mappers
         // Null for anything that is not a deterministic trim, which is the honest reading:
         // "this attempt had no trim margin", never "it used the default" (Part C3 §14, §17).
         IgnoreSmallTrimNoise = attempt.IgnoreSmallTrimNoise,
+        ImageProcessingMethod = attempt.ImageProcessingDetails?.Method.ToString(),
+        ImageProcessingInputSha256 = attempt.ImageProcessingDetails?.InputSha256.Value,
+        ImageProcessingAlgorithmVersion = attempt.ImageProcessingDetails?.AlgorithmVersion,
+        ImageUploadConfirmedAtUtc = ToTextOrNull(attempt.ImageProcessingDetails?.UploadConfirmedAtUtc),
+        ImageUploadConfirmedBy = attempt.ImageProcessingDetails?.UploadConfirmedBy,
         TrimMode = attempt.TrimParameters is { } margin ? ToText(margin.Mode) : null,
         TrimMarginTop = attempt.TrimParameters?.Top,
         TrimMarginRight = attempt.TrimParameters?.Right,
@@ -1520,6 +1535,7 @@ internal static class Mappers
             row.RetrySequence)
         {
             IgnoreSmallTrimNoise = row.IgnoreSmallTrimNoise,
+            ImageProcessingDetails = ToImageProcessingDetails(row),
             TrimParameters = ToTrimMargin(
                 row.TrimMode, row.TrimMarginTop, row.TrimMarginRight,
                 row.TrimMarginBottom, row.TrimMarginLeft),
@@ -1783,6 +1799,27 @@ internal static class Mappers
     /// beats two. A member may be added but never renamed — a renamed key is an orphaned row.
     /// </remarks>
     public static string ToText(Domain.Settings.SettingKey value) => value.ToString();
+
+    private static SessionImageProcessingSelection? ToImageProcessingSelection(string? value) =>
+        value is null ? null : SessionImageProcessingSelection.TryParse(value, out var selection)
+            ? selection : throw new InvalidDataException("The persisted image processing selection is invalid.");
+
+    private static ImageProcessingRunDetails? ToImageProcessingDetails(AttemptRow row)
+    {
+        if (row.ImageProcessingMethod is null)
+            return null;
+
+        if (!Enum.TryParse(row.ImageProcessingMethod, out ImageProcessingMethod method) || !Enum.IsDefined(method) ||
+            method.ToString() != row.ImageProcessingMethod ||
+            !Sha256.TryParse(row.ImageProcessingInputSha256, out Sha256 hash))
+            throw new InvalidDataException("The persisted image processing attempt evidence is invalid.");
+
+        return new ImageProcessingRunDetails(method, hash, row.ImageProcessingAlgorithmVersion)
+        {
+            UploadConfirmedAtUtc = ToDateTimeOffsetOrNull(row.ImageUploadConfirmedAtUtc),
+            UploadConfirmedBy = row.ImageUploadConfirmedBy,
+        };
+    }
 
     /// <summary>Reads a stored key, or null when the row predates or postdates this build's vocabulary.</summary>
     /// <remarks>

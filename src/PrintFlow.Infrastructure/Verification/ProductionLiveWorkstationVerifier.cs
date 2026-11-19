@@ -11,9 +11,9 @@ using PrintFlow.Workflow.Ports;
 namespace PrintFlow.Infrastructure.Verification;
 
 internal sealed record WorkstationLiveEvidence(
-    MeituReadiness Meitu,
-    PhotoshopReadiness Photoshop,
-    PhotoshopRuntimeFacts PhotoshopFacts);
+    MeituReadiness? Meitu,
+    PhotoshopReadiness? Photoshop,
+    PhotoshopRuntimeFacts? PhotoshopFacts);
 
 internal sealed record WorkstationLiveVerification(
     ImmutableArray<WorkstationCheckResult> Checks,
@@ -34,6 +34,11 @@ internal interface IProductionLiveWorkstationVerifier
         ReadinessProbeDiagnostics? previousProbe,
         CancellationToken cancellationToken) => RunAsync(requirements, cancellationToken);
 
+    Task<WorkstationLiveVerification> RunForApplicationAsync(
+        WorkstationRequirements requirements, ReadinessProbeDiagnostics? previousProbe,
+        WorkstationApplication application, CancellationToken cancellationToken) =>
+        RunAsync(requirements, previousProbe, cancellationToken);
+
     WorkstationLiveVerification Reobserve(
         WorkstationRequirements requirements, WorkstationLiveEvidence? evidence);
 
@@ -45,6 +50,11 @@ internal interface IProductionLiveWorkstationVerifier
     WorkstationLiveVerification ReobserveForInternalWork(
         WorkstationRequirements requirements,
         WorkstationLiveEvidence? evidence) => Reobserve(requirements, evidence);
+
+    WorkstationLiveVerification ReobserveForApplication(
+        WorkstationRequirements requirements, WorkstationLiveEvidence? evidence,
+        IWorkstationAutomationLease? ownLease, WorkstationApplication application) =>
+        Reobserve(requirements, evidence, ownLease);
 }
 
 /// <summary>
@@ -95,10 +105,20 @@ internal sealed class ProductionLiveWorkstationVerifier : IProductionLiveWorksta
         WorkstationRequirements requirements, CancellationToken cancellationToken) =>
         RunAsync(requirements, previousProbe: null, cancellationToken);
 
-    public async Task<WorkstationLiveVerification> RunAsync(
+    public Task<WorkstationLiveVerification> RunAsync(
         WorkstationRequirements requirements,
         ReadinessProbeDiagnostics? previousProbe,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken) =>
+        RunAsync(requirements, previousProbe, application: null, cancellationToken);
+
+    public Task<WorkstationLiveVerification> RunForApplicationAsync(
+        WorkstationRequirements requirements, ReadinessProbeDiagnostics? previousProbe,
+        WorkstationApplication application, CancellationToken cancellationToken) =>
+        RunAsync(requirements, previousProbe, application, cancellationToken);
+
+    private async Task<WorkstationLiveVerification> RunAsync(
+        WorkstationRequirements requirements, ReadinessProbeDiagnostics? previousProbe,
+        WorkstationApplication? application, CancellationToken cancellationToken)
     {
         List<WorkstationCheckResult> checks = [];
         IWorkstationAutomationLease? lease = null;
@@ -116,7 +136,7 @@ internal sealed class ProductionLiveWorkstationVerifier : IProductionLiveWorksta
             {
                 checks.Add(Failed(WorkstationVerificationCheck.ExternalApplicationAutomationLock,
                     WorkstationCheckKind.Live, "Available", "Held", acquired.Failure));
-                AddRemainingBlocked(checks, "The shared automation lock was not acquired.");
+                AddMissingBlocked(checks, "The shared automation lock was not acquired.", application);
                 return new WorkstationLiveVerification([.. checks], null);
             }
 
@@ -127,30 +147,40 @@ internal sealed class ProductionLiveWorkstationVerifier : IProductionLiveWorksta
                 "Acquired for this bounded live verification",
                 "The same global lock used by production automation was acquired."));
 
-            OperationResult<MeituReadiness> meitu = await _meitu
-                .EnsureReadyAsync(cancellationToken)
-                .ConfigureAwait(false);
-            if (meitu.IsFailure)
+            MeituReadiness? meituReady = null;
+            if (application != WorkstationApplication.Photoshop)
             {
-                checks.Add(Failed(WorkstationVerificationCheck.MeituLaunchability,
-                    WorkstationCheckKind.Live, "Accepted process reaches a recognised state", null, meitu.Failure));
-                checks.Add(Blocked(WorkstationVerificationCheck.MeituSafeStartingState,
-                    WorkstationCheckKind.Live, "Meitu launchability did not pass."));
-                AddMissingBlocked(checks, "Meitu did not reach a safe state, so no later application check ran.");
+                var meitu = await _meitu.EnsureReadyAsync(cancellationToken).ConfigureAwait(false);
+                if (meitu.IsFailure)
+                {
+                    checks.Add(Failed(WorkstationVerificationCheck.MeituLaunchability,
+                        WorkstationCheckKind.Live, "Accepted process reaches a recognised state", null, meitu.Failure));
+                    checks.Add(Blocked(WorkstationVerificationCheck.MeituSafeStartingState,
+                        WorkstationCheckKind.Live, "Meitu launchability did not pass."));
+                    AddMissingBlocked(checks, "Meitu did not reach a safe state, so no later application check ran.", application);
+                }
+                else
+                {
+                    meituReady = meitu.Value;
+                    checks.Add(WorkstationCheckResult.Passed(
+                        WorkstationVerificationCheck.MeituLaunchability,
+                        WorkstationCheckKind.Live,
+                        $"{(meituReady.WasLaunched ? "Launched" : "Attached")}; process {meituReady.Target.Process.ProcessId}",
+                        "The accepted Meitu process presented one positively recognised window."));
+                    checks.Add(WorkstationCheckResult.Passed(
+                        WorkstationVerificationCheck.MeituSafeStartingState,
+                        WorkstationCheckKind.Live,
+                        meituReady.State.State.ToString(),
+                        "Meitu is in a positively recognised safe starting state."));
+                }
             }
-            else
-            {
-                checks.Add(WorkstationCheckResult.Passed(
-                    WorkstationVerificationCheck.MeituLaunchability,
-                    WorkstationCheckKind.Live,
-                    $"{(meitu.Value.WasLaunched ? "Launched" : "Attached")}; process {meitu.Value.Target.Process.ProcessId}",
-                    "The accepted Meitu process presented one positively recognised window."));
-                checks.Add(WorkstationCheckResult.Passed(
-                    WorkstationVerificationCheck.MeituSafeStartingState,
-                    WorkstationCheckKind.Live,
-                    meitu.Value.State.State.ToString(),
-                    "Meitu is in a positively recognised safe starting state."));
 
+            if (application == WorkstationApplication.Meitu && meituReady is not null)
+            {
+                evidence = new WorkstationLiveEvidence(meituReady, null, null);
+            }
+            else if (application == WorkstationApplication.Photoshop || meituReady is not null)
+            {
                 OperationResult<PhotoshopReadiness> photoshop = await _photoshop
                     .EnsureReadyAsync(cancellationToken)
                     .ConfigureAwait(false);
@@ -259,7 +289,7 @@ internal sealed class ProductionLiveWorkstationVerifier : IProductionLiveWorksta
                                     WorkstationCheckKind.Smoke,
                                     "Synthetic image opened, identified, closed, and cleaned",
                                     "The exact PrintFlow-owned probe completed and Photoshop returned to its prior safe state."));
-                                evidence = new WorkstationLiveEvidence(meitu.Value, photoshop.Value, facts.Value);
+                                evidence = new WorkstationLiveEvidence(meituReady, photoshop.Value, facts.Value);
                             }
                         }
                         }
@@ -269,12 +299,12 @@ internal sealed class ProductionLiveWorkstationVerifier : IProductionLiveWorksta
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            AddCancellation(checks);
+            AddCancellation(checks, application);
             evidence = null;
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {
-            AddUnexpectedFailure(checks, ex.Message);
+            AddUnexpectedFailure(checks, ex.Message, application);
             evidence = null;
         }
         finally
@@ -316,7 +346,7 @@ internal sealed class ProductionLiveWorkstationVerifier : IProductionLiveWorksta
             evidence = null;
         }
 
-        AddMissingBlocked(checks, "The preceding live verification step did not complete.");
+        AddMissingBlocked(checks, "The preceding live verification step did not complete.", application);
         return new WorkstationLiveVerification([.. checks], evidence) { Probe = probe, Recovery = recovery };
     }
 
@@ -335,16 +365,24 @@ internal sealed class ProductionLiveWorkstationVerifier : IProductionLiveWorksta
         WorkstationLiveEvidence? evidence) =>
         Reobserve(requirements, evidence, ownLease: null, requireAutomationAvailability: false);
 
+    public WorkstationLiveVerification ReobserveForApplication(
+        WorkstationRequirements requirements, WorkstationLiveEvidence? evidence,
+        IWorkstationAutomationLease? ownLease, WorkstationApplication application) =>
+        Reobserve(requirements, evidence, ownLease, requireAutomationAvailability: true, application);
+
     private WorkstationLiveVerification Reobserve(
         WorkstationRequirements requirements,
         WorkstationLiveEvidence? evidence,
         IWorkstationAutomationLease? ownLease,
-        bool requireAutomationAvailability)
+        bool requireAutomationAvailability,
+        WorkstationApplication? application = null)
     {
-        if (evidence is null)
+        if (evidence is null ||
+            (application != WorkstationApplication.Photoshop && evidence.Meitu is null) ||
+            (application != WorkstationApplication.Meitu && evidence.Photoshop is null))
         {
             return new WorkstationLiveVerification(
-                BlockedChecks("Live application verification has not been run in this PrintFlow process."), null);
+                BlockedChecks("Live application verification has not been run in this PrintFlow process.", application), null);
         }
 
         List<WorkstationCheckResult> checks = [];
@@ -354,7 +392,8 @@ internal sealed class ProductionLiveWorkstationVerifier : IProductionLiveWorksta
             {
                 WorkstationAutomationLeaseObservation lockState = _automationLeases
                     .ObserveAsync(ownLease, CancellationToken.None).GetAwaiter().GetResult();
-                if (lockState.Status is WorkstationAutomationLeaseStatus.Busy or WorkstationAutomationLeaseStatus.Unknown)
+                if (lockState.Status is WorkstationAutomationLeaseStatus.Busy or WorkstationAutomationLeaseStatus.Unknown ||
+                    (application is not null && ownLease is not null && lockState.Status != WorkstationAutomationLeaseStatus.Owned))
                 {
                     checks.Add(WorkstationCheckResult.Failed(
                         WorkstationVerificationCheck.ExternalApplicationAutomationLock,
@@ -363,9 +402,9 @@ internal sealed class ProductionLiveWorkstationVerifier : IProductionLiveWorksta
                         "Available or owned by this operation",
                         lockState.Status.ToString(),
                         lockState.Description));
-                    AddRemainingBlocked(checks, lockState.Status == WorkstationAutomationLeaseStatus.Busy
+                    AddMissingBlocked(checks, lockState.Status == WorkstationAutomationLeaseStatus.Busy
                         ? "Current runtime observations are deferred while automation is busy; prior live evidence was not renewed."
-                        : "The shared automation lock is currently unavailable.");
+                        : "The shared automation lock is currently unavailable.", application);
                     // Known contention refuses this external operation but does not invalidate the
                     // already-certified application identities. Internal work can immediately
                     // re-use that evidence and re-inspect every applicable runtime fact. An
@@ -396,12 +435,19 @@ internal sealed class ProductionLiveWorkstationVerifier : IProductionLiveWorksta
                     "automation availability is outside its admission decision."));
             }
 
-            OperationResult<MeituReadiness> meitu = _meitu
-                .ReinspectAsync(evidence.Meitu, CancellationToken.None).GetAwaiter().GetResult();
-            AddReobservedApplication(checks, meitu, isPhotoshop: false);
+            MeituReadiness? meituReady = null;
+            if (application != WorkstationApplication.Photoshop)
+            {
+                var meitu = _meitu.ReinspectAsync(evidence.Meitu!, CancellationToken.None).GetAwaiter().GetResult();
+                AddReobservedApplication(checks, meitu, isPhotoshop: false);
+                if (meitu.IsSuccess) meituReady = meitu.Value;
+                if (application == WorkstationApplication.Meitu)
+                    return new WorkstationLiveVerification([.. checks],
+                        meituReady is null ? null : new WorkstationLiveEvidence(meituReady, null, null));
+            }
 
             OperationResult<PhotoshopReadiness> photoshop = _photoshop
-                .ReinspectAsync(evidence.Photoshop, CancellationToken.None).GetAwaiter().GetResult();
+                .ReinspectAsync(evidence.Photoshop!, CancellationToken.None).GetAwaiter().GetResult();
             if (photoshop.IsFailure)
             {
                 checks.Add(Failed(WorkstationVerificationCheck.PhotoshopLaunchability,
@@ -466,26 +512,42 @@ internal sealed class ProductionLiveWorkstationVerifier : IProductionLiveWorksta
                 $"Certified for Photoshop process {photoshop.Value.Target.Process.ProcessId}",
                 "The explicit synthetic-image round trip remains tied to this running Photoshop process."));
 
-            return meitu.IsSuccess
+            return application == WorkstationApplication.Photoshop || meituReady is not null
                 ? new WorkstationLiveVerification([.. checks],
-                    new WorkstationLiveEvidence(meitu.Value, photoshop.Value, facts.Value))
+                    new WorkstationLiveEvidence(meituReady, photoshop.Value, facts.Value))
                 : new WorkstationLiveVerification([.. checks], null);
         }
         catch (Exception ex) when (ex is InvalidOperationException or IOException or UnauthorizedAccessException)
         {
-            AddUnexpectedFailure(checks, ex.Message);
-            AddMissingBlocked(checks, "Current live state could not be re-observed.");
+            AddUnexpectedFailure(checks, ex.Message, application);
+            AddMissingBlocked(checks, "Current live state could not be re-observed.", application);
             return new WorkstationLiveVerification([.. checks], null);
         }
     }
 
-    internal static ImmutableArray<WorkstationCheckResult> BlockedChecks(string reason) =>
-        [.. OrderedLiveChecks.Select(check => Blocked(
+    internal static ImmutableArray<WorkstationCheckResult> BlockedChecks(
+        string reason, WorkstationApplication? application = null) =>
+        [.. OrderedChecksFor(application).Select(check => Blocked(
             check,
             check == WorkstationVerificationCheck.PhotoshopTestImageRoundTrip
                 ? WorkstationCheckKind.Smoke
                 : WorkstationCheckKind.Live,
             reason))];
+
+    private static IEnumerable<WorkstationVerificationCheck> OrderedChecksFor(WorkstationApplication? application) =>
+        application is null ? OrderedLiveChecks : OrderedLiveChecks.Where(check =>
+            ApplicationFor(check) is not { } owner || owner == application);
+
+    internal static WorkstationApplication? ApplicationFor(WorkstationVerificationCheck check) =>
+        check switch
+        {
+            WorkstationVerificationCheck.MeituLaunchability or WorkstationVerificationCheck.MeituSafeStartingState =>
+                WorkstationApplication.Meitu,
+            WorkstationVerificationCheck.PhotoshopLaunchability or WorkstationVerificationCheck.PhotoshopSafeStartingState
+                or WorkstationVerificationCheck.PhotoshopColourSettings or WorkstationVerificationCheck.PhotoshopTestImageRoundTrip =>
+                WorkstationApplication.Photoshop,
+            _ => null,
+        };
 
     private sealed record ProbeRecoveryResult(
         PhotoshopRuntimeFacts Facts,
@@ -1028,9 +1090,6 @@ internal sealed class ProductionLiveWorkstationVerifier : IProductionLiveWorksta
         _ => "Open, identify, close without saving, and restore the prior state",
     };
 
-    private static void AddRemainingBlocked(List<WorkstationCheckResult> checks, string reason) =>
-        AddMissingBlocked(checks, reason);
-
     private static void AddPhotoshopBlocked(List<WorkstationCheckResult> checks, string reason)
     {
         foreach (WorkstationVerificationCheck check in OrderedLiveChecks.SkipWhile(value =>
@@ -1056,9 +1115,9 @@ internal sealed class ProductionLiveWorkstationVerifier : IProductionLiveWorksta
         }
     }
 
-    private static void AddMissingBlocked(List<WorkstationCheckResult> checks, string reason)
+    private static void AddMissingBlocked(List<WorkstationCheckResult> checks, string reason, WorkstationApplication? application)
     {
-        foreach (WorkstationVerificationCheck check in OrderedLiveChecks)
+        foreach (WorkstationVerificationCheck check in OrderedChecksFor(application))
         {
             if (checks.All(existing => existing.Check != check))
                 checks.Add(Blocked(check, check == WorkstationVerificationCheck.PhotoshopTestImageRoundTrip
@@ -1066,11 +1125,9 @@ internal sealed class ProductionLiveWorkstationVerifier : IProductionLiveWorksta
         }
     }
 
-    private static void AddCancellation(List<WorkstationCheckResult> checks)
+    private static void AddCancellation(List<WorkstationCheckResult> checks, WorkstationApplication? application)
     {
-        WorkstationVerificationCheck active = OrderedLiveChecks.FirstOrDefault(check =>
-            checks.All(existing => existing.Check != check));
-        if (!Enum.IsDefined(active)) active = WorkstationVerificationCheck.PhotoshopTestImageRoundTrip;
+        WorkstationVerificationCheck active = FailureCheck(checks, application);
         checks.Add(WorkstationCheckResult.Failed(
             active,
             active == WorkstationVerificationCheck.PhotoshopTestImageRoundTrip
@@ -1082,11 +1139,9 @@ internal sealed class ProductionLiveWorkstationVerifier : IProductionLiveWorksta
             "Live application verification was cancelled; no operator process was terminated."));
     }
 
-    private static void AddUnexpectedFailure(List<WorkstationCheckResult> checks, string detail)
+    private static void AddUnexpectedFailure(List<WorkstationCheckResult> checks, string detail, WorkstationApplication? application)
     {
-        WorkstationVerificationCheck active = OrderedLiveChecks.FirstOrDefault(check =>
-            checks.All(existing => existing.Check != check));
-        if (!Enum.IsDefined(active)) active = WorkstationVerificationCheck.PhotoshopTestImageRoundTrip;
+        WorkstationVerificationCheck active = FailureCheck(checks, application);
         checks.Add(WorkstationCheckResult.Failed(
             active,
             active == WorkstationVerificationCheck.PhotoshopTestImageRoundTrip
@@ -1097,6 +1152,12 @@ internal sealed class ProductionLiveWorkstationVerifier : IProductionLiveWorksta
             "Unexpected error",
             $"Live verification stopped safely: {detail}"));
     }
+
+    private static WorkstationVerificationCheck FailureCheck(
+        List<WorkstationCheckResult> checks, WorkstationApplication? application) =>
+        OrderedChecksFor(application).FirstOrDefault(check => checks.All(existing => existing.Check != check),
+            application == WorkstationApplication.Meitu ? WorkstationVerificationCheck.MeituSafeStartingState
+                : WorkstationVerificationCheck.PhotoshopTestImageRoundTrip);
 
     private static void AddReobservedApplication(
         List<WorkstationCheckResult> checks,

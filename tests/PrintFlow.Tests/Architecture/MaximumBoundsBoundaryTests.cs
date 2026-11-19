@@ -606,7 +606,7 @@ public sealed class MaximumBoundsBoundaryTests
     /// </para>
     /// </remarks>
     [Fact]
-    public void The_migration_set_ends_at_the_additive_trim_noise_policy_migration()
+    public void The_migration_set_includes_the_image_processing_configuration_migration()
     {
         string directory = Path.Combine(FindProjectDirectory("PrintFlow.Infrastructure"), "Sqlite");
 
@@ -629,7 +629,8 @@ public sealed class MaximumBoundsBoundaryTests
         scripts.ShouldContain("0019_correction_request.sql");
         scripts.ShouldContain("0020_background_removal_mode.sql");
         scripts.ShouldContain("0021_trim_noise_policy.sql");
-        scripts.Last().ShouldBe("0022_delivery_rename.sql");
+        scripts.ShouldContain("0022_delivery_rename.sql");
+        scripts.Last().ShouldBe("0025_combined_image_upload_position.sql");
     }
 
     // -------------------------------------------------------------------------------------

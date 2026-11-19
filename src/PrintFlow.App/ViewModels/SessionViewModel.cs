@@ -698,7 +698,8 @@ public sealed partial class SessionViewModel : ObservableObject
         PrintFlow.Workflow.Delivery.IDeliveredFileShell? fileShell = null,
         PrintFlow.Workflow.Ports.ICorrectionFolderShell? correctionShell = null,
         ManualHandoffCopyService? manualHandoffCopy = null,
-        IManualHandoffCopyPicker? manualHandoffCopyPicker = null)
+        IManualHandoffCopyPicker? manualHandoffCopyPicker = null,
+        IOpenAiUploadPrompt? openAiUploadPrompt = null)
     {
         ArgumentNullException.ThrowIfNull(sessions);
         ArgumentNullException.ThrowIfNull(previews);
@@ -716,6 +717,7 @@ public sealed partial class SessionViewModel : ObservableObject
         _correctionShell = correctionShell;
         _manualHandoffCopy = manualHandoffCopy;
         _manualHandoffCopyPicker = manualHandoffCopyPicker;
+        _openAiUploadPrompt = openAiUploadPrompt;
         if (localisation is not null)
             System.Windows.WeakEventManager<PrintFlow.App.Localisation.ILocalisationService, EventArgs>.AddHandler(
                 localisation, nameof(PrintFlow.App.Localisation.ILocalisationService.LanguageChanged), OnOperatorLanguageChanged);
@@ -817,10 +819,13 @@ public sealed partial class SessionViewModel : ObservableObject
 
     public string ConfirmOriginalLabel => Strings.Session_ConfirmOriginal;
 
-    public string RunStepLabel => _session is { OriginalSourceFormat: ImageFormat.Psd, CurrentStep.Step: StepKind.OriginalConfirmation }
-        ? Strings.Session_PreparePsd
-        : _session is { OriginalSourceFormat: ImageFormat.Pdf, CurrentStep.Step: StepKind.OriginalConfirmation }
-            ? Strings.Session_PreparePdf : Strings.Session_RunStep;
+    public string RunStepLabel => _session switch
+    {
+        { OriginalSourceFormat: ImageFormat.Psd, CurrentStep.Step: StepKind.OriginalConfirmation } => Strings.Session_PreparePsd,
+        { OriginalSourceFormat: ImageFormat.Pdf, CurrentStep.Step: StepKind.OriginalConfirmation } => Strings.Session_PreparePdf,
+        _ when IsCombinedBackgroundRemoval => Strings.Resolve("ImageProcessing_RunCombined"),
+        _ => Strings.Session_RunStep,
+    };
 
     public bool HasPdfSource => _session?.OriginalSourceFormat == ImageFormat.Pdf;
     public string PdfSourceNotice => !HasPdfSource || _session?.CurrentStep?.Step != StepKind.OriginalConfirmation ? string.Empty
@@ -893,7 +898,19 @@ public sealed partial class SessionViewModel : ObservableObject
             ? _navigation.GoToErrorDetailsAsync(_session.Id, attemptId, cancellationToken)
             : Task.CompletedTask;
 
-    public string SkipLabel => Strings.Session_Skip;
+    private string? CombinedSkipReason => IsCombinedImageProcessing
+        ? ContinuesToCombinedProcessing ? WorkflowCommand.Skip.CombinedWithBackgroundRemoval
+            : WorkflowCommand.Skip.KeepReviewedInputAfterCombined
+        : null;
+
+    public string SkipLabel => CombinedSkipReason switch
+    {
+        WorkflowCommand.Skip.CombinedWithBackgroundRemoval => Strings.Resolve("ImageProcessing_ContinueCombined"),
+        WorkflowCommand.Skip.KeepReviewedInputAfterCombined => Strings.Resolve("ImageProcessing_KeepReviewedInput"),
+        _ when UsesCurrentImageWithoutProcessing && _session?.ImageProcessingExecution is { } execution =>
+            ImageProcessingMethodOption.Name(execution.Method),
+        _ => Strings.Session_Skip,
+    };
 
     public string KeepOriginalExtentLabel => Strings.Session_KeepOriginalExtent;
     public string KeepOriginalExtentHint => Strings.Session_KeepOriginalExtentHint;
@@ -901,8 +918,9 @@ public sealed partial class SessionViewModel : ObservableObject
 
     public string HandOffLabel => Strings.Session_HandOff;
 
-    public string ReviewHeading =>
-        IsProductionTiffReview ? Strings.Session_TiffReviewHeading : Strings.Session_ReviewHeading;
+    public string ReviewHeading => IsReviewRequired && IsCombinedBackgroundRemoval
+        ? Strings.Resolve("ImageProcessing_CombinedReviewHeading")
+        : IsProductionTiffReview ? Strings.Session_TiffReviewHeading : Strings.Session_ReviewHeading;
 
     public string RejectReasonLabel => Strings.Session_RejectReasonLabel;
 
@@ -1098,6 +1116,7 @@ public sealed partial class SessionViewModel : ObservableObject
     /// </remarks>
     public string? StoppingNotice => _runtime.State switch
     {
+        AutomationRuntimeState.StopRequested when _runtime.IsCancellableImageProcessing => Strings.Resolve("Session_GuidedStopping"),
         AutomationRuntimeState.StopRequested => UsesPhotoshop ? Strings.Session_PhotoshopStoppingNotice : Strings.Session_StoppingNotice,
         AutomationRuntimeState.TakeOverRequested => UsesPhotoshop ? Strings.Session_PhotoshopTakingOverNotice : Strings.Session_TakingOverNotice,
         _ => null,
@@ -1157,7 +1176,8 @@ public sealed partial class SessionViewModel : ObservableObject
     /// at the moment of choosing. Told separately, "stops this operation safely" and "leaves
     /// Meitu as it is" are each easy to read as the other.
     /// </remarks>
-    public string StopHint => UsesPhotoshop ? Strings.Session_PhotoshopStopHint
+    public string StopHint => _runtime.IsCancellableImageProcessing ? Strings.Resolve("Session_ImageProcessingStopHint")
+        : UsesPhotoshop ? Strings.Session_PhotoshopStopHint
         : $"{Strings.Session_StopHint} {Strings.Session_TakeOverHint}";
 
     public string TakeOverLabel => UsesPhotoshop ? Strings.Session_PhotoshopTakeOver : Strings.Session_TakeOver;
@@ -1373,7 +1393,8 @@ public sealed partial class SessionViewModel : ObservableObject
     public string BackgroundRemovalHeading => Strings.Session_BackgroundRemovalHeading;
 
     /// <summary>What automatic selection is, in one line. Advice, never a decision (§3).</summary>
-    public string BackgroundRemovalHint => Strings.Session_BackgroundRemovalHint;
+    public string BackgroundRemovalHint => ShowsMeituRecognitionModes
+        ? Strings.Session_BackgroundRemovalHint : Strings.Resolve("ImageProcessing_ConfirmBackgroundHint");
 
     /// <summary>
     /// The operator action, worded as a decision about this image (§3).
@@ -1383,7 +1404,8 @@ public sealed partial class SessionViewModel : ObservableObject
     /// The authority the command records is bound to one Revision and one hash, so a label
     /// that read like a session setting would be describing something the system cannot do.
     /// </remarks>
-    public string AuthoriseAutomaticSelectionLabel => Strings.Session_BackgroundRemovalAuthorise;
+    public string AuthoriseAutomaticSelectionLabel => ShowsMeituRecognitionModes
+        ? Strings.Session_BackgroundRemovalAuthorise : Strings.Resolve("ImageProcessing_AuthoriseBackgroundMethod");
 
     /// <summary>
     /// What the operator confirms before the authority is recorded (§11).
@@ -1394,14 +1416,17 @@ public sealed partial class SessionViewModel : ObservableObject
     /// image, because the authority covers neither.
     /// </remarks>
     public string AutomaticSelectionConfirmQuestion => string.Format(CultureInfo.CurrentCulture,
-        Strings.Session_BackgroundRemovalConfirmQuestion, SelectedBackgroundRemovalModeLabel);
+        ShowsMeituRecognitionModes ? Strings.Session_BackgroundRemovalConfirmQuestion
+            : Strings.Resolve("ImageProcessing_ConfirmBackgroundQuestion"),
+        BackgroundRemovalAuthorityLabel);
 
     public string ConfirmAutomaticSelectionLabel => Strings.Session_BackgroundRemovalConfirm;
 
     public string CancelAutomaticSelectionLabel => Strings.Session_BackgroundRemovalCancel;
 
     /// <summary>What is shown while nothing authorises a run (§8, §9).</summary>
-    public string AutomaticSelectionNotAuthorisedNotice => Strings.Session_BackgroundRemovalNotAuthorised;
+    public string AutomaticSelectionNotAuthorisedNotice => ShowsMeituRecognitionModes
+        ? Strings.Session_BackgroundRemovalNotAuthorised : Strings.Resolve("ImageProcessing_ConfirmBackgroundHint");
 
     /// <summary>What is shown once the step would really start (§8).</summary>
     public string BackgroundRemovalRunnableNotice => Strings.Session_BackgroundRemovalRunnable;
@@ -1414,7 +1439,8 @@ public sealed partial class SessionViewModel : ObservableObject
     /// engine's own answer to "would <c>SetBackgroundRemovalDecision</c> be accepted right now".
     /// This screen restates none of it: not the step, not the step state, not the session state.
     /// </remarks>
-    public bool CanAuthoriseAutomaticSelection => _session?.CanSetBackgroundRemovalDecision == true;
+    public bool CanAuthoriseAutomaticSelection =>
+        CanRunSelectedImageMethod && _session?.CanSetBackgroundRemovalDecision == true;
 
     /// <summary>True once the confirmation may be opened: the offer is real and nothing is in flight.</summary>
     public bool CanBeginAutomaticSelection =>
@@ -1604,7 +1630,7 @@ public sealed partial class SessionViewModel : ObservableObject
 
     public bool CanConfirmOriginal => Allows(CommandKind.ConfirmOriginal);
 
-    public bool CanRunStep => Allows(CommandKind.StartStep) && !HasUnconfirmedBackgroundRemovalMode;
+    public bool CanRunStep => Allows(CommandKind.StartStep) && CanRunSelectedImageMethod && !HasUnconfirmedBackgroundRemovalMode;
 
     public bool CanApprove => Allows(CommandKind.Approve);
 
@@ -2177,9 +2203,26 @@ public sealed partial class SessionViewModel : ObservableObject
     /// the refreshed session.
     /// </remarks>
     [RelayCommand]
-    private Task RunStepAsync(CancellationToken cancellationToken) =>
-        HasUnconfirmedBackgroundRemovalMode ? Task.CompletedTask
-            : RunAsync(step => new WorkflowCommand.StartStep(step), cancellationToken);
+    private Task RunStepAsync(CancellationToken cancellationToken)
+    {
+        if (!CanRunSelectedImageMethod || HasUnconfirmedBackgroundRemovalMode ||
+            _session is not { CurrentStep: { } current } view)
+            return Task.CompletedTask;
+
+        ImageUploadConfirmation? confirmation = null;
+        if (view.ImageProcessingExecution is { } execution && ImageUploadConfirmation.IsOpenAiMethod(execution.Method))
+        {
+            if (!CanRunStep || IsBusy || view.CurrentArtefact is not { } input ||
+                _openAiUploadPrompt?.Confirm(ImageProcessingMethodOption.Name(execution.Method)) != true ||
+                !ReferenceEquals(_session, view) || cancellationToken.IsCancellationRequested)
+                return Task.CompletedTask;
+
+            confirmation = new ImageUploadConfirmation(execution.Method, input.RevisionId, input.Sha256,
+                current.CombinedUploadPositionId);
+        }
+
+        return RunAsync(new WorkflowCommand.StartStep(current.Step, confirmation), cancellationToken);
+    }
 
     /// <summary>
     /// Approves the result currently on screen, bound to its exact hash (Part 3C3A §10).
@@ -2264,7 +2307,7 @@ public sealed partial class SessionViewModel : ObservableObject
     /// </remarks>
     [RelayCommand]
     private Task SkipAsync(CancellationToken cancellationToken) =>
-        RunAsync(step => new WorkflowCommand.Skip(step), cancellationToken);
+        RunAsync(step => new WorkflowCommand.Skip(step, CombinedSkipReason), cancellationToken);
 
     [RelayCommand(CanExecute = nameof(CanKeepOriginalExtent))]
     private Task KeepOriginalExtentAsync(CancellationToken cancellationToken) =>
@@ -2558,7 +2601,8 @@ public sealed partial class SessionViewModel : ObservableObject
         CancelReturn();
         long generation = _openGeneration;
         await RunAsync(
-            new WorkflowCommand.ReturnToStep(intent.Target.Step), cancellationToken).ConfigureAwait(true);
+            new WorkflowCommand.ReturnToStep(intent.Target.Step, intent.UseStepByStepImageProcessing),
+            cancellationToken).ConfigureAwait(true);
         if (generation == _openGeneration && intent.EditSize && _session?.Sizing.CanSetCustomTargetEdgeSize == true)
         {
             _customPresetContext = intent.Preset is { } named ? SizePresets.FirstOrDefault(choice => choice.Preset == named) : null;
@@ -2633,7 +2677,8 @@ public sealed partial class SessionViewModel : ObservableObject
                 BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent,
                 displayed.RevisionId,
                 displayed.Sha256,
-                SelectedBackgroundRemovalMode),
+                SelectedBackgroundRemovalMode,
+                _session?.ImageProcessingExecution?.Method ?? PrintFlow.Domain.Settings.ImageProcessingMethod.MeituBackgroundRemoval),
             cancellationToken,
             _ => _cleanDraft = submittedDraft).ConfigureAwait(true);
     }
@@ -3521,6 +3566,7 @@ public sealed partial class SessionViewModel : ObservableObject
         OnPropertyChanged(nameof(CanTakeOverAutomation));
         OnPropertyChanged(nameof(IsStopping));
         OnPropertyChanged(nameof(StoppingNotice));
+        OnPropertyChanged(nameof(StopHint));
         StopAutomationCommand.NotifyCanExecuteChanged();
         BeginTakeOverCommand.NotifyCanExecuteChanged();
     }
@@ -3577,6 +3623,7 @@ public sealed partial class SessionViewModel : ObservableObject
         bool lostTrimAdjustment = IsAdjustingTrim && !keepTrimDraft &&
             session.CurrentStep?.CurrentRevisionId == _trimAdjustTarget?.ResultRevisionId;
         _session = session;
+        ShowImageProcessingMethod();
         ShowBackgroundRemovalMode();
         ShowCommittedPreflight(session);
 
@@ -3724,6 +3771,7 @@ public sealed partial class SessionViewModel : ObservableObject
         OnPropertyChanged(nameof(CanRetry));
         OnPropertyChanged(nameof(CanOpenErrorDetails));
         OnPropertyChanged(nameof(CanSkip));
+        OnPropertyChanged(nameof(SkipLabel));
         OnPropertyChanged(nameof(CanKeepOriginalExtent));
         KeepOriginalExtentCommand.NotifyCanExecuteChanged();
         OnPropertyChanged(nameof(CanHandOff));
@@ -3746,6 +3794,7 @@ public sealed partial class SessionViewModel : ObservableObject
         OnPropertyChanged(nameof(IsReviewRequired));
 
         OnPropertyChanged(nameof(CanReturnToStep));
+        OnPropertyChanged(nameof(CanReturnToSeparateProcessing));
         OnPropertyChanged(nameof(CanBeginReturn));
         OnPropertyChanged(nameof(CanSetTrimParameters));
         OnPropertyChanged(nameof(PendingTrimSummary));

@@ -60,10 +60,12 @@ public sealed class SettingsAndLocalisationTests
         SettingsViewModel screen = await harness.OpenAsync();
 
         screen.SelectedLanguage = screen.Languages.Single(o => o.Language == OperatorLanguage.English);
-        screen.TrimSafetyMarginPixels = "12";
         screen.LogRetentionDays = "45";
 
         await screen.ApplyCommand.ExecuteAsync(null);
+        await screen.OpenImageProcessingCommand.ExecuteAsync(null);
+        screen.TrimSafetyMarginPixels = "12";
+        await screen.SaveImageProcessingCommand.ExecuteAsync(null);
 
         SettingsViewModel reopened = await harness.RestartAndOpenAsync();
 
@@ -76,8 +78,7 @@ public sealed class SettingsAndLocalisationTests
     /// One Apply is one transaction, and it reaches the database as one batch.
     /// </summary>
     /// <remarks>
-    /// Asserted at the repository seam as well as on the values, because "all three ended up
-    /// stored" is also true of three separate writes. The screen presents a single atomic
+    /// Asserted at the repository seam as well as on the values. The screen presents a single atomic
     /// action, so it must issue a single atomic write (SCRUM-11118).
     /// </remarks>
     [Fact]
@@ -88,14 +89,13 @@ public sealed class SettingsAndLocalisationTests
         SettingsViewModel screen = await harness.OpenAsync(settings: recording);
 
         screen.SelectedLanguage = screen.Languages.Single(o => o.Language == OperatorLanguage.English);
-        screen.TrimSafetyMarginPixels = "7";
         screen.LogRetentionDays = "14";
 
         await screen.ApplyCommand.ExecuteAsync(null);
 
         recording.Batches.Count.ShouldBe(1);
         recording.Batches[0].Select(entry => entry.Key).ShouldBe(
-            [SettingKey.UiLanguage, SettingKey.TrimSafetyMarginPixels, SettingKey.LogRetentionDays],
+            [SettingKey.UiLanguage, SettingKey.LogRetentionDays],
             ignoreOrder: true);
     }
 
@@ -133,11 +133,12 @@ public sealed class SettingsAndLocalisationTests
         RecordingSettingsRepository recording = new(harness.Settings);
         SettingsViewModel screen = await harness.OpenAsync(settings: recording);
 
+        await screen.OpenImageProcessingCommand.ExecuteAsync(null);
         screen.TrimSafetyMarginPixels = "-3";
-        await screen.ApplyCommand.ExecuteAsync(null);
+        await screen.SaveImageProcessingCommand.ExecuteAsync(null);
 
         recording.Batches.ShouldBeEmpty();
-        screen.Notice.ShouldBe(Resource("Settings_TrimMarginInvalid"));
+        screen.ImageProcessingNotice.ShouldBe(Resource("Settings_TrimMarginInvalid"));
     }
 
     /// <summary>
@@ -346,8 +347,9 @@ public sealed class SettingsAndLocalisationTests
         using SettingsScreenHarness harness = new();
         SettingsViewModel screen = await harness.OpenAsync();
 
+        await screen.OpenImageProcessingCommand.ExecuteAsync(null);
         screen.TrimSafetyMarginPixels = "8";
-        await screen.ApplyCommand.ExecuteAsync(null);
+        await screen.SaveImageProcessingCommand.ExecuteAsync(null);
 
         SessionView imported = await harness.ImportAsync("after-default.png");
 
@@ -374,8 +376,9 @@ public sealed class SettingsAndLocalisationTests
         before.TrimMargin.Mode.ShouldBe(TrimMode.TightCrop);
 
         SettingsViewModel screen = await harness.OpenAsync();
+        await screen.OpenImageProcessingCommand.ExecuteAsync(null);
         screen.TrimSafetyMarginPixels = "15";
-        await screen.ApplyCommand.ExecuteAsync(null);
+        await screen.SaveImageProcessingCommand.ExecuteAsync(null);
 
         SessionView reloaded = (await harness.Sessions.LoadAsync(before.Id, CancellationToken.None)).Value;
         reloaded.TrimMargin.Mode.ShouldBe(TrimMode.TightCrop);
@@ -629,7 +632,7 @@ public sealed class SettingsAndLocalisationTests
                             .Select(AutomationProperties.GetAutomationId)],
                         ById("Settings.Language") is ComboBox,
                         apply.GetPattern(PatternInterface.Invoke) is IInvokeProvider,
-                        ((TextBox)ById("Settings.TrimMargin")).IsReadOnly,
+                        ById("Settings.OpenImageProcessing") is Button,
                         ((TextBox)ById("Settings.ProductionDpi")).IsReadOnly,
                         ((TextBox)ById("Settings.OutputRoot")).IsReadOnly,
                         [.. elements.OfType<TextBlock>().Select(b => b.Text)
@@ -642,7 +645,7 @@ public sealed class SettingsAndLocalisationTests
 
             foreach (string id in new[]
                      {
-                         "Settings.Language", "Settings.OutputRoot", "Settings.TrimMargin",
+                         "Settings.Language", "Settings.OutputRoot", "Settings.OpenImageProcessing",
                          "Settings.ProductionDpi", "Settings.Preset",
                          "Settings.PhotoshopColourSettings", "Settings.LogRetention",
                          "Settings.Apply", "Settings.Back",
@@ -655,7 +658,7 @@ public sealed class SettingsAndLocalisationTests
             // production facts are still focusable, so a screen reader can read them out.
             foreach (string id in new[]
                      {
-                         "Settings.Language", "Settings.TrimMargin", "Settings.LogRetention",
+                         "Settings.Language", "Settings.OpenImageProcessing", "Settings.LogRetention",
                          "Settings.Apply", "Settings.Back", "Settings.OutputRoot",
                          "Settings.ProductionDpi", "Settings.Preset",
                          "Settings.PhotoshopColourSettings",
@@ -667,7 +670,7 @@ public sealed class SettingsAndLocalisationTests
             rendered.Facts.Confined.ShouldBeEmpty();
             rendered.Facts.LanguageIsComboBox.ShouldBeTrue();
             rendered.Facts.ApplyInvokes.ShouldBeTrue();
-            rendered.Facts.TrimMarginIsReadOnly.ShouldBeFalse();
+            rendered.Facts.ImageProcessingEntryIsButton.ShouldBeTrue();
             rendered.Facts.ProductionDpiIsReadOnly.ShouldBeTrue();
             rendered.Facts.OutputRootIsReadOnly.ShouldBeTrue();
 
@@ -732,13 +735,6 @@ public sealed class SettingsAndLocalisationTests
                     .Single(o => o.Language == OperatorLanguage.English);
                 view.UpdateLayout();
 
-                // Type a new safety edge through the ordinary text value pattern.
-                TextBox margin = Descendants(view).OfType<TextBox>().Single(
-                    b => AutomationProperties.GetAutomationId(b) == "Settings.TrimMargin");
-                ((IValueProvider)UIElementAutomationPeer
-                    .CreatePeerForElement(margin).GetPattern(PatternInterface.Value)!).SetValue("6");
-                view.UpdateLayout();
-
                 // Apply, and pump the dispatcher the way a real desktop pumps it.
                 Button apply = Descendants(view).OfType<Button>().Single(
                     b => AutomationProperties.GetAutomationId(b) == "Settings.Apply");
@@ -748,6 +744,23 @@ public sealed class SettingsAndLocalisationTests
                 view.UpdateLayout();
 
                 driven = new Driven(before, heading.Text, screen.ApplyCommand.IsRunning);
+
+                Button imageSettings = Descendants(view).OfType<Button>().Single(
+                    b => AutomationProperties.GetAutomationId(b) == "Settings.OpenImageProcessing");
+                ((IInvokeProvider)UIElementAutomationPeer
+                    .CreatePeerForElement(imageSettings).GetPattern(PatternInterface.Invoke)!).Invoke();
+                Pump();
+                view.UpdateLayout();
+
+                TextBox margin = Descendants(view).OfType<TextBox>().Single(
+                    b => AutomationProperties.GetAutomationId(b) == "Settings.TrimMargin");
+                ((IValueProvider)UIElementAutomationPeer
+                    .CreatePeerForElement(margin).GetPattern(PatternInterface.Value)!).SetValue("6");
+                Button save = Descendants(view).OfType<Button>().Single(
+                    b => AutomationProperties.GetAutomationId(b) == "ImageProcessing.Save");
+                ((IInvokeProvider)UIElementAutomationPeer
+                    .CreatePeerForElement(save).GetPattern(PatternInterface.Invoke)!).Invoke();
+                Pump();
 
                 view.DataContext = null;
                 view.UpdateLayout();
@@ -780,7 +793,7 @@ public sealed class SettingsAndLocalisationTests
         IReadOnlyList<string> Confined,
         bool LanguageIsComboBox,
         bool ApplyInvokes,
-        bool TrimMarginIsReadOnly,
+        bool ImageProcessingEntryIsButton,
         bool ProductionDpiIsReadOnly,
         bool OutputRootIsReadOnly,
         IReadOnlyList<string> VisibleText);

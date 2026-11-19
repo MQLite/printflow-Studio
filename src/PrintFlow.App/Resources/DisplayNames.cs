@@ -130,7 +130,7 @@ internal static class DisplayNames
                 CultureInfo.CurrentCulture, Strings.Home_ImportUnreadableImage,
                 fileName, ImageFormat(detected)),
 
-            _ => Failure(failure.Code),
+            _ => Failure(failure),
         };
 
         return string.Format(CultureInfo.CurrentCulture, Strings.Home_ImportRefused, sentence, failure.Code);

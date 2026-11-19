@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
+using PrintFlow.App.Controls;
 using PrintFlow.App.Views;
 using PrintFlow.Domain.Sessions;
 using PrintFlow.Tests.Fixtures;
@@ -28,7 +29,7 @@ public sealed class GuidedProcessingReviewTests
     [InlineData("background")]
     [InlineData("trim")]
     [InlineData("tiff")]
-    public async Task Common_review_reserves_the_majority_for_the_image_and_keeps_save_form_secondary(string step)
+    public async Task Common_review_reserves_the_majority_for_the_image_and_exposes_pending_final_save_fields(string step)
     {
         using OperatorCultureScope culture = new("zh-CN");
         using SessionServiceHarness h = new();
@@ -52,10 +53,36 @@ public sealed class GuidedProcessingReviewTests
         result.Facts.ImageShare.ShouldBeGreaterThan(0.65, "the exact result must dominate the current workspace");
         result.Facts.Checks.ShouldBeInRange(2, 4);
         result.Facts.Guidance.ShouldBeTrue();
-        result.Facts.SaveDraftShown.ShouldBeFalse("delivery inputs are secondary to required image review");
+        result.Facts.SaveDraftShown.ShouldBe(step is "trim" or "tiff",
+            "only pending final reviews expose the filename and destination before approval");
         result.Facts.TargetIdentity.ShouldBe(identity);
         result.Facts.Approve.ShouldBeTrue();
         model.ReviewGuidanceApprove.ShouldContain("不会把文件保存");
+    }
+
+    [Fact]
+    public async Task Collapsing_the_pending_save_form_restores_full_height_review_guidance()
+    {
+        using SessionServiceHarness h = new();
+        var model = (await ReviewGuidanceSetup.OpenAtAsync(h, "tiff")).Screen;
+        var result = WpfRendering.RenderExpectingNoBindingErrors(() => new SessionScreenView { DataContext = model },
+            WpfRendering.ReviewViewport, tree =>
+            {
+                var guidance = tree.OfType<ReviewGuidanceScrollViewer>().Single();
+                var save = GuidedSessionShellTests.Find<Expander>(tree, "Session.FinalSave.Options");
+                bool scrollableWhileExpanded = guidance.IsTabStop && guidance.ScrollableHeight > 0;
+
+                save.SetCurrentValue(Expander.IsExpandedProperty, false);
+                tree.Root.UpdateLayout();
+                bool guidanceExpands = !guidance.IsTabStop && double.IsPositiveInfinity(guidance.MaxHeight);
+
+                save.SetCurrentValue(Expander.IsExpandedProperty, true);
+                tree.Root.UpdateLayout();
+                bool canScrollAgain = guidance.IsTabStop && guidance.ScrollableHeight > 0;
+                return (scrollableWhileExpanded, guidanceExpands, canScrollAgain);
+            });
+
+        result.Facts.ShouldBe((true, true, true));
     }
 
     [Theory]

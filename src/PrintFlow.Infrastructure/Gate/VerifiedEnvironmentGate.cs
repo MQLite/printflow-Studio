@@ -17,6 +17,7 @@ namespace PrintFlow.Infrastructure.Gate;
 public sealed class VerifiedEnvironmentGate :
     IPreparingEnvironmentGate,
     IWorkstationScopedEnvironmentGate,
+    IApplicationEnvironmentGate,
     IInternalProductionEnvironmentGate,
     IEnvironmentDiagnostics
 {
@@ -118,8 +119,7 @@ public sealed class VerifiedEnvironmentGate :
             WorkstationVerificationResult result = _verifier.Verify();
             // Only application readiness can be repaired by starting the accepted apps.
             // Static trust and current desktop failures must be resolved before any launch.
-            if (!result.Verified && result.Preset is not null && result.BlockingChecks.Any() &&
-                result.BlockingChecks.All(check => check.Kind is WorkstationCheckKind.Live or WorkstationCheckKind.Smoke))
+            if (CanPrepareWithLiveChecks(result))
             {
                 result = await _verifier.RunLiveChecksAsync(cancellationToken).ConfigureAwait(false);
             }
@@ -130,6 +130,48 @@ public sealed class VerifiedEnvironmentGate :
         }
         finally { AbandonObservation(ticket); }
     }
+
+    public async Task<OperationResult<Unit>> PrepareForApplicationAsync(
+        AdapterExecutionMode mode, WorkstationApplication application, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (!Enum.IsDefined(application))
+            return OperationResult.Fail<Unit>(FailureCode.EnvironmentNotVerified, "Unknown workstation application.");
+        if (mode != AdapterExecutionMode.Production || !_requireEnvironmentVerification)
+            return Verify(mode);
+        if (_verifier is not IApplicationProductionWorkstationVerifier verifier)
+            return await PrepareAsync(mode, cancellationToken).ConfigureAwait(false);
+
+        WorkstationVerificationResult result = verifier.VerifyForApplication(application, ownLease: null);
+        if (CanPrepareWithLiveChecks(result))
+        {
+            result = await verifier.RunLiveChecksForApplicationAsync(application, cancellationToken).ConfigureAwait(false);
+        }
+
+        cancellationToken.ThrowIfCancellationRequested();
+        return Authorise(result);
+    }
+
+    public OperationResult<Unit> VerifyForApplication(
+        AdapterExecutionMode mode, WorkstationApplication application, IWorkstationAutomationLease workstationLease)
+    {
+        ArgumentNullException.ThrowIfNull(workstationLease);
+        if (!Enum.IsDefined(application))
+            return OperationResult.Fail<Unit>(FailureCode.EnvironmentNotVerified, "Unknown workstation application.");
+        if (mode != AdapterExecutionMode.Production || !_requireEnvironmentVerification)
+            return Verify(mode, workstationLease);
+        if (!workstationLease.IsActive)
+            return OperationResult.Fail<Unit>(FailureCode.EnvironmentNotVerified, "The workstation automation lease is inactive.");
+
+        // Only the explicit full-workstation path publishes a readiness report.
+        return _verifier is IApplicationProductionWorkstationVerifier verifier
+            ? Authorise(verifier.VerifyForApplication(application, workstationLease))
+            : Verify(mode, workstationLease);
+    }
+
+    private static bool CanPrepareWithLiveChecks(WorkstationVerificationResult result) =>
+        !result.Verified && result.Preset is not null && result.BlockingChecks.Any() &&
+        result.BlockingChecks.All(check => check.Kind is WorkstationCheckKind.Live or WorkstationCheckKind.Smoke);
 
     /// <inheritdoc />
     public EnvironmentReadinessReport Read()

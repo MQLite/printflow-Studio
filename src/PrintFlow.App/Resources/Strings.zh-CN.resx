@@ -1375,6 +1375,7 @@
   <data name="Session_GuidedPhaseWriting" xml:space="preserve"><value>已确认导出，输出文件可能仍在写入。</value></data>
   <data name="Session_GuidedProcessingWait" xml:space="preserve"><value>当前无法提供可靠的百分比，请等待；处理成功后，仍须你检查并审核结果。</value></data>
   <data name="Session_GuidedStopping" xml:space="preserve"><value>正在停止本次处理</value></data>
+  <data name="Session_ImageProcessingStopHint" xml:space="preserve"><value>停止本次处理，丢弃这次运行返回的结果。</value></data>
   <data name="Session_GuidedTakingOver" xml:space="preserve"><value>正在交由你接管</value></data>
   <data name="Session_GuidedPrintActual" xml:space="preserve"><value>预计印刷尺寸：{0:0.##} × {1:0.##} 毫米</value></data>
   <data name="Session_GuidedPrintContract" xml:space="preserve"><value>TIFF 打印文件：{0} PPI（每英寸像素数）· CMYK 印刷色彩 · W1 白墨通道。生成后须校验、人工审核，再保存。</value></data>
@@ -1717,4 +1718,102 @@
   <data name="WorkTask_Loading" xml:space="preserve"><value>正在加载 AI 任务…</value></data>
   <data name="WorkTask_Reload" xml:space="preserve"><value>刷新</value></data>
   <data name="WorkTask_RecoveryDeferred" xml:space="preserve"><value>Studio 未自动恢复这笔较早的回传。可等其它回传完成后重启 Studio，或停止接收。</value></data>
+  <data name="ImageProcessing_Heading" xml:space="preserve"><value>图像处理</value></data>
+  <data name="ImageProcessing_Hint" xml:space="preserve"><value>新任务将使用这里保存的默认方式。</value></data>
+  <data name="ImageProcessing_Breadcrumb" xml:space="preserve"><value>设置 / 图像处理</value></data>
+  <data name="ImageProcessing_Enhancement" xml:space="preserve"><value>清晰化</value></data>
+  <data name="ImageProcessing_BackgroundRemoval" xml:space="preserve"><value>去背景</value></data>
+  <data name="ImageProcessing_Crop" xml:space="preserve"><value>裁切边缘</value></data>
+  <data name="ImageProcessing_IgnoreNoise" xml:space="preserve"><value>忽略小杂点</value></data>
+  <data name="ImageProcessing_Available" xml:space="preserve"><value>当前版本支持美图和 Alpha 自动裁切。</value></data>
+  <data name="ImageProcessing_Restore" xml:space="preserve"><value>恢复默认</value></data>
+  <data name="ImageProcessing_Save" xml:space="preserve"><value>保存</value></data>
+  <data name="ImageProcessing_Back" xml:space="preserve"><value>返回</value></data>
+  <data name="ImageProcessing_LeaveQuestion" xml:space="preserve"><value>保存对图像处理设置的更改吗？</value></data>
+  <data name="ImageProcessing_Discard" xml:space="preserve"><value>放弃更改</value></data>
+  <data name="ImageProcessing_KeepEditing" xml:space="preserve"><value>继续编辑</value></data>
+  <data name="ImageProcessing_InvalidDefaults" xml:space="preserve"><value>无法读取已保存的图像处理设置。请打开「设置 → 图像处理」，恢复默认后保存。</value></data>
+  <data name="ImageProcessing_UnavailableDefaults" xml:space="preserve"><value>保存的图像处理方式在当前版本不可用。请选择可用方式，或恢复默认后保存。</value></data>
+  <data name="ImageProcessing_Method_Meitu" xml:space="preserve"><value>美图</value></data>
+  <data name="ImageProcessing_Method_LightSharpen" xml:space="preserve"><value>本地轻度锐化</value></data>
+  <data name="ImageProcessing_Method_AiUpscale" xml:space="preserve"><value>本地 AI 超分（2×）</value></data>
+  <data name="ImageProcessing_SharpenHint" xml:space="preserve"><value>增强边缘清晰度，保留图像尺寸和透明度。</value></data>
+  <data name="ImageProcessing_UpscaleHint" xml:space="preserve"><value>在 CPU 上将宽高像素各放大 2 倍。请在审核时检查五官和文字有无变化。</value></data>
+  <data name="ImageProcessing_UpscaleModelMissing" xml:space="preserve"><value>缺少本地 2× 模型。请选择轻度锐化或跳过清晰化。</value></data>
+  <data name="ImageProcessing_UpscaleModelInvalid" xml:space="preserve"><value>无法验证本地 2× 模型。请选择轻度锐化或跳过清晰化。</value></data>
+  <data name="ImageProcessing_UpscaleLowMemory" xml:space="preserve"><value>2× 超分至少需要 1.5 GiB 可用系统内存。请释放内存、改用轻度锐化或跳过清晰化。</value></data>
+  <data name="ImageProcessing_UpscaleRunFailed" xml:space="preserve"><value>本地 2× 模型无法处理此图像。请重试、改用轻度锐化或跳过清晰化。</value></data>
+  <data name="ImageProcessing_UpscaleTooLarge" xml:space="preserve"><value>2× 超分要求每边不超过 1,024 像素，总像素不超过 262,144。请选择轻度锐化或跳过清晰化。</value></data>
+  <data name="ImageProcessing_SharpenTooLarge" xml:space="preserve"><value>轻度锐化要求每边不超过 8,192 像素，总像素不超过 2,400 万，文件不超过 128 MiB。可跳过清晰化以保留原图。</value></data>
+  <data name="ImageProcessing_UpscaleBitDepth" xml:space="preserve"><value>2× 超分支持每通道最多 8 位的图像。请选择轻度锐化或跳过清晰化以保留原有位深。</value></data>
+  <data name="ImageProcessing_LocalImageUnsupported" xml:space="preserve"><value>本地清晰化支持 RGB 或灰度 PNG、JPEG。请更换方式或跳过清晰化。</value></data>
+  <data name="ImageProcessing_LocalImageError" xml:space="preserve"><value>本地清晰化未能读取图像、保留色彩配置或生成有效结果。请更换方式或跳过清晰化。</value></data>
+  <data name="ImageProcessing_LocalRuntimeUnavailable" xml:space="preserve"><value>所需的 Windows x64 图像处理运行库不可用。请选择其他方式或跳过清晰化。</value></data>
+  <data name="ImageProcessing_Method_OpenAiRestore" xml:space="preserve"><value>OpenAI 照片修复</value></data>
+  <data name="ImageProcessing_Method_SkipEnhancement" xml:space="preserve"><value>跳过清晰化</value></data>
+  <data name="ImageProcessing_Method_BiRefNet" xml:space="preserve"><value>本地 BiRefNet 抠图</value></data>
+  <data name="ImageProcessing_Method_OpenAiCutout" xml:space="preserve"><value>OpenAI 生成式去背景</value></data>
+  <data name="ImageProcessing_Method_KeepBackground" xml:space="preserve"><value>保留背景</value></data>
+  <data name="ImageProcessing_Method_AlphaTrim" xml:space="preserve"><value>Alpha 自动裁切</value></data>
+  <data name="ImageProcessing_Method_ManualCrop" xml:space="preserve"><value>手动框选</value></data>
+  <data name="ImageProcessing_Method_KeepCanvas" xml:space="preserve"><value>保留原画布</value></data>
+  <data name="WorkTask_RepairImageProcessingSettings" xml:space="preserve"><value>请打开「设置 → 图像处理」，恢复默认并保存，重启 PrintFlow Studio 后继续接收此结果。</value></data>
+  <data name="ImageProcessing_CurrentMethod" xml:space="preserve"><value>本次方式：{0}</value></data>
+  <data name="ImageProcessing_ChangeTaskMethod" xml:space="preserve"><value>更改本任务的方式</value></data>
+  <data name="ImageProcessing_ApplyTaskMethod" xml:space="preserve"><value>应用方式</value></data>
+  <data name="ImageProcessing_MethodUnavailable" xml:space="preserve"><value>当前版本尚未提供此方式。</value></data>
+  <data name="ImageProcessing_DependencyUnavailable" xml:space="preserve"><value>所需的组件或模型不可用。</value></data>
+  <data name="ImageProcessing_MeituUnavailable" xml:space="preserve"><value>请检查是否已安装美图，并完成工作站配置。</value></data>
+  <data name="ImageProcessing_MeituHint" xml:space="preserve"><value>使用工作站已配置的美图桌面应用。</value></data>
+  <data name="ImageProcessing_AlphaHint" xml:space="preserve"><value>根据透明画布上的有效内容确定裁切边界。</value></data>
+  <data name="ImageProcessing_SkipHint" xml:space="preserve"><value>在任务中确认后沿用当前图像。</value></data>
+  <data name="ImageProcessing_Ready" xml:space="preserve"><value>本工作站可用。</value></data>
+  <data name="ImageProcessing_Method_OpenAiCombined" xml:space="preserve"><value>OpenAI 合并处理</value></data>
+  <data name="ImageProcessing_Method_ManualResult" xml:space="preserve"><value>手动导入结果</value></data>
+  <data name="ImageProcessing_ManualCropHint" xml:space="preserve"><value>在任务中手动框选裁切范围。</value></data>
+  <data name="ImageProcessing_KeepCanvasHint" xml:space="preserve"><value>保留当前画布尺寸。</value></data>
+  <data name="ImageProcessing_BiRefNetHint" xml:space="preserve"><value>在本工作站运行，保留原画布和颜色样本，并合成连续 Alpha 蒙版。</value></data>
+  <data name="ImageProcessing_BiRefNetModelMissing" xml:space="preserve"><value>缺少本地 BiRefNet 模型。请选择其他方式。已选择 BiRefNet 的任务可以转为手工处理。</value></data>
+  <data name="ImageProcessing_BiRefNetModelInvalid" xml:space="preserve"><value>无法验证本地 BiRefNet 模型。请选择其他方式。已选择 BiRefNet 的任务可以转为手工处理。</value></data>
+  <data name="ImageProcessing_BiRefNetRuntimeUnavailable" xml:space="preserve"><value>所需的 Windows x64 图像处理运行库不可用。请选择其他方式。已选择 BiRefNet 的任务可以转为手工处理。</value></data>
+  <data name="ImageProcessing_BiRefNetLowMemory" xml:space="preserve"><value>BiRefNet 至少需要 4 GiB 可用系统内存。请释放内存、选择其他方式或转为手工处理。</value></data>
+  <data name="ImageProcessing_BiRefNetRunFailed" xml:space="preserve"><value>本地 BiRefNet 模型无法处理此图像。请重试、选择其他方式或转为手工处理。</value></data>
+  <data name="ImageProcessing_BiRefNetTooLarge" xml:space="preserve"><value>BiRefNet 支持每边最多 8,192 像素、总计 2,400 万像素及 128 MiB 的文件。请选择其他方式或转为手工处理。</value></data>
+  <data name="ImageProcessing_BiRefNetUnsupported" xml:space="preserve"><value>本地 BiRefNet 支持每通道最多 16 位的 RGB 或灰度 PNG、JPEG。请选择其他方式或转为手工处理。</value></data>
+  <data name="ImageProcessing_BiRefNetImageError" xml:space="preserve"><value>BiRefNet 无法读取图像或保留颜色配置和像素。请选择其他方式或转为手工处理。</value></data>
+  <data name="ImageProcessing_BiRefNetInvalidMatte" xml:space="preserve"><value>BiRefNet 生成了无效蒙版，或未能分离前景和背景。请选择其他方式或转为手工处理。</value></data>
+  <data name="ImageProcessing_CloudHint" xml:space="preserve"><value>将图像上传至 OpenAI，按使用量计费。</value></data>
+  <data name="ImageProcessing_ConfirmBackgroundHint" xml:space="preserve"><value>运行前，请为当前图像确认去背景方式。</value></data>
+  <data name="ImageProcessing_AuthoriseBackgroundMethod" xml:space="preserve"><value>对此图像使用当前方式</value></data>
+  <data name="ImageProcessing_ConfirmBackgroundQuestion" xml:space="preserve"><value>对此图像使用{0}？请复核结果后再批准。</value></data>
+  <data name="ImageProcessing_OpenAiCredentialHeading" xml:space="preserve"><value>OpenAI API 密钥</value></data>
+  <data name="ImageProcessing_OpenAiCredentialSave" xml:space="preserve"><value>保存 API 密钥</value></data>
+  <data name="ImageProcessing_OpenAiCredentialRemove" xml:space="preserve"><value>移除 API 密钥</value></data>
+  <data name="ImageProcessing_OpenAiConfigured" xml:space="preserve"><value>密钥已保存在 Windows 凭据管理器。首次请求时会验证密钥。</value></data>
+  <data name="ImageProcessing_OpenAiKeyMissing" xml:space="preserve"><value>请在图像处理设置中添加 OpenAI API 密钥。</value></data>
+  <data name="ImageProcessing_OpenAiKeyInvalid" xml:space="preserve"><value>请输入有效的 OpenAI API 密钥。</value></data>
+  <data name="ImageProcessing_OpenAiCredentialStore" xml:space="preserve"><value>Windows 凭据管理器无法访问密钥。请检查 Windows 用户会话或选择其他方式。</value></data>
+  <data name="ImageProcessing_OpenAiModelUnavailable" xml:space="preserve"><value>配置的 OpenAI Images 模型不可用。请检查部署设置。</value></data>
+  <data name="ImageProcessing_OpenAiUploadTitle" xml:space="preserve"><value>确认上传到 OpenAI</value></data>
+  <data name="ImageProcessing_OpenAiUploadQuestion" xml:space="preserve"><value>「{0}」会把任务中显示的图片上传到 OpenAI。即使请求超时，仍可能产生费用。是否继续本次上传？</value></data>
+  <data name="ImageProcessing_OpenAiConfirmationRequired" xml:space="preserve"><value>运行 OpenAI 方式时，请确认上传当前图片。</value></data>
+  <data name="ImageProcessing_OpenAiUnauthorised" xml:space="preserve"><value>OpenAI 未接受当前凭据。请更新 API 密钥或选择其他方式。</value></data>
+  <data name="ImageProcessing_OpenAiRateOrQuota" xml:space="preserve"><value>OpenAI 返回了限流或额度错误。重试前请检查用量和余额。</value></data>
+  <data name="ImageProcessing_OpenAiNetwork" xml:space="preserve"><value>OpenAI 请求未完成。重试前请检查网络和用量。</value></data>
+  <data name="ImageProcessing_OpenAiTimeout" xml:space="preserve"><value>OpenAI 未及时返回结果。发起新请求前请检查用量。</value></data>
+  <data name="ImageProcessing_OpenAiRejected" xml:space="preserve"><value>OpenAI 拒绝了图像编辑。请检查服务或选择其他方式。</value></data>
+  <data name="ImageProcessing_OpenAiUnsupportedInput" xml:space="preserve"><value>请选择有可见像素的 PNG 或 JPEG，文件不超过 20 MiB，每边不超过 8192 像素，总像素不超过 2400 万。</value></data>
+  <data name="ImageProcessing_OpenAiInvalidOutput" xml:space="preserve"><value>返回图片的 PNG 格式、尺寸或透明度无效，无法进入审核。请选择其他方式或重试。</value></data>
+  <data name="ImageProcessing_OpenAiWorkspace" xml:space="preserve"><value>无法读取或写入 OpenAI 图像工作文件。请检查工作区后重试。</value></data>
+  <data name="ImageProcessing_CombinedToggle" xml:space="preserve"><value>一次完成清晰化＋去背景</value></data>
+  <data name="ImageProcessing_CombinedHint" xml:space="preserve"><value>将已审核的图片上传到 OpenAI，可能产生费用。结果可能改变五官、文字或边缘。</value></data>
+  <data name="ImageProcessing_ContinueCombined" xml:space="preserve"><value>继续到合并处理</value></data>
+  <data name="ImageProcessing_RunCombined" xml:space="preserve"><value>运行合并处理</value></data>
+  <data name="ImageProcessing_KeepReviewedInput" xml:space="preserve"><value>保留已审核输入并继续裁切</value></data>
+  <data name="ImageProcessing_ReturnToSeparate" xml:space="preserve"><value>返回清晰化并改用分步处理</value></data>
+  <data name="ImageProcessing_CombinedReviewHeading" xml:space="preserve"><value>联合审核清晰化和去背景</value></data>
+  <data name="ImageProcessing_CombinedReviewDetails" xml:space="preserve"><value>对比输入图和结果的五官、文字与细节，检查主体是否被改变。</value></data>
+  <data name="ImageProcessing_CombinedReviewEdges" xml:space="preserve"><value>检查轮廓、发丝和浅色边缘，确认需要保留的主体完整可见。</value></data>
+  <data name="ImageProcessing_CombinedReviewReject" xml:space="preserve"><value>拒绝会丢弃本次结果。之后可重新确认上传并重试、保留已审核输入，或返回分步处理。</value></data>
+  <data name="ImageProcessing_OpenAiCutoutHint" xml:space="preserve"><value>会把图片上传到 OpenAI，可能产生用量费用。生成式去背景可能重绘部分主体。</value></data>
 </root>

@@ -22,6 +22,9 @@ public sealed record AdaptersConfiguration(string Mode);
 /// <summary>Local log retention.</summary>
 public sealed record LoggingConfiguration(int RetentionDays);
 
+/// <summary>The deployment's model identifier. Credentials are managed by Windows.</summary>
+public sealed record OpenAiImagesConfiguration(string Model);
+
 /// <summary>
 /// The complete <c>appsettings.json</c> shape (Epic 11100 plan §18, §3.2).
 /// </summary>
@@ -39,6 +42,8 @@ public sealed record PrintFlowConfiguration(
     AdaptersConfiguration Adapters,
     LoggingConfiguration Logging)
 {
+    public OpenAiImagesConfiguration? OpenAiImages { get; init; }
+
     private static readonly JsonSerializerOptions SerializerOptions = new()
     {
         PropertyNameCaseInsensitive = true,
@@ -99,7 +104,10 @@ public sealed record PrintFlowConfiguration(
         AdaptersConfiguration adapters = ReadSection(root, "Adapters", baseline.Adapters);
         LoggingConfiguration logging = ReadSection(root, "Logging", baseline.Logging);
 
-        return new PrintFlowConfiguration(workspace, database, preset, adapters, logging);
+        return new PrintFlowConfiguration(workspace, database, preset, adapters, logging)
+        {
+            OpenAiImages = ReadSection(root, "OpenAiImages", baseline.OpenAiImages),
+        };
     }
 
     private static T ReadSection<T>(JsonElement root, string propertyName, T fallback) =>

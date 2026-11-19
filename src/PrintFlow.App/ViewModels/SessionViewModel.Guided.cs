@@ -219,6 +219,9 @@ public sealed partial class SessionViewModel
         OnPropertyChanged(nameof(ShowsGuidedBackgroundDecision));
         OnPropertyChanged(nameof(ShowsGuidedTrimParameters));
         OnPropertyChanged(nameof(ShowsGuidedRunStep));
+        OnPropertyChanged(nameof(CanChangeImageProcessingMethod));
+        OnPropertyChanged(nameof(CanReturnToSeparateProcessing));
+        ApplyImageProcessingMethodCommand.NotifyCanExecuteChanged();
         OnPropertyChanged(nameof(ShowsGuidedAutomaticBegin));
         OnPropertyChanged(nameof(ShowsGuidedAutomaticConfirmation));
         OnPropertyChanged(nameof(ShowsGuidedEnlargement));

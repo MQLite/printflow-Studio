@@ -41,6 +41,7 @@ public enum CommandKind
 
     SelectWhiteUnderbaseBranch,
     SetTrimParameters,
+    SetImageProcessingSelection,
     SetBackgroundRemovalDecision,
     ReturnToStep,
     Complete,
@@ -106,6 +107,7 @@ public static class TransitionTable
         // this table, because the table answers "what does the *target step's* state permit",
         // and this command names no step (Epic 11200 Part C3 §13).
         CommandKind.SetTrimParameters,
+        CommandKind.SetImageProcessingSelection,
 
         // And a reviewed-content authority for Background Removal, for the same reason: it
         // names no step, changes no step state, and starts nothing. Whether Background Removal
@@ -147,6 +149,7 @@ public static class TransitionTable
             CommandKind.StartStep,
             CommandKind.Skip,
             CommandKind.SetPrintDimensions,
+            CommandKind.SubmitManualCrop,
 
             // The three sizing routes sit in the same row because they are one decision made
             // three ways, and all three finish the same step. Which of them a session used is
@@ -223,6 +226,7 @@ public static class TransitionTable
             CommandKind.Retry,
             CommandKind.Skip,
             CommandKind.HandOff,
+            CommandKind.SubmitManualCrop,
         ],
     };
 

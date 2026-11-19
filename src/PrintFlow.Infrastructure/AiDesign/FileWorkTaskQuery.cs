@@ -64,6 +64,7 @@ public sealed class FileWorkTaskQuery(FileAiDesignRequestStore store, ISessionSe
                         WorkResultProblem.TimedOut => WorkTaskFailure.TimedOut,
                         WorkResultProblem.ValidationFailed => WorkTaskFailure.ValidationFailed,
                         WorkResultProblem.RecoveryDeferred => WorkTaskFailure.RecoveryDeferred,
+                        WorkResultProblem.ImageProcessingSettings => WorkTaskFailure.ImageProcessingSettings,
                         _ => WorkTaskFailure.ReceiverUnavailable
                     }},
                     _ => task with { Stage = WorkTaskStage.AwaitingReturn }

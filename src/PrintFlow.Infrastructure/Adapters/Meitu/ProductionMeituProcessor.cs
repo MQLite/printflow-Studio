@@ -71,6 +71,22 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
     /// <inheritdoc />
     public AdapterExecutionMode Mode => AdapterExecutionMode.Production;
 
+    public OperationFailure? GetConfigurationFailure(MeituOperation operation)
+    {
+        var baseline = _baselines.GetVerifiedBaseline();
+        bool hasOperationConfiguration = baseline.IsSuccess && operation switch
+        {
+            MeituOperation.Enhance => baseline.Value.Enhancement is not null,
+            MeituOperation.RemoveBackground => baseline.Value.BackgroundRemoval is not null,
+            _ => false,
+        };
+        return hasOperationConfiguration && VerifyExecutableAvailability(baseline.Value).IsSuccess
+            ? null
+            : OperationFailure.Create(FailureCode.AdapterUnavailable,
+                "The selected Meitu operation is missing workstation configuration or cannot read the executable.",
+                messageKey: "ImageProcessing_MeituUnavailable");
+    }
+
     /// <summary>
     /// Runs one Meitu operation end to end, and returns success only when a validated output
     /// file exists on the controlled path (Epic 11300 Part B2B §3, §27).

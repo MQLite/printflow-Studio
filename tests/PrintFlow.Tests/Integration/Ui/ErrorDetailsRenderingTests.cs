@@ -6,6 +6,7 @@ using System.Windows.Automation;
 using System.Windows.Automation.Peers;
 using System.Windows.Automation.Provider;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Threading;
 using Microsoft.Extensions.DependencyInjection;
@@ -331,11 +332,23 @@ public sealed class ErrorDetailsRenderingTests
             TextBox input = ById<TextBox>(tree, "ErrorDetails.InputPath");
             input.Focus().ShouldBeTrue();
             input.IsKeyboardFocused.ShouldBeTrue();
-            foreach (string next in new[] { "ExpectedOutputPath", "ScreenshotPath", "TechnicalDetail", "Retry", "ManualProcessing", "ExportDiagnosticPackage", "Back" })
-            {
-                ((UIElement)Keyboard.FocusedElement).MoveFocus(new TraversalRequest(FocusNavigationDirection.Next)).ShouldBeTrue();
-                AutomationProperties.GetAutomationId((DependencyObject)Keyboard.FocusedElement).ShouldBe("ErrorDetails." + next);
-            }
+            MoveToNextFocus("ErrorDetails.ExpectedOutputPath");
+            MoveToNextFocus("ErrorDetails.ScreenshotPath");
+
+            var disclosure = ById<Expander>(tree, "ErrorDetails.TechnicalDisclosure");
+            disclosure.IsExpanded.ShouldBeFalse();
+            ((UIElement)Keyboard.FocusedElement).MoveFocus(new TraversalRequest(FocusNavigationDirection.Next)).ShouldBeTrue();
+            var header = Keyboard.FocusedElement.ShouldBeAssignableTo<ToggleButton>();
+            ReviewGuidanceLayoutTests.IsInside(header, disclosure).ShouldBeTrue();
+            var expansion = new ExpanderAutomationPeer(disclosure).GetPattern(PatternInterface.ExpandCollapse)
+                .ShouldBeAssignableTo<IExpandCollapseProvider>();
+            expansion.Expand();
+            PumpUntil(() => disclosure.IsExpanded);
+            window.UpdateLayout();
+            MoveToNextFocus("ErrorDetails.TechnicalDetail");
+
+            foreach (string next in new[] { "Back", "Retry", "ManualProcessing", "ExportDiagnosticPackage" })
+                MoveToNextFocus("ErrorDetails." + next);
         }
         finally
         {
@@ -353,19 +366,20 @@ public sealed class ErrorDetailsRenderingTests
             window.UpdateLayout();
             TextBox reference = ById<TextBox>(tree, "DiagnosticPackage.FailureReference");
             reference.Focus().ShouldBeTrue();
-            foreach (string next in new[] { "LocalPaths", "Save", "Back" })
-            {
-                ((UIElement)Keyboard.FocusedElement).MoveFocus(
-                    new TraversalRequest(FocusNavigationDirection.Next)).ShouldBeTrue();
-                AutomationProperties.GetAutomationId((DependencyObject)Keyboard.FocusedElement)
-                    .ShouldBe("DiagnosticPackage." + next);
-            }
+            foreach (string next in new[] { "LocalPaths", "Back", "Save" })
+                MoveToNextFocus("DiagnosticPackage." + next);
         }
         finally
         {
             window.Content = null;
             window.Close();
         }
+    }
+
+    private static void MoveToNextFocus(string id)
+    {
+        ((UIElement)Keyboard.FocusedElement).MoveFocus(new TraversalRequest(FocusNavigationDirection.Next)).ShouldBeTrue();
+        AutomationProperties.GetAutomationId((DependencyObject)Keyboard.FocusedElement).ShouldBe(id);
     }
 
     private static T ById<T>(RenderedTree tree, string id) where T : FrameworkElement =>

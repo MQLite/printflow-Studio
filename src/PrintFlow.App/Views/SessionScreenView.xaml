@@ -874,14 +874,6 @@
                        Margin="0,0,0,6"
                        Visibility="{Binding ShowsManualCropEntryNotice, Converter={StaticResource BoolToVisibility}}" />
 
-            <!--
-                Manual Crop (Part C2 §3). Its visibility is CanManualCrop, which the workflow
-                layer answers from the session state, the step state and the attempt history —
-                this file states no condition of its own, which is what "do not infer eligibility
-                in XAML" asks for. It is deliberately not bound to IsManualCropRequired: that
-                notice covers only the first of the two openings, and the second — offering
-                another crop after one was rejected — has no failure code to show (§21).
-            -->
             <local:SessionActionButton Content="{Binding BeginManualCropLabel}"
                     Command="{Binding BeginManualCropCommand}"
                     IsEnabled="{Binding CanInteractWithLivePage}"
@@ -1523,13 +1515,94 @@
                         </Style></ContentControl.Style>
                     </ContentControl>
                     <!--
+                        What to check (SCRUM-11149). Read-only guidance for the result under review:
+                        the checks, what Approve and Reject do, and where to get help. Collapsed while
+                        the Ask panel, the trim editor or a manual crop is the task. The two buttons are
+                        the existing entries — same command, same eligibility — so nothing here
+                        approves, rejects, prepares, hands off, crops or saves.
+                    -->
+                    <Border BorderBrush="#9BAFC0" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,0,10"
+                            AutomationProperties.AutomationId="Session.ReviewGuidance"
+                            AutomationProperties.Name="{Binding ReviewGuidanceHeading}"
+                            Visibility="{Binding ShowsReviewGuidance, Converter={StaticResource BoolToVisibility}}">
+                        <StackPanel>
+                            <TextBlock Text="{Binding ReviewGuidanceHeading}" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" />
+                            <controls:ReviewGuidanceScrollViewer HorizontalScrollBarVisibility="Disabled"
+                                                            AutomationProperties.Name="{Binding ReviewGuidanceHeading}">
+                                <controls:ReviewGuidanceScrollViewer.Style>
+                                    <Style TargetType="ScrollViewer">
+                                        <Setter Property="VerticalScrollBarVisibility" Value="Disabled" />
+                                        <Setter Property="Focusable" Value="False" />
+                                        <Setter Property="IsTabStop" Value="False" />
+                                        <Style.Triggers>
+                                            <!-- Keep the review heading and the pending save fields in view together. -->
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Binding="{Binding ShowsSaveDraft}" Value="True" />
+                                                    <Condition Binding="{Binding IsExpanded, ElementName=FinalSaveOptions}" Value="True" />
+                                                </MultiDataTrigger.Conditions>
+                                                <Setter Property="MaxHeight" Value="64" />
+                                                <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+                                                <Setter Property="Focusable" Value="True" />
+                                                <Setter Property="IsTabStop" Value="True" />
+                                            </MultiDataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </controls:ReviewGuidanceScrollViewer.Style>
+                                <StackPanel>
+                                    <ItemsControl ItemsSource="{Binding ReviewGuidanceChecks}" IsTabStop="False" Margin="0,6,0,0"
+                                                  AutomationProperties.AutomationId="Session.ReviewGuidance.Checks"
+                                                  AutomationProperties.Name="{Binding ReviewGuidanceHeading}">
+                                        <ItemsControl.ItemContainerStyle>
+                                            <Style TargetType="ContentPresenter">
+                                                <Setter Property="AutomationProperties.Name" Value="{Binding}" />
+                                            </Style>
+                                        </ItemsControl.ItemContainerStyle>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="0,0,0,4">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Text="•" Margin="0,0,6,0" />
+                                                    <TextBlock Grid.Column="1" Text="{Binding}" TextWrapping="Wrap" />
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <TextBlock Text="{Binding ReviewGuidanceApprove}" TextWrapping="Wrap" Opacity="0.85" Margin="0,4,0,0"
+                                               AutomationProperties.AutomationId="Session.ReviewGuidance.Approve" />
+                                    <TextBlock Text="{Binding ReviewGuidanceReject}" TextWrapping="Wrap" Opacity="0.85" Margin="0,4,0,0"
+                                               AutomationProperties.AutomationId="Session.ReviewGuidance.Reject" />
+                                    <TextBlock Text="{Binding ReviewGuidanceHelp}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,8,0,0"
+                                               AutomationProperties.AutomationId="Session.ReviewGuidance.Help" />
+                                    <local:SessionActionButton Content="{Binding AskColleagueLabel}"
+                                            Command="{Binding BeginAskColleagueCommand}"
+                                            IsEnabled="{Binding CanAskColleague}"
+                                            AutomationProperties.AutomationId="Session.ReviewGuidance.AskColleague"
+                                            AutomationProperties.Name="{Binding AskColleagueLabel}"
+                                            HorizontalAlignment="Left" Padding="12,4" Margin="0,6,0,0"
+                                            Visibility="{Binding ShowsGuidanceAskColleague, Converter={StaticResource BoolToVisibility}}" />
+                                    <local:SessionActionButton Content="{Binding TrimAdjustBeginLabel}"
+                                            Command="{Binding BeginTrimAdjustCommand}"
+                                            IsEnabled="{Binding CanAdjustTrim}"
+                                            AutomationProperties.AutomationId="Session.ReviewGuidance.AdjustTrim"
+                                            AutomationProperties.Name="{Binding TrimAdjustBeginLabel}"
+                                            HorizontalAlignment="Left" Padding="12,4" Margin="0,6,0,0"
+                                            Visibility="{Binding ShowsGuidanceAdjustTrim, Converter={StaticResource BoolToVisibility}}" />
+                                </StackPanel>
+                            </controls:ReviewGuidanceScrollViewer>
+                        </StackPanel>
+                    </Border>
+                    <!--
                         Final review and save (SCRUM-11145). Present only for a final review, an
                         approved final result or its recorded saves. Every state is stated in
                         words; paths are selectable text; technical identities stay in details.
                         No button here is a default button, and approving or saving buttons use
                         the fresh-gesture input guard bound to the exact target and draft.
                     -->
-                    <local:SessionExpander
+                    <local:SessionExpander x:Name="FinalSaveOptions"
                                            IsExpanded="{Binding ExpandsGuidedFinalSave, Mode=OneWay}"
                                            Visibility="{Binding HasFinalSave, Converter={StaticResource BoolToVisibility}}"
                                            AutomationProperties.AutomationId="Session.FinalSave.Options">
@@ -1555,62 +1628,6 @@
                         </ContentControl.Style>
                     </ContentControl>
                     </local:SessionExpander>
-                    <!--
-                        What to check (SCRUM-11149). Read-only guidance for the result under review:
-                        the checks, what Approve and Reject do, and where to get help. Collapsed while
-                        the Ask panel, the trim editor or a manual crop is the task. The two buttons are
-                        the existing entries — same command, same eligibility — so nothing here
-                        approves, rejects, prepares, hands off, crops or saves.
-                    -->
-                    <Border BorderBrush="#9BAFC0" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,0,10"
-                            AutomationProperties.AutomationId="Session.ReviewGuidance"
-                            AutomationProperties.Name="{Binding ReviewGuidanceHeading}"
-                            Visibility="{Binding ShowsReviewGuidance, Converter={StaticResource BoolToVisibility}}">
-                        <StackPanel>
-                            <TextBlock Text="{Binding ReviewGuidanceHeading}" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" />
-                            <ItemsControl ItemsSource="{Binding ReviewGuidanceChecks}" IsTabStop="False" Margin="0,6,0,0"
-                                          AutomationProperties.AutomationId="Session.ReviewGuidance.Checks"
-                                          AutomationProperties.Name="{Binding ReviewGuidanceHeading}">
-                                <ItemsControl.ItemContainerStyle>
-                                    <Style TargetType="ContentPresenter">
-                                        <Setter Property="AutomationProperties.Name" Value="{Binding}" />
-                                    </Style>
-                                </ItemsControl.ItemContainerStyle>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Grid Margin="0,0,0,4">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto" />
-                                                <ColumnDefinition Width="*" />
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Text="•" Margin="0,0,6,0" />
-                                            <TextBlock Grid.Column="1" Text="{Binding}" TextWrapping="Wrap" />
-                                        </Grid>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                            <TextBlock Text="{Binding ReviewGuidanceApprove}" TextWrapping="Wrap" Opacity="0.85" Margin="0,4,0,0"
-                                       AutomationProperties.AutomationId="Session.ReviewGuidance.Approve" />
-                            <TextBlock Text="{Binding ReviewGuidanceReject}" TextWrapping="Wrap" Opacity="0.85" Margin="0,4,0,0"
-                                       AutomationProperties.AutomationId="Session.ReviewGuidance.Reject" />
-                            <TextBlock Text="{Binding ReviewGuidanceHelp}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,8,0,0"
-                                       AutomationProperties.AutomationId="Session.ReviewGuidance.Help" />
-                            <local:SessionActionButton Content="{Binding AskColleagueLabel}"
-                                    Command="{Binding BeginAskColleagueCommand}"
-                                    IsEnabled="{Binding CanAskColleague}"
-                                    AutomationProperties.AutomationId="Session.ReviewGuidance.AskColleague"
-                                    AutomationProperties.Name="{Binding AskColleagueLabel}"
-                                    HorizontalAlignment="Left" Padding="12,4" Margin="0,6,0,0"
-                                    Visibility="{Binding ShowsGuidanceAskColleague, Converter={StaticResource BoolToVisibility}}" />
-                            <local:SessionActionButton Content="{Binding TrimAdjustBeginLabel}"
-                                    Command="{Binding BeginTrimAdjustCommand}"
-                                    IsEnabled="{Binding CanAdjustTrim}"
-                                    AutomationProperties.AutomationId="Session.ReviewGuidance.AdjustTrim"
-                                    AutomationProperties.Name="{Binding TrimAdjustBeginLabel}"
-                                    HorizontalAlignment="Left" Padding="12,4" Margin="0,6,0,0"
-                                    Visibility="{Binding ShowsGuidanceAdjustTrim, Converter={StaticResource BoolToVisibility}}" />
-                        </StackPanel>
-                    </Border>
 
                     <!-- Keep all per-size facts reachable without consuming the image area. -->
                     <ContentControl Focusable="False" IsTabStop="False">
@@ -1702,6 +1719,41 @@
                     </Border>
 
 </local:SessionExpander>
+                    <StackPanel Margin="0,8,0,4"
+                                Visibility="{Binding ShowsImageProcessingMethod, Converter={StaticResource BoolToVisibility}}">
+                        <TextBlock Text="{Binding CurrentImageProcessingMethod}" FontWeight="SemiBold"
+                                   TextWrapping="Wrap" AutomationProperties.AutomationId="Session.ImageProcessing.Method" />
+                        <TextBlock Text="{Binding CurrentImageProcessingUnavailable}" TextWrapping="Wrap"
+                                   Foreground="{DynamicResource PF.Brush.Muted}"
+                                   AutomationProperties.LiveSetting="Polite" />
+                        <local:SessionExpander Header="{Binding ChangeImageProcessingMethodLabel}"
+                                               Style="{StaticResource PF.Disclosure}"
+                                               IsExpanded="{Binding IsChangingImageProcessingMethod, Mode=TwoWay}"
+                                               Visibility="{Binding CanChangeImageProcessingMethod, Converter={StaticResource BoolToVisibility}}"
+                                               AutomationProperties.AutomationId="Session.ImageProcessing.Change">
+                            <StackPanel Margin="0,6,0,0">
+                                <local:SessionComboBox x:Name="TaskImageMethod" Style="{StaticResource PF.Input.ComboBox}"
+                                          ItemsSource="{Binding TaskImageProcessingMethods}" DisplayMemberPath="Label"
+                                          SelectedValuePath="Method" SelectedValue="{Binding DraftImageProcessingMethod, Mode=TwoWay}"
+                                          AutomationProperties.Name="{Binding ChangeImageProcessingMethodLabel}"
+                                          AutomationProperties.AutomationId="Session.ImageProcessing.Select">
+                                    <local:SessionComboBox.ItemContainerStyle>
+                                        <Style TargetType="ComboBoxItem">
+                                            <Setter Property="ToolTip" Value="{Binding Description}" />
+                                            <Setter Property="AutomationProperties.HelpText" Value="{Binding Description}" />
+                                        </Style>
+                                    </local:SessionComboBox.ItemContainerStyle>
+                                </local:SessionComboBox>
+                                <TextBlock Text="{Binding SelectedItem.Description, ElementName=TaskImageMethod}"
+                                           TextWrapping="Wrap" Foreground="{DynamicResource PF.Brush.Muted}" Margin="0,4,0,0" />
+                                <local:SessionActionButton Style="{StaticResource PF.Button.Secondary}"
+                                                           Content="{Binding ApplyImageProcessingMethodLabel}"
+                                                           Command="{Binding ApplyImageProcessingMethodCommand}"
+                                                           HorizontalAlignment="Left" Margin="0,8,0,0"
+                                                           AutomationProperties.AutomationId="Session.ImageProcessing.Apply" />
+                            </StackPanel>
+                        </local:SessionExpander>
+                    </StackPanel>
                     <!--
                         Background removal, reviewed-content authority (Epic 11300 Part C2B2
                         §3–§9). Visible exactly while CanAuthoriseAutomaticSelection is true,
@@ -1718,11 +1770,13 @@
                             Visibility="{Binding ShowsGuidedBackgroundDecision, Converter={StaticResource BoolToVisibility}}">
                         <StackPanel>
                             <TextBlock Text="{Binding BackgroundRemovalHeading}" FontSize="15" FontWeight="SemiBold" />
-                            <TextBlock Text="{Binding BackgroundRemovalModeHeading}" Margin="0,10,0,4" />
+                            <TextBlock Text="{Binding BackgroundRemovalModeHeading}" Margin="0,10,0,4"
+                                       Visibility="{Binding ShowsMeituRecognitionModes, Converter={StaticResource BoolToVisibility}}" />
                             <ComboBox ItemsSource="{Binding BackgroundRemovalModes}"
                                       DisplayMemberPath="Label" SelectedValuePath="Mode"
                                       SelectedValue="{Binding SelectedBackgroundRemovalMode, Mode=TwoWay}"
                                       AutomationProperties.Name="{Binding BackgroundRemovalModeHeading}"
+                                      Visibility="{Binding ShowsMeituRecognitionModes, Converter={StaticResource BoolToVisibility}}"
                                       IsEnabled="{Binding CanBeginAutomaticSelection}" />
                             <TextBlock Text="{Binding BackgroundRemovalHint}"
                                        TextWrapping="Wrap"
@@ -2768,6 +2822,11 @@
                         AutomationProperties.AutomationId="Session.Skip"
                         AutomationProperties.Name="{Binding SkipLabel}"
                         Visibility="{Binding CanSkip, Converter={StaticResource BoolToVisibility}}" />
+<local:SessionActionButton Style="{StaticResource RecommendedAction}" Content="{Binding ReturnToSeparateProcessingLabel}"
+                        Command="{Binding ReturnToSeparateProcessingCommand}"
+                        AutomationProperties.AutomationId="Session.ReturnToSeparateProcessing"
+                        AutomationProperties.Name="{Binding ReturnToSeparateProcessingLabel}"
+                        Visibility="{Binding CanReturnToSeparateProcessing, Converter={StaticResource BoolToVisibility}}" />
 <local:SessionActionButton Style="{StaticResource RecommendedAction}" Content="{Binding KeepOriginalExtentLabel}"
                         ToolTip="{Binding KeepOriginalExtentHint}"
                         Command="{Binding KeepOriginalExtentCommand}"

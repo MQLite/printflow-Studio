@@ -19,17 +19,25 @@ public partial class MainWindow : Window
         closeApproved = false;
         base.OnClosing(e);
         if (e.Cancel || approved) return;
-        if (DataContext is not ShellViewModel shell || shell.Current is not IAiAuthoringCloseGuard guard) return;
+        if (DataContext is not ShellViewModel shell) return;
+        object? source = shell.Current;
+        Func<CancellationToken, Task<bool>>? requestClose = source switch
+        {
+            IAiAuthoringCloseGuard guard => guard.RequestCloseAsync,
+            SettingsViewModel { IsEditingImageProcessing: true } settings => settings.RequestImageSettingsCloseAsync,
+            _ => null,
+        };
+        if (requestClose is null) return;
         e.Cancel = true;
         if (closePending) return;
         closePending = true;
         try
         {
-            if (await guard.RequestCloseAsync(CancellationToken.None) && ReferenceEquals(shell.Current, guard))
+            if (await requestClose(CancellationToken.None) && ReferenceEquals(shell.Current, source))
             {
                 // A clean draft can answer synchronously; unwind the first Closing event.
                 await Dispatcher.InvokeAsync(() =>
-                { if (ReferenceEquals(shell.Current, guard)) { closeApproved = true; Close(); } });
+                { if (ReferenceEquals(shell.Current, source)) { closeApproved = true; Close(); } });
             }
         }
         finally { closePending = false; }

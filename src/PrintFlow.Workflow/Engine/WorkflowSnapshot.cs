@@ -2,6 +2,7 @@ using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Sessions;
+using PrintFlow.Domain.Settings;
 using PrintFlow.Domain.Trimming;
 using PrintFlow.Workflow.Definitions;
 
@@ -73,6 +74,22 @@ public sealed record WorkflowSnapshot(
     /// </para>
     /// </remarks>
     public TrimMargin TrimMargin { get; init; } = TrimMargin.Tight;
+
+    public SessionImageProcessingSelection? ImageProcessingSelection { get; init; }
+
+    internal ImageProcessingMethod? ProcessingMethodFor(StepKind step)
+    {
+        SessionImageProcessingSelection selection = ImageProcessingSelection ?? SessionImageProcessingSelection.Compatible;
+        return step switch
+        {
+            StepKind.Enhancement or StepKind.BackgroundRemoval when selection.UseOpenAiCombined => ImageProcessingMethod.OpenAiCombined,
+            StepKind.Enhancement => selection.Enhancement,
+            StepKind.BackgroundRemoval => selection.BackgroundRemoval,
+            StepKind.Trim => selection.Crop,
+            _ => null,
+        };
+    }
+    public bool ImageProcessingDefaultsDeferred { get; init; }
 
     public bool IgnoreSmallTrimNoise { get; init; } = true;
 
@@ -459,6 +476,8 @@ public sealed record WorkflowSnapshot(
             && Nullable.Equals(WhiteUnderbaseBranch, other.WhiteUnderbaseBranch)
             && ApprovedPrintOutputCount == other.ApprovedPrintOutputCount
             && TrimMargin.Equals(other.TrimMargin)
+            && ImageProcessingSelection == other.ImageProcessingSelection
+            && ImageProcessingDefaultsDeferred == other.ImageProcessingDefaultsDeferred
             && IgnoreSmallTrimNoise == other.IgnoreSmallTrimNoise
             && Equals(BackgroundRemovalAuthority, other.BackgroundRemovalAuthority)
             && Nullable.Equals(DimensionSemantics, other.DimensionSemantics)
@@ -482,6 +501,8 @@ public sealed record WorkflowSnapshot(
         hash.Add(WhiteUnderbaseBranch);
         hash.Add(ApprovedPrintOutputCount);
         hash.Add(TrimMargin);
+        hash.Add(ImageProcessingSelection);
+        hash.Add(ImageProcessingDefaultsDeferred);
         hash.Add(IgnoreSmallTrimNoise);
         hash.Add(BackgroundRemovalAuthority);
         hash.Add(DimensionSemantics);

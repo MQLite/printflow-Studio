@@ -1,6 +1,7 @@
 using System.IO;
 using System.IO.Pipes;
 using System.Text.Json;
+using Microsoft.Extensions.Time.Testing;
 using PrintFlow.Domain.AiDesign;
 using PrintFlow.Infrastructure.AiDesign;
 using PrintFlow.NativeHost;
@@ -37,7 +38,13 @@ public sealed class AiDesignBridgeLifecycleTests
     public async Task Concurrent_mailbox_reader_observes_only_complete_published_entries()
     {
         using TempWorkspace root=new();using TempWorkspace installation=new();await using var session=new NativeHostSession(Config(root.Root),NativeHostBoundaryTests.Origin,installation.Root);
-        (await session.HandleAsync(Hello(root.Root),default)).IsSuccess.ShouldBeTrue();var store=new FileAiDesignRequestStore(root.Root);var channel=new FileAiDesignChannel(Config(root.Root),installation.Root);
+        (await session.HandleAsync(Hello(root.Root),default)).IsSuccess.ShouldBeTrue();
+        var store = new FileAiDesignRequestStore(root.Root);
+        var heartbeat = JsonSerializer.Deserialize<AiDesignBridgeConnection>(
+            await File.ReadAllTextAsync(Path.Combine(installation.Root, "connection.local.json")), NativeMessageCodec.JsonOptions)!;
+        // This bare session publishes Hello but has no heartbeat pump. Mailbox writes use a fixed clock.
+        var clock = new FakeTimeProvider(heartbeat.LastSeenUtc);
+        var channel = new FileAiDesignChannel(Config(root.Root), installation.Root, clock);
         for(int i=0;i<30;i++)
         {
             var r=await Queue(store,session.ConnectionId);string path=Path.Combine(root.Root,"AiDesign","Requests",r.RequestId.ToString("D"),"bridge-queue.local.json");
@@ -51,8 +58,17 @@ public sealed class AiDesignBridgeLifecycleTests
                 }
                 await Task.Yield();
             }
-            (await write).IsSuccess.ShouldBeTrue();
+            var published = await write;
+            published.IsSuccess.ShouldBeTrue(published.IsFailure ? published.Failure.TechnicalDetail : null);
+            var entry = JsonSerializer.Deserialize<BridgeQueueEntry>(await File.ReadAllTextAsync(path), NativeMessageCodec.JsonOptions);
+            entry!.Fence.ShouldBe(r.Fence);
         }
+
+        clock.Advance(TimeSpan.FromSeconds(11));
+        (await channel.CheckAsync(default)).Value.Reason.ShouldBe("BridgeDisconnected");
+        var stale = await channel.EnqueueAsync(await Queue(store, session.ConnectionId), default);
+        stale.IsFailure.ShouldBeTrue();
+        stale.Failure.TechnicalDetail.ShouldBe("WorkBridgeUnavailable");
     }
     [Fact]
     public async Task Pump_fault_disconnects_stdio_and_interrupts_owned_request_without_waiting_for_input()

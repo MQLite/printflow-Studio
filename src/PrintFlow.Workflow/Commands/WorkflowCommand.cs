@@ -4,7 +4,9 @@ using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Reviews;
 using PrintFlow.Domain.Sessions;
+using PrintFlow.Domain.Settings;
 using PrintFlow.Domain.Trimming;
+using PrintFlow.Workflow.Ports;
 
 namespace PrintFlow.Workflow.Commands;
 
@@ -41,7 +43,7 @@ public abstract record WorkflowCommand
     public sealed record ConfirmOriginal(string? Notes = null) : WorkflowCommand;
 
     /// <summary>Begin an attempt for the given step.</summary>
-    public sealed record StartStep(StepKind Step) : WorkflowCommand;
+    public sealed record StartStep(StepKind Step, ImageUploadConfirmation? UploadConfirmation = null) : WorkflowCommand;
 
     /// <summary>Approve the result currently awaiting review, bound to the hash reviewed.</summary>
     public sealed record Approve(StepKind Step, Sha256 ReviewedHash, string? Notes = null) : WorkflowCommand;
@@ -104,6 +106,9 @@ public abstract record WorkflowCommand
     {
         /// <summary>The default reason recorded when the operator gives none (MVP design §7.2).</summary>
         public const string DefaultReason = "File already satisfies this step";
+
+        public const string CombinedWithBackgroundRemoval = nameof(CombinedWithBackgroundRemoval);
+        public const string KeepReviewedInputAfterCombined = nameof(KeepReviewedInputAfterCombined);
 
         /// <summary>The reason actually recorded.</summary>
         public string EffectiveReason =>
@@ -304,6 +309,9 @@ public abstract record WorkflowCommand
     /// </remarks>
     public sealed record SetTrimParameters(TrimMargin Margin, bool IgnoreSmallNoise = true) : WorkflowCommand;
 
+    public sealed record SetImageProcessingSelection(
+        StepKind Step, SessionImageProcessingSelection Selection) : WorkflowCommand;
+
     /// <summary>
     /// Record the operator's explicit authority for Meitu's automatic selection over the
     /// reviewed content Background Removal is about to consume (Epic 11300 Part C2B1 §5).
@@ -336,10 +344,11 @@ public abstract record WorkflowCommand
         BackgroundRemovalDecision Decision,
         RevisionId ReviewedRevisionId,
         Sha256 DisplayedHash,
-        BackgroundRemovalMode Mode = BackgroundRemovalMode.Automatic) : WorkflowCommand;
+        BackgroundRemovalMode Mode = BackgroundRemovalMode.Automatic,
+        ImageProcessingMethod Method = ImageProcessingMethod.MeituBackgroundRemoval) : WorkflowCommand;
 
     /// <summary>Go back to an earlier step, invalidating everything derived from it.</summary>
-    public sealed record ReturnToStep(StepKind Target) : WorkflowCommand;
+    public sealed record ReturnToStep(StepKind Target, bool UseStepByStepImageProcessing = false) : WorkflowCommand;
 
     /// <summary>Finish the session. Legal only when every required condition is met.</summary>
     public sealed record Complete : WorkflowCommand;

@@ -26,13 +26,16 @@ public sealed partial class SessionViewModel
 
     public string BackgroundRemovalModeHeading => Strings.Resolve("Session_BackgroundRemovalModeHeading");
     public string SelectedBackgroundRemovalModeLabel => BackgroundRemovalModeLabel(SelectedBackgroundRemovalMode);
+    private string BackgroundRemovalAuthorityLabel =>
+        !ShowsMeituRecognitionModes && _session?.ImageProcessingExecution is { } execution
+            ? ImageProcessingMethodOption.Name(execution.Method) : SelectedBackgroundRemovalModeLabel;
     public bool HasRecordedBackgroundRemovalAuthorisation =>
         _session?.BackgroundRemovalDecision == BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent;
 
     // Engine readiness still applies. This extra presentation gate prevents a provisional
     // picker value from executing the previous persisted recogniser behind the operator's back.
     private bool HasUnconfirmedBackgroundRemovalMode =>
-        _session?.CurrentStep?.Step == StepKind.BackgroundRemoval &&
+        ShowsMeituRecognitionModes && _session?.CurrentStep?.Step == StepKind.BackgroundRemoval &&
         SelectedBackgroundRemovalMode != _session.BackgroundRemovalMode;
 
     private static string BackgroundRemovalModeLabel(BackgroundRemovalMode mode) =>
@@ -48,6 +51,9 @@ public sealed partial class SessionViewModel
     private void NotifyBackgroundRemovalMode()
     {
         OnPropertyChanged(nameof(SelectedBackgroundRemovalModeLabel));
+        OnPropertyChanged(nameof(BackgroundRemovalHint));
+        OnPropertyChanged(nameof(AuthoriseAutomaticSelectionLabel));
+        OnPropertyChanged(nameof(AutomaticSelectionNotAuthorisedNotice));
         OnPropertyChanged(nameof(AutomaticSelectionConfirmQuestion));
         OnPropertyChanged(nameof(IsAutomaticSelectionAuthorised));
         OnPropertyChanged(nameof(IsAutomaticSelectionPending));

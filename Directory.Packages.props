@@ -31,6 +31,7 @@
 
   <ItemGroup Label="Imaging">
     <PackageVersion Include="Magick.NET-Q16-x64" Version="15.1.0" />
+    <PackageVersion Include="Microsoft.ML.OnnxRuntime" Version="1.32.0" />
   </ItemGroup>
 
   <ItemGroup Label="Test">

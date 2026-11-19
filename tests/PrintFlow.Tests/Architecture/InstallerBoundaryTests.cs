@@ -302,9 +302,8 @@ public sealed class InstallerBoundaryTests
     /// Scoped to what an updater would actually need — an HTTP client, a download call, a
     /// scheduled task, a Run key, a package manager, or a custom action that could run any of
     /// them — rather than a general sweep for the word "update", which appears legitimately all
-    /// over a codebase that updates rows and view models. The product half of this repository has
-    /// never had a network client at all, and this test is what keeps that true through the one
-    /// change that would most plausibly introduce one.
+    /// over a codebase that updates rows and view models. Only the consent-gated OpenAI Images
+    /// adapter may use the HTTP primitives it needs to post an edit.
     /// </remarks>
     [Fact]
     public void Nothing_in_the_product_or_the_packaging_can_fetch_a_new_version()
@@ -322,11 +321,16 @@ public sealed class InstallerBoundaryTests
         foreach (string file in UpdaterBoundarySources())
         {
             string text = DeclarationsOf(file);
+            string relative = RepositoryRelative(file);
             foreach (string api in updaterApis)
             {
+                if (relative == @"src\PrintFlow.Infrastructure\Adapters\OpenAI\OpenAiImageBackend.cs" &&
+                    api is "HttpClient" or "HttpRequestMessage" or "System.Net.Http")
+                    continue;
+
                 if (text.Contains(api, StringComparison.OrdinalIgnoreCase))
                 {
-                    offenders.Add($"{RepositoryRelative(file)}: {api}");
+                    offenders.Add($"{relative}: {api}");
                 }
             }
         }
@@ -450,6 +454,36 @@ public sealed class InstallerBoundaryTests
             [.. root.GetProperty("allow").EnumerateArray().Select(e => e.GetString()!)],
             [.. root.GetProperty("denyAlways").EnumerateArray().Select(e => e.GetString()!)],
             [.. root.GetProperty("requiredFiles").EnumerateArray().Select(e => e.GetString()!)]);
+    }
+
+    [Fact]
+    public void The_offline_image_processing_payload_requires_only_the_selected_models_and_notices()
+    {
+        PayloadPolicy policy = ReadPayloadPolicy();
+
+        foreach (string path in new[]
+                 {
+                     "Models/real_esrgan_x2.onnx", "Models/birefnet-lite-1024.onnx",
+                     "Licenses/Real-ESRGAN.txt", "Licenses/BiRefNet.txt",
+                     "Licenses/ONNX-Runtime.txt", "Licenses/ONNX-Runtime-ThirdPartyNotices.txt",
+                     "Licenses/Magick.NET-Notice.txt", "Licenses/Magick.NET.txt",
+                     "Microsoft.ML.OnnxRuntime.dll", "onnxruntime.dll", "onnxruntime_providers_shared.dll",
+                     "Magick.NET.Core.dll", "Magick.NET-Q16-x64.dll", "Magick.Native-Q16-x64.dll",
+                     "msvcp140.dll", "msvcp140_1.dll", "vcruntime140.dll", "vcruntime140_1.dll",
+                 })
+        {
+            ShouldBeAllowed(policy, path);
+            policy.RequiredFiles.ShouldContain(path);
+        }
+
+        foreach (string path in new[]
+                 {
+                     "real_esrgan_x2.onnx", "Models/experimental.onnx", "Models/customer.png",
+                     "Models/backup/birefnet-lite-1024.onnx", "Licenses/operator-notes.txt",
+                 })
+        {
+            ShouldNotBeAllowed(policy, path);
+        }
     }
 
     /// <summary>

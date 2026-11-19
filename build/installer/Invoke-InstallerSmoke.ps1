@@ -21,7 +21,7 @@
                         .NET runtime. Read out of the MSI's own tables, so it is a statement about
                         the artefact and not about the build that made it (§26, §35).
 
-      3. Fresh install — extract version N into an empty install folder beside a synthetic
+      3. Fresh install — extract the candidate into an empty install folder beside a synthetic
                         production workspace, and confirm the expected files arrive, the
                         executable reports the expected version, and the workspace is untouched
                         (§29).
@@ -50,10 +50,11 @@
     instead. The completion report records this limit rather than papering over it.
 
 .PARAMETER MsiPath
-    Version N installer. Defaults to the newest build under artifacts\installer.
+    Candidate installer, or the previous installer when UpgradeMsiPath is supplied.
+    Defaults to the newest build under artifacts\installer.
 
 .PARAMETER UpgradeMsiPath
-    Version N+1 installer. When omitted, the upgrade check is reported as not run.
+    Candidate installer for an upgrade from MsiPath. When omitted, the upgrade check is reported as not run.
 
 .PARAMETER WorkRoot
     Where the isolated test locations are created. Defaults to a folder under TEMP.
@@ -186,8 +187,10 @@ function Test-Glob([string] $Relative, $Patterns) {
     return $false
 }
 
+$candidateMsi = if ([string]::IsNullOrWhiteSpace($UpgradeMsiPath)) { $MsiPath } else { $UpgradeMsiPath }
 Write-Host ''
-Write-Host "MSI       : $MsiPath"
+Write-Host "Candidate : $candidateMsi"
+if ($candidateMsi -ne $MsiPath) { Write-Host "Previous  : $MsiPath" }
 Write-Host "Work root : $WorkRoot"
 Write-Host ''
 
@@ -196,18 +199,18 @@ $policy = Get-Content -LiteralPath (Join-Path $RepositoryRoot 'installer\payload
 # --------------------------------------------------------------------------------------------
 # 1 — Payload
 # --------------------------------------------------------------------------------------------
-$baseDir = Expand-Msi $MsiPath (Join-Path $WorkRoot 'extract-n')
-$baseFiles = Get-ChildItem $baseDir -Recurse -File
-$prefix = (Resolve-Path $baseDir).Path.TrimEnd('\').Length + 1
+$candidateDir = Expand-Msi $candidateMsi (Join-Path $WorkRoot 'extract-candidate')
+$candidateFiles = Get-ChildItem $candidateDir -Recurse -File
+$prefix = (Resolve-Path $candidateDir).Path.TrimEnd('\').Length + 1
 
 $notAllowed = @()
 $denied = @()
-foreach ($file in $baseFiles) {
+foreach ($file in $candidateFiles) {
     $relative = $file.FullName.Substring($prefix).Replace('\', '/')
     if (Test-Glob $relative $policy.denyAlways) { $denied += $relative; continue }
     if (-not (Test-Glob $relative $policy.allow)) { $notAllowed += $relative }
 }
-$missing = @($policy.requiredFiles | Where-Object { -not (Test-Path (Join-Path $baseDir $_.Replace('/', '\'))) })
+$missing = @($policy.requiredFiles | Where-Object { -not (Test-Path (Join-Path $candidateDir $_.Replace('/', '\'))) })
 
 if ($denied.Count -gt 0) {
     Add-Result 'Payload boundary' 'FAIL' ("denied files present: " + ($denied -join ', '))
@@ -216,7 +219,7 @@ if ($denied.Count -gt 0) {
 } elseif ($missing.Count -gt 0) {
     Add-Result 'Payload boundary' 'FAIL' ("required files missing: " + ($missing -join ', '))
 } else {
-    Add-Result 'Payload boundary' 'PASS' ("$($baseFiles.Count) files, all allowed; 0 denied; all $($policy.requiredFiles.Count) required present")
+    Add-Result 'Payload boundary' 'PASS' ("$($candidateFiles.Count) files, all allowed; 0 denied; all $($policy.requiredFiles.Count) required present")
 }
 
 # --------------------------------------------------------------------------------------------
@@ -224,19 +227,19 @@ if ($denied.Count -gt 0) {
 # --------------------------------------------------------------------------------------------
 $offlineProblems = @()
 foreach ($table in @('CustomAction', 'ServiceInstall', 'ServiceControl', 'MsiPatchCertificate', 'DigitalSignature')) {
-    if (Test-MsiTableExists $MsiPath $table) { $offlineProblems += "package declares a $table table" }
+    if (Test-MsiTableExists $candidateMsi $table) { $offlineProblems += "package declares a $table table" }
 }
-if (-not (Test-Path (Join-Path $baseDir 'PrintFlow.App.runtimeconfig.json'))) {
+if (-not (Test-Path (Join-Path $candidateDir 'PrintFlow.App.runtimeconfig.json'))) {
     $offlineProblems += 'no runtimeconfig.json in the payload'
 } else {
-    $runtimeConfig = Get-Content -LiteralPath (Join-Path $baseDir 'PrintFlow.App.runtimeconfig.json') -Raw | ConvertFrom-Json
+    $runtimeConfig = Get-Content -LiteralPath (Join-Path $candidateDir 'PrintFlow.App.runtimeconfig.json') -Raw | ConvertFrom-Json
     if ($null -ne $runtimeConfig.runtimeOptions.PSObject.Properties['framework'] -or
         $null -ne $runtimeConfig.runtimeOptions.PSObject.Properties['frameworks']) {
         $offlineProblems += 'the payload is framework-dependent and would need a .NET runtime on the target machine'
     }
 }
 foreach ($required in @('System.Private.CoreLib.dll', 'PresentationFramework.dll', 'hostfxr.dll')) {
-    if (-not (Test-Path (Join-Path $baseDir $required))) { $offlineProblems += "self-contained runtime file '$required' missing" }
+    if (-not (Test-Path (Join-Path $candidateDir $required))) { $offlineProblems += "self-contained runtime file '$required' missing" }
 }
 
 if ($offlineProblems.Count -gt 0) {
@@ -254,7 +257,7 @@ Assert-NotProduction $installFolder 'Install folder'
 Assert-NotProduction $workspace 'Synthetic workspace'
 
 New-Item -ItemType Directory -Path $installFolder -Force | Out-Null
-Copy-Item (Join-Path $baseDir '*') -Destination $installFolder -Recurse -Force
+Copy-Item (Join-Path $candidateDir '*') -Destination $installFolder -Recurse -Force
 
 # A synthetic production workspace: a stand-in database, an operator configuration override, a
 # revalidation record and a customer file, all of which must survive everything below.
@@ -280,7 +283,7 @@ foreach ($file in (Get-ChildItem $workspace -Recurse -File)) {
 }
 $localConfigBefore = (Get-FileHash -LiteralPath (Join-Path $installFolder 'appsettings.local.json') -Algorithm SHA256).Hash
 
-$baseVersion = (Get-Item -LiteralPath (Join-Path $installFolder 'PrintFlow.App.exe')).VersionInfo.ProductVersion
+$candidateVersion = (Get-Item -LiteralPath (Join-Path $installFolder 'PrintFlow.App.exe')).VersionInfo.ProductVersion
 $freshProblems = @()
 foreach ($required in $policy.requiredFiles) {
     if (-not (Test-Path (Join-Path $installFolder $required.Replace('/', '\')))) { $freshProblems += "missing $required" }
@@ -288,7 +291,7 @@ foreach ($required in $policy.requiredFiles) {
 if ($freshProblems.Count -gt 0) {
     Add-Result 'Fresh install' 'FAIL' ($freshProblems -join '; ')
 } else {
-    Add-Result 'Fresh install' 'PASS' "version $baseVersion installed to an isolated folder; synthetic workspace untouched"
+    Add-Result 'Fresh install' 'PASS' "version $candidateVersion installed to an isolated folder; synthetic workspace untouched"
 }
 
 # --------------------------------------------------------------------------------------------
@@ -297,18 +300,25 @@ if ($freshProblems.Count -gt 0) {
 if ([string]::IsNullOrWhiteSpace($UpgradeMsiPath)) {
     Add-Result 'Upgrade N -> N+1' 'NOT RUN' 'no -UpgradeMsiPath supplied'
 } else {
-    $upgradeDir = Expand-Msi $UpgradeMsiPath (Join-Path $WorkRoot 'extract-n1')
+    $baseDir = Expand-Msi $MsiPath (Join-Path $WorkRoot 'extract-previous')
+    $upgradeInstallFolder = Join-Path $WorkRoot 'upgrade-install\PrintFlow Studio'
+    Assert-NotProduction $upgradeInstallFolder 'Upgrade install folder'
+    New-Item -ItemType Directory -Path $upgradeInstallFolder -Force | Out-Null
+    Copy-Item (Join-Path $baseDir '*') -Destination $upgradeInstallFolder -Recurse -Force
+    Copy-Item -LiteralPath (Join-Path $installFolder 'appsettings.local.json') -Destination $upgradeInstallFolder -Force
+    $baseVersion = (Get-Item -LiteralPath (Join-Path $upgradeInstallFolder 'PrintFlow.App.exe')).VersionInfo.ProductVersion
 
     # What a major upgrade does to the install folder: the previous version's files are removed
     # and the new set installed. Modelled here by clearing installer-owned files only — which is
     # exactly the distinction under test, because appsettings.local.json is not installer-owned.
-    foreach ($file in (Get-ChildItem $installFolder -Recurse -File)) {
-        $relative = $file.FullName.Substring((Resolve-Path $installFolder).Path.TrimEnd('\').Length + 1)
+    $upgradeInstallPrefix = (Resolve-Path $upgradeInstallFolder).Path.TrimEnd('\').Length + 1
+    foreach ($file in (Get-ChildItem $upgradeInstallFolder -Recurse -File)) {
+        $relative = $file.FullName.Substring($upgradeInstallPrefix)
         if (Test-Path (Join-Path $baseDir $relative)) { Remove-Item -LiteralPath $file.FullName -Force }
     }
-    Copy-Item (Join-Path $upgradeDir '*') -Destination $installFolder -Recurse -Force
+    Copy-Item (Join-Path $candidateDir '*') -Destination $upgradeInstallFolder -Recurse -Force
 
-    $newVersion = (Get-Item -LiteralPath (Join-Path $installFolder 'PrintFlow.App.exe')).VersionInfo.ProductVersion
+    $newVersion = (Get-Item -LiteralPath (Join-Path $upgradeInstallFolder 'PrintFlow.App.exe')).VersionInfo.ProductVersion
     $upgradeProblems = @()
     if ($newVersion -eq $baseVersion) { $upgradeProblems += "the executable still reports $baseVersion" }
 
@@ -319,14 +329,14 @@ if ([string]::IsNullOrWhiteSpace($UpgradeMsiPath)) {
         }
     }
 
-    $localConfigPath = Join-Path $installFolder 'appsettings.local.json'
+    $localConfigPath = Join-Path $upgradeInstallFolder 'appsettings.local.json'
     if (-not (Test-Path $localConfigPath)) {
         $upgradeProblems += 'appsettings.local.json was removed by the upgrade'
     } elseif ((Get-FileHash -LiteralPath $localConfigPath -Algorithm SHA256).Hash -ne $localConfigBefore) {
         $upgradeProblems += 'appsettings.local.json was modified by the upgrade'
     }
 
-    if (-not (Test-Path (Join-Path $installFolder 'appsettings.json'))) {
+    if (-not (Test-Path (Join-Path $upgradeInstallFolder 'appsettings.json'))) {
         $upgradeProblems += 'the shipped appsettings.json default is missing after the upgrade'
     }
 
@@ -341,7 +351,6 @@ if ([string]::IsNullOrWhiteSpace($UpgradeMsiPath)) {
 # --------------------------------------------------------------------------------------------
 # 5 — Uninstall, computed from the package's own tables
 # --------------------------------------------------------------------------------------------
-$candidateMsi = if ([string]::IsNullOrWhiteSpace($UpgradeMsiPath)) { $MsiPath } else { $UpgradeMsiPath }
 $directories = @{}
 foreach ($row in (Read-MsiTable $candidateMsi 'SELECT `Directory`, `Directory_Parent`, `DefaultDir` FROM `Directory`')) {
     $directories[$row[0]] = @{ parent = $row[1]; name = $row[2] }

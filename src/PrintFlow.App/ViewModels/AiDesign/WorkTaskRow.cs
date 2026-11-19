@@ -36,6 +36,7 @@ public sealed class WorkTaskRow(WorkTaskSnapshot snapshot) : ObservableObject
         WorkTaskFailure.ValidationFailed => "WorkTask_ValidationFailed",
         WorkTaskFailure.ResultUnavailable => "WorkTask_ResultUnavailable",
         WorkTaskFailure.RecoveryDeferred => "WorkTask_RecoveryDeferred",
+        WorkTaskFailure.ImageProcessingSettings => "WorkTask_RepairImageProcessingSettings",
         _ => "AiPrompt_WorkUnconfirmed"
     }) : null;
 

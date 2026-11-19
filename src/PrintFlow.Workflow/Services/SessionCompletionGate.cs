@@ -19,6 +19,12 @@ internal static class SessionCompletionGate
         return new Lease(gate);
     }
 
+    public static async Task<IDisposable?> TryEnterAsync(SessionId id, CancellationToken cancellationToken)
+    {
+        SemaphoreSlim gate = Gates.GetOrAdd(id, _ => new SemaphoreSlim(1, 1));
+        return await gate.WaitAsync(0, cancellationToken) ? new Lease(gate) : null;
+    }
+
     private sealed class Lease(SemaphoreSlim gate) : IDisposable
     {
         public void Dispose() => gate.Release();

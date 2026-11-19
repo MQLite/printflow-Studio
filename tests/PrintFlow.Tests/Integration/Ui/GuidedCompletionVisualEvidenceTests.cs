@@ -105,8 +105,13 @@ public sealed class GuidedCompletionVisualEvidenceTests
         using (SettingsScreenHarness h = new())
         {
             var settings = await h.OpenAsync();
-            Capture(() => new SettingsView { DataContext = settings }, viewport, "settings", ["Settings.Apply", "Settings.Back"],
-                ["Settings.Language", "Settings.TrimMargin", "Settings.LogRetention", "Settings.OutputRoot"]);
+            Capture(() => new SettingsView { DataContext = settings }, viewport, "settings",
+                ["Settings.Apply", "Settings.Back", "Settings.OpenImageProcessing"],
+                ["Settings.Language", "Settings.LogRetention", "Settings.OutputRoot"]);
+            await settings.OpenImageProcessingCommand.ExecuteAsync(null);
+            Capture(() => new SettingsView { DataContext = settings }, viewport, "settings-image-processing",
+                ["ImageProcessing.Back", "ImageProcessing.Save", "ImageProcessing.RestoreDefaults"],
+                ["ImageProcessing.Enhancement", "ImageProcessing.BackgroundRemoval", "ImageProcessing.Crop", "Settings.TrimMargin"]);
         }
         var diagnostics = new GuidedCompletionUtilityTests.FixedDiagnostics(GuidedCompletionUtilityTests.Report("checked"));
         var environment = new EnvironmentReadinessViewModel(diagnostics, new RecordingNavigation(), new ReadinessObservationAccessor());

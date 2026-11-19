@@ -237,7 +237,8 @@ public sealed partial class ProductionPhotoshopOutputProcessor :
         }
 
         OperationResult<PhotoshopOpenedDocument> opened =
-            await OpenManagedWorkingFileAsync(request.ApprovedInput, cancellationToken)
+            await OpenManagedWorkingFileAsync(request.ApprovedInput, observe: null,
+                    requireProductionColourSettings: true, cancellationToken)
                 .ConfigureAwait(false);
         if (opened.IsFailure)
         {
@@ -402,8 +403,13 @@ public sealed partial class ProductionPhotoshopOutputProcessor :
         WorkspaceFileRef workingFile, CancellationToken cancellationToken) =>
         OpenManagedWorkingFileAsync(workingFile, observe: null, cancellationToken);
 
-    public async Task<OperationResult<PhotoshopOpenedDocument>> OpenManagedWorkingFileAsync(
-        WorkspaceFileRef workingFile, Action<ReadinessProbeStage>? observe, CancellationToken cancellationToken)
+    public Task<OperationResult<PhotoshopOpenedDocument>> OpenManagedWorkingFileAsync(
+        WorkspaceFileRef workingFile, Action<ReadinessProbeStage>? observe, CancellationToken cancellationToken) =>
+        OpenManagedWorkingFileAsync(workingFile, observe, requireProductionColourSettings: false, cancellationToken);
+
+    private async Task<OperationResult<PhotoshopOpenedDocument>> OpenManagedWorkingFileAsync(
+        WorkspaceFileRef workingFile, Action<ReadinessProbeStage>? observe, bool requireProductionColourSettings,
+        CancellationToken cancellationToken)
     {
         observe?.Invoke(ReadinessProbeStage.OpenGuard);
         // The managed-area boundary, checked before anything is resolved to a path and long
@@ -445,8 +451,7 @@ public sealed partial class ProductionPhotoshopOutputProcessor :
 
             otherDocumentsOpen = runtime.Value.Documents.Length > 0;
 
-            // Working-space differences are optional diagnostic findings, not an open-file
-            // prerequisite. Existing unsaved work still prevents automation from taking over.
+            // Existing unsaved work prevents automation from taking over.
             if (runtime.Value.UnsavedDocumentCount > 0)
                 return OperationResult.Fail<PhotoshopOpenedDocument>(OperationFailure.Create(
                     FailureCode.PhotoshopUnknownState,
@@ -454,6 +459,22 @@ public sealed partial class ProductionPhotoshopOutputProcessor :
                     "PrintFlow did not save, close, or alter them.",
                     isRetryable: true,
                     context: new Dictionary<string, string> { ["inputSent"] = "false" }));
+
+            if (requireProductionColourSettings)
+            {
+                var preset = _baselines.GetVerifiedBaseline();
+                if (preset.IsFailure)
+                    return OperationResult.Fail<PhotoshopOpenedDocument>(preset.Failure);
+                if (preset.Value.ColourSettings is { } accepted &&
+                    !PhotoshopColourSettingsRule.Matches(accepted, runtime.Value.ColourSettings))
+                {
+                    return OperationResult.Fail<PhotoshopOpenedDocument>(OperationFailure.Create(
+                        FailureCode.EnvironmentNotVerified,
+                        "Photoshop's working colour spaces do not match the production preset.",
+                        context: new Dictionary<string, string> { ["inputSent"] = "false" },
+                        messageKey: "EnvironmentCheck_PhotoshopColourSettings"));
+                }
+            }
         }
 
         // The only path join in this adapter, and it goes through the workspace — which is the

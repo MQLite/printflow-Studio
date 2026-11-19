@@ -2,6 +2,7 @@ using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Reviews;
 using PrintFlow.Domain.Sessions;
+using PrintFlow.Domain.Settings;
 using PrintFlow.Tests.Fixtures;
 using PrintFlow.Workflow.Commands;
 using PrintFlow.Workflow.Definitions;
@@ -228,6 +229,8 @@ public sealed class TransitionMatrixTests
                 global::PrintFlow.Domain.Outputs.WhiteUnderbaseBranch.W1_1px, "matrix probe"),
             CommandKind.SetTrimParameters => new WorkflowCommand.SetTrimParameters(
                 global::PrintFlow.Domain.Trimming.TrimMargin.Uniform(2)),
+            CommandKind.SetImageProcessingSelection => new WorkflowCommand.SetImageProcessingSelection(
+                step, SessionImageProcessingSelection.Compatible),
 
             // The matrix probes with the revision it forced onto the step under test, which is
             // usually not the one BackgroundRemoval would consume. That is the point here: the

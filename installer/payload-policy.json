@@ -12,7 +12,7 @@
     "using * (within one segment) and ** (across segments)."
   ],
 
-  "policyVersion": 1,
+  "policyVersion": 2,
 
   "allow": [
     "PrintFlow.App.exe",
@@ -25,18 +25,24 @@
     "appsettings.json",
     "*.dll",
     "*/*.resources.dll",
+    "createdump.exe",
+    "Models/real_esrgan_x2.onnx",
+    "Models/birefnet-lite-1024.onnx",
+    "Licenses/Real-ESRGAN.txt",
+    "Licenses/BiRefNet.txt",
+    "Licenses/ONNX-Runtime.txt",
+    "Licenses/ONNX-Runtime-ThirdPartyNotices.txt",
     "Licenses/Magick.NET.txt",
-    "Licenses/Magick.NET-Notice.txt",
-    "createdump.exe"
+    "Licenses/Magick.NET-Notice.txt"
   ],
 
   "$allowComment": [
     "'*.dll' is the self-contained .NET runtime and the WPF framework assemblies, which are the",
     "point of the self-contained publish and cannot be enumerated by name across servicing",
     "updates. '*/*.resources.dll' is the framework's and the product's satellite resources, one",
-    "culture folder deep. Neither widens the boundary to a second file type: no pattern here",
-    "matches .pdb, .cs, .csproj, .db, .zip, .png, .tif, .psd, .pfx or a folder more than one level",
-    "deep. The WebP decoder's license notices are listed by exact path."
+    "culture folder deep. Neither pattern admits .pdb, source files, databases, archives,",
+    "sample images, certificates or files nested more than one level deep. Models and",
+    "third-party license notices are allowed by exact path only."
   ],
 
   "denyAlways": [
@@ -95,12 +101,39 @@
     "PrintFlow.App.deps.json",
     "PrintFlow.App.runtimeconfig.json",
     "appsettings.json",
+    "Microsoft.ML.OnnxRuntime.dll",
+    "onnxruntime.dll",
+    "onnxruntime_providers_shared.dll",
     "Magick.NET.Core.dll",
     "Magick.NET-Q16-x64.dll",
     "Magick.Native-Q16-x64.dll",
+    "msvcp140.dll",
+    "msvcp140_1.dll",
+    "vcruntime140.dll",
+    "vcruntime140_1.dll",
+    "Models/real_esrgan_x2.onnx",
+    "Models/birefnet-lite-1024.onnx",
+    "Licenses/Real-ESRGAN.txt",
+    "Licenses/BiRefNet.txt",
+    "Licenses/ONNX-Runtime.txt",
+    "Licenses/ONNX-Runtime-ThirdPartyNotices.txt",
     "Licenses/Magick.NET.txt",
     "Licenses/Magick.NET-Notice.txt"
   ],
+
+  "$externalAssetsComment": [
+    "These files come from the explicitly supplied offline assets directory.",
+    "The C++ binaries are the Windows x64 Visual C++ 14.51.36247.0 REDIST files.",
+    "See docs/printflow/scrum-11244-offline-packaging.md for all asset sources."
+  ],
+  "externalAssets": {
+    "Models/real_esrgan_x2.onnx": "7115BA92E8A1BFA63D68558EF006EF3D91273A068D321B1439F8BB1C9179002C",
+    "Models/birefnet-lite-1024.onnx": "A97176ABB6FE55525B11113BF5BEAD5A9B5866B2C0D4AC058186CABB86CADFFF",
+    "msvcp140.dll": "7C26614E1D733892C2DEAC7E245CE115504B1D80592DD0A01B08E3E5A55F89CA",
+    "msvcp140_1.dll": "206C931BF90FDAD8816DE3B5E2EF80B2BCAA9406C89ECC05FE6FDDFFE251E982",
+    "vcruntime140.dll": "D1F4225DF2CD877DBF130D5668A021DCE3F94118455FF5EC952061C30AFC9CE7",
+    "vcruntime140_1.dll": "A7146C08F89FE5B04541AB507CDB59FF7B44534D4BA3C668A426C6450A03434E"
+  },
 
   "$requiredComment": [
     "The payload is incomplete without these, and a staging run that cannot produce every one of",

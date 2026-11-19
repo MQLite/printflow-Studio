@@ -45,15 +45,12 @@
     <PackageReference Include="Microsoft.Data.Sqlite" />
     <PackageReference Include="Dapper" />
     <PackageReference Include="Magick.NET-Q16-x64" GeneratePathProperty="true" />
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" GeneratePathProperty="true" />
   </ItemGroup>
 
   <ItemGroup>
     <!-- Forward-only embedded migrations (Epic 11100 plan §4.5, §18). -->
     <EmbeddedResource Include="Sqlite\Migrations\*.sql" />
-    <None Include="..\..\installer\licenses\Magick.NET.txt" Link="Licenses\Magick.NET.txt"
-          CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
-    <None Include="$(PkgMagick_NET-Q16-x64)\Notice.txt" Link="Licenses\Magick.NET-Notice.txt"
-          CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

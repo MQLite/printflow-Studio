@@ -11,6 +11,7 @@ public enum ReviewGuidanceStep
     BackgroundRemoval,
     Trim,
     ProductionTiff,
+    CombinedImageProcessing,
 }
 
 /// <summary>
@@ -36,6 +37,7 @@ public sealed partial class SessionViewModel
             : _session?.CurrentStep?.Step switch
             {
                 StepKind.Enhancement => ReviewGuidanceStep.Enhancement,
+                StepKind.BackgroundRemoval when IsCombinedBackgroundRemoval => ReviewGuidanceStep.CombinedImageProcessing,
                 StepKind.BackgroundRemoval => ReviewGuidanceStep.BackgroundRemoval,
                 StepKind.Trim => ReviewGuidanceStep.Trim,
                 StepKind.PhotoshopOutput => ReviewGuidanceStep.ProductionTiff,
@@ -44,7 +46,8 @@ public sealed partial class SessionViewModel
 
     public bool ShowsReviewGuidance => ReviewGuidance != ReviewGuidanceStep.None;
 
-    public string ReviewGuidanceHeading => Strings.Session_GuidanceHeading;
+    public string ReviewGuidanceHeading => ReviewGuidance == ReviewGuidanceStep.CombinedImageProcessing
+        ? Strings.Resolve("ImageProcessing_CombinedReviewHeading") : Strings.Session_GuidanceHeading;
 
     /// <summary>The checks for this review, each naming a tool by its on-screen label.</summary>
     public IReadOnlyList<string> ReviewGuidanceChecks => ReviewGuidance switch
@@ -55,6 +58,13 @@ public sealed partial class SessionViewModel
                 Strings.Session_ReviewModeSideBySide, Strings.Session_ReviewModeSlider),
             Strings.Session_GuidanceEnhancementDetail,
             Strings.Session_GuidanceEnhancementArtefacts,
+        ],
+        ReviewGuidanceStep.CombinedImageProcessing =>
+        [
+            Strings.Resolve("ImageProcessing_CombinedReviewDetails"),
+            Strings.Resolve("ImageProcessing_CombinedReviewEdges"),
+            FormatNext(Strings.Session_GuidanceBackgroundColours,
+                Strings.Session_ReviewBackgroundWhite, Strings.Session_ReviewBackgroundBlack),
         ],
         ReviewGuidanceStep.BackgroundRemoval =>
         [
@@ -95,6 +105,7 @@ public sealed partial class SessionViewModel
     {
         ReviewGuidanceStep.None => string.Empty,
         ReviewGuidanceStep.ProductionTiff => FormatNext(Strings.Session_GuidanceRejectTiff, RejectLabel, RetryLabel, RunStepLabel),
+        ReviewGuidanceStep.CombinedImageProcessing => Strings.Resolve("ImageProcessing_CombinedReviewReject"),
         _ => FormatNext(Strings.Session_GuidanceReject, RejectLabel),
     };
 
@@ -128,6 +139,7 @@ public sealed partial class SessionViewModel
     private void NotifyReviewGuidanceChanged()
     {
         OnPropertyChanged(nameof(ReviewGuidance));
+        OnPropertyChanged(nameof(ReviewGuidanceHeading));
         OnPropertyChanged(nameof(ShowsReviewGuidance));
         OnPropertyChanged(nameof(ReviewGuidanceChecks));
         OnPropertyChanged(nameof(ReviewGuidanceApprove));

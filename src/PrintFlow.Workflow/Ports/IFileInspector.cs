@@ -23,4 +23,9 @@ public interface IFileInspector
     /// failure if the file does not exist, is empty, or cannot be read to the end.
     /// </summary>
     Task<OperationResult<FileFacts>> InspectAsync(string absolutePath, CancellationToken cancellationToken);
+
+    /// <summary>Hashes a PNG and verifies that its pixel data can be decoded.</summary>
+    Task<OperationResult<FileFacts>> InspectPngOutputAsync(string absolutePath, CancellationToken cancellationToken) =>
+        Task.FromResult(OperationResult.Fail<FileFacts>(FailureCode.AdapterUnavailable,
+            "PNG output decoding is unavailable."));
 }

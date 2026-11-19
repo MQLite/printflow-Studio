@@ -5,6 +5,7 @@ using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Sessions;
+using PrintFlow.Domain.Settings;
 using PrintFlow.Domain.Trimming;
 using PrintFlow.Workflow.Engine;
 using PrintFlow.Workflow.Ports;
@@ -657,6 +658,8 @@ public sealed record SessionView(
     public SessionCleanupResult? CompletionCleanup { get; init; }
     public BackgroundRemovalMode BackgroundRemovalMode { get; init; } = BackgroundRemovalMode.Automatic;
     public BackgroundRemovalMode BackgroundRemovalAttemptMode { get; init; } = BackgroundRemovalMode.Automatic;
+    public SessionImageProcessingSelection? ImageProcessingSelection { get; init; }
+    public ImageProcessingExecutionView? ImageProcessingExecution { get; init; }
 
     /// <summary>The exact terminal attempt represented by the current failure surface.</summary>
     public AttemptId? CurrentFailureAttemptId { get; init; }
@@ -868,10 +871,8 @@ public sealed record SessionView(
 
         ArtefactView? current = ResolveArtefact(snapshot, revisions);
 
-        // The two halves of "may an operator crop by hand", computed once and read twice: the
-        // manual-crop offer needs it, and the margin controls need its negation — a file the
-        // automatic trim has refused is on the manual path, where adding margin to a crop that
-        // was never decided would be a control that cannot do what it appears to (§17).
+        // Share the verdict between the manual entry and the automatic margin controls.
+        // A manual fallback after an Alpha refusal has its own rectangle and margin controls.
         bool canManualCrop = ManualCropEligibility.IsEligible(snapshot, attempts)
             && availableCommands.Contains(CommandKind.SubmitManualCrop);
 
@@ -1009,6 +1010,9 @@ public sealed record SessionView(
             BackgroundRemovalMode = usable?.Mode ?? BackgroundRemovalMode.Automatic,
             BackgroundRemovalAttemptMode = producingAuthority?.Mode ?? BackgroundRemovalMode.Automatic,
             IgnoreSmallTrimNoise = snapshot.IgnoreSmallTrimNoise,
+            ImageProcessingSelection = snapshot.Definition.Contains(StepKind.Trim)
+                ? snapshot.ImageProcessingSelection ?? SessionImageProcessingSelection.Compatible
+                : null,
             CurrentTrimIgnoresSmallNoise = current is not null &&
                 attempts.FirstOrDefault(attempt => attempt.OutputRevisionId == current.RevisionId)?.IgnoreSmallTrimNoise == true,
         };

@@ -62,4 +62,7 @@ public enum SettingKey
 
     /// <summary>Local log retention, in days.</summary>
     LogRetentionDays,
+
+    /// <summary>Versioned defaults for enhancement, background removal and cropping.</summary>
+    ImageProcessingDefaults,
 }

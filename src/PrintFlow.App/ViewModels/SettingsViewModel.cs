@@ -11,6 +11,7 @@ using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Settings;
 using PrintFlow.Workflow.Ports;
+using PrintFlow.Workflow.Services;
 
 namespace PrintFlow.App.ViewModels;
 
@@ -111,7 +112,9 @@ public sealed partial class SettingsViewModel : ObservableObject
         INavigationService navigation,
         SettingsDefaults defaults,
         LocalDiagnosticLocations locations,
-        ReadinessObservationAccessor observations)
+        ReadinessObservationAccessor observations,
+        ISessionService sessions,
+        IOpenAiImageCredentials? openAiCredentials = null)
     {
         ArgumentNullException.ThrowIfNull(settings);
         ArgumentNullException.ThrowIfNull(localisation);
@@ -128,6 +131,8 @@ public sealed partial class SettingsViewModel : ObservableObject
         _defaults = defaults;
         _locations = locations;
         _observations = observations;
+        _imageProcessingSessions = sessions;
+        _openAiCredentials = openAiCredentials;
 
         foreach (OperatorLanguage language in OperatorLanguages.All)
         {
@@ -299,31 +304,23 @@ public sealed partial class SettingsViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Commits every editable preference as one transaction, then applies what committed.
+    /// Commits the general preferences as one transaction, then applies what committed.
     /// </summary>
     /// <remarks>
-    /// The order is the point. Both fields are validated before anything is written, so an
+    /// The order is the point. Retention is validated before anything is written, so an
     /// unusable entry costs nothing; the batch is written as one
     /// <see cref="ISettingsRepository.UpsertAsync"/> call, so a failure leaves the database
     /// exactly as it was; and the language is switched only <i>after</i> the commit succeeded,
     /// so the interface can never be showing a language the database does not hold.
     /// <para>
-    /// All three preferences are written every time rather than only the changed ones. One
-    /// Apply means "these are my settings", and a diffing rule would make the answer to "what
-    /// did Apply write" depend on state the operator cannot see.
+    /// Image-processing preferences are saved by their own page as a separate transaction.
     /// </para>
     /// </remarks>
     [RelayCommand(CanExecute = nameof(CanApply))]
     private async Task ApplyAsync(CancellationToken cancellationToken)
     {
-        if (!CanApply())
+        if (!CanApply() || IsEditingImageProcessing)
         {
-            return;
-        }
-
-        if (!TryReadPixels(TrimSafetyMarginPixels, out int marginPixels))
-        {
-            Notice = Strings.Settings_TrimMarginInvalid;
             return;
         }
 
@@ -344,7 +341,6 @@ public sealed partial class SettingsViewModel : ObservableObject
             OperationResult<Unit> saved = await _settings.UpsertAsync(
                 [
                     SettingEntry.Text(SettingKey.UiLanguage, OperatorLanguages.CultureNameOf(language)),
-                    SettingEntry.Integer(SettingKey.TrimSafetyMarginPixels, marginPixels),
                     SettingEntry.Integer(SettingKey.LogRetentionDays, retentionDays),
                 ],
                 cancellationToken).ConfigureAwait(true);
@@ -364,7 +360,6 @@ public sealed partial class SettingsViewModel : ObservableObject
 
             // Re-displayed from the parsed values, so what the screen shows afterwards is what
             // was actually stored rather than what was typed.
-            TrimSafetyMarginPixels = marginPixels.ToString(CultureInfo.InvariantCulture);
             LogRetentionDays = retentionDays.ToString(CultureInfo.InvariantCulture);
 
             RefreshLocalisedText();
@@ -411,6 +406,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         ApplyCommand.NotifyCanExecuteChanged();
         OpenEnvironmentCommand.NotifyCanExecuteChanged();
         BackToHomeCommand.NotifyCanExecuteChanged();
+        RefreshImageProcessingCommands();
     }
 
     private void ApplyPersisted(IReadOnlyList<SettingEntry> entries)

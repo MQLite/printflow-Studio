@@ -105,6 +105,9 @@ public sealed class GuidedSessionSaveOwnershipTests
             string path = Path.Combine(confirmed, "confirmed-output.png");
             File.Exists(path).ShouldBeTrue();
             string persisted = JsonSerializer.Serialize((await h.Repository.LoadAsync(m.Id, default)).Value);
+            m.IsSaveDraftEditable.ShouldBeFalse("the recorded delivery is read-only");
+            m.BeginCopyCommand.Execute(null);
+            m.IsSaveDraftEditable.ShouldBeTrue("the new copy has its own draft");
             m.SaveFileNameText = "unfinished-second-name.png";
             picker.Folder = edited; m.ChangeLocationCommand.Execute(null);
             m.ViewHistoryCommand.Execute(m.Steps.First());

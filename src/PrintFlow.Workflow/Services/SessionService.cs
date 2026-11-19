@@ -171,7 +171,8 @@ public sealed partial class SessionService : ISessionService
         IWorkstationAutomationLease? enclosingAutomationLease = null,
         IWorkstationAutomationLeaseManager? automationLeases = null,
         ICorrectionPackageStore? correctionPackages = null,
-        IWebpRasterPreparer? webp = null)
+        IWebpRasterPreparer? webp = null,
+        IEnumerable<IImageProcessingBackend>? imageProcessingBackends = null)
     {
         ArgumentNullException.ThrowIfNull(engine);
         _webp = webp;
@@ -202,6 +203,7 @@ public sealed partial class SessionService : ISessionService
         _settings = settings;
         _diagnosticImages = diagnosticImages;
         _correctionPackages = correctionPackages;
+        _imageProcessingBackends = imageProcessingBackends?.ToArray() ?? [];
         _presetProvider = presetProvider;
         _environmentGate = environmentGate;
         _automationLeases = automationLeases;
@@ -230,6 +232,11 @@ public sealed partial class SessionService : ISessionService
         CancellationToken cancellationToken) => ImportCoreAsync(
             SessionId.From(_idGenerator.NewId()), workflowType, sourceAbsolutePath, outputName, operatorName,
             expectedHash: null, cancellationToken);
+
+    public Task<OperationResult<SessionView>> ImportForWorkflowSelectionAsync(
+        string sourceAbsolutePath, string? operatorName, CancellationToken cancellationToken) => ImportCoreAsync(
+            SessionId.From(_idGenerator.NewId()), WorkflowType.PrepareAsset, sourceAbsolutePath, null, operatorName,
+            expectedHash: null, cancellationToken, selectingWorkflow: true);
 
     public async Task<OperationResult<SessionView>> ImportVerifiedWorkResultAsync(Guid requestId, string sourceAbsolutePath,
         string outputName, Sha256 expectedHash, CancellationToken cancellationToken)
@@ -261,12 +268,28 @@ public sealed partial class SessionService : ISessionService
 
     private async Task<OperationResult<SessionView>> ImportCoreAsync(
         SessionId id, WorkflowType workflowType, string sourceAbsolutePath, string? outputName, string? operatorName,
-        Sha256? expectedHash, CancellationToken cancellationToken)
+        Sha256? expectedHash, CancellationToken cancellationToken, bool selectingWorkflow = false)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(sourceAbsolutePath);
 
         OutputName name = OutputName.Sanitise(outputName ?? StemOf(sourceAbsolutePath));
 
+        OperationResult<(ImageProcessingPolicy? Policy, TrimMargin Margin)> defaults =
+            await ResolveImageProcessingDefaultsAsync(workflowType, cancellationToken).ConfigureAwait(false);
+        bool deferred = false;
+        if (defaults.IsFailure)
+        {
+            if (!selectingWorkflow || !ImageProcessingPolicy.IsDefaultsFailure(defaults.Failure))
+                return OperationResult.Fail<SessionView>(defaults.Failure);
+
+            // The Home import takes place before route selection. Keep that entry open for
+            // print-only use and require a valid configuration before an image route is chosen.
+            deferred = true;
+            workflowType = WorkflowType.GeneratePrintTiff;
+        }
+
+        (ImageProcessingPolicy? policy, TrimMargin startingMargin) =
+            deferred ? (null, TrimMargin.Tight) : defaults.Value;
         CommandContext context = CommandContext.Create(_timeProvider, _idGenerator, operatorName);
 
         OperationResult<WorkspaceDirRef> created = _workspace.CreateSession(id, context.NowUtc);
@@ -277,16 +300,22 @@ public sealed partial class SessionService : ISessionService
 
         WorkspaceDirRef workspaceDir = created.Value;
 
-        // The configured default, applied to this new job only. Read here rather than inside the
-        // domain constructors, so the value a session is created with is a decision this service
-        // made once and persisted, not a lookup the domain repeats (SCRUM-11118).
-        TrimMargin startingMargin = await ResolveDefaultTrimMarginAsync(cancellationToken)
-            .ConfigureAwait(false);
-
         ProcessingSession session = ProcessingSession.Start(id, workflowType, name, workspaceDir, context.NowUtc)
-            with { TrimMargin = startingMargin };
+            with
+            {
+                TrimMargin = startingMargin,
+                IgnoreSmallTrimNoise = policy?.IgnoreSmallTrimNoise ?? true,
+                ImageProcessingSelection = policy?.Selection,
+                ImageProcessingDefaultsDeferred = deferred,
+            };
         WorkflowSnapshot initialSnapshot = WorkflowSnapshot.Create(id, workflowType, name, context.NowUtc)
-            with { TrimMargin = startingMargin };
+            with
+            {
+                TrimMargin = session.TrimMargin,
+                IgnoreSmallTrimNoise = session.IgnoreSmallTrimNoise,
+                ImageProcessingSelection = session.ImageProcessingSelection,
+                ImageProcessingDefaultsDeferred = deferred,
+            };
 
         WorkflowTransition started = _engine.Apply(initialSnapshot, new WorkflowCommand.StartStep(StepKind.Import), context);
         if (started.IsRejected)
@@ -383,35 +412,24 @@ public sealed partial class SessionService : ISessionService
         return ViewOf(finished.State, revisions, [], [succeededAttempt], []);
     }
 
-    /// <summary>
-    /// The trim safety margin a job imported now starts with (SCRUM-11118).
-    /// </summary>
-    /// <remarks>
-    /// Every unusable answer resolves to <see cref="TrimMargin.Tight"/> — no repository, a
-    /// persistence failure, no persisted row, a value that is not a whole number, and a
-    /// negative or zero one. That is the margin every trim has had since Epic 11200 Part B, so
-    /// the failure direction of a settings read is "behave exactly as before", never "start a
-    /// production job with a margin nobody chose".
-    /// <para>
-    /// A uniform margin, because the setting is one number. The per-edge form stays what it has
-    /// always been: a decision the operator makes on a specific image while looking at it, not
-    /// a default (Epic 11200 Part C3 §10).
-    /// </para>
-    /// </remarks>
-    private async Task<TrimMargin> ResolveDefaultTrimMarginAsync(CancellationToken cancellationToken)
+    private async Task<OperationResult<(ImageProcessingPolicy? Policy, TrimMargin Margin)>>
+        ResolveImageProcessingDefaultsAsync(WorkflowType workflow, CancellationToken cancellationToken)
     {
+        if (!WorkflowCatalog.For(workflow).Contains(StepKind.Trim))
+            return OperationResult.Ok<(ImageProcessingPolicy?, TrimMargin)>((null, TrimMargin.Tight));
         if (_settings is null)
-        {
-            return TrimMargin.Tight;
-        }
+            return OperationResult.Ok<(ImageProcessingPolicy?, TrimMargin)>((ImageProcessingPolicy.CompatibleDefault, TrimMargin.Tight));
 
-        OperationResult<SettingEntry?> persisted = await _settings
-            .ReadAsync(SettingKey.TrimSafetyMarginPixels, cancellationToken)
-            .ConfigureAwait(false);
+        var settings = await _settings.ReadAllAsync(cancellationToken).ConfigureAwait(false);
+        if (settings.IsFailure)
+            return OperationResult.Fail<(ImageProcessingPolicy?, TrimMargin)>(settings.Failure);
 
-        return persisted.IsSuccess && persisted.Value?.AsInteger() is { } pixels && pixels > 0
-            ? TrimMargin.Uniform(pixels)
-            : TrimMargin.Tight;
+        var policy = ImageProcessingPolicy.FromSettings(settings.Value);
+        if (policy.IsFailure)
+            return OperationResult.Fail<(ImageProcessingPolicy?, TrimMargin)>(policy.Failure);
+        int pixels = ImageProcessingPolicy.ReadTrimMarginPixels(settings.Value);
+        return OperationResult.Ok<(ImageProcessingPolicy?, TrimMargin)>(
+            (policy.Value, pixels == 0 ? TrimMargin.Tight : TrimMargin.Uniform(pixels)));
     }
 
     /// <inheritdoc />
@@ -420,7 +438,15 @@ public sealed partial class SessionService : ISessionService
     {
         // Every authority-changing command shares the delivery/retention gate. Complete's
         // retention path calls its under-gate core, so this lease is acquired only once.
-        using IDisposable completionLease = await SessionCompletionGate.EnterAsync(id, cancellationToken);
+        bool preventQueuedImageCommand = command is WorkflowCommand.SetImageProcessingSelection or
+            WorkflowCommand.SubmitManualCrop or
+            WorkflowCommand.StartStep { Step: StepKind.Enhancement or StepKind.BackgroundRemoval or StepKind.Trim };
+        using IDisposable? completionLease = preventQueuedImageCommand
+            ? await SessionCompletionGate.TryEnterAsync(id, cancellationToken)
+            : await SessionCompletionGate.EnterAsync(id, cancellationToken);
+        if (completionLease is null)
+            return OperationResult.Fail<SessionView>(FailureCode.PreconditionNotMet,
+                "This task is busy. Image processing commands may only be sent between attempts.");
         return await ExecuteCoreAsync(id, command, operatorName, expectedFailureAttemptId: null, cancellationToken);
     }
 
@@ -527,17 +553,13 @@ public sealed partial class SessionService : ISessionService
                 { Code: FailureCode.PdfMultiplePages or FailureCode.PdfEncrypted or FailureCode.PdfUnreadable } refusal)
             return OperationResult.Fail<SessionView>(refusal);
 
-        // The half of manual-crop eligibility the pure engine cannot see, checked before the
-        // command reaches it. Button visibility is not a guard: a crop asked for against an
-        // unrelated Trim failure, or against a rejected deterministic trim, is refused here even
-        // if something managed to construct the command (Part C2 §13).
+        // Match the manual crop offer to the selected method and attempt history at execution.
         if (command is WorkflowCommand.SubmitManualCrop &&
             !ManualCropEligibility.IsEligible(snapshot, aggregate.Attempts))
         {
             return OperationResult.Fail<SessionView>(
                 FailureCode.PreconditionNotMet,
-                "A manual crop is legal only after a Trim attempt reported ManualCropRequired, or " +
-                "after an earlier manual crop was rejected.");
+                "Select the manual crop method or use the manual crop fallback when offered.");
         }
 
         // Adjusting a trim review: the attempt-history half, on the aggregate this command will
@@ -606,6 +628,23 @@ public sealed partial class SessionService : ISessionService
             return OperationResult.Fail<SessionView>(MapRejection(transition.Rejection!));
         }
 
+        if (command is WorkflowCommand.SelectWorkflow && snapshot.ImageProcessingDefaultsDeferred &&
+            transition.State.Definition.Contains(StepKind.Trim))
+        {
+            var defaults = await ResolveImageProcessingDefaultsAsync(transition.State.WorkflowType, cancellationToken)
+                .ConfigureAwait(false);
+            if (defaults.IsFailure)
+                return OperationResult.Fail<SessionView>(defaults.Failure);
+
+            transition = WorkflowTransition.Accepted(transition.State with
+            {
+                ImageProcessingSelection = defaults.Value.Policy!.Selection,
+                ImageProcessingDefaultsDeferred = false,
+                IgnoreSmallTrimNoise = defaults.Value.Policy.IgnoreSmallTrimNoise,
+                TrimMargin = defaults.Value.Margin,
+            }, transition.Effects);
+        }
+
         ProducingWork? work = ProducingWorkOf(transition.Effects);
         if (work is null)
         {
@@ -648,6 +687,19 @@ public sealed partial class SessionService : ISessionService
                     CorrectionRequestChanges = [new CorrectionRequestChange.MarkReady(correction.RequestId, context.NowUtc)],
                 };
 
+            if (snapshot.Definition.Contains(StepKind.Trim) || state.Definition.Contains(StepKind.Trim))
+                mutation = mutation with
+                {
+                    ImageProcessingGuard = new(aggregate.Session, aggregate.Steps, command switch
+                    {
+                        WorkflowCommand.SetImageProcessingSelection selection =>
+                            FindRevision(aggregate, snapshot.UpstreamRevisionOf(selection.Step)),
+                        WorkflowCommand.Skip skip when IsCombinedSkip(skip) =>
+                            FindRevision(aggregate, snapshot.UpstreamRevisionOf(skip.Step)),
+                        _ => null,
+                    }),
+                };
+
             OperationResult<Unit> committed = await _repository.CommitAsync(mutation, cancellationToken);
             if (committed.IsFailure)
             {
@@ -675,6 +727,9 @@ public sealed partial class SessionService : ISessionService
         // the request on the post-opening aggregate (addendum §3.2).
         if (correction is { Purpose: CorrectionPurpose.Import })
             work = work with { CorrectionRequestId = correction.RequestId, ExpectedSelectedHash = correction.SelectedHash };
+
+        if (command is WorkflowCommand.StartStep start)
+            work = work with { UploadConfirmation = start.UploadConfirmation };
 
         return await RunProducingStepAsync(aggregate, transition, context, work, cancellationToken);
     }
@@ -1043,6 +1098,8 @@ public sealed partial class SessionService : ISessionService
 
         /// <summary>The selected file's hash when it was checked; the importer refuses other bytes.</summary>
         public Sha256? ExpectedSelectedHash { get; init; }
+        public ImageProcessingExecutionPlan? ImageProcessing { get; init; }
+        public ImageUploadConfirmation? UploadConfirmation { get; init; }
     }
 
     /// <summary>
@@ -1268,8 +1325,12 @@ public sealed partial class SessionService : ISessionService
             }
         }
 
+        var imageProcessing = ImageProcessingViewOf(state, attempts);
+        var availableCommands = _engine.AvailableCommands(state);
+        if (imageProcessing?.Unavailable is not null)
+            availableCommands = availableCommands.Where(kind => kind != CommandKind.StartStep).ToArray();
         SessionView view = SessionView.From(
-            state, _engine.AvailableCommands(state), revisions, outputs, attempts, ProcessingMode,
+            state, availableCommands, revisions, outputs, attempts, ProcessingMode,
             _engine.AvailableReturnTargets(state),
 
             // The configured recommendations, resolved here and offered to the screen, so the
@@ -1280,7 +1341,7 @@ public sealed partial class SessionService : ISessionService
             _presetProvider.GetPrintSizeRecommendations() is { IsSuccess: true } configured
                 ? configured.Value.All
                 : [],
-            enlargementOfferId);
+            enlargementOfferId) with { ImageProcessingExecution = imageProcessing };
 
         RecordedSize? currentSize = CurrentRecordedSize(state);
         if (currentSize is not null)
@@ -1556,12 +1617,15 @@ public sealed partial class SessionService : ISessionService
             WorkflowCommand.Approve approve => FindRevision(aggregate, snapshot.Step(approve.Step)?.CurrentRevisionId),
             WorkflowCommand.Reject reject => FindRevision(aggregate, snapshot.Step(reject.Step)?.CurrentRevisionId),
             WorkflowCommand.StartStep start => FindRevision(aggregate, snapshot.UpstreamRevisionOf(start.Step)),
+            WorkflowCommand.Skip skip when IsCombinedSkip(skip) =>
+                FindRevision(aggregate, snapshot.UpstreamRevisionOf(skip.Step)),
             // Retaining the approved original is a decision about those exact bytes.
             WorkflowCommand.KeepOriginalExtent => FindRevision(aggregate, snapshot.UpstreamRevisionOf(StepKind.Trim)),
 
             // A trim adjustment is a decision about the exact pixels of the pre-trim source it
             // crops, so those bytes are re-verified before anything is committed (SCRUM-11147).
             WorkflowCommand.AdjustTrimFromReview => FindRevision(aggregate, snapshot.UpstreamRevisionOf(StepKind.Trim)),
+            WorkflowCommand.SubmitManualCrop crop => FindRevision(aggregate, snapshot.UpstreamRevisionOf(crop.Step)),
             WorkflowCommand.SubmitManualResult manual => FindRevision(aggregate, snapshot.UpstreamRevisionOf(manual.Step)),
 
             // The same input a manual import is checked against: U's bytes are re-verified before
@@ -1621,6 +1685,8 @@ public sealed partial class SessionService : ISessionService
         SessionMutation mutation = new(
             aggregate.Session with { UpdatedAtUtc = context.NowUtc },
             aggregate.Steps, [], [invalidation], [], [], [], null, null);
+        if (snapshot.Definition.Contains(StepKind.Trim))
+            mutation = mutation with { ImageProcessingGuard = new(aggregate.Session, aggregate.Steps) };
         await _repository.CommitAsync(mutation, cancellationToken);
 
         return OperationResult.Fail<Unit>(verified.Failure);
@@ -1941,7 +2007,52 @@ public sealed partial class SessionService : ISessionService
                 FailureCode.PreconditionNotMet, $"Step {work.Step} is not part of this workflow.");
         }
 
-        bool drivesExternalApplication = definition.IsAdapterBacked && work.ManualResultPath is null;
+        if (work.ManualCrop is not null)
+        {
+            work = work with { ImageProcessing = PlanImageProcessing(ImageProcessingMethod.ManualCrop) };
+        }
+        else if (work.ManualResultPath is null &&
+            PlanImageProcessing(started.State, work.Step) is { } plan)
+        {
+            if (plan.View.Unavailable is { } unavailable)
+                return OperationResult.Fail<SessionView>(unavailable);
+            var method = plan.View.Method;
+            if (ImageUploadConfirmation.IsOpenAiMethod(method))
+            {
+                var source = FindRevision(aggregate, work.InputRevision);
+                Guid? positionId = aggregate.Steps.Single(step => step.Step == work.Step).CombinedUploadPositionId;
+                if (source is null || work.UploadConfirmation?.TryReserve(method, source.Id, source.Sha256, positionId) != true)
+                    return OperationResult.Fail<SessionView>(OperationFailure.Create(FailureCode.PreconditionNotMet,
+                        "Confirm the current input and operation before uploading to OpenAI Images.",
+                        messageKey: "ImageProcessing_OpenAiConfirmationRequired"));
+            }
+            else
+            {
+                work = work with { UploadConfirmation = null };
+            }
+
+            work = work with { ImageProcessing = plan, ProcessorId = plan.View.AdapterId! };
+        }
+
+        bool drivesExternalApplication = work.ImageProcessing?.View.DrivesExternalApplication ??
+            (definition.IsAdapterBacked && work.ManualResultPath is null);
+
+        if (work.ImageProcessing?.Backend is not null)
+        {
+            if (!await _imageProcessingSlots.WaitAsync(0, cancellationToken).ConfigureAwait(false))
+                return OperationResult.Fail<SessionView>(FailureCode.AdapterUnavailable,
+                    "The active image processors are busy. Retry when one finishes.");
+            try
+            {
+                return await RunProducingStepWithinLeaseAsync(
+                    aggregate, started, context, work, definition, drivesExternalApplication,
+                    cancellationToken).ConfigureAwait(false);
+            }
+            finally
+            {
+                _imageProcessingSlots.Release();
+            }
+        }
 
         if (!drivesExternalApplication)
         {
@@ -1973,9 +2084,12 @@ public sealed partial class SessionService : ISessionService
                 "No workstation automation lease authority was composed for this external operation.");
         }
 
+        WorkstationApplication application = work.Adapter == AdapterKind.Meitu
+            ? WorkstationApplication.Meitu : WorkstationApplication.Photoshop;
+        IApplicationEnvironmentGate? applicationGate = _environmentGate as IApplicationEnvironmentGate;
         // Readiness owns its own bounded workstation lease. Run it before acquiring the
         // attempt's lease so a cold start can launch the applications without self-contention.
-        if (_environmentGate is IPreparingEnvironmentGate preparingGate)
+        if (applicationGate is not null || _environmentGate is IPreparingEnvironmentGate)
         {
             WorkstationAutomationLeaseObservation availability = await _automationLeases
                 .ObserveAsync(_enclosingAutomationLease, cancellationToken).ConfigureAwait(false);
@@ -1984,8 +2098,9 @@ public sealed partial class SessionService : ISessionService
             // includes an uninitialised authority: readiness must try its guarded acquisition.
             if (availability.Status is not (WorkstationAutomationLeaseStatus.Busy or WorkstationAutomationLeaseStatus.Owned))
             {
-                OperationResult<Unit> prepared = await preparingGate
-                    .PrepareAsync(adapterMode, cancellationToken).ConfigureAwait(false);
+                OperationResult<Unit> prepared = applicationGate is not null
+                    ? await applicationGate.PrepareForApplicationAsync(adapterMode, application, cancellationToken).ConfigureAwait(false)
+                    : await ((IPreparingEnvironmentGate)_environmentGate).PrepareAsync(adapterMode, cancellationToken).ConfigureAwait(false);
                 if (prepared.IsFailure)
                 {
                     return OperationResult.Fail<SessionView>(prepared.Failure);
@@ -2005,9 +2120,12 @@ public sealed partial class SessionService : ISessionService
         OperationResult<SessionView> result;
         try
         {
-            OperationResult<Unit> gate = _environmentGate is IWorkstationScopedEnvironmentGate scoped
-                ? scoped.Verify(adapterMode, lease)
-                : _environmentGate.Verify(adapterMode);
+            OperationResult<Unit> gate = _environmentGate switch
+            {
+                IApplicationEnvironmentGate scoped => scoped.VerifyForApplication(adapterMode, application, lease),
+                IWorkstationScopedEnvironmentGate scoped => scoped.Verify(adapterMode, lease),
+                _ => _environmentGate.Verify(adapterMode),
+            };
             result = gate.IsFailure
                 ? OperationResult.Fail<SessionView>(gate.Failure)
                 : await RunProducingStepWithinLeaseAsync(
@@ -2089,6 +2207,21 @@ public sealed partial class SessionService : ISessionService
             work.Operation, work.ProcessorId, context.NowUtc,
             retryOfAttemptId: retryOf, retrySequence: retrySequence);
 
+        ImageProcessingMethod? method = work.ImageProcessing?.View.Method
+            ?? ManualImageProcessingMethod(work.Step, work.Operation);
+        if (method is { } actualMethod && FindRevision(aggregate, work.InputRevision) is { } imageInput)
+        {
+            string? algorithmVersion = work.ImageProcessing?.View.AlgorithmVersion;
+            runningAttempt = runningAttempt with
+            {
+                ImageProcessingDetails = new ImageProcessingRunDetails(actualMethod, imageInput.Sha256, algorithmVersion)
+                {
+                    UploadConfirmedAtUtc = work.UploadConfirmation is null ? null : context.NowUtc,
+                    UploadConfirmedBy = work.UploadConfirmation is null ? null : context.Operator,
+                },
+            };
+        }
+
         if (work.ManualResultPath is { } selectedEvidence)
             runningAttempt = runningAttempt.WithManualResultSourcePath(selectedEvidence) with
             {
@@ -2116,7 +2249,7 @@ public sealed partial class SessionService : ISessionService
         // engine already refused to start the step without one — it is the same predicate, so
         // what is snapshotted is exactly what the engine validated and never a stale record that
         // happened to still be sitting on the session (§8).
-        if (work.Step == StepKind.BackgroundRemoval &&
+        if (work.Step == StepKind.BackgroundRemoval && method != ImageProcessingMethod.OpenAiCombined &&
             started.State.UsableBackgroundRemovalAuthority is { } authority)
         {
             runningAttempt = runningAttempt.WithBackgroundRemovalAuthority(authority);
@@ -2153,6 +2286,11 @@ public sealed partial class SessionService : ISessionService
         SessionMutation opening = BuildMetadataMutation(
             aggregate, sessionAfterStart, started.State, started.Effects, context, upsertAttempts: [runningAttempt]);
         opening = opening with { LockChange = acquire };
+        if (work.ImageProcessing is not null)
+            opening = opening with
+            {
+                ImageProcessingGuard = new(aggregate.Session, aggregate.Steps, FindRevision(aggregate, work.InputRevision)),
+            };
 
         // A correction import binds its attempt to the request in the opening commit itself
         // (SCRUM-11148, design §6.5): a crash at any later point leaves a persisted READY row
@@ -2186,8 +2324,12 @@ public sealed partial class SessionService : ISessionService
         // opening transaction would have nothing to close and no row to audit against, so the
         // window in which Stop is offered is exactly the window in which it is meaningful
         // (Part D2A §24, §28).
+        bool usesImageBackend = work.ImageProcessing?.Backend is not null;
+        using CancellationTokenSource? localCancellation = usesImageBackend
+            ? CancellationTokenSource.CreateLinkedTokenSource(cancellationToken) : null;
+        CancellationToken processingToken = localCancellation?.Token ?? cancellationToken;
         IAutomationStopSignal stop = _runs.Begin(
-            aggregate.Session.Id, runningAttempt.Id, work.Step, drivesExternalApplication);
+            aggregate.Session.Id, runningAttempt.Id, work.Step, drivesExternalApplication, localCancellation);
 
         OperationResult<StepWork> produced;
         WorkspaceFileRef? establishedExpectedOutput = null;
@@ -2196,9 +2338,9 @@ public sealed partial class SessionService : ISessionService
             produced = await PerformStepWorkAsync(
                 afterStart, started.State, definition, work, runningAttempt, context, stop,
                 output => establishedExpectedOutput = output,
-                cancellationToken);
+                processingToken);
         }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        catch (OperationCanceledException) when (processingToken.IsCancellationRequested)
         {
             produced = OperationResult.Fail<StepWork>(
                 OperationFailure.Create(
@@ -2213,7 +2355,7 @@ public sealed partial class SessionService : ISessionService
                         ["retainedExternalState"] = drivesExternalApplication ? "unknown" : "none",
                     }));
         }
-        catch (Exception ex) when (ex is not OperationCanceledException || !cancellationToken.IsCancellationRequested)
+        catch (Exception ex) when (ex is not OperationCanceledException || !processingToken.IsCancellationRequested)
         {
             // Everything else a step's work can throw (Epic 11600 Part A §9, §10). Without this
             // the exception unwinds past the closing transaction, and the two things it leaves
@@ -2259,6 +2401,9 @@ public sealed partial class SessionService : ISessionService
             _runs.End(runningAttempt.Id);
         }
 
+        if (usesImageBackend && (processingToken.IsCancellationRequested || stop.RequestedMode is not null))
+            produced = OperationResult.Fail<StepWork>(FailureCode.Cancelled, "Image processing was cancelled.");
+
         // Once a destination has been constructed it is historical evidence even if the
         // adapter throws, validation fails, or the operator stops the run. Attach it in one
         // place after containment so no post-destination exit can accidentally report that a
@@ -2286,18 +2431,20 @@ public sealed partial class SessionService : ISessionService
         {
             return await CompleteProducingStepAsync(
                 aggregate, afterStart, started, closing, work, runningAttempt, produced.Value, stop,
-                cancellationToken);
+                usesImageBackend ? CancellationToken.None : cancellationToken);
         }
 
-        if (stop.RequestedMode is { } stopped)
+        AutomationStopMode? requestedStop = stop.RequestedMode ??
+            (usesImageBackend && processingToken.IsCancellationRequested ? AutomationStopMode.StopOperation : null);
+        if (requestedStop is { } stopped)
         {
             // The operator asked for this, so it is recorded as a stop rather than as a
             // failure — including when the run ended on some other adapter failure while
             // stopping. Both facts survive: the mode and retained external state go into the
             // structured context, and whatever the adapter reported goes into the detail (§29).
             return await StopAttemptAsync(
-                afterStart, started.State, closing, work.Step, runningAttempt, definition,
-                stopped, stop, produced.Failure, work.CorrectionRequestId);
+                afterStart, started.State, closing, work.Step, runningAttempt, drivesExternalApplication,
+                stopped, stop, produced.Failure, work.CorrectionRequestId, work.ImageProcessing is not null);
         }
 
         // Cancellation is the one failure whose caller token cannot be used to close the
@@ -2318,7 +2465,7 @@ public sealed partial class SessionService : ISessionService
                 : cancellationToken;
         return await FailAttemptAsync(
             afterStart, started.State, closing, work.Step, runningAttempt, produced.Failure, closingToken,
-            work.CorrectionRequestId);
+            work.CorrectionRequestId, work.ImageProcessing is not null, usesImageBackend);
     }
 
     /// <summary>
@@ -2395,8 +2542,14 @@ public sealed partial class SessionService : ISessionService
             afterStart, sessionAfterFinish, finished.State, finished.Effects, context,
             newRevisions: [newRevision], upsertAttempts: [succeededAttempt], upsertOutputs: newOutputs);
 
-        if (work.ManualResultPath is not null)
+        if (work.ManualResultPath is not null || work.ImageProcessing?.Backend is not null)
             finishing = finishing with { LockChange = null };
+        if (work.ImageProcessing is not null)
+            finishing = finishing with
+            {
+                ImageProcessingGuard = new(afterStart.Session, afterStart.Steps,
+                    FindRevision(afterStart, work.InputRevision), runningAttempt.Id),
+            };
 
         // A bound correction import returns its request in the same transaction as R2 and the
         // successful attempt (addendum §3.3 Success). When the binding predicate fails on the
@@ -2413,6 +2566,8 @@ public sealed partial class SessionService : ISessionService
             finishing, stop.RequestedMode is null ? cancellationToken : CancellationToken.None);
         if (committedFinish.IsFailure)
         {
+            if (work.ImageProcessing is not null && committedFinish.Failure.Code == FailureCode.PreconditionNotMet)
+                return await CloseConflictingImageAttemptAsync(work, runningAttempt, context, committedFinish.Failure);
             return OperationResult.Fail<SessionView>(committedFinish.Failure);
         }
 
@@ -2525,6 +2680,18 @@ public sealed partial class SessionService : ISessionService
             return OperationResult.Fail<StepWork>(workingCopy.Failure);
         }
 
+        Revision? imageSource = null;
+        if (work.ImageProcessing is { } plan)
+        {
+            imageSource = FindRevision(aggregate, work.InputRevision)!;
+            var verified = await VerifyImageProcessingInputAsync(imageSource, workingCopy.Value, cancellationToken);
+            if (verified.IsFailure)
+                return OperationResult.Fail<StepWork>(verified.Failure);
+            if (plan.Backend is not null)
+                return await RunImageBackendAsync(plan, work, attempt, imageSource, workingCopy.Value,
+                    establishExpectedOutput, cancellationToken).ConfigureAwait(false);
+        }
+
         switch (work.Adapter)
         {
             case AdapterKind.Meitu:
@@ -2588,6 +2755,9 @@ public sealed partial class SessionService : ISessionService
                     decision = authority.Decision;
                 }
 
+                if (workingCopy.Value.FileName.Equals(producedName.Value, StringComparison.OrdinalIgnoreCase))
+                    return OperationResult.Fail<StepWork>(FailureCode.OutputValidationFailed,
+                        "Meitu's assigned output must be distinct from the working copy.");
                 WorkspaceFileRef expectedOutput = SiblingOf(workingCopy.Value, producedName.Value);
                 establishExpectedOutput(expectedOutput);
                 OperationResult<AdapterOutput> result = await _meitu.ProcessAsync(
@@ -2611,8 +2781,14 @@ public sealed partial class SessionService : ISessionService
                     return OperationResult.Fail<StepWork>(WithExpectedOutput(result.Failure, expectedOutput));
                 }
 
+                if (result.Value.ProducedFile != expectedOutput)
+                    return OperationResult.Fail<StepWork>(FailureCode.OutputValidationFailed,
+                        "Meitu returned a file other than the assigned output.");
+                var verified = await VerifyImageProcessingInputAsync(imageSource!, workingCopy.Value, cancellationToken);
+                if (verified.IsFailure)
+                    return OperationResult.Fail<StepWork>(verified.Failure);
                 OperationResult<StepWork> inspected = await InspectAsync(
-                    result.Value.ProducedFile, cancellationToken, result.Value.AdapterNotes);
+                    expectedOutput, cancellationToken, result.Value.AdapterNotes);
                 return inspected.IsFailure
                     ? OperationResult.Fail<StepWork>(WithExpectedOutput(inspected.Failure, expectedOutput))
                     : inspected;
@@ -2789,9 +2965,7 @@ public sealed partial class SessionService : ISessionService
                         $"Step {definition.Kind} is internal but has no deterministic processor.");
                 }
 
-                // A rectangle on the work means a human chose it, so the alpha scan is skipped
-                // entirely: the automatic path already refused this file, and re-running it
-                // would refuse again for the same reason (Part C2 §10, §21).
+                // A manual attempt uses the operator's rectangle as its content bounds.
                 if (work.ManualCrop is { } crop)
                 {
                     WorkspaceFileRef expectedOutput = SiblingOf(workingCopy.Value, ManualCropOutputFileName);
@@ -2825,7 +2999,9 @@ public sealed partial class SessionService : ISessionService
                 // change — so nothing between the screen and the processor can substitute a
                 // margin, and the same value is what the attempt row recorded before this ran
                 // (Epic 11200 Part C3 §13, §14).
-                WorkspaceFileRef trimOutput = SiblingOf(workingCopy.Value, TrimOutputFileName);
+                string trimFileName = workingCopy.Value.FileName.Equals(TrimOutputFileName, StringComparison.OrdinalIgnoreCase)
+                    ? "trimmed-result.png" : TrimOutputFileName;
+                WorkspaceFileRef trimOutput = SiblingOf(workingCopy.Value, trimFileName);
                 establishExpectedOutput(trimOutput);
                 OperationResult<TrimResult> trimmed = await _trim.TrimAsync(
                     new TrimRequest(
@@ -2862,8 +3038,14 @@ public sealed partial class SessionService : ISessionService
                 // produced trim always has both — TrimResult.Produced is the only way to build
                 // one — so a null here would mean the outcome was ManualCropRequired, which
                 // returned above.
+                if (result.ProducedFile != trimOutput)
+                    return OperationResult.Fail<StepWork>(FailureCode.OutputValidationFailed,
+                        "Trim returned a file other than the assigned output.");
+                var verifiedTrimInput = await VerifyImageProcessingInputAsync(imageSource!, workingCopy.Value, cancellationToken);
+                if (verifiedTrimInput.IsFailure)
+                    return OperationResult.Fail<StepWork>(verifiedTrimInput.Failure);
                 OperationResult<StepWork> inspectedTrim = await InspectAsync(
-                    result.ProducedFile!.Value,
+                    trimOutput,
                     cancellationToken,
                     trimGeometry: TrimGeometry.Create(result.ContentBounds!.Value, result.AppliedBounds!.Value));
                 return inspectedTrim.IsFailure
@@ -2941,7 +3123,8 @@ public sealed partial class SessionService : ISessionService
     private async Task<OperationResult<SessionView>> FailAttemptAsync(
         SessionAggregate aggregate, WorkflowSnapshot stateAfterStart, CommandContext context, StepKind step,
         ProcessingAttempt runningAttempt, OperationFailure failure, CancellationToken cancellationToken,
-        Guid? correctionRequestId = null)
+        Guid? correctionRequestId = null, bool imageProcessing = false, bool usesImageBackend = false,
+        bool retryConflict = true)
     {
         failure = FailureEvidence.ForAttempt(failure, runningAttempt.Id);
         WorkflowCommand.System.AttemptFailed failedCommand = new(runningAttempt.Id, step, failure);
@@ -2986,8 +3169,20 @@ public sealed partial class SessionService : ISessionService
             NewAutomationLog = [RecordAutomationStop(aggregate.Session.Id, step, failure, context.NowUtc)],
             CorrectionRequestChanges = requestChanges,
         };
+        if (imageProcessing)
+            mutation = mutation with
+            {
+                ImageProcessingGuard = new(aggregate.Session, aggregate.Steps, RunningAttempt: runningAttempt.Id),
+                LockChange = usesImageBackend ? null : mutation.LockChange,
+            };
 
         OperationResult<Unit> committed = await _repository.CommitAsync(mutation, cancellationToken);
+        if (imageProcessing && retryConflict && committed.IsFailure &&
+            committed.Failure.Code == FailureCode.PreconditionNotMet &&
+            await ReloadRunningImageAttemptAsync(runningAttempt) is { } latest)
+            return await FailAttemptAsync(latest, latest.ToSnapshot(ConfiguredRecommendations()), context, step,
+                runningAttempt, failure, CancellationToken.None, correctionRequestId, imageProcessing, usesImageBackend,
+                retryConflict: false);
         return committed.IsSuccess
             ? OperationResult.Fail<SessionView>(failure)
             : OperationResult.Fail<SessionView>(committed.Failure);
@@ -3057,14 +3252,14 @@ public sealed partial class SessionService : ISessionService
         CommandContext context,
         StepKind step,
         ProcessingAttempt runningAttempt,
-        StepDefinition definition,
+        bool drivesExternalApplication,
         AutomationStopMode mode,
         IAutomationStopSignal stop,
         OperationFailure? adapterFailure,
-        Guid? correctionRequestId = null)
+        Guid? correctionRequestId = null, bool imageProcessing = false, bool retryConflict = true)
     {
         OperationFailure failure = DescribeStop(
-            mode, stop, definition.IsAdapterBacked, runningAttempt, step, adapterFailure);
+            mode, stop, drivesExternalApplication, runningAttempt, step, adapterFailure);
         failure = FailureEvidence.ForAttempt(failure, runningAttempt.Id);
 
         WorkflowCommand.System.AttemptCancelled cancelled = new(runningAttempt.Id, step, failure);
@@ -3075,7 +3270,7 @@ public sealed partial class SessionService : ISessionService
         }
 
         ProcessingAttempt cancelledAttempt = runningAttempt.Cancel(
-            failure, context.NowUtc, DescribeRetainedState(mode, stop, definition.IsAdapterBacked))
+            failure, context.NowUtc, DescribeRetainedState(mode, stop, drivesExternalApplication))
             with { PsdInspection = adapterFailure?.PsdInspection, PdfInspection = adapterFailure?.PdfInspection };
 
         WorkflowSnapshot state = stopped.State;
@@ -3121,8 +3316,20 @@ public sealed partial class SessionService : ISessionService
             NewAutomationLog = [RecordAutomationStop(aggregate.Session.Id, step, failure, context.NowUtc)],
             CorrectionRequestChanges = requestChanges,
         };
+        if (imageProcessing)
+            mutation = mutation with
+            {
+                ImageProcessingGuard = new(aggregate.Session, aggregate.Steps, RunningAttempt: runningAttempt.Id),
+                LockChange = drivesExternalApplication ? mutation.LockChange : null,
+            };
 
         OperationResult<Unit> committed = await _repository.CommitAsync(mutation, CancellationToken.None);
+        if (imageProcessing && retryConflict && committed.IsFailure &&
+            committed.Failure.Code == FailureCode.PreconditionNotMet &&
+            await ReloadRunningImageAttemptAsync(runningAttempt) is { } latest)
+            return await StopAttemptAsync(latest, latest.ToSnapshot(ConfiguredRecommendations()), context, step,
+                runningAttempt, drivesExternalApplication, mode, stop, adapterFailure, correctionRequestId,
+                imageProcessing, retryConflict: false);
         return committed.IsFailure
             ? OperationResult.Fail<SessionView>(committed.Failure)
             : OperationResult.Fail<SessionView>(failure);
@@ -3198,7 +3405,9 @@ public sealed partial class SessionService : ISessionService
             ? AutomationStopPolicy.RetainedFor(stop.Phase, stop.OperationLeftBusyAfterCancel)
             : RetainedExternalState.None;
 
-        string headline = mode == AutomationStopMode.TakeOver
+        string headline = !drivesExternalApplication
+            ? "PrintFlow stopped this image processing run without publishing a result."
+            : mode == AutomationStopMode.TakeOver
             ? "The operator took over the external application. PrintFlow stopped this attempt and " +
               "produced no further automated input; nothing was cancelled, dismissed or closed."
             : stop.OperationCancelWasInvoked && stop.OperationLeftBusyAfterCancel
@@ -3220,7 +3429,6 @@ public sealed partial class SessionService : ISessionService
             [AutomationStopAudit.ModeKey] = mode.ToString(),
             [AutomationStopAudit.PhaseKey] = stop.Phase.ToString(),
             [AutomationStopAudit.CancelInvokedKey] = stop.OperationCancelWasInvoked ? "true" : "false",
-            ["meituLeftBusy"] = stop.OperationLeftBusyAfterCancel ? "true" : "false",
             [AutomationStopAudit.RetainedKey] = retained.ToString(),
             ["operatorActionRequired"] = record.OperatorActionMayBeRequired ? "true" : "false",
             ["forceTerminationInvoked"] = "false",
@@ -3228,6 +3436,8 @@ public sealed partial class SessionService : ISessionService
             ["attemptId"] = attempt.Id.ToString(),
             ["step"] = step.ToString(),
         };
+        if (drivesExternalApplication)
+            audit["meituLeftBusy"] = stop.OperationLeftBusyAfterCancel ? "true" : "false";
 
         if (adapterFailure is not null)
         {
@@ -3578,6 +3788,8 @@ public sealed partial class SessionService : ISessionService
             WhiteUnderbaseBranch = newSnapshot.WhiteUnderbaseBranch,
             TrimMargin = newSnapshot.TrimMargin,
             IgnoreSmallTrimNoise = newSnapshot.IgnoreSmallTrimNoise,
+            ImageProcessingSelection = newSnapshot.ImageProcessingSelection,
+            ImageProcessingDefaultsDeferred = newSnapshot.ImageProcessingDefaultsDeferred,
             BackgroundRemovalAuthority = newSnapshot.BackgroundRemovalAuthority,
 
             // Carried across with the dimensions they belong to, so the pair, its reading and the

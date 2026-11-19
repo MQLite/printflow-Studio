@@ -4,6 +4,7 @@ using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Reviews;
 using PrintFlow.Domain.Sessions;
+using PrintFlow.Domain.Settings;
 using PrintFlow.Domain.Trimming;
 using PrintFlow.Workflow.Commands;
 using PrintFlow.Workflow.Definitions;
@@ -60,6 +61,7 @@ public sealed class WorkflowEngine : IWorkflowEngine
             WorkflowCommand.AuthoriseEnlargement c => AuthoriseEnlargement(state, c),
             WorkflowCommand.SelectWhiteUnderbaseBranch c => SelectWhiteUnderbaseBranch(state, c),
             WorkflowCommand.SetTrimParameters c => SetTrimParameters(state, c),
+            WorkflowCommand.SetImageProcessingSelection c => SetImageProcessingSelection(state, c),
             WorkflowCommand.SetBackgroundRemovalDecision c => SetBackgroundRemovalDecision(state, c),
             WorkflowCommand.ReturnToStep c => ReturnToStep(state, c, context),
             WorkflowCommand.Complete => Complete(state, context),
@@ -165,7 +167,15 @@ public sealed class WorkflowEngine : IWorkflowEngine
         // so its result is carried across rather than discarded.
         WorkflowSnapshot reshaped = WorkflowSnapshot.Create(
             state.SessionId, command.Type, state.OutputName, context.NowUtc)
-            with { RequiresPsdPreparation = state.RequiresPsdPreparation, RequiresPdfPreparation = state.RequiresPdfPreparation };
+            with
+            {
+                RequiresPsdPreparation = state.RequiresPsdPreparation,
+                RequiresPdfPreparation = state.RequiresPdfPreparation,
+                ImageProcessingSelection = state.ImageProcessingSelection,
+                ImageProcessingDefaultsDeferred = state.ImageProcessingDefaultsDeferred,
+                TrimMargin = state.TrimMargin,
+                IgnoreSmallTrimNoise = state.IgnoreSmallTrimNoise,
+            };
 
         SessionStep? importBefore = state.Step(StepKind.Import);
         if (importBefore is not null && importBefore.CurrentRevisionId is not null)
@@ -261,6 +271,44 @@ public sealed class WorkflowEngine : IWorkflowEngine
     /// and <c>StartStep</c> reads it later.
     /// </para>
     /// </remarks>
+    private static WorkflowTransition SetImageProcessingSelection(
+        WorkflowSnapshot state, WorkflowCommand.SetImageProcessingSelection command)
+    {
+        if (!SessionStateRules.AllowsProgress(state.SessionState))
+            return NotActive(state, nameof(WorkflowCommand.SetImageProcessingSelection));
+
+        if (!state.Definition.Contains(command.Step) ||
+            command.Step is not (StepKind.Enhancement or StepKind.BackgroundRemoval or StepKind.Trim) ||
+            state.CurrentStep is not { } current || current.Step != command.Step ||
+            !AcceptsTrimParameters(current.State) || command.Selection is not { HasValidMethods: true })
+            return WorkflowTransition.Rejected(RejectionCode.PreconditionNotMet,
+                "Select a valid method for the current image processing step between attempts.");
+
+        SessionImageProcessingSelection recorded = state.ImageProcessingSelection ?? SessionImageProcessingSelection.Compatible;
+        SessionImageProcessingSelection updated = command.Selection;
+        bool pairChanged = recorded.UseOpenAiCombined != updated.UseOpenAiCombined;
+        bool correctScope = command.Step switch
+        {
+            StepKind.Enhancement => updated.Crop == recorded.Crop && updated.BackgroundRemoval == recorded.BackgroundRemoval &&
+                (!updated.UseOpenAiCombined || updated.Enhancement == recorded.Enhancement),
+            StepKind.BackgroundRemoval => !pairChanged && !recorded.UseOpenAiCombined &&
+                updated.Enhancement == recorded.Enhancement && updated.Crop == recorded.Crop,
+            StepKind.Trim => !pairChanged &&
+                updated.Enhancement == recorded.Enhancement && updated.BackgroundRemoval == recorded.BackgroundRemoval,
+            _ => false,
+        };
+        if (!correctScope)
+            return WorkflowTransition.Rejected(RejectionCode.PreconditionNotMet,
+                "An image processing command may change only the current step, or the combined selection at Enhancement.");
+
+        return WorkflowTransition.Accepted(state with
+        {
+            ImageProcessingSelection = updated,
+            BackgroundRemovalAuthority = recorded != updated && command.Step != StepKind.Trim
+                ? null : state.BackgroundRemovalAuthority,
+        });
+    }
+
     private static WorkflowTransition SetTrimParameters(
         WorkflowSnapshot state, WorkflowCommand.SetTrimParameters command)
     {
@@ -279,6 +327,12 @@ public sealed class WorkflowEngine : IWorkflowEngine
             return WorkflowTransition.Rejected(
                 RejectionCode.PreconditionNotMet,
                 "A trim margin can only be set while Trim is the current step; it describes the run that is about to happen.");
+        }
+
+        if (state.ProcessingMethodFor(StepKind.Trim) != ImageProcessingMethod.AlphaTrim)
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.PreconditionNotMet, "Automatic trim parameters require the Alpha trim method.");
         }
 
         if (!AcceptsTrimParameters(trim.State))
@@ -362,6 +416,14 @@ public sealed class WorkflowEngine : IWorkflowEngine
                 "attempts, not during one or after a result has been produced.");
         }
 
+        if (state.ProcessingMethodFor(StepKind.BackgroundRemoval) != command.Method)
+            return WorkflowTransition.Rejected(RejectionCode.PreconditionNotMet,
+                "The background removal method changed after the image was presented for confirmation.");
+
+        if (command.Method == ImageProcessingMethod.OpenAiCombined)
+            return WorkflowTransition.Rejected(RejectionCode.PreconditionNotMet,
+                "Confirm this combined operation when starting the upload.");
+
         if (state.UpstreamResultOf(StepKind.BackgroundRemoval) is not { } upstream)
         {
             return WorkflowTransition.Rejected(
@@ -432,6 +494,12 @@ public sealed class WorkflowEngine : IWorkflowEngine
         }
 
         SessionStep? current = state.CurrentStep;
+        bool exitCombined = command.UseStepByStepImageProcessing;
+        if (exitCombined && (command.Target != StepKind.Enhancement || current?.Step != StepKind.BackgroundRemoval ||
+            state.ImageProcessingSelection?.UseOpenAiCombined != true))
+            return WorkflowTransition.Rejected(RejectionCode.PreconditionNotMet,
+                "Return to Enhancement from the combined Background Removal step to switch to separate processing.");
+
         bool isUpstream = current is null || target.Ordinal < current.Ordinal;
         if (!isUpstream)
         {
@@ -456,6 +524,10 @@ public sealed class WorkflowEngine : IWorkflowEngine
         WorkflowSnapshot newState = state with
         {
             Steps = steps,
+            ImageProcessingSelection = exitCombined
+                ? state.ImageProcessingSelection! with { UseOpenAiCombined = false } : state.ImageProcessingSelection,
+            BackgroundRemovalAuthority = state.ImageProcessingSelection?.UseOpenAiCombined == true &&
+                target.Ordinal <= state.Definition.IndexOf(StepKind.BackgroundRemoval) ? null : state.BackgroundRemovalAuthority,
             Dimensions = clearsDimensions ? null : state.Dimensions,
             DimensionSemantics = clearsDimensions ? null : state.DimensionSemantics,
             PrintPreparationPlan = clearsDimensions ? null : state.PrintPreparationPlan,
@@ -471,6 +543,15 @@ public sealed class WorkflowEngine : IWorkflowEngine
             LatestApprovedRevisionId = LatestApprovedBefore(steps, target.Ordinal),
             HasDerivedRevision = HasDerivedRevision(steps),
         };
+
+        if (command.Target == StepKind.BackgroundRemoval &&
+            state.ProcessingMethodFor(command.Target) == ImageProcessingMethod.OpenAiCombined)
+        {
+            newState = newState.WithStep(newState.Step(command.Target)! with
+            {
+                CombinedUploadPositionId = context.NewAttemptId.Value,
+            });
+        }
 
         List<WorkflowEffect> effects = [];
         if (target.CurrentRevisionId is RevisionId from)
@@ -676,6 +757,23 @@ public sealed class WorkflowEngine : IWorkflowEngine
         SessionStep step = resolved.Step!;
         StepDefinition definition = resolved.Definition!;
 
+        bool combined = state.ProcessingMethodFor(command.Step) == ImageProcessingMethod.OpenAiCombined;
+        if (combined)
+        {
+            if (command.Step == StepKind.Enhancement || !CombinedEnhancementWasPlanned(state))
+                return WorkflowTransition.Rejected(RejectionCode.PreconditionNotMet,
+                    "Continue from Enhancement to the combined Background Removal step.");
+            if (step.State != StepState.Waiting || step.CombinedUploadPositionId is null)
+                return WorkflowTransition.Rejected(RejectionCode.PreconditionNotMet,
+                    "Choose Retry before authorising another combined upload.");
+        }
+
+        if (command.Step == StepKind.Trim && state.ProcessingMethodFor(command.Step) != ImageProcessingMethod.AlphaTrim)
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.PreconditionNotMet, "Use the selected crop method's operator action.");
+        }
+
         if (!definition.ProducesRevision)
         {
             return WorkflowTransition.Rejected(
@@ -752,7 +850,7 @@ public sealed class WorkflowEngine : IWorkflowEngine
         // is not the same as being authorised. One granted over Revision A does not carry to a
         // session whose upstream is now B, and one whose bound hash no longer matches describes
         // bytes that are gone (§8, §24). Nothing re-binds it silently; the operator decides again.
-        if (command.Step == StepKind.BackgroundRemoval && state.UsableBackgroundRemovalAuthority is null)
+        if (command.Step == StepKind.BackgroundRemoval && !combined && state.UsableBackgroundRemovalAuthority is null)
         {
             return WorkflowTransition.Rejected(
                 RejectionCode.PreconditionNotMet,
@@ -795,6 +893,7 @@ public sealed class WorkflowEngine : IWorkflowEngine
         {
             State = StepState.Processing,
             AttemptCount = step.AttemptCount + 1,
+            CombinedUploadPositionId = null,
             EnteredStateAtUtc = context.NowUtc,
         };
 
@@ -927,6 +1026,9 @@ public sealed class WorkflowEngine : IWorkflowEngine
         SessionStep retryable = step with
         {
             State = StepState.Waiting,
+            CombinedUploadPositionId = command.Step == StepKind.BackgroundRemoval &&
+                state.ProcessingMethodFor(command.Step) == ImageProcessingMethod.OpenAiCombined
+                    ? context.NewAttemptId.Value : null,
             CurrentRevisionId = null,
             CurrentRevisionSha256 = null,
             EnteredStateAtUtc = context.NowUtc,
@@ -943,14 +1045,9 @@ public sealed class WorkflowEngine : IWorkflowEngine
     /// (Epic 11200 Part C2 §12, §13).
     /// </summary>
     /// <remarks>
-    /// <b>This is half of the eligibility rule, and deliberately the half a pure reducer can
-    /// answer.</b> A <see cref="WorkflowSnapshot"/> holds no attempt history, so the engine can
-    /// see that Trim is the current step and that it is Failed or RetryRequired, but not
-    /// <i>why</i>. The other half — that the failure really was
-    /// <c>ManualCropRequired</c>, or that the rejected result really was a manual crop — is
-    /// checked by <see cref="Services.ManualCropEligibility"/> in the application layer, which
-    /// does hold the attempts. Both must pass before a crop runs; neither is a UI concern
-    /// (Part C2 §3).
+    /// The engine checks the step, state, rectangle and upstream revision.
+    /// <see cref="Services.ManualCropEligibility"/> checks the selected method and any
+    /// attempt history needed for the Alpha fallback.
     /// <para>
     /// Structured exactly like <see cref="StartStep"/>, including the fresh working copy, so a
     /// manual crop is an ordinary producing attempt in every respect that matters to the audit
@@ -1135,21 +1232,40 @@ public sealed class WorkflowEngine : IWorkflowEngine
                 $"Step {command.Step} is not skippable.");
         }
 
+        string reason = command.EffectiveReason;
+        bool planningCombined = reason == WorkflowCommand.Skip.CombinedWithBackgroundRemoval;
+        bool keepingCombinedInput = reason == WorkflowCommand.Skip.KeepReviewedInputAfterCombined;
+        SessionStep step = resolved.Step!;
+        bool combined = state.ProcessingMethodFor(command.Step) == ImageProcessingMethod.OpenAiCombined;
+        if (combined != (planningCombined || keepingCombinedInput) ||
+            (planningCombined && command.Step != StepKind.Enhancement) ||
+            (keepingCombinedInput && (command.Step != StepKind.BackgroundRemoval || !CombinedEnhancementWasPlanned(state) ||
+                step.State is not (StepState.Failed or StepState.Interrupted or StepState.RetryRequired))) ||
+            (combined && state.UpstreamResultOf(command.Step) is null))
+            return WorkflowTransition.Rejected(RejectionCode.PreconditionNotMet,
+                "Choose the action for the combined image processing step and its reviewed input.");
+
         // Skipping creates no Revision: the step simply offers nothing, so downstream steps
         // fall through to the last upstream result (MVP design §7.2).
-        SessionStep skipped = resolved.Step! with
+        SessionStep skipped = step with
         {
             State = StepState.Skipped,
             CurrentRevisionId = null,
             CurrentRevisionSha256 = null,
-            SkipReason = command.EffectiveReason,
+            SkipReason = reason,
+            CombinedUploadPositionId = null,
             EnteredStateAtUtc = context.NowUtc,
         };
 
-        return WorkflowTransition.Accepted(
-            state.WithStep(skipped),
-            new WorkflowEffect.RecordSkip(command.Step, command.EffectiveReason));
+        WorkflowSnapshot updated = state.WithStep(skipped);
+        if (planningCombined && state.Step(StepKind.BackgroundRemoval) is { } background)
+            updated = updated.WithStep(background with { CombinedUploadPositionId = context.NewAttemptId.Value });
+
+        return WorkflowTransition.Accepted(updated, new WorkflowEffect.RecordSkip(command.Step, reason));
     }
+
+    private static bool CombinedEnhancementWasPlanned(WorkflowSnapshot state) =>
+        state.Step(StepKind.Enhancement) is { State: StepState.Skipped, SkipReason: WorkflowCommand.Skip.CombinedWithBackgroundRemoval };
 
     /// <summary>
     /// Transfers the work to the operator and ends automated progression for this session
@@ -1163,6 +1279,10 @@ public sealed class WorkflowEngine : IWorkflowEngine
         {
             return WorkflowTransition.Rejected(resolved.Rejection);
         }
+
+        if (state.ProcessingMethodFor(command.Step) == ImageProcessingMethod.OpenAiCombined)
+            return WorkflowTransition.Rejected(RejectionCode.PreconditionNotMet,
+                "Return to separate processing before handing off image processing.");
 
         if (string.IsNullOrWhiteSpace(command.Reason))
         {
@@ -1180,7 +1300,9 @@ public sealed class WorkflowEngine : IWorkflowEngine
         }
 
         effects.Add(new WorkflowEffect.OpenForManualWork(command.Step, reason));
-        effects.Add(new WorkflowEffect.ReleaseAutomationLock());
+        if (state.ProcessingMethodFor(command.Step) is not (ImageProcessingMethod.BiRefNet
+            or ImageProcessingMethod.OpenAiRestore or ImageProcessingMethod.OpenAiCutout))
+            effects.Add(new WorkflowEffect.ReleaseAutomationLock());
 
         (WorkflowSnapshot handedOff, WorkflowEffect marked) = HandOffSession(state, reason, context);
         effects.Add(marked);
@@ -1216,6 +1338,10 @@ public sealed class WorkflowEngine : IWorkflowEngine
         {
             return WorkflowTransition.Rejected(resolved.Rejection);
         }
+
+        if (state.ProcessingMethodFor(StepKind.BackgroundRemoval) == ImageProcessingMethod.OpenAiCombined)
+            return WorkflowTransition.Rejected(RejectionCode.PreconditionNotMet,
+                "Return to separate processing before requesting a manual correction.");
 
         if (command.CorrectionRequestId == Guid.Empty)
         {
@@ -1779,15 +1905,15 @@ public sealed class WorkflowEngine : IWorkflowEngine
                 "The session has no step left to return to, so there is no automation to re-enter.");
         }
 
-        // Only from a step that actually stopped. A handed-off session sitting on an Approved
+        // A local cutout may have been handed off before it could start. A session on an Approved
         // or ReviewRequired step has a result waiting for a decision, and re-entry must not
         // quietly discard it by resetting the step to Waiting.
-        if (current.State is not (StepState.Interrupted or StepState.Failed or StepState.RetryRequired))
+        if (!Services.ManualResultEligibility.IsManualResultPosition(state))
         {
             return WorkflowTransition.Rejected(
                 RejectionCode.IllegalStateTransition,
                 $"Step {current.Step} is {current.State}; returning to automation applies to a step " +
-                "whose attempt stopped without a result.");
+                "without a result ready for review.");
         }
 
         SessionStep reset = current with
@@ -1856,7 +1982,8 @@ public sealed class WorkflowEngine : IWorkflowEngine
                 $"Step {kind} is not the current step ({current?.Step.ToString() ?? "none"}).");
         }
 
-        if (TransitionTable.Lookup(step.State, command) != TransitionOutcome.Allowed)
+        bool handOffWaitingCutout = command == CommandKind.HandOff && Services.ManualResultEligibility.CanHandOffWaitingCutout(state);
+        if (TransitionTable.Lookup(step.State, command) != TransitionOutcome.Allowed && !handOffWaitingCutout)
         {
             return StepResolution.Refused(
                 RejectionCode.IllegalStateTransition,
@@ -1999,7 +2126,10 @@ public sealed class WorkflowEngine : IWorkflowEngine
                 when current is { Step: StepKind.Trim, CurrentRevisionId: RevisionId reviewed, CurrentRevisionSha256: Sha256 reviewedHash }
                     && state.UpstreamResultOf(StepKind.Trim) is { } trimInput =>
                 new WorkflowCommand.AdjustTrimFromReview(reviewed, reviewedHash, trimInput.Id, trimInput.Sha256, ProbeCrop),
-            CommandKind.Skip => new WorkflowCommand.Skip(step),
+            CommandKind.Skip => new WorkflowCommand.Skip(step, state.ProcessingMethodFor(step) == ImageProcessingMethod.OpenAiCombined
+                ? step == StepKind.Enhancement ? WorkflowCommand.Skip.CombinedWithBackgroundRemoval
+                    : WorkflowCommand.Skip.KeepReviewedInputAfterCombined
+                : null),
             CommandKind.KeepOriginalExtent => new WorkflowCommand.KeepOriginalExtent(),
             CommandKind.HandOff => new WorkflowCommand.HandOff(step, ProbeReason),
             CommandKind.SetPrintDimensions => new WorkflowCommand.SetPrintDimensions(ProbeDimensions),
@@ -2027,6 +2157,8 @@ public sealed class WorkflowEngine : IWorkflowEngine
             CommandKind.SelectWhiteUnderbaseBranch =>
                 new WorkflowCommand.SelectWhiteUnderbaseBranch(ProbeBranch, ProbeReason),
             CommandKind.SetTrimParameters => new WorkflowCommand.SetTrimParameters(state.TrimMargin, state.IgnoreSmallTrimNoise),
+            CommandKind.SetImageProcessingSelection => new WorkflowCommand.SetImageProcessingSelection(
+                step, state.ImageProcessingSelection ?? SessionImageProcessingSelection.Compatible),
 
             // Probed with the name the session already holds, never an invented one: nothing is
             // applied by a probe, so this asks "may the name be changed at all" without proposing
@@ -2036,7 +2168,8 @@ public sealed class WorkflowEngine : IWorkflowEngine
                 when state.Definition.Contains(StepKind.BackgroundRemoval)
                     && state.UpstreamResultOf(StepKind.BackgroundRemoval) is { } reviewed =>
                 new WorkflowCommand.SetBackgroundRemovalDecision(
-                    ProbeBackgroundRemovalDecision, reviewed.Id, reviewed.Sha256),
+                    ProbeBackgroundRemovalDecision, reviewed.Id, reviewed.Sha256,
+                    Method: state.ProcessingMethodFor(StepKind.BackgroundRemoval)!.Value),
             CommandKind.Complete => new WorkflowCommand.Complete(),
             CommandKind.AddAnotherSize => new WorkflowCommand.AddAnotherSize(),
             CommandKind.AbandonSession => new WorkflowCommand.AbandonSession(ProbeReason),
@@ -2165,9 +2298,8 @@ public sealed class WorkflowEngine : IWorkflowEngine
     /// the engine and again in the processor, when the real command is issued. It is never
     /// persisted and never cropped to: a probe applies nothing.
     /// <para>
-    /// A positive probe is necessary but not sufficient for the crop control to appear. The
-    /// screen reads <c>SessionView.CanManualCrop</c>, which also requires the attempt history
-    /// to show a genuine <c>ManualCropRequired</c> condition (Part C2 §3).
+    /// The screen reads <c>SessionView.CanManualCrop</c>, which also checks the selected
+    /// method and any relevant attempt history.
     /// </para>
     /// </remarks>
     private static readonly TrimBounds ProbeCrop = TrimBounds.Canvas(1, 1);

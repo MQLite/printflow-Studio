@@ -87,7 +87,7 @@ public sealed class GuidedUtilityReturnTests
         var diagnostics = new GuidedCompletionUtilityTests.FixedDiagnostics(GuidedCompletionUtilityTests.Report("checked"));
         services.AddTransient(p => new SettingsViewModel(preferences.Settings, preferences.Localisation, diagnostics,
             p.GetRequiredService<NavigationService>(), preferences.Defaults,
-            new LocalDiagnosticLocations(h.Inner.Database.Path, h.Inner.Workspace.Root), h.Readiness));
+            new LocalDiagnosticLocations(h.Inner.Database.Path, h.Inner.Workspace.Root), h.Readiness, h.Sessions));
         services.AddTransient(p => new EnvironmentReadinessViewModel(diagnostics, p.GetRequiredService<NavigationService>(), h.Readiness));
         using var provider = services.BuildServiceProvider();
         var nav = provider.GetRequiredService<NavigationService>();

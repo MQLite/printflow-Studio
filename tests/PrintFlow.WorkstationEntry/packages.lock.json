@@ -20,6 +20,14 @@
         "resolved": "10.0.11",
         "contentHash": "/a1aJz4m7ylhEDf25ugQChLQoN5XwoGjWw/BoR/ZWWKsO1v4DdJElS1uyngahz4B/eOzjFk1KNTkarRLE5wsIg=="
       },
+      "Microsoft.ML.OnnxRuntime.Managed": {
+        "type": "Transitive",
+        "resolved": "1.32.0",
+        "contentHash": "ApCfJdeUnrO4v+9KWtxnm/Uk3UlzdbNqGb64uBXh85RToxYbW1COJM/avDj3INNTwfEE6LUIWaJIxov0YWNa1g==",
+        "dependencies": {
+          "System.Numerics.Tensors": "9.0.0"
+        }
+      },
       "SQLitePCLRaw.bundle_e_sqlite3": {
         "type": "Transitive",
         "resolved": "2.1.12",
@@ -47,6 +55,11 @@
           "SQLitePCLRaw.core": "2.1.12"
         }
       },
+      "System.Numerics.Tensors": {
+        "type": "Transitive",
+        "resolved": "9.0.0",
+        "contentHash": "hyJB4UlpAi19Xr9AXzu2NuagKC4lPfHObNMEAA0HmqFz2rX7wKgzeYzO/jM/eBHDhnUGFFEjk5cOoJaxqg5J4A=="
+      },
       "WPF-UI.Abstractions": {
         "type": "Transitive",
         "resolved": "4.3.0",
@@ -73,6 +86,7 @@
           "Dapper": "[2.1.66, )",
           "Magick.NET-Q16-x64": "[15.1.0, )",
           "Microsoft.Data.Sqlite": "[10.0.11, )",
+          "Microsoft.ML.OnnxRuntime": "[1.32.0, )",
           "PrintFlow.Domain": "[0.1.5, )",
           "PrintFlow.Workflow": "[0.1.5, )"
         }
@@ -131,6 +145,15 @@
         "contentHash": "Ljd0Uxoq5XpScD2Bg0nM/r3mwx7Ao5Uq24eo2ARxbGvqJ7Zht6rt2cJtwVRH4Cv+1ZVMdXz6TB43KbpmsxRrvQ==",
         "dependencies": {
           "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.11"
+        }
+      },
+      "Microsoft.ML.OnnxRuntime": {
+        "type": "CentralTransitive",
+        "requested": "[1.32.0, )",
+        "resolved": "1.32.0",
+        "contentHash": "3O3isLjl6ChjMvzZMt3in+uUymFxQK5+vd1UuSShmbUjHezHXgcze6KF5NquC/uPuL/++0CpI7qUBRrf+g1ezg==",
+        "dependencies": {
+          "Microsoft.ML.OnnxRuntime.Managed": "1.32.0"
         }
       },
       "WPF-UI": {

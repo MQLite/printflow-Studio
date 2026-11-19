@@ -75,6 +75,7 @@ public sealed record AutomationRuntimeView(
     /// that is already unwinding would invite a second cancel invocation — which §9 forbids.
     /// </remarks>
     public bool CanStopAutomation => State == AutomationRuntimeState.Running;
+    public bool IsCancellableImageProcessing { get; init; }
 
     /// <summary>
     /// Whether a Take Over control should be offered (§25).
@@ -116,7 +117,7 @@ public sealed record AutomationRuntimeView(
 public sealed class AutomationRunRegistry
 {
     private readonly object _gate = new();
-    private RunningAutomation? _running;
+    private readonly Dictionary<SessionId, RunningAutomation> _running = [];
 
     /// <summary>Raised whenever the runtime view changes, so a screen can re-read it.</summary>
     /// <remarks>
@@ -133,7 +134,7 @@ public sealed class AutomationRunRegistry
         {
             lock (_gate)
             {
-                return _running?.ToView() ?? AutomationRuntimeView.Idle;
+                return _running.Values.LastOrDefault()?.ToView() ?? AutomationRuntimeView.Idle;
             }
         }
     }
@@ -143,7 +144,7 @@ public sealed class AutomationRunRegistry
     {
         lock (_gate)
         {
-            return _running is { } running && running.SessionId == session
+            return _running.TryGetValue(session, out var running)
                 ? running.ToView()
                 : AutomationRuntimeView.Idle;
         }
@@ -158,13 +159,14 @@ public sealed class AutomationRunRegistry
     /// construction rather than by lookup.
     /// </remarks>
     public IAutomationStopSignal Begin(
-        SessionId session, AttemptId attempt, StepKind step, bool drivesExternalApplication)
+        SessionId session, AttemptId attempt, StepKind step, bool drivesExternalApplication,
+        CancellationTokenSource? localCancellation = null)
     {
-        RunningAutomation run = new(session, attempt, step, drivesExternalApplication, Notify);
+        RunningAutomation run = new(session, attempt, step, drivesExternalApplication, localCancellation, Notify);
         AutomationRuntimeView view;
         lock (_gate)
         {
-            _running = run;
+            _running[session] = run;
             view = run.ToView();
         }
 
@@ -178,11 +180,8 @@ public sealed class AutomationRunRegistry
         bool ended;
         lock (_gate)
         {
-            ended = _running?.AttemptId == attempt;
-            if (ended)
-            {
-                _running = null;
-            }
+            RunningAutomation? running = _running.Values.FirstOrDefault(run => run.AttemptId == attempt);
+            ended = running is not null && _running.Remove(running.SessionId);
         }
 
         if (ended)
@@ -217,8 +216,7 @@ public sealed class AutomationRunRegistry
         AutomationRuntimeView view;
         lock (_gate)
         {
-            run = _running;
-            if (run is null || run.SessionId != session)
+            if (!_running.TryGetValue(session, out run))
             {
                 return OperationResult.Fail<Unit>(
                     FailureCode.PreconditionNotMet,
@@ -233,6 +231,10 @@ public sealed class AutomationRunRegistry
                     $"A '{already}' request is already being carried out for this operation. " +
                     "PrintFlow does not repeat it; no further input was produced.");
             }
+
+            if (mode == AutomationStopMode.TakeOver && run.HasLocalCancellation)
+                return OperationResult.Fail<Unit>(FailureCode.PreconditionNotMet,
+                    "This image processor can be stopped but has no desktop application to take over.");
 
             run.Request(mode);
             view = run.ToView();
@@ -253,6 +255,7 @@ public sealed class AutomationRunRegistry
         AttemptId attemptId,
         StepKind step,
         bool drivesExternalApplication,
+        CancellationTokenSource? localCancellation,
         Action<AutomationRuntimeView> notify) : IAutomationStopSignal
     {
         private readonly object _gate = new();
@@ -264,6 +267,7 @@ public sealed class AutomationRunRegistry
         public SessionId SessionId { get; } = sessionId;
 
         public AttemptId AttemptId { get; } = attemptId;
+        public bool HasLocalCancellation => localCancellation is not null;
 
         public AutomationStopMode? RequestedMode
         {
@@ -317,6 +321,8 @@ public sealed class AutomationRunRegistry
             {
                 _mode = mode;
             }
+            if (localCancellation is not null)
+                _ = localCancellation.CancelAsync();
         }
 
         public void ReportPhase(ExternalOperationPhase phase)
@@ -363,7 +369,10 @@ public sealed class AutomationRunRegistry
             };
 
             return new AutomationRuntimeView(
-                SessionId, AttemptId, step, state, phase, drivesExternalApplication);
+                SessionId, AttemptId, step, state, phase, drivesExternalApplication)
+            {
+                IsCancellableImageProcessing = HasLocalCancellation,
+            };
         }
     }
 }

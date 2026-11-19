@@ -1,5 +1,6 @@
 using System.IO;
 using System.Security.Cryptography;
+using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using PrintFlow.Domain.Files;
@@ -27,8 +28,14 @@ public sealed class WicFileInspector : IFileInspector
     private const int BufferSize = 1 << 20;
 
     /// <inheritdoc />
-    public async Task<OperationResult<FileFacts>> InspectAsync(
-        string absolutePath, CancellationToken cancellationToken)
+    public Task<OperationResult<FileFacts>> InspectAsync(string absolutePath, CancellationToken cancellationToken) =>
+        InspectCoreAsync(absolutePath, requirePngDecode: false, cancellationToken);
+
+    public Task<OperationResult<FileFacts>> InspectPngOutputAsync(string absolutePath, CancellationToken cancellationToken) =>
+        InspectCoreAsync(absolutePath, requirePngDecode: true, cancellationToken);
+
+    private static async Task<OperationResult<FileFacts>> InspectCoreAsync(
+        string absolutePath, bool requirePngDecode, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(absolutePath);
 
@@ -42,6 +49,7 @@ public sealed class WicFileInspector : IFileInspector
         int headerLength;
         long length;
         Sha256 hash;
+        WicMetadata? verifiedPng = null;
 
         try
         {
@@ -68,6 +76,14 @@ public sealed class WicFileInspector : IFileInspector
             }
 
             hash = Sha256.FromBytes(sha.GetHashAndReset());
+
+            if (requirePngDecode)
+            {
+                if (FormatSniffer.Detect(header.AsSpan(0, headerLength)) != ImageFormat.Png)
+                    return OperationResult.Fail<FileFacts>(FailureCode.OutputValidationFailed, "The output is not PNG.");
+                stream.Position = 0;
+                verifiedPng = VerifyPngDecode(stream, cancellationToken);
+            }
         }
         catch (IOException ex)
         {
@@ -79,11 +95,17 @@ public sealed class WicFileInspector : IFileInspector
             return OperationResult.Fail<FileFacts>(
                 FailureCode.OutputUnreadable, $"File could not be read completely: {ex.Message}");
         }
+        catch (Exception ex) when (requirePngDecode &&
+            ex is FileFormatException or NotSupportedException or ArgumentException or InvalidOperationException)
+        {
+            return OperationResult.Fail<FileFacts>(FailureCode.OutputValidationFailed,
+                $"The output PNG could not be decoded: {ex.Message}");
+        }
 
         ImageFormat format = FormatSniffer.Detect(header.AsSpan(0, headerLength));
-        WicMetadata metadata = format is ImageFormat.Png or ImageFormat.Jpeg or ImageFormat.Tiff
+        WicMetadata metadata = verifiedPng ?? (format is ImageFormat.Png or ImageFormat.Jpeg or ImageFormat.Tiff
             ? TryDecodeWic(absolutePath)
-            : WicMetadata.Unavailable;
+            : WicMetadata.Unavailable);
 
         FileFacts facts = new(
             format,
@@ -138,15 +160,7 @@ public sealed class WicFileInspector : IFileInspector
             }
 
             BitmapFrame frame = decoder.Frames[0];
-            PixelFormat pixelFormat = frame.Format;
-
-            return new WicMetadata(
-                frame.PixelWidth,
-                frame.PixelHeight,
-                frame.DpiX > 0 ? frame.DpiX : null,
-                frame.DpiY > 0 ? frame.DpiY : null,
-                WicPixelFormats.ColourModeOf(pixelFormat),
-                WicPixelFormats.HasAlpha(pixelFormat));
+            return MetadataOf(frame);
         }
         catch (NotSupportedException)
         {
@@ -158,4 +172,35 @@ public sealed class WicFileInspector : IFileInspector
             return WicMetadata.Unavailable;
         }
     }
+
+    private static WicMetadata VerifyPngDecode(Stream stream, CancellationToken cancellationToken)
+    {
+        BitmapDecoder decoder = new PngBitmapDecoder(
+            stream, BitmapCreateOptions.IgnoreColorProfile, BitmapCacheOption.None);
+        BitmapFrame frame = decoder.Frames[0];
+        var converted = new FormatConvertedBitmap(frame, PixelFormats.Bgra32, null, 0);
+        const int tileWidth = 1024;
+        const int tileHeight = 16;
+        int stride = tileWidth * 4;
+        byte[] pixels = new byte[stride * tileHeight];
+        for (int y = 0; y < frame.PixelHeight;)
+        {
+            int height = Math.Min(tileHeight, frame.PixelHeight - y);
+            for (int x = 0; x < frame.PixelWidth;)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                int width = Math.Min(tileWidth, frame.PixelWidth - x);
+                converted.CopyPixels(new Int32Rect(x, y, width, height), pixels, stride, 0);
+                x += width;
+            }
+            y += height;
+        }
+        return MetadataOf(frame);
+    }
+
+    private static WicMetadata MetadataOf(BitmapFrame frame) => new(
+        frame.PixelWidth, frame.PixelHeight,
+        frame.DpiX > 0 ? frame.DpiX : null,
+        frame.DpiY > 0 ? frame.DpiY : null,
+        WicPixelFormats.ColourModeOf(frame.Format), WicPixelFormats.HasAlpha(frame.Format));
 }

@@ -14,6 +14,7 @@
 
     <UserControl.Resources>
       <ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceDictionary Source="/PrintFlow.App;component/Themes/WpfUiTheme.xaml" /></ResourceDictionary.MergedDictionaries>
+        <BooleanToVisibilityConverter x:Key="SettingsVisibility" />
         <Style x:Key="SectionHeading" TargetType="TextBlock">
             <Setter Property="FontSize" Value="20" />
             <Setter Property="FontWeight" Value="SemiBold" />
@@ -41,7 +42,17 @@
       </ResourceDictionary>
     </UserControl.Resources>
 
+    <Grid>
     <Grid Margin="24">
+        <Grid.Style>
+            <Style TargetType="Grid">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsEditingImageProcessing}" Value="True">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Grid.Style>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -76,14 +87,12 @@
                           AutomationProperties.AutomationId="Settings.Language"
                           AutomationProperties.Name="{Binding LanguageLabel}" />
 
-                <TextBlock Text="{Binding TrimMarginLabel}" Style="{StaticResource RowLabel}" />
-                <TextBox Style="{StaticResource PF.Input.TextBox}" Text="{Binding TrimSafetyMarginPixels, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                         HorizontalAlignment="Left"
-                         MinWidth="120"
-                         Padding="6,4"
-                         AutomationProperties.AutomationId="Settings.TrimMargin"
-                         AutomationProperties.Name="{Binding TrimMarginLabel}" />
-                <TextBlock Text="{Binding TrimMarginHint}" Style="{StaticResource RowHint}" />
+                <Button Content="{Binding ImageProcessingHeading}"
+                        Command="{Binding OpenImageProcessingCommand}"
+                        Style="{StaticResource PF.Button.Secondary}"
+                        HorizontalAlignment="Left" Margin="0,12,0,12"
+                        AutomationProperties.AutomationId="Settings.OpenImageProcessing"
+                        AutomationProperties.Name="{Binding ImageProcessingHeading}" />
 
                 <!-- Diagnostics: saved retention applies at the next safe startup. -->
                 <TextBlock Text="{Binding DiagnosticsHeading}" Style="{StaticResource SectionHeading}" />
@@ -184,5 +193,8 @@
                         AutomationProperties.Name="{Binding BackLabel}" />
             </Grid>
         </StackPanel>
+    </Grid>
+    <views:ImageProcessingSettingsView
+        Visibility="{Binding IsEditingImageProcessing, Converter={StaticResource SettingsVisibility}}" />
     </Grid>
 </UserControl>
