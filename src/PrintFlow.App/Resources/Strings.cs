@@ -422,6 +422,8 @@ internal static string Session_PdfPrepared => Get(nameof(Session_PdfPrepared));
 
     internal static string Startup_AlreadyRunning => Get(nameof(Startup_AlreadyRunning));
 
+    internal static string Startup_Loading => Get(nameof(Startup_Loading));
+
     internal static string Startup_Failed => Get(nameof(Startup_Failed));
 
     internal static string Startup_RecoveryNotRun => Get(nameof(Startup_RecoveryNotRun));

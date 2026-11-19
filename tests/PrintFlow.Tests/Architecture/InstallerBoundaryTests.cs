@@ -216,7 +216,7 @@ public sealed class InstallerBoundaryTests
     // ------------------------------------------------------------------------------------------
 
     /// <summary>
-    /// The installer authors application files and one shortcut, and nothing under the production
+    /// The installer authors application files and shortcuts, and nothing under the production
     /// workspace. Because Windows Installer removes only what it installed, that is what makes
     /// "an upgrade or uninstall does not remove customer data" a structural fact rather than a
     /// promise (§25).

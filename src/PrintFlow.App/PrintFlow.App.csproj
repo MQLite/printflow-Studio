@@ -13,6 +13,7 @@
     <WindowsSdkPackageVersion>10.0.19041.57</WindowsSdkPackageVersion>
     <RootNamespace>PrintFlow.App</RootNamespace>
     <AssemblyName>PrintFlow.App</AssemblyName>
+    <ApplicationIcon>Resources\PrintFlow.ico</ApplicationIcon>
     <UseWPF>true</UseWPF>
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
 
@@ -34,6 +35,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Resources\PrintFlow.ico;Resources\PrintFlowMark.png" />
     <!-- Committed configuration shape (Epic 11100 plan §18); appsettings.local.json is
          git-ignored and, if present beside it at runtime, overrides individual sections. -->
     <Content Include="..\..\appsettings.json" Link="appsettings.json" CopyToOutputDirectory="PreserveNewest" />

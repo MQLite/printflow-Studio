@@ -2,6 +2,7 @@ using System.IO;
 using Microsoft.Extensions.DependencyInjection;
 using PrintFlow.App.Composition;
 using PrintFlow.App.Navigation;
+using PrintFlow.App.Startup;
 using PrintFlow.App.ViewModels;
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
@@ -79,6 +80,23 @@ public sealed class HomeAndWorkflowSelectionTests
             .Select(row => row.DisplayName)
             .ShouldBe(["newest", "middle", "oldest"]);
         harness.Home.HasNoRecentSessions.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void Home_keeps_recovery_and_recent_storage_reads_off_the_ui_thread()
+    {
+        using SessionServiceHarness harness = new();
+        List<ApartmentState> readApartments = [];
+        RecordingSessionRepository repository = new()
+        {
+            OnRead = () => readApartments.Add(Thread.CurrentThread.GetApartmentState()),
+        };
+        HomeViewModel home = new(harness.CreateService(repository: repository), harness.Previews,
+            new RecordingNavigation(), new StubFilePicker(), new StartupStatusAccessor(),
+            new ReadinessObservationAccessor());
+        WpfRendering.OnStaThread(() => home.RefreshCommand.ExecuteAsync(null).GetAwaiter().GetResult());
+
+        readApartments.ShouldBe([ApartmentState.MTA, ApartmentState.MTA]);
     }
 
     [Fact]

@@ -9,7 +9,7 @@
     written, installed over or uninstalled by this script, and it refuses to run if any path it
     was given points at them.
 
-    Five checks:
+    Six checks:
 
       1. Payload      — extract the MSI and compare its contents against installer\payload-policy.json.
                         Every file must be allowed; no file may match denyAlways; every required
@@ -31,11 +31,12 @@
                         the workspace, the database, the local configuration override and the
                         revalidation record must all survive unchanged (§30).
 
-      5. Uninstall    — computed from the package's own Directory, Component and File tables:
-                        the exact set of paths Windows Installer would remove. Nothing outside the
-                        install folder and the Start Menu folder may appear in it, which is what
-                        makes "uninstall preserves production data" a fact about the package
-                        rather than an observation about one run (§31).
+      5. Shortcuts    — the candidate declares one Start Menu and one desktop shortcut, both
+                        pointing to the installed executable and using the same embedded icon.
+
+      6. Uninstall    — the candidate's Directory, Component and File tables confine package
+                        files and directory removal to the application and Start Menu folders.
+                        Windows Installer also owns the desktop shortcut (§31).
 
     WHY EXTRACTION RATHER THAN msiexec /i.
 
@@ -340,8 +341,9 @@ if ([string]::IsNullOrWhiteSpace($UpgradeMsiPath)) {
 # --------------------------------------------------------------------------------------------
 # 5 — Uninstall, computed from the package's own tables
 # --------------------------------------------------------------------------------------------
+$candidateMsi = if ([string]::IsNullOrWhiteSpace($UpgradeMsiPath)) { $MsiPath } else { $UpgradeMsiPath }
 $directories = @{}
-foreach ($row in (Read-MsiTable $MsiPath 'SELECT `Directory`, `Directory_Parent`, `DefaultDir` FROM `Directory`')) {
+foreach ($row in (Read-MsiTable $candidateMsi 'SELECT `Directory`, `Directory_Parent`, `DefaultDir` FROM `Directory`')) {
     $directories[$row[0]] = @{ parent = $row[1]; name = $row[2] }
 }
 function Resolve-MsiDirectory([string] $Id) {
@@ -357,22 +359,40 @@ function Resolve-MsiDirectory([string] $Id) {
 }
 
 $componentDirectories = @{}
-foreach ($row in (Read-MsiTable $MsiPath 'SELECT `Component`, `Directory_` FROM `Component`')) {
+foreach ($row in (Read-MsiTable $candidateMsi 'SELECT `Component`, `Directory_` FROM `Component`')) {
     $componentDirectories[$row[0]] = $row[1]
 }
 
 $installedRoots = New-Object System.Collections.Generic.HashSet[string]
-foreach ($row in (Read-MsiTable $MsiPath 'SELECT `File`, `Component_` FROM `File`')) {
+foreach ($row in (Read-MsiTable $candidateMsi 'SELECT `File`, `Component_` FROM `File`')) {
     if (-not $componentDirectories.ContainsKey($row[1])) {
         throw "The File table references component '$($row[1])', which the Component table does not define."
     }
     [void] $installedRoots.Add((Resolve-MsiDirectory $componentDirectories[$row[1]]))
 }
-foreach ($id in $componentDirectories.Values) { [void] $installedRoots.Add((Resolve-MsiDirectory $id)) }
+foreach ($component in $componentDirectories.Keys) {
+    # Only the validated desktop shortcut component may name the shared desktop directory.
+    if ($component -eq 'DesktopShortcut' -and $componentDirectories[$component] -eq 'DesktopFolder') { continue }
+    [void] $installedRoots.Add((Resolve-MsiDirectory $componentDirectories[$component]))
+}
 
-# Every location the package can remove must be the application folder or the Start Menu folder,
-# or beneath one of them. Nothing else is installed, so nothing else can be uninstalled — which is
-# what makes an upgrade or uninstall structurally incapable of removing production data.
+$shortcutRows = Read-MsiTable $candidateMsi 'SELECT `Directory_`, `Component_`, `Target`, `Icon_`, `IconIndex`, `WkDir` FROM `Shortcut`'
+$startMenuShortcut = @($shortcutRows | Where-Object { $_[0] -eq 'ApplicationProgramsFolder' -and $_[1] -eq 'StartMenuShortcut' })
+$desktopShortcut = @($shortcutRows | Where-Object { $_[0] -eq 'DesktopFolder' -and $_[1] -eq 'DesktopShortcut' })
+$iconRows = try { Read-MsiTable $candidateMsi 'SELECT `Name` FROM `Icon`' } catch { @() }
+$hasIcon = @($iconRows | Where-Object { $_[0] -eq 'PrintFlow.ico' }).Count -eq 1
+$mismatchedShortcuts = @($shortcutRows | Where-Object {
+    $_[2] -ne '[INSTALLFOLDER]PrintFlow.App.exe' -or $_[3] -ne 'PrintFlow.ico' -or $_[4] -ne '0' -or $_[5] -ne 'INSTALLFOLDER'
+})
+if ($shortcutRows.Count -ne 2 -or $startMenuShortcut.Count -ne 1 -or $desktopShortcut.Count -ne 1 -or
+    $mismatchedShortcuts.Count -ne 0 -or -not $hasIcon) {
+    Add-Result 'Application shortcuts' 'FAIL' 'Expected one Start Menu and one desktop shortcut with the same embedded icon and installed executable target.'
+} else {
+    Add-Result 'Application shortcuts' 'PASS' 'Exactly two shortcuts point to the installed executable and use the same embedded icon.'
+}
+
+# The application folder, Start Menu folder, and the desktop shortcut above are installer-owned.
+# Only the first two can contain payload files or be named by a directory removal.
 #
 # The two permitted roots are resolved out of the package rather than written down here, so this
 # check compares the package against itself and cannot be satisfied by a literal that stopped
@@ -391,8 +411,8 @@ $outside = @($installedRoots | Where-Object {
 # merely being counted. This package has exactly one: the RemoveFolder that takes away the Start
 # Menu folder it created, which has no FileName and names a directory inside the permitted roots.
 $removals = @()
-if (Test-MsiTableExists $MsiPath 'RemoveFile') {
-    foreach ($row in (Read-MsiTable $MsiPath 'SELECT `FileName`, `DirProperty` FROM `RemoveFile`')) {
+if (Test-MsiTableExists $candidateMsi 'RemoveFile') {
+    foreach ($row in (Read-MsiTable $candidateMsi 'SELECT `FileName`, `DirProperty` FROM `RemoveFile`')) {
         $directory = Resolve-MsiDirectory $row[1]
         $inside = @($permittedRoots | Where-Object {
             $directory -eq $_ -or $directory.StartsWith($_ + '\', [StringComparison]::OrdinalIgnoreCase)
@@ -409,8 +429,8 @@ if ($outside.Count -gt 0) {
 } elseif ($removals.Count -gt 0) {
     Add-Result 'Uninstall preservation' 'FAIL' ("the package removes paths it did not install: " + ($removals -join '; '))
 } else {
-    Add-Result 'Uninstall preservation' 'PASS' ("all $($installedRoots.Count) installed locations are under '$applicationRoot' " +
-                                                "or '$startMenuRoot'; every removal the package declares stays inside them, " +
+    Add-Result 'Uninstall preservation' 'PASS' ("payload and package-declared directory removals stay under '$applicationRoot' " +
+                                                "or '$startMenuRoot'; Windows Installer owns the desktop shortcut, " +
                                                 "so no production or customer path can be removed")
 }
 

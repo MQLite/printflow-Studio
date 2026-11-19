@@ -124,8 +124,13 @@ internal sealed class StubDiagnosticPackageDestinationPicker : IDiagnosticPackag
 /// </summary>
 internal sealed class RecordingSessionRepository : ISessionRepository
 {
-    public Task<OperationResult<IReadOnlyList<SessionId>>> FindRecoveryCandidatesAsync(CancellationToken cancellationToken) =>
-        throw new NotSupportedException();
+    public Action? OnRead { get; init; }
+
+    public Task<OperationResult<IReadOnlyList<SessionId>>> FindRecoveryCandidatesAsync(CancellationToken cancellationToken)
+    {
+        OnRead?.Invoke();
+        return Task.FromResult(OperationResult.Ok<IReadOnlyList<SessionId>>([]));
+    }
 
     public Task<OperationResult<IReadOnlyList<SessionId>>> FindCompletedSessionsAsync(CancellationToken cancellationToken) =>
         throw new NotSupportedException();
@@ -137,6 +142,7 @@ internal sealed class RecordingSessionRepository : ISessionRepository
     public Task<OperationResult<IReadOnlyList<SessionListItem>>> ListRecentAsync(
         int maxCount, DateTimeOffset since, CancellationToken cancellationToken)
     {
+        OnRead?.Invoke();
         RequestedMaxCount = maxCount;
         RequestedSince = since;
         return Task.FromResult(OperationResult.Ok<IReadOnlyList<SessionListItem>>([]));

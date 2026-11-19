@@ -30,23 +30,69 @@ public partial class App : Application
 
     protected override async void OnStartup(StartupEventArgs e)
     {
+        StartupTiming.Log.Mark("Startup");
         base.OnStartup(e);
 
-        StartupResult result;
+        // Closing the startup window must never terminate WPF during the handoff or refusal.
+        ShutdownMode = ShutdownMode.OnExplicitShutdown;
+        StartupStatus status;
         try
         {
-            result = await _startup.RunAsync(CancellationToken.None);
+            var waiting = new StartupWindow();
+            waiting.ContentRendered += (_, _) => StartupTiming.Log.Mark("StartupWindowRendered");
+            waiting.Show();
+            try
+            {
+                // SQLite, preset verification, and workspace recovery can run synchronously
+                // inside their async methods. Keep that work off the WPF dispatcher.
+                StartupResult result = await Task.Run(() => _startup.RunAsync(_shutdown.Token));
+                status = result.Status;
+                if (status.CanShowShell)
+                {
+                    _services = result.Services!;
+                    var main = new MainWindow { DataContext = _services.GetRequiredService<ShellViewModel>() };
+                    MainWindow = main;
+                    await _services.GetRequiredService<INavigationService>().GoHomeAsync(_shutdown.Token);
+                    StartupTiming.Log.Mark("HomeDataReady");
+
+                    TaskCompletionSource handoff = new(TaskCreationOptions.RunContinuationsAsynchronously);
+                    void CompleteHandoff(object? sender, EventArgs args) => handoff.TrySetResult();
+                    main.ContentRendered += CompleteHandoff;
+                    main.Closed += CompleteHandoff;
+                    try
+                    {
+                        main.Show();
+                        await handoff.Task;
+                    }
+                    finally
+                    {
+                        main.ContentRendered -= CompleteHandoff;
+                        main.Closed -= CompleteHandoff;
+                    }
+
+                    if (!main.IsVisible)
+                    {
+                        Shutdown();
+                        return;
+                    }
+                    StartupTiming.Log.Mark("HomeReady");
+                }
+                else
+                {
+                    result.Dispose();
+                }
+            }
+            finally
+            {
+                waiting.Dismiss();
+            }
         }
         catch (Exception ex)
         {
-            // Nothing has been shown yet, so an unexpected startup fault must surface here or
-            // vanish. Refusing to start is the safe direction: the alternative is a shell whose
-            // recovery pass never completed.
             Refuse(ex.Message);
             return;
         }
 
-        StartupStatus status = result.Status;
         if (!status.IsPrimaryInstance && status.Failure is null)
         {
             // A second instance: it ran no recovery, opened no database, and owns nothing to
@@ -54,32 +100,19 @@ public partial class App : Application
             MessageBox.Show(
                 Strings.Startup_AlreadyRunning, Strings.App_Title,
                 MessageBoxButton.OK, MessageBoxImage.Information);
-            result.Dispose();
             Shutdown(ExitCodes.AlreadyRunning);
             return;
         }
 
         if (!status.CanShowShell)
         {
-            result.Dispose();
             Refuse(status.Failure?.ToString() ?? Strings.Startup_Failed);
             return;
         }
 
-        _services = result.Services;
-
-        MainWindow = new MainWindow
-        {
-            DataContext = _services!.GetRequiredService<ShellViewModel>(),
-        };
-        MainWindow.Show();
-
-        // Home is reachable only from here — after the guard was claimed, migrations applied and
-        // recovery completed. There is no other caller that can put a screen on the window
-        // (Part 3C2 §2).
+        ShutdownMode = ShutdownMode.OnLastWindowClose;
         var services = _services!;
         var navigation = services.GetRequiredService<INavigationService>();
-        await navigation.GoHomeAsync(CancellationToken.None);
         if (e.Args is ["--resume-work-result", var configuration])
         {
             var home = navigation.Current;

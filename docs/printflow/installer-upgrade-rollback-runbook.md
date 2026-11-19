@@ -44,7 +44,7 @@ regression set, both passing, both recorded.
 | .NET 10 runtime (self-contained, in the payload) | Yes | No — never downloaded | Replaced | No | No |
 | `appsettings.json` (shipped default) | Yes | — | **Replaced** | No | No |
 | `appsettings.local.json` (operator deviations) | **No** | — | **Preserved** | Yes — configured preset and workspace | No |
-| Start Menu shortcut | Yes | — | Replaced | No | No |
+| Start Menu and desktop shortcuts | Yes | — | Replaced | No | No |
 | `D:\PrintFlowStudio\` workspace root | No | — | Preserved | — | Yes |
 | `Data\printflow.db` (SQLite) | No | — | Preserved | No | Yes |
 | `Sessions\…\InputSnapshot`, `Revisions` | No | — | Preserved | No | **Yes** |
@@ -309,8 +309,8 @@ to Maintop and printed, the physical output exists regardless of what the databa
 msiexec /x "PrintFlowStudio-<version>-win-x64.msi" /qn
 ```
 
-Removes: application files under `%ProgramFiles%\PrintFlow Studio`, the Start Menu shortcut, and
-the Add/Remove Programs registration.
+Uninstall removes the application files under `%ProgramFiles%\PrintFlow Studio`, both shortcuts
+created by the installer, and the Add/Remove Programs registration.
 
 Does **not** remove, and offers no option to remove: the production workspace, the SQLite database
 and its history, source files and InputSnapshots, Revisions, approved PNGs, production TIFFs,

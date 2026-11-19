@@ -73,6 +73,9 @@
   <data name="Step_PhotoshopOutput" xml:space="preserve"><value>Photoshop Output</value></data>
   <data name="Flag_Skippable" xml:space="preserve"><value>skippable</value></data>
   <data name="Flag_RequiresReview" xml:space="preserve"><value>review required</value></data>
+  <data name="Startup_Loading" xml:space="preserve">
+    <value>Starting…</value>
+  </data>
   <data name="Startup_AlreadyRunning" xml:space="preserve">
     <value>PrintFlow Studio is already running.</value>
   </data>

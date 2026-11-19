@@ -388,7 +388,9 @@ public sealed partial class HomeViewModel : ObservableObject, IEntryScreenLifeti
         // old rows no longer describes them (SCRUM-11154 F-V4).
         if (!automatic) PendingAbandon = null;
         ReadReadiness();
-        var recovery = await _sessions.ListRecoveryAsync(cancellationToken).ConfigureAwait(true);
+        // SQLite may complete its async reads synchronously. Keep storage work off the
+        // dispatcher and apply the resulting rows on the UI thread below.
+        var recovery = await Task.Run(() => _sessions.ListRecoveryAsync(cancellationToken), cancellationToken);
         if (!CanPublishRefresh(generation, automatic)) return;
         if (recovery.IsFailure)
         {
@@ -397,7 +399,7 @@ public sealed partial class HomeViewModel : ObservableObject, IEntryScreenLifeti
         }
 
         OperationResult<IReadOnlyList<SessionListItem>> listed =
-            await _sessions.ListRecentAsync(cancellationToken).ConfigureAwait(true);
+            await Task.Run(() => _sessions.ListRecentAsync(cancellationToken), cancellationToken);
         if (!CanPublishRefresh(generation, automatic)) return;
         if (automatic && listed.IsFailure) return;
 
