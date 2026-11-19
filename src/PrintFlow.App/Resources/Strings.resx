@@ -1101,8 +1101,14 @@
   <data name="FinalSave_ChangeLocation" xml:space="preserve"><value>Change location</value></data>
   <data name="FinalSave_PickerTitle" xml:space="preserve"><value>Choose the folder for the final result</value></data>
   <data name="FinalSave_NoFolder" xml:space="preserve"><value>Choose a folder before saving.</value></data>
-  <data name="FinalSave_RememberedFolder" xml:space="preserve"><value>This is the last folder a save succeeded in. Change it if this job belongs somewhere else.</value></data>
-  <data name="FinalSave_PreferenceUnavailable" xml:space="preserve"><value>The last used folder could not be read. Choose a folder before saving.</value></data>
+  <data name="FinalSave_RememberedFolder" xml:space="preserve"><value>This workflow last saved successfully to this folder. You can choose a different folder for this save.</value></data>
+  <data name="FinalSave_PreferenceUnavailable" xml:space="preserve"><value>The default save folder could not be read. Choose a folder before saving.</value></data>
+  <data name="Settings_WorkflowSaveFolders" xml:space="preserve"><value>Default save folders</value></data>
+  <data name="Settings_WorkflowSaveFoldersHint" xml:space="preserve"><value>Choose a local NTFS folder outside PrintFlow storage for each workflow. Leave a field blank to use that workflow’s last successful save folder.</value></data>
+  <data name="Settings_WorkflowSaveFolderBrowse" xml:space="preserve"><value>Browse…</value></data>
+  <data name="Settings_WorkflowSaveFolderBrowseName" xml:space="preserve"><value>Choose a folder for {0}</value></data>
+  <data name="Settings_WorkflowSaveFolderInvalid" xml:space="preserve"><value>For {0}, choose an existing folder on a local NTFS drive outside PrintFlow storage, or leave it blank.</value></data>
+  <data name="WorkflowSaveFolder_FromSettings" xml:space="preserve"><value>This is the default folder for this workflow. You can choose a different folder for this save.</value></data>
   <data name="FinalSave_SaveAs" xml:space="preserve"><value>Save as: {0}</value></data>
   <data name="FinalSave_TypePng" xml:space="preserve"><value>PNG</value></data>
   <data name="FinalSave_TypeTiff" xml:space="preserve"><value>Print TIFF · {0:0.#} × {1:0.#} mm</value></data>

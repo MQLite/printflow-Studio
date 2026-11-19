@@ -6,6 +6,7 @@ using Microsoft.Data.Sqlite;
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Results;
+using PrintFlow.Domain.Sessions;
 using PrintFlow.Workflow.Delivery;
 
 namespace PrintFlow.Infrastructure.Sqlite;
@@ -594,6 +595,25 @@ public sealed class SqliteDeliveryRepository(SqliteConnectionFactory factory) : 
             return OperationResult.Fail<DeliveryDestinationPreferenceView?>(FailureCode.PersistenceError,
                 "Destination preference is unreadable.");
         }
+    });
+
+    public Task<OperationResult<DeliveryDestinationPreferenceView?>> ReadDestinationPreferenceAsync(
+        WorkflowType workflow, CancellationToken cancellationToken) => Run(() =>
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        using SqliteConnection connection = factory.Open();
+        using SqliteCommand command = Command(connection, null, """
+            SELECT delivery.RequestedFolder, delivery.IntentOrdinal
+            FROM ArtifactDelivery AS delivery
+            JOIN ProcessingSession AS session ON session.Id = delivery.SessionId
+            WHERE session.WorkflowType = $workflow AND delivery.Status = 'Delivered'
+            ORDER BY delivery.IntentOrdinal DESC
+            LIMIT 1;
+            """);
+        Add(command, "$workflow", Mappers.ToText(workflow));
+        using SqliteDataReader reader = command.ExecuteReader();
+        return OperationResult.Ok<DeliveryDestinationPreferenceView?>(
+            reader.Read() ? new(reader.GetString(0), reader.GetInt64(1)) : null);
     });
 
     private static Task<OperationResult<T>> Run<T>(Func<OperationResult<T>> body)

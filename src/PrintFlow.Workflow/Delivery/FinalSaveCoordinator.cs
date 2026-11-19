@@ -3,6 +3,8 @@ using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Sessions;
+using PrintFlow.Domain.Settings;
+using PrintFlow.Workflow.Ports;
 using PrintFlow.Workflow.Services;
 
 namespace PrintFlow.Workflow.Delivery;
@@ -46,6 +48,8 @@ public enum OpenFolderCode { Dispatched, Missing, Changed, Unavailable, Ineligib
 
 public sealed record OpenFolderOutcome(Guid DeliveryId, OpenFolderCode Code, string? FinalPath, string? Detail = null);
 
+public sealed record FinalSaveFolderDefault(string Folder, bool IsConfigured);
+
 /// <summary>
 /// Wraps existing lawful commands around the 11144 delivery authority (delivery design §7.2).
 /// </summary>
@@ -60,16 +64,35 @@ public sealed class FinalSaveCoordinator
     private readonly ISessionService _sessions;
     private readonly IApprovedArtifactDeliveryService _delivery;
     private readonly string? _operatorName;
+    private readonly ISettingsRepository? _settings;
 
     public FinalSaveCoordinator(ISessionService sessions, IApprovedArtifactDeliveryService delivery,
-        string? operatorName = null)
+        string? operatorName = null, ISettingsRepository? settings = null)
     {
         _sessions = sessions ?? throw new ArgumentNullException(nameof(sessions));
         _delivery = delivery ?? throw new ArgumentNullException(nameof(delivery));
         _operatorName = operatorName ?? Environment.UserName;
+        _settings = settings;
     }
 
     public IApprovedArtifactDeliveryService Delivery => _delivery;
+
+    public async Task<OperationResult<FinalSaveFolderDefault?>> GetDefaultSaveFolderAsync(
+        WorkflowType workflow, CancellationToken cancellationToken)
+    {
+        if (_settings is not null)
+        {
+            var configured = await _settings.ReadAsync(WorkflowSaveFolderSettings.KeyFor(workflow), cancellationToken);
+            if (configured.IsFailure) return OperationResult.Fail<FinalSaveFolderDefault?>(configured.Failure);
+            if (configured.Value?.Value is { } path && !string.IsNullOrWhiteSpace(path))
+                return OperationResult.Ok<FinalSaveFolderDefault?>(new(path, IsConfigured: true));
+        }
+
+        var remembered = await _delivery.GetLastSuccessfulDestinationAsync(workflow, cancellationToken);
+        if (remembered.IsFailure) return OperationResult.Fail<FinalSaveFolderDefault?>(remembered.Failure);
+        return OperationResult.Ok<FinalSaveFolderDefault?>(
+            remembered.Value is { } destination ? new(destination.Folder, IsConfigured: false) : null);
+    }
 
     public async Task<FinalSaveResult> ConfirmAndSaveAsync(FinalSaveRequest request,
         IProgress<FinalSaveObservation>? progress, CancellationToken cancellationToken)

@@ -1091,8 +1091,14 @@
   <data name="FinalSave_ChangeLocation" xml:space="preserve"><value>选择保存文件夹</value></data>
   <data name="FinalSave_PickerTitle" xml:space="preserve"><value>选择保存最终结果的文件夹</value></data>
   <data name="FinalSave_NoFolder" xml:space="preserve"><value>保存前请选择文件夹。</value></data>
-  <data name="FinalSave_RememberedFolder" xml:space="preserve"><value>这是上次成功保存使用的文件夹。要换位置，请点“选择保存文件夹”。</value></data>
-  <data name="FinalSave_PreferenceUnavailable" xml:space="preserve"><value>暂时读不到上次使用的文件夹。请重新选择保存文件夹。</value></data>
+  <data name="FinalSave_RememberedFolder" xml:space="preserve"><value>这是此流程上次成功保存的位置。本次保存可以另选文件夹。</value></data>
+  <data name="FinalSave_PreferenceUnavailable" xml:space="preserve"><value>暂时读不到默认保存目录。请先选择保存文件夹。</value></data>
+  <data name="Settings_WorkflowSaveFolders" xml:space="preserve"><value>默认保存目录</value></data>
+  <data name="Settings_WorkflowSaveFoldersHint" xml:space="preserve"><value>为每个流程选择 PrintFlow 存储目录以外的本地 NTFS 文件夹。留空时，沿用该流程上次成功保存的位置。</value></data>
+  <data name="Settings_WorkflowSaveFolderBrowse" xml:space="preserve"><value>浏览…</value></data>
+  <data name="Settings_WorkflowSaveFolderBrowseName" xml:space="preserve"><value>为“{0}”选择文件夹</value></data>
+  <data name="Settings_WorkflowSaveFolderInvalid" xml:space="preserve"><value>请为“{0}”选择 PrintFlow 存储目录以外、已存在的本地 NTFS 文件夹，或清空此项。</value></data>
+  <data name="WorkflowSaveFolder_FromSettings" xml:space="preserve"><value>这是此流程的默认保存目录。本次保存可以另选文件夹。</value></data>
   <data name="FinalSave_SaveAs" xml:space="preserve"><value>另存为：{0}</value></data>
   <data name="FinalSave_TypePng" xml:space="preserve"><value>PNG</value></data>
   <data name="FinalSave_TypeTiff" xml:space="preserve"><value>打印 TIFF · {0:0.#} × {1:0.#} 毫米</value></data>

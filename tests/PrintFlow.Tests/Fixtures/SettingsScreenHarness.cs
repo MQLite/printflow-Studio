@@ -5,6 +5,7 @@ using PrintFlow.App.Settings;
 using PrintFlow.App.Startup;
 using PrintFlow.App.ViewModels;
 using PrintFlow.Domain.Sessions;
+using PrintFlow.Workflow.Delivery;
 using PrintFlow.Workflow.Ports;
 using PrintFlow.Workflow.Services;
 
@@ -67,19 +68,22 @@ internal sealed class SettingsScreenHarness : IDisposable
 
     /// <summary>A Settings screen, optionally over a substituted store or readiness seam.</summary>
     public SettingsViewModel Create(
-        ISettingsRepository? settings = null, IEnvironmentDiagnostics? diagnostics = null) =>
+        ISettingsRepository? settings = null, IEnvironmentDiagnostics? diagnostics = null,
+        IApprovedArtifactDeliveryService? saveFolderDelivery = null) =>
         new(settings ?? Settings, Localisation, diagnostics ?? Diagnostics, Navigation, Defaults,
             new LocalDiagnosticLocations(_harness.Database.Path,
-                System.IO.Path.Combine(_harness.Workspace.Root, "Evidence")), Observations, Sessions);
+                System.IO.Path.Combine(_harness.Workspace.Root, "Evidence")), Observations, Sessions,
+            saveFolderDelivery: saveFolderDelivery);
 
     /// <summary>Where each screen records its passive reading for Home (SCRUM-11152).</summary>
     public ReadinessObservationAccessor Observations { get; } = new();
 
     /// <summary>A Settings screen that has already loaded, as navigation would have left it.</summary>
     public async Task<SettingsViewModel> OpenAsync(
-        ISettingsRepository? settings = null, IEnvironmentDiagnostics? diagnostics = null)
+        ISettingsRepository? settings = null, IEnvironmentDiagnostics? diagnostics = null,
+        IApprovedArtifactDeliveryService? saveFolderDelivery = null)
     {
-        SettingsViewModel screen = Create(settings, diagnostics);
+        SettingsViewModel screen = Create(settings, diagnostics, saveFolderDelivery);
         await screen.OpenAsync(CancellationToken.None);
         return screen;
     }

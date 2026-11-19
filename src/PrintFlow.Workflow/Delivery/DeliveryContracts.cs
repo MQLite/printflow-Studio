@@ -1,6 +1,7 @@
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Results;
+using PrintFlow.Domain.Sessions;
 
 namespace PrintFlow.Workflow.Delivery;
 
@@ -94,6 +95,16 @@ public interface IApprovedArtifactDeliveryService
         CancellationToken cancellationToken) =>
         Task.FromResult(OperationResult.Fail<DeliveryDestinationPreferenceView?>(
             FailureCode.PreconditionNotMet, "Destination preference is unavailable."));
+
+    /// <summary>Reads the latest successful destination for a single workflow.</summary>
+    Task<OperationResult<DeliveryDestinationPreferenceView?>> GetLastSuccessfulDestinationAsync(
+        WorkflowType workflow, CancellationToken cancellationToken) =>
+        Task.FromResult(OperationResult.Fail<DeliveryDestinationPreferenceView?>(
+            FailureCode.PreconditionNotMet, "Workflow destination history is unavailable."));
+
+    /// <summary>Checks whether the folder is an eligible destination without writing to it.</summary>
+    DeliveryFileResult<string> CheckSaveFolder(string folder) =>
+        DeliveryFileResult<string>.Fail(DeliveryCode.UnsupportedDestination, "Destination checking is unavailable.");
 
     /// <summary>Checks the displayed filename and folder before any approval is attempted.</summary>
     DeliveryDraftCheck CheckDraft(string folder, string fileName, ArtifactKind kind) =>
