@@ -1,5 +1,6 @@
 using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Results;
+using PrintFlow.Domain.Sessions;
 
 namespace PrintFlow.Workflow.Delivery;
 
@@ -36,4 +37,9 @@ public interface IDeliveryRepository
         CancellationToken cancellationToken) =>
         Task.FromResult(OperationResult.Fail<DeliveryDestinationPreferenceView?>(
             FailureCode.PreconditionNotMet, "Destination preference is unavailable."));
+
+    Task<OperationResult<DeliveryDestinationPreferenceView?>> ReadDestinationPreferenceAsync(
+        WorkflowType workflow, CancellationToken cancellationToken) =>
+        Task.FromResult(OperationResult.Fail<DeliveryDestinationPreferenceView?>(
+            FailureCode.PreconditionNotMet, "Workflow destination history is unavailable."));
 }

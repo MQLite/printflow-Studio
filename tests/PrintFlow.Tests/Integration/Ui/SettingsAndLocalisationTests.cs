@@ -662,6 +662,8 @@ public sealed class SettingsAndLocalisationTests
                          "Settings.Apply", "Settings.Back", "Settings.OutputRoot",
                          "Settings.ProductionDpi", "Settings.Preset",
                          "Settings.PhotoshopColourSettings",
+                         "Settings.SaveFolder.PrepareAsset", "Settings.SaveFolder.PrepareCustomerDesign",
+                         "Settings.SaveFolder.GeneratePrintTiff",
                      })
             {
                 rendered.Facts.TabStops.ShouldContain(id);

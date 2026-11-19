@@ -235,6 +235,11 @@ internal sealed class ObservedDeliveryService(IApprovedArtifactDeliveryService i
         inner.AcquireDeliveredSelectionAsync(deliveryId, cancellationToken);
     public Task<OperationResult<DeliveryDestinationPreferenceView?>> GetLastSuccessfulDestinationAsync(CancellationToken cancellationToken) =>
         inner.GetLastSuccessfulDestinationAsync(cancellationToken);
+
+    public Task<OperationResult<DeliveryDestinationPreferenceView?>> GetLastSuccessfulDestinationAsync(
+        WorkflowType workflow, CancellationToken cancellationToken) =>
+        inner.GetLastSuccessfulDestinationAsync(workflow, cancellationToken);
+    public DeliveryFileResult<string> CheckSaveFolder(string folder) => inner.CheckSaveFolder(folder);
     public DeliveryDraftCheck CheckDraft(string folder, string fileName, ArtifactKind kind) => inner.CheckDraft(folder, fileName, kind);
 }
 

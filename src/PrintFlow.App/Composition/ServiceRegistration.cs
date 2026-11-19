@@ -143,7 +143,8 @@ public static class ServiceRegistration
         services.AddSingleton<ICorrectionFolderShell, PrintFlow.Infrastructure.Workspace.WindowsCorrectionFolderShell>();
         services.AddSingleton(provider => new FinalSaveCoordinator(
             provider.GetRequiredService<ISessionService>(),
-            provider.GetRequiredService<IApprovedArtifactDeliveryService>()));
+            provider.GetRequiredService<IApprovedArtifactDeliveryService>(),
+            settings: provider.GetRequiredService<ISettingsRepository>()));
 
         // The settings store the same migrated database already carries (Jira 11108; MVP design
         // §17.6). Registered beside the session repository and against the same connection

@@ -8,8 +8,7 @@ namespace PrintFlow.Domain.Settings;
 /// <remarks>
 /// An enum rather than free-text keys, for the reason every other identifier in this codebase is
 /// typed: a key/value store with an open key space is a store whose contents nothing can
-/// enumerate, validate or migrate. These seven values are the design's list — the same list
-/// SCRUM-11118 will offer the operator — and nothing else is storable.
+/// enumerate, validate or migrate. New operator preferences extend the original design's list.
 /// <para>
 /// Values are persisted <b>by name</b>, exactly like <c>FailureCode</c> and <c>StepKind</c>, so a
 /// member may be added but never renamed or renumbered (MVP design §13.4).
@@ -65,4 +64,13 @@ public enum SettingKey
 
     /// <summary>Versioned defaults for enhancement, background removal and cropping.</summary>
     ImageProcessingDefaults,
+
+    /// <summary>Default delivery folder for the design asset workflow.</summary>
+    PrepareAssetSaveFolder,
+
+    /// <summary>Default delivery folder for the customer design workflow.</summary>
+    PrepareCustomerDesignSaveFolder,
+
+    /// <summary>Default delivery folder for the direct print TIFF workflow.</summary>
+    GeneratePrintTiffSaveFolder,
 }

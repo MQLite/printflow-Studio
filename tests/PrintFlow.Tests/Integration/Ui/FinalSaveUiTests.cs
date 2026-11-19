@@ -183,6 +183,100 @@ public sealed class FinalSaveUiTests
     }
 
     [Fact]
+    public async Task Remembered_save_folders_are_independent_for_the_three_workflows()
+    {
+        using SessionServiceHarness h = new();
+        ISessionService workflow = FinalSaveFixtures.TiffService(h);
+        var delivery = FinalSaveFixtures.Delivery(h);
+        var coordinator = new FinalSaveCoordinator(workflow, delivery, "tester");
+        string assetFolder = FinalSaveFixtures.NewFolder("asset-default");
+        string customerFolder = FinalSaveFixtures.NewFolder("customer-default");
+        string printFolder = FinalSaveFixtures.NewFolder("print-default");
+        try
+        {
+            await Save(await FinalSaveFixtures.PngAtFinalReviewAsync(h, workflow), assetFolder, "asset.png");
+            await Save(await CustomerTiffAtFinalReviewAsync(h, workflow), customerFolder, "customer.tif");
+
+            var print = await FinalSaveFixtures.TiffAtFinalReviewAsync(h, workflow);
+            (await Open(print)).SaveFolderText.ShouldBe(Strings.FinalSave_NoFolderValue);
+            await Save(print, printFolder, "print.tif");
+
+            (await Open(await FinalSaveFixtures.PngAtFinalReviewAsync(h, workflow))).SaveFolderText.ShouldBe(assetFolder);
+            (await Open(await CustomerTiffAtFinalReviewAsync(h, workflow))).SaveFolderText.ShouldBe(customerFolder);
+            (await Open(await FinalSaveFixtures.TiffAtFinalReviewAsync(h, workflow))).SaveFolderText.ShouldBe(printFolder);
+        }
+        finally { FinalSaveFixtures.Remove(assetFolder, customerFolder, printFolder); }
+
+        async Task Save(SessionView review, string folder, string name) =>
+            (await coordinator.ConfirmAndSaveAsync(FinalSaveFixtures.Confirm(review, folder, name), null, default))
+                .Delivery!.Code.ShouldBe(DeliveryCode.Delivered);
+
+        Task<SessionViewModel> Open(SessionView review) =>
+            OpenAsync(h, workflow, delivery, new StubFolderPicker(), new RecordingDeliveredFileShell(), review);
+    }
+
+    private static async Task<SessionView> CustomerTiffAtFinalReviewAsync(SessionServiceHarness h, ISessionService workflow)
+    {
+        SessionId id = await KeepOriginalExtentPersistenceTests.AtTrim(h, workflow, WorkflowType.PrepareCustomerDesign);
+        await KeepOriginalExtentPersistenceTests.Execute(workflow, id, new WorkflowCommand.KeepOriginalExtent());
+        return await FinalSaveFixtures.NextTiffSizeAsync(workflow, id, 200);
+    }
+
+    [Fact]
+    public async Task Configured_folders_apply_to_final_save_and_a_manual_choice_only_changes_that_save()
+    {
+        using SessionServiceHarness h = new();
+        using SettingsScreenHarness settingsHarness = new();
+        var delivery = FinalSaveFixtures.Delivery(h);
+        var settings = await settingsHarness.OpenAsync(h.Settings, saveFolderDelivery: delivery);
+        string assetFolder = FinalSaveFixtures.NewFolder("preset-asset");
+        string customerFolder = FinalSaveFixtures.NewFolder("preset-customer");
+        string printFolder = FinalSaveFixtures.NewFolder("preset-print");
+        string overrideFolder = FinalSaveFixtures.NewFolder("preset-override");
+        try
+        {
+            settings.WorkflowSaveFolders.Single(row => row.Key == SettingKey.PrepareAssetSaveFolder).Folder = assetFolder;
+            settings.WorkflowSaveFolders.Single(row => row.Key == SettingKey.PrepareCustomerDesignSaveFolder).Folder = customerFolder;
+            var printSetting = settings.WorkflowSaveFolders.Single(row => row.Key == SettingKey.GeneratePrintTiffSaveFolder);
+            printSetting.Folder = h.Workspace.Root;
+            await settings.ApplyCommand.ExecuteAsync(null);
+            (await h.Settings.ReadAllAsync(default)).Value.ShouldBeEmpty();
+
+            printSetting.Folder = printFolder;
+            await settings.ApplyCommand.ExecuteAsync(null);
+
+            var reopened = await settingsHarness.OpenAsync(h.Settings);
+            reopened.WorkflowSaveFolders.Select(row => row.Folder)
+                .ShouldBe([assetFolder, customerFolder, printFolder]);
+
+            ISessionService workflow = FinalSaveFixtures.TiffService(h);
+            var picker = new StubFolderPicker { Next = overrideFolder };
+            var shell = new RecordingDeliveredFileShell();
+            var asset = await FinalSaveFixtures.PngAtFinalReviewAsync(h, workflow);
+            var customer = await CustomerTiffAtFinalReviewAsync(h, workflow);
+            var print = await FinalSaveFixtures.TiffAtFinalReviewAsync(h, workflow);
+            (await OpenAsync(h, workflow, delivery, picker, shell, asset)).SaveFolderText.ShouldBe(assetFolder);
+            (await OpenAsync(h, workflow, delivery, picker, shell, customer)).SaveFolderText.ShouldBe(customerFolder);
+
+            var screen = await OpenAsync(h, workflow, delivery, picker, shell, print);
+            screen.SaveFolderText.ShouldBe(printFolder);
+            screen.ChangeLocationCommand.Execute(null);
+            screen.SaveFolderText.ShouldBe(overrideFolder);
+            await screen.ConfirmAndSaveCommand.ExecuteAsync(null);
+            await screen.FinalSaveFactsLoaded;
+            File.Exists(Path.Combine(overrideFolder, print.CurrentArtefact!.FileName)).ShouldBeTrue();
+
+            var nextPrint = await FinalSaveFixtures.TiffAtFinalReviewAsync(h, workflow);
+            (await OpenAsync(h, workflow, delivery, picker, shell, nextPrint)).SaveFolderText.ShouldBe(printFolder);
+
+            reopened.WorkflowSaveFolders.Single(row => row.Key == SettingKey.GeneratePrintTiffSaveFolder).Folder = string.Empty;
+            await reopened.ApplyCommand.ExecuteAsync(null);
+            (await OpenAsync(h, workflow, delivery, picker, shell, nextPrint)).SaveFolderText.ShouldBe(overrideFolder);
+        }
+        finally { FinalSaveFixtures.Remove(assetFolder, customerFolder, printFolder, overrideFolder); }
+    }
+
+    [Fact]
     public async Task Next_image_shows_the_remembered_folder_first_and_a_collision_needs_explicit_acceptance()
     {
         using CultureScope culture = new("en");
@@ -1119,9 +1213,7 @@ public sealed class FinalSaveUiTests
                 view = await FinalSaveFixtures.PngAtFinalReviewAsync(h, workflow);
                 break;
             case "pending-customer-tiff":
-                SessionId customer = await KeepOriginalExtentPersistenceTests.AtTrim(h, workflow, WorkflowType.PrepareCustomerDesign);
-                await KeepOriginalExtentPersistenceTests.Execute(workflow, customer, new WorkflowCommand.KeepOriginalExtent());
-                view = await FinalSaveFixtures.NextTiffSizeAsync(workflow, customer, 200);
+                view = await CustomerTiffAtFinalReviewAsync(h, workflow);
                 break;
             case "pending-direct-tiff":
                 view = await FinalSaveFixtures.TiffAtFinalReviewAsync(h, workflow);
@@ -1181,7 +1273,7 @@ public sealed class FinalSaveUiTests
         IApprovedArtifactDeliveryService delivery, IDeliveryFolderPicker picker, IDeliveredFileShell shell, SessionView view)
     {
         var screen = new SessionViewModel(workflow, h.Previews, h.TiffReviews, new RecordingNavigation(), null, null,
-            new FinalSaveCoordinator(workflow, delivery, "tester"), picker, shell);
+            new FinalSaveCoordinator(workflow, delivery, "tester", h.Settings), picker, shell);
         screen.Open(view);
         await screen.PreviewsLoaded;
         await screen.FinalSaveFactsLoaded;

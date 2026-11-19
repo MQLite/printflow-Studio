@@ -70,7 +70,7 @@
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,8,0,0">
             <Grid>
                 <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="20" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-                <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
                 <ui:Card Grid.Column="0" Padding="20" VerticalAlignment="Top" Style="{DynamicResource PF.Card.Fluent}">
                     <StackPanel>
                 <!-- General: the operator's own preferences. Everything here is editable and
@@ -150,7 +150,44 @@
 
                     </StackPanel>
                 </ui:Card>
-                <Expander Grid.Row="1" Grid.ColumnSpan="3" Header="{Binding AdvancedHeading}" Style="{StaticResource PF.Disclosure}" IsExpanded="False" Margin="0,16,0,0" AutomationProperties.AutomationId="Settings.Advanced">
+                <ui:Card Grid.Row="1" Grid.ColumnSpan="3" Margin="0,16,0,0" Padding="20" Style="{DynamicResource PF.Card.Fluent}">
+                    <StackPanel>
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                                        <Setter Property="IsEnabled" Value="False" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+                        <TextBlock Text="{Binding WorkflowSaveFoldersHeading}" Style="{StaticResource SectionHeading}" />
+                        <TextBlock Text="{Binding WorkflowSaveFoldersHint}" Style="{StaticResource RowHint}" />
+                        <ItemsControl ItemsSource="{Binding WorkflowSaveFolders}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Label}" Style="{StaticResource RowLabel}" TextWrapping="Wrap" />
+                                        <DockPanel>
+                                            <Button DockPanel.Dock="Right" Margin="8,0,0,0"
+                                                    Content="{Binding DataContext.WorkflowSaveFolderBrowseLabel, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                    Command="{Binding DataContext.BrowseWorkflowSaveFolderCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                    CommandParameter="{Binding}"
+                                                    Style="{StaticResource PF.Button.Secondary}"
+                                                    AutomationProperties.AutomationId="{Binding BrowseId}"
+                                                    AutomationProperties.Name="{Binding BrowseLabel}" />
+                                            <TextBox Text="{Binding Folder, UpdateSourceTrigger=PropertyChanged}"
+                                                     Style="{StaticResource PF.Input.TextBox}"
+                                                     AutomationProperties.AutomationId="{Binding FolderId}"
+                                                     AutomationProperties.Name="{Binding Label}" />
+                                        </DockPanel>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </ui:Card>
+                <Expander Grid.Row="2" Grid.ColumnSpan="3" Header="{Binding AdvancedHeading}" Style="{StaticResource PF.Disclosure}" IsExpanded="False" Margin="0,16,0,0" AutomationProperties.AutomationId="Settings.Advanced">
                     <StackPanel>
                 <TextBlock Text="{Binding LocalLogLocationLabel}" Style="{StaticResource RowLabel}" />
                 <TextBox Text="{Binding LocalLogLocation, Mode=OneWay}"

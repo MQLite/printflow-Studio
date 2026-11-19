@@ -10,6 +10,7 @@ using PrintFlow.App.Startup;
 using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Settings;
+using PrintFlow.Workflow.Delivery;
 using PrintFlow.Workflow.Ports;
 using PrintFlow.Workflow.Services;
 
@@ -54,8 +55,8 @@ public sealed record LanguageOption(OperatorLanguage Language, string DisplayNam
 /// production DPI would be a screen that could make PrintFlow lie about what it printed.
 /// <para>
 /// <b>Save is one transaction.</b> The screen presents a single Apply, so it writes a single
-/// <see cref="ISettingsRepository.UpsertAsync"/> batch: the three preferences commit together
-/// or not at all. Nothing is applied to the running application until that batch has committed,
+/// <see cref="ISettingsRepository.UpsertAsync"/> batch with the general preferences and any
+/// changed workflow save folders. Nothing is applied to the running application until that batch has committed,
 /// which is what keeps the visible language and the persisted language from ever disagreeing.
 /// </para>
 /// <para>
@@ -114,7 +115,9 @@ public sealed partial class SettingsViewModel : ObservableObject
         LocalDiagnosticLocations locations,
         ReadinessObservationAccessor observations,
         ISessionService sessions,
-        IOpenAiImageCredentials? openAiCredentials = null)
+        IOpenAiImageCredentials? openAiCredentials = null,
+        IDeliveryFolderPicker? saveFolderPicker = null,
+        IApprovedArtifactDeliveryService? saveFolderDelivery = null)
     {
         ArgumentNullException.ThrowIfNull(settings);
         ArgumentNullException.ThrowIfNull(localisation);
@@ -133,6 +136,8 @@ public sealed partial class SettingsViewModel : ObservableObject
         _observations = observations;
         _imageProcessingSessions = sessions;
         _openAiCredentials = openAiCredentials;
+        _saveFolderPicker = saveFolderPicker;
+        _saveFolderDelivery = saveFolderDelivery;
 
         foreach (OperatorLanguage language in OperatorLanguages.All)
         {
@@ -307,7 +312,7 @@ public sealed partial class SettingsViewModel : ObservableObject
     /// Commits the general preferences as one transaction, then applies what committed.
     /// </summary>
     /// <remarks>
-    /// The order is the point. Retention is validated before anything is written, so an
+    /// Retention and changed save folders are validated before anything is written, so an
     /// unusable entry costs nothing; the batch is written as one
     /// <see cref="ISettingsRepository.UpsertAsync"/> call, so a failure leaves the database
     /// exactly as it was; and the language is switched only <i>after</i> the commit succeeded,
@@ -333,15 +338,19 @@ public sealed partial class SettingsViewModel : ObservableObject
             return;
         }
 
+        var folderUpdates = ReadWorkflowSaveFolderUpdates();
         OperatorLanguage language = SelectedLanguage.Language;
 
         IsBusy = true;
         try
         {
+            if (!await ValidateWorkflowSaveFoldersAsync(folderUpdates, cancellationToken).ConfigureAwait(true)) return;
+
             OperationResult<Unit> saved = await _settings.UpsertAsync(
                 [
                     SettingEntry.Text(SettingKey.UiLanguage, OperatorLanguages.CultureNameOf(language)),
                     SettingEntry.Integer(SettingKey.LogRetentionDays, retentionDays),
+                    .. folderUpdates.Select(update => SettingEntry.Text(update.Row.Key, update.Folder)),
                 ],
                 cancellationToken).ConfigureAwait(true);
 
@@ -361,6 +370,8 @@ public sealed partial class SettingsViewModel : ObservableObject
             // Re-displayed from the parsed values, so what the screen shows afterwards is what
             // was actually stored rather than what was typed.
             LogRetentionDays = retentionDays.ToString(CultureInfo.InvariantCulture);
+            foreach (var update in folderUpdates)
+                update.Row.ApplySavedFolder(update.Folder);
 
             RefreshLocalisedText();
 
@@ -406,11 +417,15 @@ public sealed partial class SettingsViewModel : ObservableObject
         ApplyCommand.NotifyCanExecuteChanged();
         OpenEnvironmentCommand.NotifyCanExecuteChanged();
         BackToHomeCommand.NotifyCanExecuteChanged();
+        BrowseWorkflowSaveFolderCommand.NotifyCanExecuteChanged();
         RefreshImageProcessingCommands();
     }
 
     private void ApplyPersisted(IReadOnlyList<SettingEntry> entries)
     {
+        foreach (WorkflowSaveFolderRow row in WorkflowSaveFolders)
+            row.ApplySavedFolder(entries.FirstOrDefault(entry => entry.Key == row.Key)?.Value ?? string.Empty);
+
         // Absent is not an error and never overwrites a default with a blank: each value keeps
         // the fallback it was constructed with — appsettings.json, then the Product constant.
         foreach (SettingEntry entry in entries)
@@ -460,7 +475,12 @@ public sealed partial class SettingsViewModel : ObservableObject
     /// the whole of a language switch on the visible screen. Every other screen is constructed
     /// fresh by navigation and is therefore already in the new language.
     /// </remarks>
-    private void RefreshLocalisedText() => OnPropertyChanged(string.Empty);
+    private void RefreshLocalisedText()
+    {
+        OnPropertyChanged(string.Empty);
+        foreach (WorkflowSaveFolderRow row in WorkflowSaveFolders)
+            row.RefreshLanguage();
+    }
 
     /// <summary>A whole, non-negative pixel count, in the operator's own number format.</summary>
     private static bool TryReadPixels(string? text, out int pixels) =>

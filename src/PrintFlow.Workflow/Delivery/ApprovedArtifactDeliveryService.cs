@@ -4,6 +4,7 @@ using System.Text;
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Results;
+using PrintFlow.Domain.Sessions;
 using PrintFlow.Workflow.Ports;
 using PrintFlow.Workflow.Services;
 
@@ -44,6 +45,13 @@ public sealed partial class ApprovedArtifactDeliveryService : IApprovedArtifactD
     public Task<OperationResult<DeliveryDestinationPreferenceView?>> GetLastSuccessfulDestinationAsync(
         CancellationToken cancellationToken) => _deliveries.ReadDestinationPreferenceAsync(cancellationToken);
 
+    public Task<OperationResult<DeliveryDestinationPreferenceView?>> GetLastSuccessfulDestinationAsync(
+        WorkflowType workflow, CancellationToken cancellationToken) =>
+        _deliveries.ReadDestinationPreferenceAsync(workflow, cancellationToken);
+
+    public DeliveryFileResult<string> CheckSaveFolder(string folder) =>
+        _files.CheckFolder(folder, _protectedRoots);
+
     public DeliveryDraftCheck CheckDraft(string folder, string fileName, ArtifactKind kind)
     {
         DeliveryFileResult<string> leaf = _files.ValidateLeaf(fileName ?? string.Empty, kind);
@@ -51,7 +59,7 @@ public sealed partial class ApprovedArtifactDeliveryService : IApprovedArtifactD
         // A completed or corrected name is shown, never silently substituted.
         if (leaf.Value != fileName)
             return new(DeliveryCode.InvalidName, leaf.Value, "Confirm the effective full filename before saving.");
-        DeliveryFileResult<string> checkedFolder = _files.CheckFolder(folder ?? string.Empty, _protectedRoots);
+        DeliveryFileResult<string> checkedFolder = CheckSaveFolder(folder ?? string.Empty);
         return checkedFolder.IsSuccess
             ? new(null, leaf.Value)
             : new(checkedFolder.Code, leaf.Value, checkedFolder.Detail);

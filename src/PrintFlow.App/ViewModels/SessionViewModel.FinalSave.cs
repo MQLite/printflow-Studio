@@ -91,7 +91,7 @@ internal sealed class FinalSaveTarget
     public long Generation { get; set; }
     public bool NameEdited { get; set; }
     public bool FolderEdited { get; set; }
-    public bool FolderFromPreference { get; set; }
+    public FinalSaveFolderDefault? FolderDefault { get; set; }
     public (string Name, string Folder)? NavigationDraft { get; set; }
     public bool CopyDraft { get; set; }
     public string? RenameDraft { get; set; }
@@ -158,7 +158,7 @@ public partial class SessionViewModel
     private FinalSaveTargetRow? _selectedFinalSaveTarget;
     private string? _lastOfferedPending;
     private int _finalSaveFactsGeneration;
-    private string? _preferredFolder;
+    private FinalSaveFolderDefault? _preferredFolder;
     private bool _preferenceFailed;
     private FinalSaveOperation? _finalSaveOperation;
 
@@ -387,7 +387,7 @@ public partial class SessionViewModel
     private void ShowFinalSave(SessionView session)
     {
         if (_finalSave is null) return;
-        if (_finalSaveSession?.Id != session.Id)
+        if (_finalSaveSession?.Id != session.Id || _finalSaveSession.WorkflowType != session.WorkflowType)
         {
             _finalSaveTargets.Clear();
             _finalSaveRows.Clear();
@@ -396,6 +396,8 @@ public partial class SessionViewModel
             FinalSaveTargets.Clear();
             _selectedFinalSaveTarget = null;
             _lastOfferedPending = null;
+            _preferredFolder = null;
+            _preferenceFailed = false;
         }
         _finalSaveSession = session;
 
@@ -535,17 +537,18 @@ public partial class SessionViewModel
             target.FileName = fileName;
             target.Generation++;
         }
-        // The remembered folder follows the newest successful save until the operator chooses
-        // one; it never overrides an explicit choice or a result's own recorded destination.
-        // Re-pointing is limited to a draft nothing has happened to yet: a captured attempt, an
-        // outcome on screen or any recorded save keeps its own destination (R2).
+        // Only untouched drafts follow their workflow's default. A recorded or captured
+        // attempt keeps its own location, as does any location the operator picked.
         bool untouched = target.Captured is null && target.Fact is null && target.History is not { Count: > 0 };
-        if (!target.FolderEdited && (target.Folder.Length == 0 && target.Captured is null || target.FolderFromPreference && untouched) &&
-            _preferredFolder is { Length: > 0 } remembered && remembered != target.Folder)
+        if (!target.FolderEdited && untouched && (target.Folder.Length == 0 || target.FolderDefault is not null))
         {
-            target.Folder = remembered;
-            target.FolderFromPreference = true;
-            target.Generation++;
+            target.FolderDefault = _preferredFolder;
+            string folder = _preferredFolder?.Folder ?? string.Empty;
+            if (folder != target.Folder)
+            {
+                target.Folder = folder;
+                target.Generation++;
+            }
         }
     }
 
@@ -558,24 +561,23 @@ public partial class SessionViewModel
     {
         if (target.NameEdited || target.FolderEdited || target.Captured is not null ||
             DisplayedRecord(target) is not { } shown) return;
+        target.FolderDefault = null;
         if (target.FileName == shown.RequestedFileName && target.Folder == shown.RequestedFolder) return;
         target.FileName = shown.RequestedFileName;
         target.Folder = shown.RequestedFolder;
-        target.FolderFromPreference = false;
         target.Generation++;
     }
 
-    /// <summary>Metadata only: remembered folder, offers and recorded deliveries. No folder scan or reconciliation.</summary>
+    /// <summary>Loads the workflow's default folder, save offers and recorded deliveries.</summary>
     private async Task LoadFinalSaveFactsAsync(SessionView session, int generation)
     {
         if (_finalSave is null || _finalSaveOperation is not null) return;
         IApprovedArtifactDeliveryService delivery = _finalSave.Delivery;
         try
         {
-            // Re-read on every load: a save that just succeeded changes the default for the next
-            // output shown on this same screen.
-            OperationResult<DeliveryDestinationPreferenceView?> remembered =
-                await Task.Run(() => delivery.GetLastSuccessfulDestinationAsync(CancellationToken.None)).ConfigureAwait(true);
+            OperationResult<FinalSaveFolderDefault?> preferred =
+                await Task.Run(() => _finalSave.GetDefaultSaveFolderAsync(session.WorkflowType, CancellationToken.None))
+                    .ConfigureAwait(true);
             List<(FinalSaveTarget Target, DeliveryOffer? Offer, ArtifactRefusal Refusal,
                 OperationResult<IReadOnlyList<DeliveryState>> History)> loaded = [];
             foreach (FinalSaveTarget target in FinalSaveTargets.Select(r => r.Target).Where(t => t.Artifact is not null).ToList())
@@ -593,8 +595,8 @@ public partial class SessionViewModel
             if (generation != _finalSaveFactsGeneration || _finalSaveSession?.Id != session.Id) return;
             // A draft frozen by an operation that started meanwhile is never changed underneath it.
             if (_finalSaveOperation is not null) return;
-            _preferenceFailed = remembered.IsFailure;
-            _preferredFolder = remembered.IsSuccess ? remembered.Value?.Folder : null;
+            _preferenceFailed = preferred.IsFailure;
+            _preferredFolder = preferred.IsSuccess ? preferred.Value : null;
             foreach ((FinalSaveTarget target, DeliveryOffer? offer, ArtifactRefusal refusal,
                          OperationResult<IReadOnlyList<DeliveryState>> history) in loaded)
             {
@@ -678,6 +680,7 @@ public partial class SessionViewModel
         if (!CanBeginCopy || SelectedSave is not { } target) return;
         target.FileName = SaveFileNameText;
         target.Folder = SaveFolderText;
+        target.FolderDefault = null;
         target.NavigationDraft = (target.FileName, target.Folder);
         target.CopyDraft = true;
         target.RenameError = null;
@@ -789,7 +792,7 @@ public partial class SessionViewModel
         target.NavigationDraft ??= (target.FileName, target.Folder);
         target.Folder = picked;
         target.FolderEdited = true;
-        target.FolderFromPreference = false;
+        target.FolderDefault = null;
         target.Generation++;
         NotifyFinalSaveChanged();
     }
@@ -1334,8 +1337,10 @@ public partial class SessionViewModel
         else if (notice is not null) lines.Add(notice);
         if (target.Folder.Length == 0)
             lines.Add(_preferenceFailed ? Strings.FinalSave_PreferenceUnavailable : Strings.FinalSave_NoFolder);
-        else if (target.FolderFromPreference && !target.FolderEdited)
-            lines.Add(Strings.FinalSave_RememberedFolder);
+        else if (target.FolderDefault is { } folderDefault && !target.FolderEdited)
+            lines.Add(folderDefault.IsConfigured
+                ? Strings.Resolve("WorkflowSaveFolder_FromSettings")
+                : Strings.FinalSave_RememberedFolder);
         _ = effective;
         return string.Join(Environment.NewLine, lines);
     }
