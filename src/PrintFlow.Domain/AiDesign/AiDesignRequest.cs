@@ -18,6 +18,8 @@ public sealed record AiDesignDownload(Guid RequestId, Guid AttemptId, string Tab
     string ResultId, long DownloadId, string AbsolutePath, bool IsComplete);
 public sealed record AiDesignFailure(string Code, AiDesignState Stage, IReadOnlyList<string> DetailArguments,
     AiDesignState LastSuccessfulStage, bool RemoteStopConfirmed = false);
+public sealed record WorkDraftReference(Guid DraftId, string Title);
+
 public sealed record AiDesignRequest
 {
     public required Guid RequestId { get; init; }
@@ -40,6 +42,8 @@ public sealed record AiDesignRequest
     public Guid? ConnectionId { get; init; }
     public string? TabId { get; init; }
     public string? ConversationId { get; init; }
+    public Guid? WorkConversationId { get; init; }
+    public WorkDraftReference? WorkDraft { get; init; }
     public AiDesignDownload? Download { get; init; }
     public AiDesignCandidate? Candidate { get; init; }
     public IReadOnlyList<AiDesignCandidate> RetainedCandidates { get; init; } = [];
@@ -55,7 +59,7 @@ public abstract record AiDesignEvent
     public sealed record UploadStarted(string TabId, string ConversationId) : AiDesignEvent;
     public sealed record UploadConfirmed(AiDesignUploadReceipt Receipt) : AiDesignEvent;
     public sealed record SubmitReserved(string TabId, string ConversationId) : AiDesignEvent;
-    public sealed record SubmitConfirmed : AiDesignEvent;
+    public sealed record SubmitConfirmed(Guid? WorkConversationId = null) : AiDesignEvent;
     public sealed record GenerationStarted : AiDesignEvent;
     public sealed record DownloadRegistered(AiDesignDownload Download) : AiDesignEvent;
     public sealed record DownloadCompleted(AiDesignDownload Download) : AiDesignEvent;
@@ -63,6 +67,7 @@ public abstract record AiDesignEvent
     public sealed record CandidatePublished(AiDesignCandidate Candidate) : AiDesignEvent;
     public sealed record ImportStarted : AiDesignEvent;
     public sealed record ImportCompleted(SessionId SessionId) : AiDesignEvent;
+    public sealed record ReturnedWorkResultImported(Guid WorkConversationId, AiDesignCandidate Candidate, SessionId SessionId) : AiDesignEvent;
     public sealed record Failed(string Code, bool ImportFailure = false, SessionId? SessionId = null) : AiDesignEvent;
     public sealed record StopAccepted : AiDesignEvent;
     public sealed record RemoteStopConfirmed : AiDesignEvent;

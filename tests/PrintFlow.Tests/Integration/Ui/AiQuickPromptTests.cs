@@ -19,6 +19,61 @@ namespace PrintFlow.Tests.Integration.Ui;
 [Collection(SqliteCollection.Name)]
 public sealed class AiQuickPromptTests
 {
+    [Theory]
+    [InlineData(AiProductKind.MemorialTshirt, "设计区域：280×390mm")]
+    [InlineData(AiProductKind.MemorialBadge, "画布外圆86mm，关键内容安全区72mm")]
+    public async Task Recompose_omits_cleared_memorial_text_lines_and_retains_other_input(
+        AiProductKind product, string expectedSpecification)
+    {
+        using var f = new PromptWorkbenchFixture();
+        using TempWorkspace source = new();
+        await f.Vm.OpenAsync(null, default);
+        var template = BuiltInAiTemplates.All.Single(x => x.Content.Product == product);
+        await f.Vm.SelectTemplateAsync(template.Reference, true, default);
+        f.Picker.Pick = () => PromptWorkbenchFixture.Png(source.Root, 2);
+        await f.Vm.PickSlotImageCommand.ExecuteAsync("person-photo");
+        using TempWorkspace layout = new();
+        f.Picker.Pick = () => PromptWorkbenchFixture.Png(layout.Root, 3);
+        await f.Vm.PickSlotImageCommand.ExecuteAsync("layout-reference");
+        var name = f.Vm.Fields.Single(x => x.Key == "姓名");
+        var notes = f.Vm.Fields.Single(x => x.Key == "补充要求");
+        name.Value = "Test Name";
+        notes.Value = "Only for the first composition";
+        f.Vm.Fields.Single(x => x.Key == "出生日期行").Value = "26 March 1962";
+        f.Vm.Fields.Single(x => x.Key == "离世日期行").Value = "9 November 2026";
+        await f.Vm.ComposeCommand.ExecuteAsync(null);
+        Text(f.Vm.Document).ShouldContain("Test Name");
+
+        name = f.Vm.Fields.Single(x => x.Key == "姓名");
+        notes = f.Vm.Fields.Single(x => x.Key == "补充要求");
+        name.Value = " ";
+        notes.Value = "";
+        await f.Vm.ComposeCommand.ExecuteAsync(null);
+        await f.Vm.OpenAsync(f.Vm.Draft!.Id, default);
+        await f.Vm.CopyCommand.ExecuteAsync(null);
+
+        var copied = f.Clipboard.Text.ShouldNotBeNull();
+        copied.ShouldNotContain("姓名：");
+        copied.ShouldNotContain("{{");
+        copied.ShouldNotContain("Only for the first composition");
+        copied.ShouldContain("SUNRISE: 26 March 1962");
+        copied.ShouldContain(expectedSpecification);
+
+        f.Vm.Fields.Single(x => x.Key == "出生日期行").Value = "";
+        f.Vm.Fields.Single(x => x.Key == "离世日期行").Value = " ";
+        await f.Vm.ComposeCommand.ExecuteAsync(null);
+        await f.Vm.CopyCommand.ExecuteAsync(null);
+
+        copied = f.Clipboard.Text.ShouldNotBeNull();
+        copied.ShouldNotContain("SUNRISE");
+        copied.ShouldNotContain("SUNSET");
+        copied.ShouldNotContain("{{");
+        copied.ShouldContain(expectedSpecification);
+        copied.ShouldContain("人物参考：attachment-01.png");
+        copied.ShouldContain("版式参考：attachment-02.png");
+        f.Vm.AttachmentManifest.Count.ShouldBe(2);
+    }
+
     [Fact]
     public async Task Stale_and_manual_notices_survive_save_copy_and_reopening()
     {
@@ -215,11 +270,13 @@ internal sealed class PromptWorkbenchFixture : IDisposable
     public AiTemplateCatalog Catalog { get; }
     public AiAuthoringModule Module { get; }
     public AiPromptWorkbenchViewModel Vm { get; }
-    public PromptWorkbenchFixture(PrintFlow.App.Navigation.IAiDraftLeavePrompt? leavePrompt = null)
+    public PromptWorkbenchFixture(PrintFlow.App.Navigation.IAiDraftLeavePrompt? leavePrompt = null,
+        PrintFlow.Workflow.AiDesign.IWorkTaskQuery? tasks = null, WorkTaskTracker? tracker = null,
+        PrintFlow.Workflow.Services.IArtefactPreviewService? previews = null)
     {
         Catalog = new(new FileAiTemplateLibraryStore(Root.Root));
         Module = new(new FileAiAuthoringDraftStore(Root.Root), Catalog, new FileAiDesignAttachments(Root.Root));
-        Vm = new(Module, Catalog, new FileAiAuthoringAssetPreview(Root.Root), Picker, Clipboard, leavePrompt);
+        Vm = new(Module, Catalog, new FileAiAuthoringAssetPreview(Root.Root), Picker, Clipboard, leavePrompt, workTasks: tasks, workTracker: tracker, workPreviews: previews);
     }
     public void Dispose() => Root.Dispose();
     public static string Png(string root, int width)

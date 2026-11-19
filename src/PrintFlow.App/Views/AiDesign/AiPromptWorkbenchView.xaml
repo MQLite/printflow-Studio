@@ -27,24 +27,37 @@
    </MultiDataTrigger.Conditions><Setter Property="IsEnabled" Value="True"/></MultiDataTrigger></Style.Triggers></Style></Grid.Style>
    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
   <StackPanel Margin="0,0,0,14">
-   <WrapPanel Margin="0,0,0,8">
+   <DockPanel Margin="0,0,0,8">
+   <Button DockPanel.Dock="Right" Content="{Binding WorkTasksLabel}" Command="{Binding ShowWorkTasksCommand}"
+    Padding="12,4" HorizontalAlignment="Right" AutomationProperties.AutomationId="AiPrompt.WorkTasks"/>
+   <WrapPanel>
     <Button Content="{Binding ReturnHomeLabel}" Command="{Binding ReturnHomeCommand}" IsEnabled="{Binding CanEdit}" Margin="0,0,10,0" Padding="10,4" AutomationProperties.AutomationId="AiPrompt.ReturnHome"/>
     <Button Content="{Binding SavedDraftsLabel}" Command="{Binding ShowSavedDraftsCommand}" IsEnabled="{Binding CanEdit}" Padding="10,4" AutomationProperties.AutomationId="AiPrompt.SavedDrafts"/>
    </WrapPanel>
+   </DockPanel>
    <TextBlock Text="{x:Static r:AiPromptLabels.AiPrompt_Title}" FontSize="26" FontWeight="SemiBold"/>
    <WrapPanel Margin="0,6,0,0"><Button Content="{x:Static r:AiPromptLabels.AiPrompt_Quick}" Command="{Binding SwitchToQuickCommand}" Padding="12,6" Margin="0,0,8,0" IsEnabled="{Binding CanEdit}"/><Button Content="{x:Static r:AiDetailedLabels.Detailed}" Command="{Binding SwitchToDetailedCommand}" Padding="12,6" Margin="0,0,12,0" IsEnabled="{Binding CanEdit}"/><TextBlock Text="{x:Static r:AiDetailedLabels.ModeNotice}" VerticalAlignment="Center" TextWrapping="Wrap"/></WrapPanel>
   </StackPanel>
   <ContentControl Grid.Row="1" Content="{Binding}"><ContentControl.Style><Style TargetType="ContentControl"><Setter Property="ContentTemplate" Value="{StaticResource QuickPage}"/><Style.Triggers><DataTrigger Binding="{Binding IsDetailed}" Value="True"><Setter Property="ContentTemplate" Value="{StaticResource DetailedPage}"/></DataTrigger></Style.Triggers></Style></ContentControl.Style></ContentControl>
-  <Grid Grid.Row="2" Margin="0,12,0,0">
-   <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+  <StackPanel Grid.Row="2">
+   <local:WorkResultCardView Margin="0,10,0,0" Visibility="{Binding HasWorkCard, Converter={StaticResource BoolVisibility}}"/>
+  <Grid Margin="0,10,0,0">
+   <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
    <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
     <TextBlock Text="{Binding Error}" TextWrapping="Wrap" Foreground="#B42318" AutomationProperties.LiveSetting="Polite"/>
+    <TextBlock Text="{Binding WorkCardNotice}" TextWrapping="Wrap" Foreground="#B42318"/>
     <TextBlock Text="{Binding Status}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite"/>
    </StackPanel>
    <Button Grid.Column="1" Content="{x:Static r:AiPromptLabels.AiPrompt_Save}" Command="{Binding SaveDraftCommand}" Margin="0,0,10,0" Padding="16,10" IsEnabled="{Binding CanEdit}"/>
-   <Button Grid.Column="2" Content="{x:Static r:AiPromptLabels.AiPrompt_Copy}" Command="{Binding CopyCommand}" Padding="20,10" IsEnabled="{Binding CanEdit}"
-    AutomationProperties.AutomationId="AiPrompt.Copy" Background="#007F6B" Foreground="White"/>
+   <Button Grid.Column="2" Content="{x:Static r:AiPromptLabels.AiPrompt_Copy}" Command="{Binding CopyCommand}" Margin="0,0,10,0" Padding="16,10" IsEnabled="{Binding CanEdit}"
+    AutomationProperties.AutomationId="AiPrompt.Copy"/>
+   <Button Grid.Column="3" Content="{Binding StopReceivingLabel}" Command="{Binding StopReceivingCommand}"
+    Visibility="{Binding CanStopReceiving, Converter={StaticResource BoolVisibility}}"
+    Margin="0,0,10,0" Padding="16,10" AutomationProperties.AutomationId="AiPrompt.StopReceiving"/>
+   <Button Grid.Column="4" Content="{Binding AutoGenerateLabel}" Command="{Binding AutoGenerateCommand}" Padding="16,10"
+    AutomationProperties.AutomationId="AiPrompt.AutoGenerate" Background="#007F6B" Foreground="White"/>
   </Grid>
+  </StackPanel>
   </Grid>
   <Border Grid.Row="1" Grid.RowSpan="2" Background="{DynamicResource PF.Brush.Canvas}" Padding="14" BorderBrush="#007F6B" BorderThickness="2" KeyboardNavigation.TabNavigation="Cycle"
    Visibility="{Binding IsChangePending, Converter={StaticResource BoolVisibility}}">

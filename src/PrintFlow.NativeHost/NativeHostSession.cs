@@ -9,17 +9,19 @@ using PrintFlow.Infrastructure.AiDesign;
 namespace PrintFlow.NativeHost;
 
 /// <summary>A persistent browser port owns this session; no registry/configuration entry can impersonate it.</summary>
-public sealed class NativeHostSession : IAsyncDisposable
+public sealed partial class NativeHostSession : IAsyncDisposable
 {
     private readonly AiDesignBridgeConfiguration _configuration;
     private readonly string _origin,_installation;
     private readonly FileAiDesignRequestStore _store;
     private readonly FileAiDesignAttachments _attachments;
     private readonly HashSet<(Guid,Guid)> _dispatched=[];
+    private readonly ConcurrentDictionary<(Guid AttemptId, Guid AttachmentId), byte> _transferred = new();
     private readonly ConcurrentDictionary<Guid,SemaphoreSlim> _requestGates=new();
     private FileStream? _connectionLock;
     private bool _verified;
     private string? _contractHash;
+    private string? _launchNonce;
     public Guid ConnectionId {get;}=Guid.NewGuid();
     public NativeHostSession(AiDesignBridgeConfiguration configuration,string callerOrigin,string installationDirectory)
     {
@@ -40,15 +42,23 @@ public sealed class NativeHostSession : IAsyncDisposable
                 string root=m.Payload.GetProperty("workspaceIdentity").GetString()??"";
                 if(version!=AiDesignBridgeConfiguration.CurrentHostVersion)return Fail("BridgeVersionMismatch");
                 if(root.Length>0&&root!=config.Value)return Fail("BridgeRootMismatch");
+                // Check the trial launch before taking the single native connection lock.
+                _contractHash=m.Payload.GetProperty("workContractHash").GetString();
+                _launchNonce = m.Payload.TryGetProperty("launchNonce", out var nonce) ? nonce.GetString() : null;
+                bool trialLaunch = _launchNonce is { Length: 32 } && _launchNonce.All(c => c is >= '0' and <= '9' or >= 'A' and <= 'F');
+                _verified = _configuration.VerifiedWorkContractHash is not null && _contractHash == _configuration.VerifiedWorkContractHash
+                    && (_contractHash != AiDesignBridgeConfiguration.TextSubmissionTrialContract || trialLaunch && _configuration.ChromeProfileDirectory is not null);
+                if (_configuration.VerifiedWorkContractHash == AiDesignBridgeConfiguration.TextSubmissionTrialContract && !_verified)
+                    return Fail("WorkTrialLaunchRequired");
                 RefuseAncestry(_installation);Directory.CreateDirectory(_installation);string path=Path.Combine(_installation,"connection.lock");RefuseAncestry(path);
                 _connectionLock=new(path,FileMode.OpenOrCreate,FileAccess.ReadWrite,FileShare.None);
-                _contractHash=m.Payload.GetProperty("workContractHash").GetString();
-                _verified=_configuration.VerifiedWorkContractHash is not null&&_contractHash==_configuration.VerifiedWorkContractHash;
                 await InterruptDisconnectedAsync(ct);await HeartbeatAsync(ct);
                 return Reply(m,"Ready",new{available=_verified,protocolVersion=1,hostVersion=AiDesignBridgeConfiguration.CurrentHostVersion,
                     extensionOrigin=_origin,workspaceIdentity=config.Value,connectionId=ConnectionId,reason=_verified?(string?)null:"WorkContractUnverified"});
             }
             if(_connectionLock is null)return Fail("BridgeHelloRequired");
+            if (m.Kind == "SubmitReceipt") return AcceptSubmitReceipt(m);
+            if (Volatile.Read(ref _submission)?.Fence.RequestId == m.RequestId) return Fail("SubmitInProgress");
             if(m.Kind is "Request" or "AttachmentChunk" or "AttachmentComplete" or "Ready" or "SubmitPermit")return Fail("NativeDirectionInvalid");
             gate=_requestGates.GetOrAdd(m.RequestId,_=>new(1,1));await gate.WaitAsync(ct);held=true;
             var read=await _store.ReadAsync(m.RequestId,ct);
@@ -56,10 +66,15 @@ public sealed class NativeHostSession : IAsyncDisposable
             if(read.IsFailure||!FileAiDesignRequestStore.Matches(read.Value,fence)||read.Value.ConnectionId!=ConnectionId||read.Value.AttemptId==Guid.Empty)return Fail("BridgeFenceMismatch");
             if(m.Kind=="Ack")return Reply(m,"Ack",new{stateVersion=read.Value.StateVersion});
             if(!_verified)return Fail("WorkContractUnverified");
+            if (m.Kind == "Progress" && m.Payload.GetProperty("stage").GetString() == "SubmitReady")
+                return AcceptSubmitReady(m, read.Value);
+            if (m.Kind == "UploadReceipt" && IsWorkTrial && !IsTransferredAttachmentReceipt(m, read.Value))
+                return Fail("WorkUploadReceiptInvalid");
             AiDesignEvent? change=m.Kind switch
             {
                 "Progress" when m.Payload.GetProperty("stage").GetString()=="UploadStarted" =>new AiDesignEvent.UploadStarted(m.Payload.GetProperty("tabId").GetString()!,m.Payload.GetProperty("conversationId").GetString()!),
                 "Progress" when m.Payload.GetProperty("stage").GetString()=="GenerationStarted" =>new AiDesignEvent.GenerationStarted(),
+                "Failure" when m.Payload.TryGetProperty("code", out var code) && code.GetString() is "WorkAttachmentsUnavailable" or "WorkPageUnknown" or "WorkModeUnavailable" or "WorkComposerChanged" or "WorkPromptRejected" or "WorkSendUnavailable" or "WorkUploadFailed" => new AiDesignEvent.Failed(code.GetString()!),
                 "UploadReceipt"=>new AiDesignEvent.UploadConfirmed(new(m.Payload.GetProperty("attachmentId").GetGuid(),m.AttemptId,
                     m.Payload.GetProperty("conversationId").GetString()!,AiDesignUploadStatus.Uploaded,m.Payload.GetProperty("evidenceKey").GetString()!)),
                 // Page submit authority and result interpretation are implemented only after the T02/T07 gate.
@@ -107,7 +122,10 @@ public sealed class NativeHostSession : IAsyncDisposable
             }
             var final=await AuthorizedAsync(fence,ct);if(final.IsFailure)return OperationResult.Fail<Unit>(final.Failure);
             if(input.Length!=a.ByteLength||input.Position!=a.ByteLength)return OperationResult.Fail<Unit>(FailureCode.RevisionIntegrityMismatch,"AttachmentLengthMismatch");
-            return await emit(Reply(final.Value,"AttachmentComplete",new{attachmentId=a.Id,order=a.Order,chunkCount=count,totalLength=a.ByteLength,sha256=a.Sha256.Value}),ct);
+            var completed = await emit(Reply(final.Value,"AttachmentComplete",new{attachmentId=a.Id,order=a.Order,chunkCount=count,totalLength=a.ByteLength,sha256=a.Sha256.Value}),ct);
+            if (completed.IsSuccess && IsWorkTrial)
+                _transferred.TryAdd((fence.AttemptId, attachmentId), 0);
+            return completed;
         }
         catch(Exception ex) when(ex is IOException or UnauthorizedAccessException or OperationCanceledException)
         {return OperationResult.Fail<Unit>(FailureCode.Cancelled,"AttachmentTransferInterrupted");}
@@ -119,10 +137,16 @@ public sealed class NativeHostSession : IAsyncDisposable
         {
             await Task.Delay(500,ct);if(_connectionLock is null)continue;await HeartbeatAsync(ct);
             if(!_verified)continue;
+            await ProcessSubmissionAsync(emit, ct);
             var list=await _store.ListAsync(ct);if(list.IsFailure)continue;
             foreach(var r in list.Value.Where(r=>r.State==AiDesignState.Queued&&r.ConnectionId==ConnectionId))
             {
                 if(_dispatched.Contains((r.RequestId,r.AttemptId)))continue;
+                if (IsWorkTrial && !HasLiveOwner(r))
+                {
+                    await _store.ChangeAsync(r.Fence, new AiDesignEvent.Failed("WorkOwnerUnavailable"), ct);
+                    continue;
+                }
                 string path=Path.Combine(_store.RequestsRoot,r.RequestId.ToString("D"),"bridge-queue.local.json");
                 if(!File.Exists(path))continue;RefuseAncestry(path);
                 BridgeQueueEntry? queued;
@@ -130,10 +154,18 @@ public sealed class NativeHostSession : IAsyncDisposable
                 {if(file.Length>65536)continue;queued=await JsonSerializer.DeserializeAsync<BridgeQueueEntry>(file,NativeMessageCodec.JsonOptions,ct);}
                 if(queued is null||queued.ConnectionId!=ConnectionId||queued.WorkspaceIdentity!=r.WorkspaceIdentity||queued.Fence!=r.Fence)continue;
                 var current=await AuthorizedAsync(r.Fence,ct);if(current.IsFailure)continue;
+                string promptText = r.Prompt.Text;
+                if (queued.WorkResultUploadTicket is { } ticket)
+                {
+                    if (!IsWorkTrial || !WorkResultPrompt.IsTicket(ticket)) continue;
+                    promptText = WorkResultPrompt.Append(r, ticket);
+                    if (promptText.Length > 100000) continue;
+                }
                 _dispatched.Add((r.RequestId,r.AttemptId));
-                var sent=await emit(Reply(r,"Request",new{connectionId=ConnectionId,workspaceIdentity=r.WorkspaceIdentity,promptText=r.Prompt.Text,
-                    handoffInstructions=r.Prompt.HandoffInstructions,attachments=r.Attachments.Select(a=>new{a.Id,a.Order,a.OriginalName,a.UploadName,a.Purpose,a.MediaType,a.ByteLength,sha256=a.Sha256.Value}).ToArray()}),ct);
+                var sent=await emit(Reply(r,"Request",new{connectionId=ConnectionId,workspaceIdentity=r.WorkspaceIdentity,promptText,
+                    handoffInstructions=r.Prompt.HandoffInstructions,attachments=r.Attachments.OrderBy(a=>a.Order).Select(a=>new{a.Id,a.Order,a.OriginalName,a.UploadName,a.Purpose,a.MediaType,a.ByteLength,sha256=a.Sha256.Value}).ToArray()}),ct);
                 if(sent.IsFailure)throw new IOException("Native request frame failed.");
+                if (IsWorkTrial) continue;
                 foreach(var attachment in r.Attachments.OrderBy(a=>a.Order))
                 {
                     var latest=await _store.ReadAsync(r.RequestId,ct);
@@ -143,6 +175,38 @@ public sealed class NativeHostSession : IAsyncDisposable
                     {var failed=await _store.ReadAsync(r.RequestId,ct);if(failed.IsSuccess&&AiDesignTransitions.CanStop(failed.Value.State))await _store.ChangeAsync(failed.Value.Fence,new AiDesignEvent.Interrupted(),ct);break;}
                 }
             }
+            if (IsWorkTrial)
+                await PumpWorkAttachmentsAsync(list.Value, emit, ct);
+        }
+    }
+
+    private bool IsWorkTrial => _contractHash == AiDesignBridgeConfiguration.TextSubmissionTrialContract;
+
+    private bool IsTransferredAttachmentReceipt(NativeMessageEnvelope message, AiDesignRequest request)
+    {
+        var attachment = request.Attachments.SingleOrDefault(a => a.Id == message.Payload.GetProperty("attachmentId").GetGuid());
+        return attachment is not null && _transferred.ContainsKey((request.AttemptId, attachment.Id)) &&
+            message.Payload.GetProperty("evidenceKey").GetString() == "ready:" + attachment.UploadName;
+    }
+
+    private async Task PumpWorkAttachmentsAsync(IEnumerable<AiDesignRequest> requests,
+        Func<NativeMessageEnvelope, CancellationToken, Task<OperationResult<Unit>>> emit, CancellationToken ct)
+    {
+        foreach (var request in requests.Where(r => r.State == AiDesignState.Uploading && r.ConnectionId == ConnectionId &&
+            _dispatched.Contains((r.RequestId, r.AttemptId))))
+        {
+            if (!HasLiveOwner(request))
+            {
+                await _store.ChangeAsync(request.Fence, new AiDesignEvent.Interrupted(), ct);
+                continue;
+            }
+            var next = request.Attachments.OrderBy(a => a.Order)
+                .FirstOrDefault(a => !request.UploadReceipts.Any(receipt => receipt.AttachmentId == a.Id));
+            if (next is null || _transferred.ContainsKey((request.AttemptId, next.Id))) continue;
+
+            var transfer = await StreamAttachmentAsync(request.Fence, next.Id, emit, ct, refreshCurrentFence: true);
+            if (transfer.IsFailure)
+                await _store.ChangeAsync(request.Fence, new AiDesignEvent.Failed("WorkUploadFailed"), ct);
         }
     }
     private async Task<OperationResult<AiDesignRequest>> AuthorizedAsync(AiDesignFence fence,CancellationToken ct)
@@ -156,7 +220,7 @@ public sealed class NativeHostSession : IAsyncDisposable
     private async Task HeartbeatAsync(CancellationToken ct)
     {
         var connection=new AiDesignBridgeConnection(ConnectionId,Environment.ProcessId,Process.GetCurrentProcess().StartTime.ToUniversalTime().Ticks,
-            1,AiDesignBridgeConfiguration.CurrentHostVersion,_origin,_store.WorkspaceIdentity,_contractHash,_verified,DateTimeOffset.UtcNow);
+            1,AiDesignBridgeConfiguration.CurrentHostVersion,_origin,_store.WorkspaceIdentity,_contractHash,_verified,DateTimeOffset.UtcNow,_launchNonce);
         using var staged=AiDesignOwnedStagingFiles.CreateConnection(_installation);
         await JsonSerializer.SerializeAsync(staged.Output,connection,NativeMessageCodec.JsonOptions,ct);
         await staged.PublishAsync(ct);

@@ -10,6 +10,7 @@
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=vm:ShellViewModel}"
         Title="{Binding Title}"
+        Icon="/PrintFlow.App;component/Resources/PrintFlow.ico"
         Height="700" Width="1000"
         Background="{DynamicResource PF.Brush.Canvas}"
         Foreground="{DynamicResource PF.Brush.Ink}"
@@ -20,6 +21,9 @@
         AutomationProperties.Name="{Binding Title}">
 
     <Window.Resources>
+        <DataTemplate DataType="{x:Type aivm:AiWorkTasksViewModel}">
+            <aiview:AiWorkTasksView />
+        </DataTemplate>
         <DataTemplate DataType="{x:Type aivm:AiPromptWorkbenchViewModel}">
             <aiview:AiPromptWorkbenchView />
         </DataTemplate>

@@ -57,69 +57,55 @@ public sealed class MemorialWorkbenchLayoutTests
         vm.MemorialResult.ShouldBeNull();
     }
 
-    [Theory]
-    [InlineData(1000, 660)]
-    [InlineData(800, 536)]
-    public async Task Workbench_shows_both_proof_images_without_clipping(int width, int height)
+    [Fact]
+    public async Task Saving_layout_completes_step_five_without_a_confirmation_or_preview()
     {
         using var fixture = new MemorialWorkflowAcceptanceTests.Fixture();
-        await ConfirmLayoutAsync(fixture);
+        await fixture.OpenReadyAsync();
         var vm = fixture.Vm;
-        await vm.RenderMemorialMaterialCommand.ExecuteAsync(null);
-        var viewport = new Size(width, height);
-        if (Environment.GetEnvironmentVariable("PRINTFLOW_MEMORIAL_WORKBENCH_EVIDENCE") is { Length: > 0 } evidence)
-            WpfRendering.CapturePng(() => Workbench(vm), viewport, Path.Combine(evidence, $"workbench-{width}x{height}.png"));
+        await vm.SwitchToDetailedCommand.ExecuteAsync(null);
+        vm.DetailedStep = 5;
+        await vm.PrepareMemorialLayoutCommand.ExecuteAsync(null);
+        await vm.SaveMemorialLayoutCommand.ExecuteAsync(null);
+        vm.Draft!.Layout.ShouldNotBeNull();
+        vm.DetailedStep = 6;
+        vm.DetailedSteps.Single(step => step.Number == 5).Status.ShouldBe(PrintFlow.App.Resources.Strings.AiDetail_Confirmed);
 
-        WpfRendering.RenderExpectingNoBindingErrors(() => Workbench(vm), viewport, tree =>
+        await vm.SwitchToDetailedCommand.ExecuteAsync(null);
+        vm.DetailedStep = 5;
+        WpfRendering.RenderExpectingNoBindingErrors(() => Workbench(vm), WpfRendering.ReviewViewport, tree =>
         {
-            var images = tree.OfType<Image>().Where(image => image.Source is not null &&
-                GuidedSessionProjectionTests.Shown(image)).ToArray();
-            images.Length.ShouldBe(2);
-            foreach (Image image in images)
-            {
-                image.ActualWidth.ShouldBeGreaterThan(70);
-                image.ActualHeight.ShouldBeGreaterThan(70);
-                ProofFractionVisible(image, tree.Root).ShouldBeGreaterThan(0.99);
-            }
+            tree.OfType<Button>().Any(button => GuidedSessionProjectionTests.Shown(button) &&
+                ReferenceEquals(button.Command, vm.SaveMemorialLayoutCommand)).ShouldBeTrue();
+            tree.OfType<Button>().Any(button => GuidedSessionProjectionTests.Shown(button) &&
+                (System.Windows.Automation.AutomationProperties.GetAutomationId(button) == "Memorial.ConfirmLayout" ||
+                 ReferenceEquals(button.Command, vm.RenderMemorialPreviewCommand))).ShouldBeFalse();
             return 0;
         });
     }
 
     [Fact]
-    public async Task Proof_and_prompt_remain_reachable_when_switching_steps()
+    public async Task Final_step_shows_the_prompt_and_attachment_list_without_local_result_actions()
     {
         using var fixture = new MemorialWorkflowAcceptanceTests.Fixture();
-        await ConfirmLayoutAsync(fixture);
+        await fixture.OpenReadyAsync();
         var vm = fixture.Vm;
-        await vm.RenderMemorialMaterialCommand.ExecuteAsync(null);
-        vm.DetailedStep = 4;
-        WpfRendering.RenderExpectingNoBindingErrors(() => Workbench(vm), new Size(800, 536), tree =>
+        await vm.SwitchToDetailedCommand.ExecuteAsync(null);
+        vm.DetailedStep = 6;
+        WpfRendering.RenderExpectingNoBindingErrors(() => Workbench(vm), WpfRendering.ReviewViewport, tree =>
         {
-            TabControl tabs = tree.OfType<TabControl>().Single();
-            TabItem proofTab = tabs.Items.OfType<TabItem>().Single(item => Equals(item.Header, AiMemorialLabels.ProofTitle));
-            TabItem promptTab = tabs.Items.OfType<TabItem>().Single(item => Equals(item.Header, AiPromptLabels.AiPrompt_FinalText));
-            proofTab.Visibility.ShouldBe(Visibility.Collapsed);
-            promptTab.IsSelected.ShouldBeTrue();
-
-            vm.DetailedStep = 6;
-            tree.Root.UpdateLayout();
-            proofTab.IsSelected.ShouldBeTrue();
-            promptTab.SetCurrentValue(TabItem.IsSelectedProperty, true);
-            tree.Root.UpdateLayout();
-            var editor = SharedReviewSurfaceTests.Descendants<AiPromptEditor>(tabs).Single();
-            editor.IsEnabled.ShouldBeTrue();
-            editor.Document.Parts.ShouldBe(vm.Document.Parts);
-
-            vm.DetailedStep = 4;
-            tree.Root.UpdateLayout();
-            promptTab.IsSelected.ShouldBeTrue();
-            vm.DetailedStep = 6;
-            tree.Root.UpdateLayout();
-            proofTab.IsSelected.ShouldBeTrue();
+            tree.OfType<AiPromptEditor>().Single().Document.Parts.ShouldBe(vm.Document.Parts);
+            tree.OfType<Expander>().Any(expander => Equals(expander.Header, AiPromptLabels.AiPrompt_Manifest) &&
+                GuidedSessionProjectionTests.Shown(expander)).ShouldBeTrue();
+            tree.OfType<Button>().Any(button => ReferenceEquals(button.Command, vm.CopyCommand) &&
+                GuidedSessionProjectionTests.Shown(button)).ShouldBeTrue();
+            tree.OfType<Button>().Any(button => GuidedSessionProjectionTests.Shown(button) &&
+                (ReferenceEquals(button.Command, vm.ComposeCommand) ||
+                 ReferenceEquals(button.Command, vm.RenderMemorialMaterialCommand) ||
+                 ReferenceEquals(button.Command, vm.RefreshMemorialResultsCommand))).ShouldBeFalse();
             return 0;
         });
     }
-
     [Fact]
     public async Task Final_step_does_not_offer_a_next_step()
     {
@@ -143,21 +129,7 @@ public sealed class MemorialWorkbenchLayoutTests
         var vm = fixture.Vm;
         await vm.PrepareMemorialLayoutCommand.ExecuteAsync(null);
         await vm.SaveMemorialLayoutCommand.ExecuteAsync(null);
-        await vm.ConfirmMemorialLayoutCommand.ExecuteAsync(null);
         vm.CanPreviewLayout.ShouldBeTrue();
-    }
-
-    private static double ProofFractionVisible(Image image, FrameworkElement root)
-    {
-        Rect imageBounds = image.TransformToAncestor(root).TransformBounds(new Rect(image.RenderSize));
-        Rect visible = Rect.Intersect(imageBounds, new Rect(root.RenderSize));
-        foreach (FrameworkElement ancestor in GuidedSessionShellTests.Ancestors(image).OfType<FrameworkElement>())
-        {
-            Geometry? clip = LayoutInformation.GetLayoutClip(ancestor);
-            if (clip is null || ancestor == root) continue;
-            visible.Intersect(ancestor.TransformToAncestor(root).TransformBounds(clip.Bounds));
-        }
-        return visible.IsEmpty ? 0 : (visible.Width * visible.Height) / (imageBounds.Width * imageBounds.Height);
     }
 
     private sealed class PausedRenderer : IMemorialRenderer

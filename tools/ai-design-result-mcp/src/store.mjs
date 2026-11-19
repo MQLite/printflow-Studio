@@ -1,7 +1,7 @@
 import { lstat, mkdir, open, readFile, realpath, rename, rm } from 'node:fs/promises';
 import { createHash, randomBytes, randomUUID, timingSafeEqual } from 'node:crypto';
 import { isAbsolute, join, resolve } from 'node:path';
-import { inspectImage } from './image-validation.mjs';
+import { inspectWorkResult, PDF_MEDIA_TYPE } from './image-validation.mjs';
 
 const idPattern = /^[A-Za-z0-9_-]{1,100}$/;
 const digest = value => createHash('sha256').update(value).digest('hex');
@@ -11,6 +11,8 @@ const validSourceFileId = value => {
   if (typeof value !== 'string' || !value.trim() || Buffer.byteLength(value, 'utf8') > 512 || /\p{Cc}/u.test(value)) throw new Error('invalid source identity');
   return value;
 };
+const isWorkConversation = value => typeof value === 'string' &&
+  /^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/.test(value) && value !== '00000000-0000-0000-0000-000000000000';
 const keyOf = (requestId, attemptId) => digest(`${validId(requestId)}\0${validId(attemptId)}`);
 const requestKey = requestId => `request-${digest(validId(requestId))}`;
 function matchTicket(secretHash, value) {
@@ -113,20 +115,37 @@ export class ResultStore {
     current.finally(() => { if (this.queues.get(key) === current) this.queues.delete(key); }).catch(() => {});
     return current;
   }
-  async enroll({ requestId, attemptId, expectedFileId }) {
+  async #claimSource(fileId, requestId, attemptId) {
+    const claim = join(this.root, 'attempts', 'source-' + digest(fileId) + '.json');
+    try { await createFlushedFile(claim, JSON.stringify({ requestId, attemptId })); return claim; }
+    catch (e) {
+      if (e.code !== 'EEXIST') throw e;
+      const owner = JSON.parse((await ordinaryFile(claim)).toString('utf8'));
+      if (owner.requestId !== requestId || owner.attemptId !== attemptId) throw new Error('source already used');
+      return null;
+    }
+  }
+  async enroll({ requestId, attemptId, expectedFileId, referenceSha256 = [], requireWorkConversation = false, returnMediaType }) {
     const key = requestKey(requestId);
+    if (typeof requireWorkConversation !== 'boolean' || (requireWorkConversation && expectedFileId !== undefined))
+      throw new Error('independent conversation binding required');
+    if (returnMediaType !== undefined && (returnMediaType !== PDF_MEDIA_TYPE || !requireWorkConversation))
+      throw new Error('invalid Work result format');
     if (expectedFileId !== undefined) validSourceFileId(expectedFileId);
+    if (!Array.isArray(referenceSha256) || referenceSha256.length > 8 ||
+        referenceSha256.some(value => typeof value !== 'string' || !/^[a-f0-9]{64}$/i.test(value)))
+      throw new Error('invalid reference digests');
     return this.#serialized(key, async () => {
       this.#checkOpen();
       try { await this.#read(requestId, attemptId); throw new Error('attempt already enrolled'); }
       catch (e) { if (e.message !== 'unknown attempt') throw e; }
       const uploadTicket = ticket(), readTicket = ticket();
       await atomicJson(this.#path(requestId, attemptId), {
-        requestId, attemptId, expectedFileId: expectedFileId ?? null,
-        uploadHash: digest(uploadTicket), readHash: digest(readTicket), state: 'pending'
+        requestId, attemptId, expectedFileId: expectedFileId ?? null, referenceSha256: referenceSha256.map(value => value.toLowerCase()), requireWorkConversation,
+        uploadHash: digest(uploadTicket), readHash: digest(readTicket), state: 'pending', returnMediaType
       });
       await atomicJson(this.#activePath(requestId), { requestId, attemptId });
-      return { requestId, attemptId, uploadTicket, readTicket };
+      return { requestId, attemptId, uploadTicket, readTicket, returnMediaType };
     });
   }
   async cancel(requestId, attemptId) {
@@ -138,32 +157,72 @@ export class ResultStore {
       return { state: 'cancelled' };
     });
   }
-  async receive({ requestId, attemptId, uploadTicket, file }, fetchFile) {
+  async bindObservedSource({ requestId, attemptId, expectedFileId, expectedSha256, expectedByteLength, workConversationId, allowReissuedFileId = false }) {
+    validSourceFileId(expectedFileId);
+    if (workConversationId !== undefined && !isWorkConversation(workConversationId)) throw new Error('invalid Work conversation');
+    if (typeof expectedSha256 !== 'string' || !/^[a-f0-9]{64}$/.test(expectedSha256))
+      throw new Error('invalid source digest');
+    if (!Number.isSafeInteger(expectedByteLength) || expectedByteLength <= 0 || expectedByteLength > 40 * 1024 * 1024 || typeof allowReissuedFileId !== 'boolean')
+      throw new Error('invalid source length');
+    return this.#serialized(requestKey(requestId), async () => {
+      await this.#requireCurrent(requestId, attemptId);
+      const row = await this.#read(requestId, attemptId);
+      if (row.state === 'cancelled' || row.referenceSha256?.includes(expectedSha256) ||
+          (row.requireWorkConversation && !workConversationId) ||
+          (row.workConversationId && row.workConversationId !== workConversationId) ||
+          row.expectedFileId && row.expectedFileId !== expectedFileId ||
+          row.expectedSha256 && row.expectedSha256 !== expectedSha256 ||
+          row.expectedByteLength && row.expectedByteLength !== expectedByteLength) throw new Error('source binding conflict');
+      let claimed = null;
+      if (row.receipt) {
+        const receipt = row.receipt;
+        if ((!allowReissuedFileId && receipt.sourceFileId !== expectedFileId) ||
+            receipt.sha256 !== expectedSha256 || receipt.byteLength !== expectedByteLength ||
+            (row.state === 'Ready' && row.allowReissuedFileId !== allowReissuedFileId))
+          throw new Error('source binding conflict');
+        if (row.state === 'Ready') return { state: row.state };
+        if (row.state !== 'received_unverified') throw new Error('source binding conflict');
+        const bytes = await ordinaryFile(join(this.root, 'blobs', receipt.objectId));
+        if (bytes.length !== expectedByteLength || digest(bytes) !== expectedSha256) throw new Error('stored blob changed');
+        claimed = await this.#claimSource(receipt.sourceFileId, requestId, attemptId);
+        row.state = 'Ready';
+        row.receipt = { ...receipt, ...(workConversationId ? { workConversationId } : {}), state: 'Ready', sourceVerified: true };
+      } else if (row.state !== 'pending') throw new Error('source binding conflict');
+      try {
+        await atomicJson(this.#path(requestId, attemptId), { ...row, expectedFileId, expectedSha256, expectedByteLength, workConversationId, allowReissuedFileId });
+        return { state: row.state };
+      } catch (e) {
+        if (claimed) await rm(claimed, { force: true });
+        throw e;
+      }
+    });
+  }
+  async receive({ requestId, attemptId, uploadTicket, file, returnMediaType }, fetchFile) {
     const key = requestKey(requestId);
     await this.#requireCurrent(requestId, attemptId);
     const before = await this.#read(requestId, attemptId);
     if (!matchTicket(before.uploadHash, uploadTicket) || before.state === 'cancelled') throw new Error('upload unauthorized');
+    if (before.returnMediaType !== returnMediaType) throw new Error('Work result format mismatch');
     if (!file || typeof file.download_url !== 'string' || !validSourceFileId(file.file_id)) throw new Error('invalid file');
-    if (before.expectedFileId && before.expectedFileId !== file.file_id) throw new Error('source mismatch');
+    if (before.expectedFileId && !before.allowReissuedFileId && before.expectedFileId !== file.file_id)
+      throw new Error('source identity mismatch');
     const bytes = await fetchFile(file);
-    const facts = await inspectImage(bytes);
+    const facts = await inspectWorkResult(bytes, returnMediaType);
     return this.#serialized(key, async () => {
       await this.#requireCurrent(requestId, attemptId);
       const row = await this.#read(requestId, attemptId);
       if (row.state === 'cancelled' || !matchTicket(row.uploadHash, uploadTicket)) throw new Error('upload revoked');
+      if (row.referenceSha256?.includes(facts.sha256) ||
+          row.expectedFileId && !row.allowReissuedFileId && row.expectedFileId !== file.file_id ||
+          row.expectedSha256 && row.expectedSha256 !== facts.sha256 ||
+          row.expectedByteLength && row.expectedByteLength !== facts.byteLength)
+        throw new Error('source bytes mismatch');
       if (row.receipt) {
         if (row.receipt.sourceFileId === file.file_id && row.receipt.sha256 === facts.sha256 && row.receipt.byteLength === facts.byteLength) return row.receipt;
         throw new Error('conflicting upload');
       }
-      // Claim source globally before publishing so one file cannot satisfy another attempt.
-      const claim = join(this.root, 'attempts', `source-${digest(file.file_id)}.json`);
-      let claimed = false;
-      try { await createFlushedFile(claim, JSON.stringify({ requestId, attemptId })); claimed = true; }
-      catch (e) {
-        if (e.code !== 'EEXIST') throw e;
-        const owner = JSON.parse((await ordinaryFile(claim)).toString('utf8'));
-        if (owner.requestId !== requestId || owner.attemptId !== attemptId) throw new Error('source already used');
-      }
+      // An unverified upload cannot reserve an image that belongs to another attempt.
+      const claimed = row.expectedFileId ? await this.#claimSource(file.file_id, requestId, attemptId) : null;
       const objectId = randomUUID();
       const objectVersion = randomUUID();
       const blobPath = join(this.root, 'blobs', objectId);
@@ -172,6 +231,7 @@ export class ResultStore {
         const receipt = {
           schemaVersion: 1, requestId, attemptId, sourceFileId: file.file_id,
           objectId, objectVersion, ...facts,
+          ...(row.workConversationId ? { workConversationId: row.workConversationId } : {}),
           sourceVerified: Boolean(row.expectedFileId),
           state: row.expectedFileId ? 'Ready' : 'received_unverified'
         };
@@ -181,16 +241,34 @@ export class ResultStore {
         return receipt;
       } catch (e) {
         await rm(blobPath, { force: true });
-        if (claimed) await rm(claim, { force: true });
+        if (claimed) await rm(claimed, { force: true });
         throw e;
       }
     });
   }
-  async status(requestId, attemptId, readTicket) {
+  async status(requestId, attemptId, readTicket, workConversationId) {
+    if (workConversationId !== undefined && !isWorkConversation(workConversationId)) throw new Error('invalid Work conversation');
     return this.#serialized(requestKey(requestId), async () => {
       await this.#requireCurrent(requestId, attemptId);
       const row = await this.#read(requestId, attemptId);
       if (row.state === 'cancelled' || !matchTicket(row.readHash, readTicket)) throw new Error('read unauthorized');
+      if (workConversationId !== undefined) {
+        if (row.requireWorkConversation !== true ||
+            row.workConversationId && row.workConversationId !== workConversationId)
+          throw new Error('Work return does not match its enrollment');
+        if (row.state === 'received_unverified') {
+          const receipt = row.receipt;
+          if (!receipt || row.referenceSha256?.includes(receipt.sha256)) throw new Error('invalid Work return');
+          const bytes = await ordinaryFile(join(this.root, 'blobs', receipt.objectId));
+          if (bytes.length !== receipt.byteLength || digest(bytes) !== receipt.sha256) throw new Error('stored blob changed');
+          const claimed = await this.#claimSource(receipt.sourceFileId, requestId, attemptId);
+          row.state = 'Ready';
+          row.workConversationId = workConversationId;
+          row.receipt = { ...receipt, state: 'Ready', workConversationId, workReturnAccepted: true };
+          try { await atomicJson(this.#path(requestId, attemptId), row); }
+          catch (e) { if (claimed) await rm(claimed, { force: true }); throw e; }
+        }
+      }
       return row.receipt ?? { schemaVersion: 1, requestId, attemptId, state: row.state };
     });
   }
@@ -200,8 +278,9 @@ export class ResultStore {
       const row = await this.#read(requestId, attemptId);
       if (row.state !== 'Ready' || !matchTicket(row.readHash, readTicket) || row.receipt.objectVersion !== version) throw new Error('blob unauthorized');
       const bytes = await ordinaryFile(join(this.root, 'blobs', row.receipt.objectId));
-      const facts = await inspectImage(bytes);
-      if (facts.sha256 !== row.receipt.sha256 || facts.byteLength !== row.receipt.byteLength) throw new Error('stored blob changed');
+      const facts = await inspectWorkResult(bytes, row.returnMediaType);
+      if (facts.sha256 !== row.receipt.sha256 || facts.byteLength !== row.receipt.byteLength ||
+          facts.mediaType !== row.receipt.mediaType) throw new Error('stored blob changed');
       return bytes;
     });
   }

@@ -25,10 +25,11 @@ public sealed class SessionRetentionService(ISessionRepository repository, IWork
     public async Task<SessionCleanupResult> CleanupAsync(SessionId id, CancellationToken cancellationToken)
     {
         using IDisposable lease = await SessionCompletionGate.EnterAsync(id, cancellationToken);
-        return await CleanupUnderCompletionGateAsync(id, cancellationToken);
+        return await CleanupUnderCompletionGateAsync(id, cancellationToken, onlyIfPending: true);
     }
 
-    internal async Task<SessionCleanupResult> CleanupUnderCompletionGateAsync(SessionId id, CancellationToken cancellationToken)
+    internal async Task<SessionCleanupResult> CleanupUnderCompletionGateAsync(
+        SessionId id, CancellationToken cancellationToken, bool onlyIfPending = false)
     {
         int promoted = 0;
         List<string> warnings = [];
@@ -48,6 +49,21 @@ public sealed class SessionRetentionService(ISessionRepository repository, IWork
         if (planned.IsFailure) return Failed(planned.Failure);
         SessionRetentionPlan plan = planned.Value;
         warnings.AddRange(plan.Unclassified.Select(f => $"Unclassified managed file preserved: {f.RelativePath}"));
+
+        if (onlyIfPending && plan.Promote.Count == 0 && plan.Release.Count == 0)
+        {
+            // Historical plans still name copies removed by an earlier pass. At startup,
+            // re-verify authority only when a managed copy actually remains to be removed.
+            var deletePaths = plan.Delete.Select(file => file.File.RelativePath)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+            if (!listed.Value.Any(entry => deletePaths.Contains(entry.File.RelativePath)))
+            {
+                int preserved = plan.Required.Select(file => file.File.RelativePath)
+                    .Distinct(StringComparer.OrdinalIgnoreCase).Count();
+                return new SessionCleanupResult(0, 0, preserved, warnings, null);
+            }
+        }
+
         OperationResult<Unit> verified = workspace.VerifyRetentionFiles(aggregate.Session.Workspace, plan.Required);
         if (verified.IsFailure) return Failed(verified.Failure);
 

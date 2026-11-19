@@ -1,0 +1,122 @@
+<UserControl x:Class="PrintFlow.App.Views.AiDesign.AiWorkTasksView"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:views="clr-namespace:PrintFlow.App.Views"
+ xmlns:vm="clr-namespace:PrintFlow.App.ViewModels.AiDesign"
+ Background="{DynamicResource PF.Brush.Canvas}" Foreground="{DynamicResource PF.Brush.Ink}"
+ FontFamily="{DynamicResource PF.Font.Family}" FontSize="14"
+ AutomationProperties.AutomationId="Screen.AiWorkTasks" AutomationProperties.Name="{Binding Title}">
+ <UserControl.Resources>
+  <ResourceDictionary>
+   <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="/PrintFlow.App;component/Themes/WpfUiTheme.xaml"/>
+   </ResourceDictionary.MergedDictionaries>
+   <BooleanToVisibilityConverter x:Key="Visible"/>
+   <views:PreviewPayloadConverter x:Key="Preview"/>
+   <Style x:Key="FilterButton" TargetType="Button">
+    <Setter Property="Padding" Value="14,6"/>
+    <Setter Property="Margin" Value="0,0,8,0"/>
+   </Style>
+  </ResourceDictionary>
+ </UserControl.Resources>
+ <DockPanel Margin="20">
+  <DockPanel DockPanel.Dock="Top" Margin="0,0,0,16" LastChildFill="True">
+   <Button DockPanel.Dock="Left" Content="{Binding HomeLabel}" Command="{Binding ReturnHomeCommand}"
+    Padding="12,6" AutomationProperties.AutomationId="AiWorkTasks.Home"/>
+   <Button DockPanel.Dock="Right" Content="{Binding WorkbenchLabel}" Command="{Binding ReturnWorkbenchCommand}"
+    Padding="12,6" AutomationProperties.AutomationId="AiWorkTasks.Workbench"/>
+   <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="24" HorizontalAlignment="Center"/>
+  </DockPanel>
+  <DockPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+   <Button DockPanel.Dock="Right" Content="{Binding ReloadLabel}" Command="{Binding ReloadCommand}" Padding="12,6"
+    AutomationProperties.AutomationId="AiWorkTasks.Refresh"/>
+   <WrapPanel>
+    <Button Content="{Binding AllLabel}" Command="{Binding SelectFilterCommand}" CommandParameter="{x:Static vm:WorkTaskFilter.All}">
+     <Button.Style><Style TargetType="Button" BasedOn="{StaticResource FilterButton}"><Style.Triggers>
+      <DataTrigger Binding="{Binding Filter}" Value="{x:Static vm:WorkTaskFilter.All}"><Setter Property="Background" Value="#007F6B"/><Setter Property="Foreground" Value="White"/></DataTrigger>
+     </Style.Triggers></Style></Button.Style>
+    </Button>
+    <Button Content="{Binding ActiveLabel}" Command="{Binding SelectFilterCommand}" CommandParameter="{x:Static vm:WorkTaskFilter.Active}">
+     <Button.Style><Style TargetType="Button" BasedOn="{StaticResource FilterButton}"><Style.Triggers>
+      <DataTrigger Binding="{Binding Filter}" Value="{x:Static vm:WorkTaskFilter.Active}"><Setter Property="Background" Value="#007F6B"/><Setter Property="Foreground" Value="White"/></DataTrigger>
+     </Style.Triggers></Style></Button.Style>
+    </Button>
+    <Button Content="{Binding AttentionLabel}" Command="{Binding SelectFilterCommand}" CommandParameter="{x:Static vm:WorkTaskFilter.NeedsAttention}">
+     <Button.Style><Style TargetType="Button" BasedOn="{StaticResource FilterButton}"><Style.Triggers>
+      <DataTrigger Binding="{Binding Filter}" Value="{x:Static vm:WorkTaskFilter.NeedsAttention}"><Setter Property="Background" Value="#007F6B"/><Setter Property="Foreground" Value="White"/></DataTrigger>
+     </Style.Triggers></Style></Button.Style>
+    </Button>
+   </WrapPanel>
+  </DockPanel>
+  <TextBlock DockPanel.Dock="Top" Text="{Binding Error}" TextWrapping="Wrap" Foreground="{DynamicResource PF.Brush.Danger}"
+   AutomationProperties.LiveSetting="Polite"/>
+  <Border BorderBrush="{DynamicResource PF.Brush.Border}" BorderThickness="1" CornerRadius="8">
+   <DockPanel>
+    <Border DockPanel.Dock="Top" Background="#E1F6F1" CornerRadius="7,7,0,0">
+     <Grid Margin="12,9,29,9" TextBlock.FontWeight="SemiBold">
+      <Grid.ColumnDefinitions><ColumnDefinition Width="2.1*"/><ColumnDefinition Width="2*"/><ColumnDefinition Width="1.1*"/><ColumnDefinition Width="162"/></Grid.ColumnDefinitions>
+      <TextBlock Text="{Binding TaskColumn}"/>
+      <TextBlock Grid.Column="1" Text="{Binding StatusColumn}"/>
+      <TextBlock Grid.Column="2" Text="{Binding UpdatedColumn}"/>
+      <TextBlock Grid.Column="3" Text="{Binding ActionsColumn}"/>
+     </Grid>
+    </Border>
+    <Grid>
+     <TextBlock Text="{Binding EmptyMessage}" TextWrapping="Wrap" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+     <ScrollViewer VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled">
+      <ItemsControl ItemsSource="{Binding Rows}">
+       <ItemsControl.ItemTemplate>
+        <DataTemplate>
+         <Border BorderBrush="{DynamicResource PF.Brush.Border}" BorderThickness="0,0,0,1" Padding="12,8">
+          <Grid MinHeight="55">
+           <Grid.ColumnDefinitions><ColumnDefinition Width="2.1*"/><ColumnDefinition Width="2*"/><ColumnDefinition Width="1.1*"/><ColumnDefinition Width="162"/></Grid.ColumnDefinitions>
+           <DockPanel Margin="0,0,12,0" VerticalAlignment="Center">
+            <Border DockPanel.Dock="Left" Width="47" Height="47" BorderBrush="#A5BCB6" BorderThickness="1" CornerRadius="4"
+             Background="{DynamicResource PF.Brush.Surface}" Margin="0,0,10,0">
+             <Grid>
+              <TextBlock Text="▧" Foreground="#54827B" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center">
+               <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers>
+                <DataTrigger Binding="{Binding HasThumbnail}" Value="True"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger>
+               </Style.Triggers></Style></TextBlock.Style>
+              </TextBlock>
+              <Image Source="{Binding Thumbnail, Converter={StaticResource Preview}}" Stretch="Uniform"
+               Visibility="{Binding HasThumbnail, Converter={StaticResource Visible}}" Margin="2"/>
+             </Grid>
+            </Border>
+            <StackPanel VerticalAlignment="Center">
+             <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap"/>
+             <TextBlock Text="{Binding ImageFacts}" FontSize="12" TextWrapping="Wrap"/>
+            </StackPanel>
+           </DockPanel>
+           <StackPanel Grid.Column="1" Margin="0,0,12,0" VerticalAlignment="Center">
+            <TextBlock Text="{Binding Stage}" FontWeight="SemiBold" TextWrapping="Wrap">
+             <TextBlock.Style><Style TargetType="TextBlock">
+              <Setter Property="Foreground" Value="#007362"/>
+              <Style.Triggers><DataTrigger Binding="{Binding Snapshot.Stage}" Value="NeedsAttention">
+               <Setter Property="Foreground" Value="{DynamicResource PF.Brush.WarningInk}"/>
+              </DataTrigger></Style.Triggers>
+             </Style></TextBlock.Style>
+            </TextBlock>
+            <TextBlock Text="{Binding Problem}" FontSize="12" TextWrapping="Wrap"/>
+           </StackPanel>
+           <TextBlock Grid.Column="2" Text="{Binding Updated}" Margin="0,0,8,0" TextWrapping="Wrap" VerticalAlignment="Center"/>
+           <StackPanel Grid.Column="3" VerticalAlignment="Center">
+            <Button Content="{Binding DataContext.ContinueLabel, RelativeSource={RelativeSource AncestorType=UserControl}}"
+             Command="{Binding DataContext.ContinueCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"
+             Visibility="{Binding CanContinue, Converter={StaticResource Visible}}" Padding="8,5"
+             Background="#007F6B" Foreground="White" AutomationProperties.AutomationId="AiWorkTasks.Continue"/>
+            <Button Content="{Binding DataContext.ViewWorkLabel, RelativeSource={RelativeSource AncestorType=UserControl}}"
+             Command="{Binding DataContext.ViewWorkCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"
+             Visibility="{Binding CanViewWork, Converter={StaticResource Visible}}" Padding="8,5" AutomationProperties.AutomationId="AiWorkTasks.ViewWork"/>
+           </StackPanel>
+          </Grid>
+         </Border>
+        </DataTemplate>
+       </ItemsControl.ItemTemplate>
+      </ItemsControl>
+     </ScrollViewer>
+    </Grid>
+   </DockPanel>
+  </Border>
+ </DockPanel>
+</UserControl>

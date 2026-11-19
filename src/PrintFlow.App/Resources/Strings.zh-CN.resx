@@ -73,6 +73,9 @@
   <data name="Step_PhotoshopOutput" xml:space="preserve"><value>Photoshop 输出</value></data>
   <data name="Flag_Skippable" xml:space="preserve"><value>可跳过</value></data>
   <data name="Flag_RequiresReview" xml:space="preserve"><value>需审核</value></data>
+  <data name="Startup_Loading" xml:space="preserve">
+    <value>正在启动…</value>
+  </data>
   <data name="Startup_AlreadyRunning" xml:space="preserve">
     <value>PrintFlow Studio 已在运行。</value>
   </data>
@@ -1349,7 +1352,7 @@
   <data name="Session_KeepDraft" xml:space="preserve"><value>继续编辑</value></data>
   <data name="Session_DiscardDraft" xml:space="preserve"><value>放弃输入并离开</value></data>
   <data name="Session_ReturnImpact" xml:space="preserve"><value>返回“{0}”后，须重新处理：{1}。相关尺寸、输出结果和审核都须重做；已有历史记录会保留。</value></data>
-  <data name="Home_GuidedAiUnavailable" xml:space="preserve"><value>可保存、复制设计提示词；自动生图与排版合成暂不可用。</value></data>
+  <data name="Home_GuidedAiUnavailable" xml:space="preserve"><value>可准备设计提示词和参考图片。自动生图需要先配置 Work 连接。</value></data>
   <data name="Home_GuidedCancelImport" xml:space="preserve"><value>取消本次导入等待</value></data>
   <data name="Home_GuidedContinue" xml:space="preserve"><value>继续待处理任务</value></data>
   <data name="Home_GuidedImportCancelled" xml:space="preserve"><value>已取消导入等待。若任务已创建，可在最近任务中找到；原文件保持不变。</value></data>
@@ -1484,7 +1487,7 @@
   <data name="AiPrompt_AddReference" xml:space="preserve"><value>插入图片引用</value></data>
   <data name="AiPrompt_ReferenceRole" xml:space="preserve"><value>新增图片引用的用途</value></data>
   <data name="AiPrompt_Manifest" xml:space="preserve"><value>本次提示词需另外提供的文件</value></data>
-  <data name="AiPrompt_ManifestNotice" xml:space="preserve"><value>复制时图片引用展开为上传文件名，缺图保留待补充提示。此页暂不提供自动生图。</value></data>
+  <data name="AiPrompt_ManifestNotice" xml:space="preserve"><value>复制提示词时会使用下方的上传文件名。缺少的图片会标为待补充。</value></data>
   <data name="AiPrompt_NoDate" xml:space="preserve"><value>日期留空即不显示该行，请保留姓名与日期原文。</value></data>
   <data name="AiPrompt_AddField" xml:space="preserve"><value>添加变量</value></data>
   <data name="AiPrompt_RemoveField" xml:space="preserve"><value>移除变量</value></data>
@@ -1560,7 +1563,7 @@
   <data name="AiDetail_Tshirt" xml:space="preserve"><value>纪念T恤</value></data>
   <data name="AiDetail_Badge" xml:space="preserve"><value>圆形纪念徽章</value></data>
   <data name="AiDetail_TextChange" xml:space="preserve"><value>仅修改文字</value></data>
-  <data name="AiDetail_SummaryNotice" xml:space="preserve"><value>这是需求草稿，逐项待核对内容与版式能力缺口仍保留；保存或复制不等于生产文件已批准。</value></data>
+  <data name="AiDetail_SummaryNotice" xml:space="preserve"><value>核对姓名、日期、引用图片和最终提示词。</value></data>
   <data name="Home_PromptWorkbench" xml:space="preserve"><value>AI设计提示词</value></data>
   <data name="AiPrompt_ReturnHome" xml:space="preserve"><value>返回首页</value></data>
   <data name="AiPrompt_Discard" xml:space="preserve"><value>放弃未保存修改</value></data>
@@ -1577,7 +1580,7 @@
   <data name="Session_BackgroundRemovalMode_PortraitPets" xml:space="preserve"><value>人像宠物</value></data>
   <data name="Session_BackgroundRemovalMode_Products" xml:space="preserve"><value>商品货物</value></data>
   <data name="Session_BackgroundRemovalMode_LogosStamps" xml:space="preserve"><value>图标印章</value></data>
-  <data name="AiMemorial_LayoutHelp" xml:space="preserve"><value>先核对来源图片和精确文字，再选择排入成品的图片，保存并确认位置。使用本地背景时，先在第 2 步添加参考图，在第 3 步核对权限，再在此选择「背景」。</value></data>
+  <data name="AiMemorial_LayoutHelp" xml:space="preserve"><value>选择排入成品的图片和位置后，保存排版。使用本地背景时，先在第 2 步添加参考图，在第 3 步核对权限，再在此选择「背景」。</value></data>
   <data name="AiMemorial_EditLayout" xml:space="preserve"><value>编辑版式</value></data>
   <data name="AiMemorial_ReopenLayout" xml:space="preserve"><value>按当前内容重新打开版式</value></data>
   <data name="AiMemorial_FixedSpecification" xml:space="preserve"><value>由产品版式固定</value></data>
@@ -1615,8 +1618,8 @@
   <data name="AiMemorial_Black" xml:space="preserve"><value>黑底</value></data>
   <data name="AiMemorial_White" xml:space="preserve"><value>白底</value></data>
   <data name="AiMemorial_Guide" xml:space="preserve"><value>徽章安全区辅助线</value></data>
-  <data name="AiMemorial_LayoutConfirmed" xml:space="preserve"><value>已确认版式</value></data>
-  <data name="AiMemorial_LayoutPending" xml:space="preserve"><value>版式待确认</value></data>
+  <data name="AiMemorial_LayoutConfirmed" xml:space="preserve"><value>排版已保存</value></data>
+  <data name="AiMemorial_LayoutPending" xml:space="preserve"><value>排版待保存</value></data>
   <data name="AiMemorial_SourceUnavailable" xml:space="preserve"><value>无法读取已核验的来源图片。请重新打开草稿或重新选择对应图片。</value></data>
   <data name="AiMemorial_PlacementInputsChanged" xml:space="preserve"><value>文字、图片或权限已变更。完成核对后，请重新打开版式；重新打开会替换未保存的排版编辑。</value></data>
   <data name="AiMemorial_InvalidPlacement" xml:space="preserve"><value>请输入有效坐标和正数尺寸，并检查排版与来源尺寸。</value></data>
@@ -1658,4 +1661,59 @@
   <data name="AiMemorial_Zoom" xml:space="preserve"><value>缩放</value></data>
   <data name="AiMemorial_Background" xml:space="preserve"><value>预览底色</value></data>
   <data name="AiMemorial_ProofReduced" xml:space="preserve"><value>显示图片已缩小。保存的 PNG 保留上方所示的完整像素尺寸。</value></data>
+  <data name="AiPrompt_AutoGenerate" xml:space="preserve"><value>自动生图</value></data>
+  <data name="AiPrompt_WorkSetup" xml:space="preserve"><value>请先登记 Chrome 桥接，然后重试。</value></data>
+  <data name="AiPrompt_WorkAttachmentRequired" xml:space="preserve"><value>请补齐提示词引用的附件，再提交生图。</value></data>
+  <data name="AiPrompt_WorkUploadFailed" xml:space="preserve"><value>Work 未能确认所有必需附件。提示词和附件已保存在 Studio。</value></data>
+  <data name="AiPrompt_WorkConnecting" xml:space="preserve"><value>正在打开 Chrome 并连接 Work…</value></data>
+  <data name="AiPrompt_WorkStopReceiving" xml:space="preserve"><value>停止接收</value></data>
+  <data name="AiPrompt_WorkResultImported" xml:space="preserve"><value>回传图片已导入。刷新「最近任务」即可打开。</value></data>
+  <data name="AiPrompt_WorkResultNotImported" xml:space="preserve"><value>尚未导入已核验的图片。仍可在 Work 对话中查看。</value></data>
+  <data name="AiPrompt_WorkReceivingStopped" xml:space="preserve"><value>Studio 已停止接收这张图片。</value></data>
+  <data name="AiPrompt_WorkAwaitingResult" xml:space="preserve"><value>已提交到 Work。回传图片核验通过后，刷新「最近任务」即可打开。</value></data>
+  <data name="AiPrompt_WorkReceiverUnavailable" xml:space="preserve"><value>Studio 无法连接图片接收器。提示词已保存。</value></data>
+  <data name="AiPrompt_WorkSubmitted" xml:space="preserve"><value>已提交到 Chrome 的 Work 对话。请在该对话查看图片。</value></data>
+  <data name="AiPrompt_WorkChromeFailed" xml:space="preserve"><value>Chrome 或本机桥接未能连接。请检查登记的 Chrome 配置后重试。</value></data>
+  <data name="AiPrompt_WorkModeUnavailable" xml:space="preserve"><value>当前 Chrome 页面未进入 Work。请检查登录及 Work 模式。</value></data>
+  <data name="AiPrompt_WorkActive" xml:space="preserve"><value>上一次 Work 请求仍在进行，请在 Chrome 中查看进度。</value></data>
+  <data name="AiPrompt_WorkUnconfirmed" xml:space="preserve"><value>Studio 未能确认 Work 是否已收到请求。请先查看 Chrome 中的对话。</value></data>
+  <data name="WorkTask_Title" xml:space="preserve"><value>AI 任务</value></data>
+  <data name="WorkTask_Result" xml:space="preserve"><value>Work 回传结果</value></data>
+  <data name="WorkTask_ViewWork" xml:space="preserve"><value>查看 Work</value></data>
+  <data name="WorkTask_Continue" xml:space="preserve"><value>继续处理</value></data>
+  <data name="WorkTask_NoPreview" xml:space="preserve"><value>暂无预览</value></data>
+  <data name="WorkTask_Protected" xml:space="preserve"><value>核验后显示预览</value></data>
+  <data name="WorkTask_Submitting" xml:space="preserve"><value>正在发送到 Work</value></data>
+  <data name="WorkTask_AwaitingReturn" xml:space="preserve"><value>等待 Work 回传最终结果</value></data>
+  <data name="WorkTask_AwaitingVerification" xml:space="preserve"><value>已回传，待核验</value></data>
+  <data name="WorkTask_Validating" xml:space="preserve"><value>核验中</value></data>
+  <data name="WorkTask_Imported" xml:space="preserve"><value>已导入</value></data>
+  <data name="WorkTask_SubmittedOnly" xml:space="preserve"><value>已提交，未配置回传</value></data>
+  <data name="WorkTask_Cancelled" xml:space="preserve"><value>已停止接收</value></data>
+  <data name="WorkTask_NeedsAttention" xml:space="preserve"><value>需处理</value></data>
+  <data name="WorkTask_ValidationFailed" xml:space="preserve"><value>Studio 未能核验回传文件。最终 PDF 必须可读、未加密且只有一页。</value></data>
+  <data name="WorkTask_TimedOut" xml:space="preserve"><value>等待结束前未收到通过核验的图片。</value></data>
+  <data name="WorkTask_ResultUnavailable" xml:space="preserve"><value>无法载入已导入的处理任务。</value></data>
+  <data name="WorkTask_LoadFailed" xml:space="preserve"><value>无法载入 AI 任务。</value></data>
+  <data name="WorkTask_OpenFailed" xml:space="preserve"><value>无法打开 Work 会话。</value></data>
+  <data name="WorkTask_OpenResultFailed" xml:space="preserve"><value>无法打开已导入的处理任务。</value></data>
+  <data name="WorkTask_Sent" xml:space="preserve"><value>已提交</value></data>
+  <data name="WorkTask_Returned" xml:space="preserve"><value>已回传</value></data>
+  <data name="WorkTask_Verified" xml:space="preserve"><value>已核验</value></data>
+  <data name="WorkTask_NextStep" xml:space="preserve"><value>打开现有处理任务</value></data>
+  <data name="WorkTask_UploadFailed" xml:space="preserve"><value>参考图上传失败</value></data>
+  <data name="WorkTask_HistoryTitle" xml:space="preserve"><value>AI 任务</value></data>
+  <data name="WorkTask_BackToWorkbench" xml:space="preserve"><value>返回工作台</value></data>
+  <data name="WorkTask_All" xml:space="preserve"><value>全部</value></data>
+  <data name="WorkTask_Active" xml:space="preserve"><value>进行中</value></data>
+  <data name="WorkTask_Attention" xml:space="preserve"><value>需处理</value></data>
+  <data name="WorkTask_ColumnTask" xml:space="preserve"><value>任务</value></data>
+  <data name="WorkTask_ColumnStatus" xml:space="preserve"><value>状态</value></data>
+  <data name="WorkTask_ColumnUpdated" xml:space="preserve"><value>更新时间</value></data>
+  <data name="WorkTask_ColumnActions" xml:space="preserve"><value>操作</value></data>
+  <data name="WorkTask_Empty" xml:space="preserve"><value>暂无 AI 任务。</value></data>
+  <data name="WorkTask_NoMatches" xml:space="preserve"><value>没有符合当前筛选条件的 AI 任务。</value></data>
+  <data name="WorkTask_Loading" xml:space="preserve"><value>正在加载 AI 任务…</value></data>
+  <data name="WorkTask_Reload" xml:space="preserve"><value>刷新</value></data>
+  <data name="WorkTask_RecoveryDeferred" xml:space="preserve"><value>Studio 未自动恢复这笔较早的回传。可等其它回传完成后重启 Studio，或停止接收。</value></data>
 </root>

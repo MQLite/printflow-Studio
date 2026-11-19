@@ -3,7 +3,7 @@ using PrintFlow.Domain.Results;
 
 namespace PrintFlow.Workflow.AiDesign;
 
-public sealed record AiDesignDraft(AiDesignPrompt Prompt, IReadOnlyList<AiDesignAttachment> Attachments);
+public sealed record AiDesignDraft(AiDesignPrompt Prompt, IReadOnlyList<AiDesignAttachment> Attachments, WorkDraftReference? WorkDraft = null);
 public sealed record SelectedAiDesignFile(string AbsolutePath, string Purpose);
 public sealed record AiDesignRequestView(Guid RequestId, Guid AttemptId, long StateVersion, AiDesignPrompt Prompt,
     IReadOnlyList<AiDesignAttachment> Attachments, IReadOnlyList<AiDesignUploadReceipt> UploadReceipts, AiDesignState State,

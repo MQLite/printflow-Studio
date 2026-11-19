@@ -5,7 +5,7 @@ namespace PrintFlow.Workflow.AiDesign.Authoring;
 
 public abstract record AiAuthoringEdit
 {
-    public sealed record SetLayout(MemorialLayout Layout) : AiAuthoringEdit;
+    public sealed record SetLayout(MemorialLayout Layout, bool ValidateAndFinalize = false) : AiAuthoringEdit;
     public sealed record SetPreservation(AiPreservationRule Rule) : AiAuthoringEdit;
     public sealed record ConfirmField(string Key, string ExpectedContentHash) : AiAuthoringEdit;
     public sealed record SetDateInterpretation(string FieldKey, string Format) : AiAuthoringEdit;

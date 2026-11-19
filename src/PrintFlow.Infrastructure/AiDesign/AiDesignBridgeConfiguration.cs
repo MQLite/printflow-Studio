@@ -7,9 +7,10 @@ using System.Text.Json;
 namespace PrintFlow.Infrastructure.AiDesign;
 
 public sealed record AiDesignBridgeConfiguration(int ProtocolVersion,string HostVersion,string ExtensionOrigin,string WorkspaceRoot,
-    string DownloadRoot,string? VerifiedWorkContractHash=null)
+    string DownloadRoot,string? VerifiedWorkContractHash=null,string? ChromeProfileDirectory=null)
 {
     public const string CurrentHostVersion="1.0.0", HostName="com.printflow.ai_design";
+    public const string TextSubmissionTrialContract = "580178DAB8DA753A6B4FE1BD247D63F99D8396DD30D7E2D595743D0F7DA05083";
     public static string InstallationDirectory => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"PrintFlowStudio","AiDesignBridge");
     public static string ConfigurationPath => Path.Combine(InstallationDirectory,"bridge.local.json");
     public OperationResult<string> Validate(string callerOrigin)
@@ -24,6 +25,8 @@ public sealed record AiDesignBridgeConfiguration(int ProtocolVersion,string Host
                 if(!Path.IsPathFullyQualified(root)||!Directory.Exists(root))return OperationResult.Fail<string>(FailureCode.AdapterUnavailable,"BridgeRootInvalid");
                 ReparsePointGuard.RefuseAncestry(root);
             }
+            if (ChromeProfileDirectory is not null && !Regex.IsMatch(ChromeProfileDirectory, @"\A(?:Default|Profile [1-9][0-9]{0,2})\z", RegexOptions.CultureInvariant))
+                return OperationResult.Fail<string>(FailureCode.AdapterUnavailable, "WorkTrialConfigurationInvalid");
             if(VerifiedWorkContractHash is not null&&!PrintFlow.Domain.Files.Sha256.TryParse(VerifiedWorkContractHash,out _))
                 return OperationResult.Fail<string>(FailureCode.AdapterUnavailable,"WorkContractUnverified");
             return OperationResult.Ok(new FileAiDesignRequestStore(WorkspaceRoot).WorkspaceIdentity);
@@ -46,4 +49,4 @@ public sealed record AiDesignBridgeConfiguration(int ProtocolVersion,string Host
     }
 }
 public sealed record AiDesignBridgeConnection(Guid ConnectionId,int ProcessId,long ProcessStartUtcTicks,int ProtocolVersion,string HostVersion,
-    string ExtensionOrigin,string WorkspaceIdentity,string? WorkContractHash,bool Available,DateTimeOffset LastSeenUtc);
+    string ExtensionOrigin,string WorkspaceIdentity,string? WorkContractHash,bool Available,DateTimeOffset LastSeenUtc,string? LaunchNonce=null);

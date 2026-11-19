@@ -31,8 +31,6 @@ public sealed class MemorialWorkflowAcceptanceTests
         var background = vm.MemorialImages.Single(x => x.Asset.OriginalName == "background.png");
         background.SelectedRole = background.Roles.Single(x => x.Role == MemorialLayerRole.Background);
         await vm.SaveMemorialLayoutCommand.ExecuteAsync(null);
-        vm.CanPreviewLayout.ShouldBeFalse();
-        await vm.ConfirmMemorialLayoutCommand.ExecuteAsync(null);
         vm.CanPreviewLayout.ShouldBeTrue();
         await vm.RenderMemorialPreviewCommand.ExecuteAsync(null);
         vm.MemorialResult!.File.Purpose.ShouldBe(MemorialRenderPurpose.Preview);
@@ -43,7 +41,7 @@ public sealed class MemorialWorkflowAcceptanceTests
         vm.MemorialResult!.Facts.PixelWidth.ShouldBe(1016);
         vm.MemorialResult.File.Purpose.ShouldBe(MemorialRenderPurpose.DesignMaterial);
         vm.CanExportMemorialPng.ShouldBeFalse();
-        WpfRendering.RenderExpectingNoBindingErrors(() => new DetailedPromptView { DataContext = vm }, WpfRendering.ReviewViewport, tree =>
+        WpfRendering.RenderExpectingNoBindingErrors(() => new MemorialResultReviewView { DataContext = vm }, WpfRendering.ReviewViewport, tree =>
         {
             tree.OfType<Button>().Single(b => AutomationProperties.GetAutomationId(b) == "Memorial.Export").IsEnabled.ShouldBeFalse();
             return 0;
@@ -59,7 +57,7 @@ public sealed class MemorialWorkflowAcceptanceTests
         });
         if (Environment.GetEnvironmentVariable("PRINTFLOW_MEMORIAL_UI_EVIDENCE") is { Length: > 0 } evidence)
         {
-            WpfRendering.CapturePng(() => new DetailedPromptView { DataContext = vm }, WpfRendering.ReviewViewport, Path.Combine(evidence, "result-review.png"));
+            WpfRendering.CapturePng(() => new MemorialResultReviewView { DataContext = vm }, WpfRendering.ReviewViewport, Path.Combine(evidence, "result-review.png"));
             WpfRendering.CapturePng(() => new MemorialProofView { DataContext = vm }, new Size(1100, 700), Path.Combine(evidence, "enlarged-proof.png"));
         }
         foreach (var check in vm.MemorialChecks.ToArray())
@@ -187,7 +185,6 @@ public sealed class MemorialWorkflowAcceptanceTests
         var vm = f.Vm;
         await vm.PrepareMemorialLayoutCommand.ExecuteAsync(null);
         await vm.SaveMemorialLayoutCommand.ExecuteAsync(null);
-        await vm.ConfirmMemorialLayoutCommand.ExecuteAsync(null);
         vm.CanPreviewLayout.ShouldBeTrue();
         var saved = vm.Draft!.Layout!;
         vm.MemorialText.Single(x => x.Key == "name").FontSize = "8";
@@ -211,7 +208,6 @@ public sealed class MemorialWorkflowAcceptanceTests
         await vm.PrepareMemorialLayoutCommand.ExecuteAsync(null);
         vm.MemorialText.Single(x => x.Key == "name").Text.ShouldBe("Ava");
         await vm.SaveMemorialLayoutCommand.ExecuteAsync(null);
-        await vm.ConfirmMemorialLayoutCommand.ExecuteAsync(null);
         vm.CanPreviewLayout.ShouldBeTrue();
         vm.Draft!.Layout!.Text.Single(x => x.Key == "name").Text.ShouldBe("Ava");
     }

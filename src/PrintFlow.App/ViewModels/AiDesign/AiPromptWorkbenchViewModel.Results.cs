@@ -273,7 +273,7 @@ public sealed partial class AiPromptWorkbenchViewModel
         {
             nameof(IsMemorialLayoutAvailable), nameof(CanPrepareMemorialLayout), nameof(CanSaveMemorialLayout),
             nameof(IsMemorialLayoutEditorStale), nameof(MemorialLayoutEditLabel),
-            nameof(CanConfirmMemorialLayout), nameof(CanPreviewLayout), nameof(MemorialCanvasLabel), nameof(MemorialLayoutStatus), nameof(MemorialLayoutIssues),
+            nameof(CanPreviewLayout), nameof(MemorialCanvasLabel), nameof(MemorialLayoutStatus), nameof(MemorialLayoutIssues),
             nameof(MemorialResult), nameof(MemorialResultImage), nameof(MemorialComparisonImage), nameof(MemorialComparisonLabel), nameof(MemorialResultLabel),
             nameof(IsMemorialResultVisible), nameof(IsMemorialResultHistorical), nameof(IsMemorialResultAccepted), nameof(IsCurrentMemorialReview),
             nameof(MemorialProofSources), nameof(MemorialProofSafeRatio), nameof(HasMemorialBadgeGuide),

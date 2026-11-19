@@ -127,6 +127,7 @@ public sealed class ApplicationStartup : IDisposable
                         isPrimaryInstance: false),
                     null);
         }
+        StartupTiming.Log.Mark("SingleInstanceGuard");
 
         // 2 — configuration.
         PrintFlowConfiguration configuration;
@@ -165,6 +166,7 @@ public sealed class ApplicationStartup : IDisposable
         }
 
         // 4 — database and migrations, before anything reads persistence.
+        StartupTiming.Log.Mark("WorkspacePrepared");
         string databasePath = System.IO.Path.Combine(workspaceRoot, configuration.Database.RelativePath);
         SqliteConnectionFactory connectionFactory;
         try
@@ -188,6 +190,7 @@ public sealed class ApplicationStartup : IDisposable
         }
 
         // 5 — the service graph. Registration only; fails closed on an unsupported adapter mode.
+        StartupTiming.Log.Mark("DatabaseReady");
         ServiceProvider services;
         try
         {
@@ -205,12 +208,14 @@ public sealed class ApplicationStartup : IDisposable
             // that an unverified preset stops production work at the gate, not at the shell.
             OperationResult<Domain.Outputs.ProductionPresetRef> preset =
                 services.GetRequiredService<IWorkstationPresetProvider>().GetVerifiedPreset();
+            StartupTiming.Log.Mark("PresetChecked");
 
             // 7 — recovery, exactly once, from the process that owns the guard.
             OperationResult<StartupRecoveryReport> recovered = await services
                 .GetRequiredService<IStartupRecoveryService>()
                 .RecoverAsync(cancellationToken)
                 .ConfigureAwait(true);
+            StartupTiming.Log.Mark("RecoveryFinished");
 
             if (recovered.IsFailure)
             {
@@ -252,7 +257,9 @@ public sealed class ApplicationStartup : IDisposable
                         $"Diagnostic retention could not finish safely: {ex.Message}"));
             }
 
-            // 9 — the operator's language, before any screen is constructed.
+            StartupTiming.Log.Mark("DiagnosticRetentionFinished");
+
+            // 9 — the operator's language, before the shell is constructed.
             //
             // Deliberately not a stage that can refuse: the culture authority answers an absent,
             // unreadable or unrecognised persisted value with the Product's first-run default
@@ -263,6 +270,7 @@ public sealed class ApplicationStartup : IDisposable
             await services.GetRequiredService<ILocalisationService>()
                 .RestoreAsync(cancellationToken)
                 .ConfigureAwait(true);
+            StartupTiming.Log.Mark("LanguageRestored");
 
             // 10 — record the result where the shell can read it.
             StartupStatus status = StartupStatus.Started(preset.IsSuccess, recovered.Value, retention);

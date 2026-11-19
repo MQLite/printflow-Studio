@@ -65,8 +65,6 @@
     <Button Content="{x:Static r:AiMemorialLabels.DiscardLayout}" Command="{Binding DiscardMemorialLayoutCommand}"/>
    </WrapPanel>
   </StackPanel>
-  <Button Content="{x:Static r:AiMemorialLabels.ConfirmLayout}" Command="{Binding ConfirmMemorialLayoutCommand}" IsEnabled="{Binding CanConfirmMemorialLayout}" AutomationProperties.AutomationId="Memorial.ConfirmLayout"/>
-  <Button Content="{x:Static r:AiMemorialLabels.Preview}" Command="{Binding RenderMemorialPreviewCommand}" IsEnabled="{Binding CanPreviewLayout}" AutomationProperties.AutomationId="Memorial.Preview"/>
   <Button Content="{x:Static r:AiMemorialLabels.Convert}" Command="{Binding BeginMemorialConversionCommand}" IsEnabled="{Binding CanBeginMemorialConversion}"/>
   <Border BorderBrush="#A6B4B1" BorderThickness="1" Padding="8" Margin="0,6"
           Visibility="{Binding IsMemorialConversionPending, Converter={StaticResource VisibleIf}}">

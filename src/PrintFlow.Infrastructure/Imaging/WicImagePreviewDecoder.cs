@@ -78,11 +78,41 @@ public sealed class WicImagePreviewDecoder : IImagePreviewDecoder, IDiagnosticIm
 
     /// <inheritdoc />
     public async Task<OperationResult<DecodedPreview>> DecodeThumbnailAsync(
-        WorkspaceFileRef file, CancellationToken cancellationToken)
+        WorkspaceFileRef file, ImageFormat format, CancellationToken cancellationToken)
     {
         string absolutePath = _workspace.ResolveAbsolute(file);
 
-        return await DecodeAbsoluteAsync(absolutePath, ThumbnailEdge, cancellationToken);
+        return format == ImageFormat.Pdf
+            ? await DecodePdfThumbnailAsync(absolutePath, cancellationToken)
+            : await DecodeAbsoluteAsync(absolutePath, ThumbnailEdge, cancellationToken);
+    }
+
+    private async Task<OperationResult<DecodedPreview>> DecodePdfThumbnailAsync(
+        string absolutePath, CancellationToken cancellationToken)
+    {
+        try
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            using var input = new FileStream(absolutePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            using var document = await new WindowsPdfDocumentAuthority().OpenAsync(input, cancellationToken).ConfigureAwait(false);
+            if (document.IsEncrypted || document.PageCount != 1 ||
+                !WindowsPdfPreparationProcessor.HasSupportedPageGeometry(document.InspectSinglePage()))
+                return Undisplayable("The PDF thumbnail requires a readable single page with supported dimensions.");
+
+            return OperationResult.Ok(await document.RenderThumbnailAsync(ThumbnailEdge, cancellationToken).ConfigureAwait(false));
+        }
+        catch (OperationCanceledException)
+        {
+            return OperationResult.Fail<DecodedPreview>(FailureCode.Cancelled, "Preview decoding was cancelled.");
+        }
+        catch (FileNotFoundException)
+        {
+            return OperationResult.Fail<DecodedPreview>(FailureCode.OutputMissing, "The managed PDF source is missing.");
+        }
+        catch (Exception ex) when (ex is not (OutOfMemoryException or StackOverflowException))
+        {
+            return Undisplayable($"The PDF thumbnail could not be rendered ({ex.HResult:X8}).");
+        }
     }
 
     /// <inheritdoc />

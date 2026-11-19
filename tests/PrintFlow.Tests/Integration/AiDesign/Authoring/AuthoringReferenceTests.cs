@@ -111,6 +111,71 @@ public sealed class AuthoringReferenceTests
     }
 
     [Fact]
+    public async Task An_existing_recoverable_return_blocks_new_work_for_the_same_draft()
+    {
+        using TempWorkspace root = new();
+        var draft = await Create(WithImages(root.Root));
+        var id = Guid.NewGuid();
+        var store = new FileAiDesignRequestStore(root.Root);
+        var prompt = new PrintFlow.Domain.AiDesign.AiDesignPrompt("test", 1, new Dictionary<string, string>(), "Synthetic", [], "");
+        var request = (await store.CreateAsync(id,
+            new(prompt, [], new(draft.Id, draft.TemplateSnapshot.Name)), default)).Value;
+        request = (await store.ChangeAsync(request.Fence,
+            new PrintFlow.Domain.AiDesign.AiDesignEvent.Queued(Guid.NewGuid(), "token", Environment.ProcessId, 1, Guid.NewGuid()), default)).Value;
+        request = (await store.ChangeAsync(request.Fence,
+            new PrintFlow.Domain.AiDesign.AiDesignEvent.UploadStarted("tab", "binding"), default)).Value;
+        request = (await store.SubmitOnceAsync(request.Fence, (_, _) =>
+            Task.FromResult(PrintFlow.Domain.Results.OperationResult.Ok<Guid?>(Guid.NewGuid())), default)).Value;
+        (await store.ChangeAsync(request.Fence,
+            new PrintFlow.Domain.AiDesign.AiDesignEvent.Failed("WorkResultPending"), default)).IsSuccess.ShouldBeTrue();
+
+        using var submission = new ChromeWorkTextSubmission(root.Root);
+        // This draft deliberately lacks its required images; even a missing guard cannot launch Chrome in this test.
+        var result = await submission.SubmitAsync(draft, default);
+        result.IsFailure.ShouldBeTrue();
+        result.Failure.TechnicalDetail.ShouldBe("WorkRequestActive");
+        (await store.ListAsync(default)).Value.ShouldHaveSingleItem();
+    }
+
+    [Fact]
+    public async Task Retrying_work_uses_new_names_for_both_verified_uploads_and_their_prompt_references()
+    {
+        using TempWorkspace root = new(); using TempWorkspace source = new(); var module = WithImages(root.Root);
+        string photo = Png(source.Root, "reference.png");
+        var draft = await Bind(module, await Create(module), "person-photo", photo);
+        draft = await Bind(module, draft, "layout-reference", photo);
+        var original = module.Export(draft);
+        var fork = new FileAiAuthoringAssetFork(root.Root);
+        var reader = new VerifiedAiAttachmentReader(root.Root);
+        var usedNames = new HashSet<string>();
+
+        for (int attempt = 0; attempt < 2; attempt++)
+        {
+            Guid requestId = Guid.NewGuid();
+            var prompt = ChromeWorkTextSubmission.ExportForWork(draft, requestId);
+            var copied = (await fork.CopyAndPublishAsync(draft.Id, requestId, prompt.RequiredAttachments,
+                assets => Task.FromResult(PrintFlow.Domain.Results.OperationResult.Ok(assets)), default, useWorkNames: true)).Value;
+            copied.Count.ShouldBe(2);
+            prompt.Text.ShouldContain($"人物参考：{copied[0].UploadName}");
+            prompt.Text.ShouldContain($"版式参考：{copied[1].UploadName}");
+            for (int i = 0; i < copied.Count; i++)
+            {
+                var asset = copied[i];
+                usedNames.Add(asset.UploadName).ShouldBeTrue();
+                asset.Sha256.ShouldBe(original.RequiredAttachments[i].Sha256);
+                var opened = await reader.OpenAsync(requestId, asset, default);
+                opened.IsSuccess.ShouldBeTrue();
+                await using var lease = opened.Value;
+                using var bytes = new MemoryStream();
+                await lease.Stream.CopyToAsync(bytes);
+                bytes.ToArray().ShouldBe(File.ReadAllBytes(photo));
+            }
+        }
+
+        module.Export((await module.ReadAsync(draft.Id, default)).Value).Text.ShouldBe(original.Text);
+    }
+
+    [Fact]
     public async Task Same_names_and_reordering_do_not_rebind_slots()
     {
         using TempWorkspace root = new(); using TempWorkspace first = new(); using TempWorkspace second = new(); var module = WithImages(root.Root);

@@ -11,7 +11,7 @@ export function validateEnvelope(message) {
 export class AttachmentAssembler {
   constructor(attachment, fence) {
     if (!guid.test(attachment.id) || !Number.isSafeInteger(attachment.byteLength) || attachment.byteLength <= 0 || attachment.byteLength > 40 * 1024 * 1024
-      || !Number.isSafeInteger(attachment.order) || attachment.order <= 0 || !/^attachment-\d+\.(png|jpe?g|webp|pdf|txt|md|csv|docx|xlsx|pptx)$/.test(attachment.uploadName)
+      || !Number.isSafeInteger(attachment.order) || attachment.order <= 0 || !/^attachment-\d+(?:-[0-9a-f]{32})?\.(png|jpe?g|webp|pdf|txt|md|csv|docx|xlsx|pptx)$/.test(attachment.uploadName)
       || !/^[0-9A-F]{64}$/.test(attachment.sha256)) throw new Error("AttachmentManifestInvalid");
     this.attachment = structuredClone(attachment); this.fence = { ...fence }; this.chunks = []; this.length = 0;
   }

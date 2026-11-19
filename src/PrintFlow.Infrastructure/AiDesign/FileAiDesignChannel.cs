@@ -9,7 +9,8 @@ using PrintFlow.Workflow.AiDesign;
 namespace PrintFlow.Infrastructure.AiDesign;
 
 /// <summary>Local persistent-port handoff. A registry entry alone can never establish channel readiness.</summary>
-public sealed class FileAiDesignChannel(AiDesignBridgeConfiguration? configuration,string? installationDirectory=null,TimeProvider? clock=null):IAiDesignChannel
+public sealed class FileAiDesignChannel(AiDesignBridgeConfiguration? configuration,string? installationDirectory=null,TimeProvider? clock=null,string? expectedLaunchNonce=null,
+    Func<AiDesignRequest, CancellationToken, Task<OperationResult<string>>>? prepareResult=null):IAiDesignChannel
 {
     private readonly string _installation=Path.GetFullPath(installationDirectory??AiDesignBridgeConfiguration.InstallationDirectory);
     private readonly TimeProvider _clock=clock??TimeProvider.System;
@@ -33,7 +34,8 @@ public sealed class FileAiDesignChannel(AiDesignBridgeConfiguration? configurati
             try{using var gate=new FileStream(gatePath,FileMode.Open,FileAccess.ReadWrite,FileShare.None);held=false;}
             catch(IOException) when(File.Exists(gatePath)){held=true;}
             if(!held)return Unavailable("BridgeDisconnected",identity);
-            bool verified=configuration.VerifiedWorkContractHash is not null&&connection.WorkContractHash==configuration.VerifiedWorkContractHash&&connection.Available;
+            bool verified=configuration.VerifiedWorkContractHash is not null&&connection.WorkContractHash==configuration.VerifiedWorkContractHash&&connection.Available
+                && (expectedLaunchNonce is null || connection.LaunchNonce == expectedLaunchNonce);
             return OperationResult.Ok(new AiDesignBridgeReadiness(verified,1,configuration.HostVersion,configuration.ExtensionOrigin,identity,
                 verified?null:"WorkContractUnverified",connection.ConnectionId));
         }
@@ -60,8 +62,17 @@ public sealed class FileAiDesignChannel(AiDesignBridgeConfiguration? configurati
                 if(old is null||old.Fence.RequestId!=request.RequestId||old.WorkspaceIdentity!=request.WorkspaceIdentity)return OperationResult.Fail<Unit>(FailureCode.PreconditionNotMet,"BridgeQueueInvalid");
                 if(old.Fence.AttemptId==request.AttemptId)return OperationResult.Fail<Unit>(FailureCode.PreconditionNotMet,"BridgeAttemptAlreadyQueued");
             }
+            string? uploadTicket = null;
+            if (prepareResult is not null)
+            {
+                var prepared = await prepareResult(request, ct);
+                if (prepared.IsFailure) return OperationResult.Fail<Unit>(prepared.Failure);
+                uploadTicket = prepared.Value;
+                if (!WorkResultPrompt.IsTicket(uploadTicket) || WorkResultPrompt.Append(request, uploadTicket).Length > 100000)
+                    return OperationResult.Fail<Unit>(FailureCode.PreconditionNotMet, "WorkResultPromptTooLong");
+            }
             using var staged=AiDesignOwnedStagingFiles.CreateRequest(configuration.WorkspaceRoot,request.RequestId,AiDesignOwnedStagingFiles.RequestPurpose.BridgeQueue);
-            await JsonSerializer.SerializeAsync(staged.Output,new BridgeQueueEntry(request.Fence,request.ConnectionId!.Value,request.WorkspaceIdentity),NativeMessageCodec.JsonOptions,ct);
+            await JsonSerializer.SerializeAsync(staged.Output,new BridgeQueueEntry(request.Fence,request.ConnectionId!.Value,request.WorkspaceIdentity,uploadTicket),NativeMessageCodec.JsonOptions,ct);
             await staged.PublishAsync(ct);
             return OperationResult.Ok();
         }
@@ -75,4 +86,4 @@ public sealed class FileAiDesignChannel(AiDesignBridgeConfiguration? configurati
     private OperationResult<AiDesignBridgeReadiness> Unavailable(string reason,string identity)=>OperationResult.Ok(new AiDesignBridgeReadiness(false,
         configuration?.ProtocolVersion??1,configuration?.HostVersion??AiDesignBridgeConfiguration.CurrentHostVersion,configuration?.ExtensionOrigin??"",identity,reason));
 }
-public sealed record BridgeQueueEntry(AiDesignFence Fence,Guid ConnectionId,string WorkspaceIdentity);
+public sealed record BridgeQueueEntry(AiDesignFence Fence,Guid ConnectionId,string WorkspaceIdentity,string? WorkResultUploadTicket=null);

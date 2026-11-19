@@ -5,6 +5,8 @@ param(
     [Parameter(Mandatory=$true)][string]$WorkspaceRoot,
     [Parameter(Mandatory=$true)][string]$DownloadRoot,
     [ValidateSet('Edge','Chrome')][string]$Browser = 'Edge',
+    [switch]$EnableTextSubmissionTrial,
+    [ValidatePattern('\A(?:Default|Profile [1-9][0-9]{0,2})\z')][string]$ChromeProfileDirectory = 'Default',
     [switch]$ValidateOnly
 )
 . (Join-Path $PSScriptRoot 'NativeHost-Tools.ps1')
@@ -18,6 +20,11 @@ Assert-NoReparse $script:NativeInstallation
 $paths = Get-OwnedPaths
 $manifest = [ordered]@{ name=$script:NativeHostName; description='PrintFlow AI design local bridge'; path=$hostFile; type='stdio'; allowed_origins=@("chrome-extension://$ExtensionId/") }
 $configuration = [ordered]@{ protocolVersion=1; hostVersion='1.0.0'; extensionOrigin="chrome-extension://$ExtensionId/"; workspaceRoot=$workspace; downloadRoot=$downloads; verifiedWorkContractHash=$null }
+if ($EnableTextSubmissionTrial) {
+    if ($Browser -cne 'Chrome') { throw 'The pure-text submission trial requires Chrome.' }
+    $configuration.verifiedWorkContractHash = '580178DAB8DA753A6B4FE1BD247D63F99D8396DD30D7E2D595743D0F7DA05083'
+    $configuration.chromeProfileDirectory = $ChromeProfileDirectory
+}
 $manifestBytes = Get-JsonBytes $manifest; $configurationBytes = Get-JsonBytes $configuration
 $record = [ordered]@{ registrationId=[Guid]::NewGuid().ToString('D'); hostName=$script:NativeHostName; protocolVersion=1; browser=$Browser; registryKey=$registryKey; manifestPath=$paths[0]; configurationPath=$paths[1]; manifestHash=(Get-ByteHash $manifestBytes); configurationHash=(Get-ByteHash $configurationBytes) }
 if ($ValidateOnly) {

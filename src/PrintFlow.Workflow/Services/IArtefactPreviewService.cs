@@ -67,9 +67,8 @@ public interface IArtefactPreviewService
     /// <para>
     /// The artefact chosen is the imported original as PrintFlow can draw it: the root Revision
     /// when its container is one this product decodes, and otherwise the managed raster the
-    /// PSD/PDF preparation step derived from that root. That is what an operator recognises —
-    /// it is the picture they dropped in — and it does not change as the job progresses, so a
-    /// row does not silently become a different image between two visits to Home.
+    /// PSD/PDF preparation step derived from that root. Before preparation, a readable
+    /// single-page PDF can be rendered directly at thumbnail size.
     /// </para>
     /// <para>
     /// Strictly read-only, exactly like <see cref="GetPreviewAsync"/>: no Revision, no review, no

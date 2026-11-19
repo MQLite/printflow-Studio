@@ -28,11 +28,12 @@ async function body(req) {
   return JSON.parse(Buffer.concat(chunks).toString('utf8'));
 }
 
-export async function startServer({ store, writerBearer, controlBearer, readBearer, allowedSources = [], fileFetcher, port = 32179 }) {
+export async function startServer({ store, writerBearer, controlBearer, readBearer, allowedSources = [], fileFetcher,
+  observeSource, reportSourceFailure, port = 32179 }) {
   if (![writerBearer, controlBearer, readBearer].every(x => typeof x === 'string' && x.length >= 8 && !x.startsWith('replace-with-'))) throw new Error('three distinct bearer secrets required');
   if (new Set([writerBearer, controlBearer, readBearer]).size !== 3) throw new Error('bearer roles must be distinct');
   if (!Number.isInteger(port) || port < 0 || port > 65535) throw new Error('invalid port');
-  const mcp = makeMcpHandler({ store, allowedSources, fileFetcher });
+  const mcp = makeMcpHandler({ store, allowedSources, fileFetcher, observeSource, reportSourceFailure });
   const nodeMcp = toNodeHandler(mcp, { maxRequestBodySize: 65_536 });
   let active = 0;
   const server = createServer((req, res) => {
@@ -51,6 +52,10 @@ export async function startServer({ store, writerBearer, controlBearer, readBear
           if (!authorized(req, controlBearer)) return json(res, 401, { error: 'unauthorized' });
           const args = await body(req);
           return json(res, 201, await store.enroll(args));
+        }
+        if (path === '/control/source-binding' && req.method === 'POST') {
+          if (!authorized(req, controlBearer)) return json(res, 401, { error: 'unauthorized' });
+          return json(res, 200, await store.bindObservedSource(await body(req)));
         }
         const cancel = /^\/control\/attempts\/([A-Za-z0-9_-]+)\/([A-Za-z0-9_-]+)\/cancel$/.exec(path);
         if (cancel && req.method === 'POST') {

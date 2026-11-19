@@ -18,9 +18,13 @@ public sealed class FileAiAuthoringAssetFork(string workspaceRoot) : IAiAuthorin
         IReadOnlyList<AiDesignAttachment> assets, CancellationToken ct) =>
         CopyAndPublishAsync(sourceOwnerId, targetOwnerId, assets, value => Task.FromResult(OperationResult.Ok(value)), ct);
 
-    public async Task<OperationResult<T>> CopyAndPublishAsync<T>(Guid sourceOwnerId, Guid targetOwnerId,
+    public Task<OperationResult<T>> CopyAndPublishAsync<T>(Guid sourceOwnerId, Guid targetOwnerId,
         IReadOnlyList<AiDesignAttachment> assets, Func<IReadOnlyList<AiDesignAttachment>, Task<OperationResult<T>>> publish,
-        CancellationToken ct)
+        CancellationToken ct) => CopyAndPublishAsync(sourceOwnerId, targetOwnerId, assets, publish, ct, useWorkNames: false);
+
+    internal async Task<OperationResult<T>> CopyAndPublishAsync<T>(Guid sourceOwnerId, Guid targetOwnerId,
+        IReadOnlyList<AiDesignAttachment> assets, Func<IReadOnlyList<AiDesignAttachment>, Task<OperationResult<T>>> publish,
+        CancellationToken ct, bool useWorkNames)
     {
         try
         {
@@ -51,10 +55,10 @@ public sealed class FileAiAuthoringAssetFork(string workspaceRoot) : IAiAuthorin
                     if (!await VerifiedAiAttachmentReader.HasImageHeaderAsync(original.Stream, source.MediaType, ct))
                         return OperationResult.Fail<T>(FailureCode.PreconditionNotMet, "Fork source is not a supported image.");
 
-                    var staged = batch.Create(source.Order, Path.GetExtension(source.UploadName));
+                    var staged = batch.Create(source.Order, Path.GetExtension(source.UploadName), useWorkNames ? targetOwnerId : null);
                     await original.Stream.CopyToAsync(staged.Snapshot.Output, ct);
                     await staged.PublishSnapshotAsync(ct);
-                    var child = source with { Id = staged.Id, Snapshot = new(targetOwnerId, staged.RelativePath) };
+                    var child = source with { Id = staged.Id, UploadName = staged.UploadName, Snapshot = new(targetOwnerId, staged.RelativePath) };
                     var seal = staged.CreateIdentity();
                     await JsonSerializer.SerializeAsync(seal.Output, child, FileAiDesignRequestStore.JsonOptions, ct);
                     await seal.CloseFlushedAsync(ct);

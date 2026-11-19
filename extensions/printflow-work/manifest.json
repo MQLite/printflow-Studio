@@ -3,7 +3,8 @@
   "name": "PrintFlow Work Bridge",
   "version": "1.0.0",
   "description": "Local PrintFlow native protocol bridge. Work page support requires separate verification.",
-  "permissions": ["nativeMessaging"],
+  "permissions": ["nativeMessaging", "scripting"],
+  "host_permissions": ["https://chatgpt.com/*"],
   "background": { "service_worker": "service-worker.js", "type": "module" },
   "action": { "default_title": "Check PrintFlow local bridge" }
 }

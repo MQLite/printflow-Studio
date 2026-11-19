@@ -96,7 +96,8 @@ public sealed class AuthoringGraphTests
         string.Concat(nav.Current.ShouldBeOfType<AiPromptWorkbenchViewModel>().Document.Parts.OfType<PrintFlow.Domain.AiDesign.Authoring.AiTextPart>().Select(x => x.Text)).ShouldBe("  Āna\r\n陈  ");
     }
 
-    internal static ServiceProvider Compose(TempApplication app, ControlledLeavePrompt prompt, bool denyNewDrafts = false)
+    internal static ServiceProvider Compose(TempApplication app, ControlledLeavePrompt prompt, bool denyNewDrafts = false,
+        Action<IServiceCollection>? configure = null)
     {
         var factory = new SqliteConnectionFactory(app.DatabasePath);
         using (var connection = factory.Open()) MigrationRunner.Migrate(connection).IsSuccess.ShouldBeTrue();
@@ -104,6 +105,7 @@ public sealed class AuthoringGraphTests
             services =>
             {
                 services.AddSingleton<IAiDraftLeavePrompt>(prompt);
+                configure?.Invoke(services);
                 if (denyNewDrafts) services.AddSingleton<IAiAuthoringDraftStore>(new DenyNewDraftStore(new FileAiAuthoringDraftStore(app.WorkspaceRoot)));
             });
     }

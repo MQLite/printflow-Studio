@@ -448,6 +448,34 @@ public sealed class RetentionCleanupTests
         (await AssertAuthority(h, id)).Revisions.ShouldContain(r => r.FormerWorkingFile != null);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Startup_verifies_retained_authority_only_when_a_cleanup_action_is_pending(bool redundantCopyExists)
+    {
+        using SessionServiceHarness h = new();
+        ISessionService service = h.CreateService();
+        SessionId id = await ReadyAsync(h, service, WorkflowType.PrepareAsset, h.WriteSourcePng());
+        SessionView completed = await Command(service, id, new WorkflowCommand.Complete());
+        completed.CompletionCleanup!.IsComplete.ShouldBeTrue();
+        Revision promoted = (await Load(h, id)).Revisions.First(r => r.FormerWorkingFile is not null);
+        string retained = h.FileWorkspace.ResolveAbsolute(promoted.File);
+        string redundant = h.FileWorkspace.ResolveAbsolute(promoted.FormerWorkingFile!.Value);
+        File.Exists(redundant).ShouldBeFalse();
+        if (redundantCopyExists)
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(redundant)!);
+            File.Copy(retained, redundant);
+        }
+        File.WriteAllText(retained, "corrupt retained synthetic file");
+
+        StartupRecoveryReport report = await Restart(h);
+
+        report.Entries.Any(entry => entry.Action == StartupRecoveryAction.RecoveryFailed && entry.SessionId == id)
+            .ShouldBe(redundantCopyExists);
+        File.Exists(redundant).ShouldBe(redundantCopyExists);
+    }
+
     [Fact]
     public async Task Rejected_TIFF_remains_explicitly_recycled_without_double_recycle_after_successful_retry()
     {

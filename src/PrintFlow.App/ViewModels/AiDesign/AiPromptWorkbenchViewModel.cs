@@ -7,6 +7,7 @@ using PrintFlow.App.Resources;
 using PrintFlow.Domain.AiDesign;
 using PrintFlow.Domain.AiDesign.Authoring;
 using PrintFlow.Domain.Results;
+using PrintFlow.Workflow.AiDesign;
 using PrintFlow.Workflow.AiDesign.Authoring;
 using PrintFlow.Workflow.AiDesign.Memorial;
 using PrintFlow.Workflow.Ports;
@@ -22,6 +23,7 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
     private readonly IFilePicker picker;
     private readonly IAiPromptClipboard clipboard;
     private readonly AiMemorialServices? memorial;
+    private readonly IAiDesignTextSubmission? textSubmission;
     private readonly SemaphoreSlim operations = new(1, 1);
     private long epoch, editGeneration;
     private bool active, busy;
@@ -42,7 +44,7 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
             bool changedOwner = draft?.Id != value?.Id;
             hasOutdatedMemorialSpecification = value is not null && PromptDocumentComposer.HasOutdatedProductSpecification(value);
             if (!SetProperty(ref draft, value)) return;
-            if (changedOwner) { ResetMemorialLayoutEditor(); ResetMemorialResult(); }
+            if (changedOwner) { ResetMemorialLayoutEditor(); ResetMemorialResult(); ResetWorkCard(); }
             else NotifyMemorial();
         }
     }
@@ -90,6 +92,7 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
     public string ReferenceRole { get; set; } = "";
     public IAsyncRelayCommand ComposeCommand { get; }
     public IAsyncRelayCommand CopyCommand { get; }
+    public IAsyncRelayCommand AutoGenerateCommand { get; }
     public IAsyncRelayCommand SaveDraftCommand { get; }
     public IAsyncRelayCommand EditTemplateCommand { get; }
     public IAsyncRelayCommand<string> PickSlotImageCommand { get; }
@@ -107,11 +110,16 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
 
     public AiPromptWorkbenchViewModel(AiAuthoringModule module, AiTemplateCatalog catalog, IAiAuthoringAssetPreview preview,
         IFilePicker picker, IAiPromptClipboard clipboard, IAiDraftLeavePrompt? leavePrompt = null, INavigationService? navigation = null,
-        AiMemorialServices? memorial = null)
+        AiMemorialServices? memorial = null, IAiDesignTextSubmission? textSubmission = null,
+        IWorkTaskQuery? workTasks = null, WorkTaskTracker? workTracker = null,
+        PrintFlow.Workflow.Services.IArtefactPreviewService? workPreviews = null, IWorkConversationLauncher? workLauncher = null)
     {
         this.module = module; this.catalog = catalog; this.preview = preview; this.picker = picker; this.clipboard = clipboard;
         this.leavePrompt = leavePrompt; this.navigation = navigation;
         this.memorial = memorial;
+        this.textSubmission = textSubmission;
+        this.workTasks = workTasks; this.workTracker = workTracker; this.workPreviews = workPreviews;
+        ViewWorkCommand = new RelayCommand(() => { if (WorkCard?.OpenWork(workLauncher) == false) Error = Strings.Resolve("WorkTask_OpenFailed"); });
         ReturnHomeCommand = new AsyncRelayCommand(async () => { if (this.navigation is not null) await this.navigation.GoHomeAsync(default); });
         ShowSavedDraftsCommand = new AsyncRelayCommand(async () => await RunAsync(async () => { await ListSavedDraftsCoreAsync(default); }, default));
         OpenSavedDraftCommand = new AsyncRelayCommand<AiSavedDraftChoice>(OpenSavedDraftAsync);
@@ -123,6 +131,13 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
         InitializeMemorialResultCommands();
         ComposeCommand = new AsyncRelayCommand(() => ComposeAsync(false, default));
         CopyCommand = new AsyncRelayCommand(CopyAsync);
+        ShowWorkTasksCommand = new AsyncRelayCommand(async ct =>
+        {
+            if (this.navigation is IAiDesignNavigation ai) await ai.GoToAiWorkTasksAsync(Draft?.Id, ct);
+        });
+        ContinueWorkResultCommand = new AsyncRelayCommand(ContinueWorkResultAsync);
+        AutoGenerateCommand = new AsyncRelayCommand(SubmitToWorkAsync, () => !IsWaitingForWorkResult && !isLoadingWorkCard && !workCardUnavailable);
+        StopReceivingCommand = new AsyncRelayCommand(StopReceivingAsync);
         SaveDraftCommand = new AsyncRelayCommand(async () => { await FlushAsync(default); });
         EditTemplateCommand = new AsyncRelayCommand(EditTemplateAsync);
         SaveInstanceTemplateCommand = new AsyncRelayCommand(SaveInstanceTemplateAsync);
@@ -155,6 +170,7 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
     public async Task OpenAsync(Guid? draftId, CancellationToken ct)
     {
         long opening = ++epoch; active = true;
+        SubscribeToWorkResults();
         await RunAsync(async () =>
         {
             if (Draft is not null && HasUnsavedChanges && (await FlushCoreAsync(ct)).IsFailure) return;
@@ -175,6 +191,8 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
     public void Deactivate()
     {
         active = false; epoch++; ClearPending();
+        UnsubscribeFromWorkResults();
+        ResetWorkCard();
         CancelMemorialTaskCommand.Execute(null);
         ResetMemorialLayoutEditor(); ResetMemorialResult();
     }
@@ -264,7 +282,9 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
             ReferenceRole = ""; OnPropertyChanged(nameof(ReferenceRole)); Status = null;
         }
         if (Draft?.Id != value.Id || Draft.Template != value.Template) editingTemplate = null;
+        bool changedDraft = Draft?.Id != value.Id;
         Draft = value;
+        if (changedDraft || WorkCard is null) QueueWorkCardRefresh();
         document = value.FinalDocument; OnPropertyChanged(nameof(Document));
         foreach (var input in Fields) input.PropertyChanged -= FieldEdited;
         Fields.Clear();
@@ -295,6 +315,7 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
             Photos.Add(new(slot, value.Assets.SingleOrDefault(x => x.Id == assetId), value.Assets));
         }
         RefreshExport(); OnPropertyChanged(nameof(HasUnsavedChanges)); OnPropertyChanged(nameof(PromptNotice));
+        await WorkCardRefresh;
         RefreshDetailed();
         foreach (var photo in Photos.ToArray())
         {
