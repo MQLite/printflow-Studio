@@ -107,11 +107,11 @@ public sealed class ImageProcessingPolicyPersistenceTests
 
         Must(MigrationRunner.Migrate(connection));
         Must(MigrationRunner.Migrate(connection));
-        MigrationRunner.NewestKnownVersion.ShouldBe(24);
         var session = Must(await new SqliteSessionRepository(database.Factory).LoadAsync(id, default)).ShouldNotBeNull();
         session.Session.TrimMargin.ShouldBe(TrimMargin.PerEdge(1, 2, 3, 4));
         session.Session.IgnoreSmallTrimNoise.ShouldBeFalse();
         session.Steps.Single(s => s.Step == StepKind.Trim).State.ShouldBe(StepState.ReviewRequired);
+        session.Steps.ShouldAllBe(step => step.CombinedUploadPositionId == null);
         var historical = session.Attempts.ShouldHaveSingleItem();
         historical.AdapterId.ShouldBe("internal-alpha-trim-v1");
         historical.TrimGeometry.ShouldNotBeNull();
@@ -119,6 +119,8 @@ public sealed class ImageProcessingPolicyPersistenceTests
         historical.OutputRevisionId.ShouldBe(RevisionId.From(Guid.Parse(output)));
 
         using var command = connection.CreateCommand();
+        command.CommandText = "PRAGMA user_version";
+        Convert.ToInt64(command.ExecuteScalar()).ShouldBe(MigrationRunner.NewestKnownVersion);
         command.CommandText = "SELECT ImageProcessingMethod FROM ProcessingAttempt";
         command.ExecuteScalar().ShouldBe(DBNull.Value);
         command.CommandText = "PRAGMA foreign_key_check";
