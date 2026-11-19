@@ -10,7 +10,7 @@ public sealed partial class AiAuthoringModule
     {
         var slot = draft.Slots.SingleOrDefault(x => x.SlotId == edit.SlotId);
         if (attachments is null || slot is null || edit.Selection is null ||
-            !new[] { ".png", ".jpg", ".jpeg", ".webp" }.Any(ext => edit.Selection.AbsolutePath.EndsWith(ext, StringComparison.OrdinalIgnoreCase)))
+            !new[] { ".png", ".jpg", ".jpeg", ".jfif", ".webp" }.Any(ext => edit.Selection.AbsolutePath.EndsWith(ext, StringComparison.OrdinalIgnoreCase)))
             return Fail("An explicit supported image selection and slot are required.");
         bool active = draft.FinalDocument.Parts.OfType<AiImagePart>().Any(x => x.SlotId == edit.SlotId);
         var snapshots = await attachments.SnapshotAsync(draft.Id, [edit.Selection with { Purpose = slot.Role }], active ? ActiveAssets(draft, edit.SlotId) : [], ct);

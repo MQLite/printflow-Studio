@@ -948,6 +948,7 @@ internal static string Session_PdfPrepared => Get(nameof(Session_PdfPrepared));
     internal static string Format_Png => Get(nameof(Format_Png));
 
     internal static string Format_Jpeg => Get(nameof(Format_Jpeg));
+    internal static string Format_Webp => Get(nameof(Format_Webp));
 
     internal static string Format_Tiff => Get(nameof(Format_Tiff));
 

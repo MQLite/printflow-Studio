@@ -65,6 +65,7 @@ public sealed partial class SessionService : ISessionService
     private const string ManualCropOutputFileName = "manual-crop.png";
 
     private readonly IWorkflowEngine _engine;
+    private readonly IWebpRasterPreparer? _webp;
     private readonly ISessionRepository _repository;
     private readonly IWorkspace _workspace;
 
@@ -169,9 +170,11 @@ public sealed partial class SessionService : ISessionService
         IDiagnosticImagePreviewDecoder? diagnosticImages = null,
         IWorkstationAutomationLease? enclosingAutomationLease = null,
         IWorkstationAutomationLeaseManager? automationLeases = null,
-        ICorrectionPackageStore? correctionPackages = null)
+        ICorrectionPackageStore? correctionPackages = null,
+        IWebpRasterPreparer? webp = null)
     {
         ArgumentNullException.ThrowIfNull(engine);
+        _webp = webp;
         ArgumentNullException.ThrowIfNull(repository);
         ArgumentNullException.ThrowIfNull(workspace);
         ArgumentNullException.ThrowIfNull(recycleBin);
@@ -303,10 +306,10 @@ public sealed partial class SessionService : ISessionService
                 return OperationResult.Fail<SessionView>(committedOpening.Failure);
         }
 
-        OperationResult<(WorkspaceFileRef Source, FileFacts Facts)> established;
+        OperationResult<EstablishedSource> established;
         try
         {
-            established = await EstablishSourceAsync(workspaceDir, sourceAbsolutePath, cancellationToken);
+            established = await EstablishSourceAsync(workspaceDir, runningAttempt.Id, sourceAbsolutePath, expectedHash, cancellationToken);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -314,10 +317,9 @@ public sealed partial class SessionService : ISessionService
             // extended to the one producing path that had none. Import is the only operation an
             // operator can start from Home, and its command is cancellable, so an escape here is
             // an escape all the way out of the view model — which is a terminated shell, not a
-            // reported failure. Nothing in this method's own awaits can reach here today (the
-            // workspace and the repository both answer cancellation structurally), so this is the
-            // boundary that keeps that true rather than a second cancellation policy.
-            established = OperationResult.Fail<(WorkspaceFileRef, FileFacts)>(OperationFailure.Create(
+            // reported failure. Source inspection and raster preparation both observe the
+            // command's cancellation token inside this boundary.
+            established = OperationResult.Fail<EstablishedSource>(OperationFailure.Create(
                 FailureCode.Cancelled,
                 "The import was cancelled before the source was established. No source snapshot " +
                 "and no Revision were created.",
@@ -341,16 +343,18 @@ public sealed partial class SessionService : ISessionService
             return await FailImportAsync(session, started.State, closing, runningAttempt, established.Failure, cancellationToken);
         }
 
-        (WorkspaceFileRef importedSource, FileFacts sourceFacts) = established.Value;
-        if (expectedHash is { } verified && sourceFacts.Sha256 != verified)
-            return OperationResult.Fail<SessionView>(FailureCode.RevisionIntegrityMismatch, "The copied Work result does not match its receipt.");
-
+        EstablishedSource source = established.Value;
         RevisionId revisionId = RevisionId.From(_idGenerator.NewId());
         Revision rootRevision = Revision.Create(
-            revisionId, id, null, OperationKind.Import, importedSource, sourceFacts, closing.NowUtc);
+            revisionId, id, null, OperationKind.Import, source.File, source.Facts, closing.NowUtc);
+        Revision workflowRevision = source.Raster is { } raster
+            ? Revision.Create(RevisionId.From(_idGenerator.NewId()), id, revisionId, OperationKind.Import,
+                raster.File, raster.Facts, closing.NowUtc)
+            : rootRevision;
+        IReadOnlyList<Revision> revisions = source.Raster is null ? [rootRevision] : [rootRevision, workflowRevision];
 
         WorkflowCommand.System.AttemptSucceeded succeeded = new(
-            closing.NewAttemptId, StepKind.Import, revisionId, sourceFacts.Sha256);
+            closing.NewAttemptId, StepKind.Import, workflowRevision.Id, workflowRevision.Sha256);
         WorkflowTransition finished = _engine.Apply(started.State, succeeded, closing);
         if (finished.IsRejected)
         {
@@ -362,12 +366,12 @@ public sealed partial class SessionService : ISessionService
             FileNameOf(sourceAbsolutePath), closing.NowUtc);
 
         ProcessingSession sessionAfterImport = MergeSession(session, finished.State, finished.Effects, closing.NowUtc);
-        ProcessingAttempt succeededAttempt = runningAttempt.Succeed(revisionId, closing.NowUtc);
+        ProcessingAttempt succeededAttempt = runningAttempt.Succeed(workflowRevision.Id, closing.NowUtc);
 
         SessionAggregate aggregateSoFar = new(session, null, started.State.Steps, [], [runningAttempt], [], []);
         SessionMutation closingMutation = BuildMetadataMutation(
             aggregateSoFar, sessionAfterImport, finished.State, finished.Effects, closing,
-            newRevisions: [rootRevision], newInputSnapshot: snapshotRecord, upsertAttempts: [succeededAttempt]);
+            newRevisions: revisions, newInputSnapshot: snapshotRecord, upsertAttempts: [succeededAttempt]);
 
         OperationResult<Unit> committedClosing = await _repository.CommitAsync(closingMutation, cancellationToken);
         if (committedClosing.IsFailure)
@@ -376,7 +380,7 @@ public sealed partial class SessionService : ISessionService
         }
 
         // A freshly imported session has produced nothing yet, so it holds no PrintOutput.
-        return ViewOf(finished.State, [rootRevision], [], [succeededAttempt], []);
+        return ViewOf(finished.State, revisions, [], [succeededAttempt], []);
     }
 
     /// <summary>
@@ -3274,23 +3278,19 @@ public sealed partial class SessionService : ISessionService
                $"retained external state {retained}; force termination no";
     }
 
-    /// <summary>
-    /// The two steps that turn the operator's chosen file into an established source: the copy
-    /// into the managed workspace, and the inspection that describes what was copied.
-    /// </summary>
-    /// <remarks>
-    /// Together rather than separately because neither half is a source on its own — a copy
-    /// nothing has read is not something a Revision may be written against — and because that
-    /// makes them one cancellable unit with one containment boundary at the caller.
-    /// </remarks>
-    private async Task<OperationResult<(WorkspaceFileRef Source, FileFacts Facts)>> EstablishSourceAsync(
-        WorkspaceDirRef workspaceDir, string sourceAbsolutePath, CancellationToken cancellationToken)
+    private sealed record EstablishedSource(WorkspaceFileRef File, FileFacts Facts, PreparedRaster? Raster = null);
+    private sealed record PreparedRaster(WorkspaceFileRef File, FileFacts Facts);
+
+    /// <summary>Establishes the managed source and prepares a working raster when the workflow needs one.</summary>
+    private async Task<OperationResult<EstablishedSource>> EstablishSourceAsync(
+        WorkspaceDirRef workspaceDir, AttemptId attemptId, string sourceAbsolutePath, Sha256? expectedHash,
+        CancellationToken cancellationToken)
     {
         OperationResult<WorkspaceFileRef> imported =
             await _workspace.ImportSourceAsync(workspaceDir, sourceAbsolutePath, cancellationToken);
         if (imported.IsFailure)
         {
-            return OperationResult.Fail<(WorkspaceFileRef, FileFacts)>(imported.Failure);
+            return OperationResult.Fail<EstablishedSource>(imported.Failure);
         }
 
         OperationResult<FileFacts> inspected =
@@ -3298,13 +3298,46 @@ public sealed partial class SessionService : ISessionService
 
         if (inspected.IsFailure)
         {
-            return OperationResult.Fail<(WorkspaceFileRef, FileFacts)>(inspected.Failure);
+            return OperationResult.Fail<EstablishedSource>(inspected.Failure);
         }
 
-        OperationFailure? refusal = RefuseUnacceptableInput(inspected.Value, FileNameOf(sourceAbsolutePath));
+        FileFacts facts = inspected.Value;
+        string sourceName = FileNameOf(sourceAbsolutePath);
+        if (expectedHash is { } verified && facts.Sha256 != verified)
+            return OperationResult.Fail<EstablishedSource>(FailureCode.RevisionIntegrityMismatch,
+                "The copied Work result does not match its receipt.");
+
+        PreparedRaster? raster = null;
+        if (facts.Format == ImageFormat.Webp)
+        {
+            if (_webp is null)
+                return OperationResult.Fail<EstablishedSource>(FailureCode.AdapterUnavailable, "WebP preparation is unavailable.");
+
+            WorkspaceFileRef output = WorkspaceFileRef.Create(
+                $"{workspaceDir.RelativePath}/Working/{attemptId}/prepared-webp.png", WorkspaceArea.Working);
+            var prepared = await _webp.PrepareAsync(imported.Value, facts.Sha256, output, cancellationToken);
+            if (prepared.IsFailure)
+                return OperationResult.Fail<EstablishedSource>(prepared.Failure with
+                {
+                    Context = new Dictionary<string, string>(prepared.Failure.Context)
+                    {
+                        ["sourceFormat"] = facts.Format.ToString(), ["sourceFileName"] = sourceName,
+                    },
+                });
+
+            FileFacts png = prepared.Value;
+            raster = new PreparedRaster(output, png);
+            facts = facts with
+            {
+                PixelWidth = png.PixelWidth, PixelHeight = png.PixelHeight,
+                ColourMode = png.ColourMode, HasAlpha = png.HasAlpha,
+            };
+        }
+
+        OperationFailure? refusal = RefuseUnacceptableInput(facts, sourceName);
         return refusal is not null
-            ? OperationResult.Fail<(WorkspaceFileRef, FileFacts)>(refusal)
-            : OperationResult.Ok((imported.Value, inspected.Value));
+            ? OperationResult.Fail<EstablishedSource>(refusal)
+            : OperationResult.Ok(new EstablishedSource(imported.Value, facts, raster));
     }
 
     /// <summary>

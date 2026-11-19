@@ -8,6 +8,15 @@
         "resolved": "2.1.66",
         "contentHash": "/q77jUgDOS+bzkmk3Vy9SiWMaetTw+NOoPAV0xPBsGVAyljd5S6P+4RUW7R3ZUGGr9lDRyPKgAMj2UAOwvqZYw=="
       },
+      "Magick.NET-Q16-x64": {
+        "type": "Direct",
+        "requested": "[15.1.0, )",
+        "resolved": "15.1.0",
+        "contentHash": "JoLBZ5fp6zkjdVkQuLLNOeEd/ke+8/6srqyGL3hmAh4mKwp/CiAQ/K0MKOF6zDrRQrBqD2SoQoNMm80JjVAiRQ==",
+        "dependencies": {
+          "Magick.NET.Core": "15.1.0"
+        }
+      },
       "Microsoft.Data.Sqlite": {
         "type": "Direct",
         "requested": "[10.0.11, )",
@@ -18,6 +27,11 @@
           "SQLitePCLRaw.bundle_e_sqlite3": "2.1.12",
           "SQLitePCLRaw.core": "2.1.12"
         }
+      },
+      "Magick.NET.Core": {
+        "type": "Transitive",
+        "resolved": "15.1.0",
+        "contentHash": "WIaemRN4tJvw5BNUfsO8/V3LojV5FOCojQ/sQ4ruXme1o2frRYfcvHPhKV5E6TbYoEdVEvtGX+8Wbut0F2lJHg=="
       },
       "Microsoft.Data.Sqlite.Core": {
         "type": "Transitive",
@@ -60,11 +74,20 @@
       "printflow.workflow": {
         "type": "Project",
         "dependencies": {
-          "PrintFlow.Domain": "[0.1.0, )"
+          "PrintFlow.Domain": "[0.1.5, )"
         }
       }
     },
     "net10.0-windows10.0.19041/win-x64": {
+      "Magick.NET-Q16-x64": {
+        "type": "Direct",
+        "requested": "[15.1.0, )",
+        "resolved": "15.1.0",
+        "contentHash": "JoLBZ5fp6zkjdVkQuLLNOeEd/ke+8/6srqyGL3hmAh4mKwp/CiAQ/K0MKOF6zDrRQrBqD2SoQoNMm80JjVAiRQ==",
+        "dependencies": {
+          "Magick.NET.Core": "15.1.0"
+        }
+      },
       "SQLitePCLRaw.lib.e_sqlite3": {
         "type": "Transitive",
         "resolved": "2.1.12",

@@ -33,6 +33,7 @@ public sealed class ManualResultFileTests
     [Theory]
     [InlineData("jpg", true)]
     [InlineData("jpeg", true)]
+    [InlineData("JFIF", true)]
     [InlineData("tif", false)]
     [InlineData("psd", false)]
     [InlineData("pdf", false)]

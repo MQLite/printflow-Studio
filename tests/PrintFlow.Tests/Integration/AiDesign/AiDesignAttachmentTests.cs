@@ -10,6 +10,24 @@ namespace PrintFlow.Tests.Integration.AiDesign;
 public sealed class AiDesignAttachmentTests
 {
     [Fact]
+    public async Task A_jfif_attachment_preserves_its_original_name_and_uses_a_jpeg_upload_name()
+    {
+        using TempWorkspace workspace = new();
+        Guid request = Guid.NewGuid();
+        string path = workspace.CreateSourceFile("reference.JFIF", SyntheticImages.Jpeg(8, 6));
+        var files = new FileAiDesignAttachments(workspace.Root);
+
+        var result = await files.SnapshotAsync(request, [new(path, "reference")], [], default);
+
+        result.IsSuccess.ShouldBeTrue();
+        var attachment = result.Value.Single();
+        attachment.OriginalName.ShouldBe("reference.JFIF");
+        attachment.UploadName.ShouldBe("attachment-01.jpg");
+        attachment.MediaType.ShouldBe("image/jpeg");
+        (await files.VerifyImagesAsync(request, result.Value, default)).IsSuccess.ShouldBeTrue();
+    }
+
+    [Fact]
     public async Task Refused_batch_cleanup_preserves_replaced_file_and_original_snapshot_failure()
     {
         using TempWorkspace source=new();using TempWorkspace owned=new();Guid id=Guid.NewGuid();

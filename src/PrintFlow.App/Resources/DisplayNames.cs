@@ -58,6 +58,7 @@ internal static class DisplayNames
     {
         Domain.Files.ImageFormat.Png => Strings.Format_Png,
         Domain.Files.ImageFormat.Jpeg => Strings.Format_Jpeg,
+        Domain.Files.ImageFormat.Webp => Strings.Format_Webp,
         Domain.Files.ImageFormat.Tiff => Strings.Format_Tiff,
         Domain.Files.ImageFormat.Psd => Strings.Format_Psd,
         Domain.Files.ImageFormat.Pdf => Strings.Format_Pdf,

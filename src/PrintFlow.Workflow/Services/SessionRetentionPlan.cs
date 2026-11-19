@@ -113,6 +113,9 @@ public sealed record SessionRetentionPlan(
             WorkspaceFileRef copy = WorkspaceFileRef.Create(
                 $"{root}Working/{attempt.Id}/{upstream.File.FileName}", WorkspaceArea.Working);
             if (!authority.Contains(copy.RelativePath)) AddDelete(copy, upstream.Sha256);
+            string compatibleName = SupportedInputFormats.JpegCompatibleName(upstream.File.FileName);
+            if (compatibleName != upstream.File.FileName)
+                AddDelete(WorkspaceFileRef.Create($"{root}Working/{attempt.Id}/{compatibleName}", WorkspaceArea.Working), upstream.Sha256);
         }
 
         foreach (WorkingFileEntry entry in working)

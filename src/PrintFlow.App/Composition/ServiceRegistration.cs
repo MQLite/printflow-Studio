@@ -79,6 +79,7 @@ public static class ServiceRegistration
         services.AddSingleton<IWorkflowEngine>(WorkflowEngine.Instance);
         services.AddSingleton<IWorkstationPresetProvider>(presetProvider);
         services.AddSingleton<IFileInspector, WicFileInspector>();
+        services.AddSingleton<IWebpRasterPreparer, WebpRasterPreparer>();
         services.AddSingleton<IManualResultImporter, WicManualResultImporter>();
         services.AddSingleton<IPdfPreparationProcessor, PrintFlow.Infrastructure.Imaging.WindowsPdfPreparationProcessor>();
         services.AddSingleton<IWorkspace>(new FileWorkspace(workspaceRootAbsolute));

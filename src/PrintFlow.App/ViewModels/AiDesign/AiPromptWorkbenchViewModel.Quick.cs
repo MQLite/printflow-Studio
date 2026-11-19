@@ -32,7 +32,7 @@ public sealed partial class AiPromptWorkbenchViewModel
         if (slotId is null || (await FlushAsync(default, saveLayout: false)).IsFailure || Draft is null) return;
         var selectedDraft = Draft; long capturedEpoch = epoch, generation = editGeneration;
         if (!selectedDraft.Slots.Any(x => x.SlotId == slotId) || !selectedDraft.FinalDocument.Parts.OfType<AiImagePart>().Any(x => x.SlotId == slotId)) return;
-        string? path = picker.PickSingleFile(Strings.AiPrompt_ChoosePhoto, "Images|*.png;*.jpg;*.jpeg;*.webp");
+        string? path = picker.PickSingleFile(Strings.AiPrompt_ChoosePhoto, "Images|*.png;*.jpg;*.jpeg;*.jfif;*.webp");
         if (path is null) return;
         await RunAsync(async () =>
         {

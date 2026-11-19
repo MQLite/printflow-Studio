@@ -245,8 +245,9 @@ public sealed class PhotoshopTiffWorkflowOutputTests
         }
 
         // And there is exactly one place a Revision is created for a producing step.
-        Regex.Matches(source, @"Revision\.Create\(").Count.ShouldBe(2,
-            "one for the import root Revision, one for every producing step");
+        Regex.Matches(successTransaction, @"Revision\.Create\(").Count.ShouldBe(1);
+        Regex.Matches(source, @"Revision\.Create\(").Count.ShouldBe(3,
+            "one for the import root, one for a WebP working raster, and one shared by producing steps");
     }
 
     // -----------------------------------------------------------------------------------

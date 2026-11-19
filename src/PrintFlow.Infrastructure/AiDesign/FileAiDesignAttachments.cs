@@ -18,7 +18,7 @@ public sealed class FileAiDesignAttachments : IAiDesignAttachments
     private readonly string _workspaceRoot;
     private readonly Action<AiDesignAttachment>? _afterPrepared;
     internal static readonly IReadOnlyDictionary<string,string> Types = new Dictionary<string,string>(StringComparer.OrdinalIgnoreCase)
-    { [".png"]="image/png",[".jpg"]="image/jpeg",[".jpeg"]="image/jpeg",[".webp"]="image/webp",[".pdf"]="application/pdf",
+    { [".png"]="image/png",[".jpg"]="image/jpeg",[".jpeg"]="image/jpeg",[".jfif"]="image/jpeg",[".webp"]="image/webp",[".pdf"]="application/pdf",
       [".txt"]="text/plain",[".md"]="text/markdown",[".csv"]="text/csv",[".docx"]="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       [".xlsx"]="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",[".pptx"]="application/vnd.openxmlformats-officedocument.presentationml.presentation" };
     public FileAiDesignAttachments(string workspaceRoot)
@@ -55,7 +55,7 @@ public sealed class FileAiDesignAttachments : IAiDesignAttachments
             {
                 ct.ThrowIfCancellationRequested(); string path = SelectedPath(selected[i].AbsolutePath); string ext = Path.GetExtension(path).ToLowerInvariant();
                 int order = await ReserveOrder(requestId,existing,ct);
-                var staged=batch.Create(order,ext);
+                var staged=batch.Create(order,ext == ".jfif" ? ".jpg" : ext);
                 var input = inputs[i]; // The exact checked selection stays pinned through copying.
                 if (input.Length != sizes[i]) throw new IOException("Attachment changed after selection.");
                 using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256); long copied=0;

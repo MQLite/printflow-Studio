@@ -183,7 +183,8 @@ internal sealed class SessionServiceHarness : IDisposable
         settings: Settings,
         diagnosticImages: (IDiagnosticImagePreviewDecoder)PreviewDecoder,
         enclosingAutomationLease: enclosingAutomationLease,
-        automationLeases: automationLeases ?? AutomationLeases);
+        automationLeases: automationLeases ?? AutomationLeases,
+        webp: new WebpRasterPreparer(workspace ?? FileWorkspace, FileInspector));
 
     /// <summary>
     /// Builds a fresh <see cref="IStartupRecoveryService"/> against the same workspace and
@@ -239,7 +240,8 @@ internal sealed class SessionServiceHarness : IDisposable
         settings: Settings,
         diagnosticImages: (IDiagnosticImagePreviewDecoder)PreviewDecoder,
         enclosingAutomationLease: enclosingAutomationLease,
-        automationLeases: automationLeases ?? AutomationLeases);
+        automationLeases: automationLeases ?? AutomationLeases,
+        webp: new WebpRasterPreparer(FileWorkspace, FileInspector));
 
     /// <summary>
     /// Builds a service with a caller-supplied Photoshop adapter, and optionally a caller-supplied
@@ -280,7 +282,8 @@ internal sealed class SessionServiceHarness : IDisposable
         settings: Settings,
         diagnosticImages: (IDiagnosticImagePreviewDecoder)PreviewDecoder,
         enclosingAutomationLease: enclosingAutomationLease,
-        automationLeases: automationLeases ?? AutomationLeases);
+        automationLeases: automationLeases ?? AutomationLeases,
+        webp: new WebpRasterPreparer(FileWorkspace, FileInspector));
 
     /// <summary>
     /// Records the reviewed-content authority for whatever Background Removal is currently about

@@ -19,10 +19,8 @@ namespace PrintFlow.Infrastructure.Imaging;
 /// proof (plan §10.1): a file that cannot be streamed to the end throws or fails, and no
 /// Revision is ever created from it.
 ///
-/// WIC is asked to decode only PNG, JPEG and TIFF containers. PSD and PDF are recorded with
-/// format, length and hash but null pixel metadata — nullable is honest; WIC does not reliably
-/// decode either container, and a stronger decoder is deferred to Epic 11400 behind this same
-/// interface (plan §14.3).
+/// WIC decodes PNG, JPEG and TIFF. PSD, PDF and WebP are recorded with format, length and hash.
+/// Their preparation processors establish pixel metadata from the decoded raster.
 /// </remarks>
 public sealed class WicFileInspector : IFileInspector
 {

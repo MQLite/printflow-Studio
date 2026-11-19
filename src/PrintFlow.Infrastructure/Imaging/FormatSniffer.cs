@@ -9,7 +9,7 @@ namespace PrintFlow.Infrastructure.Imaging;
 public static class FormatSniffer
 {
     /// <summary>The largest header any recognised signature needs.</summary>
-    public const int RequiredHeaderLength = 8;
+    public const int RequiredHeaderLength = 12;
 
     public static ImageFormat Detect(ReadOnlySpan<byte> header)
     {
@@ -21,6 +21,11 @@ public static class FormatSniffer
         if (header.Length >= 3 && header[0] == 0xFF && header[1] == 0xD8 && header[2] == 0xFF)
         {
             return ImageFormat.Jpeg;
+        }
+
+        if (header.Length >= 12 && StartsWith(header, "RIFF"u8) && StartsWith(header[8..], "WEBP"u8))
+        {
+            return ImageFormat.Webp;
         }
 
         // TIFF little-endian ("II*\0") and big-endian ("MM\0*").

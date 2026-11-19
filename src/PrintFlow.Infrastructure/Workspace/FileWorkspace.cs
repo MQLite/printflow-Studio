@@ -147,7 +147,7 @@ public sealed class FileWorkspace : IWorkspace
 
         string attemptFolder = attemptId.Value.ToString("D", CultureInfo.InvariantCulture);
         string targetRelative =
-            $"{session.RelativePath}/{AreaFolder(WorkspaceArea.Working)}/{attemptFolder}/{source.FileName}";
+            $"{session.RelativePath}/{AreaFolder(WorkspaceArea.Working)}/{attemptFolder}/{SupportedInputFormats.JpegCompatibleName(source.FileName)}";
 
         OperationResult<string> targetAbsolute = PathGuard.ResolveWithinRoot(_rootAbsolute, targetRelative);
         if (targetAbsolute.IsFailure)

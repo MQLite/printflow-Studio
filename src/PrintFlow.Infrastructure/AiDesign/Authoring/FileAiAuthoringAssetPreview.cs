@@ -32,7 +32,7 @@ public sealed class FileAiAuthoringAssetPreview(string workspaceRoot) : IAiAutho
             try { completion.SetResult(Decode(lease.Stream, ct)); }
             catch (OperationCanceledException) { completion.SetResult(OperationResult.Fail<DecodedPreview>(FailureCode.Cancelled, "Preview cancelled.")); }
             catch (Exception ex) when (ex is IOException or NotSupportedException or ArgumentException or InvalidOperationException or
-                FileFormatException or OverflowException or COMException)
+                FileFormatException or InvalidDataException or OverflowException or COMException)
             { completion.SetResult(Failed("Image could not be decoded for preview.")); }
         }) { IsBackground = true, Name = "Authoring image preview" };
         thread.SetApartmentState(ApartmentState.STA); thread.Start();
@@ -42,7 +42,8 @@ public sealed class FileAiAuthoringAssetPreview(string workspaceRoot) : IAiAutho
     private static OperationResult<DecodedPreview> Decode(Stream stream, CancellationToken ct)
     {
         ct.ThrowIfCancellationRequested();
-        var decoder = BitmapDecoder.Create(stream, BitmapCreateOptions.DelayCreation | BitmapCreateOptions.IgnoreColorProfile, BitmapCacheOption.None);
+        using MemoryStream? webpRaster = WebpRasterCodec.OpenPngForWebp(stream, ct);
+        var decoder = BitmapDecoder.Create(webpRaster ?? stream, BitmapCreateOptions.DelayCreation | BitmapCreateOptions.IgnoreColorProfile, BitmapCacheOption.None);
         if (decoder.Frames.Count != 1) return Failed("A single image frame is required.");
         var frame = decoder.Frames[0]; int width = frame.PixelWidth, height = frame.PixelHeight;
         if (width <= 0 || height <= 0 || (long)width * height > 64_000_000) return Failed("Image pixel limit exceeded.");

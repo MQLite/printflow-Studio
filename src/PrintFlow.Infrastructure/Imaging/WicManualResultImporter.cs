@@ -166,7 +166,7 @@ public sealed class WicManualResultImporter(IWorkspace workspace, IFileInspector
         extension = Path.GetExtension(name).ToLowerInvariant();
         if (name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0 ||
             (step == StepKind.BackgroundRemoval ? extension != ".png" :
-                extension is not (".png" or ".jpg" or ".jpeg")))
+                extension is not (".png" or ".jpg" or ".jpeg" or ".jfif")))
             return Localise(OperationFailure.Create(FailureCode.OutputValidationFailed,
                 "The selected format is not supported for this operation.", isRetryable: true));
         if (!File.Exists(selectedPath))

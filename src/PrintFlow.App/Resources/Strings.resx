@@ -110,7 +110,7 @@
     <value>Choose file…</value>
   </data>
   <data name="Home_ImportFilter" xml:space="preserve">
-    <value>Images|*.png;*.jpg;*.jpeg;*.psd;*.pdf|All files|*.*</value>
+    <value>Images|*.png;*.jpg;*.jpeg;*.jfif;*.webp;*.psd;*.pdf|All files|*.*</value>
   </data>
   <data name="Home_RecentHeading" xml:space="preserve">
     <value>Recent processing</value>
@@ -355,6 +355,7 @@
   <data name="Rejection_Other" xml:space="preserve"><value>Other</value></data>
   <data name="Format_Png" xml:space="preserve"><value>PNG</value></data>
   <data name="Format_Jpeg" xml:space="preserve"><value>JPEG</value></data>
+  <data name="Format_Webp" xml:space="preserve"><value>WebP</value></data>
   <data name="Format_Tiff" xml:space="preserve"><value>TIFF</value></data>
   <data name="Format_Psd" xml:space="preserve"><value>PSD</value></data>
   <data name="Format_Pdf" xml:space="preserve"><value>PDF</value></data>
@@ -853,7 +854,7 @@
   <data name="Session_ManualHandoffCopyFailed" xml:space="preserve"><value>The image copy could not be saved. Check the image and the destination folder, then try again.</value></data>
   <data name="Session_ManualProcessingResult" xml:space="preserve"><value>Manual processing result</value></data>
   <data name="Session_ManualCutoutFilter" xml:space="preserve"><value>Transparent PNG (*.png)|*.png</value></data>
-  <data name="Session_ManualEnhancementFilter" xml:space="preserve"><value>Raster image (*.png;*.jpg;*.jpeg)|*.png;*.jpg;*.jpeg</value></data>
+  <data name="Session_ManualEnhancementFilter" xml:space="preserve"><value>Raster image (*.png;*.jpg;*.jpeg;*.jfif)|*.png;*.jpg;*.jpeg;*.jfif</value></data>
   <data name="Failure_ManualResultInvalid" xml:space="preserve"><value>Invalid manual result. Select a complete, readable image in a supported format.</value></data>
   <data name="Failure_ManualResultImport" xml:space="preserve"><value>The result could not be imported. Check file access and workspace storage, then submit again.</value></data>
   <data name="Failure_ManualResultTransparency" xml:space="preserve"><value>The background removal result must be a PNG with transparent pixels and visible artwork.</value></data>

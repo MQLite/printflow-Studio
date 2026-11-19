@@ -25,6 +25,8 @@
     "appsettings.json",
     "*.dll",
     "*/*.resources.dll",
+    "Licenses/Magick.NET.txt",
+    "Licenses/Magick.NET-Notice.txt",
     "createdump.exe"
   ],
 
@@ -34,8 +36,7 @@
     "updates. '*/*.resources.dll' is the framework's and the product's satellite resources, one",
     "culture folder deep. Neither widens the boundary to a second file type: no pattern here",
     "matches .pdb, .cs, .csproj, .db, .zip, .png, .tif, .psd, .pfx or a folder more than one level",
-    "deep, so a payload can only ever be executable code, its two runtime .json descriptors and",
-    "the shipped configuration default."
+    "deep. The WebP decoder's license notices are listed by exact path."
   ],
 
   "denyAlways": [
@@ -93,7 +94,12 @@
     "PrintFlow.Infrastructure.dll",
     "PrintFlow.App.deps.json",
     "PrintFlow.App.runtimeconfig.json",
-    "appsettings.json"
+    "appsettings.json",
+    "Magick.NET.Core.dll",
+    "Magick.NET-Q16-x64.dll",
+    "Magick.Native-Q16-x64.dll",
+    "Licenses/Magick.NET.txt",
+    "Licenses/Magick.NET-Notice.txt"
   ],
 
   "$requiredComment": [

@@ -15,6 +15,27 @@ namespace PrintFlow.Tests.Integration.AiDesign.Authoring;
 public sealed class AuthoringReferenceTests
 {
     [Theory]
+    [InlineData("person.JFIF", "attachment-01.jpg", 8, 6, false)]
+    [InlineData("person.WEBP", "attachment-01.webp", 4, 3, true)]
+    public async Task Reference_images_can_be_bound_and_previewed(
+        string fileName, string uploadName, int width, int height, bool alpha)
+    {
+        using TempWorkspace workspace = new();
+        var module = WithImages(workspace.Root);
+        var draft = await Create(module);
+        string path = workspace.CreateSourceFile(fileName,
+            alpha ? SyntheticImages.WebpWithAlpha() : SyntheticImages.Jpeg(width, height));
+
+        draft = await Bind(module, draft, "person-photo", path);
+        var asset = module.Export(draft).RequiredAttachments.ShouldHaveSingleItem();
+        asset.UploadName.ShouldBe(uploadName);
+        var preview = await new FileAiAuthoringAssetPreview(workspace.Root).LoadAsync(draft.Id, asset, default);
+        preview.Value.SourcePixelWidth.ShouldBe(width);
+        preview.Value.SourcePixelHeight.ShouldBe(height);
+        preview.Value.HasTransparency.ShouldBe(alpha);
+    }
+
+    [Theory]
     [InlineData(false)]
     [InlineData(true)]
     public async Task Reactivating_old_bindings_cannot_bypass_active_quota(bool recompose)

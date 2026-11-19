@@ -11,6 +11,10 @@ namespace PrintFlow.Tests.Fixtures;
 /// </summary>
 internal static class SyntheticImages
 {
+    // Lossless WebP with transparent, semitransparent and opaque pixels in the first row.
+    public static byte[] WebpWithAlpha() =>
+        Convert.FromBase64String("UklGRjQAAABXRUJQVlA4TCcAAAAvA4AAEBcgFkzxcLoTC6Z4dwAJBJIQBxtaQFD0nOkB1304qWpE/8MA");
+
     public static byte[] Png(int width = 4, int height = 3, double dpi = 300, bool alpha = true)
     {
         PixelFormat format = alpha ? PixelFormats.Bgra32 : PixelFormats.Bgr32;

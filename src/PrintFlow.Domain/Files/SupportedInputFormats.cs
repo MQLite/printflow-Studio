@@ -10,8 +10,8 @@ namespace PrintFlow.Domain.Files;
 /// offered its own filter, and the screen's refusal text would have had to restate a list of
 /// its own — three places to disagree about the same product rule.
 /// <para>
-/// The set is exactly the four inputs the MVP has a production path for: PNG and JPEG enter the
-/// Photoshop output flow directly (Jira 11405), PSD is prepared through Photoshop
+/// PNG and JPEG enter the Photoshop output flow directly (Jira 11405), WebP is converted to a
+/// managed PNG during import, and PSD is prepared through Photoshop
 /// (Jira 11406) and single-page PDF is rasterised at production DPI (Jira 11407). TIFF is
 /// deliberately absent: it is an <i>output</i> of this product, and design §9.2 gives it no
 /// input rule — accepting one would create a session that could only fail several steps later.
@@ -27,11 +27,15 @@ public static class SupportedInputFormats
 {
     /// <summary>The accepted input containers, in the order an operator message should list them.</summary>
     public static IReadOnlyList<ImageFormat> All { get; } =
-        [ImageFormat.Png, ImageFormat.Jpeg, ImageFormat.Psd, ImageFormat.Pdf];
+        [ImageFormat.Png, ImageFormat.Jpeg, ImageFormat.Webp, ImageFormat.Psd, ImageFormat.Pdf];
 
     /// <summary>Whether <paramref name="format"/> may start a processing session at all.</summary>
     public static bool IsSupported(ImageFormat format) =>
-        format is ImageFormat.Png or ImageFormat.Jpeg or ImageFormat.Psd or ImageFormat.Pdf;
+        format is ImageFormat.Png or ImageFormat.Jpeg or ImageFormat.Webp or ImageFormat.Psd or ImageFormat.Pdf;
+
+    /// <summary>Gives a JPEG interchange filename an extension understood by downstream tools.</summary>
+    public static string JpegCompatibleName(string fileName) =>
+        fileName.EndsWith(".jfif", StringComparison.OrdinalIgnoreCase) ? fileName[..^5] + ".jpg" : fileName;
 
     /// <summary>
     /// Whether PrintFlow decodes this container itself at import time, rather than preparing a
@@ -46,5 +50,5 @@ public static class SupportedInputFormats
     /// Their readability is established by their own preparation step.
     /// </remarks>
     public static bool IsDecodedAtImport(ImageFormat format) =>
-        format is ImageFormat.Png or ImageFormat.Jpeg;
+        format is ImageFormat.Png or ImageFormat.Jpeg or ImageFormat.Webp;
 }

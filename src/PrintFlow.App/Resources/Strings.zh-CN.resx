@@ -110,7 +110,7 @@
     <value>选择文件…</value>
   </data>
   <data name="Home_ImportFilter" xml:space="preserve">
-    <value>图片|*.png;*.jpg;*.jpeg;*.psd;*.pdf|所有文件|*.*</value>
+    <value>图片|*.png;*.jpg;*.jpeg;*.jfif;*.webp;*.psd;*.pdf|所有文件|*.*</value>
   </data>
   <data name="Home_RecentHeading" xml:space="preserve">
     <value>最近任务</value>
@@ -355,6 +355,7 @@
   <data name="Rejection_Other" xml:space="preserve"><value>其他</value></data>
   <data name="Format_Png" xml:space="preserve"><value>PNG</value></data>
   <data name="Format_Jpeg" xml:space="preserve"><value>JPEG</value></data>
+  <data name="Format_Webp" xml:space="preserve"><value>WebP</value></data>
   <data name="Format_Tiff" xml:space="preserve"><value>TIFF</value></data>
   <data name="Format_Psd" xml:space="preserve"><value>PSD</value></data>
   <data name="Format_Pdf" xml:space="preserve"><value>PDF</value></data>
@@ -843,7 +844,7 @@
   <data name="Session_ManualHandoffCopyFailed" xml:space="preserve"><value>无法保存图片副本。请检查图片和目标文件夹后重试。</value></data>
   <data name="Session_ManualProcessingResult" xml:space="preserve"><value>手动处理结果</value></data>
   <data name="Session_ManualCutoutFilter" xml:space="preserve"><value>透明 PNG (*.png)|*.png</value></data>
-  <data name="Session_ManualEnhancementFilter" xml:space="preserve"><value>栅格图像 (*.png;*.jpg;*.jpeg)|*.png;*.jpg;*.jpeg</value></data>
+  <data name="Session_ManualEnhancementFilter" xml:space="preserve"><value>栅格图像 (*.png;*.jpg;*.jpeg;*.jfif)|*.png;*.jpg;*.jpeg;*.jfif</value></data>
   <data name="Failure_ManualResultInvalid" xml:space="preserve"><value>手动处理结果无效。请选择完整、可读取且格式受支持的图像。</value></data>
   <data name="Failure_ManualResultImport" xml:space="preserve"><value>无法导入结果。请检查文件访问权限及工作区存储，然后重新提交。</value></data>
   <data name="Failure_ManualResultTransparency" xml:space="preserve"><value>去背景结果必须为 PNG，并同时包含透明像素和可见图案。</value></data>

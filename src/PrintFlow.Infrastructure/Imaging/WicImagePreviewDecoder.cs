@@ -159,8 +159,9 @@ public sealed class WicImagePreviewDecoder : IImagePreviewDecoder, IDiagnosticIm
             // OnLoad so the handle is released before this method returns: a preview must never
             // be the reason a later step cannot rewrite or move the file it looked at (§6).
             using FileStream stream = new(absolutePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            using MemoryStream? webpRaster = WebpRasterCodec.OpenPngForWebp(stream, cancellationToken);
             BitmapDecoder decoder = BitmapDecoder.Create(
-                stream,
+                webpRaster as Stream ?? stream,
                 BitmapCreateOptions.PreservePixelFormat | BitmapCreateOptions.IgnoreColorProfile,
                 BitmapCacheOption.OnLoad);
 
@@ -179,6 +180,10 @@ public sealed class WicImagePreviewDecoder : IImagePreviewDecoder, IDiagnosticIm
         catch (FileFormatException)
         {
             return Undisplayable($"'{Path.GetFileName(absolutePath)}' is not a container WIC can read.");
+        }
+        catch (InvalidDataException ex)
+        {
+            return Undisplayable(ex.Message);
         }
         catch (IOException ex)
         {

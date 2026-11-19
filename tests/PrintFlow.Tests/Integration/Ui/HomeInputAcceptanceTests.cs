@@ -1,10 +1,13 @@
 using System.IO;
+using ImageMagick;
 using PrintFlow.App.Resources;
 using PrintFlow.App.ViewModels;
 using PrintFlow.Domain.Files;
+using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Sessions;
 using PrintFlow.Tests.Fixtures;
+using PrintFlow.Workflow.Commands;
 using PrintFlow.Workflow.Services;
 
 namespace PrintFlow.Tests.Integration.Ui;
@@ -233,5 +236,94 @@ public sealed class HomeInputAcceptanceTests
         return listed.Value.Count == 0
             ? null
             : (await harness.Inner.Repository.LoadAsync(listed.Value.Single().Id, CancellationToken.None)).Value;
+    }
+
+    [Fact]
+    public async Task The_picker_offers_jfif_and_imports_its_original_jpeg_bytes()
+    {
+        using HomeScreenHarness harness = new();
+        byte[] original = SyntheticImages.Jpeg(8, 6);
+        harness.FilePicker.Path = harness.Inner.Workspace.CreateSourceFile("photo.JFIF", original);
+
+        await harness.Home.ChooseFileCommand.ExecuteAsync(null);
+
+        Strings.Home_ImportFilter.ShouldContain("*.jfif");
+        harness.Navigation.WorkflowSelectionFor.ShouldNotBeNull();
+        var stored = (await SoleSessionAsync(harness)).ShouldNotBeNull();
+        stored.Snapshot!.OriginalFileName.ShouldBe("photo.JFIF");
+        var revision = stored.Revisions.Single();
+        revision.Facts.Format.ShouldBe(ImageFormat.Jpeg);
+        File.ReadAllBytes(harness.Inner.FileWorkspace.ResolveAbsolute(revision.File)).ShouldBe(original);
+
+        var working = await harness.Inner.FileWorkspace.CreateWorkingCopyAsync(
+            stored.Session.Workspace, AttemptId.From(Guid.NewGuid()), revision.File, default);
+        working.Value.FileName.ShouldBe("photo.jpg");
+        File.ReadAllBytes(harness.Inner.FileWorkspace.ResolveAbsolute(working.Value)).ShouldBe(original);
+    }
+
+    [Fact]
+    public async Task Dropping_webp_keeps_the_original_and_routes_an_alpha_png_into_the_workflow()
+    {
+        using HomeScreenHarness harness = new();
+        byte[] original = SyntheticImages.WebpWithAlpha();
+        string path = harness.Inner.Workspace.CreateSourceFile("art.WEBP", original);
+
+        await harness.Home.DropFilesCommand.ExecuteAsync(new[] { path });
+
+        harness.Home.Notice.ShouldBeNull();
+        Strings.Home_ImportFilter.ShouldContain("*.webp");
+        SessionView imported = harness.Navigation.WorkflowSelectionFor.ShouldNotBeNull();
+        var stored = (await SoleSessionAsync(harness)).ShouldNotBeNull();
+        var root = stored.Revisions.Single(r => r.Id == stored.Snapshot!.RootRevisionId);
+        var raster = stored.Revisions.Single(r => r.Id == stored.Steps.Single(s => s.Step == StepKind.Import).CurrentRevisionId);
+        root.Facts.Format.ShouldBe(ImageFormat.Webp);
+        File.ReadAllBytes(harness.Inner.FileWorkspace.ResolveAbsolute(root.File)).ShouldBe(original);
+        File.ReadAllBytes(path).ShouldBe(original);
+        raster.SourceRevisionId.ShouldBe(root.Id);
+        raster.Facts.Format.ShouldBe(ImageFormat.Png);
+        raster.Facts.PixelWidth.ShouldBe(4);
+        raster.Facts.PixelHeight.ShouldBe(3);
+        raster.Facts.HasAlpha.ShouldBe(true);
+        byte[] pixels = SyntheticImages.ReadBgra(harness.Inner.FileWorkspace.ResolveAbsolute(raster.File), out _, out _);
+        new[] { pixels[3], pixels[7], pixels[11] }.ShouldBe(new byte[] { 0, 128, 255 });
+
+        var preview = await harness.Previews.GetPreviewAsync(imported.Id, root.Id, default);
+        preview.Value.SourcePixelWidth.ShouldBe(4);
+        preview.Value.HasTransparency.ShouldBeTrue();
+
+        var chosen = await harness.Sessions.ExecuteAsync(imported.Id,
+            new WorkflowCommand.SelectWorkflow(WorkflowType.GeneratePrintTiff), "tester", default);
+        chosen.IsSuccess.ShouldBeTrue();
+        var confirmed = await harness.Sessions.ExecuteAsync(imported.Id, new WorkflowCommand.ConfirmOriginal(), "tester", default);
+        confirmed.Value.Steps.Single(step => step.Step == StepKind.OriginalConfirmation).State.ShouldBe(StepState.Approved);
+        var reviewed = (await SoleSessionAsync(harness)).ShouldNotBeNull().Reviews.Single();
+        reviewed.SubjectId.ShouldBe(raster.Id.Value);
+        reviewed.ReviewedSha256.ShouldBe(raster.Sha256);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task An_unreadable_or_multiframe_webp_does_not_create_a_revision(bool animated)
+    {
+        using HomeScreenHarness harness = new();
+        byte[] bytes = "RIFF\0\0\0\0WEBP"u8.ToArray();
+        if (animated)
+        {
+            using MagickImageCollection frames = new();
+            frames.Add(new MagickImage(MagickColors.Red, 4, 3) { AnimationDelay = 10 });
+            frames.Add(new MagickImage(MagickColors.Blue, 4, 3) { AnimationDelay = 10 });
+            bytes = frames.ToByteArray(MagickFormat.WebP);
+        }
+        string path = harness.Inner.Workspace.CreateSourceFile("unreadable.webp", bytes);
+
+        await harness.Home.DropFilesCommand.ExecuteAsync([path]);
+
+        harness.Navigation.WorkflowSelectionFor.ShouldBeNull();
+        harness.Home.Notice!.ShouldContain(nameof(FailureCode.SourceImageUnreadable));
+        var stored = (await SoleSessionAsync(harness)).ShouldNotBeNull();
+        stored.Revisions.ShouldBeEmpty();
+        stored.Snapshot.ShouldBeNull();
+        File.ReadAllBytes(path).ShouldBe(bytes);
     }
 }

@@ -9,6 +9,7 @@ public enum ImageFormat
     Tiff,
     Psd,
     Pdf,
+    Webp,
 }
 
 /// <summary>Colour mode of a managed file, where it can be determined.</summary>
