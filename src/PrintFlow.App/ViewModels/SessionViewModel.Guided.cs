@@ -37,7 +37,7 @@ public sealed partial class SessionViewModel
     };
     public bool ExpandsGuidedFinalSave => GuidedPage != GuidedSessionPage.Review ||
         FinalSaveTargets.Any(row => row.Target.PendingReview is not null);
-    public string GuidedProcessingApplication => UsesPhotoshop ? "Photoshop"
+    public string GuidedProcessingApplication => UsesMagickNetTiff ? MagickNetTiffLabel : UsesPhotoshop ? PhotoshopTiffLabel
         : _runtime.DrivesExternalApplication ? Strings.Resolve("Session_GuidedMeitu") : "PrintFlow";
     public string GuidedProcessingState => _runtime.State switch
     {
@@ -216,6 +216,7 @@ public sealed partial class SessionViewModel
         OnPropertyChanged(nameof(ShowsGuidedWhiteInk));
         OnPropertyChanged(nameof(ShowsGuidedPreparation));
         OnPropertyChanged(nameof(ShowsGuidedPreflight));
+        NotifyTiffBackendSelection();
         OnPropertyChanged(nameof(ShowsGuidedBackgroundDecision));
         OnPropertyChanged(nameof(ShowsGuidedTrimParameters));
         OnPropertyChanged(nameof(ShowsGuidedRunStep));

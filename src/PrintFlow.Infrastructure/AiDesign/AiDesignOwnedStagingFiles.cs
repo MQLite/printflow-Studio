@@ -108,6 +108,14 @@ public static class AiDesignOwnedStagingFiles
         return $"returned-{objectVersion:N}.{extension}";
     }
 
+    internal static OwnedFile CreateOpenAiResult(string workspaceRoot, Guid requestId)
+    {
+        string root = RequestRoot(workspaceRoot, requestId);
+        PrepareDirectory(root);
+        return OwnedFile.Create(root, System.IO.Path.Combine(root, $".openai-{Guid.NewGuid():N}.tmp"),
+            System.IO.Path.Combine(root, "openai-result.png"));
+    }
+
     public static AttachmentBatch BeginAttachments(string workspaceRoot, Guid requestId)
         => AttachmentBatch.Begin(RequestRoot(workspaceRoot, requestId));
 

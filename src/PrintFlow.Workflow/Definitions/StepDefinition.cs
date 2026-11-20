@@ -38,7 +38,7 @@ public enum AdapterKind
 /// </param>
 /// <param name="ProducesRevision">Whether a successful attempt creates a new Revision.</param>
 /// <param name="Operation">The operation recorded on the Revision this step produces.</param>
-/// <param name="Adapter">Which adapter performs the work.</param>
+/// <param name="Adapter">The workflow's default adapter for the step.</param>
 public sealed record StepDefinition(
     StepKind Kind,
     int Ordinal,

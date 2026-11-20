@@ -1,6 +1,7 @@
 using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using PrintFlow.App.Resources;
+using PrintFlow.Domain.AiDesign;
 using PrintFlow.Domain.Files;
 using PrintFlow.Workflow.AiDesign;
 using PrintFlow.Workflow.Services;
@@ -11,6 +12,7 @@ public sealed class WorkTaskRow(WorkTaskSnapshot snapshot) : ObservableObject
 {
     public WorkTaskSnapshot Snapshot { get; } = snapshot;
     public string Title => Snapshot.Title ?? Strings.Resolve("WorkTask_Title");
+    public string Provider => Snapshot.Provider == AiDesignProvider.OpenAiApi ? "OpenAI API" : "ChatGPT Work";
     public string Stage => Strings.Resolve(Snapshot.Failure == WorkTaskFailure.UploadFailed ? "WorkTask_UploadFailed" : "WorkTask_" + Snapshot.Stage);
     public string Updated => Snapshot.UpdatedAtUtc.ToLocalTime().ToString("g", CultureInfo.CurrentCulture);
     public bool CanContinue => Snapshot.Stage == WorkTaskStage.Imported && Snapshot.ImportedSessionId is not null;

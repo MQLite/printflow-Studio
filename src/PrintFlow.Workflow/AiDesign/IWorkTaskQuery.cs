@@ -1,3 +1,4 @@
+using PrintFlow.Domain.AiDesign;
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Results;
@@ -10,7 +11,8 @@ public enum WorkTaskFailure { Unconfirmed, Setup, UploadFailed, ReceiverUnavaila
 public sealed record WorkTaskSnapshot(Guid RequestId, Guid AttemptId, long StateVersion,
     Guid? DraftId, string? Title, DateTimeOffset UpdatedAtUtc, WorkTaskStage Stage, Guid? WorkConversationId = null,
     SessionId? ImportedSessionId = null, ImageFormat? Format = null, int? PixelWidth = null, int? PixelHeight = null,
-    WorkTaskFailure? Failure = null, bool CanStopReceiving = false, Guid? FollowUpSourceRequestId = null)
+    WorkTaskFailure? Failure = null, bool CanStopReceiving = false, Guid? FollowUpSourceRequestId = null,
+    AiDesignProvider Provider = AiDesignProvider.ChatGptWork)
 {
     public bool IsVerifyingResult => Stage is WorkTaskStage.AwaitingVerification or WorkTaskStage.Validating;
     public bool HasReturnedImage => IsVerifyingResult || Stage == WorkTaskStage.Imported;

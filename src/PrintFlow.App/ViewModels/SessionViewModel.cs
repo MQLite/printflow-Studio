@@ -1159,7 +1159,7 @@ public sealed partial class SessionViewModel : ObservableObject
     public bool CanReenterAutomation => _session?.RequiresAutomationReentry == true;
 
     /// <summary>The confirmation text shown before a takeover is carried out (§26).</summary>
-    private bool UsesPhotoshop => _session?.CurrentStep?.Step == StepKind.PhotoshopOutput ||
+    private bool UsesPhotoshop => _session?.CurrentStep?.Step == StepKind.PhotoshopOutput && !UsesMagickNetTiff ||
         (_session?.CurrentStep?.Step == StepKind.OriginalConfirmation &&
          _session.OriginalSourceFormat is ImageFormat.Psd or ImageFormat.Pdf);
 
@@ -1931,7 +1931,8 @@ public sealed partial class SessionViewModel : ObservableObject
 
     /// <inheritdoc cref="RunReadinessNotice" />
     public bool HasRunReadinessNotice =>
-        _session?.CurrentStep is { Step: StepKind.PhotoshopOutput };
+        _session?.CurrentStep is { Step: StepKind.PhotoshopOutput } &&
+        !(UsesMagickNetTiff && HasMagickNetTiffUnavailable);
 
     /// <summary>
     /// Whether recorded millimetres exist that cannot be executed (§11).

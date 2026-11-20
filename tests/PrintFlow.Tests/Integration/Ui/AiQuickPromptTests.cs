@@ -316,12 +316,15 @@ internal sealed class PromptWorkbenchFixture : IDisposable
         PrintFlow.Workflow.AiDesign.IWorkTaskQuery? tasks = null, WorkTaskTracker? tracker = null,
         PrintFlow.Workflow.Services.IArtefactPreviewService? previews = null,
         PrintFlow.Workflow.AiDesign.IAiDesignTextSubmission? submission = null,
-        PrintFlow.Workflow.AiDesign.IWorkConversationLauncher? launcher = null)
+        PrintFlow.Workflow.AiDesign.IWorkConversationLauncher? launcher = null,
+        PrintFlow.Workflow.AiDesign.IAiDesignApiGeneration? api = null,
+        PrintFlow.App.Navigation.IAiDesignApiConsent? consent = null)
     {
         Catalog = new(new FileAiTemplateLibraryStore(Root.Root));
         Module = new(new FileAiAuthoringDraftStore(Root.Root), Catalog, new FileAiDesignAttachments(Root.Root));
         Vm = new(Module, Catalog, new FileAiAuthoringAssetPreview(Root.Root), Picker, Clipboard, leavePrompt,
-            textSubmission: submission, workTasks: tasks, workTracker: tracker, workPreviews: previews, workLauncher: launcher);
+            textSubmission: submission, workTasks: tasks, workTracker: tracker, workPreviews: previews, workLauncher: launcher,
+            apiGeneration: api, apiConsent: consent);
     }
     public void Dispose() => Root.Dispose();
     public static string Png(string root, int width)

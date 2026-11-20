@@ -187,7 +187,7 @@ public sealed class PresetPhotoshopBaselineProvider : IPhotoshopBaselineProvider
             colourSettings.Value));
     }
 
-    private static OperationResult<PhotoshopColourSettingsContract> ReadColourSettings(JsonElement contract)
+    internal static OperationResult<PhotoshopColourSettingsContract> ReadColourSettings(JsonElement contract)
     {
         JsonElement settings = contract.TryGetProperty("colourSettings", out JsonElement value)
             ? value

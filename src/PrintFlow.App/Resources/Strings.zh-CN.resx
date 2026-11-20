@@ -455,6 +455,12 @@
   <data name="Session_RunNotReady" xml:space="preserve">
     <value>请先确认本图片的印刷尺寸；如需放大，还须单独授权。</value>
   </data>
+  <data name="ProductionTiff_BackendHeading" xml:space="preserve"><value>TIFF 生成方式</value></data>
+  <data name="ProductionTiff_MagickUnavailable" xml:space="preserve"><value>此工作站无法使用 Magick.NET。</value></data>
+  <data name="ProductionTiff_MagickUnsupportedInput" xml:space="preserve"><value>Magick.NET 需要受支持且尺寸在允许范围内的 PNG 或 JPEG 图片。</value></data>
+  <data name="ProductionTiff_MagickDimensionsLimit" xml:space="preserve"><value>本地 TIFF 的输出尺寸最多 8192 像素/边、2400 万像素。请缩小目标尺寸或切换到 Photoshop。</value></data>
+  <data name="ProductionTiff_MagickPresetMismatch" xml:space="preserve"><value>Magick.NET 需要指定 sRGB IEC61966-2.1 和 Coated FOGRA39 的已验证生产预设。</value></data>
+  <data name="ProductionTiff_MagickOutputInvalid" xml:space="preserve"><value>Magick.NET 无法生成通过验证的带 W1 通道的 CMYK TIFF。请检查源图和白墨选项，或选择 Photoshop。</value></data>
   <data name="Session_DimensionReviewRequired" xml:space="preserve">
     <value>此尺寸来自旧版精确尺寸规则，或所依据的图片已变化。继续前，请重新确认最大印刷尺寸。</value>
   </data>
@@ -1670,6 +1676,21 @@
   <data name="AiMemorial_Background" xml:space="preserve"><value>预览底色</value></data>
   <data name="AiMemorial_ProofReduced" xml:space="preserve"><value>显示图片已缩小。保存的 PNG 保留上方所示的完整像素尺寸。</value></data>
   <data name="AiPrompt_AutoGenerate" xml:space="preserve"><value>生成</value></data>
+  <data name="AiPrompt_GenerationProvider" xml:space="preserve"><value>生成方式</value></data>
+  <data name="AiPrompt_GenerationAlreadyActive" xml:space="preserve"><value>这份草稿已有生成任务正在进行。</value></data>
+  <data name="AiPrompt_OpenAiConsent" xml:space="preserve"><value>是否将提示词和其中引用的图片发送到 OpenAI API 生成设计？即使取消或超时，本次请求仍可能产生费用。</value></data>
+  <data name="AiPrompt_OpenAiGenerate" xml:space="preserve"><value>通过 OpenAI API 生成</value></data>
+  <data name="AiPrompt_OpenAiGenerating" xml:space="preserve"><value>正在通过 OpenAI API 生成图片…</value></data>
+  <data name="AiPrompt_OpenAiCancel" xml:space="preserve"><value>取消生成</value></data>
+  <data name="AiPrompt_OpenAiCancelled" xml:space="preserve"><value>Studio 已取消请求。再次生成前请检查 OpenAI 用量。</value></data>
+  <data name="AiPrompt_OpenAiUnavailable" xml:space="preserve"><value>此工作站暂时无法使用 OpenAI API 生成设计。</value></data>
+  <data name="AiPrompt_OpenAiAccessDenied" xml:space="preserve"><value>OpenAI 拒绝访问。请检查 API 密钥，以及项目是否有权使用已配置的图像模型。</value></data>
+  <data name="AiPrompt_OpenAiRejected" xml:space="preserve"><value>OpenAI 拒绝了生成请求。请检查提示词和参考图。</value></data>
+  <data name="AiPrompt_OpenAiPromptLength" xml:space="preserve"><value>请输入不超过 32,000 字符的生图提示词。</value></data>
+  <data name="AiPrompt_OpenAiReferenceUnavailable" xml:space="preserve"><value>有参考图未能通过核验。请重新选择后再试。</value></data>
+  <data name="AiPrompt_OpenAiInvalidResult" xml:space="preserve"><value>OpenAI 未返回可用的 PNG 图片。</value></data>
+  <data name="AiPrompt_OpenAiStorageFailed" xml:space="preserve"><value>Studio 无法读取草稿的生成记录或导入图片。请检查工作区和存储空间。</value></data>
+  <data name="AiPrompt_OpenAiHistoryFailed" xml:space="preserve"><value>图片已导入，可从「最近任务」打开。Studio 未能更新 AI 任务历史。</value></data>
   <data name="AiPrompt_WorkSetup" xml:space="preserve"><value>请先登记 Chrome 桥接，然后重试。</value></data>
   <data name="AiPrompt_WorkAttachmentRequired" xml:space="preserve"><value>请补齐提示词引用的附件，再提交生图。</value></data>
   <data name="AiPrompt_WorkUploadFailed" xml:space="preserve"><value>Work 未能确认所有必需附件。提示词和附件已保存在 Studio。</value></data>

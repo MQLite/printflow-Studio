@@ -1,5 +1,6 @@
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
+using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Reviews;
 using PrintFlow.Domain.Sessions;
 using PrintFlow.Domain.Settings;
@@ -229,6 +230,7 @@ public sealed class TransitionMatrixTests
                 global::PrintFlow.Domain.Outputs.WhiteUnderbaseBranch.W1_1px, "matrix probe"),
             CommandKind.SetTrimParameters => new WorkflowCommand.SetTrimParameters(
                 global::PrintFlow.Domain.Trimming.TrimMargin.Uniform(2)),
+            CommandKind.SetProductionTiffBackend => new WorkflowCommand.SetProductionTiffBackend(ProductionTiffBackend.Photoshop),
             CommandKind.SetImageProcessingSelection => new WorkflowCommand.SetImageProcessingSelection(
                 step, SessionImageProcessingSelection.Compatible),
 

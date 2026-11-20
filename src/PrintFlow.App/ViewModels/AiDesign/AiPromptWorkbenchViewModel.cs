@@ -24,6 +24,8 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
     private readonly IAiPromptClipboard clipboard;
     private readonly AiMemorialServices? memorial;
     private readonly IAiDesignTextSubmission? textSubmission;
+    private readonly IAiDesignApiGeneration? apiGeneration;
+    private readonly IAiDesignApiConsent? apiConsent;
     private readonly SemaphoreSlim operations = new(1, 1);
     private long epoch, editGeneration;
     private bool active, busy;
@@ -120,12 +122,15 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
         IFilePicker picker, IAiPromptClipboard clipboard, IAiDraftLeavePrompt? leavePrompt = null, INavigationService? navigation = null,
         AiMemorialServices? memorial = null, IAiDesignTextSubmission? textSubmission = null,
         IWorkTaskQuery? workTasks = null, WorkTaskTracker? workTracker = null,
-        PrintFlow.Workflow.Services.IArtefactPreviewService? workPreviews = null, IWorkConversationLauncher? workLauncher = null)
+        PrintFlow.Workflow.Services.IArtefactPreviewService? workPreviews = null, IWorkConversationLauncher? workLauncher = null,
+        IAiDesignApiGeneration? apiGeneration = null, IAiDesignApiConsent? apiConsent = null)
     {
         this.module = module; this.catalog = catalog; this.preview = preview; this.picker = picker; this.clipboard = clipboard;
         this.leavePrompt = leavePrompt; this.navigation = navigation;
         this.memorial = memorial;
         this.textSubmission = textSubmission;
+        this.apiGeneration = apiGeneration;
+        this.apiConsent = apiConsent;
         this.workTasks = workTasks; this.workTracker = workTracker; this.workPreviews = workPreviews;
         this.workLauncher = workLauncher;
         OpenWorkResultPreviewCommand = new AsyncRelayCommand(OpenWorkResultPreviewAsync);
@@ -150,8 +155,9 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
             if (this.navigation is IAiDesignNavigation ai) await ai.GoToAiWorkTasksAsync(Draft?.Id, ct);
         });
         ContinueWorkResultCommand = new AsyncRelayCommand(ContinueWorkResultAsync);
-        AutoGenerateCommand = new AsyncRelayCommand(SubmitToWorkAsync,
+        AutoGenerateCommand = new AsyncRelayCommand(GenerateAsync,
             () => CanEdit && Draft is not null && !IsWaitingForWorkResult && !isLoadingWorkCard && !workCardUnavailable);
+        CancelOpenAiGenerationCommand = new RelayCommand(AutoGenerateCommand.Cancel);
         StopReceivingCommand = new AsyncRelayCommand(StopReceivingAsync);
         SaveDraftCommand = new AsyncRelayCommand(async () => { await FlushAsync(default); });
         EditTemplateCommand = new AsyncRelayCommand(EditTemplateAsync);
@@ -207,6 +213,7 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
     {
         active = false; epoch++; ClearPending();
         UnsubscribeFromWorkResults();
+        if (CanCancelOpenAiGeneration) CancelOpenAiGenerationCommand.Execute(null);
         ResetWorkCard();
         CancelMemorialTaskCommand.Execute(null);
         ResetMemorialLayoutEditor(); ResetMemorialResult();

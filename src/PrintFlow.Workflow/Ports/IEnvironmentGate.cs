@@ -27,7 +27,7 @@ public enum AdapterExecutionMode
 /// one with <see cref="FailureCode.EnvironmentNotVerified"/>, because nothing in this Epic has
 /// verified a real workstation (no Meitu/Photoshop executable check, no resolution/DPI check,
 /// no display or Action-hash check — those belong to Epic 11500). The invariant this seam
-/// exists to make structural: a production adapter can never be invoked without first passing
+/// exists to make structural: a production desktop adapter can never be invoked without first passing
 /// through here, regardless of what future implementation replaces today's foundation gate.
 /// </remarks>
 public interface IEnvironmentGate

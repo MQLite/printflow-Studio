@@ -52,6 +52,35 @@ public sealed class FileAiDesignRequestStore : IAiDesignRequestStore
     });
     public Task<OperationResult<AiDesignRequest>> ReadAsync(Guid id, CancellationToken ct) => Guard(async () =>
     { await using var gate = await LockAsync(id, ct); return OperationResult.Ok(await ReadCoreAsync(id, ct)); });
+
+    internal Task<OperationResult<AiDesignRequest>> RecordOpenAiResultAsync(WorkDraftReference draft, string prompt,
+        AiDesignCandidate candidate, PrintFlow.Domain.Ids.SessionId sessionId, CancellationToken ct) => Guard(async () =>
+    {
+        Guid id = candidate.File.RequestId;
+        await using var gate = await LockAsync(id, ct);
+        if (File.Exists(Authority(id)) || sessionId.Value != id)
+            return Fail("OpenAI result authority does not match its session.");
+
+        var now = _clock.GetUtcNow();
+        var request = new AiDesignRequest
+        {
+            RequestId = id,
+            WorkspaceIdentity = WorkspaceIdentity,
+            Provider = AiDesignProvider.OpenAiApi,
+            Prompt = new(PromptTemplateService.WorkbenchTemplate, 1, new Dictionary<string, string>(), prompt, [], ""),
+            WorkDraft = draft,
+            Token = AiDesignTransitions.NewToken(),
+            CreatedAtUtc = now,
+            UpdatedAtUtc = now,
+            State = AiDesignState.Imported,
+            LastSuccessfulStage = AiDesignState.Imported,
+            Candidate = candidate,
+            ImportedSessionId = sessionId
+        };
+        if (!ValidShape(request)) return Fail("Invalid OpenAI result authority.");
+        await WriteAsync(request, ct);
+        return OperationResult.Ok(request);
+    });
     internal Task<OperationResult<AiDesignRequest>> CreateWorkFollowUpAsync(Guid sourceId, Guid id, string text,
         CancellationToken ct) => Guard(async () =>
     {
@@ -113,6 +142,12 @@ public sealed class FileAiDesignRequestStore : IAiDesignRequestStore
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { return false; }
     }
+
+    internal bool BlocksNewSubmission(AiDesignRequest request) =>
+        (AiDesignTransitions.IsRunning(request.State) && LoopbackWorkResultImport.IsOwnerAlive(request)) ||
+        (request.State == AiDesignState.Submitted && request.WorkConversationId is not null && HasWorkResultTicket(request.RequestId)) ||
+        (AiDesignTransitions.CanResumeWorkResult(request) &&
+            (request.Failure?.Code == "WorkResultPending" || HasWorkResultTicket(request.RequestId)));
 
     internal async Task<OperationResult<AiDesignRequest?>> FindSnapshotAsync(Guid id, CancellationToken ct)
     {
@@ -202,6 +237,7 @@ public sealed class FileAiDesignRequestStore : IAiDesignRequestStore
     }
     private static bool ValidShape(AiDesignRequest r)
     {
+        if (!Enum.IsDefined(r.Provider)) return false;
         if (r.WorkDraft is { } work && (work.DraftId == Guid.Empty || string.IsNullOrWhiteSpace(work.Title))) return false;
         if (r.WorkFollowUp is { } prior && (prior.RequestId == Guid.Empty || prior.RequestId == r.RequestId ||
             prior.ConversationId == Guid.Empty || !Sha256.TryParse(prior.ResultSha256.Value, out _))) return false;

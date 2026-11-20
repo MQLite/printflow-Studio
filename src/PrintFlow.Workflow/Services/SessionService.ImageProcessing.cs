@@ -117,7 +117,7 @@ public sealed partial class SessionService
             return OperationResult.Fail<StepWork>(FailureCode.OutputValidationFailed,
                 "Image processing returned a file other than the assigned output.");
 
-        var verifiedInput = await VerifyImageProcessingInputAsync(source, workingCopy, cancellationToken).ConfigureAwait(false);
+        var verifiedInput = await VerifyWorkingCopyAsync(source, workingCopy, cancellationToken).ConfigureAwait(false);
         if (verifiedInput.IsFailure)
         {
             OperationFailure failure = verifiedInput.Failure;
@@ -136,30 +136,30 @@ public sealed partial class SessionService
         return OperationResult.Ok(new StepWork(output, inspected.Value, result.Value.AdapterNotes));
     }
 
-    private async Task<OperationResult<Sha256>> VerifyImageProcessingInputAsync(
+    private async Task<OperationResult<Sha256>> VerifyWorkingCopyAsync(
         Revision source, WorkspaceFileRef workingCopy, CancellationToken cancellationToken)
     {
         var copy = await InspectAsync(workingCopy, cancellationToken).ConfigureAwait(false);
         if (copy.IsFailure || copy.Value.Facts.Sha256 != source.Sha256)
             return OperationResult.Fail<Sha256>(FailureCode.RevisionIntegrityMismatch,
-                "The working copy differs from the verified image processing input.");
+                "The working copy differs from the verified processing input.");
         return await _integrityGuard.VerifyAsync(source, cancellationToken).ConfigureAwait(false);
     }
 
-    private async Task<OperationResult<SessionView>> CloseConflictingImageAttemptAsync(
+    private async Task<OperationResult<SessionView>> CloseConflictingProducingAttemptAsync(
         ProducingWork work, ProcessingAttempt attempt, CommandContext context, OperationFailure conflict)
     {
-        if (await ReloadRunningImageAttemptAsync(attempt).ConfigureAwait(false) is { } latest)
+        if (await ReloadRunningAttemptAsync(attempt).ConfigureAwait(false) is { } latest)
         {
             return await FailAttemptAsync(latest, latest.ToSnapshot(ConfiguredRecommendations()), context,
                 work.Step, attempt, conflict, CancellationToken.None,
-                imageProcessing: true, usesImageBackend: work.ImageProcessing?.Backend is not null,
+                requiresWriteGuard: true, suppressLockRelease: work.HasLocalCancellation,
                 retryConflict: false).ConfigureAwait(false);
         }
         return OperationResult.Fail<SessionView>(conflict);
     }
 
-    private async Task<SessionAggregate?> ReloadRunningImageAttemptAsync(ProcessingAttempt attempt)
+    private async Task<SessionAggregate?> ReloadRunningAttemptAsync(ProcessingAttempt attempt)
     {
         var loaded = await _repository.LoadAsync(attempt.SessionId, CancellationToken.None).ConfigureAwait(false);
         return loaded.IsSuccess && loaded.Value is { } latest &&

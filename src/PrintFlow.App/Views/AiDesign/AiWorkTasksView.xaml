@@ -85,6 +85,7 @@
             </Border>
             <StackPanel VerticalAlignment="Center">
              <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap"/>
+             <TextBlock Text="{Binding Provider}" FontSize="12"/>
              <TextBlock Text="{Binding ImageFacts}" FontSize="12" TextWrapping="Wrap"/>
             </StackPanel>
            </DockPanel>

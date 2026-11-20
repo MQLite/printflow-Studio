@@ -2074,6 +2074,30 @@
                                        Margin="0,6,0,0"
                                        AutomationProperties.AutomationId="Session.PrintDimensions.DraftEnlargementNote"
                                        Visibility="{Binding HasPreflightEnlargementNote, Converter={StaticResource BoolToVisibility}}" />
+                            <StackPanel Margin="0,12,0,0"
+                                        Visibility="{Binding ShowsTiffBackendSelector, Converter={StaticResource BoolToVisibility}}"
+                                        AutomationProperties.Name="{Binding TiffBackendHeading}">
+                                <TextBlock Text="{Binding TiffBackendHeading}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                <WrapPanel>
+                                    <local:SessionRadioButton Style="{StaticResource PF.Input.RadioButton}"
+                                                              Content="{Binding PhotoshopTiffLabel}" Margin="0,0,12,0"
+                                                              GroupName="ProductionTiffBackend"
+                                                              IsChecked="{Binding IsPhotoshopTiffSelected, Mode=TwoWay}"
+                                                              IsEnabled="{Binding CanSelectPhotoshopTiff}"
+                                                              AutomationProperties.AutomationId="Session.PrintDimensions.Backend.Photoshop" />
+                                    <local:SessionRadioButton Style="{StaticResource PF.Input.RadioButton}"
+                                                              Content="{Binding MagickNetTiffLabel}" GroupName="ProductionTiffBackend"
+                                                              IsChecked="{Binding IsMagickNetTiffSelected, Mode=TwoWay}"
+                                                              IsEnabled="{Binding CanSelectMagickNetTiff}"
+                                                              AutomationProperties.AutomationId="Session.PrintDimensions.Backend.MagickNet"
+                                                              AutomationProperties.HelpText="{Binding MagickNetTiffUnavailableText, TargetNullValue=''}" />
+                                </WrapPanel>
+                                <TextBlock Text="{Binding MagickNetTiffUnavailableText}" TextWrapping="Wrap"
+                                           Foreground="{DynamicResource PF.Brush.Muted}"
+                                           Visibility="{Binding HasMagickNetTiffUnavailable, Converter={StaticResource BoolToVisibility}}"
+                                           AutomationProperties.AutomationId="Session.PrintDimensions.Backend.Availability"
+                                           AutomationProperties.LiveSetting="Polite" />
+                            </StackPanel>
                             <!-- The unchanged pixel and PPI facts, one click away. View state only. -->
                             <local:SessionExpander Header="{Binding SizeTechnicalDetailsLabel}"
                                       Margin="0,8,0,0"

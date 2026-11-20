@@ -84,6 +84,7 @@ public sealed partial class SessionService : ISessionService
     private readonly IFileInspector _fileInspector;
     private readonly IMeituProcessor _meitu;
     private readonly IPhotoshopOutputProcessor _photoshop;
+    private readonly ILocalProductionTiffProcessor? _localProductionTiff;
     private readonly IPdfPreparationProcessor _pdf;
     private readonly ITrimProcessor _trim;
     private readonly IManualCropProcessor _manualCrop;
@@ -172,7 +173,8 @@ public sealed partial class SessionService : ISessionService
         IWorkstationAutomationLeaseManager? automationLeases = null,
         ICorrectionPackageStore? correctionPackages = null,
         IWebpRasterPreparer? webp = null,
-        IEnumerable<IImageProcessingBackend>? imageProcessingBackends = null)
+        IEnumerable<IImageProcessingBackend>? imageProcessingBackends = null,
+        ILocalProductionTiffProcessor? localProductionTiff = null)
     {
         ArgumentNullException.ThrowIfNull(engine);
         _webp = webp;
@@ -196,6 +198,7 @@ public sealed partial class SessionService : ISessionService
         _fileInspector = fileInspector;
         _meitu = meitu;
         _photoshop = photoshop;
+        _localProductionTiff = localProductionTiff;
         _pdf = pdf ?? new UnavailablePdfPreparationProcessor();
         _trim = trim;
         _manualCrop = manualCrop;
@@ -438,15 +441,16 @@ public sealed partial class SessionService : ISessionService
     {
         // Every authority-changing command shares the delivery/retention gate. Complete's
         // retention path calls its under-gate core, so this lease is acquired only once.
-        bool preventQueuedImageCommand = command is WorkflowCommand.SetImageProcessingSelection or
+        bool preventQueuedProcessingCommand = command is WorkflowCommand.SetImageProcessingSelection or
+            WorkflowCommand.SetProductionTiffBackend or
             WorkflowCommand.SubmitManualCrop or
-            WorkflowCommand.StartStep { Step: StepKind.Enhancement or StepKind.BackgroundRemoval or StepKind.Trim };
-        using IDisposable? completionLease = preventQueuedImageCommand
+            WorkflowCommand.StartStep { Step: StepKind.Enhancement or StepKind.BackgroundRemoval or StepKind.Trim or StepKind.PhotoshopOutput };
+        using IDisposable? completionLease = preventQueuedProcessingCommand
             ? await SessionCompletionGate.TryEnterAsync(id, cancellationToken)
             : await SessionCompletionGate.EnterAsync(id, cancellationToken);
         if (completionLease is null)
             return OperationResult.Fail<SessionView>(FailureCode.PreconditionNotMet,
-                "This task is busy. Image processing commands may only be sent between attempts.");
+                "This task is busy. Processing commands may only be sent between attempts.");
         return await ExecuteCoreAsync(id, command, operatorName, expectedFailureAttemptId: null, cancellationToken);
     }
 
@@ -628,6 +632,11 @@ public sealed partial class SessionService : ISessionService
             return OperationResult.Fail<SessionView>(MapRejection(transition.Rejection!));
         }
 
+        if (command is WorkflowCommand.SetProductionTiffBackend { Backend: ProductionTiffBackend.MagickNet } &&
+            MagickNetTiffUnavailable(FindRevision(aggregate, snapshot.UpstreamRevisionOf(StepKind.PhotoshopOutput)),
+                snapshot.UsablePhotoshopPreparation) is { } tiffUnavailable)
+            return OperationResult.Fail<SessionView>(tiffUnavailable);
+
         if (command is WorkflowCommand.SelectWorkflow && snapshot.ImageProcessingDefaultsDeferred &&
             transition.State.Definition.Contains(StepKind.Trim))
         {
@@ -668,7 +677,7 @@ public sealed partial class SessionService : ISessionService
             // it, so a promotion or a disposal that did not happen cannot leave a reviewed state
             // behind. Every other command — and every review of a Revision that is not a
             // PrintOutput — passes straight through with nothing to do.
-            OperationResult<PrintOutput?> lifecycle =
+            OperationResult<FinalReviewFileWork> lifecycle =
                 await PerformFinalReviewFileWorkAsync(aggregate, command, context, cancellationToken);
             if (lifecycle.IsFailure)
             {
@@ -678,7 +687,7 @@ public sealed partial class SessionService : ISessionService
             ProcessingSession updatedSession = MergeSession(aggregate.Session, state, transition.Effects, context.NowUtc);
             SessionMutation mutation = BuildMetadataMutation(
                 aggregate, updatedSession, state, transition.Effects, context,
-                upsertOutputs: lifecycle.Value is { } lifecycleOutput ? [lifecycleOutput] : null);
+                upsertOutputs: lifecycle.Value.UpdatedOutput is { } lifecycleOutput ? [lifecycleOutput] : null);
 
             // The handoff and READY land together, or neither does (design §6.2 commit 2).
             if (command is WorkflowCommand.RequestColleagueCorrection && correction is { Purpose: CorrectionPurpose.Prepare })
@@ -687,10 +696,11 @@ public sealed partial class SessionService : ISessionService
                     CorrectionRequestChanges = [new CorrectionRequestChange.MarkReady(correction.RequestId, context.NowUtc)],
                 };
 
-            if (snapshot.Definition.Contains(StepKind.Trim) || state.Definition.Contains(StepKind.Trim))
+            if (snapshot.Definition.Contains(StepKind.Trim) || state.Definition.Contains(StepKind.Trim) ||
+                snapshot.Definition.Contains(StepKind.PhotoshopOutput) || state.Definition.Contains(StepKind.PhotoshopOutput))
                 mutation = mutation with
                 {
-                    ImageProcessingGuard = new(aggregate.Session, aggregate.Steps, command switch
+                    ImageProcessingGuard = new(lifecycle.Value.ExpectedSession, aggregate.Steps, command switch
                     {
                         WorkflowCommand.SetImageProcessingSelection selection =>
                             FindRevision(aggregate, snapshot.UpstreamRevisionOf(selection.Step)),
@@ -1100,6 +1110,9 @@ public sealed partial class SessionService : ISessionService
         public Sha256? ExpectedSelectedHash { get; init; }
         public ImageProcessingExecutionPlan? ImageProcessing { get; init; }
         public ImageUploadConfirmation? UploadConfirmation { get; init; }
+        public ILocalProductionTiffProcessor? LocalProductionTiff { get; init; }
+        public bool HasLocalCancellation => ImageProcessing?.Backend is not null || LocalProductionTiff is not null;
+        public bool RequiresWriteGuard => ImageProcessing is not null || Step == StepKind.PhotoshopOutput;
     }
 
     /// <summary>
@@ -1327,7 +1340,12 @@ public sealed partial class SessionService : ISessionService
 
         var imageProcessing = ImageProcessingViewOf(state, attempts);
         var availableCommands = _engine.AvailableCommands(state);
-        if (imageProcessing?.Unavailable is not null)
+        RevisionId? tiffInput = state.UpstreamRevisionOf(StepKind.PhotoshopOutput);
+        OperationFailure? magickUnavailable = availableCommands.Contains(CommandKind.SetProductionTiffBackend)
+            ? MagickNetTiffUnavailable(revisions.FirstOrDefault(r => r.Id == tiffInput), state.UsablePhotoshopPreparation)
+            : null;
+        if (imageProcessing?.Unavailable is not null ||
+            (state.ProductionTiffBackend == ProductionTiffBackend.MagickNet && magickUnavailable is not null))
             availableCommands = availableCommands.Where(kind => kind != CommandKind.StartStep).ToArray();
         SessionView view = SessionView.From(
             state, availableCommands, revisions, outputs, attempts, ProcessingMode,
@@ -1341,7 +1359,11 @@ public sealed partial class SessionService : ISessionService
             _presetProvider.GetPrintSizeRecommendations() is { IsSuccess: true } configured
                 ? configured.Value.All
                 : [],
-            enlargementOfferId) with { ImageProcessingExecution = imageProcessing };
+            enlargementOfferId) with
+        {
+            ImageProcessingExecution = imageProcessing,
+            MagickNetTiffUnavailable = magickUnavailable,
+        };
 
         RecordedSize? currentSize = CurrentRecordedSize(state);
         if (currentSize is not null)
@@ -1368,6 +1390,20 @@ public sealed partial class SessionService : ISessionService
         };
 
         return OperationResult.Ok(view);
+    }
+
+    private OperationFailure? MagickNetTiffUnavailable(Revision? input, PhotoshopPreparation? preparation)
+    {
+        if (_localProductionTiff is null)
+            return OperationFailure.Create(FailureCode.AdapterUnavailable,
+                "The local production TIFF processor is unavailable in this installation.",
+                messageKey: "ProductionTiff_MagickUnavailable");
+        if (input is null)
+            return OperationFailure.Create(FailureCode.PreconditionNotMet,
+                "There is no approved prepared raster for production TIFF export.",
+                messageKey: "ProductionTiff_MagickUnsupportedInput");
+
+        return _localProductionTiff.GetAvailability(input.Facts, preparation);
     }
 
     /// <summary>
@@ -1685,7 +1721,7 @@ public sealed partial class SessionService : ISessionService
         SessionMutation mutation = new(
             aggregate.Session with { UpdatedAtUtc = context.NowUtc },
             aggregate.Steps, [], [invalidation], [], [], [], null, null);
-        if (snapshot.Definition.Contains(StepKind.Trim))
+        if (snapshot.Definition.Contains(StepKind.Trim) || snapshot.Definition.Contains(StepKind.PhotoshopOutput))
             mutation = mutation with { ImageProcessingGuard = new(aggregate.Session, aggregate.Steps) };
         await _repository.CommitAsync(mutation, cancellationToken);
 
@@ -1699,13 +1735,16 @@ public sealed partial class SessionService : ISessionService
     // Final production-TIFF review: promotion and disposal (Epic 11400 Part C2B)
     // -------------------------------------------------------------------------------------
 
+    private readonly record struct FinalReviewFileWork(PrintOutput? UpdatedOutput, ProcessingSession ExpectedSession);
+    private readonly record struct ApprovedTiffReservation(WorkspaceFileRef Destination, ProcessingSession Session);
+
     /// <summary>
     /// Carries out the file lifecycle a final review decision implies, before the transaction
     /// that records the decision (Part C2B §6, §10, §12, §15).
     /// </summary>
     /// <remarks>
-    /// Returns the updated <see cref="PrintOutput"/> for the caller to commit, or <c>null</c> when
-    /// the command is not a decision about a production output and there is no file work to do.
+    /// Returns any updated <see cref="PrintOutput"/> and the session version the final commit
+    /// must compare against. A new approval reservation records a newer version before the copy.
     /// A failure means nothing was recorded: the step is still <c>ReviewRequired</c>, no approval
     /// and no rejection exists, and the operator can decide again once the cause is cleared.
     /// <para>
@@ -1721,13 +1760,13 @@ public sealed partial class SessionService : ISessionService
     /// the independent re-hash of the <i>promoted</i> bytes, which is a different question.
     /// </para>
     /// </remarks>
-    private async Task<OperationResult<PrintOutput?>> PerformFinalReviewFileWorkAsync(
+    private async Task<OperationResult<FinalReviewFileWork>> PerformFinalReviewFileWorkAsync(
         SessionAggregate aggregate, WorkflowCommand command, CommandContext context,
         CancellationToken cancellationToken)
     {
         if (command is not (WorkflowCommand.Approve or WorkflowCommand.Reject))
         {
-            return OperationResult.Ok<PrintOutput?>(null);
+            return OperationResult.Ok(new FinalReviewFileWork(null, aggregate.Session));
         }
 
         (StepKind step, bool isApproval) = command switch
@@ -1745,12 +1784,13 @@ public sealed partial class SessionService : ISessionService
             // A reviewed Revision that has no twin PrintOutput is an ordinary intermediate
             // artefact — an enhanced PNG, a cut-out, a trim. Those have never had a promotion or
             // a disposal on approval and do not gain one here (§19).
-            return OperationResult.Ok<PrintOutput?>(null);
+            return OperationResult.Ok(new FinalReviewFileWork(null, aggregate.Session));
         }
 
         return isApproval
             ? await PromoteApprovedOutputAsync(aggregate, output, revision, context, cancellationToken)
-            : RecycleRejectedOutput(output, revision, context);
+            : RecycleRejectedOutput(output, revision, context)
+                .Map(recycled => new FinalReviewFileWork(recycled, aggregate.Session));
     }
 
     /// <summary>
@@ -1782,7 +1822,7 @@ public sealed partial class SessionService : ISessionService
     /// across a crash rather than merely likely (§10, §11, §33).
     /// </para>
     /// </remarks>
-    private async Task<OperationResult<PrintOutput?>> PromoteApprovedOutputAsync(
+    private async Task<OperationResult<FinalReviewFileWork>> PromoteApprovedOutputAsync(
         SessionAggregate aggregate, PrintOutput output, Revision revision, CommandContext context,
         CancellationToken cancellationToken)
     {
@@ -1790,17 +1830,18 @@ public sealed partial class SessionService : ISessionService
         {
             // Already promoted, and this approval is a replay of one that completed its file work.
             // Nothing is copied a second time and no name is reserved (§11).
-            return OperationResult.Ok<PrintOutput?>(null);
+            return OperationResult.Ok(new FinalReviewFileWork(null, aggregate.Session));
         }
 
-        OperationResult<WorkspaceFileRef> destination =
+        OperationResult<ApprovedTiffReservation> destination =
             await ReserveApprovedDestinationAsync(aggregate, output, revision, context, cancellationToken);
         if (destination.IsFailure)
         {
-            return OperationResult.Fail<PrintOutput?>(destination.Failure);
+            return OperationResult.Fail<FinalReviewFileWork>(destination.Failure);
         }
 
-        WorkspaceFileRef approved = destination.Value;
+        WorkspaceFileRef approved = destination.Value.Destination;
+        SessionAggregate reservedAggregate = aggregate with { Session = destination.Value.Session };
 
         OperationResult<Unit> copied = await _workspace.WriteReservedAsync(approved, revision.File, cancellationToken);
         if (copied.IsFailure)
@@ -1808,7 +1849,7 @@ public sealed partial class SessionService : ISessionService
             // The reservation stays recorded on purpose: the destination is claimed, the operator
             // can approve again once the cause is cleared, and the retry writes into the same
             // file rather than claiming a second name.
-            return OperationResult.Fail<PrintOutput?>(copied.Failure);
+            return OperationResult.Fail<FinalReviewFileWork>(copied.Failure);
         }
 
         // The promoted bytes are re-read and re-hashed independently of the copy that wrote them.
@@ -1819,14 +1860,14 @@ public sealed partial class SessionService : ISessionService
         if (promoted.IsFailure)
         {
             return await AbandonPromotionAsync(
-                aggregate, output, approved, context, promoted.Failure, cancellationToken);
+                reservedAggregate, output, approved, context, promoted.Failure, cancellationToken);
         }
 
         FileFacts facts = promoted.Value.Facts;
         if (!facts.Sha256.Equals(revision.Sha256) || facts.ByteLength != revision.Facts.ByteLength)
         {
             return await AbandonPromotionAsync(
-                aggregate,
+                reservedAggregate,
                 output,
                 approved,
                 context,
@@ -1844,7 +1885,7 @@ public sealed partial class SessionService : ISessionService
                 cancellationToken);
         }
 
-        return OperationResult.Ok<PrintOutput?>(output.Promoted(approved));
+        return OperationResult.Ok(new FinalReviewFileWork(output.Promoted(approved), destination.Value.Session));
     }
 
     /// <summary>
@@ -1857,36 +1898,39 @@ public sealed partial class SessionService : ISessionService
     /// nothing. Only the collision suffix is decided here, and it is decided by the workspace
     /// against what is actually on disk.
     /// </remarks>
-    private async Task<OperationResult<WorkspaceFileRef>> ReserveApprovedDestinationAsync(
+    private async Task<OperationResult<ApprovedTiffReservation>> ReserveApprovedDestinationAsync(
         SessionAggregate aggregate, PrintOutput output, Revision revision, CommandContext context,
         CancellationToken cancellationToken)
     {
         if (output.PromotionReservation is { } resumed)
         {
-            return OperationResult.Ok(resumed);
+            return OperationResult.Ok(new ApprovedTiffReservation(resumed, aggregate.Session));
         }
 
         OperationResult<NamingPatternSet> patterns = _presetProvider.GetNamingPatterns();
         if (patterns.IsFailure)
         {
-            return OperationResult.Fail<WorkspaceFileRef>(patterns.Failure);
+            return OperationResult.Fail<ApprovedTiffReservation>(patterns.Failure);
         }
 
         OperationResult<WorkspaceFileRef> reserved = _workspace.ReserveOutput(
             aggregate.Session.Workspace, WorkspaceArea.Approved, revision.File.FileName, patterns.Value);
         if (reserved.IsFailure)
         {
-            return reserved;
+            return OperationResult.Fail<ApprovedTiffReservation>(reserved.Failure);
         }
 
         SessionMutation claim = new(
             aggregate.Session with { UpdatedAtUtc = context.NowUtc },
-            aggregate.Steps, [], [], [], [], [output.ReservingPromotion(reserved.Value)], null, null);
+            aggregate.Steps, [], [], [], [], [output.ReservingPromotion(reserved.Value)], null, null)
+        {
+            ImageProcessingGuard = new(aggregate.Session, aggregate.Steps, revision),
+        };
 
         OperationResult<Unit> committed = await _repository.CommitAsync(claim, cancellationToken);
         if (committed.IsSuccess)
         {
-            return reserved;
+            return OperationResult.Ok(new ApprovedTiffReservation(reserved.Value, claim.Session));
         }
 
         // The name was claimed on disk but the claim never reached the database, so nothing will
@@ -1902,7 +1946,7 @@ public sealed partial class SessionService : ISessionService
             _workspace.ResolveAbsolute(reserved.Value),
             $"Final approval of {output.Id} reserved this name but could not record the reservation.");
 
-        return OperationResult.Fail<WorkspaceFileRef>(committed.Failure);
+        return OperationResult.Fail<ApprovedTiffReservation>(committed.Failure);
     }
 
     /// <summary>
@@ -1915,7 +1959,7 @@ public sealed partial class SessionService : ISessionService
     /// the operator's next approval claims a fresh name instead of writing into a destination that
     /// has already failed once. The review is not recorded either way.
     /// </remarks>
-    private async Task<OperationResult<PrintOutput?>> AbandonPromotionAsync(
+    private async Task<OperationResult<FinalReviewFileWork>> AbandonPromotionAsync(
         SessionAggregate aggregate, PrintOutput output, WorkspaceFileRef approved, CommandContext context,
         OperationFailure failure, CancellationToken cancellationToken)
     {
@@ -1925,10 +1969,13 @@ public sealed partial class SessionService : ISessionService
 
         SessionMutation release = new(
             aggregate.Session with { UpdatedAtUtc = context.NowUtc },
-            aggregate.Steps, [], [], [], [], [output.WithoutPromotionReservation()], null, null);
+            aggregate.Steps, [], [], [], [], [output.WithoutPromotionReservation()], null, null)
+        {
+            ImageProcessingGuard = new(aggregate.Session, aggregate.Steps),
+        };
         await _repository.CommitAsync(release, cancellationToken);
 
-        return OperationResult.Fail<PrintOutput?>(failure);
+        return OperationResult.Fail<FinalReviewFileWork>(failure);
     }
 
     /// <summary>
@@ -2007,6 +2054,15 @@ public sealed partial class SessionService : ISessionService
                 FailureCode.PreconditionNotMet, $"Step {work.Step} is not part of this workflow.");
         }
 
+        if (work.Step == StepKind.PhotoshopOutput && started.State.ProductionTiffBackend == ProductionTiffBackend.MagickNet)
+        {
+            if (MagickNetTiffUnavailable(FindRevision(aggregate, work.InputRevision),
+                    started.State.UsablePhotoshopPreparation) is { } unavailable)
+                return OperationResult.Fail<SessionView>(unavailable);
+
+            work = work with { LocalProductionTiff = _localProductionTiff, ProcessorId = _localProductionTiff!.AdapterId };
+        }
+
         if (work.ManualCrop is not null)
         {
             work = work with { ImageProcessing = PlanImageProcessing(ImageProcessingMethod.ManualCrop) };
@@ -2035,9 +2091,9 @@ public sealed partial class SessionService : ISessionService
         }
 
         bool drivesExternalApplication = work.ImageProcessing?.View.DrivesExternalApplication ??
-            (definition.IsAdapterBacked && work.ManualResultPath is null);
+            (definition.IsAdapterBacked && work.ManualResultPath is null && work.LocalProductionTiff is null);
 
-        if (work.ImageProcessing?.Backend is not null)
+        if (work.HasLocalCancellation)
         {
             if (!await _imageProcessingSlots.WaitAsync(0, cancellationToken).ConfigureAwait(false))
                 return OperationResult.Fail<SessionView>(FailureCode.AdapterUnavailable,
@@ -2286,7 +2342,7 @@ public sealed partial class SessionService : ISessionService
         SessionMutation opening = BuildMetadataMutation(
             aggregate, sessionAfterStart, started.State, started.Effects, context, upsertAttempts: [runningAttempt]);
         opening = opening with { LockChange = acquire };
-        if (work.ImageProcessing is not null)
+        if (work.RequiresWriteGuard)
             opening = opening with
             {
                 ImageProcessingGuard = new(aggregate.Session, aggregate.Steps, FindRevision(aggregate, work.InputRevision)),
@@ -2324,8 +2380,7 @@ public sealed partial class SessionService : ISessionService
         // opening transaction would have nothing to close and no row to audit against, so the
         // window in which Stop is offered is exactly the window in which it is meaningful
         // (Part D2A §24, §28).
-        bool usesImageBackend = work.ImageProcessing?.Backend is not null;
-        using CancellationTokenSource? localCancellation = usesImageBackend
+        using CancellationTokenSource? localCancellation = work.HasLocalCancellation
             ? CancellationTokenSource.CreateLinkedTokenSource(cancellationToken) : null;
         CancellationToken processingToken = localCancellation?.Token ?? cancellationToken;
         IAutomationStopSignal stop = _runs.Begin(
@@ -2345,8 +2400,10 @@ public sealed partial class SessionService : ISessionService
             produced = OperationResult.Fail<StepWork>(
                 OperationFailure.Create(
                     FailureCode.Cancelled,
-                    "PrintFlow orchestration was cancelled after the attempt started. No further " +
-                    "adapter input was requested; the external application may still be running.",
+                    drivesExternalApplication
+                        ? "PrintFlow orchestration was cancelled after the attempt started. No further " +
+                          "adapter input was requested; the external application may still be running."
+                        : "PrintFlow cancelled local processing after the attempt started.",
                     isRetryable: true,
                     context: new Dictionary<string, string>
                     {
@@ -2401,8 +2458,8 @@ public sealed partial class SessionService : ISessionService
             _runs.End(runningAttempt.Id);
         }
 
-        if (usesImageBackend && (processingToken.IsCancellationRequested || stop.RequestedMode is not null))
-            produced = OperationResult.Fail<StepWork>(FailureCode.Cancelled, "Image processing was cancelled.");
+        if (work.HasLocalCancellation && (processingToken.IsCancellationRequested || stop.RequestedMode is not null))
+            produced = OperationResult.Fail<StepWork>(FailureCode.Cancelled, "Processing was cancelled.");
 
         // Once a destination has been constructed it is historical evidence even if the
         // adapter throws, validation fails, or the operator stops the run. Attach it in one
@@ -2431,11 +2488,11 @@ public sealed partial class SessionService : ISessionService
         {
             return await CompleteProducingStepAsync(
                 aggregate, afterStart, started, closing, work, runningAttempt, produced.Value, stop,
-                usesImageBackend ? CancellationToken.None : cancellationToken);
+                work.HasLocalCancellation ? CancellationToken.None : cancellationToken);
         }
 
         AutomationStopMode? requestedStop = stop.RequestedMode ??
-            (usesImageBackend && processingToken.IsCancellationRequested ? AutomationStopMode.StopOperation : null);
+            (work.HasLocalCancellation && processingToken.IsCancellationRequested ? AutomationStopMode.StopOperation : null);
         if (requestedStop is { } stopped)
         {
             // The operator asked for this, so it is recorded as a stop rather than as a
@@ -2444,7 +2501,7 @@ public sealed partial class SessionService : ISessionService
             // structured context, and whatever the adapter reported goes into the detail (§29).
             return await StopAttemptAsync(
                 afterStart, started.State, closing, work.Step, runningAttempt, drivesExternalApplication,
-                stopped, stop, produced.Failure, work.CorrectionRequestId, work.ImageProcessing is not null);
+                stopped, stop, produced.Failure, work.CorrectionRequestId, work.RequiresWriteGuard);
         }
 
         // Cancellation is the one failure whose caller token cannot be used to close the
@@ -2465,7 +2522,7 @@ public sealed partial class SessionService : ISessionService
                 : cancellationToken;
         return await FailAttemptAsync(
             afterStart, started.State, closing, work.Step, runningAttempt, produced.Failure, closingToken,
-            work.CorrectionRequestId, work.ImageProcessing is not null, usesImageBackend);
+            work.CorrectionRequestId, work.RequiresWriteGuard, work.HasLocalCancellation);
     }
 
     /// <summary>
@@ -2544,7 +2601,7 @@ public sealed partial class SessionService : ISessionService
 
         if (work.ManualResultPath is not null || work.ImageProcessing?.Backend is not null)
             finishing = finishing with { LockChange = null };
-        if (work.ImageProcessing is not null)
+        if (work.RequiresWriteGuard)
             finishing = finishing with
             {
                 ImageProcessingGuard = new(afterStart.Session, afterStart.Steps,
@@ -2566,8 +2623,8 @@ public sealed partial class SessionService : ISessionService
             finishing, stop.RequestedMode is null ? cancellationToken : CancellationToken.None);
         if (committedFinish.IsFailure)
         {
-            if (work.ImageProcessing is not null && committedFinish.Failure.Code == FailureCode.PreconditionNotMet)
-                return await CloseConflictingImageAttemptAsync(work, runningAttempt, context, committedFinish.Failure);
+            if (work.RequiresWriteGuard && committedFinish.Failure.Code == FailureCode.PreconditionNotMet)
+                return await CloseConflictingProducingAttemptAsync(work, runningAttempt, context, committedFinish.Failure);
             return OperationResult.Fail<SessionView>(committedFinish.Failure);
         }
 
@@ -2684,7 +2741,7 @@ public sealed partial class SessionService : ISessionService
         if (work.ImageProcessing is { } plan)
         {
             imageSource = FindRevision(aggregate, work.InputRevision)!;
-            var verified = await VerifyImageProcessingInputAsync(imageSource, workingCopy.Value, cancellationToken);
+            var verified = await VerifyWorkingCopyAsync(imageSource, workingCopy.Value, cancellationToken);
             if (verified.IsFailure)
                 return OperationResult.Fail<StepWork>(verified.Failure);
             if (plan.Backend is not null)
@@ -2784,7 +2841,7 @@ public sealed partial class SessionService : ISessionService
                 if (result.Value.ProducedFile != expectedOutput)
                     return OperationResult.Fail<StepWork>(FailureCode.OutputValidationFailed,
                         "Meitu returned a file other than the assigned output.");
-                var verified = await VerifyImageProcessingInputAsync(imageSource!, workingCopy.Value, cancellationToken);
+                var verified = await VerifyWorkingCopyAsync(imageSource!, workingCopy.Value, cancellationToken);
                 if (verified.IsFailure)
                     return OperationResult.Fail<StepWork>(verified.Failure);
                 OperationResult<StepWork> inspected = await InspectAsync(
@@ -2936,18 +2993,41 @@ public sealed partial class SessionService : ISessionService
                 WorkspaceFileRef reserved = SiblingOf(workingCopy.Value, tiffName.Value);
                 establishExpectedOutput(reserved);
 
-                OperationResult<AdapterOutput> result = await _photoshop.GenerateAsync(
-                    new PhotoshopRequest(
-                        workingCopy.Value, dimensions, preparation, preset.Value, branch,
-                        reserved.FileName, ParentDirOf(workingCopy.Value), reserved),
-                    cancellationToken);
+                if (work.LocalProductionTiff is not null)
+                {
+                    var verified = await VerifyWorkingCopyAsync(
+                        FindRevision(aggregate, work.InputRevision)!, workingCopy.Value, cancellationToken);
+                    if (verified.IsFailure)
+                        return OperationResult.Fail<StepWork>(verified.Failure);
+                }
+
+                PhotoshopRequest request = new(
+                    workingCopy.Value, dimensions, preparation, preset.Value, branch,
+                    reserved.FileName, ParentDirOf(workingCopy.Value), reserved);
+                OperationResult<AdapterOutput> result = work.LocalProductionTiff is { } local
+                    ? await local.GenerateAsync(request, cancellationToken)
+                    : await _photoshop.GenerateAsync(request, cancellationToken);
                 if (result.IsFailure)
                 {
                     return OperationResult.Fail<StepWork>(WithExpectedOutput(result.Failure, reserved));
                 }
 
+                if (result.Value.ProducedFile != reserved)
+                    return OperationResult.Fail<StepWork>(FailureCode.OutputValidationFailed,
+                        "The production TIFF processor returned a file other than its assigned output.");
+
                 OperationResult<StepWork> inspectedOutput = await InspectAsync(
-                    result.Value.ProducedFile, cancellationToken, result.Value.AdapterNotes);
+                    reserved, cancellationToken, result.Value.AdapterNotes);
+                if (inspectedOutput.IsSuccess &&
+                    ((result.Value.ValidatedImageSha256 is { } hash && inspectedOutput.Value.Facts.Sha256 != hash) ||
+                     (work.LocalProductionTiff is not null &&
+                         (inspectedOutput.Value.Facts.Format != ImageFormat.Tiff || result.Value.ValidatedImageSha256 is null))))
+                {
+                    return OperationResult.Fail<StepWork>(OperationFailure.Create(FailureCode.OutputValidationFailed,
+                        "The assigned output does not match the validated production TIFF.",
+                        isRetryable: true, messageKey: work.LocalProductionTiff is null ? null : "ProductionTiff_MagickOutputInvalid"));
+                }
+
                 return inspectedOutput.IsFailure
                     ? OperationResult.Fail<StepWork>(WithExpectedOutput(inspectedOutput.Failure, reserved))
                     : inspectedOutput;
@@ -3041,7 +3121,7 @@ public sealed partial class SessionService : ISessionService
                 if (result.ProducedFile != trimOutput)
                     return OperationResult.Fail<StepWork>(FailureCode.OutputValidationFailed,
                         "Trim returned a file other than the assigned output.");
-                var verifiedTrimInput = await VerifyImageProcessingInputAsync(imageSource!, workingCopy.Value, cancellationToken);
+                var verifiedTrimInput = await VerifyWorkingCopyAsync(imageSource!, workingCopy.Value, cancellationToken);
                 if (verifiedTrimInput.IsFailure)
                     return OperationResult.Fail<StepWork>(verifiedTrimInput.Failure);
                 OperationResult<StepWork> inspectedTrim = await InspectAsync(
@@ -3123,7 +3203,7 @@ public sealed partial class SessionService : ISessionService
     private async Task<OperationResult<SessionView>> FailAttemptAsync(
         SessionAggregate aggregate, WorkflowSnapshot stateAfterStart, CommandContext context, StepKind step,
         ProcessingAttempt runningAttempt, OperationFailure failure, CancellationToken cancellationToken,
-        Guid? correctionRequestId = null, bool imageProcessing = false, bool usesImageBackend = false,
+        Guid? correctionRequestId = null, bool requiresWriteGuard = false, bool suppressLockRelease = false,
         bool retryConflict = true)
     {
         failure = FailureEvidence.ForAttempt(failure, runningAttempt.Id);
@@ -3169,19 +3249,19 @@ public sealed partial class SessionService : ISessionService
             NewAutomationLog = [RecordAutomationStop(aggregate.Session.Id, step, failure, context.NowUtc)],
             CorrectionRequestChanges = requestChanges,
         };
-        if (imageProcessing)
+        if (requiresWriteGuard)
             mutation = mutation with
             {
                 ImageProcessingGuard = new(aggregate.Session, aggregate.Steps, RunningAttempt: runningAttempt.Id),
-                LockChange = usesImageBackend ? null : mutation.LockChange,
+                LockChange = suppressLockRelease ? null : mutation.LockChange,
             };
 
         OperationResult<Unit> committed = await _repository.CommitAsync(mutation, cancellationToken);
-        if (imageProcessing && retryConflict && committed.IsFailure &&
+        if (requiresWriteGuard && retryConflict && committed.IsFailure &&
             committed.Failure.Code == FailureCode.PreconditionNotMet &&
-            await ReloadRunningImageAttemptAsync(runningAttempt) is { } latest)
+            await ReloadRunningAttemptAsync(runningAttempt) is { } latest)
             return await FailAttemptAsync(latest, latest.ToSnapshot(ConfiguredRecommendations()), context, step,
-                runningAttempt, failure, CancellationToken.None, correctionRequestId, imageProcessing, usesImageBackend,
+                runningAttempt, failure, CancellationToken.None, correctionRequestId, requiresWriteGuard, suppressLockRelease,
                 retryConflict: false);
         return committed.IsSuccess
             ? OperationResult.Fail<SessionView>(failure)
@@ -3256,7 +3336,7 @@ public sealed partial class SessionService : ISessionService
         AutomationStopMode mode,
         IAutomationStopSignal stop,
         OperationFailure? adapterFailure,
-        Guid? correctionRequestId = null, bool imageProcessing = false, bool retryConflict = true)
+        Guid? correctionRequestId = null, bool requiresWriteGuard = false, bool retryConflict = true)
     {
         OperationFailure failure = DescribeStop(
             mode, stop, drivesExternalApplication, runningAttempt, step, adapterFailure);
@@ -3316,7 +3396,7 @@ public sealed partial class SessionService : ISessionService
             NewAutomationLog = [RecordAutomationStop(aggregate.Session.Id, step, failure, context.NowUtc)],
             CorrectionRequestChanges = requestChanges,
         };
-        if (imageProcessing)
+        if (requiresWriteGuard)
             mutation = mutation with
             {
                 ImageProcessingGuard = new(aggregate.Session, aggregate.Steps, RunningAttempt: runningAttempt.Id),
@@ -3324,12 +3404,12 @@ public sealed partial class SessionService : ISessionService
             };
 
         OperationResult<Unit> committed = await _repository.CommitAsync(mutation, CancellationToken.None);
-        if (imageProcessing && retryConflict && committed.IsFailure &&
+        if (requiresWriteGuard && retryConflict && committed.IsFailure &&
             committed.Failure.Code == FailureCode.PreconditionNotMet &&
-            await ReloadRunningImageAttemptAsync(runningAttempt) is { } latest)
+            await ReloadRunningAttemptAsync(runningAttempt) is { } latest)
             return await StopAttemptAsync(latest, latest.ToSnapshot(ConfiguredRecommendations()), context, step,
                 runningAttempt, drivesExternalApplication, mode, stop, adapterFailure, correctionRequestId,
-                imageProcessing, retryConflict: false);
+                requiresWriteGuard, retryConflict: false);
         return committed.IsFailure
             ? OperationResult.Fail<SessionView>(committed.Failure)
             : OperationResult.Fail<SessionView>(failure);
@@ -3786,6 +3866,7 @@ public sealed partial class SessionService : ISessionService
             UpdatedAtUtc = nowUtc,
             Dimensions = newSnapshot.Dimensions,
             WhiteUnderbaseBranch = newSnapshot.WhiteUnderbaseBranch,
+            ProductionTiffBackend = newSnapshot.ProductionTiffBackend,
             TrimMargin = newSnapshot.TrimMargin,
             IgnoreSmallTrimNoise = newSnapshot.IgnoreSmallTrimNoise,
             ImageProcessingSelection = newSnapshot.ImageProcessingSelection,

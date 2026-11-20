@@ -454,6 +454,12 @@
   <data name="Session_RunNotReady" xml:space="preserve">
     <value>Run Step stays unavailable until the print size and any required enlargement are confirmed for this image.</value>
   </data>
+  <data name="ProductionTiff_BackendHeading" xml:space="preserve"><value>TIFF generation method</value></data>
+  <data name="ProductionTiff_MagickUnavailable" xml:space="preserve"><value>Magick.NET is unavailable on this workstation.</value></data>
+  <data name="ProductionTiff_MagickUnsupportedInput" xml:space="preserve"><value>Magick.NET requires a supported PNG or JPEG within its image size limits.</value></data>
+  <data name="ProductionTiff_MagickDimensionsLimit" xml:space="preserve"><value>Magick.NET output is limited to 8,192 pixels per side and 24 million pixels. Reduce the target size or select Photoshop.</value></data>
+  <data name="ProductionTiff_MagickPresetMismatch" xml:space="preserve"><value>Magick.NET requires a verified production preset that specifies sRGB IEC61966-2.1 and Coated FOGRA39.</value></data>
+  <data name="ProductionTiff_MagickOutputInvalid" xml:space="preserve"><value>Magick.NET could not create a verified CMYK TIFF with a W1 channel. Check the source artwork and white ink choice, or select Photoshop.</value></data>
   <data name="Session_DimensionReviewRequired" xml:space="preserve">
     <value>This size was saved under the previous exact-size rule, or the image it was measured against has changed. Review the maximum print bounds before continuing.</value>
   </data>
@@ -1680,6 +1686,21 @@
   <data name="AiMemorial_Background" xml:space="preserve"><value>Preview background</value></data>
   <data name="AiMemorial_ProofReduced" xml:space="preserve"><value>The display image was reduced. The saved PNG retains the full dimensions shown above.</value></data>
   <data name="AiPrompt_AutoGenerate" xml:space="preserve"><value>Generate</value></data>
+  <data name="AiPrompt_GenerationProvider" xml:space="preserve"><value>Generation method</value></data>
+  <data name="AiPrompt_GenerationAlreadyActive" xml:space="preserve"><value>A generation request is already in progress for this draft.</value></data>
+  <data name="AiPrompt_OpenAiConsent" xml:space="preserve"><value>Send the prompt and any referenced images to the OpenAI API to generate a design? This request may incur charges, even if it is cancelled or times out.</value></data>
+  <data name="AiPrompt_OpenAiGenerate" xml:space="preserve"><value>Generate with OpenAI API</value></data>
+  <data name="AiPrompt_OpenAiGenerating" xml:space="preserve"><value>Generating an image with OpenAI API…</value></data>
+  <data name="AiPrompt_OpenAiCancel" xml:space="preserve"><value>Cancel generation</value></data>
+  <data name="AiPrompt_OpenAiCancelled" xml:space="preserve"><value>Studio cancelled the request. Check your OpenAI usage before trying again.</value></data>
+  <data name="AiPrompt_OpenAiUnavailable" xml:space="preserve"><value>OpenAI API generation is unavailable on this workstation.</value></data>
+  <data name="AiPrompt_OpenAiAccessDenied" xml:space="preserve"><value>OpenAI denied access. Check the API key and the project’s access to the configured image model.</value></data>
+  <data name="AiPrompt_OpenAiRejected" xml:space="preserve"><value>OpenAI rejected the generation request. Check the prompt and references.</value></data>
+  <data name="AiPrompt_OpenAiPromptLength" xml:space="preserve"><value>Enter an image prompt of up to 32,000 characters.</value></data>
+  <data name="AiPrompt_OpenAiReferenceUnavailable" xml:space="preserve"><value>A reference image could not be verified. Select it again and retry.</value></data>
+  <data name="AiPrompt_OpenAiInvalidResult" xml:space="preserve"><value>OpenAI did not return a usable PNG.</value></data>
+  <data name="AiPrompt_OpenAiStorageFailed" xml:space="preserve"><value>Studio could not load the draft’s generation records or import the image. Check the workspace and storage.</value></data>
+  <data name="AiPrompt_OpenAiHistoryFailed" xml:space="preserve"><value>The image was imported. Open it from Recent Tasks. Studio could not update AI task history.</value></data>
   <data name="AiPrompt_WorkSetup" xml:space="preserve"><value>Set up the Chrome bridge, then try again.</value></data>
   <data name="AiPrompt_WorkAttachmentRequired" xml:space="preserve"><value>Complete the referenced attachments before submitting this draft.</value></data>
   <data name="AiPrompt_WorkUploadFailed" xml:space="preserve"><value>Work did not confirm all required attachments. The prompt and attachments are saved in Studio.</value></data>

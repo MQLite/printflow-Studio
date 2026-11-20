@@ -37,7 +37,7 @@ public sealed class FileWorkTaskQuery(FileAiDesignRequestStore store, ISessionSe
 
         var task = new WorkTaskSnapshot(request.RequestId, request.AttemptId, request.StateVersion, request.WorkDraft?.DraftId,
             request.WorkDraft?.Title, request.UpdatedAtUtc, WorkTaskStage.NeedsAttention, conversation,
-            FollowUpSourceRequestId: request.WorkFollowUp?.RequestId);
+            FollowUpSourceRequestId: request.WorkFollowUp?.RequestId, Provider: request.Provider);
         if (request.State == AiDesignState.Cancelled) return task with { Stage = WorkTaskStage.Cancelled };
         if (request.State == AiDesignState.Imported)
         {

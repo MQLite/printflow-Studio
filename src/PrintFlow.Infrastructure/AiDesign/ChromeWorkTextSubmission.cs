@@ -36,7 +36,7 @@ public sealed class ChromeWorkTextSubmission(string workspaceRoot, LoopbackWorkR
                     if (draftLease is null) return Unavailable("WorkRequestActive");
                     var authority = await _store.ListSnapshotsAsync(linked.Token);
                     if (authority.IsFailure) return OperationResult.Fail<AiDesignWorkSubmission>(authority.Failure);
-                    if (authority.Value.Any(request => request.WorkDraft?.DraftId == draft.Id && BlocksNewSubmission(request)))
+                    if (authority.Value.Any(request => request.WorkDraft?.DraftId == draft.Id && _store.BlocksNewSubmission(request)))
                         return Unavailable("WorkRequestActive");
 
                     var prompt = ExportForWork(draft, id);
@@ -57,12 +57,6 @@ public sealed class ChromeWorkTextSubmission(string workspaceRoot, LoopbackWorkR
             return Unavailable("WorkSubmitUnconfirmed");
         }
     }
-
-    private bool BlocksNewSubmission(AiDesignRequest request) =>
-        (AiDesignTransitions.IsRunning(request.State) && LoopbackWorkResultImport.IsOwnerAlive(request)) ||
-        (request.State == AiDesignState.Submitted && request.WorkConversationId is not null && _store.HasWorkResultTicket(request.RequestId)) ||
-        (AiDesignTransitions.CanResumeWorkResult(request) &&
-            (request.Failure?.Code == "WorkResultPending" || _store.HasWorkResultTicket(request.RequestId)));
 
     public async Task<OperationResult<AiDesignWorkSubmission>> SubmitFollowUpAsync(Guid sourceRequestId, string prompt,
         CancellationToken cancellationToken)
@@ -93,7 +87,7 @@ public sealed class ChromeWorkTextSubmission(string workspaceRoot, LoopbackWorkR
                     if (listed.IsFailure) return OperationResult.Fail<AiDesignWorkSubmission>(listed.Failure);
                     if (listed.Value.Any(request => (request.WorkDraft?.DraftId == draft.DraftId ||
                         request.WorkConversationId == conversation || request.WorkFollowUp?.ConversationId == conversation)
-                        && BlocksNewSubmission(request)))
+                        && _store.BlocksNewSubmission(request)))
                         return Unavailable("WorkRequestActive");
 
                     return await SubmitCoreAsync(draft, id, new(prompt, [], []), linked.Token, sourceRequestId);

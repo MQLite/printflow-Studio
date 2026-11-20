@@ -71,6 +71,8 @@ public partial class SessionViewModel
             if (UsesCurrentImageWithoutProcessing && CanSkip) return FormatNext(Strings.Session_NextAction, SkipLabel);
             if (CanChangeImageProcessingMethod && CurrentImageProcessingUnavailable is not null)
                 return FormatNext(Strings.Session_NextAction, ChangeImageProcessingMethodLabel);
+            if (ShowsTiffBackendSelector && UsesMagickNetTiff && MagickNetTiffUnavailableText is { } tiffUnavailable)
+                return tiffUnavailable;
             // The status panel repeats what the save section says, so the two never disagree.
             if (FinalSaveNextText is { } saveText) return saveText;
             if (CanComplete) return FormatNext(Strings.Session_NextAction, CompleteLabel);

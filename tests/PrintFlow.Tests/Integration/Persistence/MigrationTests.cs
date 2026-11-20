@@ -12,6 +12,30 @@ namespace PrintFlow.Tests.Integration.Persistence;
 public sealed class MigrationTests
 {
     [Fact]
+    public void A_task_saved_before_backend_selection_defaults_to_photoshop()
+    {
+        using TempDatabase database = new(migrate: false);
+        using var connection = database.OpenRaw();
+        foreach (string resource in typeof(MigrationRunner).Assembly.GetManifestResourceNames()
+            .Where(n => n.Contains(".Migrations.", StringComparison.Ordinal) && n.EndsWith(".sql", StringComparison.Ordinal))
+            .OrderBy(n => n, StringComparer.Ordinal))
+        {
+            string file = resource[(resource.LastIndexOf(".Migrations.", StringComparison.Ordinal) + 12)..];
+            if (int.Parse(file[..4], System.Globalization.CultureInfo.InvariantCulture) >= 26) continue;
+            Execute(connection, ReadMigrationScript(file));
+        }
+
+        InsertSession(connection, "tiff-upgrade", []);
+        Execute(connection, "PRAGMA user_version = 25;");
+        MigrationRunner.Migrate(connection).IsSuccess.ShouldBeTrue();
+        using var command = connection.CreateCommand();
+        command.CommandText = "SELECT ProductionTiffBackend FROM ProcessingSession WHERE Id = 'tiff-upgrade'";
+        command.ExecuteScalar().ShouldBe("PHOTOSHOP");
+        Should.Throw<SqliteException>(() => Execute(connection,
+            "UPDATE ProcessingSession SET ProductionTiffBackend = 'UNKNOWN' WHERE Id = 'tiff-upgrade'"));
+    }
+
+    [Fact]
     public void Noise_policy_upgrade_defaults_pending_sessions_but_preserves_historical_attempts_as_null()
     {
         using TempDatabase database = new(migrate: false);

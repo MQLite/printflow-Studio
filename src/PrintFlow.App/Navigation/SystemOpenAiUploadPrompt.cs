@@ -9,12 +9,21 @@ public interface IOpenAiUploadPrompt
     bool Confirm(string operation);
 }
 
-internal sealed class SystemOpenAiUploadPrompt : IOpenAiUploadPrompt
+public interface IAiDesignApiConsent
 {
-    public bool Confirm(string operation)
+    bool Confirm();
+}
+
+internal sealed class SystemOpenAiUploadPrompt : IOpenAiUploadPrompt, IAiDesignApiConsent
+{
+    public bool Confirm(string operation) => Show(
+        string.Format(CultureInfo.CurrentCulture, Strings.Resolve("ImageProcessing_OpenAiUploadQuestion"), operation));
+
+    public bool Confirm() => Show(Strings.Resolve("AiPrompt_OpenAiConsent"));
+
+    private static bool Show(string message)
     {
         string title = Strings.Resolve("ImageProcessing_OpenAiUploadTitle");
-        string message = string.Format(CultureInfo.CurrentCulture, Strings.Resolve("ImageProcessing_OpenAiUploadQuestion"), operation);
         return (Application.Current?.MainWindow is { } owner
             ? MessageBox.Show(owner, message, title, MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No)
             : MessageBox.Show(message, title, MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No))

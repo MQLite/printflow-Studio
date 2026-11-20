@@ -50,6 +50,8 @@ public sealed record ProcessingSession(
     /// </remarks>
     public TrimMargin TrimMargin { get; init; } = TrimMargin.Tight;
 
+    public ProductionTiffBackend ProductionTiffBackend { get; init; } = ProductionTiffBackend.Photoshop;
+
     /// <summary>Whether the next automatic trim ignores small detached alpha-1 residue.</summary>
     public bool IgnoreSmallTrimNoise { get; init; } = true;
 

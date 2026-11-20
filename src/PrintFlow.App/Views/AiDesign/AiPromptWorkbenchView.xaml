@@ -15,6 +15,9 @@
   </ResourceDictionary>
  </UserControl.Resources>
  <DockPanel Margin="20">
+ <Button DockPanel.Dock="Bottom" Content="{Binding CancelOpenAiGenerationLabel}" Command="{Binding CancelOpenAiGenerationCommand}"
+         Visibility="{Binding CanCancelOpenAiGeneration, Converter={StaticResource BoolVisibility}}"
+         HorizontalAlignment="Right" Margin="0,8,0,0" Padding="16,10" AutomationProperties.AutomationId="AiPrompt.CancelOpenAiGeneration"/>
  <Button DockPanel.Dock="Bottom" Content="{x:Static r:AiMemorialLabels.CancelTask}" Command="{Binding CancelMemorialTaskCommand}"
          Visibility="{Binding IsMemorialTaskRunning, Converter={StaticResource BoolVisibility}}"
          HorizontalAlignment="Right" Margin="0,8,0,0" Padding="16,10" AutomationProperties.AutomationId="Memorial.StopTask"/>
@@ -49,8 +52,14 @@
    <Button Grid.Column="1" Content="{Binding StopReceivingLabel}" Command="{Binding StopReceivingCommand}"
     Visibility="{Binding CanStopReceiving, Converter={StaticResource BoolVisibility}}"
     Margin="0,0,10,0" Padding="16,10" AutomationProperties.AutomationId="AiPrompt.StopReceiving"/>
-   <Button Grid.Column="2" Content="{Binding AutoGenerateLabel}" Command="{Binding AutoGenerateCommand}" Padding="24,10"
-    MinWidth="140" AutomationProperties.AutomationId="AiPrompt.AutoGenerate" Background="#007F6B" Foreground="White"/>
+   <StackPanel Grid.Column="2" Orientation="Horizontal">
+    <ComboBox ItemsSource="{Binding GenerationOptions}" SelectedValue="{Binding GenerationProvider, Mode=TwoWay}"
+              SelectedValuePath="Provider" DisplayMemberPath="Label" VerticalContentAlignment="Center"
+              MinWidth="136" Margin="0,0,8,0" AutomationProperties.Name="{Binding GenerationProviderLabel}"
+              AutomationProperties.AutomationId="AiPrompt.GenerationProvider"/>
+    <Button Content="{Binding AutoGenerateLabel}" Command="{Binding AutoGenerateCommand}" Padding="24,10"
+     MinWidth="140" AutomationProperties.AutomationId="AiPrompt.AutoGenerate" Background="#007F6B" Foreground="White"/>
+   </StackPanel>
   </Grid>
   </StackPanel>
   </Grid>

@@ -47,6 +47,8 @@ public sealed record WorkflowSnapshot(
     public bool RequiresPsdPreparation { get; init; }
     public bool RequiresPdfPreparation { get; init; }
 
+    public ProductionTiffBackend ProductionTiffBackend { get; init; } = ProductionTiffBackend.Photoshop;
+
     public WorkflowDefinition Definition => WorkflowCatalog.For(WorkflowType, RequiresPsdPreparation, RequiresPdfPreparation);
 
     /// <summary>
@@ -474,6 +476,7 @@ public sealed record WorkflowSnapshot(
             && Nullable.Equals(LatestApprovedRevisionId, other.LatestApprovedRevisionId)
             && Nullable.Equals(Dimensions, other.Dimensions)
             && Nullable.Equals(WhiteUnderbaseBranch, other.WhiteUnderbaseBranch)
+            && ProductionTiffBackend == other.ProductionTiffBackend
             && ApprovedPrintOutputCount == other.ApprovedPrintOutputCount
             && TrimMargin.Equals(other.TrimMargin)
             && ImageProcessingSelection == other.ImageProcessingSelection
@@ -499,6 +502,7 @@ public sealed record WorkflowSnapshot(
         hash.Add(LatestApprovedRevisionId);
         hash.Add(Dimensions);
         hash.Add(WhiteUnderbaseBranch);
+        hash.Add(ProductionTiffBackend);
         hash.Add(ApprovedPrintOutputCount);
         hash.Add(TrimMargin);
         hash.Add(ImageProcessingSelection);

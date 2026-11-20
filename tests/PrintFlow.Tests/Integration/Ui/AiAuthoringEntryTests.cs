@@ -1,5 +1,6 @@
 using System.IO;
 using PrintFlow.App.Navigation;
+using PrintFlow.Domain.AiDesign;
 using PrintFlow.Domain.AiDesign.Authoring;
 using Shouldly;
 using Xunit;
@@ -73,6 +74,13 @@ public sealed class AiAuthoringEntryTests
         }, new Size(width, height), tree =>
         {
             tree.OfType<AiPromptWorkbenchView>().Count().ShouldBe(1);
+            var generationMethod = tree.OfType<ComboBox>().Single(x =>
+                AutomationProperties.GetAutomationId(x) == "AiPrompt.GenerationProvider");
+            generationMethod.Items.Count.ShouldBe(2);
+            generationMethod.SelectedValue.ShouldBe(AiDesignProvider.ChatGptWork);
+            generationMethod.SelectedIndex = 1;
+            ((AiPromptWorkbenchViewModel)nav.Current!).GenerationProvider.ShouldBe(AiDesignProvider.OpenAiApi);
+            generationMethod.SelectedIndex = 0;
             foreach (string id in new[] { "AiPrompt.Copy", "AiPrompt.ReturnHome", "AiPrompt.SavedDrafts" })
             {
                 var action = tree.OfType<Button>().Single(x => AutomationProperties.GetAutomationId(x) == id);

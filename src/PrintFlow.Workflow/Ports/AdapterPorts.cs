@@ -145,3 +145,15 @@ public interface IPhotoshopOutputProcessor
 
     Task<OperationResult<AdapterOutput>> GenerateAsync(PhotoshopRequest request, CancellationToken cancellationToken);
 }
+
+/// <summary>Produces and validates a local CMYK + W1 TIFF without controlling a desktop application.</summary>
+public interface ILocalProductionTiffProcessor
+{
+    string AdapterId { get; }
+
+    /// <summary>Checks the upstream raster, available output geometry and local dependencies.</summary>
+    OperationFailure? GetAvailability(FileFacts input, PhotoshopPreparation? preparation);
+
+    /// <summary>Returns the assigned output and the SHA-256 of the validated TIFF on success.</summary>
+    Task<OperationResult<AdapterOutput>> GenerateAsync(PhotoshopRequest request, CancellationToken cancellationToken);
+}

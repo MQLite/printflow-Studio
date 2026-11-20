@@ -60,6 +60,7 @@ public sealed class WorkflowEngine : IWorkflowEngine
             WorkflowCommand.SetCustomTargetEdgeSize c => SetCustomTargetEdgeSize(state, c, context),
             WorkflowCommand.AuthoriseEnlargement c => AuthoriseEnlargement(state, c),
             WorkflowCommand.SelectWhiteUnderbaseBranch c => SelectWhiteUnderbaseBranch(state, c),
+            WorkflowCommand.SetProductionTiffBackend c => SetProductionTiffBackend(state, c),
             WorkflowCommand.SetTrimParameters c => SetTrimParameters(state, c),
             WorkflowCommand.SetImageProcessingSelection c => SetImageProcessingSelection(state, c),
             WorkflowCommand.SetBackgroundRemovalDecision c => SetBackgroundRemovalDecision(state, c),
@@ -248,6 +249,23 @@ public sealed class WorkflowEngine : IWorkflowEngine
             state with { WhiteUnderbaseBranch = command.Branch },
             new WorkflowEffect.PersistWhiteUnderbaseBranch(command.Branch, command.Justification.Trim()));
     }
+
+    private static WorkflowTransition SetProductionTiffBackend(
+        WorkflowSnapshot state, WorkflowCommand.SetProductionTiffBackend command)
+    {
+        if (!SessionStateRules.AllowsProgress(state.SessionState))
+            return NotActive(state, nameof(WorkflowCommand.SetProductionTiffBackend));
+        if (state.CurrentStep is not { Step: StepKind.PhotoshopOutput, State: StepState.Waiting })
+            return WorkflowTransition.Rejected(RejectionCode.PreconditionNotMet,
+                "The production TIFF processor can be selected when export is waiting to run.");
+        if (!Enum.IsDefined(command.Backend))
+            return WorkflowTransition.Rejected(RejectionCode.InvalidPayload, "Unknown production TIFF processor.");
+
+        return WorkflowTransition.Accepted(state with { ProductionTiffBackend = command.Backend });
+    }
+
+    private static bool UsesLocalProductionTiff(WorkflowSnapshot state, StepKind step) =>
+        step == StepKind.PhotoshopOutput && state.ProductionTiffBackend == ProductionTiffBackend.MagickNet;
 
     /// <summary>
     /// Records the margin the next deterministic Trim attempt will run with
@@ -597,11 +615,11 @@ public sealed class WorkflowEngine : IWorkflowEngine
                 $"The terminal step {terminalKind} is {terminal.State}; it must be Approved.");
         }
 
-        return WorkflowTransition.Accepted(
-            state with { SessionState = SessionState.Completed },
-            new WorkflowEffect.CleanupWorking(),
-            new WorkflowEffect.ReleaseAutomationLock(),
-            new WorkflowEffect.MarkSessionCompleted(context.NowUtc));
+        List<WorkflowEffect> effects = [new WorkflowEffect.CleanupWorking()];
+        if (!UsesLocalProductionTiff(state, terminalKind))
+            effects.Add(new WorkflowEffect.ReleaseAutomationLock());
+        effects.Add(new WorkflowEffect.MarkSessionCompleted(context.NowUtc));
+        return WorkflowTransition.Accepted(state with { SessionState = SessionState.Completed }, effects);
     }
 
     /// <summary>
@@ -688,10 +706,11 @@ public sealed class WorkflowEngine : IWorkflowEngine
                 RejectionCode.InvalidPayload, "Abandoning a session requires a reason.");
         }
 
-        return WorkflowTransition.Accepted(
-            state with { SessionState = SessionState.Abandoned },
-            new WorkflowEffect.ReleaseAutomationLock(),
-            new WorkflowEffect.MarkSessionAbandoned(context.NowUtc, command.Reason.Trim()));
+        List<WorkflowEffect> effects = [];
+        if (!UsesLocalProductionTiff(state, state.Definition.Terminal.Kind))
+            effects.Add(new WorkflowEffect.ReleaseAutomationLock());
+        effects.Add(new WorkflowEffect.MarkSessionAbandoned(context.NowUtc, command.Reason.Trim()));
+        return WorkflowTransition.Accepted(state with { SessionState = SessionState.Abandoned }, effects);
     }
 
     // ---------------------------------------------------------------------------------
@@ -1300,7 +1319,8 @@ public sealed class WorkflowEngine : IWorkflowEngine
         }
 
         effects.Add(new WorkflowEffect.OpenForManualWork(command.Step, reason));
-        if (state.ProcessingMethodFor(command.Step) is not (ImageProcessingMethod.BiRefNet
+        if (!UsesLocalProductionTiff(state, command.Step) &&
+            state.ProcessingMethodFor(command.Step) is not (ImageProcessingMethod.BiRefNet
             or ImageProcessingMethod.OpenAiRestore or ImageProcessingMethod.OpenAiCutout))
             effects.Add(new WorkflowEffect.ReleaseAutomationLock());
 
@@ -1740,7 +1760,7 @@ public sealed class WorkflowEngine : IWorkflowEngine
             new WorkflowEffect.PersistRevision(command.OutputRevision, command.Step, command.AttemptId),
         ];
 
-        if (definition.IsAdapterBacked)
+        if (definition.IsAdapterBacked && !UsesLocalProductionTiff(state, command.Step))
         {
             effects.Add(new WorkflowEffect.ReleaseAutomationLock());
         }
@@ -1766,7 +1786,7 @@ public sealed class WorkflowEngine : IWorkflowEngine
             new WorkflowEffect.RecordAttemptFailure(command.AttemptId, command.Step, command.Failure),
         ];
 
-        if (resolved.Definition!.IsAdapterBacked)
+        if (resolved.Definition!.IsAdapterBacked && !UsesLocalProductionTiff(state, command.Step))
         {
             effects.Add(new WorkflowEffect.ReleaseAutomationLock());
         }
@@ -1811,10 +1831,8 @@ public sealed class WorkflowEngine : IWorkflowEngine
     /// "late Stop cannot erase success", and it is a table row rather than an <c>if</c>.
     /// </para>
     /// <para>
-    /// The automation lock is released unconditionally, and unlike <see cref="AttemptFailed"/>
-    /// this does not first ask whether the step is adapter-backed. A stopped run is over
-    /// however it was performed, and holding a global lock on behalf of a run that has stopped
-    /// is exactly the state §32 requires not to persist.
+    /// A production TIFF generated locally owns no automation lock. Other stopped runs still
+    /// release any lock they may hold.
     /// </para>
     /// </remarks>
     private static WorkflowTransition AttemptCancelled(
@@ -1829,12 +1847,10 @@ public sealed class WorkflowEngine : IWorkflowEngine
         SessionStep stopped = resolved.Step!.WithState(
             TransitionTable.Destination(CommandKind.AttemptCancelled, resolved.Definition!), context.NowUtc);
 
-        return WorkflowTransition.Accepted(
-            state.WithStep(stopped),
-            [
-                new WorkflowEffect.RecordAttemptCancelled(command.AttemptId, command.Step, command.Failure),
-                new WorkflowEffect.ReleaseAutomationLock(),
-            ]);
+        List<WorkflowEffect> effects = [new WorkflowEffect.RecordAttemptCancelled(command.AttemptId, command.Step, command.Failure)];
+        if (!UsesLocalProductionTiff(state, command.Step))
+            effects.Add(new WorkflowEffect.ReleaseAutomationLock());
+        return WorkflowTransition.Accepted(state.WithStep(stopped), effects);
     }
 
     /// <summary>SCRUM-11092 / SCRUM-11112: start a local import from explicit manual handoff.</summary>
@@ -2159,6 +2175,7 @@ public sealed class WorkflowEngine : IWorkflowEngine
             CommandKind.SetTrimParameters => new WorkflowCommand.SetTrimParameters(state.TrimMargin, state.IgnoreSmallTrimNoise),
             CommandKind.SetImageProcessingSelection => new WorkflowCommand.SetImageProcessingSelection(
                 step, state.ImageProcessingSelection ?? SessionImageProcessingSelection.Compatible),
+            CommandKind.SetProductionTiffBackend => new WorkflowCommand.SetProductionTiffBackend(state.ProductionTiffBackend),
 
             // Probed with the name the session already holds, never an invented one: nothing is
             // applied by a probe, so this asks "may the name be changed at all" without proposing

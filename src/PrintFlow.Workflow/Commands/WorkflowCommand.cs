@@ -45,6 +45,9 @@ public abstract record WorkflowCommand
     /// <summary>Begin an attempt for the given step.</summary>
     public sealed record StartStep(StepKind Step, ImageUploadConfirmation? UploadConfirmation = null) : WorkflowCommand;
 
+    /// <summary>Sets the processor for this task's next production TIFF attempt.</summary>
+    public sealed record SetProductionTiffBackend(ProductionTiffBackend Backend) : WorkflowCommand;
+
     /// <summary>Approve the result currently awaiting review, bound to the hash reviewed.</summary>
     public sealed record Approve(StepKind Step, Sha256 ReviewedHash, string? Notes = null) : WorkflowCommand;
 

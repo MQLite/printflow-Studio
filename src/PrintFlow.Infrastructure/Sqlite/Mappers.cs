@@ -989,6 +989,12 @@ internal static class Mappers
         DimensionsPixelHeight = session.Dimensions?.PixelHeight,
         DimensionsPreset = session.Dimensions is { } d ? ToText(d.Preset) : null,
         WhiteUnderbaseBranch = session.WhiteUnderbaseBranch is { } b ? ToText(b) : null,
+        ProductionTiffBackend = session.ProductionTiffBackend switch
+        {
+            ProductionTiffBackend.Photoshop => "PHOTOSHOP",
+            ProductionTiffBackend.MagickNet => "MAGICK_NET",
+            _ => throw new InvalidOperationException($"Unknown production TIFF backend '{session.ProductionTiffBackend}'."),
+        },
 
         // Always written, unlike the attempt's copy: a session always has a pending trim
         // decision, and Tight is a decision rather than an absence (Epic 11200 Part C3 §10).
@@ -1127,6 +1133,12 @@ internal static class Mappers
             IgnoreSmallTrimNoise = row.IgnoreSmallTrimNoise ?? true,
             ImageProcessingSelection = ToImageProcessingSelection(row.ImageProcessingSelection),
             ImageProcessingDefaultsDeferred = row.ImageProcessingDefaultsDeferred,
+            ProductionTiffBackend = row.ProductionTiffBackend switch
+            {
+                "PHOTOSHOP" => ProductionTiffBackend.Photoshop,
+                "MAGICK_NET" => ProductionTiffBackend.MagickNet,
+                _ => throw new InvalidOperationException($"Unknown production TIFF backend '{row.ProductionTiffBackend}' in database."),
+            },
             TrimMargin = ToTrimMargin(
                 row.TrimMode, row.TrimMarginTop, row.TrimMarginRight,
                 row.TrimMarginBottom, row.TrimMarginLeft) ?? TrimMargin.Tight,

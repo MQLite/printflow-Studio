@@ -639,7 +639,7 @@ public sealed class SqliteSessionRepository : ISessionRepository
                 (Id, WorkflowType, OutputName, CurrentStep, State, WorkspacePath, CreatedAtUtc, UpdatedAtUtc,
                  CompletedAtUtc, HandedOffAtUtc, HandOffReason, AbandonedAtUtc, AbandonReason,
                  DimensionsWidthMm, DimensionsHeightMm, DimensionsPixelWidth, DimensionsPixelHeight,
-                 DimensionsPreset, WhiteUnderbaseBranch,
+                 DimensionsPreset, WhiteUnderbaseBranch, ProductionTiffBackend,
                  TrimMode, TrimMarginTop, TrimMarginRight, TrimMarginBottom, TrimMarginLeft, IgnoreSmallTrimNoise,
                  ImageProcessingSelection, ImageProcessingDefaultsDeferred,
                  BackgroundRemovalDecision, BackgroundRemovalRevisionId, BackgroundRemovalReviewedSha, BackgroundRemovalMode,
@@ -668,7 +668,7 @@ public sealed class SqliteSessionRepository : ISessionRepository
                 (@Id, @WorkflowType, @OutputName, @CurrentStep, @State, @WorkspacePath, @CreatedAtUtc, @UpdatedAtUtc,
                  @CompletedAtUtc, @HandedOffAtUtc, @HandOffReason, @AbandonedAtUtc, @AbandonReason,
                  @DimensionsWidthMm, @DimensionsHeightMm, @DimensionsPixelWidth, @DimensionsPixelHeight,
-                 @DimensionsPreset, @WhiteUnderbaseBranch,
+                 @DimensionsPreset, @WhiteUnderbaseBranch, @ProductionTiffBackend,
                  @TrimMode, @TrimMarginTop, @TrimMarginRight, @TrimMarginBottom, @TrimMarginLeft, @IgnoreSmallTrimNoise,
                  @ImageProcessingSelection, @ImageProcessingDefaultsDeferred,
                  @BackgroundRemovalDecision, @BackgroundRemovalRevisionId, @BackgroundRemovalReviewedSha, @BackgroundRemovalMode,
@@ -710,6 +710,7 @@ public sealed class SqliteSessionRepository : ISessionRepository
                 DimensionsPixelHeight = excluded.DimensionsPixelHeight,
                 DimensionsPreset = excluded.DimensionsPreset,
                 WhiteUnderbaseBranch = excluded.WhiteUnderbaseBranch,
+                ProductionTiffBackend = excluded.ProductionTiffBackend,
 
                 -- The session's *pending* trim decision, so it does update: it is what the next
                 -- run will use, and the operator is allowed to change their mind. The attempt's

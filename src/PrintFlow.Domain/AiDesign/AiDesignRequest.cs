@@ -4,6 +4,7 @@ using PrintFlow.Domain.Ids;
 namespace PrintFlow.Domain.AiDesign;
 
 public enum AiDesignState { PromptReady, Queued, Uploading, Submitted, Generating, Receiving, Validating, Importing, Imported, PromptOnly, Cancelled, Interrupted, ImportFailed, AwaitingWorkFollowUp }
+public enum AiDesignProvider { ChatGptWork, OpenAiApi }
 public enum AiDesignUploadStatus { Pending, Uploading, Uploaded, Failed, Cancelled }
 public sealed record AiDesignFence(Guid RequestId, Guid AttemptId, long StateVersion, string Token);
 public sealed record AiDesignFileRef(Guid RequestId, string RelativePath);
@@ -26,6 +27,7 @@ public sealed record AiDesignRequest
     public required Guid RequestId { get; init; }
     public required string WorkspaceIdentity { get; init; }
     public required AiDesignPrompt Prompt { get; init; }
+    public AiDesignProvider Provider { get; init; }
     public IReadOnlyList<AiDesignAttachment> Attachments { get; init; } = [];
     public IReadOnlyList<AiDesignUploadReceipt> UploadReceipts { get; init; } = [];
     public int NextAttachmentOrder { get; init; } = 1;

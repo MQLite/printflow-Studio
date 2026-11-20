@@ -21,7 +21,7 @@ public enum OperationKind
     /// <summary>A file the operator produced manually and dragged back in.</summary>
     ManualImport,
 
-    /// <summary>Photoshop production output (implementation: Epic 11400).</summary>
+    /// <summary>Production TIFF export. The attempt identifies the processor used.</summary>
     PhotoshopOutput,
 
     /// <summary>Photoshop's full-canvas raster representation of an immutable PSD source.</summary>

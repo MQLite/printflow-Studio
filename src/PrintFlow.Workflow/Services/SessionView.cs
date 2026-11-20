@@ -633,6 +633,9 @@ public sealed record SessionView(
 {
     public IReadOnlyList<SessionHistoryView> History { get; init; } = [];
 
+    public ProductionTiffBackend ProductionTiffBackend { get; init; } = ProductionTiffBackend.Photoshop;
+    public OperationFailure? MagickNetTiffUnavailable { get; init; }
+
     public bool IgnoreSmallTrimNoise { get; init; } = true;
     public bool CurrentTrimIgnoresSmallNoise { get; init; }
 
@@ -1000,6 +1003,7 @@ public sealed record SessionView(
                 ? TrimAdjustmentEligibility.Resolve(snapshot, revisions, attempts, outputs)
                 : null,
             OriginalSourceFormat = revisions.FirstOrDefault(r => r.IsRoot)?.Facts.Format,
+            ProductionTiffBackend = snapshot.ProductionTiffBackend,
 
             // The same root Revision the format is read from, so the file name, the format and
             // the previewable identity can never describe three different files.

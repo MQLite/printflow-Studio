@@ -1,7 +1,10 @@
+using CommunityToolkit.Mvvm.Input;
 using PrintFlow.App.Resources;
 using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Results;
+using PrintFlow.Domain.Sessions;
 using PrintFlow.Workflow.Commands;
+using PrintFlow.Workflow.Engine;
 using PrintFlow.Workflow.Services;
 
 namespace PrintFlow.App.ViewModels;
@@ -62,6 +65,60 @@ public sealed partial class SessionViewModel
     public bool IsDraftPreflight { get; private set; }
     public string PreflightHeading => Strings.Session_PreflightHeading;
     public string PreflightDraftHint => Strings.Session_PreflightDraftHint;
+
+    public bool ShowsTiffBackendSelector => GuidedPage == GuidedSessionPage.Preflight;
+    public string TiffBackendHeading => Strings.Resolve("ProductionTiff_BackendHeading");
+    public string PhotoshopTiffLabel => "Photoshop";
+    public string MagickNetTiffLabel => "Magick.NET";
+    // UI Automation selects a radio button by updating IsChecked.
+    public bool IsMagickNetTiffSelected
+    {
+        get => _session?.ProductionTiffBackend == ProductionTiffBackend.MagickNet;
+        set
+        {
+            if (value && !IsMagickNetTiffSelected && CanSelectMagickNetTiff)
+                SelectProductionTiffBackendCommand.Execute(ProductionTiffBackend.MagickNet);
+        }
+    }
+    public bool IsPhotoshopTiffSelected
+    {
+        get => !IsMagickNetTiffSelected;
+        set
+        {
+            if (value && !IsPhotoshopTiffSelected && CanSelectPhotoshopTiff)
+                SelectProductionTiffBackendCommand.Execute(ProductionTiffBackend.Photoshop);
+        }
+    }
+    public bool CanSelectPhotoshopTiff => CanSelectProductionTiffBackend(ProductionTiffBackend.Photoshop);
+    public bool CanSelectMagickNetTiff => CanSelectProductionTiffBackend(ProductionTiffBackend.MagickNet);
+    public bool HasMagickNetTiffUnavailable => _session?.MagickNetTiffUnavailable is not null;
+    public string? MagickNetTiffUnavailableText => _session?.MagickNetTiffUnavailable is { } failure
+        ? DisplayNames.Failure(failure)
+        : null;
+    private bool UsesMagickNetTiff => _session?.CurrentStep?.Step == StepKind.PhotoshopOutput && IsMagickNetTiffSelected;
+
+    private bool CanSelectProductionTiffBackend(ProductionTiffBackend backend) =>
+        ShowsTiffBackendSelector && !IsBusy && Allows(CommandKind.SetProductionTiffBackend) &&
+        (backend == ProductionTiffBackend.Photoshop ||
+         backend == ProductionTiffBackend.MagickNet && !HasMagickNetTiffUnavailable);
+
+    [RelayCommand(CanExecute = nameof(CanSelectProductionTiffBackend))]
+    private Task SelectProductionTiffBackendAsync(ProductionTiffBackend backend, CancellationToken cancellationToken) =>
+        CanSelectProductionTiffBackend(backend) && _session?.ProductionTiffBackend != backend
+            ? RunAsync(new WorkflowCommand.SetProductionTiffBackend(backend), cancellationToken)
+            : Task.CompletedTask;
+
+    private void NotifyTiffBackendSelection()
+    {
+        OnPropertyChanged(nameof(ShowsTiffBackendSelector));
+        OnPropertyChanged(nameof(IsPhotoshopTiffSelected));
+        OnPropertyChanged(nameof(IsMagickNetTiffSelected));
+        OnPropertyChanged(nameof(CanSelectPhotoshopTiff));
+        OnPropertyChanged(nameof(CanSelectMagickNetTiff));
+        OnPropertyChanged(nameof(HasMagickNetTiffUnavailable));
+        OnPropertyChanged(nameof(MagickNetTiffUnavailableText));
+        SelectProductionTiffBackendCommand.NotifyCanExecuteChanged();
+    }
 
     /// <summary>The latest read-only proposal query, also used by deterministic UI tests.</summary>
     public Task PreflightLoaded { get; private set; } = Task.CompletedTask;

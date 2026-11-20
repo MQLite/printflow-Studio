@@ -27,6 +27,7 @@ internal sealed record SessionRow
     public int? DimensionsPixelHeight { get; set; }
     public string? DimensionsPreset { get; set; }
     public string? WhiteUnderbaseBranch { get; set; }
+    public string ProductionTiffBackend { get; set; } = "PHOTOSHOP";
     public string? CurrentStepState { get; set; }
     public bool HasRunningCurrentAttempt { get; set; }
     public bool? IgnoreSmallTrimNoise { get; set; }

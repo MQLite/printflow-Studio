@@ -7,6 +7,7 @@ using PrintFlow.App.ViewModels;
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
 using PrintFlow.Infrastructure.Adapters.Fake;
+using PrintFlow.Infrastructure.Adapters.Magick;
 using PrintFlow.Infrastructure.Adapters.Meitu;
 using PrintFlow.Infrastructure.Adapters.OpenAI;
 using PrintFlow.Infrastructure.Adapters.Photoshop;
@@ -276,6 +277,10 @@ public static class ServiceRegistration
         services.AddSingleton<IAiDesignWorkResultImport>(p => p.GetRequiredService<LoopbackWorkResultImport>());
         services.AddSingleton<IAiDesignTextSubmission>(p => new ChromeWorkTextSubmission(workspaceRootAbsolute,
             p.GetRequiredService<LoopbackWorkResultImport>(), p.GetRequiredService<WorkTaskTracker>()));
+        services.AddSingleton<IAiDesignApiConsent, SystemOpenAiUploadPrompt>();
+        services.AddSingleton<IAiDesignApiGeneration>(p => new OpenAiDesignGeneration(workspaceRootAbsolute,
+            p.GetRequiredService<IOpenAiImageCredentials>(), configuration.OpenAiImages?.Model ?? OpenAiImageBackend.DefaultModel,
+            p.GetRequiredService<IFileInspector>(), p.GetRequiredService<ISessionService>()));
         services.AddTransient<AiPromptWorkbenchViewModel>();
         services.AddTransient<AiWorkTasksViewModel>();
         services.AddSingleton<IFilePicker, OpenFileDialogPicker>();
@@ -433,6 +438,9 @@ public static class ServiceRegistration
                         provider.GetRequiredService<IWorkspace>(),
                         evidenceDirectory,
                         provider.GetRequiredService<TimeProvider>()));
+                services.AddSingleton<ILocalProductionTiffProcessor>(provider => new MagickProductionTiffProcessor(
+                    provider.GetRequiredService<IWorkspace>(),
+                    presetManifestPath, expectedPresetHash));
                 break;
 
             default:

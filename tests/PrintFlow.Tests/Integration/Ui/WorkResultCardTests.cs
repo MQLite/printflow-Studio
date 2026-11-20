@@ -4,9 +4,11 @@ using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using PrintFlow.App.Navigation;
 using PrintFlow.App.ViewModels.AiDesign;
 using PrintFlow.App.Views.AiDesign;
 using PrintFlow.Domain.AiDesign.Authoring;
+using PrintFlow.Domain.AiDesign;
 using PrintFlow.Tests.Fixtures;
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
@@ -19,6 +21,49 @@ namespace PrintFlow.Tests.Integration.Ui;
 [Collection(SqliteCollection.Name)]
 public sealed class WorkResultCardTests
 {
+    [Fact]
+    public async Task OpenAi_generation_requires_consent_and_reuses_the_imported_result_card()
+    {
+        var query = new TestQuery();
+        var api = new DesignApi();
+        using var fixture = new PromptWorkbenchFixture(tasks: query, api: api, consent: api);
+        var vm = fixture.Vm;
+        await vm.OpenAsync(null, default);
+        vm.GenerationProvider = AiDesignProvider.OpenAiApi;
+        vm.Document = new([new AiTextPart(Guid.NewGuid(), "Draw a floral border.")]);
+
+        await vm.AutoGenerateCommand.ExecuteAsync(null);
+        api.Submitted.ShouldBeNull();
+
+        api.Consent = true;
+        query.Items = [TaskFor(vm.Draft!.Id, WorkTaskStage.Imported) with
+        {
+            RequestId = api.RequestId,
+            Provider = AiDesignProvider.OpenAiApi,
+            ImportedSessionId = SessionId.From(api.RequestId)
+        }];
+        await vm.AutoGenerateCommand.ExecuteAsync(null);
+
+        api.Submitted!.FinalDocument.Parts.OfType<AiTextPart>().ShouldHaveSingleItem().Text.ShouldBe("Draw a floral border.");
+        vm.WorkCard!.CanContinue.ShouldBeTrue();
+        vm.WorkCard.CanViewWork.ShouldBeFalse();
+        vm.GenerationMilestones.ShouldAllBe(step => step.Reached);
+    }
+
+    private sealed class DesignApi : IAiDesignApiGeneration, IAiDesignApiConsent
+    {
+        public Guid RequestId { get; } = Guid.NewGuid();
+        public bool Consent { get; set; }
+        public AiAuthoringDraft? Submitted { get; private set; }
+        public bool Confirm() => Consent;
+        public OperationFailure? GetUnavailable() => null;
+        public Task<OperationResult<Guid>> GenerateAsync(AiAuthoringDraft draft, CancellationToken ct)
+        {
+            Submitted = draft;
+            return Task.FromResult(OperationResult.Ok(RequestId));
+        }
+    }
+
     [Fact]
     public async Task Failed_new_generation_keeps_previous_imported_result_available()
     {

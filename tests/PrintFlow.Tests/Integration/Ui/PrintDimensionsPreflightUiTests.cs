@@ -11,6 +11,7 @@ using System.Windows.Threading;
 using PrintFlow.App.Resources;
 using PrintFlow.App.ViewModels;
 using PrintFlow.App.Views;
+using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Results;
@@ -27,6 +28,119 @@ namespace PrintFlow.Tests.Integration.Ui;
 [Collection(SqliteCollection.Name)]
 public sealed class PrintDimensionsPreflightUiTests
 {
+    [Fact]
+    public async Task Tiff_preflight_shows_the_default_backend_and_disables_unavailable_magick()
+    {
+        using HomeScreenHarness h = new();
+        SessionView state = await AtDimensions(h);
+        state = await Execute(h.Sessions, state.Id,
+            new WorkflowCommand.SetCustomTargetEdgeSize(TargetEdge.Width, 25.4m));
+        state = await Execute(h.Sessions, state.Id,
+            new WorkflowCommand.SelectWhiteUnderbaseBranch(WhiteUnderbaseBranch.W1_1px, "ordinary design"));
+
+        WpfRendering.RenderExpectingNoBindingErrors(() => CreateView(h, state, "en-US"),
+            WpfRendering.ReviewViewport, tree =>
+            {
+                RadioButton photoshop = Control<RadioButton>(tree.Root, "Backend.Photoshop");
+                RadioButton magick = Control<RadioButton>(tree.Root, "Backend.MagickNet");
+                TextBlock availability = Control<TextBlock>(tree.Root, "Backend.Availability");
+                GuidedSessionProjectionTests.Shown(photoshop).ShouldBeTrue();
+                photoshop.IsChecked.ShouldBe(true);
+                GuidedSessionProjectionTests.Shown(magick).ShouldBeTrue();
+                magick.IsChecked.ShouldBe(false);
+                magick.IsEnabled.ShouldBeFalse();
+                GuidedSessionProjectionTests.Shown(availability).ShouldBeTrue();
+                availability.Text.ShouldContain("Magick.NET");
+                return true;
+            });
+    }
+
+    [Theory]
+    [InlineData(WorkflowType.GeneratePrintTiff)]
+    [InlineData(WorkflowType.PrepareCustomerDesign)]
+    public async Task Tiff_preflight_selection_starts_the_identified_local_processor(WorkflowType workflow)
+    {
+        using SessionServiceHarness harness = new();
+        var processor = new WaitingLocalTiffProcessor();
+        ISessionService service = harness.CreateService(localProductionTiff: processor);
+        SessionId id;
+        if (workflow == WorkflowType.PrepareCustomerDesign)
+        {
+            id = await AtTrim(harness, service, workflow);
+            await Execute(service, id, new WorkflowCommand.KeepOriginalExtent());
+        }
+        else
+        {
+            string file = harness.Workspace.CreateSourceFile("backend-selection.png", SyntheticImages.Png(600, 300));
+            id = (await service.ImportAsync(workflow, file, "preflight", "tester", default)).Value.Id;
+            await Execute(service, id, new WorkflowCommand.ConfirmOriginal());
+        }
+        await Execute(service, id, new WorkflowCommand.SetCustomTargetEdgeSize(TargetEdge.Width, 0.5m));
+        SessionView state = await Execute(service, id,
+            new WorkflowCommand.SelectWhiteUnderbaseBranch(WhiteUnderbaseBranch.W1_1px, "ordinary design"));
+        SessionViewModel model = new(service, harness.Previews, harness.TiffReviews, new RecordingNavigation());
+        model.Open(state);
+        await model.PreviewsLoaded;
+
+        WpfRendering.RenderExpectingNoBindingErrors(() => new SessionScreenView { DataContext = model },
+            WpfRendering.ReviewViewport, tree =>
+            {
+                RadioButton magick = Control<RadioButton>(tree.Root, "Backend.MagickNet");
+                GuidedSessionProjectionTests.Shown(magick).ShouldBeTrue();
+                magick.IsEnabled.ShouldBeTrue();
+                var selection = (ISelectionItemProvider)UIElementAutomationPeer.CreatePeerForElement(magick)!
+                    .GetPattern(PatternInterface.SelectionItem)!;
+                var previousContext = SynchronizationContext.Current;
+                try
+                {
+                    SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext());
+                    selection.Select();
+                    var command = model.SelectProductionTiffBackendCommand;
+                    PumpUntil(() => command.ExecutionTask?.IsCompleted == true);
+                    command.ExecutionTask!.GetAwaiter().GetResult();
+                }
+                finally
+                {
+                    SynchronizationContext.SetSynchronizationContext(previousContext);
+                }
+                magick.IsChecked.ShouldBe(true);
+                Control<RadioButton>(tree.Root, "Backend.Photoshop").IsChecked.ShouldBe(false);
+                return true;
+            });
+
+        SessionView selected = (await service.LoadAsync(id, default)).Value;
+        selected.ProductionTiffBackend.ShouldBe(ProductionTiffBackend.MagickNet);
+        SessionViewModel running = new(service, harness.Previews, harness.TiffReviews, new RecordingNavigation());
+        running.Open(selected);
+        Task run = running.RunStepCommand.ExecuteAsync(null);
+        try
+        {
+            await processor.Started.Task.WaitAsync(TimeSpan.FromSeconds(10));
+            running.GuidedProcessingApplication.ShouldBe("Magick.NET");
+            running.CanStopAutomation.ShouldBeTrue();
+            running.CanTakeOverAutomation.ShouldBeFalse();
+        }
+        finally
+        {
+            running.StopAutomationCommand.Execute(null);
+            await run.WaitAsync(TimeSpan.FromSeconds(10));
+        }
+    }
+
+    private sealed class WaitingLocalTiffProcessor : ILocalProductionTiffProcessor
+    {
+        public string AdapterId => "test-local-production-tiff";
+        public TaskCompletionSource Started { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public OperationFailure? GetAvailability(FileFacts input, PhotoshopPreparation? preparation) => null;
+
+        public async Task<OperationResult<AdapterOutput>> GenerateAsync(PhotoshopRequest request, CancellationToken cancellationToken)
+        {
+            Started.TrySetResult();
+            await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
+            throw new InvalidOperationException("This test stops the local generation.");
+        }
+    }
+
     [Theory]
     [InlineData("en-US", "Effective source resolution", "No enlargement required", "Enlargement required")]
     [InlineData("zh-CN", "源图有效分辨率", "无需放大", "需要放大")]

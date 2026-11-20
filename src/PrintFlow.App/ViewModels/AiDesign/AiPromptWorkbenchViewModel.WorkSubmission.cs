@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.Input;
 using PrintFlow.App.Resources;
 using PrintFlow.App.Navigation;
+using PrintFlow.Domain.AiDesign;
 using PrintFlow.Workflow.AiDesign;
 
 namespace PrintFlow.App.ViewModels.AiDesign;
@@ -10,8 +11,19 @@ public sealed partial class AiPromptWorkbenchViewModel
     private Guid? submittedWorkRequest;
     private bool generationStarted;
     private bool submittingGeneration;
+    private bool generationUsesOpenAi;
     private string? generationFeedback;
     public string AutoGenerateLabel => Strings.Resolve("AiPrompt_AutoGenerate");
+    public string GenerationProviderLabel => Strings.Resolve("AiPrompt_GenerationProvider");
+    public IReadOnlyList<AiDesignGenerationOption> GenerationOptions =>
+    [
+        new(AiDesignProvider.ChatGptWork, "ChatGPT Work"),
+        new(AiDesignProvider.OpenAiApi, "OpenAI API")
+    ];
+    public AiDesignProvider GenerationProvider { get; set; }
+    public string CancelOpenAiGenerationLabel => Strings.Resolve("AiPrompt_OpenAiCancel");
+    public bool CanCancelOpenAiGeneration => submittingGeneration && generationUsesOpenAi;
+    public IRelayCommand CancelOpenAiGenerationCommand { get; }
     public string GenerationProgressLabel => Strings.Resolve("AiPrompt_GenerationProgress");
     public bool ShowGenerationProgress => generationStarted || HasWorkCard;
     public string? GenerationFeedback => WorkCard?.Stage ?? generationFeedback;
@@ -45,6 +57,9 @@ public sealed partial class AiPromptWorkbenchViewModel
                 reached >= 3 ? "WorkTask_Verified" : "AiPrompt_GenerationVerify",
                 reached >= 4 ? "WorkTask_Imported" : "AiPrompt_GenerationImport"
             ];
+            if (snapshot?.Provider == AiDesignProvider.OpenAiApi || snapshot is null && generationUsesOpenAi)
+                labels = ["AiPrompt_OpenAiGenerate", "AiPrompt_GenerationVerify", "AiPrompt_GenerationImport"];
+
             return labels.Select((label, index) => new GenerationMilestone(Strings.Resolve(label), index < reached,
                 index == current, index > 0, index < labels.Length - 1)).ToArray();
         }
@@ -64,18 +79,22 @@ public sealed partial class AiPromptWorkbenchViewModel
     public bool IsWaitingForWorkResult => WorkCard?.Snapshot.BlocksNewSubmission == true;
     public bool CanStopReceiving => WorkCard?.Snapshot.CanStopReceiving == true;
     public CommunityToolkit.Mvvm.Input.IAsyncRelayCommand StopReceivingCommand { get; }
-    private async Task SubmitToWorkAsync() => await RunAsync(async () =>
+    private async Task GenerateAsync(CancellationToken ct) => await RunAsync(async () =>
     {
         if (!active || Draft is null || IsWaitingForWorkResult || isLoadingWorkCard || workCardUnavailable) return;
+        bool useApi = GenerationProvider == AiDesignProvider.OpenAiApi;
+        if (useApi && !ConfirmOpenAiGeneration()) return;
+
         long submittingEpoch = epoch;
         var previousResult = WorkCard is { CanContinue: true } imported ? imported : null;
         generationStarted = true;
         submittingGeneration = true;
-        generationFeedback = Strings.Resolve("AiPrompt_WorkConnecting");
+        generationUsesOpenAi = useApi;
+        generationFeedback = Strings.Resolve(useApi ? "AiPrompt_OpenAiGenerating" : "AiPrompt_WorkConnecting");
         submittedWorkRequest = null;
         WorkCard = null;
         NotifyGenerationProgress();
-        try { await SubmitGenerationCoreAsync(submittingEpoch); }
+        try { await SubmitGenerationCoreAsync(submittingEpoch, useApi, ct); }
         finally
         {
             if (IsCurrent(submittingEpoch))
@@ -100,11 +119,27 @@ public sealed partial class AiPromptWorkbenchViewModel
         OnPropertyChanged(nameof(ShowGenerationProgress));
         OnPropertyChanged(nameof(GenerationFeedback));
         OnPropertyChanged(nameof(GenerationMilestones));
+        OnPropertyChanged(nameof(CanCancelOpenAiGeneration));
     }
 
-    private async Task SubmitGenerationCoreAsync(long submittingEpoch)
+    private bool ConfirmOpenAiGeneration()
     {
-        if (textSubmission is null)
+        if (apiGeneration is null || apiConsent is null)
+        {
+            Error = Strings.Resolve("AiPrompt_OpenAiUnavailable");
+            return false;
+        }
+        if (apiGeneration.GetUnavailable() is { } failure)
+        {
+            Error = Strings.Resolve(failure.MessageKey);
+            return false;
+        }
+        return apiConsent.Confirm();
+    }
+
+    private async Task SubmitGenerationCoreAsync(long submittingEpoch, bool useApi, CancellationToken ct)
+    {
+        if (!useApi && textSubmission is null)
         {
             Error = Strings.Resolve("AiPrompt_WorkSetup");
             return;
@@ -119,15 +154,24 @@ public sealed partial class AiPromptWorkbenchViewModel
 
         if (!IsCurrent(submittingEpoch)) return;
         Status = null;
-        var result = await textSubmission.SubmitAsync(Draft!, default);
+        if (useApi)
+        {
+            var generated = await apiGeneration!.GenerateAsync(Draft!, ct);
+            if (!IsCurrent(submittingEpoch)) return;
+            if (generated.IsFailure)
+            {
+                Error = Strings.Resolve(generated.Failure.MessageKey);
+                return;
+            }
+            await ShowSubmittedResultAsync(generated.Value, "WorkTask_Imported");
+            return;
+        }
+
+        var result = await textSubmission!.SubmitAsync(Draft!, default);
         if (!IsCurrent(submittingEpoch)) return;
         if (result.IsSuccess)
         {
-            submittedWorkRequest = result.Value.RequestId;
-            Status = null;
-            generationFeedback = Strings.Resolve("AiPrompt_WorkSubmitted");
-            QueueWorkCardRefresh();
-            await WorkCardRefresh;
+            await ShowSubmittedResultAsync(result.Value.RequestId, "AiPrompt_WorkSubmitted");
             return;
         }
 
@@ -145,6 +189,14 @@ public sealed partial class AiPromptWorkbenchViewModel
         });
     }
 
+    private async Task ShowSubmittedResultAsync(Guid requestId, string feedbackKey)
+    {
+        submittedWorkRequest = requestId;
+        generationFeedback = Strings.Resolve(feedbackKey);
+        QueueWorkCardRefresh();
+        await WorkCardRefresh;
+    }
+
     private async Task StopReceivingAsync() => await RunAsync(async () =>
     {
         if (textSubmission is null || !CanStopReceiving || WorkCard is not { } card) return;
@@ -158,3 +210,4 @@ public sealed partial class AiPromptWorkbenchViewModel
 }
 
 public sealed record GenerationMilestone(string Label, bool Reached, bool IsCurrent, bool HasPrevious, bool HasNext);
+public sealed record AiDesignGenerationOption(AiDesignProvider Provider, string Label);

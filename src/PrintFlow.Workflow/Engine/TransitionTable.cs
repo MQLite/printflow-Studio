@@ -42,6 +42,7 @@ public enum CommandKind
     SelectWhiteUnderbaseBranch,
     SetTrimParameters,
     SetImageProcessingSelection,
+    SetProductionTiffBackend,
     SetBackgroundRemovalDecision,
     ReturnToStep,
     Complete,
@@ -108,6 +109,7 @@ public static class TransitionTable
         // and this command names no step (Epic 11200 Part C3 §13).
         CommandKind.SetTrimParameters,
         CommandKind.SetImageProcessingSelection,
+        CommandKind.SetProductionTiffBackend,
 
         // And a reviewed-content authority for Background Removal, for the same reason: it
         // names no step, changes no step state, and starts nothing. Whether Background Removal

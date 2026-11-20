@@ -37,6 +37,8 @@ public enum StepKind
 
     ApprovedPngExport,
     PrintDimensions,
+
+    /// <summary>Production TIFF export and review.</summary>
     PhotoshopOutput,
 }
 

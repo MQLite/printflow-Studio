@@ -60,7 +60,7 @@ public sealed partial class AiPromptWorkbenchViewModel
         CloseWorkPreview();
         CloseFollowUpEditor();
         submittedWorkRequest = null;
-        generationStarted = submittingGeneration = false;
+        generationStarted = submittingGeneration = generationUsesOpenAi = false;
         generationFeedback = null;
         SetWorkCardUnavailable(false);
         isLoadingWorkCard = active && Draft is not null && workTasks is not null;
