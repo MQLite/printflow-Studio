@@ -12,6 +12,7 @@ public abstract record AiAuthoringEdit
     public sealed record AcknowledgeDocumentReconciliation(string ExpectedDocumentHash, string ExpectedFieldsHash) : AiAuthoringEdit;
     public sealed record RestoreRevision(long Revision) : AiAuthoringEdit;
     public sealed record SetField(string Key, string Value) : AiAuthoringEdit;
+    public sealed record SaveWorkbench(IReadOnlyDictionary<string, string> FieldChanges, AiPromptDocument Document) : AiAuthoringEdit;
     public sealed record ReplaceDocument(AiPromptDocument Document) : AiAuthoringEdit;
     public sealed record Recompose(bool PreservePrevious) : AiAuthoringEdit;
     public sealed record BindImage(string SlotId, SelectedAiDesignFile Selection) : AiAuthoringEdit;

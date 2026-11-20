@@ -18,6 +18,19 @@ public sealed class FileAiDesignRequestStore : IAiDesignRequestStore
     public string WorkspaceRoot { get; }
     public string WorkspaceIdentity { get; }
     public string RequestsRoot => Path.Combine(WorkspaceRoot, "AiDesign", "Requests");
+
+    internal FileStream? TryLockWorkDraft(Guid draftId)
+    {
+        if (draftId == Guid.Empty) return null;
+        try
+        {
+            string path = Path.Combine(RequestsRoot, $".work-draft-{draftId:N}.lock");
+            ReparsePointGuard.RefuseAncestry(path);
+            Directory.CreateDirectory(RequestsRoot);
+            return new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { return null; }
+    }
     public FileAiDesignRequestStore(string workspaceRoot, TimeProvider? timeProvider = null)
     {
         if (!Path.IsPathFullyQualified(workspaceRoot)) throw new ArgumentException("Absolute workspace root required.", nameof(workspaceRoot));
@@ -39,6 +52,29 @@ public sealed class FileAiDesignRequestStore : IAiDesignRequestStore
     });
     public Task<OperationResult<AiDesignRequest>> ReadAsync(Guid id, CancellationToken ct) => Guard(async () =>
     { await using var gate = await LockAsync(id, ct); return OperationResult.Ok(await ReadCoreAsync(id, ct)); });
+    internal Task<OperationResult<AiDesignRequest>> CreateWorkFollowUpAsync(Guid sourceId, Guid id, string text,
+        CancellationToken ct) => Guard(async () =>
+    {
+        if (sourceId == id || string.IsNullOrWhiteSpace(text)) return Fail("WorkFollowUpUnavailable");
+        await using var sourceGate = await LockAsync(sourceId, ct);
+        var source = await ReadCoreAsync(sourceId, ct);
+        if (source.State != AiDesignState.Imported || source.ImportedSessionId is null || source.Candidate is not { } result ||
+            source.WorkDraft is not { } draft || source.WorkConversationId is not { } conversation || conversation == Guid.Empty)
+            return Fail("WorkFollowUpUnavailable");
+        await using var gate = await LockAsync(id, ct);
+        if (File.Exists(Authority(id))) return Fail("Request authority already exists.");
+
+        var now = _clock.GetUtcNow();
+        var request = new AiDesignRequest
+        {
+            RequestId = id, WorkspaceIdentity = WorkspaceIdentity, Token = AiDesignTransitions.NewToken(),
+            WorkDraft = draft, WorkFollowUp = new(sourceId, result.Facts.Sha256, conversation),
+            Prompt = new(PromptTemplateService.WorkbenchTemplate, 1, new Dictionary<string, string>(), text, [], ""),
+            CreatedAtUtc = now, UpdatedAtUtc = now
+        };
+        await WriteAsync(request, ct);
+        return OperationResult.Ok(request);
+    });
     public Task<OperationResult<AiDesignRequest>> ChangeAsync(AiDesignFence expected, AiDesignEvent change, CancellationToken ct) => Guard(async () =>
     {
         await using var gate = await LockAsync(expected.RequestId, ct); var r = await ReadCoreAsync(expected.RequestId, ct);
@@ -124,7 +160,8 @@ public sealed class FileAiDesignRequestStore : IAiDesignRequestStore
         using var bound = CancellationTokenSource.CreateLinkedTokenSource(ct); bound.CancelAfter(TimeSpan.FromSeconds(15));
         try { outcome = await click(r, bound.Token).WaitAsync(bound.Token); }
         catch (Exception ex) when (ex is not OutOfMemoryException) { outcome = OperationResult.Fail<Guid?>(FailureCode.AdapterUnavailable, "SubmitUnconfirmed"); }
-        var result = AiDesignTransitions.Apply(r, outcome.IsSuccess ? new AiDesignEvent.SubmitConfirmed(outcome.Value) : new AiDesignEvent.Interrupted(), _clock.GetUtcNow());
+        bool confirmed = outcome.IsSuccess && (r.WorkFollowUp?.ConversationId is not { } target || outcome.Value == target);
+        var result = AiDesignTransitions.Apply(r, confirmed ? new AiDesignEvent.SubmitConfirmed(outcome.Value) : new AiDesignEvent.Interrupted(), _clock.GetUtcNow());
         if (result.IsSuccess) await WriteAsync(result.Value, CancellationToken.None); return result;
     });
     public Task<OperationResult<AiDesignRequest>> EditDraftAsync(AiDesignFence expected,
@@ -166,6 +203,9 @@ public sealed class FileAiDesignRequestStore : IAiDesignRequestStore
     private static bool ValidShape(AiDesignRequest r)
     {
         if (r.WorkDraft is { } work && (work.DraftId == Guid.Empty || string.IsNullOrWhiteSpace(work.Title))) return false;
+        if (r.WorkFollowUp is { } prior && (prior.RequestId == Guid.Empty || prior.RequestId == r.RequestId ||
+            prior.ConversationId == Guid.Empty || !Sha256.TryParse(prior.ResultSha256.Value, out _))) return false;
+        if (r.State == AiDesignState.AwaitingWorkFollowUp && (r.WorkDraft is null || !AiDesignTransitions.CanResumeWorkResult(r))) return false;
         if (r.Prompt is null || r.Prompt.Fields is null || r.Prompt.AttachmentReferences is null || r.Attachments is null
             || r.UploadReceipts is null || r.RetainedCandidates is null || string.IsNullOrWhiteSpace(r.Prompt.TemplateId)
             || string.IsNullOrWhiteSpace(r.Prompt.Text) || r.Prompt.HandoffInstructions is null || r.NextAttachmentOrder < 1

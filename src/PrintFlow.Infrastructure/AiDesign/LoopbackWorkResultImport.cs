@@ -127,6 +127,7 @@ public sealed partial class LoopbackWorkResultImport(string workspaceRoot, IFile
                 receipt.ByteLength is <= 0 or > MaxImageBytes || !Sha256.TryParse(receipt.Sha256, out var hash) ||
                 (!automatic && (!Sha256.TryParse(options.SourceSha256, out var expectedHash) || hash != expectedHash)) ||
                 current.Attachments.Any(attachment => attachment.Sha256 == hash) ||
+                current.WorkFollowUp?.ResultSha256 == hash ||
                 format == ImageFormat.Unknown || !validDimensions)
             {
                 await ReportProblemAsync(WorkResultProblem.ValidationFailed);

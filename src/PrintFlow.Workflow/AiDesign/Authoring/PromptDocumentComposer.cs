@@ -13,6 +13,7 @@ public static partial class PromptDocumentComposer
 
     public static bool HasOutdatedProductSpecification(AiAuthoringDraft draft)
     {
+        if (draft.HasLegacyProductSpecification) return true;
         var fixedValues = draft.TemplateSnapshot.Fields
             .Select(definition => (definition.Key, Value: MemorialLayoutModule.FixedPromptSpecification(draft.Product, definition)))
             .Where(entry => entry.Value is not null)

@@ -1467,12 +1467,12 @@
   <data name="Session_SaveHideReview" xml:space="preserve"><value>Return to result preview</value></data>
   <data name="Session_SaveCurrentResult" xml:space="preserve"><value>Current result preview</value></data>
   <data name="AiPrompt_ChoosePhoto" xml:space="preserve"><value>Choose photo</value></data>
-  <data name="AiPrompt_Title" xml:space="preserve"><value>AI design prompts</value></data>
+  <data name="AiPrompt_Title" xml:space="preserve"><value>AI Generation</value></data>
   <data name="AiPrompt_Quick" xml:space="preserve"><value>Quick prompts</value></data>
   <data name="AiPrompt_DetailPending" xml:space="preserve"><value>Detailed review will be available in the next step.</value></data>
-  <data name="AiPrompt_Templates" xml:space="preserve"><value>Reusable templates</value></data>
-  <data name="AiPrompt_Inputs" xml:space="preserve"><value>This draft</value></data>
-  <data name="AiPrompt_FinalText" xml:space="preserve"><value>Editable prompt</value></data>
+  <data name="AiPrompt_Templates" xml:space="preserve"><value>Base templates</value></data>
+  <data name="AiPrompt_Inputs" xml:space="preserve"><value>Edit fields</value></data>
+  <data name="AiPrompt_FinalText" xml:space="preserve"><value>Prompt</value></data>
   <data name="AiPrompt_Compose" xml:space="preserve"><value>Generate prompt</value></data>
   <data name="AiPrompt_Copy" xml:space="preserve"><value>Copy prompt</value></data>
   <data name="AiPrompt_Save" xml:space="preserve"><value>Save draft</value></data>
@@ -1536,7 +1536,7 @@
   <data name="AiPrompt_LayoutImage" xml:space="preserve"><value>Layout reference</value></data>
   <data name="AiPrompt_EditSourceImage" xml:space="preserve"><value>Artwork to edit</value></data>
   <data name="AiPrompt_SelectTemplate" xml:space="preserve"><value>Use this template</value></data>
-  <data name="AiPrompt_ManualNotice" xml:space="preserve"><value>Edited for this draft. Field changes will not overwrite this text.</value></data>
+  <data name="AiPrompt_ManualNotice" xml:space="preserve"><value>Manual edits are retained.</value></data>
   <data name="AiPrompt_FieldsChangedNotice" xml:space="preserve"><value>Information changed. Generate the prompt again to include it.</value></data>
   <data name="AiPrompt_SaveInstanceTemplate" xml:space="preserve"><value>Save this prompt as a template</value></data>
   <data name="AiPrompt_InstancePreviewNotice" xml:space="preserve"><value>This preview preserves your current wording and converts image references and matching known fields to variables. Check every line: ambiguous or manually changed customer details must be replaced with variables before you confirm. No customer photos or field values become template defaults.</value></data>
@@ -1602,7 +1602,7 @@
   <data name="AiMemorial_EditLayout" xml:space="preserve"><value>Edit layout</value></data>
   <data name="AiMemorial_ReopenLayout" xml:space="preserve"><value>Reopen layout with current inputs</value></data>
   <data name="AiMemorial_FixedSpecification" xml:space="preserve"><value>Fixed by the product layout</value></data>
-  <data name="AiMemorial_OutdatedPromptSpecification" xml:space="preserve"><value>This draft has an older size entry. Generate the prompt again to use the fixed product specification.</value></data>
+  <data name="AiMemorial_OutdatedPromptSpecification" xml:space="preserve"><value>This draft uses an older size. Update the draft to use the current product specification.</value></data>
   <data name="AiMemorial_MmHelp" xml:space="preserve"><value>All measurements are in millimetres. Image height follows its source proportions.</value></data>
   <data name="AiMemorial_LayerRole" xml:space="preserve"><value>Layer role</value></data>
   <data name="AiMemorial_Left" xml:space="preserve"><value>Left</value></data>
@@ -1679,7 +1679,7 @@
   <data name="AiMemorial_Zoom" xml:space="preserve"><value>Zoom</value></data>
   <data name="AiMemorial_Background" xml:space="preserve"><value>Preview background</value></data>
   <data name="AiMemorial_ProofReduced" xml:space="preserve"><value>The display image was reduced. The saved PNG retains the full dimensions shown above.</value></data>
-  <data name="AiPrompt_AutoGenerate" xml:space="preserve"><value>Generate image</value></data>
+  <data name="AiPrompt_AutoGenerate" xml:space="preserve"><value>Generate</value></data>
   <data name="AiPrompt_WorkSetup" xml:space="preserve"><value>Set up the Chrome bridge, then try again.</value></data>
   <data name="AiPrompt_WorkAttachmentRequired" xml:space="preserve"><value>Complete the referenced attachments before submitting this draft.</value></data>
   <data name="AiPrompt_WorkUploadFailed" xml:space="preserve"><value>Work did not confirm all required attachments. The prompt and attachments are saved in Studio.</value></data>
@@ -1832,4 +1832,36 @@
   <data name="ImageProcessing_CombinedReviewEdges" xml:space="preserve"><value>Check the outline, hair and light edges. Confirm that the intended foreground is visible.</value></data>
   <data name="ImageProcessing_CombinedReviewReject" xml:space="preserve"><value>Reject to discard this result. You can retry with a new upload confirmation, keep the reviewed input, or return to separate methods.</value></data>
   <data name="ImageProcessing_OpenAiCutoutHint" xml:space="preserve"><value>Sends the image to OpenAI and may incur usage charges. Generative background removal can redraw parts of the subject.</value></data>
+  <data name="AiPrompt_FieldOptions" xml:space="preserve"><value>Editable options</value></data>
+  <data name="AiPrompt_Lifespan" xml:space="preserve"><value>Life dates</value></data>
+  <data name="AiPrompt_ShortName" xml:space="preserve"><value>Name</value></data>
+  <data name="AiPrompt_ShortBirth" xml:space="preserve"><value>Date of birth</value></data>
+  <data name="AiPrompt_ShortDeath" xml:space="preserve"><value>Date of death</value></data>
+  <data name="AiPrompt_DraftsShort" xml:space="preserve"><value>Drafts</value></data>
+  <data name="AiPrompt_CopyShort" xml:space="preserve"><value>Copy</value></data>
+  <data name="AiPrompt_Review" xml:space="preserve"><value>Review and layout</value></data>
+  <data name="AiPrompt_GenerationProgress" xml:space="preserve"><value>Generation progress</value></data>
+  <data name="AiPrompt_GenerationSubmit" xml:space="preserve"><value>Submit</value></data>
+  <data name="AiPrompt_GenerationWaiting" xml:space="preserve"><value>Awaiting return</value></data>
+  <data name="AiPrompt_GenerationReturn" xml:space="preserve"><value>Return</value></data>
+  <data name="AiPrompt_GenerationVerify" xml:space="preserve"><value>Verify</value></data>
+  <data name="AiPrompt_GenerationImport" xml:space="preserve"><value>Import</value></data>
+  <data name="AiPrompt_UpdateSpecification" xml:space="preserve"><value>Update legacy specification</value></data>
+  <data name="AiPrompt_ReviewPreservation" xml:space="preserve"><value>Reference preservation</value></data>
+  <data name="AiPrompt_ReviewText" xml:space="preserve"><value>Review text</value></data>
+  <data name="AiPrompt_ReviewLayout" xml:space="preserve"><value>Product layout</value></data>
+  <data name="AiPrompt_HistoryShort" xml:space="preserve"><value>Draft history</value></data>
+  <data name="AiPrompt_DraftTools" xml:space="preserve"><value>Draft tools</value></data>
+  <data name="AiPrompt_ReferenceTools" xml:space="preserve"><value>Manage references</value></data>
+  <data name="WorkTask_Preview" xml:space="preserve"><value>Preview</value></data>
+  <data name="WorkTask_PreviewTitle" xml:space="preserve"><value>Generated result</value></data>
+  <data name="WorkTask_PreviewLoading" xml:space="preserve"><value>Loading the generated result…</value></data>
+  <data name="WorkTask_PreviewFailed" xml:space="preserve"><value>Could not preview the generated result.</value></data>
+  <data name="WorkTask_Regenerate" xml:space="preserve"><value>Regenerate in Work</value></data>
+  <data name="WorkTask_AwaitingFollowUp" xml:space="preserve"><value>Send the revision instructions in the original Work conversation.</value></data>
+  <data name="WorkTask_RegenerateFailed" xml:space="preserve"><value>Could not confirm the follow-up in the original Work conversation. Check the conversation before trying again.</value></data>
+  <data name="WorkTask_FollowUpPrefix" xml:space="preserve"><value>Make the following changes:</value></data>
+  <data name="WorkTask_FollowUpSubmit" xml:space="preserve"><value>Generate again</value></data>
+  <data name="WorkTask_FollowUpBridgeUnavailable" xml:space="preserve"><value>Update the Work bridge to send revisions in the original conversation.</value></data>
+  <data name="WorkTask_FollowUpTooLong" xml:space="preserve"><value>Shorten your revision instructions and try again.</value></data>
 </root>

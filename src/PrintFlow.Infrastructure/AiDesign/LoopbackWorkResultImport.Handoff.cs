@@ -21,7 +21,9 @@ public sealed partial class LoopbackWorkResultImport
         {
             var receiver = await LoadReceiverAsync(configPath, ct);
             var enroll = new WorkResultPipeRequest("enroll", receiver.ControlBearer, request.RequestId, request.AttemptId,
-                ReferenceSha256: request.Attachments.Select(attachment => attachment.Sha256.Value).Distinct().ToArray(),
+                ReferenceSha256: request.Attachments.Select(attachment => attachment.Sha256.Value)
+                    .Concat(request.WorkFollowUp is { } prior ? [prior.ResultSha256.Value] : [])
+                    .Distinct().ToArray(),
                 ReturnMediaType: FinalPdfMediaType);
             var tickets = await ReadPipeAsync<Enrollment>(receiver.PipeName, enroll, ct);
             if (tickets.RequestId != request.RequestId || tickets.AttemptId != request.AttemptId ||
@@ -45,7 +47,7 @@ public sealed partial class LoopbackWorkResultImport
     internal async Task<OperationResult<SessionView>> ResumeEnrolledAsync(string configPath, AiDesignRequest request, CancellationToken ct)
     {
         if (!AiDesignTransitions.CanResumeWorkResult(request) || request.WorkConversationId is not { } conversation)
-            return Fail("The local Work request has not confirmed submission.");
+            return Fail("The local Work request has no active result handoff.");
         try
         {
             string path = Path.Combine(_requests.RequestsRoot, request.RequestId.ToString("D"), TicketFileName);

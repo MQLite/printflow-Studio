@@ -8,7 +8,47 @@ namespace PrintFlow.App.ViewModels.AiDesign;
 public sealed partial class AiPromptWorkbenchViewModel
 {
     private Guid? submittedWorkRequest;
+    private bool generationStarted;
+    private bool submittingGeneration;
+    private string? generationFeedback;
     public string AutoGenerateLabel => Strings.Resolve("AiPrompt_AutoGenerate");
+    public string GenerationProgressLabel => Strings.Resolve("AiPrompt_GenerationProgress");
+    public bool ShowGenerationProgress => generationStarted || HasWorkCard;
+    public string? GenerationFeedback => WorkCard?.Stage ?? generationFeedback;
+    public IReadOnlyList<GenerationMilestone> GenerationMilestones
+    {
+        get
+        {
+            var snapshot = WorkCard?.Snapshot;
+            var stage = snapshot?.Stage;
+            bool isVerifying = snapshot?.IsVerifyingResult == true;
+            int reached = stage switch
+            {
+                WorkTaskStage.Submitting or WorkTaskStage.AwaitingFollowUp => 0,
+                WorkTaskStage.Imported => 4,
+                _ when isVerifying => 2,
+                WorkTaskStage.AwaitingReturn or WorkTaskStage.SubmittedOnly => 1,
+                _ => WorkCard?.CanViewWork == true || submittedWorkRequest is not null ? 1 : 0
+            };
+            int current = stage switch
+            {
+                WorkTaskStage.Submitting or WorkTaskStage.AwaitingFollowUp => 0,
+                WorkTaskStage.AwaitingReturn => 1,
+                _ when isVerifying => 2,
+                null when submittingGeneration => 0,
+                _ => -1
+            };
+            string[] labels =
+            [
+                reached >= 1 ? "WorkTask_Sent" : "AiPrompt_GenerationSubmit",
+                reached >= 2 ? "WorkTask_Returned" : current == 1 ? "AiPrompt_GenerationWaiting" : "AiPrompt_GenerationReturn",
+                reached >= 3 ? "WorkTask_Verified" : "AiPrompt_GenerationVerify",
+                reached >= 4 ? "WorkTask_Imported" : "AiPrompt_GenerationImport"
+            ];
+            return labels.Select((label, index) => new GenerationMilestone(Strings.Resolve(label), index < reached,
+                index == current, index > 0, index < labels.Length - 1)).ToArray();
+        }
+    }
     public string ContinueWorkResultLabel => Strings.Resolve("WorkTask_Continue");
     public string ContinueWorkResultHint => Strings.Resolve("WorkTask_NextStep");
     public IAsyncRelayCommand ContinueWorkResultCommand { get; }
@@ -26,7 +66,35 @@ public sealed partial class AiPromptWorkbenchViewModel
     public CommunityToolkit.Mvvm.Input.IAsyncRelayCommand StopReceivingCommand { get; }
     private async Task SubmitToWorkAsync() => await RunAsync(async () =>
     {
-        if (IsWaitingForWorkResult || isLoadingWorkCard || workCardUnavailable) return;
+        if (!active || Draft is null || IsWaitingForWorkResult || isLoadingWorkCard || workCardUnavailable) return;
+        long submittingEpoch = epoch;
+        generationStarted = true;
+        submittingGeneration = true;
+        generationFeedback = Strings.Resolve("AiPrompt_WorkConnecting");
+        submittedWorkRequest = null;
+        WorkCard = null;
+        NotifyGenerationProgress();
+        try { await SubmitGenerationCoreAsync(submittingEpoch); }
+        finally
+        {
+            if (IsCurrent(submittingEpoch))
+            {
+                submittingGeneration = false;
+                if (Error is not null) generationFeedback = Error;
+                NotifyGenerationProgress();
+            }
+        }
+    }, default);
+
+    private void NotifyGenerationProgress()
+    {
+        OnPropertyChanged(nameof(ShowGenerationProgress));
+        OnPropertyChanged(nameof(GenerationFeedback));
+        OnPropertyChanged(nameof(GenerationMilestones));
+    }
+
+    private async Task SubmitGenerationCoreAsync(long submittingEpoch)
+    {
         if (textSubmission is null)
         {
             Error = Strings.Resolve("AiPrompt_WorkSetup");
@@ -40,12 +108,15 @@ public sealed partial class AiPromptWorkbenchViewModel
         if ((await FlushCoreAsync(default, saveLayout: false)).IsFailure)
             return;
 
-        Status = Strings.Resolve("AiPrompt_WorkConnecting");
+        if (!IsCurrent(submittingEpoch)) return;
+        Status = null;
         var result = await textSubmission.SubmitAsync(Draft!, default);
+        if (!IsCurrent(submittingEpoch)) return;
         if (result.IsSuccess)
         {
             submittedWorkRequest = result.Value.RequestId;
-            Status = workTasks is null ? Strings.Resolve("AiPrompt_WorkSubmitted") : null;
+            Status = null;
+            generationFeedback = Strings.Resolve("AiPrompt_WorkSubmitted");
             QueueWorkCardRefresh();
             await WorkCardRefresh;
             return;
@@ -63,7 +134,7 @@ public sealed partial class AiPromptWorkbenchViewModel
             "WorkReceiverUnavailable" => "AiPrompt_WorkReceiverUnavailable",
             _ => "AiPrompt_WorkUnconfirmed"
         });
-    }, default);
+    }
 
     private async Task StopReceivingAsync() => await RunAsync(async () =>
     {
@@ -76,3 +147,5 @@ public sealed partial class AiPromptWorkbenchViewModel
         Status = Strings.Resolve("AiPrompt_WorkReceivingStopped");
     }, default);
 }
+
+public sealed record GenerationMilestone(string Label, bool Reached, bool IsCurrent, bool HasPrevious, bool HasNext);

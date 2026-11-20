@@ -30,6 +30,17 @@ public static class AiPromptLabels
     public static string AiPrompt_EditSourceImage => Strings.AiPrompt_EditSourceImage;
     public static string AiPrompt_SelectTemplate => Strings.AiPrompt_SelectTemplate;
     public static string AiPrompt_Title => Strings.AiPrompt_Title;
+    public static string AiPrompt_FieldOptions => Strings.Resolve("AiPrompt_FieldOptions");
+    public static string AiPrompt_DraftsShort => Strings.Resolve("AiPrompt_DraftsShort");
+    public static string AiPrompt_CopyShort => Strings.Resolve("AiPrompt_CopyShort");
+    public static string AiPrompt_Review => Strings.Resolve("AiPrompt_Review");
+    public static string AiPrompt_UpdateSpecification => Strings.Resolve("AiPrompt_UpdateSpecification");
+    public static string AiPrompt_ReviewPreservation => Strings.Resolve("AiPrompt_ReviewPreservation");
+    public static string AiPrompt_ReviewText => Strings.Resolve("AiPrompt_ReviewText");
+    public static string AiPrompt_ReviewLayout => Strings.Resolve("AiPrompt_ReviewLayout");
+    public static string AiPrompt_HistoryShort => Strings.Resolve("AiPrompt_HistoryShort");
+    public static string AiPrompt_DraftTools => Strings.Resolve("AiPrompt_DraftTools");
+    public static string AiPrompt_ReferenceTools => Strings.Resolve("AiPrompt_ReferenceTools");
     public static string AiPrompt_Quick => Strings.AiPrompt_Quick;
     public static string AiPrompt_DetailPending => Strings.AiPrompt_DetailPending;
     public static string AiPrompt_Templates => Strings.AiPrompt_Templates;

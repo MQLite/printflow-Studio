@@ -247,7 +247,14 @@ public sealed class AiAuthoringEntryTests
         using var f = new PromptWorkbenchFixture(prompt); await f.Vm.OpenAsync(null, default); await f.Vm.EditTemplateCommand.ExecuteAsync(null);
         var editor = f.Vm.TemplateEditor!; editor.Body += " keep me";
         var render = WpfRendering.Render(() => new AiPromptWorkbenchView { DataContext = f.Vm }, new Size(1000, 700), tree =>
-            tree.OfType<Button>().Where(x => ReferenceEquals(x.Command, f.Vm.EditTemplateCommand) || ReferenceEquals(x.Command, f.Vm.SaveInstanceTemplateCommand)).All(x => !x.IsEnabled));
+        {
+            var page = tree.OfType<AiGenerationEditorView>().Single();
+            var management = (Expander)page.FindName("TemplateManagement");
+            management.IsExpanded = true;
+            tree.Root.UpdateLayout();
+            management.IsEnabled.ShouldBeFalse();
+            return true;
+        });
         render.Facts.ShouldBeTrue(); render.BindingErrors.ShouldBeEmpty();
         await f.Vm.EditTemplateCommand.ExecuteAsync(null); f.Vm.TemplateEditor.ShouldBeSameAs(editor);
         await f.Vm.SaveInstanceTemplateCommand.ExecuteAsync(null); f.Vm.TemplateEditor.ShouldBeSameAs(editor);

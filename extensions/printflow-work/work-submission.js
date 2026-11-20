@@ -1,5 +1,7 @@
 import { AttachmentAssembler, validateEnvelope } from './protocol.js';
 
+const conversationGuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export class WorkSubmission {
   #current;
   constructor(page) { this.page = page; }
@@ -89,18 +91,26 @@ export class WorkSubmission {
       result = { ok: false };
     }
     if (this.#current !== request) return;
+    const confirmed = result?.ok === true &&
+      (!request.followUpConversationId || result.conversation?.toLowerCase() === request.followUpConversationId);
     send('SubmitReceipt', {
       permitId: permit.permitId, tabId: String(request.tab), conversationId: request.conversationId,
-      confirmed: result?.ok === true, workConversationId: result?.conversation
+      confirmed, workConversationId: confirmed ? result.conversation : undefined
     });
   }
 
   async #stage(message, send) {
-    const { promptText, attachments } = message.payload;
+    const { promptText, attachments, followUpConversationId } = message.payload;
     if (!Array.isArray(attachments) || attachments.length > 8 ||
         attachments.some(a => !a || typeof a.uploadName !== 'string') ||
         new Set(attachments.map(a => a.uploadName)).size !== attachments.length) {
       send('Failure', { code: 'WorkUploadFailed' });
+      return;
+    }
+    if (followUpConversationId != null && (typeof followUpConversationId !== 'string' ||
+        !conversationGuid.test(followUpConversationId) || /^0{8}-0{4}-0{4}-0{4}-0{12}$/.test(followUpConversationId) ||
+        attachments.length !== 0)) {
+      send('Failure', { code: 'WorkPageUnknown' });
       return;
     }
     if (typeof promptText !== 'string' || !promptText.trim()) {
@@ -110,14 +120,14 @@ export class WorkSubmission {
     const request = {
       requestId: message.requestId, attemptId: message.attemptId, token: message.token,
       version: message.stateVersion, conversationId: crypto.randomUUID(), phase: 'staging',
-      attachments, attachmentIndex: 0
+      attachments, attachmentIndex: 0, followUpConversationId: followUpConversationId?.toLowerCase()
     };
     this.#current = request;
     try {
-      request.tab = await this.page.create();
+      request.tab = await this.page.create(request.followUpConversationId);
       if (!Number.isInteger(request.tab)) throw new Error('No owned Work tab');
       const staged = await this.page.run(request.tab, { kind: 'stage', identity: request.conversationId, prompt: promptText,
-        attachmentNames: attachments.map(a => a.uploadName) });
+        attachmentNames: attachments.map(a => a.uploadName), followUpConversationId: request.followUpConversationId });
       if (this.#current !== request) return;
       if (!staged?.ok) {
         this.disconnect();

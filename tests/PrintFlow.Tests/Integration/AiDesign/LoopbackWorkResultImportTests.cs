@@ -1,6 +1,7 @@
 using System.IO;
 using System.Text.Json;
 using PrintFlow.Domain.AiDesign;
+using PrintFlow.Domain.Results;
 using PrintFlow.Infrastructure.AiDesign;
 using PrintFlow.Tests.Fixtures;
 using PrintFlow.Tests.Unit.AiDesign;
@@ -12,12 +13,12 @@ namespace PrintFlow.Tests.Integration.AiDesign;
 public sealed class LoopbackWorkResultImportTests
 {
     [Fact]
-    public async Task Resume_adopts_only_the_enrolled_original_and_preserves_bytes_on_repeat()
+    public async Task Resume_and_follow_up_import_only_their_enrolled_files_and_preserve_the_original()
     {
         using var harness = new SessionServiceHarness();
         var store = new FileAiDesignRequestStore(harness.Workspace.Root);
         var draft = AiDesignTransitionsTests.Draft();
-        var request = (await store.CreateAsync(draft.RequestId, new(draft.Prompt, []), default)).Value;
+        var request = (await store.CreateAsync(draft.RequestId, new(draft.Prompt, [], new(Guid.NewGuid(), "Work return")), default)).Value;
         var attemptId = Guid.NewGuid();
         var conversationId = Guid.NewGuid();
         request = (await store.ChangeAsync(request.Fence,
@@ -73,6 +74,62 @@ public sealed class LoopbackWorkResultImportTests
         matching.BlobReads.ShouldBe(1);
         (await harness.Repository.LoadAsync(imported.Value.Id, default)).Value!.Revisions.ShouldHaveSingleItem()
             .Sha256.ShouldBe(facts.Sha256);
+
+        var followUpConfig = Path.Combine(harness.Workspace.Root, "follow-up.local.json");
+        await File.WriteAllTextAsync(followUpConfig, JsonSerializer.Serialize(new
+        {
+            pipeName = "PrintFlow-WorkTest", controlBearer = "local-control-bearer", readBearer = "local-read-bearer",
+            workspaceRoot = harness.Workspace.Root
+        }));
+        var transport = new FollowUpTransport(conversationId, facts.Sha256.Value, PdfFixtures.Read("single"));
+        var receiver = new LoopbackWorkResultImport(harness.Workspace.Root, harness.FileInspector, sessions, transport);
+        using (var lease = store.TryLockWorkDraft(result.WorkDraft!.DraftId))
+        {
+            lease.ShouldNotBeNull();
+            new FileAiDesignRequestStore(harness.Workspace.Root).TryLockWorkDraft(result.WorkDraft.DraftId).ShouldBeNull();
+        }
+        async Task<AiDesignRequest> QueueFollowUp()
+        {
+            var ready = (await store.CreateWorkFollowUpAsync(result.RequestId, Guid.NewGuid(),
+                "做以下修改：\n把边框改成蓝色。", default)).Value;
+            ready.State.ShouldBe(AiDesignState.PromptReady);
+            ready.WorkFollowUp!.ConversationId.ShouldBe(conversationId);
+            ready.WorkConversationId.ShouldBeNull();
+            var queued = (await store.ChangeAsync(ready.Fence,
+                new AiDesignEvent.Queued(Guid.NewGuid(), "follow-up-token", Environment.ProcessId, 1, Guid.NewGuid()), default)).Value;
+            return (await store.ChangeAsync(queued.Fence, new AiDesignEvent.UploadStarted("tab", "binding"), default)).Value;
+        }
+        var rejectedFollowUp = await QueueFollowUp();
+        var rejectedOutcome = (await store.SubmitOnceAsync(rejectedFollowUp.Fence, (_, _) =>
+            Task.FromResult(OperationResult.Ok<Guid?>(Guid.NewGuid())), default)).Value;
+        rejectedOutcome.State.ShouldBe(AiDesignState.Interrupted);
+        rejectedOutcome.WorkConversationId.ShouldBeNull();
+        AiDesignTransitions.CanResumeWorkResult(rejectedOutcome).ShouldBeFalse();
+
+        var prepared = await QueueFollowUp();
+        prepared.SubmissionReservedAtUtc.ShouldBeNull();
+        prepared.AttemptId.ShouldNotBe(attemptId);
+        var token = (await receiver.EnrollAsync(followUpConfig, prepared, default)).Value;
+        token.ShouldBe("new-upload-ticket");
+        WorkResultPrompt.Append(prepared, token).ShouldStartWith("做以下修改：");
+        WorkResultPrompt.Append(prepared, token).ShouldContain("save_final_pdf");
+        prepared = (await store.SubmitOnceAsync(prepared.Fence, (_, _) =>
+            Task.FromResult(OperationResult.Ok<Guid?>(conversationId)), default)).Value;
+        prepared.WorkConversationId.ShouldBe(conversationId);
+        prepared = (await store.ChangeAsync(prepared.Fence, new AiDesignEvent.Failed("WorkResultPending"), default)).Value;
+        var query = new FileWorkTaskQuery(store, sessions, new ProgressCapture(_ => { }));
+        var waiting = (await query.FindAsync(prepared.RequestId, default)).Value!;
+        waiting.Stage.ShouldBe(WorkTaskStage.AwaitingReturn);
+        waiting.CanStopReceiving.ShouldBeTrue();
+
+        transport.ReusePreviousHash = true;
+        (await receiver.ResumeEnrolledAsync(followUpConfig, prepared, default)).IsFailure.ShouldBeTrue();
+        transport.BlobReads.ShouldBe(0);
+        transport.ReusePreviousHash = false;
+        var second = (await receiver.ResumeEnrolledAsync(followUpConfig, prepared, default)).Value;
+        second.Id.ShouldNotBe(imported.Value.Id);
+        (await store.ReadAsync(prepared.RequestId, default)).Value.State.ShouldBe(AiDesignState.Imported);
+        (await store.ReadAsync(result.RequestId, default)).Value.ImportedSessionId.ShouldBe(imported.Value.Id);
     }
 
     [Theory]
@@ -190,13 +247,51 @@ public sealed class LoopbackWorkResultImportTests
         }
     }
 
-    private sealed class ProgressCapture(Action<WorkResultObservation> onReport) : IWorkResultProgressObserver
+    private sealed class ProgressCapture(Action<WorkResultObservation> onReport) : IWorkResultProgressObserver, IWorkResultProgressReader
     {
         public List<WorkResultObservation> Events { get; } = [];
         public void Report(WorkResultObservation observation)
         {
             onReport(observation);
             Events.Add(observation);
+        }
+        public WorkResultObservation? Find(Guid requestId) => Events.LastOrDefault(x => x.RequestId == requestId);
+    }
+
+    private sealed class FollowUpTransport(Guid conversation, string previousHash, byte[] pdf) : IWorkResultPipe
+    {
+        private readonly Guid version = Guid.NewGuid();
+        private Guid request, attempt;
+        public int BlobReads { get; private set; }
+        public bool ReusePreviousHash { get; set; }
+        public Task<byte[]> ExchangeAsync(string name, WorkResultPipeRequest message, int limit, CancellationToken ct)
+        {
+            if (message.Operation == "enroll")
+            {
+                message.ReferenceSha256.ShouldBe([previousHash]);
+                request = message.RequestId;
+                attempt = message.AttemptId;
+                return Task.FromResult(JsonSerializer.SerializeToUtf8Bytes(new
+                {
+                    requestId = request, attemptId = attempt, uploadTicket = "new-upload-ticket",
+                    readTicket = "new-read-ticket", returnMediaType = "application/pdf"
+                }));
+            }
+            message.RequestId.ShouldBe(request);
+            message.AttemptId.ShouldBe(attempt);
+            message.ReadTicket.ShouldBe("new-read-ticket");
+            message.WorkConversationId.ShouldBe(conversation);
+            if (message.Operation == "status")
+                return Task.FromResult(JsonSerializer.SerializeToUtf8Bytes(new
+                {
+                    schemaVersion = 1, requestId = request, attemptId = attempt, state = "Ready",
+                    workConversationId = conversation, workReturnAccepted = true, sourceFileId = "new-work-pdf",
+                    objectId = version, objectVersion = version, byteLength = pdf.Length, mediaType = "application/pdf",
+                    sha256 = ReusePreviousHash ? previousHash : Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(pdf)).ToLowerInvariant()
+                }));
+            message.Operation.ShouldBe("read");
+            BlobReads++;
+            return Task.FromResult(pdf);
         }
     }
 

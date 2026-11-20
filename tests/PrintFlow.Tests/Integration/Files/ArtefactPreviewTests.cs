@@ -45,6 +45,10 @@ public sealed class ArtefactPreviewTests
         result.Value.RevisionId.ShouldBe(root);
         var size = SyntheticImages.DecodeDimensions(result.Value.Payload);
         Math.Max(size.Item1, size.Item2).ShouldBe(harness.PreviewDecoder.ThumbnailEdge);
+        var large = (await harness.Previews.GetImportedOriginalPreviewAsync(imported.Id, default)).Value;
+        large.RevisionId.ShouldBe(root);
+        var largeSize = SyntheticImages.DecodeDimensions(large.Payload);
+        Math.Max(largeSize.Item1, largeSize.Item2).ShouldBeGreaterThan(harness.PreviewDecoder.ThumbnailEdge);
         (await harness.Previews.GetPreviewAsync(imported.Id, root, default)).IsFailure.ShouldBeTrue();
         (await service.LoadAsync(imported.Id, default)).Value.CurrentStep!.Step.ShouldBe(StepKind.OriginalConfirmation);
     }

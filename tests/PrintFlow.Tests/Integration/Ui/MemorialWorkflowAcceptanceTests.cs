@@ -133,11 +133,11 @@ public sealed class MemorialWorkflowAcceptanceTests
         composed.ShouldContain(expectedValue);
         composed.ShouldNotContain(priorValue);
 
-        WpfRendering.RenderExpectingNoBindingErrors(() => new QuickPromptView { DataContext = f.Vm }, WpfRendering.ReviewViewport, tree =>
+        WpfRendering.RenderExpectingNoBindingErrors(() => new AiGenerationEditorView { DataContext = f.Vm }, WpfRendering.ReviewViewport, tree =>
         {
-            var field = tree.OfType<TextBox>().Single(box => AutomationProperties.GetName(box) == fieldKey);
-            field.IsReadOnly.ShouldBeTrue();
-            field.Text.ShouldBe(expectedValue);
+            tree.OfType<TextBox>().ShouldNotContain(box => AutomationProperties.GetName(box) == fieldKey);
+            f.Vm.Fields.Single(x => x.Key == fieldKey).IsReadOnly.ShouldBeTrue();
+            f.Vm.Fields.Single(x => x.Key == fieldKey).Value.ShouldBe(expectedValue);
             return 0;
         });
     }
@@ -169,7 +169,14 @@ public sealed class MemorialWorkflowAcceptanceTests
         await f.Vm.CopyCommand.ExecuteAsync(null);
         f.Clipboard.Text.ShouldBeNull();
         f.Vm.Error.ShouldNotBeNullOrEmpty();
+        f.Vm.Fields.Single(x => x.Key == "补充要求").Value = "Keep the original decorative border.";
+        (await f.Vm.FlushAsync(default)).IsSuccess.ShouldBeTrue();
+        await f.Vm.OpenAsync(draft.Id, default);
+        await f.Vm.CopyCommand.ExecuteAsync(null);
+        f.Clipboard.Text.ShouldBeNull();
+        f.Vm.RequiresSpecificationUpdate.ShouldBeTrue();
         await f.Vm.ComposeCommand.ExecuteAsync(null);
+        if (f.Vm.IsChangePending) await f.Vm.ConfirmChangeCommand.ExecuteAsync(null);
         await f.Vm.CopyCommand.ExecuteAsync(null);
         f.Clipboard.Text.ShouldNotBeNull().ShouldContain("86mm");
         f.Clipboard.Text.ShouldNotContain("100mm");
@@ -199,10 +206,8 @@ public sealed class MemorialWorkflowAcceptanceTests
         vm.CanSaveMemorialLayout.ShouldBeFalse();
         vm.CanPreviewLayout.ShouldBeFalse();
 
-        // The prompt still contains the previous wording. Preserve the existing requirement
-        // to acknowledge that comparison before composing from the newly confirmed text.
-        vm.ReconciliationNeeded.ShouldBeTrue();
-        await vm.ReconcileCommand.ExecuteAsync(null);
+        // Live synchronization already brought the generated prompt into agreement with the form.
+        vm.ReconciliationNeeded.ShouldBeFalse();
         vm.DetailedStep = 5;
         vm.CanPrepareMemorialLayout.ShouldBeTrue();
         await vm.PrepareMemorialLayoutCommand.ExecuteAsync(null);

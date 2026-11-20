@@ -137,7 +137,7 @@ public sealed class AiModeHandoffTests
     [Theory]
     [InlineData(1000, 700)]
     [InlineData(1920, 1080)]
-    public async Task Detailed_page_renders_all_steps_and_real_text_edits_without_binding_errors(int width, int height)
+    public async Task Same_page_review_expands_and_binds_text_without_mode_navigation(int width, int height)
     {
         using var f = new PromptWorkbenchFixture(); using TempWorkspace source = new(); await f.Vm.OpenAsync(null, default);
         f.Picker.Pick = () => PromptWorkbenchFixture.Png(source.Root, 2); await f.Vm.PickSlotImageCommand.ExecuteAsync("person-photo");
@@ -145,28 +145,36 @@ public sealed class AiModeHandoffTests
         await f.Vm.ReusePhotoCommand.ExecuteAsync(layout);
         f.Vm.Fields.Single(x => x.Key == "出生日期行").Value = "12/06/1039";
         f.Vm.Fields.Single(x => x.Key == "出生日期行.format").Value = "dd/MM/yyyy";
-        await f.Vm.SwitchToDetailedCommand.ExecuteAsync(null);
-        for (int step = 1; step <= 6; step++)
         {
-            f.Vm.SelectDetailedStepCommand.Execute(step);
             var render = WpfRendering.Render(() => new AiPromptWorkbenchView { DataContext = f.Vm }, new Size(width, height), tree =>
             {
-                tree.OfType<DetailedPromptView>().Count().ShouldBe(1);
+                var editor = tree.OfType<AiGenerationEditorView>().Single();
+                var tools = (Expander)editor.FindName("DraftTools");
+                tools.IsExpanded.ShouldBeFalse();
+                tools.IsExpanded = true;
+                tree.Root.UpdateLayout();
+                var review = tree.OfType<AiGenerationReviewView>().Single();
+                var disclosure = (Expander)review.FindName("ReviewOptions");
+                disclosure.IsExpanded.ShouldBeFalse();
+                disclosure.IsExpanded = true;
+                tree.Root.UpdateLayout();
                 tree.OfType<PrintFlow.App.Controls.AiPromptEditor>().Count().ShouldBe(1);
+                tree.OfType<Button>().Any(x => ReferenceEquals(x.Command, f.Vm.SwitchToDetailedCommand) ||
+                    ReferenceEquals(x.Command, f.Vm.SwitchToQuickCommand)).ShouldBeFalse();
                 var copy = tree.OfType<Button>().Single(x => System.Windows.Automation.AutomationProperties.GetAutomationId(x) == "AiPrompt.Copy");
                 var point = copy.TransformToAncestor(tree.Root).Transform(new Point());
-                if (step == 4)
-                {
-                    var name = tree.OfType<TextBox>().Single(x => System.Windows.Automation.AutomationProperties.GetAutomationId(x) == "AiDetail.Value.name");
-                    name.Text = "  ʻĀna e\u0301 陈\r\nJR  ";
-                    name.GetBindingExpression(TextBox.TextProperty)!.UpdateSource();
-                    f.Vm.Fields.Single(x => x.Key == "姓名").Value.ShouldBe("  ʻĀna e\u0301 陈\r\nJR  ");
-                }
+                var name = tree.OfType<TextBox>().Single(x => System.Windows.Automation.AutomationProperties.GetAutomationId(x) == "AiPrompt.Field.姓名");
+                var fieldColumn = (Border)editor.FindName("FieldColumn");
+                name.IsDescendantOf(fieldColumn).ShouldBeTrue();
+                tree.OfType<Expander>().ShouldNotContain(x => x.IsDescendantOf(fieldColumn));
+                name.Text = "  ʻĀna e\u0301 陈\r\nJR  ";
+                name.GetBindingExpression(TextBox.TextProperty)!.UpdateSource();
+                f.Vm.Fields.Single(x => x.Key == "姓名").Value.ShouldBe("  ʻĀna e\u0301 陈\r\nJR  ");
                 return point.X >= 0 && point.Y >= 0 && point.X + copy.ActualWidth <= width && point.Y + copy.ActualHeight <= height;
             });
             render.BindingErrors.ShouldBeEmpty(); render.Facts.ShouldBeTrue();
             if (Environment.GetEnvironmentVariable("PRINTFLOW_A6_CAPTURE") is { Length: > 0 } directory)
-                WpfRendering.CapturePng(() => new AiPromptWorkbenchView { DataContext = f.Vm }, new Size(width, height), Path.Combine(directory, $"detail-{step}-{width}x{height}.png"));
+                WpfRendering.CapturePng(() => new AiPromptWorkbenchView { DataContext = f.Vm }, new Size(width, height), Path.Combine(directory, $"unified-{width}x{height}.png"));
         }
         f.Vm.CanPreviewLayout.ShouldBeFalse();
         f.Vm.Fields.Single(x => x.Key == "出生日期行.format").Value.ShouldBe("dd/MM/yyyy", "detaching a date-format selector must not erase the stored interpretation");

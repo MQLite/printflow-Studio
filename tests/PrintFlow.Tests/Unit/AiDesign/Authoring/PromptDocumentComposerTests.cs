@@ -6,6 +6,24 @@ namespace PrintFlow.Tests.Unit.AiDesign.Authoring;
 public sealed class PromptDocumentComposerTests
 {
     [Fact]
+    public void Live_change_can_omit_a_line_with_a_reference_while_keeping_manual_text_and_other_images()
+    {
+        var template = Template("Header\r\n{{Date}} {{Photo}}\r\nFooter {{Layout}}",
+            new AiTemplateField("Date", AiTemplateFieldKind.OptionalDateLine, false),
+            new AiTemplateField("Photo", AiTemplateFieldKind.ImageReference, false, SlotId: "photo"),
+            new AiTemplateField("Layout", AiTemplateFieldKind.ImageReference, false, SlotId: "layout"));
+        var before = PromptDocumentComposer.Compose(template, new Dictionary<string, string> { ["Date"] = "1948" }).Document;
+        var after = PromptDocumentComposer.Compose(template, new Dictionary<string, string>()).Document;
+        var layout = before.Parts.OfType<AiImagePart>().Single(x => x.SlotId == "layout");
+        var edited = new AiPromptDocument(before.Parts.Append(new AiTextPart(Guid.NewGuid(), "\r\n  Manual  ")).ToArray());
+
+        var updated = PromptFieldSynchronization.Update(edited, before, after);
+
+        updated.Parts.OfType<AiImagePart>().ShouldHaveSingleItem().ShouldBe(layout);
+        string.Concat(updated.Parts.OfType<AiTextPart>().Select(x => x.Text)).ShouldBe("Header\r\nFooter \r\n  Manual  ");
+    }
+
+    [Fact]
     public void Compose_preserves_operator_literals()
     {
         const string literal = "  ʻĀna\r\n陈 {{姓名}} e\u0301  ";

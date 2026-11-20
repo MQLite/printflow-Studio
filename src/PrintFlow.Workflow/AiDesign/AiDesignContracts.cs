@@ -12,7 +12,7 @@ public sealed record AiDesignRequestView(Guid RequestId, Guid AttemptId, long St
 public sealed record AiDesignView(AiDesignRequestView Request, bool CanEditAttachments, bool CanStartAutomatically,
     bool CanStop, string? BridgeUnavailableReason, string ManualHandoffText);
 public sealed record AiDesignBridgeReadiness(bool Available, int ProtocolVersion, string HostVersion,
-    string ExtensionOrigin, string WorkspaceIdentity, string? Reason, Guid ConnectionId = default);
+    string ExtensionOrigin, string WorkspaceIdentity, string? Reason, Guid ConnectionId = default, bool SupportsWorkFollowUp = false);
 public interface IAiDesignBrowserLease
 {
     OperationResult<IDisposable> TryAcquire(Guid requestId);

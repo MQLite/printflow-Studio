@@ -3,7 +3,7 @@ using PrintFlow.Domain.Ids;
 
 namespace PrintFlow.Domain.AiDesign;
 
-public enum AiDesignState { PromptReady, Queued, Uploading, Submitted, Generating, Receiving, Validating, Importing, Imported, PromptOnly, Cancelled, Interrupted, ImportFailed }
+public enum AiDesignState { PromptReady, Queued, Uploading, Submitted, Generating, Receiving, Validating, Importing, Imported, PromptOnly, Cancelled, Interrupted, ImportFailed, AwaitingWorkFollowUp }
 public enum AiDesignUploadStatus { Pending, Uploading, Uploaded, Failed, Cancelled }
 public sealed record AiDesignFence(Guid RequestId, Guid AttemptId, long StateVersion, string Token);
 public sealed record AiDesignFileRef(Guid RequestId, string RelativePath);
@@ -19,6 +19,7 @@ public sealed record AiDesignDownload(Guid RequestId, Guid AttemptId, string Tab
 public sealed record AiDesignFailure(string Code, AiDesignState Stage, IReadOnlyList<string> DetailArguments,
     AiDesignState LastSuccessfulStage, bool RemoteStopConfirmed = false);
 public sealed record WorkDraftReference(Guid DraftId, string Title);
+public sealed record WorkFollowUpReference(Guid RequestId, Sha256 ResultSha256, Guid? ConversationId = null);
 
 public sealed record AiDesignRequest
 {
@@ -44,6 +45,7 @@ public sealed record AiDesignRequest
     public string? ConversationId { get; init; }
     public Guid? WorkConversationId { get; init; }
     public WorkDraftReference? WorkDraft { get; init; }
+    public WorkFollowUpReference? WorkFollowUp { get; init; }
     public AiDesignDownload? Download { get; init; }
     public AiDesignCandidate? Candidate { get; init; }
     public IReadOnlyList<AiDesignCandidate> RetainedCandidates { get; init; } = [];

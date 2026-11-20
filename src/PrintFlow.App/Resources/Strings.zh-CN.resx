@@ -1457,12 +1457,12 @@
   <data name="Session_SaveHideReview" xml:space="preserve"><value>返回结果预览</value></data>
   <data name="Session_SaveCurrentResult" xml:space="preserve"><value>当前结果预览</value></data>
   <data name="AiPrompt_ChoosePhoto" xml:space="preserve"><value>选择照片</value></data>
-  <data name="AiPrompt_Title" xml:space="preserve"><value>AI设计提示词</value></data>
+  <data name="AiPrompt_Title" xml:space="preserve"><value>AI 生成</value></data>
   <data name="AiPrompt_Quick" xml:space="preserve"><value>快速生成</value></data>
   <data name="AiPrompt_DetailPending" xml:space="preserve"><value>详细核对将在后续步骤接入。</value></data>
-  <data name="AiPrompt_Templates" xml:space="preserve"><value>常用模板</value></data>
-  <data name="AiPrompt_Inputs" xml:space="preserve"><value>本次信息</value></data>
-  <data name="AiPrompt_FinalText" xml:space="preserve"><value>本次提示词（可直接编辑）</value></data>
+  <data name="AiPrompt_Templates" xml:space="preserve"><value>基础模板</value></data>
+  <data name="AiPrompt_Inputs" xml:space="preserve"><value>编辑字段</value></data>
+  <data name="AiPrompt_FinalText" xml:space="preserve"><value>提示词</value></data>
   <data name="AiPrompt_Compose" xml:space="preserve"><value>生成提示词</value></data>
   <data name="AiPrompt_Copy" xml:space="preserve"><value>复制提示词</value></data>
   <data name="AiPrompt_Save" xml:space="preserve"><value>保存草稿</value></data>
@@ -1526,7 +1526,7 @@
   <data name="AiPrompt_LayoutImage" xml:space="preserve"><value>版式参考</value></data>
   <data name="AiPrompt_EditSourceImage" xml:space="preserve"><value>待修改图稿</value></data>
   <data name="AiPrompt_SelectTemplate" xml:space="preserve"><value>使用此模板</value></data>
-  <data name="AiPrompt_ManualNotice" xml:space="preserve"><value>本次已编辑，表单修改不会覆盖全文。</value></data>
+  <data name="AiPrompt_ManualNotice" xml:space="preserve"><value>已保留手动编辑的内容。</value></data>
   <data name="AiPrompt_FieldsChangedNotice" xml:space="preserve"><value>信息已变，可重新生成提示词。</value></data>
   <data name="AiPrompt_SaveInstanceTemplate" xml:space="preserve"><value>将本次另存为模板</value></data>
   <data name="AiPrompt_InstancePreviewNotice" xml:space="preserve"><value>此预览保留本次全文，并将图片引用与能明确匹配的已知字段还原为变量。请逐字核对：无法匹配或手改过的客户内容须自行换回变量后确认。客户照片与本次字段值不成为模板默认值。</value></data>
@@ -1592,7 +1592,7 @@
   <data name="AiMemorial_EditLayout" xml:space="preserve"><value>编辑版式</value></data>
   <data name="AiMemorial_ReopenLayout" xml:space="preserve"><value>按当前内容重新打开版式</value></data>
   <data name="AiMemorial_FixedSpecification" xml:space="preserve"><value>由产品版式固定</value></data>
-  <data name="AiMemorial_OutdatedPromptSpecification" xml:space="preserve"><value>这份草稿含有旧版尺寸。请重新生成提示词，以使用产品的固定规格。</value></data>
+  <data name="AiMemorial_OutdatedPromptSpecification" xml:space="preserve"><value>这份草稿使用旧版尺寸。请先更新为当前产品规格。</value></data>
   <data name="AiMemorial_MmHelp" xml:space="preserve"><value>尺寸单位为毫米。图片高度随来源比例调整。</value></data>
   <data name="AiMemorial_LayerRole" xml:space="preserve"><value>图层用途</value></data>
   <data name="AiMemorial_Left" xml:space="preserve"><value>左</value></data>
@@ -1669,7 +1669,7 @@
   <data name="AiMemorial_Zoom" xml:space="preserve"><value>缩放</value></data>
   <data name="AiMemorial_Background" xml:space="preserve"><value>预览底色</value></data>
   <data name="AiMemorial_ProofReduced" xml:space="preserve"><value>显示图片已缩小。保存的 PNG 保留上方所示的完整像素尺寸。</value></data>
-  <data name="AiPrompt_AutoGenerate" xml:space="preserve"><value>自动生图</value></data>
+  <data name="AiPrompt_AutoGenerate" xml:space="preserve"><value>生成</value></data>
   <data name="AiPrompt_WorkSetup" xml:space="preserve"><value>请先登记 Chrome 桥接，然后重试。</value></data>
   <data name="AiPrompt_WorkAttachmentRequired" xml:space="preserve"><value>请补齐提示词引用的附件，再提交生图。</value></data>
   <data name="AiPrompt_WorkUploadFailed" xml:space="preserve"><value>Work 未能确认所有必需附件。提示词和附件已保存在 Studio。</value></data>
@@ -1822,4 +1822,36 @@
   <data name="ImageProcessing_CombinedReviewEdges" xml:space="preserve"><value>检查轮廓、发丝和浅色边缘，确认需要保留的主体完整可见。</value></data>
   <data name="ImageProcessing_CombinedReviewReject" xml:space="preserve"><value>拒绝会丢弃本次结果。之后可重新确认上传并重试、保留已审核输入，或返回分步处理。</value></data>
   <data name="ImageProcessing_OpenAiCutoutHint" xml:space="preserve"><value>会把图片上传到 OpenAI，可能产生用量费用。生成式去背景可能重绘部分主体。</value></data>
+  <data name="AiPrompt_FieldOptions" xml:space="preserve"><value>可编辑选项</value></data>
+  <data name="AiPrompt_Lifespan" xml:space="preserve"><value>生卒年</value></data>
+  <data name="AiPrompt_ShortName" xml:space="preserve"><value>姓名</value></data>
+  <data name="AiPrompt_ShortBirth" xml:space="preserve"><value>出生日期</value></data>
+  <data name="AiPrompt_ShortDeath" xml:space="preserve"><value>离世日期</value></data>
+  <data name="AiPrompt_DraftsShort" xml:space="preserve"><value>草稿</value></data>
+  <data name="AiPrompt_CopyShort" xml:space="preserve"><value>复制</value></data>
+  <data name="AiPrompt_Review" xml:space="preserve"><value>核对与版式</value></data>
+  <data name="AiPrompt_GenerationProgress" xml:space="preserve"><value>生成进度</value></data>
+  <data name="AiPrompt_GenerationSubmit" xml:space="preserve"><value>提交</value></data>
+  <data name="AiPrompt_GenerationWaiting" xml:space="preserve"><value>等待回传</value></data>
+  <data name="AiPrompt_GenerationReturn" xml:space="preserve"><value>回传</value></data>
+  <data name="AiPrompt_GenerationVerify" xml:space="preserve"><value>核验</value></data>
+  <data name="AiPrompt_GenerationImport" xml:space="preserve"><value>导入</value></data>
+  <data name="AiPrompt_UpdateSpecification" xml:space="preserve"><value>更新旧版规格</value></data>
+  <data name="AiPrompt_ReviewPreservation" xml:space="preserve"><value>确认保留内容</value></data>
+  <data name="AiPrompt_ReviewText" xml:space="preserve"><value>核对文字</value></data>
+  <data name="AiPrompt_ReviewLayout" xml:space="preserve"><value>成品版式</value></data>
+  <data name="AiPrompt_HistoryShort" xml:space="preserve"><value>草稿历史</value></data>
+  <data name="AiPrompt_DraftTools" xml:space="preserve"><value>草稿工具</value></data>
+  <data name="AiPrompt_ReferenceTools" xml:space="preserve"><value>管理引用</value></data>
+  <data name="WorkTask_Preview" xml:space="preserve"><value>预览</value></data>
+  <data name="WorkTask_PreviewTitle" xml:space="preserve"><value>生成结果预览</value></data>
+  <data name="WorkTask_PreviewLoading" xml:space="preserve"><value>正在打开生成结果…</value></data>
+  <data name="WorkTask_PreviewFailed" xml:space="preserve"><value>无法预览生成结果。</value></data>
+  <data name="WorkTask_Regenerate" xml:space="preserve"><value>在原会话重生成</value></data>
+  <data name="WorkTask_AwaitingFollowUp" xml:space="preserve"><value>请在原 Work 会话发送重生成指令。</value></data>
+  <data name="WorkTask_RegenerateFailed" xml:space="preserve"><value>无法确认修改要求已发送到原 Work 对话。请先检查原对话，再重试。</value></data>
+  <data name="WorkTask_FollowUpPrefix" xml:space="preserve"><value>做以下修改：</value></data>
+  <data name="WorkTask_FollowUpSubmit" xml:space="preserve"><value>再次生成</value></data>
+  <data name="WorkTask_FollowUpBridgeUnavailable" xml:space="preserve"><value>请更新 Work 桥接后，再发送修改要求。</value></data>
+  <data name="WorkTask_FollowUpTooLong" xml:space="preserve"><value>请缩短修改要求后重试。</value></data>
 </root>

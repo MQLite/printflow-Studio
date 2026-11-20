@@ -64,9 +64,8 @@ public static class AiAuthoringConfirmationRules
         if (draft.Confirmations.GetValueOrDefault(ReconciledDocument) == DocumentHash(draft.FinalDocument) &&
             draft.Confirmations.GetValueOrDefault(ReconciledFields) == FieldsHash(draft)) return false;
         if (draft.IsManuallyEdited) return true;
-        static (string?, string?) Content(AiPromptPart part) => part is AiTextPart text ? (text.Text, null) : (null, ((AiImagePart)part).SlotId);
         var composed = PromptDocumentComposer.Compose(draft.TemplateSnapshot, draft.Fields).Document;
-        return !composed.Parts.Select(Content).SequenceEqual(draft.FinalDocument.Parts.Select(Content));
+        return !PromptFieldSynchronization.ContentEquals(composed, draft.FinalDocument);
     }
     internal static AiAuthoringDraft Refresh(AiAuthoringDraft draft)
     {

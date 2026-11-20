@@ -79,4 +79,9 @@ public interface IArtefactPreviewService
     /// </remarks>
     Task<OperationResult<ImagePreview>> GetRecentThumbnailAsync(
         SessionId sessionId, CancellationToken cancellationToken);
+
+    /// <summary>Displays the imported original at preview size, including a verified single-page PDF.</summary>
+    Task<OperationResult<ImagePreview>> GetImportedOriginalPreviewAsync(
+        SessionId sessionId, CancellationToken cancellationToken) =>
+        Task.FromResult(OperationResult.Fail<ImagePreview>(FailureCode.AdapterUnavailable, "Original preview is unavailable."));
 }

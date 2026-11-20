@@ -24,7 +24,6 @@ public sealed partial class AiPromptWorkbenchViewModel
     public IReadOnlyList<AiDetailedStep> DetailedSteps { get; private set; } = [];
     public IReadOnlyList<AiDetailedTextCheck> TextChecks { get; private set; } = [];
     public IReadOnlyList<AiPreservationCheck> PreservationChecks { get; private set; } = [];
-    public IEnumerable<AiPromptFieldInput> QuickFields => Fields.Where(x => !x.IsDateFormat);
     public bool IsDetailed => Draft?.Mode == AiAuthoringMode.Detailed;
     public bool ReconciliationNeeded => Draft is not null && AiAuthoringConfirmationRules.NeedsReconciliation(ReviewDraft());
     public bool HasUnsavedPreservationChanges => Draft is not null && PreservationChecks.Any(x => x.IsEdited && !Draft.Preservation.Contains(x.Rule));
@@ -83,7 +82,7 @@ public sealed partial class AiPromptWorkbenchViewModel
         var rules = value.Preservation.ToDictionary(x => x.AssetId);
         foreach (var input in PreservationChecks.Where(x => x.IsEdited)) rules[input.Asset.Id] = input.Rule;
         return value with { Fields = fields, Preservation = rules.Values.ToArray(), FinalDocument = Document,
-            IsManuallyEdited = value.IsManuallyEdited || !Document.Parts.SequenceEqual(value.FinalDocument.Parts) };
+            IsManuallyEdited = !PromptFieldSynchronization.ContentEquals(Document, generatedDocument) };
     }
     internal AiAuthoringDraft ReviewWithRule(AiPreservationRule rule)
     {
@@ -108,7 +107,7 @@ public sealed partial class AiPromptWorkbenchViewModel
         PreservationChecks = AiDetailedReview.ActiveAssets(Draft).Select(asset => new AiPreservationCheck(this, asset,
             Draft.Preservation.SingleOrDefault(x => x.AssetId == asset.Id) ?? new(asset.Id, true, true, true, false, false), epoch, Draft.Id,
             string.Join(" / ", Photos.Where(x => x.Asset?.Id == asset.Id).Select(x => x.Role)), Photos.FirstOrDefault(x => x.Asset?.Id == asset.Id))).ToArray();
-        OnPropertyChanged(nameof(TextChecks)); OnPropertyChanged(nameof(PreservationChecks)); OnPropertyChanged(nameof(IsDetailed)); OnPropertyChanged(nameof(QuickFields));
+        OnPropertyChanged(nameof(TextChecks)); OnPropertyChanged(nameof(PreservationChecks)); OnPropertyChanged(nameof(IsDetailed));
         NotifyDetailed();
     }
     private void NotifyDetailed()

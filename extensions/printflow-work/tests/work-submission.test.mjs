@@ -3,6 +3,40 @@ import test from 'node:test';
 import { createHash } from 'node:crypto';
 import { WorkSubmission } from '../work-submission.js';
 
+test('a follow-up routes only to its identified Work conversation', async () => {
+  const target = crypto.randomUUID();
+  const actions = [], messages = [];
+  const flow = new WorkSubmission({
+    async create(conversation) { actions.push(conversation); return 42; },
+    async run(tab, command) {
+      assert.equal(tab, 42);
+      actions.push(command.kind);
+      if (command.kind === 'stage') {
+        assert.equal(command.followUpConversationId, target);
+        assert.match(command.prompt, /^做以下修改：\n/);
+        return { ok: true };
+      }
+      return { ok: true, conversation: crypto.randomUUID() };
+    }
+  });
+  const request = { protocolVersion: 1, messageId: crypto.randomUUID(), requestId: crypto.randomUUID(),
+    attemptId: crypto.randomUUID(), stateVersion: 4, token: 'known', kind: 'Request',
+    payload: { promptText: '做以下修改：\n换成蓝色。', attachments: [], followUpConversationId: target } };
+  const post = message => messages.push(message);
+  const frame = (kind, stateVersion, payload) => ({ ...request, messageId: crypto.randomUUID(), kind, stateVersion, payload });
+  await flow.receive(frame('Request', 4, { ...request.payload, followUpConversationId: '/' }), post);
+  assert.deepEqual(actions, []);
+  await flow.receive(request, post);
+  assert.deepEqual(actions, [target, 'stage']);
+  const { conversationId } = messages.at(-1).payload;
+  await flow.receive(frame('Ack', 5, { stateVersion: 5 }), post);
+  await flow.receive(frame('SubmitPermit', 6, { permitId: crypto.randomUUID(), tabId: '42', conversationId,
+    expiresAt: Date.now() + 5000 }), post);
+  assert.deepEqual(actions, [target, 'stage', 'submit']);
+  assert.equal(messages.at(-1).kind, 'SubmitReceipt');
+  assert.equal(messages.at(-1).payload.confirmed, false);
+});
+
 test('a native permit for the bound tab is the only route to a page click', async () => {
   const actions = [], messages = [];
   const flow = new WorkSubmission({

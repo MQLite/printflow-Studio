@@ -32,6 +32,8 @@ public sealed class ChromeWorkTextSubmission(string workspaceRoot, LoopbackWorkR
                 await _gate.WaitAsync(linked.Token);
                 try
                 {
+                    using var draftLease = _store.TryLockWorkDraft(draft.Id);
+                    if (draftLease is null) return Unavailable("WorkRequestActive");
                     var authority = await _store.ListSnapshotsAsync(linked.Token);
                     if (authority.IsFailure) return OperationResult.Fail<AiDesignWorkSubmission>(authority.Failure);
                     if (authority.Value.Any(request => request.WorkDraft?.DraftId == draft.Id && BlocksNewSubmission(request)))
@@ -62,11 +64,59 @@ public sealed class ChromeWorkTextSubmission(string workspaceRoot, LoopbackWorkR
         (AiDesignTransitions.CanResumeWorkResult(request) &&
             (request.Failure?.Code == "WorkResultPending" || _store.HasWorkResultTicket(request.RequestId)));
 
+    public async Task<OperationResult<AiDesignWorkSubmission>> SubmitFollowUpAsync(Guid sourceRequestId, string prompt,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(prompt) || prompt.Length > 100000) return Unavailable("WorkPromptRejected");
+        string? configuration = Environment.GetEnvironmentVariable(LoopbackWorkResultImport.ConfigurationVariable);
+        if (resultImport is null || string.IsNullOrWhiteSpace(configuration))
+            return Unavailable("WorkReceiverUnavailable");
+
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _lifetime.Token);
+        Guid id = Guid.NewGuid();
+        try
+        {
+            return await Task.Run(async () =>
+            {
+                await _gate.WaitAsync(linked.Token);
+                try
+                {
+                    var source = await _store.ReadAsync(sourceRequestId, linked.Token);
+                    if (source.IsFailure || source.Value.State != AiDesignState.Imported ||
+                        source.Value.ImportedSessionId is null || source.Value.Candidate is null ||
+                        source.Value.WorkDraft is not { } draft ||
+                        source.Value.WorkConversationId is not { } conversation || conversation == Guid.Empty)
+                        return Unavailable("WorkFollowUpUnavailable");
+                    using var draftLease = _store.TryLockWorkDraft(draft.DraftId);
+                    if (draftLease is null) return Unavailable("WorkRequestActive");
+                    var listed = await _store.ListSnapshotsAsync(linked.Token);
+                    if (listed.IsFailure) return OperationResult.Fail<AiDesignWorkSubmission>(listed.Failure);
+                    if (listed.Value.Any(request => (request.WorkDraft?.DraftId == draft.DraftId ||
+                        request.WorkConversationId == conversation || request.WorkFollowUp?.ConversationId == conversation)
+                        && BlocksNewSubmission(request)))
+                        return Unavailable("WorkRequestActive");
+
+                    return await SubmitCoreAsync(draft, id, new(prompt, [], []), linked.Token, sourceRequestId);
+                }
+                finally
+                {
+                    _gate.Release();
+                    progress?.RequestChanged(id);
+                }
+            }, linked.Token).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (linked.IsCancellationRequested)
+        {
+            return Unavailable("WorkSubmitUnconfirmed");
+        }
+    }
+
     internal static AiPromptExport ExportForWork(AiAuthoringDraft draft, Guid requestId) =>
         AiAuthoringModule.Export(draft, asset =>
             AiDesignOwnedStagingFiles.AttachmentName(asset.Order, Path.GetExtension(asset.UploadName), requestId));
 
-    private async Task<OperationResult<AiDesignWorkSubmission>> SubmitCoreAsync(WorkDraftReference draft, Guid id, AiPromptExport prompt, CancellationToken ct)
+    private async Task<OperationResult<AiDesignWorkSubmission>> SubmitCoreAsync(WorkDraftReference draft, Guid id, AiPromptExport prompt,
+        CancellationToken ct, Guid? sourceRequestId = null)
     {
         var loaded = await AiDesignBridgeConfiguration.LoadAsync(AiDesignBridgeConfiguration.ConfigurationPath, ct);
         if (loaded.IsFailure)
@@ -81,7 +131,9 @@ public sealed class ChromeWorkTextSubmission(string workspaceRoot, LoopbackWorkR
             return Unavailable("WorkContractUnverified");
         string launchNonce = Convert.ToHexString(RandomNumberGenerator.GetBytes(16));
         string? resultConfig = Environment.GetEnvironmentVariable(LoopbackWorkResultImport.ConfigurationVariable);
-        bool returnEnabled = resultConfig is not null && resultImport is not null;
+        bool returnEnabled = !string.IsNullOrWhiteSpace(resultConfig) && resultImport is not null;
+        if (sourceRequestId is not null && !returnEnabled)
+            return Unavailable("WorkReceiverUnavailable");
         string? preparationFailure = null;
         var channel = new FileAiDesignChannel(configuration, expectedLaunchNonce: launchNonce,
             prepareResult: returnEnabled ? async (request, token) =>
@@ -118,12 +170,21 @@ public sealed class ChromeWorkTextSubmission(string workspaceRoot, LoopbackWorkR
             }
         }
 
+        if (sourceRequestId is not null)
+        {
+            var readiness = await channel.CheckAsync(ct);
+            if (readiness.IsFailure || !readiness.Value.Available || !readiness.Value.SupportsWorkFollowUp)
+                return Unavailable("WorkFollowUpBridgeUnavailable");
+        }
+
         using var coordinator = new AiDesignCoordinator(_store, channel,
             new AiDesignBrowserLease(AiDesignBridgeConfiguration.InstallationDirectory), attachments: new FileAiDesignAttachments(workspaceRoot));
-        var saved = await new FileAiAuthoringAssetFork(workspaceRoot).CopyAndPublishAsync(draft.DraftId, id, prompt.RequiredAttachments,
-            assets => _store.CreateAsync(id, new(new AiDesignPrompt(PromptTemplateService.WorkbenchTemplate, 1,
-                new Dictionary<string, string>(), prompt.Text, assets.Select(asset => asset.Id).ToArray(), ""), assets, draft), ct), ct,
-            useWorkNames: true);
+        var saved = sourceRequestId is { } sourceId
+            ? await _store.CreateWorkFollowUpAsync(sourceId, id, prompt.Text, ct)
+            : await new FileAiAuthoringAssetFork(workspaceRoot).CopyAndPublishAsync(draft.DraftId, id, prompt.RequiredAttachments,
+                assets => _store.CreateAsync(id, new(new AiDesignPrompt(PromptTemplateService.WorkbenchTemplate, 1,
+                    new Dictionary<string, string>(), prompt.Text, assets.Select(asset => asset.Id).ToArray(), ""), assets, draft), ct), ct,
+                useWorkNames: true);
         if (saved.IsFailure)
             return OperationResult.Fail<AiDesignWorkSubmission>(saved.Failure);
 
@@ -165,6 +226,7 @@ public sealed class ChromeWorkTextSubmission(string workspaceRoot, LoopbackWorkR
         var current = await _store.ReadAsync(requestId, ct).ConfigureAwait(false);
         if (current.IsFailure) return OperationResult.Fail<Unit>(current.Failure);
         if (!AiDesignTransitions.CanResumeWorkResult(current.Value) ||
+            current.Value.State != AiDesignState.AwaitingWorkFollowUp &&
             current.Value.Failure?.Code is not ("WorkResultPending" or "Interrupted"))
             return OperationResult.Fail<Unit>(FailureCode.PreconditionNotMet, "This Work result is no longer pending.");
         var stopped = await _store.ChangeAsync(current.Value.Fence, new AiDesignEvent.StopAccepted(), ct).ConfigureAwait(false);
@@ -204,7 +266,7 @@ public sealed class ChromeWorkTextSubmission(string workspaceRoot, LoopbackWorkR
         return OperationResult.Ok(launch);
     }
 
-    private static string? LocateChrome() => new[]
+    internal static string? LocateChrome() => new[]
     {
         Environment.SpecialFolder.ProgramFiles, Environment.SpecialFolder.ProgramFilesX86, Environment.SpecialFolder.LocalApplicationData
     }.Select(folder => Environment.GetFolderPath(folder))
