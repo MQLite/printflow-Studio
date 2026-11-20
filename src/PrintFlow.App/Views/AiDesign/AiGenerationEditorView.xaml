@@ -176,13 +176,18 @@
       </StackPanel.Style>
       <TextBlock Text="{Binding ReferenceFileName}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"
                  AutomationProperties.LiveSetting="Polite"/>
+      <TextBlock Text="{Binding ReferencePendingHint}" TextWrapping="Wrap" FontSize="12" Margin="0,3,0,0"/>
       <TextBlock x:Name="ReferencePurposeLabel" Text="{x:Static r:AiPromptLabels.AiPrompt_ReferenceRole}" Margin="0,6,0,0"/>
       <TextBlock Text="{x:Static r:AiPromptLabels.AiPrompt_ReferenceRoleHint}" TextWrapping="Wrap" FontSize="12"/>
       <TextBox Text="{Binding ReferenceRole, UpdateSourceTrigger=PropertyChanged}" Margin="0,4,0,4"
                AutomationProperties.LabeledBy="{Binding ElementName=ReferencePurposeLabel}"
                AutomationProperties.AutomationId="AiPrompt.ReferencePurpose"/>
-      <Button Content="{x:Static r:AiPromptLabels.AiPrompt_AddReference}" Command="{Binding AddReferenceCommand}"
-              HorizontalAlignment="Left" Padding="8,4" AutomationProperties.AutomationId="AiPrompt.AddReference"/>
+      <WrapPanel>
+       <Button Content="{x:Static r:AiPromptLabels.AiPrompt_AddReference}" Command="{Binding AddReferenceCommand}"
+               Padding="8,4" Margin="0,0,6,0" AutomationProperties.AutomationId="AiPrompt.AddReference"/>
+       <Button Content="{Binding DiscardReferenceLabel}" Command="{Binding DiscardReferenceCommand}"
+               IsEnabled="{Binding CanEdit}" Padding="8,4" AutomationProperties.AutomationId="AiPrompt.DiscardReference"/>
+      </WrapPanel>
      </StackPanel>
      <Expander Header="{x:Static r:AiPromptLabels.AiPrompt_ReferenceTools}" AutomationProperties.AutomationId="AiPrompt.ReferenceTools">
       <ScrollViewer MaxHeight="215" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">

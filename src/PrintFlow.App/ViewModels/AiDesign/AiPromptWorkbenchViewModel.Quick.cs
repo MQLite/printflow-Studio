@@ -13,6 +13,8 @@ public sealed partial class AiPromptWorkbenchViewModel
     private string referenceRole = "";
 
     public string? ReferenceFileName { get; private set; }
+    public string ReferencePendingHint => Strings.Resolve("AiPrompt_ReferencePending");
+    public string DiscardReferenceLabel => Strings.Resolve("AiPrompt_DiscardSelectedReference");
 
     public string ReferenceRole
     {
@@ -68,6 +70,7 @@ public sealed partial class AiPromptWorkbenchViewModel
         referencePath = null;
         ReferenceFileName = null;
         ReferenceRole = "";
+        if (Error == ReferencePendingHint) Error = null;
         OnPropertyChanged(nameof(ReferenceFileName));
         AddReferenceCommand.NotifyCanExecuteChanged();
     }

@@ -124,6 +124,7 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
     public IAsyncRelayCommand<AiPromptPhotoSlot> RemovePhotoCommand { get; }
     public IAsyncRelayCommand<AiPromptPhotoSlot> ReusePhotoCommand { get; }
     public IRelayCommand ChooseReferenceImageCommand { get; }
+    public IRelayCommand DiscardReferenceCommand { get; }
     public IAsyncRelayCommand AddReferenceCommand { get; }
     public IRelayCommand<AiPromptPhotoSlot> ExpandPhotoCommand { get; }
     public IRelayCommand ClosePhotoCommand { get; }
@@ -194,6 +195,7 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
         ReusePhotoCommand = new AsyncRelayCommand<AiPromptPhotoSlot>(async value =>
         { if (value?.SelectedAsset is { } asset) await EditAsync(new AiAuthoringEdit.BindExistingImage(value.SlotId, asset.Id)); });
         ChooseReferenceImageCommand = new RelayCommand(ChooseReferenceImage);
+        DiscardReferenceCommand = new RelayCommand(ResetPendingReference);
         AddReferenceCommand = new AsyncRelayCommand(AddReferenceAsync, CanAddReference);
         ExpandPhotoCommand = new RelayCommand<AiPromptPhotoSlot>(value => { ExpandedPhoto = value; OnPropertyChanged(nameof(ExpandedPhoto)); });
         ClosePhotoCommand = new RelayCommand(() => { ExpandedPhoto = null; OnPropertyChanged(nameof(ExpandedPhoto)); });

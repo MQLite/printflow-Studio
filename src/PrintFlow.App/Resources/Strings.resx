@@ -1903,4 +1903,6 @@
   <data name="AiPrompt_SaveCloudPdf" xml:space="preserve"><value>Save PDF…</value></data>
   <data name="AiPrompt_CloudPdfSaved" xml:space="preserve"><value>The approved PDF was saved.</value></data>
   <data name="AiPrompt_CloudPdfSaveFailed" xml:space="preserve"><value>Could not save the approved PDF. Choose a new file name or an available folder.</value></data>
+  <data name="AiPrompt_ReferencePending" xml:space="preserve"><value>Insert the selected image reference or clear the selection before generating.</value></data>
+  <data name="AiPrompt_DiscardSelectedReference" xml:space="preserve"><value>Clear selection</value></data>
 </root>

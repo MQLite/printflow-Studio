@@ -83,6 +83,11 @@ public sealed partial class AiPromptWorkbenchViewModel
     private async Task GenerateAsync(CancellationToken ct) => await RunAsync(async () =>
     {
         if (!active || Draft is null || IsWaitingForWorkResult || isLoadingWorkCard || workCardUnavailable) return;
+        if (referencePath is not null)
+        {
+            Error = ReferencePendingHint;
+            return;
+        }
         bool useApi = GenerationProvider == AiDesignProvider.OpenAiApi;
         if (useApi && !ConfirmOpenAiGeneration()) return;
 

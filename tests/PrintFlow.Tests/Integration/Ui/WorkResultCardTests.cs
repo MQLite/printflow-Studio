@@ -60,14 +60,50 @@ public sealed class WorkResultCardTests
     {
         public Guid RequestId { get; } = Guid.NewGuid();
         public bool Consent { get; set; }
+        public int ConfirmationCount { get; private set; }
         public AiAuthoringDraft? Submitted { get; private set; }
-        public bool Confirm() => Consent;
+        public bool Confirm()
+        {
+            ConfirmationCount++;
+            return Consent;
+        }
         public OperationFailure? GetUnavailable() => null;
         public Task<OperationResult<Guid>> GenerateAsync(AiAuthoringDraft draft, CancellationToken ct)
         {
             Submitted = draft;
             return Task.FromResult(OperationResult.Ok(RequestId));
         }
+    }
+
+    [Fact]
+    public async Task A_selected_reference_must_be_inserted_or_discarded_before_api_consent()
+    {
+        var api = new DesignApi { Consent = true };
+        using var source = new TempWorkspace();
+        using var fixture = new PromptWorkbenchFixture(tasks: new TestQuery(), api: api, consent: api);
+        var vm = fixture.Vm;
+        await vm.OpenAsync(null, default);
+        vm.GenerationProvider = AiDesignProvider.OpenAiApi;
+        vm.Document = new([new AiTextPart(Guid.NewGuid(), "Recolor the reference.")]);
+        fixture.Picker.Pick = () => PromptWorkbenchFixture.Png(source.Root, 3);
+        vm.ChooseReferenceImageCommand.Execute(null);
+        vm.ReferenceRole = "Layout reference";
+
+        await vm.AutoGenerateCommand.ExecuteAsync(null);
+
+        api.ConfirmationCount.ShouldBe(0);
+        api.Submitted.ShouldBeNull();
+        vm.Error.ShouldBe(vm.ReferencePendingHint);
+
+        vm.DiscardReferenceCommand.Execute(null);
+        vm.ReferenceFileName.ShouldBeNull();
+        vm.Error.ShouldBeNull();
+        vm.ChooseReferenceImageCommand.Execute(null);
+        vm.ReferenceRole = "Layout reference";
+        await vm.AddReferenceCommand.ExecuteAsync(null);
+        await vm.AutoGenerateCommand.ExecuteAsync(null);
+        api.ConfirmationCount.ShouldBe(1);
+        api.Submitted.ShouldNotBeNull().FinalDocument.Parts.OfType<AiImagePart>().ShouldHaveSingleItem();
     }
 
     [Fact]

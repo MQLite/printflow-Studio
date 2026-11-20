@@ -1893,4 +1893,6 @@
   <data name="AiPrompt_SaveCloudPdf" xml:space="preserve"><value>保存 PDF…</value></data>
   <data name="AiPrompt_CloudPdfSaved" xml:space="preserve"><value>已保存通过审核的 PDF。</value></data>
   <data name="AiPrompt_CloudPdfSaveFailed" xml:space="preserve"><value>无法保存通过审核的 PDF，请选择新文件名或可写入的文件夹。</value></data>
+  <data name="AiPrompt_ReferencePending" xml:space="preserve"><value>参考图待插入。请先插入图片引用，或取消选择后再生成。</value></data>
+  <data name="AiPrompt_DiscardSelectedReference" xml:space="preserve"><value>取消选择</value></data>
 </root>
