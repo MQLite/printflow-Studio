@@ -12,6 +12,7 @@ public interface IOpenAiUploadPrompt
 public interface IAiDesignApiConsent
 {
     bool Confirm();
+    bool Confirm(bool withCloudReview) => Confirm();
 }
 
 internal sealed class SystemOpenAiUploadPrompt : IOpenAiUploadPrompt, IAiDesignApiConsent
@@ -20,6 +21,8 @@ internal sealed class SystemOpenAiUploadPrompt : IOpenAiUploadPrompt, IAiDesignA
         string.Format(CultureInfo.CurrentCulture, Strings.Resolve("ImageProcessing_OpenAiUploadQuestion"), operation));
 
     public bool Confirm() => Show(Strings.Resolve("AiPrompt_OpenAiConsent"));
+    public bool Confirm(bool withCloudReview) =>
+        withCloudReview ? Show(Strings.Resolve("AiPrompt_CloudConsent")) : Confirm();
 
     private static bool Show(string message)
     {

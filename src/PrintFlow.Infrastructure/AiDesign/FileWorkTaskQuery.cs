@@ -48,7 +48,7 @@ public sealed class FileWorkTaskQuery(FileAiDesignRequestStore store, ISessionSe
             var facts = candidate.Facts;
             return task with { Stage = WorkTaskStage.Imported, ImportedSessionId = session,
                 Format = facts.Format, PixelWidth = facts.PixelWidth, PixelHeight = facts.PixelHeight,
-                OpenAiReceipt = request.OpenAiReceipt };
+                OpenAiReceipt = request.OpenAiReceipt, CloudDesignAttempts = request.CloudReceipt?.Attempts.Length ?? 0 };
         }
         if (request.Failure?.Code == "TrialResultHandoffUnavailable" && conversation is not null && !ticket)
             return task with { Stage = WorkTaskStage.SubmittedOnly };

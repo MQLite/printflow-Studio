@@ -19,6 +19,10 @@ public sealed class WorkTaskRow(WorkTaskSnapshot snapshot) : ObservableObject
     public bool CanViewWork => Snapshot.WorkConversationId is { } id && id != Guid.Empty;
     public bool CanRegenerate => CanContinue && CanViewWork;
     public bool HasOpenAiReceipt => Snapshot.OpenAiReceipt is not null;
+    public bool HasCloudPdf => CanContinue && Snapshot.CloudDesignAttempts > 0;
+    public string? CloudReviewDetails => HasCloudPdf
+        ? string.Format(CultureInfo.CurrentCulture, Strings.Resolve("AiPrompt_CloudReviewPassed"), Snapshot.CloudDesignAttempts)
+        : null;
     public string? OpenAiResponseDetails => Snapshot.OpenAiReceipt is { } receipt
         ? receipt.TotalTokens is { } total
             ? string.Format(CultureInfo.CurrentCulture, Strings.Resolve("AiPrompt_OpenAiResponseUsage"), receipt.ResponseId, total)

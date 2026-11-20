@@ -1,4 +1,3 @@
-using System.IO;
 using System.Runtime.InteropServices;
 using PrintFlow.App.Resources;
 using PrintFlow.Domain.AiDesign.Authoring;
@@ -13,7 +12,7 @@ public sealed partial class AiPromptWorkbenchViewModel
     private string? referencePath;
     private string referenceRole = "";
 
-    public string? ReferenceFileName => Path.GetFileName(referencePath);
+    public string? ReferenceFileName { get; private set; }
 
     public string ReferenceRole
     {
@@ -29,9 +28,10 @@ public sealed partial class AiPromptWorkbenchViewModel
     {
         if (!active || !CanEdit || Draft is null) return;
         long capturedEpoch = epoch;
-        string? path = picker.PickSingleFile(Strings.AiPrompt_ChooseReferenceImage, ImageFileFilter);
-        if (path is null || !IsCurrent(capturedEpoch)) return;
-        referencePath = path;
+        var picked = picker.PickNamedFile(Strings.AiPrompt_ChooseReferenceImage, ImageFileFilter);
+        if (picked is not { } selection || !IsCurrent(capturedEpoch)) return;
+        referencePath = selection.Path;
+        ReferenceFileName = selection.FileName;
         OnPropertyChanged(nameof(ReferenceFileName));
         AddReferenceCommand.NotifyCanExecuteChanged();
     }
@@ -66,6 +66,7 @@ public sealed partial class AiPromptWorkbenchViewModel
     private void ResetPendingReference()
     {
         referencePath = null;
+        ReferenceFileName = null;
         ReferenceRole = "";
         OnPropertyChanged(nameof(ReferenceFileName));
         AddReferenceCommand.NotifyCanExecuteChanged();

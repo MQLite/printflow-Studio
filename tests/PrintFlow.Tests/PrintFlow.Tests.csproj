@@ -15,6 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\PrintFlow.DesignCloud\PrintFlow.DesignCloud.csproj" />
     <ProjectReference Include="..\PrintFlow.AiDesignProbe\PrintFlow.AiDesignProbe.csproj" />
     <ProjectReference Include="..\..\src\PrintFlow.NativeHost\PrintFlow.NativeHost.csproj" />
     <ProjectReference Include="..\PrintFlow.WorkstationEntry\PrintFlow.WorkstationEntry.csproj" />

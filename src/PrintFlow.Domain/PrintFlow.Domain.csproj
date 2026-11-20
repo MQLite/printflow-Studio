@@ -19,7 +19,7 @@
       the packaging one. RuntimeIdentifiers (plural) is a restore target list, so it changes no
       build output path here.
     -->
-    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+    <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
   </PropertyGroup>
 
 </Project>

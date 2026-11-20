@@ -134,7 +134,8 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
         AiMemorialServices? memorial = null, IAiDesignTextSubmission? textSubmission = null,
         IWorkTaskQuery? workTasks = null, WorkTaskTracker? workTracker = null,
         PrintFlow.Workflow.Services.IArtefactPreviewService? workPreviews = null, IWorkConversationLauncher? workLauncher = null,
-        IAiDesignApiGeneration? apiGeneration = null, IAiDesignApiConsent? apiConsent = null)
+        IAiDesignApiGeneration? apiGeneration = null, IAiDesignApiConsent? apiConsent = null,
+        ICloudDesignPdfExport? pdfExport = null, ICloudDesignPdfSavePicker? pdfPicker = null)
     {
         this.module = module; this.catalog = catalog; this.preview = preview; this.picker = picker; this.clipboard = clipboard;
         this.leavePrompt = leavePrompt; this.navigation = navigation;
@@ -142,11 +143,14 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
         this.textSubmission = textSubmission;
         this.apiGeneration = apiGeneration;
         this.apiConsent = apiConsent;
+        this.pdfExport = pdfExport;
+        this.pdfPicker = pdfPicker;
         this.workTasks = workTasks; this.workTracker = workTracker; this.workPreviews = workPreviews;
         this.workLauncher = workLauncher;
         OpenWorkResultPreviewCommand = new AsyncRelayCommand(OpenWorkResultPreviewAsync);
         CloseWorkResultPreviewCommand = new RelayCommand(CloseWorkPreview);
         CopyOpenAiResponseIdCommand = new RelayCommand(CopyOpenAiResponseId);
+        SaveCloudPdfCommand = new AsyncRelayCommand(SaveCloudPdfAsync);
         RegenerateInWorkCommand = new AsyncRelayCommand(RegenerateInWorkAsync);
         SubmitFollowUpCommand = new AsyncRelayCommand(SubmitFollowUpAsync, CanSubmitFollowUp);
         CloseFollowUpEditorCommand = new RelayCommand(CloseFollowUpEditor);

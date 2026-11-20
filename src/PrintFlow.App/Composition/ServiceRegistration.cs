@@ -270,7 +270,8 @@ public static class ServiceRegistration
         services.AddSingleton<IWorkConversationLauncher, WorkConversationLauncher>();
         services.AddSingleton<WorkTaskTracker>();
         services.AddSingleton<IWorkResultProgressReader>(p => p.GetRequiredService<WorkTaskTracker>());
-        services.AddSingleton<IWorkTaskQuery>(p => new FileWorkTaskQuery(new FileAiDesignRequestStore(workspaceRootAbsolute),
+        services.AddSingleton(new FileAiDesignRequestStore(workspaceRootAbsolute));
+        services.AddSingleton<IWorkTaskQuery>(p => new FileWorkTaskQuery(p.GetRequiredService<FileAiDesignRequestStore>(),
             p.GetRequiredService<ISessionService>(), p.GetRequiredService<IWorkResultProgressReader>()));
         services.AddSingleton(p => new LoopbackWorkResultImport(workspaceRootAbsolute,
             p.GetRequiredService<IFileInspector>(), p.GetRequiredService<ISessionService>(), p.GetRequiredService<WorkTaskTracker>()));
@@ -280,7 +281,10 @@ public static class ServiceRegistration
         services.AddSingleton<IAiDesignApiConsent, SystemOpenAiUploadPrompt>();
         services.AddSingleton<IAiDesignApiGeneration>(p => new OpenAiDesignGeneration(workspaceRootAbsolute,
             p.GetRequiredService<IOpenAiImageCredentials>(), configuration.OpenAiImages?.Model ?? OpenAiImageBackend.DefaultModel,
-            p.GetRequiredService<IFileInspector>(), p.GetRequiredService<ISessionService>()));
+            p.GetRequiredService<IFileInspector>(), p.GetRequiredService<ISessionService>(),
+            configuration.OpenAiDesignCloud is { } cloud ? cloud.Endpoint ?? "" : null));
+        services.AddSingleton<ICloudDesignPdfExport, CloudDesignPdfExport>();
+        services.AddSingleton<ICloudDesignPdfSavePicker, SaveCloudDesignPdfDialog>();
         services.AddTransient<AiPromptWorkbenchViewModel>();
         services.AddTransient<AiWorkTasksViewModel>();
         services.AddSingleton<IFilePicker, OpenFileDialogPicker>();

@@ -204,6 +204,13 @@
           "WPF-UI": "[4.3.0, )"
         }
       },
+      "printflow.designcloud": {
+        "type": "Project",
+        "dependencies": {
+          "Magick.NET-Q16-x64": "[15.1.0, )",
+          "PrintFlow.Domain": "[0.1.5, )"
+        }
+      },
       "printflow.domain": {
         "type": "Project"
       },

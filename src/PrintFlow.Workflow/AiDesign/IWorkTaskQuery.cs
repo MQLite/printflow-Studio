@@ -15,6 +15,7 @@ public sealed record WorkTaskSnapshot(Guid RequestId, Guid AttemptId, long State
     AiDesignProvider Provider = AiDesignProvider.ChatGptWork)
 {
     public OpenAiDesignReceipt? OpenAiReceipt { get; init; }
+    public int CloudDesignAttempts { get; init; }
     public bool IsVerifyingResult => Stage is WorkTaskStage.AwaitingVerification or WorkTaskStage.Validating;
     public bool HasReturnedImage => IsVerifyingResult || Stage == WorkTaskStage.Imported;
     public bool BlocksNewSubmission => IsActive || CanStopReceiving;

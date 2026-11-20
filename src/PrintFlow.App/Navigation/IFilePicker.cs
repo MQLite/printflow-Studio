@@ -1,3 +1,5 @@
+using System.IO;
+
 namespace PrintFlow.App.Navigation;
 
 /// <summary>
@@ -31,4 +33,7 @@ public interface IFilePicker
     /// </summary>
     string? PickSingleFile(string dialogTitle, string filter, string? initialFolder) =>
         PickSingleFile(dialogTitle, filter);
+
+    (string Path, string FileName)? PickNamedFile(string dialogTitle, string filter) =>
+        PickSingleFile(dialogTitle, filter) is { } path ? (path, Path.GetFileName(path)) : null;
 }

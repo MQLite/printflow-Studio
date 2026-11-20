@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrintFlow.NativeHost", "src
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrintFlow.AiDesignProbe", "tests\PrintFlow.AiDesignProbe\PrintFlow.AiDesignProbe.csproj", "{61BB66CC-446C-411A-924E-0B48C15983AD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrintFlow.DesignCloud", "src\PrintFlow.DesignCloud\PrintFlow.DesignCloud.csproj", "{9CCF2989-B151-4557-BB90-C6C0B827053C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -115,6 +117,18 @@ Global
 		{61BB66CC-446C-411A-924E-0B48C15983AD}.Release|x64.Build.0 = Release|Any CPU
 		{61BB66CC-446C-411A-924E-0B48C15983AD}.Release|x86.ActiveCfg = Release|Any CPU
 		{61BB66CC-446C-411A-924E-0B48C15983AD}.Release|x86.Build.0 = Release|Any CPU
+		{9CCF2989-B151-4557-BB90-C6C0B827053C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9CCF2989-B151-4557-BB90-C6C0B827053C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9CCF2989-B151-4557-BB90-C6C0B827053C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{9CCF2989-B151-4557-BB90-C6C0B827053C}.Debug|x64.Build.0 = Debug|Any CPU
+		{9CCF2989-B151-4557-BB90-C6C0B827053C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{9CCF2989-B151-4557-BB90-C6C0B827053C}.Debug|x86.Build.0 = Debug|Any CPU
+		{9CCF2989-B151-4557-BB90-C6C0B827053C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9CCF2989-B151-4557-BB90-C6C0B827053C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9CCF2989-B151-4557-BB90-C6C0B827053C}.Release|x64.ActiveCfg = Release|Any CPU
+		{9CCF2989-B151-4557-BB90-C6C0B827053C}.Release|x64.Build.0 = Release|Any CPU
+		{9CCF2989-B151-4557-BB90-C6C0B827053C}.Release|x86.ActiveCfg = Release|Any CPU
+		{9CCF2989-B151-4557-BB90-C6C0B827053C}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -127,5 +141,6 @@ Global
 		{1548CD36-9E35-47C5-9452-94E92B66CB79} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{D2D9A30A-FDE0-4C0D-84ED-8A5C87575E0B} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{61BB66CC-446C-411A-924E-0B48C15983AD} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+		{9CCF2989-B151-4557-BB90-C6C0B827053C} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 EndGlobal

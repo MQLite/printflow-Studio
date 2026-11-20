@@ -1,5 +1,7 @@
 using CommunityToolkit.Mvvm.Input;
+using PrintFlow.App.Navigation;
 using PrintFlow.App.Resources;
+using PrintFlow.Workflow.AiDesign;
 using PrintFlow.Workflow.Services;
 
 namespace PrintFlow.App.ViewModels.AiDesign;
@@ -18,6 +20,20 @@ public sealed partial class AiPromptWorkbenchViewModel
     public IRelayCommand CloseWorkResultPreviewCommand { get; }
     public IRelayCommand CopyOpenAiResponseIdCommand { get; }
     public string CopyOpenAiResponseIdLabel => Strings.Resolve("AiPrompt_OpenAiCopyResponseId");
+    private readonly ICloudDesignPdfExport? pdfExport;
+    private readonly ICloudDesignPdfSavePicker? pdfPicker;
+    public IAsyncRelayCommand SaveCloudPdfCommand { get; }
+    public string SaveCloudPdfLabel => Strings.Resolve("AiPrompt_SaveCloudPdf");
+
+    private async Task SaveCloudPdfAsync(CancellationToken ct)
+    {
+        if (!active || WorkCard is not { HasCloudPdf: true } card || pdfExport is null ||
+            pdfPicker?.PickDestination() is not { } destination) return;
+        var result = await pdfExport.SaveAsync(card.Snapshot.RequestId, destination, ct);
+        if (!active || ct.IsCancellationRequested) return;
+        if (result.IsSuccess) Status = Strings.Resolve("AiPrompt_CloudPdfSaved");
+        else Error = Strings.Resolve("AiPrompt_CloudPdfSaveFailed");
+    }
 
     private void CopyOpenAiResponseId()
     {

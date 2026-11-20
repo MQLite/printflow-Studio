@@ -18,7 +18,8 @@ public sealed partial class AiPromptWorkbenchViewModel
     public IReadOnlyList<AiDesignGenerationOption> GenerationOptions =>
     [
         new(AiDesignProvider.ChatGptWork, "ChatGPT Work"),
-        new(AiDesignProvider.OpenAiApi, "OpenAI API")
+        new(AiDesignProvider.OpenAiApi, apiGeneration?.UsesCloudReview == true
+            ? Strings.Resolve("AiPrompt_CloudProvider") : "OpenAI API")
     ];
     public AiDesignProvider GenerationProvider { get; set; }
     public string CancelOpenAiGenerationLabel => Strings.Resolve("AiPrompt_OpenAiCancel");
@@ -90,7 +91,9 @@ public sealed partial class AiPromptWorkbenchViewModel
         generationStarted = true;
         submittingGeneration = true;
         generationUsesOpenAi = useApi;
-        generationFeedback = Strings.Resolve(useApi ? "AiPrompt_OpenAiGenerating" : "AiPrompt_WorkConnecting");
+        generationFeedback = Strings.Resolve(useApi
+            ? apiGeneration?.UsesCloudReview == true ? "AiPrompt_CloudWorking" : "AiPrompt_OpenAiGenerating"
+            : "AiPrompt_WorkConnecting");
         submittedWorkRequest = null;
         WorkCard = null;
         NotifyGenerationProgress();
@@ -134,7 +137,7 @@ public sealed partial class AiPromptWorkbenchViewModel
             Error = Strings.Resolve(failure.MessageKey);
             return false;
         }
-        return apiConsent.Confirm();
+        return apiConsent.Confirm(apiGeneration.UsesCloudReview);
     }
 
     private async Task SubmitGenerationCoreAsync(long submittingEpoch, bool useApi, CancellationToken ct)
@@ -160,7 +163,10 @@ public sealed partial class AiPromptWorkbenchViewModel
             if (!IsCurrent(submittingEpoch)) return;
             if (generated.IsFailure)
             {
-                Error = Strings.Resolve(generated.Failure.MessageKey);
+                var failure = generated.Failure;
+                Error = failure.Context.TryGetValue(CloudDesignLimits.ReviewReasonKey, out var reason)
+                    ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Resolve(failure.MessageKey), reason)
+                    : Strings.Resolve(failure.MessageKey);
                 return;
             }
             await ShowSubmittedResultAsync(generated.Value, "WorkTask_Imported");

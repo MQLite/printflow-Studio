@@ -14,6 +14,7 @@ namespace PrintFlow.Infrastructure.AiDesign;
 /// <summary>Creation-issued authority for this operation's exact staging files, never retention or production disposal.</summary>
 public static class AiDesignOwnedStagingFiles
 {
+    internal const string OpenAiPdfName = "openai-result.pdf";
     public enum RequestPurpose { RequestAuthority, AttachmentSequence, BridgeQueue, WorkResultTicket }
 
     internal static OwnedFile CreateAuthoring(string workspaceRoot, Guid? draftId, Guid? versionId, Guid? reviewId = null)
@@ -108,12 +109,12 @@ public static class AiDesignOwnedStagingFiles
         return $"returned-{objectVersion:N}.{extension}";
     }
 
-    internal static OwnedFile CreateOpenAiResult(string workspaceRoot, Guid requestId)
+    internal static OwnedFile CreateOpenAiResult(string workspaceRoot, Guid requestId, bool pdf = false)
     {
         string root = RequestRoot(workspaceRoot, requestId);
         PrepareDirectory(root);
         return OwnedFile.Create(root, System.IO.Path.Combine(root, $".openai-{Guid.NewGuid():N}.tmp"),
-            System.IO.Path.Combine(root, "openai-result.png"));
+            System.IO.Path.Combine(root, pdf ? OpenAiPdfName : "openai-result.png"));
     }
 
     public static AttachmentBatch BeginAttachments(string workspaceRoot, Guid requestId)

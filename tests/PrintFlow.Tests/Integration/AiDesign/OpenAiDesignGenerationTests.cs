@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Json;
 using System.Text.Json;
 using PrintFlow.Domain.AiDesign;
 using PrintFlow.Domain.AiDesign.Authoring;
@@ -93,6 +94,69 @@ public sealed class OpenAiDesignGenerationTests
         result.Failure.MessageKey.ShouldBe(message);
         transport.Calls.ShouldBe(expectedCalls);
         (await new FileAiDesignRequestStore(harness.Workspace.Root).ListAsync(default)).Value.ShouldBeEmpty();
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Cloud_generation_imports_only_approved_results_and_saves_the_exact_returned_pdf(bool approved)
+    {
+        using var harness = new SessionServiceHarness();
+        var (draft, _) = await CreateDraftAsync(harness, true);
+        byte[] png = SyntheticImages.Png(20, 12);
+        byte[] pdf = "%PDF-1.4\ncloud payload"u8.ToArray();
+        var attempt = new CloudDesignAttempt(new("resp_generated", null, "ig_design", 1, 2, 3, 20),
+            new("resp_reviewed", null, null, 3, 4, 7));
+        var job = new CloudDesignJob(approved ? CloudDesignStage.Approved : CloudDesignStage.Rejected, [attempt],
+            approved ? png : null, approved ? pdf : null, approved ? null : "Missing the requested blue border.");
+        using var transport = new CloudTransport(job);
+        using var generator = new OpenAiDesignGeneration(harness.Workspace.Root, new Credentials(null),
+            "test-image-model", harness.FileInspector, harness.CreateService(), transport, "https://cloud.example",
+            () => "test_cloud_token_for_authorized_clients");
+
+        var result = await generator.GenerateAsync(draft, default);
+        transport.Methods.ShouldBe([HttpMethod.Post, HttpMethod.Get, HttpMethod.Delete]);
+        var store = new FileAiDesignRequestStore(harness.Workspace.Root);
+        if (!approved)
+        {
+            result.Failure.MessageKey.ShouldBe("AiPrompt_CloudRejected");
+            result.Failure.Context[CloudDesignLimits.ReviewReasonKey].ShouldBe(job.Reason);
+            (await store.ListAsync(default)).Value.ShouldBeEmpty();
+            return;
+        }
+
+        result.IsSuccess.ShouldBeTrue(result.IsFailure ? result.Failure.TechnicalDetail : null);
+        var request = (await store.ReadAsync(result.Value, default)).Value;
+        request.State.ShouldBe(AiDesignState.Imported);
+        request.CloudReceipt!.Attempts.ShouldHaveSingleItem().ShouldBe(attempt);
+        string output = System.IO.Path.Combine(harness.Workspace.Root, "saved-cloud-design.pdf");
+        var export = new CloudDesignPdfExport(store);
+        (await export.SaveAsync(result.Value, output, default)).IsSuccess.ShouldBeTrue();
+        (await System.IO.File.ReadAllBytesAsync(output)).ShouldBe(pdf);
+        (await export.SaveAsync(result.Value, output, default)).IsFailure.ShouldBeTrue();
+        (await System.IO.File.ReadAllBytesAsync(output)).ShouldBe(pdf);
+    }
+
+    private sealed class CloudTransport(CloudDesignJob job) : HttpMessageHandler
+    {
+        public List<HttpMethod> Methods { get; } = [];
+
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
+        {
+            request.RequestUri!.Host.ShouldBe("cloud.example");
+            request.RequestUri.AbsolutePath.ShouldStartWith(CloudDesignLimits.Route + "/");
+            request.Headers.Authorization!.Parameter.ShouldBe("test_cloud_token_for_authorized_clients");
+            Methods.Add(request.Method);
+            if (request.Method == HttpMethod.Post)
+            {
+                var input = (await request.Content!.ReadFromJsonAsync<CloudDesignInput>(ct)).ShouldNotBeNull();
+                input.References.ShouldHaveSingleItem().MediaType.ShouldBe("image/png");
+                return new HttpResponseMessage(HttpStatusCode.Accepted);
+            }
+            return request.Method == HttpMethod.Get
+                ? new HttpResponseMessage(HttpStatusCode.OK) { Content = JsonContent.Create(job) }
+                : new HttpResponseMessage(HttpStatusCode.NoContent);
+        }
     }
 
     private static async Task<(AiAuthoringDraft Draft, byte[]? Reference)> CreateDraftAsync(

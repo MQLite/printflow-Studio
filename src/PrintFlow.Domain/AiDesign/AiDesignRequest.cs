@@ -21,7 +21,7 @@ public sealed record AiDesignFailure(string Code, AiDesignState Stage, IReadOnly
     AiDesignState LastSuccessfulStage, bool RemoteStopConfirmed = false);
 public sealed record WorkDraftReference(Guid DraftId, string Title);
 public sealed record OpenAiDesignReceipt(string ResponseId, string? RequestId, string? ImageCallId,
-    long? InputTokens, long? OutputTokens, long? TotalTokens);
+    long? InputTokens, long? OutputTokens, long? TotalTokens, long? ImageToolTokens = null);
 public sealed record WorkFollowUpReference(Guid RequestId, Sha256 ResultSha256, Guid? ConversationId = null);
 
 public sealed record AiDesignRequest
@@ -31,6 +31,7 @@ public sealed record AiDesignRequest
     public required AiDesignPrompt Prompt { get; init; }
     public AiDesignProvider Provider { get; init; }
     public OpenAiDesignReceipt? OpenAiReceipt { get; init; }
+    public CloudDesignReceipt? CloudReceipt { get; init; }
     public IReadOnlyList<AiDesignAttachment> Attachments { get; init; } = [];
     public IReadOnlyList<AiDesignUploadReceipt> UploadReceipts { get; init; } = [];
     public int NextAttachmentOrder { get; init; } = 1;

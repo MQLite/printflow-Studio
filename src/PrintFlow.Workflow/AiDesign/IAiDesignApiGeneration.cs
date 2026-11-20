@@ -5,6 +5,7 @@ namespace PrintFlow.Workflow.AiDesign;
 
 public interface IAiDesignApiGeneration
 {
+    bool UsesCloudReview => false;
     OperationFailure? GetUnavailable();
     Task<OperationResult<Guid>> GenerateAsync(AiAuthoringDraft draft, CancellationToken cancellationToken);
 }

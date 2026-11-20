@@ -1880,4 +1880,17 @@
   <data name="WorkTask_FollowUpSubmit" xml:space="preserve"><value>再次生成</value></data>
   <data name="WorkTask_FollowUpBridgeUnavailable" xml:space="preserve"><value>请更新 Work 桥接后，再发送修改要求。</value></data>
   <data name="WorkTask_FollowUpTooLong" xml:space="preserve"><value>请缩短修改要求后重试。</value></data>
+  <data name="AiPrompt_CloudConsent" xml:space="preserve"><value>是否将提示词和参考图发往云端服务及 OpenAI 生图和审核？审核未通过时会自动重做一次。OpenAI 按项目的数据设置保留响应。生图和审核可能产生费用。</value></data>
+  <data name="AiPrompt_CloudWorking" xml:space="preserve"><value>正在云端生图和审核，若未通过会自动重做一次。</value></data>
+  <data name="AiPrompt_CloudProvider" xml:space="preserve"><value>OpenAI API · 云端审核</value></data>
+  <data name="AiPrompt_CloudSetup" xml:space="preserve"><value>请先配置云端设计服务的 HTTPS 地址和访问令牌。</value></data>
+  <data name="AiPrompt_CloudUnavailable" xml:space="preserve"><value>云端设计服务未能完成任务，请稍后重试。</value></data>
+  <data name="AiPrompt_CloudBusy" xml:space="preserve"><value>云端设计服务繁忙，请稍后重试。</value></data>
+  <data name="AiPrompt_CloudAccessDenied" xml:space="preserve"><value>云端设计服务拒绝了访问令牌。</value></data>
+  <data name="AiPrompt_CloudReferenceLimit" xml:space="preserve"><value>请使用最多 8 张 PNG、JPEG 或 WebP 参考图，并将参考图总大小控制在 35 MB 以内。</value></data>
+  <data name="AiPrompt_CloudRejected" xml:space="preserve"><value>自动重做一次后仍未通过审核。原因为「{0}」。</value></data>
+  <data name="AiPrompt_CloudReviewPassed" xml:space="preserve"><value>云端审核通过，生成轮次 {0}。</value></data>
+  <data name="AiPrompt_SaveCloudPdf" xml:space="preserve"><value>保存 PDF…</value></data>
+  <data name="AiPrompt_CloudPdfSaved" xml:space="preserve"><value>已保存通过审核的 PDF。</value></data>
+  <data name="AiPrompt_CloudPdfSaveFailed" xml:space="preserve"><value>无法保存通过审核的 PDF，请选择新文件名或可写入的文件夹。</value></data>
 </root>

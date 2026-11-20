@@ -24,6 +24,7 @@ public sealed record LoggingConfiguration(int RetentionDays);
 
 /// <summary>The deployment's model identifier. Credentials are managed by Windows.</summary>
 public sealed record OpenAiImagesConfiguration(string Model);
+public sealed record OpenAiDesignCloudConfiguration(string Endpoint);
 
 /// <summary>
 /// The complete <c>appsettings.json</c> shape (Epic 11100 plan §18, §3.2).
@@ -43,6 +44,7 @@ public sealed record PrintFlowConfiguration(
     LoggingConfiguration Logging)
 {
     public OpenAiImagesConfiguration? OpenAiImages { get; init; }
+    public OpenAiDesignCloudConfiguration? OpenAiDesignCloud { get; init; }
 
     private static readonly JsonSerializerOptions SerializerOptions = new()
     {
@@ -107,6 +109,7 @@ public sealed record PrintFlowConfiguration(
         return new PrintFlowConfiguration(workspace, database, preset, adapters, logging)
         {
             OpenAiImages = ReadSection(root, "OpenAiImages", baseline.OpenAiImages),
+            OpenAiDesignCloud = ReadSection(root, "OpenAiDesignCloud", baseline.OpenAiDesignCloud),
         };
     }
 
