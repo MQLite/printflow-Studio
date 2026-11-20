@@ -20,6 +20,8 @@ public sealed record AiDesignDownload(Guid RequestId, Guid AttemptId, string Tab
 public sealed record AiDesignFailure(string Code, AiDesignState Stage, IReadOnlyList<string> DetailArguments,
     AiDesignState LastSuccessfulStage, bool RemoteStopConfirmed = false);
 public sealed record WorkDraftReference(Guid DraftId, string Title);
+public sealed record OpenAiDesignReceipt(string ResponseId, string? RequestId, string? ImageCallId,
+    long? InputTokens, long? OutputTokens, long? TotalTokens);
 public sealed record WorkFollowUpReference(Guid RequestId, Sha256 ResultSha256, Guid? ConversationId = null);
 
 public sealed record AiDesignRequest
@@ -28,6 +30,7 @@ public sealed record AiDesignRequest
     public required string WorkspaceIdentity { get; init; }
     public required AiDesignPrompt Prompt { get; init; }
     public AiDesignProvider Provider { get; init; }
+    public OpenAiDesignReceipt? OpenAiReceipt { get; init; }
     public IReadOnlyList<AiDesignAttachment> Attachments { get; init; } = [];
     public IReadOnlyList<AiDesignUploadReceipt> UploadReceipts { get; init; } = [];
     public int NextAttachmentOrder { get; init; } = 1;

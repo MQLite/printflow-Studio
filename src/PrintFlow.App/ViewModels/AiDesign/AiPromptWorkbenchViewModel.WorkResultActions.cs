@@ -16,6 +16,22 @@ public sealed partial class AiPromptWorkbenchViewModel
 
     public IAsyncRelayCommand OpenWorkResultPreviewCommand { get; }
     public IRelayCommand CloseWorkResultPreviewCommand { get; }
+    public IRelayCommand CopyOpenAiResponseIdCommand { get; }
+    public string CopyOpenAiResponseIdLabel => Strings.Resolve("AiPrompt_OpenAiCopyResponseId");
+
+    private void CopyOpenAiResponseId()
+    {
+        if (WorkCard?.Snapshot.OpenAiReceipt is not { } receipt) return;
+        try
+        {
+            clipboard.SetText(receipt.ResponseId);
+            Status = Strings.Resolve("AiPrompt_OpenAiResponseIdCopied");
+        }
+        catch (Exception ex) when (ex is System.Runtime.InteropServices.ExternalException or InvalidOperationException)
+        {
+            Error = Strings.AiPrompt_CopyFailed;
+        }
+    }
     public IAsyncRelayCommand RegenerateInWorkCommand { get; }
     public IAsyncRelayCommand SubmitFollowUpCommand { get; }
     public IRelayCommand CloseFollowUpEditorCommand { get; }

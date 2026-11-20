@@ -1690,7 +1690,10 @@
   <data name="AiPrompt_AutoGenerate" xml:space="preserve"><value>Generate</value></data>
   <data name="AiPrompt_GenerationProvider" xml:space="preserve"><value>Generation method</value></data>
   <data name="AiPrompt_GenerationAlreadyActive" xml:space="preserve"><value>A generation request is already in progress for this draft.</value></data>
-  <data name="AiPrompt_OpenAiConsent" xml:space="preserve"><value>Send the prompt and any referenced images to the OpenAI API to generate a design? This request may incur charges, even if it is cancelled or times out.</value></data>
+  <data name="AiPrompt_OpenAiConsent" xml:space="preserve"><value>Send the prompt and any referenced images to OpenAI to generate a design? This request may incur charges, even if it is cancelled or times out. The response can be retained in OpenAI Platform Logs according to your project's data settings.</value></data>
+  <data name="AiPrompt_OpenAiCopyResponseId" xml:space="preserve"><value>Copy Response ID</value></data>
+  <data name="AiPrompt_OpenAiResponseIdCopied" xml:space="preserve"><value>Response ID copied for lookup in OpenAI Platform Logs.</value></data>
+  <data name="AiPrompt_OpenAiResponseUsage" xml:space="preserve"><value>{0} · Responses usage {1:N0} tokens</value></data>
   <data name="AiPrompt_OpenAiGenerate" xml:space="preserve"><value>Generate with OpenAI API</value></data>
   <data name="AiPrompt_OpenAiGenerating" xml:space="preserve"><value>Generating an image with OpenAI API…</value></data>
   <data name="AiPrompt_OpenAiCancel" xml:space="preserve"><value>Cancel generation</value></data>

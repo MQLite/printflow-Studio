@@ -54,7 +54,8 @@ public sealed class FileAiDesignRequestStore : IAiDesignRequestStore
     { await using var gate = await LockAsync(id, ct); return OperationResult.Ok(await ReadCoreAsync(id, ct)); });
 
     internal Task<OperationResult<AiDesignRequest>> RecordOpenAiResultAsync(WorkDraftReference draft, string prompt,
-        AiDesignCandidate candidate, PrintFlow.Domain.Ids.SessionId sessionId, CancellationToken ct) => Guard(async () =>
+        AiDesignCandidate candidate, PrintFlow.Domain.Ids.SessionId sessionId, OpenAiDesignReceipt receipt,
+        CancellationToken ct) => Guard(async () =>
     {
         Guid id = candidate.File.RequestId;
         await using var gate = await LockAsync(id, ct);
@@ -67,6 +68,7 @@ public sealed class FileAiDesignRequestStore : IAiDesignRequestStore
             RequestId = id,
             WorkspaceIdentity = WorkspaceIdentity,
             Provider = AiDesignProvider.OpenAiApi,
+            OpenAiReceipt = receipt,
             Prompt = new(PromptTemplateService.WorkbenchTemplate, 1, new Dictionary<string, string>(), prompt, [], ""),
             WorkDraft = draft,
             Token = AiDesignTransitions.NewToken(),

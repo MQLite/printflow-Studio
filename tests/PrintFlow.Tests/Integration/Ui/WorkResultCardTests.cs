@@ -40,13 +40,19 @@ public sealed class WorkResultCardTests
         {
             RequestId = api.RequestId,
             Provider = AiDesignProvider.OpenAiApi,
-            ImportedSessionId = SessionId.From(api.RequestId)
+            ImportedSessionId = SessionId.From(api.RequestId),
+            OpenAiReceipt = new("resp_ui_test", "req_ui_test", "ig_ui_test", 100, 200, 300)
         }];
         await vm.AutoGenerateCommand.ExecuteAsync(null);
 
         api.Submitted!.FinalDocument.Parts.OfType<AiTextPart>().ShouldHaveSingleItem().Text.ShouldBe("Draw a floral border.");
         vm.WorkCard!.CanContinue.ShouldBeTrue();
         vm.WorkCard.CanViewWork.ShouldBeFalse();
+        string details = vm.WorkCard.OpenAiResponseDetails.ShouldNotBeNull();
+        details.ShouldContain("resp_ui_test");
+        details.ShouldContain("300");
+        vm.CopyOpenAiResponseIdCommand.Execute(null);
+        fixture.Clipboard.Text.ShouldBe("resp_ui_test");
         vm.GenerationMilestones.ShouldAllBe(step => step.Reached);
     }
 

@@ -23,7 +23,8 @@ public sealed class OpenAiDesignGeneration : IAiDesignApiGeneration, IDisposable
     private const int MaxPromptLength = 32_000;
     private const int MaxPngBytes = 40 * 1024 * 1024;
     private const int MaxPixels = 64_000_000;
-    private const string Endpoint = "https://api.openai.com/v1/images/";
+    private const string Endpoint = "https://api.openai.com/v1/responses";
+    private const string ResponsesModel = "gpt-6.2-sol";
     private readonly FileAiDesignRequestStore _store;
     private readonly VerifiedAiAttachmentReader _attachments;
     private readonly IOpenAiImageCredentials _credentials;
@@ -126,36 +127,54 @@ public sealed class OpenAiDesignGeneration : IAiDesignApiGeneration, IDisposable
         }
     }
 
-    private async Task<OperationResult<byte[]>> RequestImageAsync(Guid draftId, AiPromptExport prompt, string key,
+    private async Task<OperationResult<DesignResponse>> RequestImageAsync(Guid draftId, AiPromptExport prompt, string key,
         CancellationToken ct)
     {
-        bool edit = prompt.RequiredAttachments.Count > 0;
-        using var request = new HttpRequestMessage(HttpMethod.Post, Endpoint + (edit ? "edits" : "generations"));
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", key);
-        if (edit)
+        List<object> inputs = [new { type = "input_text", text = prompt.Text }];
+        foreach (var attachment in prompt.RequiredAttachments)
         {
-            var content = new MultipartFormDataContent();
-            request.Content = content;
-            content.Add(new StringContent(_model), "model");
-            content.Add(new StringContent(prompt.Text), "prompt");
-            content.Add(new StringContent("png"), "output_format");
-            foreach (var attachment in prompt.RequiredAttachments)
+            var opened = await _attachments.OpenAsync(draftId, attachment, ct).ConfigureAwait(false);
+            if (opened.IsFailure)
             {
-                var opened = await _attachments.OpenAsync(draftId, attachment, ct).ConfigureAwait(false);
-                if (opened.IsFailure)
-                {
-                    ct.ThrowIfCancellationRequested();
-                    return Fail<byte[]>(FailureCode.RevisionIntegrityMismatch, "AiPrompt_OpenAiReferenceUnavailable");
-                }
-                var part = new StreamContent(opened.Value.Stream);
-                part.Headers.ContentType = new MediaTypeHeaderValue(attachment.MediaType);
-                content.Add(part, "image[]", attachment.UploadName);
+                ct.ThrowIfCancellationRequested();
+                return Fail<DesignResponse>(FailureCode.RevisionIntegrityMismatch, "AiPrompt_OpenAiReferenceUnavailable");
             }
+            await using var verified = opened.Value;
+            byte[] bytes = new byte[checked((int)attachment.ByteLength)];
+            await verified.Stream.ReadExactlyAsync(bytes, ct).ConfigureAwait(false);
+            // Data URLs have no filename, so identify the image next to its content.
+            inputs.Add(new { type = "input_text", text = $"Reference image: {attachment.UploadName}" });
+            inputs.Add(new
+            {
+                type = "input_image",
+                image_url = $"data:{attachment.MediaType};base64,{Convert.ToBase64String(bytes)}",
+                detail = "auto"
+            });
         }
-        else
+
+        using var request = new HttpRequestMessage(HttpMethod.Post, Endpoint)
         {
-            request.Content = JsonContent.Create(new { model = _model, prompt = prompt.Text, output_format = "png" });
-        }
+            Content = JsonContent.Create(new
+            {
+                model = ResponsesModel,
+                store = true,
+                reasoning = new { effort = "low" },
+                max_tool_calls = 1,
+                tool_choice = new { type = "image_generation" },
+                tools = new[]
+                {
+                    new
+                    {
+                        type = "image_generation",
+                        model = _model,
+                        action = prompt.RequiredAttachments.Count == 0 ? "generate" : "auto",
+                        output_format = "png"
+                    }
+                },
+                input = new[] { new { role = "user", content = inputs } }
+            })
+        };
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", key);
 
         using var response = await _http.SendAsync(request, ct).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode)
@@ -163,28 +182,52 @@ public sealed class OpenAiDesignGeneration : IAiDesignApiGeneration, IDisposable
             string message = response.StatusCode switch
             {
                 HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden => "AiPrompt_OpenAiAccessDenied",
-                HttpStatusCode.TooManyRequests => "ImageProcessing_OpenAiRateOrQuota",
+                HttpStatusCode.TooManyRequests or HttpStatusCode.PaymentRequired => "ImageProcessing_OpenAiRateOrQuota",
                 HttpStatusCode.RequestTimeout or HttpStatusCode.GatewayTimeout => "ImageProcessing_OpenAiTimeout",
                 _ => "AiPrompt_OpenAiRejected"
             };
-            return Fail<byte[]>(FailureCode.AdapterUnavailable, message);
+            return Fail<DesignResponse>(FailureCode.AdapterUnavailable, message);
         }
 
         await using var stream = await response.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
         using var result = await JsonDocument.ParseAsync(stream, cancellationToken: ct).ConfigureAwait(false);
         var root = result.RootElement;
-        if (root.ValueKind != JsonValueKind.Object ||
-            !root.TryGetProperty("data", out var data) || data.ValueKind != JsonValueKind.Array ||
-            data.GetArrayLength() != 1 || data[0].ValueKind != JsonValueKind.Object ||
-            !data[0].TryGetProperty("b64_json", out var encoded) || encoded.ValueKind != JsonValueKind.String ||
+        string? responseId = SafeIdentifier(StringProperty(root, "id"), "resp_", key);
+        if (responseId is null || StringProperty(root, "status") != "completed" ||
+            !root.TryGetProperty("output", out var output) || output.ValueKind != JsonValueKind.Array)
+            return Fail<DesignResponse>(FailureCode.OutputValidationFailed, "AiPrompt_OpenAiInvalidResult");
+
+        var images = output.EnumerateArray().Where(item => StringProperty(item, "type") == "image_generation_call").ToArray();
+        if (images.Length != 1 || StringProperty(images[0], "status") != "completed" ||
+            !images[0].TryGetProperty("result", out var encoded) || encoded.ValueKind != JsonValueKind.String ||
             !encoded.TryGetBytesFromBase64(out var png) || png.Length is <= 0 or > MaxPngBytes)
-            return Fail<byte[]>(FailureCode.OutputValidationFailed, "AiPrompt_OpenAiInvalidResult");
-        return OperationResult.Ok(png);
+            return Fail<DesignResponse>(FailureCode.OutputValidationFailed, "AiPrompt_OpenAiInvalidResult");
+
+        string? requestId = response.Headers.TryGetValues("x-request-id", out var requestIds)
+            ? SafeIdentifier(requestIds.FirstOrDefault(), "req_", key) : null;
+        string? imageCallId = SafeIdentifier(StringProperty(images[0], "id"), "ig_", key);
+        root.TryGetProperty("usage", out var usage);
+        return OperationResult.Ok(new DesignResponse(png, new(responseId, requestId, imageCallId,
+            ReadTokens(usage, "input_tokens"), ReadTokens(usage, "output_tokens"), ReadTokens(usage, "total_tokens"))));
     }
 
-    private async Task<OperationResult<Guid>> ImportAsync(AiAuthoringDraft draft, string prompt, byte[] png,
+    private static string? StringProperty(JsonElement item, string name) =>
+        item.ValueKind == JsonValueKind.Object && item.TryGetProperty(name, out var value) &&
+        value.ValueKind == JsonValueKind.String ? value.GetString() : null;
+
+    private static string? SafeIdentifier(string? id, string prefix, string key) =>
+        id is { Length: <= 128 } && id.Length > prefix.Length && id.StartsWith(prefix, StringComparison.Ordinal) &&
+        id.All(c => char.IsAsciiLetterOrDigit(c) || c is '_' or '-') && !id.Contains(key, StringComparison.Ordinal)
+            ? id : null;
+
+    private static long? ReadTokens(JsonElement usage, string name) =>
+        usage.ValueKind == JsonValueKind.Object && usage.TryGetProperty(name, out var value) &&
+        value.ValueKind == JsonValueKind.Number && value.TryGetInt64(out long count) && count >= 0 ? count : null;
+
+    private async Task<OperationResult<Guid>> ImportAsync(AiAuthoringDraft draft, string prompt, DesignResponse response,
         CancellationToken ct)
     {
+        byte[] png = response.Png;
         Guid requestId = Guid.NewGuid();
         using var staged = AiDesignOwnedStagingFiles.CreateOpenAiResult(_store.WorkspaceRoot, requestId);
         await staged.Output.WriteAsync(png, ct).ConfigureAwait(false);
@@ -207,10 +250,12 @@ public sealed class OpenAiDesignGeneration : IAiDesignApiGeneration, IDisposable
         staged.Release();
         var candidate = new AiDesignCandidate(new(requestId, Path.GetFileName(staged.Path)), image);
         var recorded = await _store.RecordOpenAiResultAsync(new(draft.Id, title), prompt, candidate,
-            session.Value.Id, CancellationToken.None).ConfigureAwait(false);
+            session.Value.Id, response.Receipt, CancellationToken.None).ConfigureAwait(false);
         return recorded.IsSuccess ? OperationResult.Ok(requestId)
             : Fail<Guid>(FailureCode.PersistenceError, "AiPrompt_OpenAiHistoryFailed");
     }
+
+    private sealed record DesignResponse(byte[] Png, OpenAiDesignReceipt Receipt);
 
     private static OperationResult<T> Fail<T>(FailureCode code, string messageKey) =>
         OperationResult.Fail<T>(OperationFailure.Create(code, messageKey, messageKey: messageKey));

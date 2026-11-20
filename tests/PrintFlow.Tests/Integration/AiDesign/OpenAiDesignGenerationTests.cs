@@ -27,7 +27,13 @@ public sealed class OpenAiDesignGenerationTests
         byte[] png = SyntheticImages.Png(20, 12);
         using var transport = new ImageTransport(HttpStatusCode.OK, JsonSerializer.Serialize(new
         {
-            data = new[] { new { b64_json = Convert.ToBase64String(png) } }
+            id = "resp_test",
+            status = "completed",
+            usage = new { input_tokens = 123, output_tokens = 456, total_tokens = 579 },
+            output = new[]
+            {
+                new { id = "ig_test", type = "image_generation_call", status = "completed", result = Convert.ToBase64String(png) }
+            }
         }));
         using var generation = new OpenAiDesignGeneration(harness.Workspace.Root, new Credentials("test-key"),
             "test-image-model", harness.FileInspector, harness.CreateService(), transport);
@@ -36,11 +42,25 @@ public sealed class OpenAiDesignGenerationTests
 
         generated.IsSuccess.ShouldBeTrue(generated.IsFailure ? generated.Failure.TechnicalDetail : null);
         transport.Calls.ShouldBe(1);
-        transport.Path.ShouldBe(withReference ? "/v1/images/edits" : "/v1/images/generations");
+        transport.Path.ShouldBe("/v1/responses");
         transport.Key.ShouldBe("test-key");
-        transport.Model.ShouldBe("test-image-model");
-        transport.Prompt!.ShouldContain("Create a blue floral border");
-        transport.Reference.ShouldBe(reference);
+        var body = transport.Json;
+        body.GetProperty("model").GetString().ShouldBe("gpt-6.2-sol");
+        body.GetProperty("store").GetBoolean().ShouldBeTrue();
+        body.GetProperty("max_tool_calls").GetInt32().ShouldBe(1);
+        body.GetProperty("reasoning").GetProperty("effort").GetString().ShouldBe("low");
+        body.GetProperty("tool_choice").GetProperty("type").GetString().ShouldBe("image_generation");
+        var tool = body.GetProperty("tools").EnumerateArray().ShouldHaveSingleItem();
+        tool.GetProperty("model").GetString().ShouldBe("test-image-model");
+        tool.GetProperty("action").GetString().ShouldBe(withReference ? "auto" : "generate");
+        var input = body.GetProperty("input")[0].GetProperty("content");
+        input[0].GetProperty("text").GetString()!.ShouldContain("Create a blue floral border");
+        input.GetArrayLength().ShouldBe(withReference ? 3 : 1);
+        if (reference is not null)
+        {
+            input[1].GetProperty("text").GetString()!.ShouldContain("attachment-01.png");
+            input[2].GetProperty("image_url").GetString().ShouldBe("data:image/png;base64," + Convert.ToBase64String(reference));
+        }
 
         var store = new FileAiDesignRequestStore(harness.Workspace.Root);
         var request = (await store.ReadAsync(generated.Value, default)).Value;
@@ -48,6 +68,7 @@ public sealed class OpenAiDesignGenerationTests
         request.Provider.ShouldBe(AiDesignProvider.OpenAiApi);
         request.WorkDraft!.DraftId.ShouldBe(draft.Id);
         request.WorkConversationId.ShouldBeNull();
+        request.OpenAiReceipt.ShouldBe(new OpenAiDesignReceipt("resp_test", "req_test", "ig_test", 123, 456, 579));
         var stored = (await harness.Repository.LoadAsync(request.ImportedSessionId!.Value, default)).Value!;
         stored.Revisions.ShouldHaveSingleItem().Sha256.ShouldBe(request.Candidate!.Facts.Sha256);
     }
@@ -61,7 +82,8 @@ public sealed class OpenAiDesignGenerationTests
     {
         using var harness = new SessionServiceHarness();
         var (draft, _) = await CreateDraftAsync(harness, false);
-        using var transport = new ImageTransport(status, """{"data":[{"b64_json":"bm90IGEgcG5n"}]}""");
+        using var transport = new ImageTransport(status,
+            """{"id":"resp_test","status":"completed","output":[{"type":"image_generation_call","id":"ig_test","status":"completed","result":"bm90IGEgcG5n"}]}""");
         using var generation = new OpenAiDesignGeneration(harness.Workspace.Root, new Credentials(key),
             "test-image-model", harness.FileInspector, harness.CreateService(), transport);
 
@@ -105,32 +127,21 @@ public sealed class OpenAiDesignGenerationTests
         public int Calls { get; private set; }
         public string? Path { get; private set; }
         public string? Key { get; private set; }
-        public string? Model { get; private set; }
-        public string? Prompt { get; private set; }
-        public byte[]? Reference { get; private set; }
+        public JsonElement Json { get; private set; }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
         {
             Calls++;
             Path = request.RequestUri!.AbsolutePath;
             Key = request.Headers.Authorization!.Parameter;
-            if (request.Content is MultipartFormDataContent multipart)
-            {
-                foreach (var part in multipart)
-                    switch (part.Headers.ContentDisposition!.Name!.Trim('"'))
-                    {
-                        case "prompt": Prompt = await part.ReadAsStringAsync(ct); break;
-                        case "model": Model = await part.ReadAsStringAsync(ct); break;
-                        case "image[]": Reference = await part.ReadAsByteArrayAsync(ct); break;
-                    }
-            }
-            else
+            if (request.Content is not MultipartFormDataContent)
             {
                 using var json = JsonDocument.Parse(await request.Content!.ReadAsStringAsync(ct));
-                Model = json.RootElement.GetProperty("model").GetString();
-                Prompt = json.RootElement.GetProperty("prompt").GetString();
+                Json = json.RootElement.Clone();
             }
-            return new HttpResponseMessage(status) { Content = new StringContent(body) };
+            var response = new HttpResponseMessage(status) { Content = new StringContent(body) };
+            response.Headers.Add("x-request-id", "req_test");
+            return response;
         }
     }
 }

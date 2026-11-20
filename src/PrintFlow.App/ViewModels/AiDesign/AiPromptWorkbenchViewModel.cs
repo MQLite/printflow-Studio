@@ -146,6 +146,7 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
         this.workLauncher = workLauncher;
         OpenWorkResultPreviewCommand = new AsyncRelayCommand(OpenWorkResultPreviewAsync);
         CloseWorkResultPreviewCommand = new RelayCommand(CloseWorkPreview);
+        CopyOpenAiResponseIdCommand = new RelayCommand(CopyOpenAiResponseId);
         RegenerateInWorkCommand = new AsyncRelayCommand(RegenerateInWorkAsync);
         SubmitFollowUpCommand = new AsyncRelayCommand(SubmitFollowUpAsync, CanSubmitFollowUp);
         CloseFollowUpEditorCommand = new RelayCommand(CloseFollowUpEditor);

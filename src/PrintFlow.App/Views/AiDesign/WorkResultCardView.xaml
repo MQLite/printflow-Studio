@@ -34,6 +34,12 @@
      <TextBlock Text="{Binding WorkCard.Problem}" TextWrapping="Wrap" Foreground="#84251C"/>
     </StackPanel>
    </DockPanel>
+   <DockPanel Margin="0,6,0,0"
+              Visibility="{Binding WorkCard.HasOpenAiReceipt, Converter={StaticResource Visible}, FallbackValue=Collapsed}">
+    <Button DockPanel.Dock="Right" Content="{Binding CopyOpenAiResponseIdLabel}" Command="{Binding CopyOpenAiResponseIdCommand}"
+            Padding="8,3" Margin="8,0,0,0" AutomationProperties.AutomationId="AiPrompt.CopyOpenAiResponseId"/>
+    <TextBlock Text="{Binding WorkCard.OpenAiResponseDetails}" TextWrapping="Wrap" VerticalAlignment="Center" FontSize="12"/>
+   </DockPanel>
    <ItemsControl ItemsSource="{Binding GenerationMilestones}" Margin="0,6,0,0">
     <ItemsControl.ItemsPanel><ItemsPanelTemplate><UniformGrid Rows="1"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
     <ItemsControl.ItemTemplate>
