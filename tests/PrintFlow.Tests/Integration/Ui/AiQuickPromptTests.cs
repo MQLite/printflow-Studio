@@ -21,6 +21,77 @@ namespace PrintFlow.Tests.Integration.Ui;
 [Collection(SqliteCollection.Name)]
 public sealed class AiQuickPromptTests
 {
+    [Fact]
+    public async Task Added_reference_needs_a_selected_image_and_purpose()
+    {
+        using var f = new PromptWorkbenchFixture();
+        using var source = new TempWorkspace();
+        await f.Vm.OpenAsync(null, default);
+        var original = f.Vm.Draft!;
+
+        f.Vm.ReferenceRole = "构图参考";
+        f.Vm.ChooseReferenceImageCommand.Execute(null);
+        f.Vm.ReferenceFileName.ShouldBeNull();
+        f.Vm.AddReferenceCommand.CanExecute(null).ShouldBeFalse();
+
+        string path = PromptWorkbenchFixture.Png(source.Root, 3);
+        f.Picker.Pick = () => path;
+        f.Vm.ReferenceRole = " ";
+        f.Vm.ChooseReferenceImageCommand.Execute(null);
+        f.Vm.ReferenceFileName.ShouldBe(Path.GetFileName(path));
+        f.Vm.AddReferenceCommand.CanExecute(null).ShouldBeFalse();
+        f.Vm.Draft!.Revision.ShouldBe(original.Revision);
+        WpfRendering.RenderExpectingNoBindingErrors(() => new AiPromptWorkbenchView { DataContext = f.Vm },
+            new Size(1000, 700), tree =>
+            {
+                var choose = tree.OfType<Button>().Single(x =>
+                    AutomationProperties.GetAutomationId(x) == "AiPrompt.ChooseReferenceImage");
+                var purpose = tree.OfType<TextBox>().Single(x =>
+                    AutomationProperties.GetAutomationId(x) == "AiPrompt.ReferencePurpose");
+                var insert = tree.OfType<Button>().Single(x =>
+                    AutomationProperties.GetAutomationId(x) == "AiPrompt.AddReference");
+                choose.IsEnabled.ShouldBeTrue();
+                purpose.ActualHeight.ShouldBeGreaterThan(0);
+                AutomationProperties.GetLabeledBy(purpose).ShouldBeOfType<TextBlock>().Text.ShouldNotBeNullOrWhiteSpace();
+                insert.IsEnabled.ShouldBeFalse();
+                return true;
+            });
+
+        f.Vm.ReferenceRole = " 构图参考 ";
+        f.Vm.AddReferenceCommand.CanExecute(null).ShouldBeTrue();
+        await f.Vm.AddReferenceCommand.ExecuteAsync(null);
+
+        var saved = (await f.Module.ReadAsync(original.Id, default)).Value;
+        saved.Revision.ShouldBe(original.Revision + 1);
+        var added = f.Module.Export(saved).RequiredAttachments.ShouldHaveSingleItem();
+        added.Purpose.ShouldBe("构图参考");
+        added.OriginalName.ShouldBe(Path.GetFileName(path));
+        f.Vm.ReferenceFileName.ShouldBeNull();
+        f.Vm.ReferenceRole.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task Unreadable_new_reference_leaves_the_saved_prompt_intact()
+    {
+        using var f = new PromptWorkbenchFixture();
+        using var source = new TempWorkspace();
+        await f.Vm.OpenAsync(null, default);
+        var original = f.Vm.Draft!;
+        string path = Path.Combine(source.Root, "invalid.png");
+        await File.WriteAllTextAsync(path, "invalid image");
+        f.Picker.Pick = () => path;
+        f.Vm.ChooseReferenceImageCommand.Execute(null);
+        f.Vm.ReferenceRole = "Reference";
+
+        await f.Vm.AddReferenceCommand.ExecuteAsync(null);
+
+        var saved = (await f.Module.ReadAsync(original.Id, default)).Value;
+        saved.Revision.ShouldBe(original.Revision);
+        saved.FinalDocument.Parts.ShouldBe(original.FinalDocument.Parts);
+        f.Vm.Error.ShouldNotBeNullOrWhiteSpace();
+    }
+
+
     [Theory]
     [InlineData(AiProductKind.MemorialTshirt, "设计区域：280×390mm")]
     [InlineData(AiProductKind.MemorialBadge, "画布外圆86mm，关键内容安全区72mm")]

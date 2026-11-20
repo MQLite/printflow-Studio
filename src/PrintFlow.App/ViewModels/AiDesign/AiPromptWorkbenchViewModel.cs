@@ -81,7 +81,18 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
     public AiPromptPhotoSlot? ExpandedPhoto { get; private set; }
     public AiTemplateEditorViewModel? TemplateEditor { get => templateEditor; private set => SetProperty(ref templateEditor, value); }
     public bool IsChangePending { get => changePending; private set => SetProperty(ref changePending, value); }
-    public bool IsBusy { get => busy; private set { SetProperty(ref busy, value); OnPropertyChanged(nameof(CanEdit)); NotifyWorkActions(); NotifyMemorial(); } }
+    public bool IsBusy
+    {
+        get => busy;
+        private set
+        {
+            SetProperty(ref busy, value);
+            OnPropertyChanged(nameof(CanEdit));
+            AddReferenceCommand.NotifyCanExecuteChanged();
+            NotifyWorkActions();
+            NotifyMemorial();
+        }
+    }
     public bool CanEdit => !IsBusy && !isClosing;
     public bool HasUnsavedChanges => Draft is not null && (!Document.Parts.SequenceEqual(Draft.FinalDocument.Parts) ||
         Fields.Any(x => !x.IsReadOnly && x.Value != Draft.Fields.GetValueOrDefault(x.Key, x.InitialValue)) || HasUnsavedPreservationChanges || memorialLayoutDirty);
@@ -99,7 +110,6 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
         }
     }
     public IAsyncRelayCommand SaveInstanceTemplateCommand { get; }
-    public string ReferenceRole { get; set; } = "";
     public IAsyncRelayCommand ComposeCommand { get; }
     public IAsyncRelayCommand CopyCommand { get; }
     public IAsyncRelayCommand AutoGenerateCommand { get; }
@@ -113,6 +123,7 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
     public IAsyncRelayCommand<AiAuthoringDraft> RestoreHistoryCommand { get; }
     public IAsyncRelayCommand<AiPromptPhotoSlot> RemovePhotoCommand { get; }
     public IAsyncRelayCommand<AiPromptPhotoSlot> ReusePhotoCommand { get; }
+    public IRelayCommand ChooseReferenceImageCommand { get; }
     public IAsyncRelayCommand AddReferenceCommand { get; }
     public IRelayCommand<AiPromptPhotoSlot> ExpandPhotoCommand { get; }
     public IRelayCommand ClosePhotoCommand { get; }
@@ -177,11 +188,8 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
         { if (value?.Asset is { } asset) await EditAsync(new AiAuthoringEdit.RemoveImage(asset.Id)); });
         ReusePhotoCommand = new AsyncRelayCommand<AiPromptPhotoSlot>(async value =>
         { if (value?.SelectedAsset is { } asset) await EditAsync(new AiAuthoringEdit.BindExistingImage(value.SlotId, asset.Id)); });
-        AddReferenceCommand = new AsyncRelayCommand(async () =>
-        {
-            if (string.IsNullOrWhiteSpace(ReferenceRole)) return;
-            await EditAsync(new AiAuthoringEdit.InsertImageReference(Guid.NewGuid(), new("extra-" + Guid.NewGuid().ToString("N"), ReferenceRole, false), null));
-        });
+        ChooseReferenceImageCommand = new RelayCommand(ChooseReferenceImage);
+        AddReferenceCommand = new AsyncRelayCommand(AddReferenceAsync, CanAddReference);
         ExpandPhotoCommand = new RelayCommand<AiPromptPhotoSlot>(value => { ExpandedPhoto = value; OnPropertyChanged(nameof(ExpandedPhoto)); });
         ClosePhotoCommand = new RelayCommand(() => { ExpandedPhoto = null; OnPropertyChanged(nameof(ExpandedPhoto)); });
         CloseTemplateCommand = new AsyncRelayCommand(async () =>
@@ -213,6 +221,7 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
     {
         active = false; epoch++; ClearPending();
         UnsubscribeFromWorkResults();
+        ResetPendingReference();
         if (CanCancelOpenAiGeneration) CancelOpenAiGenerationCommand.Execute(null);
         ResetWorkCard();
         CancelMemorialTaskCommand.Execute(null);
@@ -310,7 +319,8 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
         long capturedEpoch = epoch;
         if (Draft?.Id != value.Id)
         {
-            ReferenceRole = ""; OnPropertyChanged(nameof(ReferenceRole)); Status = null;
+            ResetPendingReference();
+            Status = null;
         }
         if (Draft?.Id != value.Id || Draft.Template != value.Template) editingTemplate = null;
         bool changedDraft = Draft?.Id != value.Id;

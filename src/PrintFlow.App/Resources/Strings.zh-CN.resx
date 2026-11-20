@@ -1499,7 +1499,9 @@
   <data name="AiPrompt_Expand" xml:space="preserve"><value>放大</value></data>
   <data name="AiPrompt_Reuse" xml:space="preserve"><value>使用所选草稿图片</value></data>
   <data name="AiPrompt_AddReference" xml:space="preserve"><value>插入图片引用</value></data>
-  <data name="AiPrompt_ReferenceRole" xml:space="preserve"><value>新增图片引用的用途</value></data>
+  <data name="AiPrompt_ReferenceRole" xml:space="preserve"><value>用途</value></data>
+  <data name="AiPrompt_ChooseReferenceImage" xml:space="preserve"><value>选择参考图…</value></data>
+  <data name="AiPrompt_ReferenceRoleHint" xml:space="preserve"><value>请说明这张图的用途，例如构图参考、配色参考或人物照片。</value></data>
   <data name="AiPrompt_Manifest" xml:space="preserve"><value>本次提示词需另外提供的文件</value></data>
   <data name="AiPrompt_ManifestNotice" xml:space="preserve"><value>复制提示词时会使用下方的上传文件名。缺少的图片会标为待补充。</value></data>
   <data name="AiPrompt_NoDate" xml:space="preserve"><value>日期留空即不显示该行，请保留姓名与日期原文。</value></data>

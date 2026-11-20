@@ -153,6 +153,12 @@ public sealed partial class AiAuthoringModule(IAiAuthoringDraftStore store, AiTe
                     break;
                 case AiAuthoringEdit.InsertImageReference insertion:
                     next = InsertReference(draft, insertion);
+                    if (insertion.Selection is { } file)
+                    {
+                        var inserted = await BindNewImageAsync(next, new(insertion.Slot.SlotId, file), ct);
+                        if (inserted.IsFailure) return inserted;
+                        next = inserted.Value;
+                    }
                     break;
                 case AiAuthoringEdit.RemoveReference removal:
                     if (!draft.FinalDocument.Parts.OfType<AiImagePart>().Any(x => x.PartId == removal.PartId)) return Fail("Image reference is missing.");
@@ -174,7 +180,8 @@ public sealed partial class AiAuthoringModule(IAiAuthoringDraftStore store, AiTe
             var active = ActiveAssets(next);
             if (active.Count > AiDesignAttachmentLimits.MaximumFiles || active.Any(x => x.ByteLength > AiDesignAttachmentLimits.ImageBytes || !IsImageMetadata(x)) ||
                 active.Sum(x => x.ByteLength) > AiDesignAttachmentLimits.TotalBytes) return Fail("Active image attachment limit exceeded.");
-            if (edit is not (AiAuthoringEdit.BindImage or AiAuthoringEdit.BindExistingImage))
+            if (edit is not (AiAuthoringEdit.BindImage or AiAuthoringEdit.BindExistingImage or
+                AiAuthoringEdit.InsertImageReference { Selection: not null }))
             {
                 var previous = ActiveAssets(draft).Select(x => x.Id).ToHashSet();
                 var activated = active.Where(x => !previous.Contains(x.Id)).ToArray();

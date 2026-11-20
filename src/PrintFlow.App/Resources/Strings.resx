@@ -1509,7 +1509,9 @@
   <data name="AiPrompt_Expand" xml:space="preserve"><value>Enlarge</value></data>
   <data name="AiPrompt_Reuse" xml:space="preserve"><value>Use selected saved image</value></data>
   <data name="AiPrompt_AddReference" xml:space="preserve"><value>Insert image reference</value></data>
-  <data name="AiPrompt_ReferenceRole" xml:space="preserve"><value>Role for new image reference</value></data>
+  <data name="AiPrompt_ReferenceRole" xml:space="preserve"><value>Purpose</value></data>
+  <data name="AiPrompt_ChooseReferenceImage" xml:space="preserve"><value>Choose reference image…</value></data>
+  <data name="AiPrompt_ReferenceRoleHint" xml:space="preserve"><value>Describe how to use this image, such as composition, colour, or a portrait reference.</value></data>
   <data name="AiPrompt_Manifest" xml:space="preserve"><value>Files to provide with this prompt</value></data>
   <data name="AiPrompt_ManifestNotice" xml:space="preserve"><value>Copied prompts use the upload names below. Missing photos are marked as pending.</value></data>
   <data name="AiPrompt_NoDate" xml:space="preserve"><value>Leave the date empty to omit that line. Preserve the original spelling and date text.</value></data>

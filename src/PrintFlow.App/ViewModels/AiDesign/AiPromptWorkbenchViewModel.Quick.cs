@@ -1,3 +1,4 @@
+using System.IO;
 using System.Runtime.InteropServices;
 using PrintFlow.App.Resources;
 using PrintFlow.Domain.AiDesign.Authoring;
@@ -8,6 +9,68 @@ namespace PrintFlow.App.ViewModels.AiDesign;
 
 public sealed partial class AiPromptWorkbenchViewModel
 {
+    private const string ImageFileFilter = "Images|*.png;*.jpg;*.jpeg;*.jfif;*.webp";
+    private string? referencePath;
+    private string referenceRole = "";
+
+    public string? ReferenceFileName => Path.GetFileName(referencePath);
+
+    public string ReferenceRole
+    {
+        get => referenceRole;
+        set
+        {
+            if (SetProperty(ref referenceRole, value))
+                AddReferenceCommand.NotifyCanExecuteChanged();
+        }
+    }
+
+    private void ChooseReferenceImage()
+    {
+        if (!active || !CanEdit || Draft is null) return;
+        long capturedEpoch = epoch;
+        string? path = picker.PickSingleFile(Strings.AiPrompt_ChooseReferenceImage, ImageFileFilter);
+        if (path is null || !IsCurrent(capturedEpoch)) return;
+        referencePath = path;
+        OnPropertyChanged(nameof(ReferenceFileName));
+        AddReferenceCommand.NotifyCanExecuteChanged();
+    }
+
+    private bool CanAddReference() => active && CanEdit && Draft is not null &&
+        referencePath is not null && !string.IsNullOrWhiteSpace(ReferenceRole);
+
+    private Task AddReferenceAsync()
+    {
+        if (!CanAddReference() || referencePath is not { } path) return Task.CompletedTask;
+        long capturedEpoch = epoch;
+        string purpose = ReferenceRole.Trim();
+
+        return RunAsync(async () =>
+        {
+            if (!IsCurrent(capturedEpoch) || (await FlushCoreAsync(default, saveLayout: false)).IsFailure) return;
+            long generation = editGeneration;
+            var slot = new AiReferenceSlot("extra-" + Guid.NewGuid().ToString("N"), purpose, false);
+            var edit = new AiAuthoringEdit.InsertImageReference(Guid.NewGuid(), slot, null)
+            {
+                Selection = new(path, purpose)
+            };
+            var result = await ApplyCoreAsync(edit, default);
+            if (result.IsSuccess && IsCurrent(capturedEpoch) && generation == editGeneration)
+            {
+                ResetPendingReference();
+                await PresentAsync(result.Value, default);
+            }
+        }, default);
+    }
+
+    private void ResetPendingReference()
+    {
+        referencePath = null;
+        ReferenceRole = "";
+        OnPropertyChanged(nameof(ReferenceFileName));
+        AddReferenceCommand.NotifyCanExecuteChanged();
+    }
+
     private async Task ComposeAsync(bool preserveManual, CancellationToken ct) => await RunAsync(async () =>
     {
         if ((await FlushCoreAsync(ct, saveLayout: false)).IsFailure) return;
@@ -32,7 +95,7 @@ public sealed partial class AiPromptWorkbenchViewModel
         if (slotId is null || (await FlushAsync(default, saveLayout: false)).IsFailure || Draft is null) return;
         var selectedDraft = Draft; long capturedEpoch = epoch, generation = editGeneration;
         if (!selectedDraft.Slots.Any(x => x.SlotId == slotId) || !selectedDraft.FinalDocument.Parts.OfType<AiImagePart>().Any(x => x.SlotId == slotId)) return;
-        string? path = picker.PickSingleFile(Strings.AiPrompt_ChoosePhoto, "Images|*.png;*.jpg;*.jpeg;*.jfif;*.webp");
+        string? path = picker.PickSingleFile(Strings.AiPrompt_ChoosePhoto, ImageFileFilter);
         if (path is null) return;
         await RunAsync(async () =>
         {

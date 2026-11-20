@@ -77,6 +77,8 @@ public static class AiPromptLabels
     public static string AiPrompt_Reuse => Strings.AiPrompt_Reuse;
     public static string AiPrompt_AddReference => Strings.AiPrompt_AddReference;
     public static string AiPrompt_ReferenceRole => Strings.AiPrompt_ReferenceRole;
+    public static string AiPrompt_ChooseReferenceImage => Strings.AiPrompt_ChooseReferenceImage;
+    public static string AiPrompt_ReferenceRoleHint => Strings.AiPrompt_ReferenceRoleHint;
     public static string AiPrompt_Manifest => Strings.AiPrompt_Manifest;
     public static string AiPrompt_ManifestNotice => Strings.AiPrompt_ManifestNotice;
     public static string AiPrompt_NoDate => Strings.AiPrompt_NoDate;

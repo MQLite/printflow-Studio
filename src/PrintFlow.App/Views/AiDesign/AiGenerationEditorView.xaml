@@ -161,6 +161,29 @@
         Command="{Binding DataContext.PickSlotImageCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
       </DataTemplate></ItemsControl.ItemTemplate>
      </ItemsControl>
+     <Button Content="{x:Static r:AiPromptLabels.AiPrompt_ChooseReferenceImage}"
+             Command="{Binding ChooseReferenceImageCommand}" HorizontalAlignment="Left" Padding="8,4"
+             Margin="0,4,0,0" AutomationProperties.AutomationId="AiPrompt.ChooseReferenceImage"/>
+     <StackPanel Margin="0,8,0,8">
+      <StackPanel.Style>
+       <Style TargetType="StackPanel">
+        <Style.Triggers>
+         <DataTrigger Binding="{Binding ReferenceFileName}" Value="{x:Null}">
+          <Setter Property="Visibility" Value="Collapsed"/>
+         </DataTrigger>
+        </Style.Triggers>
+       </Style>
+      </StackPanel.Style>
+      <TextBlock Text="{Binding ReferenceFileName}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"
+                 AutomationProperties.LiveSetting="Polite"/>
+      <TextBlock x:Name="ReferencePurposeLabel" Text="{x:Static r:AiPromptLabels.AiPrompt_ReferenceRole}" Margin="0,6,0,0"/>
+      <TextBlock Text="{x:Static r:AiPromptLabels.AiPrompt_ReferenceRoleHint}" TextWrapping="Wrap" FontSize="12"/>
+      <TextBox Text="{Binding ReferenceRole, UpdateSourceTrigger=PropertyChanged}" Margin="0,4,0,4"
+               AutomationProperties.LabeledBy="{Binding ElementName=ReferencePurposeLabel}"
+               AutomationProperties.AutomationId="AiPrompt.ReferencePurpose"/>
+      <Button Content="{x:Static r:AiPromptLabels.AiPrompt_AddReference}" Command="{Binding AddReferenceCommand}"
+              HorizontalAlignment="Left" Padding="8,4" AutomationProperties.AutomationId="AiPrompt.AddReference"/>
+     </StackPanel>
      <Expander Header="{x:Static r:AiPromptLabels.AiPrompt_ReferenceTools}" AutomationProperties.AutomationId="AiPrompt.ReferenceTools">
       <ScrollViewer MaxHeight="215" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
        <StackPanel>
@@ -180,7 +203,6 @@
           </StackPanel>
          </Border>
         </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
-        <Expander Header="{x:Static r:AiPromptLabels.AiPrompt_AddReference}"><StackPanel><TextBox Text="{Binding ReferenceRole, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="{x:Static r:AiPromptLabels.AiPrompt_ReferenceRole}"/><Button Content="{x:Static r:AiPromptLabels.AiPrompt_AddReference}" Command="{Binding AddReferenceCommand}"/></StackPanel></Expander>
         <ItemsControl ItemsSource="{Binding AttachmentManifest}"><ItemsControl.ItemTemplate><DataTemplate><TextBlock TextWrapping="Wrap"><Run Text="{Binding UploadName}"/><Run Text=" · "/><Run Text="{Binding Purpose}"/></TextBlock></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
        </StackPanel>
       </ScrollViewer>

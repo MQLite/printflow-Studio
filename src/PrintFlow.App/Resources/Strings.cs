@@ -127,6 +127,8 @@ internal static class Strings
     internal static string AiPrompt_Reuse => Get(nameof(AiPrompt_Reuse));
     internal static string AiPrompt_AddReference => Get(nameof(AiPrompt_AddReference));
     internal static string AiPrompt_ReferenceRole => Get(nameof(AiPrompt_ReferenceRole));
+    internal static string AiPrompt_ChooseReferenceImage => Get(nameof(AiPrompt_ChooseReferenceImage));
+    internal static string AiPrompt_ReferenceRoleHint => Get(nameof(AiPrompt_ReferenceRoleHint));
     internal static string AiPrompt_Manifest => Get(nameof(AiPrompt_Manifest));
     internal static string AiPrompt_ManifestNotice => Get(nameof(AiPrompt_ManifestNotice));
     internal static string AiPrompt_NoDate => Get(nameof(AiPrompt_NoDate));
