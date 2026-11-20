@@ -20,6 +20,37 @@ namespace PrintFlow.Tests.Integration.Ui;
 public sealed class WorkResultCardTests
 {
     [Fact]
+    public async Task Failed_new_generation_keeps_previous_imported_result_available()
+    {
+        var submission = new PausedSubmission();
+        var query = new TestQuery();
+        var tracker = new WorkTaskTracker();
+        using var fixture = new PromptWorkbenchFixture(tasks: query, tracker: tracker, submission: submission);
+        var vm = fixture.Vm;
+        await vm.OpenAsync(null, default);
+        var previous = TaskFor(vm.Draft!.Id, WorkTaskStage.Imported) with
+        {
+            ImportedSessionId = SessionId.From(Guid.NewGuid()), WorkConversationId = Guid.NewGuid()
+        };
+        query.Items = [previous];
+        tracker.RequestChanged(previous.RequestId);
+        await vm.WorkCardRefresh;
+        vm.WorkCard!.CanContinue.ShouldBeTrue();
+        var generation = vm.AutoGenerateCommand.ExecuteAsync(null);
+        await submission.Started.Task.WaitAsync(TimeSpan.FromSeconds(10));
+        var failed = TaskFor(vm.Draft.Id, WorkTaskStage.NeedsAttention);
+        query.Items = [previous, failed];
+        submission.Finish.SetResult(OperationResult.Fail<AiDesignWorkSubmission>(FailureCode.AdapterUnavailable, "WorkModeUnavailable"));
+        await generation.WaitAsync(TimeSpan.FromSeconds(10));
+        tracker.RequestChanged(failed.RequestId);
+        await vm.WorkCardRefresh;
+
+        vm.Error.ShouldNotBeNullOrEmpty();
+        vm.WorkCard!.Snapshot.ShouldBe(previous);
+        vm.WorkCard.CanContinue.ShouldBeTrue();
+    }
+
+    [Fact]
     public async Task Generate_expands_progress_before_receipt_and_tracks_observed_stages()
     {
         var submission = new PausedSubmission();

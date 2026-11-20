@@ -120,7 +120,7 @@ public sealed class ArtefactPreviewService : IArtefactPreviewService
     {
         var loaded = await _repository.LoadAsync(sessionId, cancellationToken);
         if (loaded.IsFailure) return OperationResult.Fail<ImagePreview>(loaded.Failure);
-        if (loaded.Value is not { } aggregate || ThumbnailArtefactOf(aggregate) is not { } revision)
+        if (loaded.Value?.Revisions.FirstOrDefault(candidate => candidate.IsRoot) is not { RetentionReleasedAtUtc: null } revision)
             return OperationResult.Fail<ImagePreview>(FailureCode.PreconditionNotMet, "Imported original is unavailable.");
 
         var decoded = await _decoder.DecodeOriginalPreviewAsync(revision.File, revision.Facts.Format, cancellationToken);

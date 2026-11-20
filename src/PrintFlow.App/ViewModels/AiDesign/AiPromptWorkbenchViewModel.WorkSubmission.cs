@@ -68,6 +68,7 @@ public sealed partial class AiPromptWorkbenchViewModel
     {
         if (!active || Draft is null || IsWaitingForWorkResult || isLoadingWorkCard || workCardUnavailable) return;
         long submittingEpoch = epoch;
+        var previousResult = WorkCard is { CanContinue: true } imported ? imported : null;
         generationStarted = true;
         submittingGeneration = true;
         generationFeedback = Strings.Resolve("AiPrompt_WorkConnecting");
@@ -80,7 +81,15 @@ public sealed partial class AiPromptWorkbenchViewModel
             if (IsCurrent(submittingEpoch))
             {
                 submittingGeneration = false;
-                if (Error is not null) generationFeedback = Error;
+                if (Error is not null)
+                {
+                    generationFeedback = Error;
+                    if (submittedWorkRequest is null && previousResult is not null)
+                    {
+                        submittedWorkRequest = previousResult.Snapshot.RequestId;
+                        WorkCard = previousResult;
+                    }
+                }
                 NotifyGenerationProgress();
             }
         }

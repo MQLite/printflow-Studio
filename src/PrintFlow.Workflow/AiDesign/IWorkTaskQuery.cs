@@ -22,7 +22,6 @@ public sealed record WorkTaskSnapshot(Guid RequestId, Guid AttemptId, long State
 public interface IWorkConversationLauncher
 {
     bool Open(Guid conversationId);
-    Task<bool> OpenInWorkProfileAsync(Guid conversationId, CancellationToken ct) => Task.FromResult(Open(conversationId));
 }
 
 public interface IWorkTaskQuery

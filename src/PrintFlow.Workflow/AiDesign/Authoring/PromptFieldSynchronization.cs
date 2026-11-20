@@ -130,9 +130,9 @@ public static partial class PromptFieldSynchronization
         {
             string oldText = string.Concat(oldLines[oldFrom..oldTo]);
             string newText = string.Concat(newLines[newFrom..newTo]);
-            int preceding = oldFrom > 0 ? FindLine(edited, oldLines[oldFrom - 1], 0) : -1;
-            int start = preceding < 0 ? 0 : preceding + oldLines[oldFrom - 1].Length;
-            int next = oldTo < oldLines.Length ? FindLine(edited, oldLines[oldTo], start) : -1;
+            int preceding = FindAnchor(edited, oldLines.Take(oldFrom).Reverse(), 0, endOfLine: true);
+            int start = Math.Max(0, preceding);
+            int next = FindAnchor(edited, oldLines.Skip(oldTo), start, endOfLine: false);
             int limit = next < 0 ? edited.Length : next;
             int match = oldText.Length == 0 ? -1 : FindLine(edited, oldText, start);
             if (match >= 0 && match + oldText.Length <= limit && EndsAtLineBoundary(edited, oldText, match))
@@ -148,6 +148,22 @@ public static partial class PromptFieldSynchronization
             {
                 edited = edited.Remove(match, oldBody.Length).Insert(match, newText.TrimEnd('\r', '\n'));
                 continue;
+            }
+
+            if (oldTo - oldFrom > 1)
+            {
+                var lines = FindChangedLines(edited, oldLines[oldFrom..oldTo], start, limit);
+                bool replaceInPlace = lines.Count == oldTo - oldFrom && lines.Count == newTo - newFrom;
+                for (int i = lines.Count - 1; i >= 0; i--)
+                {
+                    var (index, length, wholeLine) = lines[i];
+                    string replacement = replaceInPlace ? newLines[newFrom + i] : "";
+                    if (!wholeLine) replacement = replacement.TrimEnd('\r', '\n');
+                    edited = edited.Remove(index, length).Insert(index, replacement);
+                    if (next >= 0) next += replacement.Length - length;
+                    limit += replacement.Length - length;
+                }
+                if (replaceInPlace) continue;
             }
 
             if (newText.Length == 0) continue;
@@ -167,6 +183,55 @@ public static partial class PromptFieldSynchronization
             edited = edited.Insert(insertAt, newText);
         }
         return edited;
+    }
+
+    private static List<(int Index, int Length, bool WholeLine)> FindChangedLines(
+        string edited, string[] oldLines, int start, int limit)
+    {
+        var matches = new List<(int, int, bool)>();
+        for (int i = 0; i < oldLines.Length; i++)
+        {
+            string line = oldLines[i];
+            int next = i + 1 < oldLines.Length ? FindUniqueLine(edited, oldLines[i + 1], start, limit) : -1;
+            int lineLimit = next > start ? next : limit;
+            int index = FindUniqueLine(edited, line, start, lineLimit);
+            if (index >= 0)
+            {
+                matches.Add((index, line.Length, true));
+                start = index + line.Length;
+                continue;
+            }
+
+            string body = line.TrimEnd('\r', '\n');
+            if (body.Length == 0 || (index = FindUniqueInline(edited, body, start, lineLimit)) < 0) continue;
+            matches.Add((index, body.Length, false));
+            start = index + body.Length;
+        }
+        return matches;
+    }
+
+    private static int FindAnchor(string edited, IEnumerable<string> lines, int start, bool endOfLine)
+    {
+        foreach (string line in lines)
+        {
+            if (string.IsNullOrWhiteSpace(line)) continue;
+            int index = FindUniqueLine(edited, line, start, edited.Length);
+            if (index >= 0) return endOfLine ? index + line.Length : index;
+        }
+        return -1;
+    }
+
+    private static int FindUniqueLine(string text, string value, int start, int limit)
+    {
+        int match = -1;
+        for (int index = FindLine(text, value, start); index >= 0 && index + value.Length <= limit;
+             index = FindLine(text, value, index + value.Length))
+        {
+            if (!EndsAtLineBoundary(text, value, index)) continue;
+            if (match >= 0) return -1;
+            match = index;
+        }
+        return match;
     }
 
     private static int FindLine(string text, string value, int start)
