@@ -5,13 +5,16 @@ import { WorkSubmission } from './work-submission.js';
 import { MAX_RAW_CHUNK } from './protocol.js';
 
 const work = new WorkSubmission({
-  async create() {
-    const created = await chrome.tabs.create({ url: 'https://chatgpt.com/' });
+  async create(followUpConversationId) {
+    const path = followUpConversationId ? '/c/' + followUpConversationId : '/';
+    const created = await chrome.tabs.create({ url: 'https://chatgpt.com' + path });
     const deadline = Date.now() + 8000;
     while (Date.now() < deadline) {
       const tab = await chrome.tabs.get(created.id);
       if (tab.status === 'complete') {
-        if (new URL(tab.url).origin !== 'https://chatgpt.com') throw new Error('Unexpected Work origin');
+        const url = new URL(tab.url);
+        if (url.origin !== 'https://chatgpt.com' || url.pathname.toLowerCase() !== path)
+          throw new Error('Unexpected Work page');
         return created.id;
       }
       await new Promise(resolve => setTimeout(resolve, 100));

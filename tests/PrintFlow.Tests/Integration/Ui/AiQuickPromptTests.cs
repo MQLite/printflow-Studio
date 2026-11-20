@@ -1,6 +1,8 @@
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Automation;
 using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -75,20 +77,52 @@ public sealed class AiQuickPromptTests
     }
 
     [Fact]
-    public async Task Stale_and_manual_notices_survive_save_copy_and_reopening()
+    public async Task Live_fields_preserve_manual_text_and_references_across_save_copy_and_reopening()
     {
         using var f = new PromptWorkbenchFixture(); await f.Vm.OpenAsync(null, default);
+        var references = f.Vm.Document.Parts.OfType<AiImagePart>().ToArray();
         f.Vm.Fields.Single(x => x.Key == "姓名").Value = "First";
-        await f.Vm.ComposeCommand.ExecuteAsync(null);
+        Text(f.Vm.Document).ShouldContain("First");
         f.Vm.PromptNotice.ShouldBeNullOrEmpty();
+        var final = (AiTextPart)f.Vm.Document.Parts.Last();
+        const string manual = "\r\n  手改保留 e\u0301 First {{姓名}}  ";
+        f.Vm.Document = new(f.Vm.Document.Parts.SkipLast(1).Append(final with
+        {
+            Text = final.Text.Replace("姓名：First", "Print 姓名：First (verified)", StringComparison.Ordinal) + manual
+        }).ToArray());
         f.Vm.Fields.Single(x => x.Key == "姓名").Value = "Second";
-        f.Vm.PromptNotice.ShouldNotBeNullOrEmpty(); await f.Vm.CopyCommand.ExecuteAsync(null);
-        f.Clipboard.Text.ShouldNotBeNull().ShouldContain("First");
-        f.Vm.PromptNotice.ShouldNotBeNullOrEmpty();
+        Text(f.Vm.Document).ShouldContain("Print 姓名：Second (verified)");
+        Text(f.Vm.Document).ShouldNotContain("姓名：First");
+        Text(f.Vm.Document).ShouldEndWith(manual);
+        f.Vm.Document.Parts.OfType<AiImagePart>().ShouldBe(references);
+        await f.Vm.CopyCommand.ExecuteAsync(null);
+        f.Clipboard.Text.ShouldNotBeNull().ShouldContain("姓名：Second");
         await f.Vm.OpenAsync(f.Vm.Draft!.Id, default); f.Vm.PromptNotice.ShouldNotBeNullOrEmpty();
-        f.Vm.Document = Document("手改保留"); await f.Vm.FlushAsync(default);
-        f.Vm.PromptNotice.ShouldNotBeNullOrEmpty();
-        await f.Vm.OpenAsync(f.Vm.Draft.Id, default); f.Vm.PromptNotice.ShouldNotBeNullOrEmpty();
+        f.Vm.Fields.Single(x => x.Key == "出生日期行").Value = "1948-06-12";
+        Text(f.Vm.Document).ShouldContain("SUNRISE: 1948-06-12");
+        f.Vm.Fields.Single(x => x.Key == "出生日期行").Value = "";
+        Text(f.Vm.Document).ShouldNotContain("SUNRISE");
+        Text(f.Vm.Document).ShouldEndWith(manual);
+    }
+
+    [Fact]
+    public async Task Opening_legacy_unsynced_form_updates_the_prompt_and_retains_reference_ids()
+    {
+        using var f = new PromptWorkbenchFixture();
+        await f.Vm.OpenAsync(null, default);
+        var draft = f.Vm.Draft!;
+        var oldPrompt = (await f.Module.ApplyAsync(draft.Id, draft.Revision, new AiAuthoringEdit.SetField("姓名", "First"), default)).Value;
+        oldPrompt = (await f.Module.ApplyAsync(draft.Id, oldPrompt.Revision, new AiAuthoringEdit.Recompose(true), default)).Value;
+        await f.Module.ApplyAsync(draft.Id, oldPrompt.Revision, new AiAuthoringEdit.SetField("姓名", "SavedLater"), default);
+
+        await f.Vm.OpenAsync(draft.Id, default);
+        Text(f.Vm.Document).ShouldContain("姓名：SavedLater");
+        Text(f.Vm.Document).ShouldNotContain("姓名：First");
+        f.Vm.Document.Parts.OfType<AiImagePart>().ShouldBe(oldPrompt.FinalDocument.Parts.OfType<AiImagePart>());
+        f.Vm.Fields.Single(x => x.Key == "姓名").Value = "Current";
+        await f.Vm.CopyCommand.ExecuteAsync(null);
+        f.Clipboard.Text.ShouldNotBeNull().ShouldContain("姓名：Current");
+        f.Clipboard.Text.ShouldNotContain("姓名：SavedLater");
     }
     [Fact]
     public async Task History_restore_refuses_changed_image_bytes_and_keeps_current_version()
@@ -152,6 +186,13 @@ public sealed class AiQuickPromptTests
         var result = WpfRendering.Render(() => new AiPromptWorkbenchView { DataContext = f.Vm }, new Size(width, height), tree =>
         {
             var editor = tree.OfType<PrintFlow.App.Controls.AiPromptEditor>().Single();
+            var dates = tree.OfType<ToggleButton>().Single(x => AutomationProperties.GetAutomationId(x) == "AiPrompt.FieldOption.出生日期行");
+            dates.IsChecked.ShouldBe(true);
+            dates.SetCurrentValue(ToggleButton.IsCheckedProperty, false);
+            f.Vm.VisibleFields.Select(x => x.Key).ShouldNotContain("出生日期行");
+            f.Vm.VisibleFields.Select(x => x.Key).ShouldNotContain("离世日期行");
+            dates.SetCurrentValue(ToggleButton.IsCheckedProperty, true);
+            f.Vm.VisibleFields.Select(x => x.Key).ShouldContain("离世日期行");
             var box = (RichTextBox)editor.FindName("Editor");
             var paragraph = (Paragraph)box.Document.Blocks.FirstBlock;
             paragraph.Inlines.Add(new Run("实际编辑 e\u0301\r\n"));
@@ -179,10 +220,11 @@ public sealed class AiQuickPromptTests
         f.Vm.Document = Document(literal);
         f.Vm.Fields.Single(x => x.Key == "姓名").Value = "另一个姓名";
         await f.Vm.CopyCommand.ExecuteAsync(null);
-        f.Clipboard.Text.ShouldBe(literal);
+        f.Clipboard.Text.ShouldNotBeNull().ShouldStartWith(literal);
+        f.Clipboard.Text.ShouldContain("姓名：另一个姓名");
         var id = f.Vm.Draft!.Id;
         await f.Vm.OpenAsync(id, default);
-        Text(f.Vm.Document).ShouldBe(literal);
+        Text(f.Vm.Document).ShouldBe(f.Clipboard.Text);
         f.Vm.Draft!.Fields["姓名"].ShouldBe("另一个姓名");
         f.Vm.Draft.Mode.ShouldBe(AiAuthoringMode.Quick);
     }
@@ -272,11 +314,14 @@ internal sealed class PromptWorkbenchFixture : IDisposable
     public AiPromptWorkbenchViewModel Vm { get; }
     public PromptWorkbenchFixture(PrintFlow.App.Navigation.IAiDraftLeavePrompt? leavePrompt = null,
         PrintFlow.Workflow.AiDesign.IWorkTaskQuery? tasks = null, WorkTaskTracker? tracker = null,
-        PrintFlow.Workflow.Services.IArtefactPreviewService? previews = null)
+        PrintFlow.Workflow.Services.IArtefactPreviewService? previews = null,
+        PrintFlow.Workflow.AiDesign.IAiDesignTextSubmission? submission = null,
+        PrintFlow.Workflow.AiDesign.IWorkConversationLauncher? launcher = null)
     {
         Catalog = new(new FileAiTemplateLibraryStore(Root.Root));
         Module = new(new FileAiAuthoringDraftStore(Root.Root), Catalog, new FileAiDesignAttachments(Root.Root));
-        Vm = new(Module, Catalog, new FileAiAuthoringAssetPreview(Root.Root), Picker, Clipboard, leavePrompt, workTasks: tasks, workTracker: tracker, workPreviews: previews);
+        Vm = new(Module, Catalog, new FileAiAuthoringAssetPreview(Root.Root), Picker, Clipboard, leavePrompt,
+            textSubmission: submission, workTasks: tasks, workTracker: tracker, workPreviews: previews, workLauncher: launcher);
     }
     public void Dispose() => Root.Dispose();
     public static string Png(string root, int width)

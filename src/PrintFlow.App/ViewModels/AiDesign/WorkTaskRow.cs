@@ -12,17 +12,10 @@ public sealed class WorkTaskRow(WorkTaskSnapshot snapshot) : ObservableObject
     public WorkTaskSnapshot Snapshot { get; } = snapshot;
     public string Title => Snapshot.Title ?? Strings.Resolve("WorkTask_Title");
     public string Stage => Strings.Resolve(Snapshot.Failure == WorkTaskFailure.UploadFailed ? "WorkTask_UploadFailed" : "WorkTask_" + Snapshot.Stage);
-    public sealed record Milestone(string Label, bool Reached);
-    public IReadOnlyList<Milestone> Milestones =>
-    [
-        new(Strings.Resolve("WorkTask_Sent"), CanViewWork),
-        new(Strings.Resolve("WorkTask_Returned"), Snapshot.HasReturnedImage),
-        new(Strings.Resolve("WorkTask_Verified"), CanContinue),
-        new(Strings.Resolve("WorkTask_Imported"), CanContinue)
-    ];
     public string Updated => Snapshot.UpdatedAtUtc.ToLocalTime().ToString("g", CultureInfo.CurrentCulture);
     public bool CanContinue => Snapshot.Stage == WorkTaskStage.Imported && Snapshot.ImportedSessionId is not null;
     public bool CanViewWork => Snapshot.WorkConversationId is { } id && id != Guid.Empty;
+    public bool CanRegenerate => CanContinue && CanViewWork;
     public string Placeholder => Strings.Resolve(CanContinue ? "WorkTask_NoPreview" : "WorkTask_Protected");
     public string? ImageFacts => Snapshot.Format == ImageFormat.Pdf ? "PDF" :
         Snapshot.Format is { } format && Snapshot.PixelWidth is { } width && Snapshot.PixelHeight is { } height

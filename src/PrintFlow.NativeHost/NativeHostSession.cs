@@ -20,6 +20,7 @@ public sealed partial class NativeHostSession : IAsyncDisposable
     private readonly ConcurrentDictionary<Guid,SemaphoreSlim> _requestGates=new();
     private FileStream? _connectionLock;
     private bool _verified;
+    private bool _supportsWorkFollowUp;
     private string? _contractHash;
     private string? _launchNonce;
     public Guid ConnectionId {get;}=Guid.NewGuid();
@@ -45,6 +46,7 @@ public sealed partial class NativeHostSession : IAsyncDisposable
                 // Check the trial launch before taking the single native connection lock.
                 _contractHash=m.Payload.GetProperty("workContractHash").GetString();
                 _launchNonce = m.Payload.TryGetProperty("launchNonce", out var nonce) ? nonce.GetString() : null;
+                _supportsWorkFollowUp = m.Payload.TryGetProperty("supportsWorkFollowUp", out var followUp) && followUp.ValueKind == JsonValueKind.True;
                 bool trialLaunch = _launchNonce is { Length: 32 } && _launchNonce.All(c => c is >= '0' and <= '9' or >= 'A' and <= 'F');
                 _verified = _configuration.VerifiedWorkContractHash is not null && _contractHash == _configuration.VerifiedWorkContractHash
                     && (_contractHash != AiDesignBridgeConfiguration.TextSubmissionTrialContract || trialLaunch && _configuration.ChromeProfileDirectory is not null);
@@ -154,6 +156,12 @@ public sealed partial class NativeHostSession : IAsyncDisposable
                 {if(file.Length>65536)continue;queued=await JsonSerializer.DeserializeAsync<BridgeQueueEntry>(file,NativeMessageCodec.JsonOptions,ct);}
                 if(queued is null||queued.ConnectionId!=ConnectionId||queued.WorkspaceIdentity!=r.WorkspaceIdentity||queued.Fence!=r.Fence)continue;
                 var current=await AuthorizedAsync(r.Fence,ct);if(current.IsFailure)continue;
+                var followUpConversationId = current.Value.WorkFollowUp?.ConversationId;
+                if (followUpConversationId is not null && (!_supportsWorkFollowUp || queued.WorkResultUploadTicket is null))
+                {
+                    await _store.ChangeAsync(r.Fence, new AiDesignEvent.Failed("WorkFollowUpBridgeUnavailable"), ct);
+                    continue;
+                }
                 string promptText = r.Prompt.Text;
                 if (queued.WorkResultUploadTicket is { } ticket)
                 {
@@ -162,7 +170,7 @@ public sealed partial class NativeHostSession : IAsyncDisposable
                     if (promptText.Length > 100000) continue;
                 }
                 _dispatched.Add((r.RequestId,r.AttemptId));
-                var sent=await emit(Reply(r,"Request",new{connectionId=ConnectionId,workspaceIdentity=r.WorkspaceIdentity,promptText,
+                var sent=await emit(Reply(r,"Request",new{connectionId=ConnectionId,workspaceIdentity=r.WorkspaceIdentity,promptText,followUpConversationId,
                     handoffInstructions=r.Prompt.HandoffInstructions,attachments=r.Attachments.OrderBy(a=>a.Order).Select(a=>new{a.Id,a.Order,a.OriginalName,a.UploadName,a.Purpose,a.MediaType,a.ByteLength,sha256=a.Sha256.Value}).ToArray()}),ct);
                 if(sent.IsFailure)throw new IOException("Native request frame failed.");
                 if (IsWorkTrial) continue;
@@ -220,7 +228,7 @@ public sealed partial class NativeHostSession : IAsyncDisposable
     private async Task HeartbeatAsync(CancellationToken ct)
     {
         var connection=new AiDesignBridgeConnection(ConnectionId,Environment.ProcessId,Process.GetCurrentProcess().StartTime.ToUniversalTime().Ticks,
-            1,AiDesignBridgeConfiguration.CurrentHostVersion,_origin,_store.WorkspaceIdentity,_contractHash,_verified,DateTimeOffset.UtcNow,_launchNonce);
+            1,AiDesignBridgeConfiguration.CurrentHostVersion,_origin,_store.WorkspaceIdentity,_contractHash,_verified,DateTimeOffset.UtcNow,_launchNonce,_supportsWorkFollowUp);
         using var staged=AiDesignOwnedStagingFiles.CreateConnection(_installation);
         await JsonSerializer.SerializeAsync(staged.Output,connection,NativeMessageCodec.JsonOptions,ct);
         await staged.PublishAsync(ct);

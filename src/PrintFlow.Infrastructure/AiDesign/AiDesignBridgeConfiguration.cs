@@ -49,4 +49,5 @@ public sealed record AiDesignBridgeConfiguration(int ProtocolVersion,string Host
     }
 }
 public sealed record AiDesignBridgeConnection(Guid ConnectionId,int ProcessId,long ProcessStartUtcTicks,int ProtocolVersion,string HostVersion,
-    string ExtensionOrigin,string WorkspaceIdentity,string? WorkContractHash,bool Available,DateTimeOffset LastSeenUtc,string? LaunchNonce=null);
+    string ExtensionOrigin,string WorkspaceIdentity,string? WorkContractHash,bool Available,DateTimeOffset LastSeenUtc,string? LaunchNonce=null,
+    bool SupportsWorkFollowUp=false);

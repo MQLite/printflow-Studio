@@ -43,7 +43,8 @@ export class NativeBridgeClient {
       port.postMessage({
         protocolVersion: 1, messageId: crypto.randomUUID(), requestId: emptyId, attemptId: emptyId,
         stateVersion: 0, token: '', kind: 'Hello',
-        payload: { hostVersion: '1.0.0', workspaceIdentity: '', workContractHash: this.contractHash, launchNonce }
+        payload: { hostVersion: '1.0.0', workspaceIdentity: '', workContractHash: this.contractHash, launchNonce,
+          supportsWorkFollowUp: !!this.work }
       });
     } catch {
       this.port = null;

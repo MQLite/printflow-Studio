@@ -3,7 +3,9 @@ using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Sessions;
+using PrintFlow.Infrastructure.Imaging;
 using PrintFlow.Tests.Fixtures;
+using PrintFlow.Tests.Integration.Persistence;
 using PrintFlow.Workflow.Commands;
 using PrintFlow.Workflow.Services;
 
@@ -31,7 +33,7 @@ public sealed class ArtefactPreviewTests
     public async Task Returned_pdf_has_a_thumbnail_before_preparation()
     {
         using SessionServiceHarness harness = new();
-        var service = harness.CreateService();
+        var service = PdfPreparationWorkflowTests.Service(harness, new WindowsPdfPreparationProcessor(harness.FileWorkspace, harness.FileInspector));
         string path = Path.ChangeExtension(harness.WriteSourcePng(), ".pdf");
         await File.WriteAllBytesAsync(path, PdfFixtures.Read("single"));
         var facts = (await harness.FileInspector.InspectAsync(path, default)).Value;
@@ -45,8 +47,18 @@ public sealed class ArtefactPreviewTests
         result.Value.RevisionId.ShouldBe(root);
         var size = SyntheticImages.DecodeDimensions(result.Value.Payload);
         Math.Max(size.Item1, size.Item2).ShouldBe(harness.PreviewDecoder.ThumbnailEdge);
+        var large = (await harness.Previews.GetImportedOriginalPreviewAsync(imported.Id, default)).Value;
+        large.RevisionId.ShouldBe(root);
+        var largeSize = SyntheticImages.DecodeDimensions(large.Payload);
+        Math.Max(largeSize.Item1, largeSize.Item2).ShouldBeGreaterThan(harness.PreviewDecoder.ThumbnailEdge);
         (await harness.Previews.GetPreviewAsync(imported.Id, root, default)).IsFailure.ShouldBeTrue();
         (await service.LoadAsync(imported.Id, default)).Value.CurrentStep!.Step.ShouldBe(StepKind.OriginalConfirmation);
+
+        var prepared = await service.ExecuteAsync(imported.Id, new WorkflowCommand.StartStep(StepKind.OriginalConfirmation),
+            "preview", default);
+        prepared.IsSuccess.ShouldBeTrue(prepared.IsFailure ? prepared.Failure.TechnicalDetail : null);
+        (await harness.Previews.GetRecentThumbnailAsync(imported.Id, default)).Value.RevisionId.ShouldNotBe(root);
+        (await harness.Previews.GetImportedOriginalPreviewAsync(imported.Id, default)).Value.RevisionId.ShouldBe(root);
     }
 
     // -----------------------------------------------------------------------------

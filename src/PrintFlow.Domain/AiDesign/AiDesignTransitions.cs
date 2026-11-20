@@ -6,14 +6,16 @@ public static class AiDesignTransitions
 {
     public static bool IsRunning(AiDesignState state) => state is >= AiDesignState.Queued and <= AiDesignState.Importing;
     public static bool CanStop(AiDesignState state) => state is >= AiDesignState.Queued and <= AiDesignState.Validating;
-    public static bool CanResumeWorkResult(AiDesignRequest request) =>
-        ((request.State == AiDesignState.PromptOnly &&
-            request.Failure?.Code is "TrialResultHandoffUnavailable" or "WorkResultPending") ||
-            request.State == AiDesignState.Interrupted) &&
-        request.LastSuccessfulStage == AiDesignState.Submitted &&
-        request.AttemptId != Guid.Empty && request.SubmissionReservedAtUtc is not null &&
-        request.WorkConversationId is { } conversation && conversation != Guid.Empty &&
-        request.Candidate is null && request.ImportedSessionId is null;
+    public static bool CanResumeWorkResult(AiDesignRequest request)
+    {
+        bool followUp = request.State == AiDesignState.AwaitingWorkFollowUp && request.WorkFollowUp is not null;
+        bool submitted = request.LastSuccessfulStage == AiDesignState.Submitted && request.SubmissionReservedAtUtc is not null &&
+            (request.State == AiDesignState.Interrupted || request.State == AiDesignState.PromptOnly &&
+                request.Failure?.Code is "TrialResultHandoffUnavailable" or "WorkResultPending");
+        return (followUp || submitted) && request.AttemptId != Guid.Empty &&
+            request.WorkConversationId is { } conversation && conversation != Guid.Empty &&
+            request.Candidate is null && request.ImportedSessionId is null;
+    }
     public static OperationResult<AiDesignRequest> Apply(AiDesignRequest r, AiDesignEvent change, DateTimeOffset now)
     {
         AiDesignRequest? next = null;
@@ -53,6 +55,8 @@ public static class AiDesignTransitions
                 next = r with { SubmissionReservedAtUtc = now, TabId = s.TabId, ConversationId = s.ConversationId };
                 break;
             case AiDesignEvent.SubmitConfirmed submitted when r.State is AiDesignState.Queued or AiDesignState.Uploading && r.SubmissionReservedAtUtc is not null:
+                if (r.WorkFollowUp?.ConversationId is { } target && submitted.WorkConversationId != target)
+                    return Reject("Work follow-up confirmed a different conversation.");
                 next = r with { State = AiDesignState.Submitted, WorkConversationId = submitted.WorkConversationId, DeadlineUtc = now.AddMinutes(10) };
                 break;
             case AiDesignEvent.GenerationStarted when r.State == AiDesignState.Submitted:
@@ -91,7 +95,7 @@ public static class AiDesignTransitions
                     ImportedSessionId = f.SessionId ?? r.ImportedSessionId, Token = NewToken(), DeadlineUtc = null,
                     Failure = new(f.Code, r.State, [], r.LastSuccessfulStage), OwnerProcessId = null, OwnerProcessStartUtcTicks = null };
                 break;
-            case AiDesignEvent.StopAccepted when CanStop(r.State) ||
+            case AiDesignEvent.StopAccepted when CanStop(r.State) || r.State == AiDesignState.AwaitingWorkFollowUp ||
                 (CanResumeWorkResult(r) && r.Failure?.Code is "WorkResultPending" or "Interrupted"):
                 next = r with { State = AiDesignState.Cancelled, Token = NewToken(), DeadlineUtc = null,
                     Failure = new("Cancelled", r.State, [], r.LastSuccessfulStage), OwnerProcessId = null, OwnerProcessStartUtcTicks = null };

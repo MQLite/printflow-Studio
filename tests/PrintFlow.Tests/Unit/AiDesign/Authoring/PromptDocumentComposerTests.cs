@@ -5,6 +5,49 @@ namespace PrintFlow.Tests.Unit.AiDesign.Authoring;
 
 public sealed class PromptDocumentComposerTests
 {
+    [Theory]
+    [InlineData("Header\nfirst\nsecond (keep note)\nFooter", "", "Header\n (keep note)\nFooter")]
+    [InlineData("Header\nfirst\nsecond (keep note)\nFooter", "new first\nnew second\n", "Header\nnew first\nnew second (keep note)\nFooter")]
+    [InlineData("Header\nfirst (keep note)\nsecond\nfirst\nFooter", "", "Header\n (keep note)\nfirst\nFooter")]
+    public void Live_change_updates_multiline_field_while_keeping_an_inline_note(string current, string value, string expected)
+    {
+        static AiPromptDocument Document(string text) => new([new AiTextPart(Guid.NewGuid(), text)]);
+        var before = Document("Header\nfirst\nsecond\nFooter");
+        var edited = Document(current);
+        var after = Document("Header\n" + value + "Footer");
+
+        PromptFieldSynchronization.Update(edited, before, after).Parts.OfType<AiTextPart>()
+            .Select(part => part.Text).ShouldBe([expected]);
+    }
+
+    [Fact]
+    public void Live_change_uses_distinct_anchors_across_repeated_blank_lines()
+    {
+        static AiPromptDocument Document(string text) => new([new AiTextPart(Guid.NewGuid(), text)]);
+        const string before = "Header\n\nAlpha\n\nOld\n\nFooter";
+        string after = before.Replace("Old", "New", StringComparison.Ordinal);
+        var updated = PromptFieldSynchronization.Update(Document(before + "\nmanual"), Document(before), Document(after));
+        updated.Parts.OfType<AiTextPart>().Select(part => part.Text).ShouldBe([after + "\nmanual"]);
+    }
+
+    [Fact]
+    public void Live_change_can_omit_a_line_with_a_reference_while_keeping_manual_text_and_other_images()
+    {
+        var template = Template("Header\r\n{{Date}} {{Photo}}\r\nFooter {{Layout}}",
+            new AiTemplateField("Date", AiTemplateFieldKind.OptionalDateLine, false),
+            new AiTemplateField("Photo", AiTemplateFieldKind.ImageReference, false, SlotId: "photo"),
+            new AiTemplateField("Layout", AiTemplateFieldKind.ImageReference, false, SlotId: "layout"));
+        var before = PromptDocumentComposer.Compose(template, new Dictionary<string, string> { ["Date"] = "1948" }).Document;
+        var after = PromptDocumentComposer.Compose(template, new Dictionary<string, string>()).Document;
+        var layout = before.Parts.OfType<AiImagePart>().Single(x => x.SlotId == "layout");
+        var edited = new AiPromptDocument(before.Parts.Append(new AiTextPart(Guid.NewGuid(), "\r\n  Manual  ")).ToArray());
+
+        var updated = PromptFieldSynchronization.Update(edited, before, after);
+
+        updated.Parts.OfType<AiImagePart>().ShouldHaveSingleItem().ShouldBe(layout);
+        string.Concat(updated.Parts.OfType<AiTextPart>().Select(x => x.Text)).ShouldBe("Header\r\nFooter \r\n  Manual  ");
+    }
+
     [Fact]
     public void Compose_preserves_operator_literals()
     {

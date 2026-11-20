@@ -75,6 +75,12 @@ public sealed class MemorialWorkbenchLayoutTests
         vm.DetailedStep = 5;
         WpfRendering.RenderExpectingNoBindingErrors(() => Workbench(vm), WpfRendering.ReviewViewport, tree =>
         {
+            var page = tree.OfType<AiGenerationEditorView>().Single();
+            ((Expander)page.FindName("DraftTools")).IsExpanded = true;
+            var review = tree.OfType<AiGenerationReviewView>().Single();
+            ((Expander)review.FindName("ReviewOptions")).IsExpanded = true;
+            ((Expander)review.FindName("LayoutOptions")).IsExpanded = true;
+            tree.Root.UpdateLayout();
             tree.OfType<Button>().Any(button => GuidedSessionProjectionTests.Shown(button) &&
                 ReferenceEquals(button.Command, vm.SaveMemorialLayoutCommand)).ShouldBeTrue();
             tree.OfType<Button>().Any(button => GuidedSessionProjectionTests.Shown(button) &&
@@ -95,7 +101,7 @@ public sealed class MemorialWorkbenchLayoutTests
         WpfRendering.RenderExpectingNoBindingErrors(() => Workbench(vm), WpfRendering.ReviewViewport, tree =>
         {
             tree.OfType<AiPromptEditor>().Single().Document.Parts.ShouldBe(vm.Document.Parts);
-            tree.OfType<Expander>().Any(expander => Equals(expander.Header, AiPromptLabels.AiPrompt_Manifest) &&
+            tree.OfType<Expander>().Any(expander => System.Windows.Automation.AutomationProperties.GetAutomationId(expander) == "AiPrompt.ReferenceTools" &&
                 GuidedSessionProjectionTests.Shown(expander)).ShouldBeTrue();
             tree.OfType<Button>().Any(button => ReferenceEquals(button.Command, vm.CopyCommand) &&
                 GuidedSessionProjectionTests.Shown(button)).ShouldBeTrue();

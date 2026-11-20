@@ -82,6 +82,10 @@ public interface IImagePreviewDecoder
     Task<OperationResult<DecodedPreview>> DecodeAsync(
         WorkspaceFileRef file, CancellationToken cancellationToken);
 
+    Task<OperationResult<DecodedPreview>> DecodeOriginalPreviewAsync(
+        WorkspaceFileRef file, ImageFormat format, CancellationToken cancellationToken) =>
+        DecodeAsync(file, cancellationToken);
+
     /// <summary>
     /// Decodes <paramref name="file"/> reduced to <see cref="ThumbnailEdge"/>. Reads only.
     /// </summary>

@@ -83,12 +83,18 @@ public sealed class WicImagePreviewDecoder : IImagePreviewDecoder, IDiagnosticIm
         string absolutePath = _workspace.ResolveAbsolute(file);
 
         return format == ImageFormat.Pdf
-            ? await DecodePdfThumbnailAsync(absolutePath, cancellationToken)
+            ? await DecodePdfPreviewAsync(absolutePath, ThumbnailEdge, cancellationToken)
             : await DecodeAbsoluteAsync(absolutePath, ThumbnailEdge, cancellationToken);
     }
 
-    private async Task<OperationResult<DecodedPreview>> DecodePdfThumbnailAsync(
-        string absolutePath, CancellationToken cancellationToken)
+    public Task<OperationResult<DecodedPreview>> DecodeOriginalPreviewAsync(
+        WorkspaceFileRef file, ImageFormat format, CancellationToken cancellationToken) =>
+        format == ImageFormat.Pdf
+            ? DecodePdfPreviewAsync(_workspace.ResolveAbsolute(file), MaximumDisplayEdge, cancellationToken)
+            : DecodeAsync(file, cancellationToken);
+
+    private async Task<OperationResult<DecodedPreview>> DecodePdfPreviewAsync(
+        string absolutePath, int maximumEdge, CancellationToken cancellationToken)
     {
         try
         {
@@ -97,9 +103,9 @@ public sealed class WicImagePreviewDecoder : IImagePreviewDecoder, IDiagnosticIm
             using var document = await new WindowsPdfDocumentAuthority().OpenAsync(input, cancellationToken).ConfigureAwait(false);
             if (document.IsEncrypted || document.PageCount != 1 ||
                 !WindowsPdfPreparationProcessor.HasSupportedPageGeometry(document.InspectSinglePage()))
-                return Undisplayable("The PDF thumbnail requires a readable single page with supported dimensions.");
+                return Undisplayable("The PDF preview requires a readable single page with supported dimensions.");
 
-            return OperationResult.Ok(await document.RenderThumbnailAsync(ThumbnailEdge, cancellationToken).ConfigureAwait(false));
+            return OperationResult.Ok(await document.RenderThumbnailAsync(maximumEdge, cancellationToken).ConfigureAwait(false));
         }
         catch (OperationCanceledException)
         {
@@ -111,7 +117,7 @@ public sealed class WicImagePreviewDecoder : IImagePreviewDecoder, IDiagnosticIm
         }
         catch (Exception ex) when (ex is not (OutOfMemoryException or StackOverflowException))
         {
-            return Undisplayable($"The PDF thumbnail could not be rendered ({ex.HResult:X8}).");
+            return Undisplayable($"The PDF preview could not be rendered ({ex.HResult:X8}).");
         }
     }
 

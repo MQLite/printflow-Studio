@@ -115,6 +115,18 @@ public sealed class ArtefactPreviewService : IArtefactPreviewService
         return Present(revision, decoded);
     }
 
+    public async Task<OperationResult<ImagePreview>> GetImportedOriginalPreviewAsync(
+        SessionId sessionId, CancellationToken cancellationToken)
+    {
+        var loaded = await _repository.LoadAsync(sessionId, cancellationToken);
+        if (loaded.IsFailure) return OperationResult.Fail<ImagePreview>(loaded.Failure);
+        if (loaded.Value?.Revisions.FirstOrDefault(candidate => candidate.IsRoot) is not { RetentionReleasedAtUtc: null } revision)
+            return OperationResult.Fail<ImagePreview>(FailureCode.PreconditionNotMet, "Imported original is unavailable.");
+
+        var decoded = await _decoder.DecodeOriginalPreviewAsync(revision.File, revision.Facts.Format, cancellationToken);
+        return Present(revision, decoded);
+    }
+
     /// <summary>
     /// Which of a session's Revisions stands for it in a list (Jira 11602).
     /// </summary>

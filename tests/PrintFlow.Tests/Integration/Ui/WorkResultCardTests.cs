@@ -6,6 +6,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using PrintFlow.App.ViewModels.AiDesign;
 using PrintFlow.App.Views.AiDesign;
+using PrintFlow.Domain.AiDesign.Authoring;
 using PrintFlow.Tests.Fixtures;
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
@@ -18,6 +19,92 @@ namespace PrintFlow.Tests.Integration.Ui;
 [Collection(SqliteCollection.Name)]
 public sealed class WorkResultCardTests
 {
+    [Fact]
+    public async Task Failed_new_generation_keeps_previous_imported_result_available()
+    {
+        var submission = new PausedSubmission();
+        var query = new TestQuery();
+        var tracker = new WorkTaskTracker();
+        using var fixture = new PromptWorkbenchFixture(tasks: query, tracker: tracker, submission: submission);
+        var vm = fixture.Vm;
+        await vm.OpenAsync(null, default);
+        var previous = TaskFor(vm.Draft!.Id, WorkTaskStage.Imported) with
+        {
+            ImportedSessionId = SessionId.From(Guid.NewGuid()), WorkConversationId = Guid.NewGuid()
+        };
+        query.Items = [previous];
+        tracker.RequestChanged(previous.RequestId);
+        await vm.WorkCardRefresh;
+        vm.WorkCard!.CanContinue.ShouldBeTrue();
+        var generation = vm.AutoGenerateCommand.ExecuteAsync(null);
+        await submission.Started.Task.WaitAsync(TimeSpan.FromSeconds(10));
+        var failed = TaskFor(vm.Draft.Id, WorkTaskStage.NeedsAttention);
+        query.Items = [previous, failed];
+        submission.Finish.SetResult(OperationResult.Fail<AiDesignWorkSubmission>(FailureCode.AdapterUnavailable, "WorkModeUnavailable"));
+        await generation.WaitAsync(TimeSpan.FromSeconds(10));
+        tracker.RequestChanged(failed.RequestId);
+        await vm.WorkCardRefresh;
+
+        vm.Error.ShouldNotBeNullOrEmpty();
+        vm.WorkCard!.Snapshot.ShouldBe(previous);
+        vm.WorkCard.CanContinue.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task Generate_expands_progress_before_receipt_and_tracks_observed_stages()
+    {
+        var submission = new PausedSubmission();
+        var query = new TestQuery();
+        var tracker = new WorkTaskTracker();
+        using var fixture = new PromptWorkbenchFixture(tasks: query, tracker: tracker, submission: submission);
+        var vm = fixture.Vm;
+        await vm.OpenAsync(null, default);
+        vm.ShowGenerationProgress.ShouldBeFalse();
+        vm.Fields.Single(x => x.Key == "姓名").Value = "Current";
+
+        var generation = vm.AutoGenerateCommand.ExecuteAsync(null);
+        var submitted = await submission.Started.Task.WaitAsync(TimeSpan.FromSeconds(10));
+        vm.ShowGenerationProgress.ShouldBeTrue();
+        vm.GenerationMilestones[0].IsCurrent.ShouldBeTrue();
+        vm.AutoGenerateCommand.CanExecute(null).ShouldBeFalse();
+        string.Concat(submitted.FinalDocument.Parts.OfType<AiTextPart>().Select(x => x.Text)).ShouldContain("姓名：Current");
+
+        var awaiting = TaskFor(submitted.Id, WorkTaskStage.AwaitingReturn) with { WorkConversationId = Guid.NewGuid() };
+        query.Items = [awaiting];
+        submission.Finish.SetResult(OperationResult.Ok(new AiDesignWorkSubmission(awaiting.RequestId, awaiting.WorkConversationId.Value, null)));
+        await generation.WaitAsync(TimeSpan.FromSeconds(10));
+        vm.GenerationMilestones[0].Reached.ShouldBeTrue();
+        vm.GenerationMilestones[1].IsCurrent.ShouldBeTrue();
+        WpfRendering.RenderExpectingNoBindingErrors(() => new AiPromptWorkbenchView { DataContext = vm }, new Size(1000, 700), tree =>
+        {
+            var progress = tree.OfType<WorkResultCardView>().Single();
+            var bounds = progress.TransformToAncestor(tree.Root).TransformBounds(new Rect(progress.RenderSize));
+            progress.Visibility.ShouldBe(Visibility.Visible);
+            bounds.Height.ShouldBeGreaterThan(0);
+            bounds.Bottom.ShouldBeLessThan(700);
+            return 0;
+        });
+
+        query.Items = [awaiting with { Stage = WorkTaskStage.Validating }];
+        tracker.RequestChanged(awaiting.RequestId);
+        await vm.WorkCardRefresh;
+        vm.GenerationMilestones[2].IsCurrent.ShouldBeTrue();
+        vm.GenerationMilestones[3].Reached.ShouldBeFalse();
+    }
+
+    private sealed class PausedSubmission : IAiDesignTextSubmission
+    {
+        public TaskCompletionSource<AiAuthoringDraft> Started { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public TaskCompletionSource<OperationResult<AiDesignWorkSubmission>> Finish { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public Task<OperationResult<AiDesignWorkSubmission>> SubmitAsync(AiAuthoringDraft draft, CancellationToken ct)
+        {
+            Started.SetResult(draft);
+            return Finish.Task;
+        }
+        public Task<OperationResult<PrintFlow.Domain.Results.Unit>> StopReceivingAsync(Guid requestId, CancellationToken ct) =>
+            throw new NotSupportedException();
+    }
+
     [Fact]
     public async Task Current_draft_card_shows_observed_progress_and_only_imported_thumbnail()
     {
@@ -122,6 +209,121 @@ public sealed class WorkResultCardTests
         await vm.WorkCardThumbnail;
         vm.WorkCard!.HasThumbnail.ShouldBeTrue();
         Verify("AiPrompt.ContinueWorkResult", "work-card-imported");
+        Verify("AiPrompt.OpenResultPreview", "work-card-preview");
+        Verify("AiPrompt.RegenerateInWork", "work-card-regenerate");
+        await vm.OpenWorkResultPreviewCommand.ExecuteAsync(null);
+        vm.ShowWorkPreview.ShouldBeTrue();
+        vm.WorkPreview.ShouldNotBeNull();
+        preview.FullPreviewCalls.ShouldBe([SessionId.From(task.RequestId)]);
+        WpfRendering.RenderExpectingNoBindingErrors(() => new AiPromptWorkbenchView { DataContext = vm }, new Size(1000, 700), tree =>
+        {
+            var overlay = tree.OfType<Border>().Single(x => AutomationProperties.GetAutomationId(x) == "AiPrompt.ResultPreview");
+            overlay.Visibility.ShouldBe(Visibility.Visible);
+            tree.OfType<Image>().Single(x => x.IsDescendantOf(overlay)).RenderSize.Height.ShouldBeGreaterThan(250);
+            return 0;
+        });
+        vm.CloseWorkResultPreviewCommand.Execute(null);
+        vm.ShowWorkPreview.ShouldBeFalse();
+        vm.WorkPreview.ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task Regenerate_opens_the_editor_and_only_confirmation_submits_the_revision()
+    {
+        using var culture = new OperatorCultureScope("zh-CN");
+        var query = new TestQuery();
+        var tracker = new WorkTaskTracker();
+        var launcher = new CapturingLauncher();
+        var submission = new FollowUpSubmission();
+        var preview = new TestPreview();
+        using var fixture = new PromptWorkbenchFixture(tasks: query, tracker: tracker, submission: submission,
+            launcher: launcher, previews: preview);
+        var vm = fixture.Vm;
+        await vm.OpenAsync(null, default);
+        var source = TaskFor(vm.Draft!.Id, WorkTaskStage.Imported) with
+            { WorkConversationId = Guid.NewGuid(), ImportedSessionId = SessionId.From(Guid.NewGuid()) };
+        var pixels = await File.ReadAllBytesAsync(WriteSyntheticReturn(fixture.Root.Root, source.RequestId));
+        preview.Decode = _ => Task.FromResult(OperationResult.Ok(new ImagePreview(default, 64, 64, 1254, 1254, false, pixels)));
+        query.Items = [source];
+        await vm.OpenAsync(vm.Draft.Id, default);
+        var fresh = TaskFor(vm.Draft.Id, WorkTaskStage.AwaitingReturn) with
+            { WorkConversationId = source.WorkConversationId, CanStopReceiving = true, FollowUpSourceRequestId = source.RequestId };
+        submission.Send = (request, prompt) =>
+        {
+            request.ShouldBe(source.RequestId);
+            prompt.ShouldBe($"{vm.FollowUpPrefix}\n把边框改成蓝色。");
+            if (submission.Calls == 1) return OperationResult.Fail<AiDesignWorkSubmission>(FailureCode.AdapterUnavailable, "WorkFollowUpBridgeUnavailable");
+            query.Items = [source, fresh];
+            return OperationResult.Ok(new AiDesignWorkSubmission(fresh.RequestId, source.WorkConversationId!.Value, null));
+        };
+        await vm.RegenerateInWorkCommand.ExecuteAsync(null);
+        vm.ShowFollowUpEditor.ShouldBeTrue();
+        vm.WorkPreview.ShouldNotBeNull();
+        preview.FullPreviewCalls.ShouldBe([source.ImportedSessionId!.Value]);
+        vm.FollowUpPrefix.ShouldBe("做以下修改：");
+        vm.SubmitFollowUpLabel.ShouldBe("再次生成");
+        vm.FollowUpInstructions.ShouldBeEmpty();
+        WpfRendering.RenderExpectingNoBindingErrors(() => new AiPromptWorkbenchView { DataContext = vm }, new Size(1000, 700), tree =>
+        {
+            var overlay = tree.OfType<Border>().Single(x => AutomationProperties.GetAutomationId(x) == "AiPrompt.FollowUpEditor");
+            overlay.Visibility.ShouldBe(Visibility.Visible);
+            var image = tree.OfType<Image>().Single(x => x.IsDescendantOf(overlay));
+            var instructions = tree.OfType<TextBox>().Single(x => AutomationProperties.GetAutomationId(x) == "AiPrompt.FollowUpInstructions");
+            var submit = tree.OfType<Button>().Single(x => AutomationProperties.GetAutomationId(x) == "AiPrompt.SubmitFollowUp");
+            var imageBounds = image.TransformToAncestor(tree.Root).TransformBounds(new Rect(image.RenderSize));
+            var instructionsBounds = instructions.TransformToAncestor(tree.Root).TransformBounds(new Rect(instructions.RenderSize));
+            image.Source.ShouldNotBeNull();
+            imageBounds.Height.ShouldBeGreaterThan(250);
+            imageBounds.Right.ShouldBeLessThan(instructionsBounds.Left);
+            instructions.Text.ShouldBeEmpty();
+            instructions.AcceptsReturn.ShouldBeTrue();
+            submit.IsEnabled.ShouldBeFalse();
+            return 0;
+        });
+        vm.SubmitFollowUpCommand.CanExecute(null).ShouldBeFalse();
+        await vm.SubmitFollowUpCommand.ExecuteAsync(null);
+        submission.Calls.ShouldBe(0);
+        launcher.Conversation.ShouldBeNull();
+        string.IsNullOrEmpty(fixture.Clipboard.Text).ShouldBeTrue();
+        vm.WorkCard!.Snapshot.RequestId.ShouldBe(source.RequestId);
+
+        vm.FollowUpInstructions = "把边框改成蓝色。";
+        vm.SubmitFollowUpCommand.CanExecute(null).ShouldBeTrue();
+        await vm.SubmitFollowUpCommand.ExecuteAsync(null);
+        vm.FollowUpFeedback.ShouldNotBeNull();
+        vm.FollowUpInstructions.ShouldBe("把边框改成蓝色。");
+        vm.ShowFollowUpEditor.ShouldBeTrue();
+        await vm.SubmitFollowUpCommand.ExecuteAsync(null);
+        submission.Calls.ShouldBe(2);
+        vm.ShowFollowUpEditor.ShouldBeFalse();
+        vm.WorkCard!.Snapshot.RequestId.ShouldBe(fresh.RequestId);
+        vm.GenerationMilestones[0].Reached.ShouldBeTrue();
+        vm.CanStopReceiving.ShouldBeTrue();
+        query.Items = [source, fresh with { Stage = WorkTaskStage.Cancelled, CanStopReceiving = false }];
+        tracker.RequestChanged(fresh.RequestId);
+        await vm.WorkCardRefresh;
+        vm.WorkCard!.Snapshot.RequestId.ShouldBe(source.RequestId);
+    }
+
+    private sealed class FollowUpSubmission : IAiDesignTextSubmission
+    {
+        public Func<Guid, string, OperationResult<AiDesignWorkSubmission>> Send { get; set; } = (_, _) => throw new InvalidOperationException();
+        public int Calls { get; private set; }
+        public Task<OperationResult<AiDesignWorkSubmission>> SubmitFollowUpAsync(Guid sourceRequestId, string prompt, CancellationToken ct)
+        {
+            Calls++;
+            return Task.FromResult(Send(sourceRequestId, prompt));
+        }
+        public Task<OperationResult<AiDesignWorkSubmission>> SubmitAsync(AiAuthoringDraft draft, CancellationToken ct) =>
+            throw new NotSupportedException();
+        public Task<OperationResult<PrintFlow.Domain.Results.Unit>> StopReceivingAsync(Guid requestId, CancellationToken ct) =>
+            throw new NotSupportedException();
+    }
+
+    private sealed class CapturingLauncher : IWorkConversationLauncher
+    {
+        public Guid? Conversation { get; private set; }
+        public bool Open(Guid conversationId) { Conversation = conversationId; return true; }
     }
 
     internal static string WriteSyntheticReturn(string root, Guid request)
@@ -166,10 +368,13 @@ public sealed class WorkResultCardTests
     internal sealed class TestPreview : IArtefactPreviewService
     {
         public List<SessionId> Calls { get; } = [];
+        public List<SessionId> FullPreviewCalls { get; } = [];
         public Func<SessionId, Task<OperationResult<ImagePreview>>> Decode { get; set; } = _ =>
             Task.FromResult(OperationResult.Fail<ImagePreview>(FailureCode.PersistenceError, "No thumbnail"));
         public Task<OperationResult<ImagePreview>> GetRecentThumbnailAsync(SessionId id, CancellationToken ct)
         { Calls.Add(id); return Decode(id); }
+        public Task<OperationResult<ImagePreview>> GetImportedOriginalPreviewAsync(SessionId id, CancellationToken ct)
+        { FullPreviewCalls.Add(id); return Decode(id); }
         public Task<OperationResult<ImagePreview>> GetPreviewAsync(SessionId id, RevisionId revision, CancellationToken ct) =>
             throw new NotSupportedException();
     }

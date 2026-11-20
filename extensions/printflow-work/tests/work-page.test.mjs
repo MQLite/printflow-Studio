@@ -2,7 +2,10 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { runWorkPageCommand } from '../work-page.js';
 
-function fixture({ work = true, switchWork = false, attachments = 0, renderParagraphs = false, existingPrompt = '', settleAfterInsert = false } = {}) {
+const originalConversation = 'a9999999-0000-4000-8000-000000000000';
+
+function fixture({ work = true, switchWork = false, attachments = 0, renderParagraphs = false, existingPrompt = '',
+  settleAfterInsert = false, posts = true, messages = [] } = {}) {
   const docUrl = new URL('https://chatgpt.com/');
   const editor = { innerText: existingPrompt, focus() {} };
   let modeClicks = 0;
@@ -14,7 +17,11 @@ function fixture({ work = true, switchWork = false, attachments = 0, renderParag
   let clicks = 0;
   let enteredText = existingPrompt;
   let insertions = 0;
-  const send = { disabled: false, click() { clicks++; docUrl.pathname = '/c/a9999999-0000-4000-8000-000000000000'; } };
+  const send = { disabled: false, click() {
+    clicks++;
+    docUrl.pathname = '/c/' + originalConversation;
+    if (posts) messages.push(enteredText);
+  } };
   const stop = {};
   const chips = Array.from({ length: attachments }, () => ({}));
   const form = { querySelectorAll(selector) {
@@ -29,7 +36,7 @@ function fixture({ work = true, switchWork = false, attachments = 0, renderParag
       if (selector.includes('aria-pressed')) return [toggle];
       if (selector.includes('Work with ChatGPT')) return work ? [editor] : [];
       if (selector.includes('Ask ChatGPT')) return work ? [] : [editor];
-      if (selector.includes('data-user-message-bubble')) return clicks ? [{ innerText: enteredText }] : [];
+      if (selector.includes('data-user-message-bubble')) return messages.map(innerText => ({ innerText }));
       return [];
     },
     execCommand(command, _, text) {
@@ -60,6 +67,35 @@ function fixture({ work = true, switchWork = false, attachments = 0, renderParag
 
 const identity = 'distinct-request/attempt';
 const prompt = '一张白底青绿色圆形图片。';
+
+test('a follow-up is staged and sent in the original conversation and requires a new message', async () => {
+  for (const posts of [true, false]) {
+    const page = fixture({ posts, messages: [prompt] });
+    page.url.pathname = '/c/' + originalConversation;
+    const stage = { kind: 'stage', identity, prompt, followUpConversationId: originalConversation };
+    assert.equal((await runWorkPageCommand(stage, page)).ok, true);
+    assert.equal(page.clicks, 0);
+    const permit = { kind: 'submit', identity, permitId: 'permit-1', expiresAt: Date.now() + 5000 };
+    const receipt = await runWorkPageCommand(permit, page);
+    assert.deepEqual(receipt, posts ? { ok: true, conversation: originalConversation } :
+      { ok: false, reason: 'WorkSubmitUnconfirmed' });
+    assert.equal(page.clicks, 1);
+    assert.equal(page.modeClicks, 0);
+  }
+});
+
+test('a follow-up refuses a different conversation before staging and before the permitted click', async () => {
+  const page = fixture();
+  const stage = { kind: 'stage', identity, prompt, followUpConversationId: originalConversation };
+  assert.equal((await runWorkPageCommand(stage, page)).ok, false);
+  assert.equal(page.insertions, 0);
+  page.url.pathname = '/c/' + originalConversation;
+  assert.equal((await runWorkPageCommand(stage, page)).ok, true);
+  page.url.pathname = '/c/c9999999-0000-4000-8000-000000000000';
+  const permit = { kind: 'submit', identity, permitId: 'permit-1', expiresAt: Date.now() + 5000 };
+  assert.equal((await runWorkPageCommand(permit, page)).ok, false);
+  assert.equal(page.clicks, 0);
+});
 
 test('a staged Work prompt is clicked once and a replay cannot click again', async () => {
   const page = fixture();

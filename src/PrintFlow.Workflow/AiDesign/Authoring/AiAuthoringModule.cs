@@ -28,6 +28,9 @@ public sealed partial class AiAuthoringModule(IAiAuthoringDraftStore store, AiTe
         {
             if (edit is AiAuthoringEdit.ReplaceDocument replacement)
                 edit = replacement with { Document = AiAuthoringSnapshots.Document(replacement.Document) };
+            if (edit is AiAuthoringEdit.SaveWorkbench workbench)
+                edit = new AiAuthoringEdit.SaveWorkbench(new Dictionary<string, string>(workbench.FieldChanges, StringComparer.Ordinal),
+                    AiAuthoringSnapshots.Document(workbench.Document));
             if (edit is AiAuthoringEdit.SetLayout pendingLayout)
                 edit = pendingLayout with { Layout = MemorialLayoutModule.Freeze(pendingLayout.Layout) };
             var read = await store.ReadAsync(id, ct); if (read.IsFailure) return read;
@@ -105,6 +108,22 @@ public sealed partial class AiAuthoringModule(IAiAuthoringDraftStore store, AiTe
                 case AiAuthoringEdit.ReplaceDocument document:
                     next = draft with { FinalDocument = document.Document, IsManuallyEdited = true, NeedsFieldReconcile = true };
                     break;
+                case AiAuthoringEdit.SaveWorkbench workspace:
+                    var updatedFields = new Dictionary<string, string>(draft.Fields, StringComparer.Ordinal);
+                    foreach (var (key, value) in workspace.FieldChanges)
+                    {
+                        if (!ValidWorkbenchField(draft, key, value)) return Fail("Invalid authoring field.");
+                        updatedFields[key] = value;
+                    }
+                    var generated = PromptDocumentComposer.Compose(draft.TemplateSnapshot, updatedFields).Document;
+                    next = draft with
+                    {
+                        Fields = updatedFields,
+                        FinalDocument = workspace.Document,
+                        HasLegacyProductSpecification = PromptDocumentComposer.HasOutdatedProductSpecification(draft),
+                        IsManuallyEdited = !PromptFieldSynchronization.ContentEquals(generated, workspace.Document)
+                    };
+                    break;
                 case AiAuthoringEdit.Recompose recompose:
                     if (draft.IsManuallyEdited && !recompose.PreservePrevious) return Fail("Preserve the manual draft before recomposing.");
                     var composedFields = new Dictionary<string, string>(draft.Fields, StringComparer.Ordinal);
@@ -112,7 +131,8 @@ public sealed partial class AiAuthoringModule(IAiAuthoringDraftStore store, AiTe
                         if (MemorialLayoutModule.FixedPromptSpecification(draft.Product, definition) is { } specification)
                             composedFields[definition.Key] = specification;
                     var composition = PromptDocumentComposer.Compose(draft.TemplateSnapshot, composedFields);
-                    next = draft with { Fields = composedFields, FinalDocument = composition.Document, IsManuallyEdited = false, NeedsFieldReconcile = false };
+                    next = draft with { Fields = composedFields, FinalDocument = composition.Document, IsManuallyEdited = false,
+                        HasLegacyProductSpecification = false, NeedsFieldReconcile = false };
                     break;
                 case AiAuthoringEdit.SwitchMode mode:
                     next = draft with { Mode = mode.Mode };
@@ -218,8 +238,24 @@ public sealed partial class AiAuthoringModule(IAiAuthoringDraftStore store, AiTe
         {
             Template = template.Reference, TemplateSnapshot = template.Content, Product = template.Content.Product,
             Fields = fields, Slots = slots, Bindings = [], InitialDocument = composition.Document, FinalDocument = composition.Document,
-            IsManuallyEdited = false, NeedsFieldReconcile = false, Confirmations = new Dictionary<string, string>(), Layout = null
+            IsManuallyEdited = false, HasLegacyProductSpecification = false, NeedsFieldReconcile = false,
+            Confirmations = new Dictionary<string, string>(), Layout = null
         });
+    }
+
+    private static bool ValidWorkbenchField(AiAuthoringDraft draft, string key, string value)
+    {
+        if (value is null) return false;
+        foreach (var field in draft.TemplateSnapshot.Fields.Where(x => x.Kind != AiTemplateFieldKind.ImageReference))
+        {
+            if (field.Key == key)
+                return MemorialLayoutModule.FixedPromptSpecification(draft.Product, field) is not { } fixedValue || fixedValue == value;
+            if (field.Kind == AiTemplateFieldKind.OptionalDateLine && AiTemplateMetadata.LabelKey(draft.TemplateSnapshot, field) == key)
+                return true;
+            if (AiAuthoringConfirmationRules.IsDate(field) && AiTemplateMetadata.FormatKey(draft.TemplateSnapshot, field) == key)
+                return value.Length == 0 || AiDetailedReview.DateFormats.Contains(value, StringComparer.Ordinal);
+        }
+        return false;
     }
 
     private static OperationResult<AiAuthoringDraft> Fail(string message) => OperationResult.Fail<AiAuthoringDraft>(FailureCode.PreconditionNotMet, message);

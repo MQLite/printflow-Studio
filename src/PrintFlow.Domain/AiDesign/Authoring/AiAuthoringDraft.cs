@@ -23,6 +23,7 @@ public sealed record AiAuthoringDraft
     public IReadOnlyList<AiReferenceSlot> Slots { get; init; } = [];
     public IReadOnlyList<AiSlotBinding> Bindings { get; init; } = [];
     public bool IsManuallyEdited { get; init; }
+    public bool HasLegacyProductSpecification { get; init; }
     public bool NeedsFieldReconcile { get; init; }
     public IReadOnlyDictionary<string, string> Confirmations { get; init; } =
         new ReadOnlyDictionary<string, string>(new Dictionary<string, string>(StringComparer.Ordinal));

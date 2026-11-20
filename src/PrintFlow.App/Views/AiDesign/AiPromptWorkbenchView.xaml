@@ -3,6 +3,7 @@
  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
  xmlns:local="clr-namespace:PrintFlow.App.Views.AiDesign"
  xmlns:r="clr-namespace:PrintFlow.App.Views.AiDesign"
+ xmlns:views="clr-namespace:PrintFlow.App.Views"
  Background="{DynamicResource PF.Brush.Canvas}" Foreground="{DynamicResource PF.Brush.Ink}"
  FontFamily="{DynamicResource PF.Font.Family}" FontSize="14"
  AutomationProperties.AutomationId="Screen.AiPromptWorkbench">
@@ -10,8 +11,7 @@
   <ResourceDictionary>
    <ResourceDictionary.MergedDictionaries><ResourceDictionary Source="/PrintFlow.App;component/Themes/WpfUiTheme.xaml" /></ResourceDictionary.MergedDictionaries>
    <BooleanToVisibilityConverter x:Key="BoolVisibility" />
-   <DataTemplate x:Key="QuickPage"><local:QuickPromptView/></DataTemplate>
-   <DataTemplate x:Key="DetailedPage"><local:DetailedPromptView/></DataTemplate>
+   <views:PreviewPayloadConverter x:Key="WorkPreviewPayload"/>
   </ResourceDictionary>
  </UserControl.Resources>
  <DockPanel Margin="20">
@@ -24,38 +24,33 @@
    <Grid.Style><Style TargetType="Grid"><Setter Property="IsEnabled" Value="False"/><Style.Triggers><MultiDataTrigger><MultiDataTrigger.Conditions>
     <Condition Binding="{Binding TemplateEditor}" Value="{x:Null}"/><Condition Binding="{Binding ExpandedPhoto}" Value="{x:Null}"/>
     <Condition Binding="{Binding IsChangePending}" Value="False"/><Condition Binding="{Binding IsSavedDraftsVisible}" Value="False"/>
+    <Condition Binding="{Binding ShowWorkPreview}" Value="False"/>
+    <Condition Binding="{Binding ShowFollowUpEditor}" Value="False"/>
    </MultiDataTrigger.Conditions><Setter Property="IsEnabled" Value="True"/></MultiDataTrigger></Style.Triggers></Style></Grid.Style>
    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
-  <StackPanel Margin="0,0,0,14">
-   <DockPanel Margin="0,0,0,8">
-   <Button DockPanel.Dock="Right" Content="{Binding WorkTasksLabel}" Command="{Binding ShowWorkTasksCommand}"
-    Padding="12,4" HorizontalAlignment="Right" AutomationProperties.AutomationId="AiPrompt.WorkTasks"/>
-   <WrapPanel>
-    <Button Content="{Binding ReturnHomeLabel}" Command="{Binding ReturnHomeCommand}" IsEnabled="{Binding CanEdit}" Margin="0,0,10,0" Padding="10,4" AutomationProperties.AutomationId="AiPrompt.ReturnHome"/>
-    <Button Content="{Binding SavedDraftsLabel}" Command="{Binding ShowSavedDraftsCommand}" IsEnabled="{Binding CanEdit}" Padding="10,4" AutomationProperties.AutomationId="AiPrompt.SavedDrafts"/>
+  <DockPanel Margin="0,0,0,12" LastChildFill="True">
+   <WrapPanel DockPanel.Dock="Right">
+    <Button Content="{Binding ReturnHomeLabel}" Command="{Binding ReturnHomeCommand}" Margin="0,0,8,0" Padding="10,6" AutomationProperties.AutomationId="AiPrompt.ReturnHome"/>
+    <Button Content="{x:Static r:AiPromptLabels.AiPrompt_DraftsShort}" Command="{Binding ShowSavedDraftsCommand}" Margin="0,0,8,0" Padding="10,6" AutomationProperties.AutomationId="AiPrompt.SavedDrafts"/>
+    <Button Content="{Binding WorkTasksLabel}" Command="{Binding ShowWorkTasksCommand}" Padding="10,6" AutomationProperties.AutomationId="AiPrompt.WorkTasks"/>
    </WrapPanel>
-   </DockPanel>
-   <TextBlock Text="{x:Static r:AiPromptLabels.AiPrompt_Title}" FontSize="26" FontWeight="SemiBold"/>
-   <WrapPanel Margin="0,6,0,0"><Button Content="{x:Static r:AiPromptLabels.AiPrompt_Quick}" Command="{Binding SwitchToQuickCommand}" Padding="12,6" Margin="0,0,8,0" IsEnabled="{Binding CanEdit}"/><Button Content="{x:Static r:AiDetailedLabels.Detailed}" Command="{Binding SwitchToDetailedCommand}" Padding="12,6" Margin="0,0,12,0" IsEnabled="{Binding CanEdit}"/><TextBlock Text="{x:Static r:AiDetailedLabels.ModeNotice}" VerticalAlignment="Center" TextWrapping="Wrap"/></WrapPanel>
-  </StackPanel>
-  <ContentControl Grid.Row="1" Content="{Binding}"><ContentControl.Style><Style TargetType="ContentControl"><Setter Property="ContentTemplate" Value="{StaticResource QuickPage}"/><Style.Triggers><DataTrigger Binding="{Binding IsDetailed}" Value="True"><Setter Property="ContentTemplate" Value="{StaticResource DetailedPage}"/></DataTrigger></Style.Triggers></Style></ContentControl.Style></ContentControl>
+   <TextBlock Text="{x:Static r:AiPromptLabels.AiPrompt_Title}" FontSize="28" FontWeight="SemiBold" VerticalAlignment="Center"/>
+  </DockPanel>
+  <local:AiGenerationEditorView Grid.Row="1"/>
   <StackPanel Grid.Row="2">
-   <local:WorkResultCardView Margin="0,10,0,0" Visibility="{Binding HasWorkCard, Converter={StaticResource BoolVisibility}}"/>
+   <local:WorkResultCardView Margin="0,10,0,0" Visibility="{Binding ShowGenerationProgress, Converter={StaticResource BoolVisibility}}"/>
   <Grid Margin="0,10,0,0">
-   <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+   <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
    <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
     <TextBlock Text="{Binding Error}" TextWrapping="Wrap" Foreground="#B42318" AutomationProperties.LiveSetting="Polite"/>
     <TextBlock Text="{Binding WorkCardNotice}" TextWrapping="Wrap" Foreground="#B42318"/>
     <TextBlock Text="{Binding Status}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite"/>
    </StackPanel>
-   <Button Grid.Column="1" Content="{x:Static r:AiPromptLabels.AiPrompt_Save}" Command="{Binding SaveDraftCommand}" Margin="0,0,10,0" Padding="16,10" IsEnabled="{Binding CanEdit}"/>
-   <Button Grid.Column="2" Content="{x:Static r:AiPromptLabels.AiPrompt_Copy}" Command="{Binding CopyCommand}" Margin="0,0,10,0" Padding="16,10" IsEnabled="{Binding CanEdit}"
-    AutomationProperties.AutomationId="AiPrompt.Copy"/>
-   <Button Grid.Column="3" Content="{Binding StopReceivingLabel}" Command="{Binding StopReceivingCommand}"
+   <Button Grid.Column="1" Content="{Binding StopReceivingLabel}" Command="{Binding StopReceivingCommand}"
     Visibility="{Binding CanStopReceiving, Converter={StaticResource BoolVisibility}}"
     Margin="0,0,10,0" Padding="16,10" AutomationProperties.AutomationId="AiPrompt.StopReceiving"/>
-   <Button Grid.Column="4" Content="{Binding AutoGenerateLabel}" Command="{Binding AutoGenerateCommand}" Padding="16,10"
-    AutomationProperties.AutomationId="AiPrompt.AutoGenerate" Background="#007F6B" Foreground="White"/>
+   <Button Grid.Column="2" Content="{Binding AutoGenerateLabel}" Command="{Binding AutoGenerateCommand}" Padding="24,10"
+    MinWidth="140" AutomationProperties.AutomationId="AiPrompt.AutoGenerate" Background="#007F6B" Foreground="White"/>
   </Grid>
   </StackPanel>
   </Grid>
@@ -81,6 +76,58 @@
    <DockPanel>
     <Button DockPanel.Dock="Bottom" Content="{x:Static r:AiPromptLabels.AiPrompt_Close}" Command="{Binding ClosePhotoCommand}" Padding="16,8" HorizontalAlignment="Right"/>
     <local:PromptPhotoPreview DataContext="{Binding ExpandedPhoto}"/>
+   </DockPanel>
+  </Border>
+  <Border Grid.RowSpan="3" Background="{DynamicResource PF.Brush.Canvas}" Padding="16" KeyboardNavigation.TabNavigation="Cycle"
+          Visibility="{Binding ShowWorkPreview, Converter={StaticResource BoolVisibility}}" AutomationProperties.AutomationId="AiPrompt.ResultPreview">
+   <DockPanel>
+    <DockPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+     <Button DockPanel.Dock="Right" Content="{x:Static r:AiPromptLabels.AiPrompt_Close}" Command="{Binding CloseWorkResultPreviewCommand}"
+             Padding="14,6" AutomationProperties.AutomationId="AiPrompt.CloseResultPreview"/>
+     <TextBlock Text="{Binding WorkPreviewTitle}" FontSize="22" FontWeight="SemiBold" VerticalAlignment="Center"/>
+    </DockPanel>
+    <Grid>
+     <Image Source="{Binding WorkPreview.Payload, Converter={StaticResource WorkPreviewPayload}}" Stretch="Uniform"
+            AutomationProperties.Name="{Binding WorkPreviewTitle}"/>
+     <TextBlock Text="{Binding WorkPreviewNotice}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite"/>
+    </Grid>
+   </DockPanel>
+  </Border>
+  <Border Grid.RowSpan="3" Background="{DynamicResource PF.Brush.Canvas}" Padding="18" KeyboardNavigation.TabNavigation="Cycle"
+          Visibility="{Binding ShowFollowUpEditor, Converter={StaticResource BoolVisibility}}" AutomationProperties.AutomationId="AiPrompt.FollowUpEditor">
+   <DockPanel>
+    <DockPanel DockPanel.Dock="Top" Margin="0,0,0,16">
+     <Button DockPanel.Dock="Right" Content="{x:Static r:AiPromptLabels.AiPrompt_Close}" Command="{Binding CloseFollowUpEditorCommand}"
+             Padding="14,6" AutomationProperties.AutomationId="AiPrompt.CloseFollowUp"/>
+     <TextBlock Text="{Binding RegenerateInWorkLabel}" FontSize="22" FontWeight="SemiBold" VerticalAlignment="Center"/>
+    </DockPanel>
+    <Grid>
+     <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+     <Border Background="{DynamicResource PF.Brush.Surface}" Margin="0,0,16,0" Padding="12" CornerRadius="12">
+      <Grid>
+       <Image Source="{Binding WorkPreview.Payload, Converter={StaticResource WorkPreviewPayload}}" Stretch="Uniform"
+              AutomationProperties.Name="{Binding WorkPreviewTitle}"/>
+       <TextBlock Text="{Binding WorkPreviewNotice}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                  TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite"/>
+      </Grid>
+     </Border>
+     <DockPanel Grid.Column="1">
+      <StackPanel DockPanel.Dock="Bottom" Margin="0,12,0,0">
+       <TextBlock Text="{Binding FollowUpFeedback}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite"/>
+       <Button Content="{Binding SubmitFollowUpLabel}" Command="{Binding SubmitFollowUpCommand}" HorizontalAlignment="Right"
+               Margin="0,8,0,0" Padding="24,10" Background="#007F6B" Foreground="White" AutomationProperties.AutomationId="AiPrompt.SubmitFollowUp"/>
+      </StackPanel>
+      <Border BorderBrush="#C6D5CF" BorderThickness="1" Background="{DynamicResource PF.Brush.Surface}" Padding="14" CornerRadius="12">
+       <DockPanel>
+        <TextBlock DockPanel.Dock="Top" Text="{Binding FollowUpPrefix}" FontWeight="SemiBold" Margin="0,0,0,8"/>
+        <TextBox Text="{Binding FollowUpInstructions, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True"
+                 TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" BorderThickness="0" Padding="0"
+                 AutomationProperties.Name="{Binding FollowUpPrefix}" AutomationProperties.AutomationId="AiPrompt.FollowUpInstructions"/>
+       </DockPanel>
+      </Border>
+     </DockPanel>
+    </Grid>
    </DockPanel>
   </Border>
   <Border Grid.RowSpan="3" Background="{DynamicResource PF.Brush.Canvas}" Padding="16" KeyboardNavigation.TabNavigation="Cycle" Visibility="{Binding IsSavedDraftsVisible, Converter={StaticResource BoolVisibility}}">

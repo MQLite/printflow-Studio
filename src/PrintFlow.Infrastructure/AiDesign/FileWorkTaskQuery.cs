@@ -36,7 +36,8 @@ public sealed class FileWorkTaskQuery(FileAiDesignRequestStore store, ISessionSe
         if (request.WorkDraft is null && conversation is null && !ticket) return null;
 
         var task = new WorkTaskSnapshot(request.RequestId, request.AttemptId, request.StateVersion, request.WorkDraft?.DraftId,
-            request.WorkDraft?.Title, request.UpdatedAtUtc, WorkTaskStage.NeedsAttention, conversation);
+            request.WorkDraft?.Title, request.UpdatedAtUtc, WorkTaskStage.NeedsAttention, conversation,
+            FollowUpSourceRequestId: request.WorkFollowUp?.RequestId);
         if (request.State == AiDesignState.Cancelled) return task with { Stage = WorkTaskStage.Cancelled };
         if (request.State == AiDesignState.Imported)
         {
@@ -52,7 +53,10 @@ public sealed class FileWorkTaskQuery(FileAiDesignRequestStore store, ISessionSe
             return task with { Stage = WorkTaskStage.SubmittedOnly };
         if ((ticket || request.Failure?.Code == "WorkResultPending") && AiDesignTransitions.CanResumeWorkResult(request))
         {
-            task = task with { CanStopReceiving = request.Failure?.Code is "WorkResultPending" or "Interrupted" };
+            var awaiting = request.State == AiDesignState.AwaitingWorkFollowUp ?
+                WorkTaskStage.AwaitingFollowUp : WorkTaskStage.AwaitingReturn;
+            task = task with { CanStopReceiving = request.State == AiDesignState.AwaitingWorkFollowUp ||
+                request.Failure?.Code is "WorkResultPending" or "Interrupted" };
             var observed = progress.Find(request.RequestId);
             if (observed is not null && observed.AttemptId == request.AttemptId && observed.StateVersion == request.StateVersion)
                 return observed.Stage switch
@@ -67,9 +71,9 @@ public sealed class FileWorkTaskQuery(FileAiDesignRequestStore store, ISessionSe
                         WorkResultProblem.ImageProcessingSettings => WorkTaskFailure.ImageProcessingSettings,
                         _ => WorkTaskFailure.ReceiverUnavailable
                     }},
-                    _ => task with { Stage = WorkTaskStage.AwaitingReturn }
+                    _ => task with { Stage = awaiting }
                 };
-            return task with { Stage = WorkTaskStage.AwaitingReturn };
+            return task with { Stage = awaiting };
         }
         if (request.State == AiDesignState.Submitted && conversation is not null && ticket)
             return task with { Stage = WorkTaskStage.AwaitingReturn };

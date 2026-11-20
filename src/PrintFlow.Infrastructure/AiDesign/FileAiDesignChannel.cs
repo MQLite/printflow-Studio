@@ -37,7 +37,7 @@ public sealed class FileAiDesignChannel(AiDesignBridgeConfiguration? configurati
             bool verified=configuration.VerifiedWorkContractHash is not null&&connection.WorkContractHash==configuration.VerifiedWorkContractHash&&connection.Available
                 && (expectedLaunchNonce is null || connection.LaunchNonce == expectedLaunchNonce);
             return OperationResult.Ok(new AiDesignBridgeReadiness(verified,1,configuration.HostVersion,configuration.ExtensionOrigin,identity,
-                verified?null:"WorkContractUnverified",connection.ConnectionId));
+                verified?null:"WorkContractUnverified",connection.ConnectionId,verified&&connection.SupportsWorkFollowUp));
         }
         catch(Exception ex) when(ex is IOException or UnauthorizedAccessException or JsonException or ArgumentException or System.ComponentModel.Win32Exception or OperationCanceledException)
         {return Unavailable("BridgeDisconnected",identity);}
@@ -46,6 +46,8 @@ public sealed class FileAiDesignChannel(AiDesignBridgeConfiguration? configurati
     {
         var readiness=await CheckAsync(ct);
         if(readiness.IsFailure||!readiness.Value.Available||configuration is null)return OperationResult.Fail<Unit>(FailureCode.AdapterUnavailable,"WorkBridgeUnavailable");
+        if (request.WorkFollowUp?.ConversationId is not null && (!readiness.Value.SupportsWorkFollowUp || prepareResult is null))
+            return OperationResult.Fail<Unit>(FailureCode.AdapterUnavailable, "WorkFollowUpBridgeUnavailable");
         var store=new FileAiDesignRequestStore(configuration.WorkspaceRoot);var read=await store.ReadAsync(request.RequestId,ct);
         if(read.IsFailure||!FileAiDesignRequestStore.Matches(read.Value,request.Fence)||request.State!=AiDesignState.Queued||request.ConnectionId!=readiness.Value.ConnectionId
             ||request.WorkspaceIdentity!=readiness.Value.WorkspaceIdentity)return OperationResult.Fail<Unit>(FailureCode.PreconditionNotMet,"BridgeFenceMismatch");

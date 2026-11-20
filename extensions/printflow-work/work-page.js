@@ -30,6 +30,9 @@ export async function runWorkPageCommand(command, testPage) {
   const readyFile = (form, name) => find(form, 'button[aria-label], [role="button"][aria-label]',
     e => e.getAttribute('aria-label') === name && !e.disabled && e.getAttribute('aria-disabled') !== 'true') &&
     removes(form).some(e => e.getAttribute('aria-label') === 'Remove ' + name);
+  const matchesPath = path => url.pathname.toLowerCase() === path;
+  const isGenerating = () => Array.from(doc.querySelectorAll(
+    'button[data-testid="stop-button"], button[aria-label="Stop generating"]')).some(visible);
   const poll = async (read, milliseconds) => {
     const deadline = Date.now() + milliseconds;
     do {
@@ -49,13 +52,16 @@ export async function runWorkPageCommand(command, testPage) {
 
   if (command.kind === 'stage') {
     const names = command.attachmentNames ?? [];
-    if (url.pathname !== '/' || state.identity || typeof command.prompt !== 'string' ||
+    const followUp = command.followUpConversationId;
+    const path = followUp ? '/c/' + followUp : '/';
+    if ((followUp && (!/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/.test(followUp) || names.length)) ||
+        !matchesPath(path) || state.identity || typeof command.prompt !== 'string' ||
         !command.prompt.trim() || command.prompt.length > 100000 || !Array.isArray(names) || names.length > 8 ||
         names.some(name => typeof name !== 'string' || !uploadName.test(name)) || new Set(names).size !== names.length)
       return fail('WorkPageUnknown');
-    const toggle = await poll(workToggle, 5000);
-    if (!toggle || url.pathname !== '/') return fail('WorkModeUnavailable');
-    if (toggle.getAttribute('aria-pressed') === 'false') {
+    const toggle = followUp ? null : await poll(workToggle, 5000);
+    if (!matchesPath(path) || (!followUp && !toggle)) return fail('WorkModeUnavailable');
+    if (toggle?.getAttribute('aria-pressed') === 'false') {
       if (state.modeSwitchRequested || toggle.disabled || toggle.getAttribute('aria-disabled') === 'true')
         return fail('WorkModeUnavailable');
       const chat = await poll(chatEditor, 5000);
@@ -72,16 +78,19 @@ export async function runWorkPageCommand(command, testPage) {
         currentToggle.click();
       }
     }
-    const input = await poll(() => url.pathname === '/' &&
-      workToggle()?.getAttribute('aria-pressed') === 'true' && editor(), 5000);
+    const input = await poll(() => matchesPath(path) &&
+      (followUp || workToggle()?.getAttribute('aria-pressed') === 'true') && editor(), 5000);
     if (!input) return fail('WorkModeUnavailable');
     const form = input?.closest('form');
     const prompt = command.prompt.replace(/\r\n/g, '\n');
     const existing = input ? composerText(input) : '';
-    if (!form || (existing.trim() && existing !== prompt) || find(form, '[role="progressbar"]') ||
+    if (!form || (existing.trim() && existing !== prompt) || (followUp && isGenerating()) ||
+        find(form, '[role="progressbar"]') ||
         Array.from(form.querySelectorAll('button[aria-label^="Remove "]')).some(visible))
       return fail('WorkComposerChanged');
     state.identity = command.identity;
+    state.path = path;
+    state.followUp = followUp;
     state.attachmentNames = names;
     state.uploaded = [];
     state.prompt = prompt;
@@ -92,7 +101,7 @@ export async function runWorkPageCommand(command, testPage) {
     // Work can rebuild the editor after insertion. Verify its live content before enabling uploads.
     const stagedForm = await poll(() => {
       const current = editor();
-      return current && composerText(current) === prompt && current.closest('form');
+      return matchesPath(path) && current && composerText(current) === prompt && current.closest('form');
     }, 2500);
     if (!stagedForm) return fail('WorkPromptRejected');
     if (!await poll(() => find(stagedForm, 'button[type="submit"][aria-label="Send"]', e => !e.disabled), 2500))
@@ -138,26 +147,28 @@ export async function runWorkPageCommand(command, testPage) {
 
   if (command.kind !== 'submit' || state.identity !== command.identity || state.clicked ||
       typeof command.permitId !== 'string' || !command.permitId ||
-      !Number.isSafeInteger(command.expiresAt) || Date.now() >= command.expiresAt || url.pathname !== '/')
+      !Number.isSafeInteger(command.expiresAt) || Date.now() >= command.expiresAt || !matchesPath(state.path))
     return fail('WorkPermitMismatch');
-  if (workToggle()?.getAttribute('aria-pressed') !== 'true') return fail('WorkModeUnavailable');
+  if (!state.followUp && workToggle()?.getAttribute('aria-pressed') !== 'true') return fail('WorkModeUnavailable');
 
   const input = editor();
   const form = input?.closest('form');
   const send = form && find(form, 'button[type="submit"][aria-label="Send"]', e => !e.disabled);
-  if (!send || composerText(input) !== state.prompt ||
+  if (!send || composerText(input) !== state.prompt || (state.followUp && isGenerating()) ||
       state.uploaded.length !== state.attachmentNames.length || removes(form).length !== state.attachmentNames.length ||
       !state.attachmentNames.every(name => readyFile(form, name)) ||
       Array.from(form.querySelectorAll('[role="progressbar"]')).some(visible))
     return fail('WorkComposerChanged');
 
+  const matchingUserMessages = () => Array.from(doc.querySelectorAll('[data-user-message-bubble] .whitespace-pre-wrap'))
+    .filter(bubble => editableText(bubble) === state.prompt).length;
+  const before = matchingUserMessages();
   // Reserve the page-side click before interacting with the site, including uncertain outcomes.
   state.clicked = true;
   send.click();
   const conversation = await poll(() => {
     const match = /^\/c\/([0-9a-f-]{36})$/i.exec(url.pathname);
-    const submitted = find(doc, '[data-user-message-bubble] .whitespace-pre-wrap', bubble => editableText(bubble) === state.prompt);
-    return match && submitted && match[1];
+    return match && (!state.followUp || matchesPath(state.path)) && matchingUserMessages() > before && match[1];
   }, 7000);
   return conversation ? { ok: true, conversation } : fail('WorkSubmitUnconfirmed');
 }

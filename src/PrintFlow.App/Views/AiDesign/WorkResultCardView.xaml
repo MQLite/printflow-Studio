@@ -6,61 +6,88 @@
  <UserControl.Resources>
   <BooleanToVisibilityConverter x:Key="Visible"/>
   <views:PreviewPayloadConverter x:Key="Preview"/>
+  <Style x:Key="ProgressLine" TargetType="Border">
+   <Setter Property="Height" Value="2"/><Setter Property="Background" Value="#9CAFAA"/>
+   <Setter Property="VerticalAlignment" Value="Center"/>
+  </Style>
  </UserControl.Resources>
- <Border BorderBrush="{DynamicResource PF.Brush.Border}" BorderThickness="1" CornerRadius="8">
-  <DockPanel>
-   <Border DockPanel.Dock="Top" Background="#E1F6F1" CornerRadius="7,7,0,0" Padding="12,5">
-    <TextBlock Text="{Binding WorkResultLabel}" FontWeight="SemiBold" Foreground="#06483E"/>
-   </Border>
-   <Grid Margin="12,8">
-    <Grid.ColumnDefinitions>
-     <ColumnDefinition Width="78"/><ColumnDefinition Width="1.1*"/><ColumnDefinition Width="1.4*"/><ColumnDefinition Width="Auto"/>
-    </Grid.ColumnDefinitions>
-    <Border Height="70" Padding="3" Background="{DynamicResource PF.Brush.Canvas}" BorderBrush="#8DAEA7" BorderThickness="1" CornerRadius="5">
-     <Grid>
-      <TextBlock Text="{Binding WorkCard.Placeholder}" FontSize="11" TextWrapping="Wrap" TextAlignment="Center"
-       HorizontalAlignment="Center" VerticalAlignment="Center">
-       <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers>
-        <DataTrigger Binding="{Binding WorkCard.HasThumbnail}" Value="True"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger>
-       </Style.Triggers></Style></TextBlock.Style>
-      </TextBlock>
-      <Image Source="{Binding WorkCard.Thumbnail, Converter={StaticResource Preview}}"
-       Visibility="{Binding WorkCard.HasThumbnail, Converter={StaticResource Visible}}" Stretch="Uniform"/>
-     </Grid>
-    </Border>
-    <StackPanel Grid.Column="1" Margin="12,0" VerticalAlignment="Center">
-     <TextBlock Text="{Binding WorkCard.Title}" TextTrimming="CharacterEllipsis" FontWeight="SemiBold"/>
-     <TextBlock Text="{Binding WorkCard.Stage, NotifyOnTargetUpdated=True}" TextWrapping="Wrap" FontWeight="SemiBold"
-      Foreground="#007362" AutomationProperties.LiveSetting="Polite" TargetUpdated="OnStageUpdated"/>
-     <TextBlock Text="{Binding WorkCard.ImageFacts}" FontSize="12" TextWrapping="Wrap"/>
-     <TextBlock Text="{Binding WorkCard.Problem}" FontSize="12" TextWrapping="Wrap"/>
-    </StackPanel>
-    <ItemsControl Grid.Column="2" ItemsSource="{Binding WorkCard.Milestones}" VerticalAlignment="Center" Margin="0,0,12,0">
-     <ItemsControl.ItemsPanel><ItemsPanelTemplate><UniformGrid Rows="1"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
-     <ItemsControl.ItemTemplate>
-      <DataTemplate>
-       <StackPanel HorizontalAlignment="Center">
-        <TextBlock TextAlignment="Center" FontSize="16">
-         <TextBlock.Style><Style TargetType="TextBlock">
-          <Setter Property="Text" Value="○"/><Setter Property="Foreground" Value="#64827D"/>
-          <Style.Triggers><DataTrigger Binding="{Binding Reached}" Value="True">
-           <Setter Property="Text" Value="✓"/><Setter Property="Foreground" Value="#007F6B"/>
-          </DataTrigger></Style.Triggers>
-         </Style></TextBlock.Style>
-        </TextBlock>
-        <TextBlock Text="{Binding Label}" FontSize="11" TextAlignment="Center" TextWrapping="Wrap"/>
-       </StackPanel>
-      </DataTemplate>
-     </ItemsControl.ItemTemplate>
-    </ItemsControl>
-    <StackPanel Grid.Column="3" VerticalAlignment="Center">
+ <Border Background="#E9F8F4" BorderBrush="#B8DFD5" BorderThickness="1" CornerRadius="8" Padding="12,8">
+  <StackPanel>
+   <DockPanel>
+    <WrapPanel DockPanel.Dock="Right">
+     <Button Content="{Binding OpenWorkResultPreviewLabel}" Command="{Binding OpenWorkResultPreviewCommand}" Padding="10,6"
+      Margin="0,0,8,0" Visibility="{Binding WorkCard.CanContinue, Converter={StaticResource Visible}, FallbackValue=Collapsed}"
+      AutomationProperties.AutomationId="AiPrompt.OpenResultPreview"/>
      <Button Content="{Binding ContinueWorkResultLabel}" ToolTip="{Binding ContinueWorkResultHint}"
       Command="{Binding ContinueWorkResultCommand}" Padding="10,6" Background="#007F6B" Foreground="White"
-      Visibility="{Binding WorkCard.CanContinue, Converter={StaticResource Visible}}" AutomationProperties.AutomationId="AiPrompt.ContinueWorkResult"/>
-     <Button Content="{Binding ViewWorkLabel}" Command="{Binding ViewWorkCommand}" Padding="10,5"
-      Visibility="{Binding WorkCard.CanViewWork, Converter={StaticResource Visible}}" AutomationProperties.AutomationId="AiPrompt.ViewWork"/>
+      Visibility="{Binding WorkCard.CanContinue, Converter={StaticResource Visible}, FallbackValue=Collapsed}" AutomationProperties.AutomationId="AiPrompt.ContinueWorkResult"/>
+     <Button Content="{Binding ViewWorkLabel}" Command="{Binding ViewWorkCommand}" Padding="10,5" Margin="8,0,0,0"
+      Visibility="{Binding WorkCard.CanViewWork, Converter={StaticResource Visible}, FallbackValue=Collapsed}" AutomationProperties.AutomationId="AiPrompt.ViewWork"/>
+     <Button Content="{Binding RegenerateInWorkLabel}" Command="{Binding RegenerateInWorkCommand}" Padding="10,5" Margin="8,0,0,0"
+      Visibility="{Binding WorkCard.CanRegenerate, Converter={StaticResource Visible}, FallbackValue=Collapsed}"
+      AutomationProperties.AutomationId="AiPrompt.RegenerateInWork"/>
+    </WrapPanel>
+    <StackPanel VerticalAlignment="Center">
+     <TextBlock Text="{Binding GenerationProgressLabel}" FontSize="16" FontWeight="SemiBold" Foreground="#12483E"/>
+     <TextBlock Text="{Binding GenerationFeedback, NotifyOnTargetUpdated=True}" TextWrapping="Wrap" Foreground="#12483E"
+      AutomationProperties.LiveSetting="Polite" TargetUpdated="OnStageUpdated"/>
+     <TextBlock Text="{Binding WorkCard.Problem}" TextWrapping="Wrap" Foreground="#84251C"/>
     </StackPanel>
-   </Grid>
-  </DockPanel>
+   </DockPanel>
+   <ItemsControl ItemsSource="{Binding GenerationMilestones}" Margin="0,6,0,0">
+    <ItemsControl.ItemsPanel><ItemsPanelTemplate><UniformGrid Rows="1"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+    <ItemsControl.ItemTemplate>
+     <DataTemplate>
+      <StackPanel>
+       <Grid Height="22">
+        <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions>
+        <Border Visibility="{Binding HasPrevious, Converter={StaticResource Visible}}">
+         <Border.Style>
+          <Style TargetType="Border" BasedOn="{StaticResource ProgressLine}">
+           <Style.Triggers>
+            <DataTrigger Binding="{Binding Reached}" Value="True"><Setter Property="Background" Value="#007F6B"/></DataTrigger>
+            <DataTrigger Binding="{Binding IsCurrent}" Value="True"><Setter Property="Background" Value="#007F6B"/></DataTrigger>
+           </Style.Triggers>
+          </Style>
+         </Border.Style>
+        </Border>
+        <Border Grid.Column="1" Visibility="{Binding HasNext, Converter={StaticResource Visible}}">
+         <Border.Style>
+          <Style TargetType="Border" BasedOn="{StaticResource ProgressLine}">
+           <Style.Triggers><DataTrigger Binding="{Binding Reached}" Value="True"><Setter Property="Background" Value="#007F6B"/></DataTrigger></Style.Triggers>
+          </Style>
+         </Border.Style>
+        </Border>
+        <Border Grid.ColumnSpan="2" Width="20" Height="20" HorizontalAlignment="Center" BorderThickness="2" CornerRadius="10">
+         <Border.Style>
+          <Style TargetType="Border">
+           <Setter Property="Background" Value="White"/><Setter Property="BorderBrush" Value="#8A9C97"/>
+           <Style.Triggers>
+            <DataTrigger Binding="{Binding Reached}" Value="True"><Setter Property="Background" Value="#007F6B"/><Setter Property="BorderBrush" Value="#007F6B"/></DataTrigger>
+            <DataTrigger Binding="{Binding IsCurrent}" Value="True"><Setter Property="BorderBrush" Value="#007F6B"/></DataTrigger>
+           </Style.Triggers>
+          </Style>
+         </Border.Style>
+         <Grid>
+          <TextBlock Text="✓" Visibility="{Binding Reached, Converter={StaticResource Visible}}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" FontSize="11"/>
+          <Ellipse Width="8" Height="8" Fill="#007F6B" Visibility="{Binding IsCurrent, Converter={StaticResource Visible}}"/>
+         </Grid>
+        </Border>
+       </Grid>
+       <TextBlock Text="{Binding Label}" FontSize="12" TextAlignment="Center" TextWrapping="Wrap" Margin="3,3,3,0">
+        <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers>
+         <DataTrigger Binding="{Binding IsCurrent}" Value="True"><Setter Property="FontWeight" Value="Bold"/></DataTrigger>
+        </Style.Triggers></Style></TextBlock.Style>
+       </TextBlock>
+      </StackPanel>
+     </DataTemplate>
+    </ItemsControl.ItemTemplate>
+   </ItemsControl>
+   <StackPanel Orientation="Horizontal" Margin="0,7,0,0" Visibility="{Binding WorkCard.CanContinue, Converter={StaticResource Visible}, FallbackValue=Collapsed}">
+    <Image Width="48" Height="40" Source="{Binding WorkCard.Thumbnail, Converter={StaticResource Preview}}"
+     Visibility="{Binding WorkCard.HasThumbnail, Converter={StaticResource Visible}, FallbackValue=Collapsed}" Stretch="Uniform"/>
+    <TextBlock Text="{Binding WorkCard.ImageFacts}" Margin="8,0,0,0" VerticalAlignment="Center" FontSize="12"/>
+   </StackPanel>
+  </StackPanel>
  </Border>
 </UserControl>

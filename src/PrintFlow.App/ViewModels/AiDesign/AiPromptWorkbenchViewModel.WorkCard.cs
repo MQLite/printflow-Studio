@@ -11,6 +11,7 @@ public sealed partial class AiPromptWorkbenchViewModel
     private readonly IWorkTaskQuery? workTasks;
     private readonly WorkTaskTracker? workTracker;
     private readonly IArtefactPreviewService? workPreviews;
+    private readonly IWorkConversationLauncher? workLauncher;
     private CancellationTokenSource? workQueryCancellation, workThumbnailCancellation;
     private bool isLoadingWorkCard, workCardUnavailable;
     public string? WorkCardNotice => workCardUnavailable ? Strings.Resolve("WorkTask_LoadFailed") : null;
@@ -23,6 +24,7 @@ public sealed partial class AiPromptWorkbenchViewModel
         {
             if (!SetProperty(ref workCard, value)) return;
             OnPropertyChanged(nameof(HasWorkCard));
+            NotifyGenerationProgress();
             NotifyWorkActions();
         }
     }
@@ -30,7 +32,6 @@ public sealed partial class AiPromptWorkbenchViewModel
     public IAsyncRelayCommand ShowWorkTasksCommand { get; }
     public string WorkTasksLabel => Strings.Resolve("WorkTask_HistoryTitle");
     public bool HasWorkCard => WorkCard is not null;
-    public string WorkResultLabel => Strings.Resolve("WorkTask_Result");
     public string ViewWorkLabel => Strings.Resolve("WorkTask_ViewWork");
     public IRelayCommand ViewWorkCommand { get; }
     internal Task WorkCardRefresh { get; private set; } = Task.CompletedTask;
@@ -56,10 +57,15 @@ public sealed partial class AiPromptWorkbenchViewModel
         workThumbnailCancellation?.Cancel();
         workThumbnailCancellation?.Dispose();
         workThumbnailCancellation = null;
+        CloseWorkPreview();
+        CloseFollowUpEditor();
         submittedWorkRequest = null;
+        generationStarted = submittingGeneration = false;
+        generationFeedback = null;
         SetWorkCardUnavailable(false);
         isLoadingWorkCard = active && Draft is not null && workTasks is not null;
         WorkCard = null;
+        NotifyGenerationProgress();
         NotifyWorkActions();
     }
 
@@ -100,8 +106,11 @@ public sealed partial class AiPromptWorkbenchViewModel
             SetWorkCardUnavailable(false);
             var matching = listed.Value.Where(x => x.DraftId == draftId)
                 .OrderByDescending(x => x.UpdatedAtUtc).ToArray();
-            var next = matching.FirstOrDefault(x => x.RequestId == submittedWorkRequest)
-                ?? matching.FirstOrDefault(x => x.BlocksNewSubmission) ?? matching.FirstOrDefault();
+            var next = submittedWorkRequest is { } submitted
+                ? matching.FirstOrDefault(x => x.RequestId == submitted)
+                : matching.FirstOrDefault(x => x.BlocksNewSubmission) ?? (generationStarted ? null : matching.FirstOrDefault());
+            if (next is { Stage: WorkTaskStage.Cancelled, FollowUpSourceRequestId: { } source })
+                next = matching.FirstOrDefault(x => x.RequestId == source && x.Stage == WorkTaskStage.Imported) ?? next;
             if (next == WorkCard?.Snapshot) return;
             var previous = WorkCard;
             workThumbnailCancellation?.Cancel();

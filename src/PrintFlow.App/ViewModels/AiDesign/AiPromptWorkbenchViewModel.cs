@@ -30,6 +30,7 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
     private AiAuthoringDraft? draft;
     private bool hasOutdatedMemorialSpecification;
     private AiPromptDocument document = new([]);
+    private AiPromptDocument generatedDocument = new([]);
     private string? error, status;
     private AiTemplateRef? pendingTemplate;
     private long? pendingRestore;
@@ -44,6 +45,8 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
             bool changedOwner = draft?.Id != value?.Id;
             hasOutdatedMemorialSpecification = value is not null && PromptDocumentComposer.HasOutdatedProductSpecification(value);
             if (!SetProperty(ref draft, value)) return;
+            OnPropertyChanged(nameof(RequiresSpecificationUpdate));
+            AutoGenerateCommand.NotifyCanExecuteChanged();
             if (changedOwner) { ResetMemorialLayoutEditor(); ResetMemorialResult(); ResetWorkCard(); }
             else NotifyMemorial();
         }
@@ -55,11 +58,19 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
         {
             var frozen = AiAuthoringSnapshots.Document(value);
             if (document.Parts.SequenceEqual(frozen.Parts)) return;
-            document = frozen; Edited(); OnPropertyChanged();
+            document = frozen; Edited(); RefreshExport(); OnPropertyChanged();
         }
     }
     public ObservableCollection<AiPromptFieldInput> Fields { get; } = [];
     public ObservableCollection<AiPromptPhotoSlot> Photos { get; } = [];
+    public IEnumerable<AiPromptPhotoSlot> ActivePhotoSlots
+    {
+        get
+        {
+            var slots = Document.Parts.OfType<AiImagePart>().Select(x => x.SlotId).ToHashSet(StringComparer.Ordinal);
+            return Photos.Where(x => slots.Contains(x.SlotId));
+        }
+    }
     public IReadOnlyList<AiTemplateDefinition> Templates { get; private set; } = [];
     public IReadOnlyList<AiDesignAttachment> AttachmentManifest { get; private set; } = [];
     public IReadOnlyList<AiAuthoringIssue> Issues { get; private set; } = [];
@@ -68,11 +79,12 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
     public AiPromptPhotoSlot? ExpandedPhoto { get; private set; }
     public AiTemplateEditorViewModel? TemplateEditor { get => templateEditor; private set => SetProperty(ref templateEditor, value); }
     public bool IsChangePending { get => changePending; private set => SetProperty(ref changePending, value); }
-    public bool IsBusy { get => busy; private set { SetProperty(ref busy, value); OnPropertyChanged(nameof(CanEdit)); NotifyMemorial(); } }
+    public bool IsBusy { get => busy; private set { SetProperty(ref busy, value); OnPropertyChanged(nameof(CanEdit)); NotifyWorkActions(); NotifyMemorial(); } }
     public bool CanEdit => !IsBusy && !isClosing;
     public bool HasUnsavedChanges => Draft is not null && (!Document.Parts.SequenceEqual(Draft.FinalDocument.Parts) ||
         Fields.Any(x => !x.IsReadOnly && x.Value != Draft.Fields.GetValueOrDefault(x.Key, x.InitialValue)) || HasUnsavedPreservationChanges || memorialLayoutDirty);
     private bool HasOutdatedMemorialSpecification => hasOutdatedMemorialSpecification;
+    public bool RequiresSpecificationUpdate => HasOutdatedMemorialSpecification;
     public string? Error { get => error; private set => SetProperty(ref error, value); }
     public string? Status { get => status; private set => SetProperty(ref status, value); }
     public string? PromptNotice
@@ -81,11 +93,7 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
         {
             if (Draft is null) return null;
             if (HasOutdatedMemorialSpecification) return L("OutdatedPromptSpecification");
-            if (Draft.IsManuallyEdited || !Document.Parts.SequenceEqual(Draft.FinalDocument.Parts)) return Strings.AiPrompt_ManualNotice;
-            var values = Fields.ToDictionary(x => x.Key, x => x.Value, StringComparer.Ordinal);
-            var composed = PromptDocumentComposer.Compose(Draft.TemplateSnapshot, values).Document;
-            static (string?, string?) Content(AiPromptPart part) => part is AiTextPart text ? (text.Text, null) : (null, ((AiImagePart)part).SlotId);
-            return composed.Parts.Select(Content).SequenceEqual(Document.Parts.Select(Content)) ? null : Strings.AiPrompt_FieldsChangedNotice;
+            return PromptFieldSynchronization.ContentEquals(Document, generatedDocument) ? null : Strings.AiPrompt_ManualNotice;
         }
     }
     public IAsyncRelayCommand SaveInstanceTemplateCommand { get; }
@@ -119,6 +127,12 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
         this.memorial = memorial;
         this.textSubmission = textSubmission;
         this.workTasks = workTasks; this.workTracker = workTracker; this.workPreviews = workPreviews;
+        this.workLauncher = workLauncher;
+        OpenWorkResultPreviewCommand = new AsyncRelayCommand(OpenWorkResultPreviewAsync);
+        CloseWorkResultPreviewCommand = new RelayCommand(CloseWorkPreview);
+        RegenerateInWorkCommand = new AsyncRelayCommand(RegenerateInWorkAsync);
+        SubmitFollowUpCommand = new AsyncRelayCommand(SubmitFollowUpAsync, CanSubmitFollowUp);
+        CloseFollowUpEditorCommand = new RelayCommand(CloseFollowUpEditor);
         ViewWorkCommand = new RelayCommand(() => { if (WorkCard?.OpenWork(workLauncher) == false) Error = Strings.Resolve("WorkTask_OpenFailed"); });
         ReturnHomeCommand = new AsyncRelayCommand(async () => { if (this.navigation is not null) await this.navigation.GoHomeAsync(default); });
         ShowSavedDraftsCommand = new AsyncRelayCommand(async () => await RunAsync(async () => { await ListSavedDraftsCoreAsync(default); }, default));
@@ -136,7 +150,8 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
             if (this.navigation is IAiDesignNavigation ai) await ai.GoToAiWorkTasksAsync(Draft?.Id, ct);
         });
         ContinueWorkResultCommand = new AsyncRelayCommand(ContinueWorkResultAsync);
-        AutoGenerateCommand = new AsyncRelayCommand(SubmitToWorkAsync, () => !IsWaitingForWorkResult && !isLoadingWorkCard && !workCardUnavailable);
+        AutoGenerateCommand = new AsyncRelayCommand(SubmitToWorkAsync,
+            () => CanEdit && Draft is not null && !IsWaitingForWorkResult && !isLoadingWorkCard && !workCardUnavailable);
         StopReceivingCommand = new AsyncRelayCommand(StopReceivingAsync);
         SaveDraftCommand = new AsyncRelayCommand(async () => { await FlushAsync(default); });
         EditTemplateCommand = new AsyncRelayCommand(EditTemplateAsync);
@@ -203,7 +218,24 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
         OnPropertyChanged(nameof(HasUnsavedChanges)); OnPropertyChanged(nameof(PromptNotice)); NotifyDetailed();
     }
     internal void PreservationEdited() => Edited();
-    private void FieldEdited(object? sender, PropertyChangedEventArgs e) { if (e.PropertyName == nameof(AiPromptFieldInput.Value)) Edited(); }
+    private void FieldEdited(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != nameof(AiPromptFieldInput.Value) || Draft is null) return;
+        var values = Fields.ToDictionary(x => x.Key, x => x.Value, StringComparer.Ordinal);
+        var next = PromptDocumentComposer.Compose(Draft.TemplateSnapshot, values).Document;
+        var previous = generatedDocument;
+        generatedDocument = next;
+        if (!PromptFieldSynchronization.ContentEquals(previous, next))
+        {
+            var updated = PromptFieldSynchronization.Update(Document, previous, next);
+            if (!Document.Parts.SequenceEqual(updated.Parts))
+            {
+                Document = updated;
+                return;
+            }
+        }
+        Edited();
+    }
     private void ClearPending() { IsChangePending = false; pendingTemplate = null; pendingRestore = null; }
     private static OperationResult<AiAuthoringDraft> Refused() => OperationResult.Fail<AiAuthoringDraft>(FailureCode.PreconditionNotMet, "Draft is unavailable or changed; retry the action.");
 
@@ -220,20 +252,12 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
         if (Draft is null || !active) return Refused();
         long generation = editGeneration, capturedEpoch = epoch;
         var capturedDocument = Document;
-        var fields = Fields.Where(x => !x.IsReadOnly).Select(x => (x.Key, x.Value, x.InitialValue)).ToArray();
+        var fields = Fields.Where(x => !x.IsReadOnly && x.Value != Draft.Fields.GetValueOrDefault(x.Key, x.InitialValue))
+            .ToDictionary(x => x.Key, x => x.Value, StringComparer.Ordinal);
         var rules = PreservationChecks.Where(x => x.IsEdited).Select(x => x.Rule).ToArray();
-        if (!Draft.FinalDocument.Parts.SequenceEqual(capturedDocument.Parts))
+        if (fields.Count > 0 || !Draft.FinalDocument.Parts.SequenceEqual(capturedDocument.Parts))
         {
-            var saved = await ApplyCoreAsync(new AiAuthoringEdit.ReplaceDocument(capturedDocument), ct);
-            if (saved.IsFailure) return saved;
-        }
-        foreach (var (key, value, initialValue) in fields)
-        {
-            if (!IsCurrent(capturedEpoch)) return Refused();
-            if (Draft.Fields.GetValueOrDefault(key, initialValue) == value) continue;
-            var dateFormat = Fields.SingleOrDefault(x => x.Key == key && x.IsDateFormat);
-            AiAuthoringEdit change = dateFormat is not null ? new AiAuthoringEdit.SetDateInterpretation(dateFormat.DateFieldKey!, value) : new AiAuthoringEdit.SetField(key, value);
-            var saved = await ApplyCoreAsync(change, ct);
+            var saved = await ApplyCoreAsync(new AiAuthoringEdit.SaveWorkbench(fields, capturedDocument), ct);
             if (saved.IsFailure) return saved;
         }
         foreach (var rule in rules)
@@ -285,13 +309,17 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
         bool changedDraft = Draft?.Id != value.Id;
         Draft = value;
         if (changedDraft || WorkCard is null) QueueWorkCardRefresh();
-        document = value.FinalDocument; OnPropertyChanged(nameof(Document));
+        generatedDocument = PromptDocumentComposer.Compose(value.TemplateSnapshot, value.Fields).Document;
+        document = value.FinalDocument;
+        if (!value.IsManuallyEdited && !HasOutdatedMemorialSpecification &&
+            !PromptFieldSynchronization.ContentEquals(document, generatedDocument))
+            document = PromptFieldSynchronization.Update(document, document, generatedDocument);
         foreach (var input in Fields) input.PropertyChanged -= FieldEdited;
         Fields.Clear();
         foreach (var definition in value.TemplateSnapshot.Fields.Where(x => x.Kind != AiTemplateFieldKind.ImageReference))
         {
             string? specification = MemorialLayoutModule.FixedPromptSpecification(value.Product, definition);
-            var input = new AiPromptFieldInput(definition, specification ?? value.Fields.GetValueOrDefault(definition.Key, ""),
+            var input = new AiPromptFieldInput(definition, specification ?? value.Fields.GetValueOrDefault(definition.Key, definition.DefaultValue ?? ""),
                 isReadOnly: specification is not null);
             input.PropertyChanged += FieldEdited; Fields.Add(input);
             if (definition.Kind == AiTemplateFieldKind.OptionalDateLine)
@@ -307,9 +335,10 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
                 format.PropertyChanged += FieldEdited; Fields.Add(format);
             }
         }
+        RefreshFieldOptions();
+        OnPropertyChanged(nameof(Document));
         Photos.Clear(); ExpandedPhoto = null; OnPropertyChanged(nameof(ExpandedPhoto));
-        var activeSlots = value.FinalDocument.Parts.OfType<AiImagePart>().Select(x => x.SlotId).ToHashSet(StringComparer.Ordinal);
-        foreach (var slot in value.Slots.Where(x => activeSlots.Contains(x.SlotId)))
+        foreach (var slot in value.Slots)
         {
             var assetId = value.Bindings.SingleOrDefault(x => x.SlotId == slot.SlotId)?.AssetId;
             Photos.Add(new(slot, value.Assets.SingleOrDefault(x => x.Id == assetId), value.Assets));
@@ -339,6 +368,7 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
             return slot.Role + " · " + (asset?.UploadName ?? Strings.AiPrompt_ChoosePhoto);
         }, StringComparer.Ordinal);
         OnPropertyChanged(nameof(ReferenceLabels)); OnPropertyChanged(nameof(AttachmentManifest)); OnPropertyChanged(nameof(Issues));
+        OnPropertyChanged(nameof(ActivePhotoSlots));
     }
     private void SetTemplates(AiTemplateLibrary library)
     {
@@ -347,7 +377,7 @@ public sealed partial class AiPromptWorkbenchViewModel : ObservableObject, IAiAu
         DefaultTemplateName = byId[library.DefaultId].Content.Name;
         FavoriteTemplateNames = string.Join(" · ", library.FavoriteIds.Select(id => byId[id].Content.Name));
         OnPropertyChanged(nameof(DefaultTemplateName)); OnPropertyChanged(nameof(FavoriteTemplateNames));
-        OnPropertyChanged(nameof(Templates));
+        OnPropertyChanged(nameof(Templates)); RefreshTemplateChoices();
     }
 }
 
@@ -356,6 +386,16 @@ public sealed class AiPromptFieldInput(AiTemplateField definition, string initia
 {
     private string value = initialValue;
     public string Key => definition.Key;
+    public AiTemplateSemantic Semantic => definition.Semantic;
+    public bool Required => definition.Required;
+    public string WorkbenchLabel => definition.Semantic switch
+    {
+        AiTemplateSemantic.Name => Strings.Resolve("AiPrompt_ShortName"),
+        AiTemplateSemantic.BirthDate => Strings.Resolve("AiPrompt_ShortBirth"),
+        AiTemplateSemantic.DeathDate => Strings.Resolve("AiPrompt_ShortDeath"),
+        _ => definition.Key
+    };
+    public string WorkbenchAutomationId => "AiPrompt.Field." + Key;
     public string Label => dateFieldKey is not null && !isDateFormat ? dateFieldKey + " · " + Strings.AiPrompt_DateLabel : definition.Semantic switch
     {
         AiTemplateSemantic.Name => Strings.AiPrompt_NameField,
