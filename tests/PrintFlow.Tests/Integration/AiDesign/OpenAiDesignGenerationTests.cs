@@ -21,7 +21,7 @@ public sealed class OpenAiDesignGenerationTests
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
-    public async Task Generates_from_the_saved_prompt_and_imports_one_reviewable_png(bool withReference)
+    public async Task Main_app_generates_and_reviews_via_openai_then_imports_png_and_pdf(bool withReference)
     {
         using var harness = new SessionServiceHarness();
         var (draft, reference) = await CreateDraftAsync(harness, withReference);
@@ -42,10 +42,10 @@ public sealed class OpenAiDesignGenerationTests
         var generated = await generation.GenerateAsync(draft, default);
 
         generated.IsSuccess.ShouldBeTrue(generated.IsFailure ? generated.Failure.TechnicalDetail : null);
-        transport.Calls.ShouldBe(1);
+        transport.Calls.ShouldBe(2);
         transport.Path.ShouldBe("/v1/responses");
         transport.Key.ShouldBe("test-key");
-        var body = transport.Json;
+        var body = transport.GenerationJson;
         body.GetProperty("model").GetString().ShouldBe("gpt-6.2-sol");
         body.GetProperty("store").GetBoolean().ShouldBeTrue();
         body.GetProperty("max_tool_calls").GetInt32().ShouldBe(1);
@@ -70,6 +70,10 @@ public sealed class OpenAiDesignGenerationTests
         request.WorkDraft!.DraftId.ShouldBe(draft.Id);
         request.WorkConversationId.ShouldBeNull();
         request.OpenAiReceipt.ShouldBe(new OpenAiDesignReceipt("resp_test", "req_test", "ig_test", 123, 456, 579));
+        request.CloudReceipt!.Attempts.ShouldHaveSingleItem().Review.ResponseId.ShouldBe("resp_review_test");
+        transport.ReviewJson.GetProperty("text").GetProperty("format").GetProperty("strict").GetBoolean().ShouldBeTrue();
+        string pdf = System.IO.Path.Combine(harness.Workspace.Root, "reviewed-design.pdf");
+        (await new CloudDesignPdfExport(store).SaveAsync(generated.Value, pdf, default)).IsSuccess.ShouldBeTrue();
         var stored = (await harness.Repository.LoadAsync(request.ImportedSessionId!.Value, default)).Value!;
         stored.Revisions.ShouldHaveSingleItem().Sha256.ShouldBe(request.Candidate!.Facts.Sha256);
     }
@@ -93,6 +97,35 @@ public sealed class OpenAiDesignGenerationTests
         result.IsFailure.ShouldBeTrue();
         result.Failure.MessageKey.ShouldBe(message);
         transport.Calls.ShouldBe(expectedCalls);
+        (await new FileAiDesignRequestStore(harness.Workspace.Root).ListAsync(default)).Value.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task Main_app_retries_once_on_review_failure_and_does_not_import_an_unapproved_design()
+    {
+        using var harness = new SessionServiceHarness();
+        var (draft, _) = await CreateDraftAsync(harness, false);
+        const string reason = "The border is red, but the brief requires blue.";
+        using var transport = new ImageTransport(HttpStatusCode.OK, JsonSerializer.Serialize(new
+        {
+            id = "resp_test",
+            status = "completed",
+            output = new[]
+            {
+                new { id = "ig_test", type = "image_generation_call", status = "completed",
+                    result = Convert.ToBase64String(SyntheticImages.Png(20, 12)) }
+            }
+        }), reason);
+        using var generation = new OpenAiDesignGeneration(harness.Workspace.Root, new Credentials("test-key"),
+            "test-image-model", harness.FileInspector, harness.CreateService(), transport);
+
+        var outcome = await generation.GenerateAsync(draft, default);
+
+        transport.Calls.ShouldBe(4);
+        transport.GenerationJson.GetProperty("previous_response_id").GetString().ShouldBe("resp_test");
+        transport.GenerationJson.GetProperty("input")[0].GetProperty("content")[0].GetProperty("text").GetString()!
+            .ShouldContain(reason);
+        outcome.Failure.Context[CloudDesignLimits.ReviewReasonKey].ShouldBe(reason);
         (await new FileAiDesignRequestStore(harness.Workspace.Root).ListAsync(default)).Value.ShouldBeEmpty();
     }
 
@@ -186,24 +219,40 @@ public sealed class OpenAiDesignGenerationTests
         public OperationResult<ResultUnit> Delete() => throw new NotSupportedException();
     }
 
-    private sealed class ImageTransport(HttpStatusCode status, string body) : HttpMessageHandler
+    private sealed class ImageTransport(HttpStatusCode status, string body, string? rejection = null) : HttpMessageHandler
     {
         public int Calls { get; private set; }
         public string? Path { get; private set; }
         public string? Key { get; private set; }
-        public JsonElement Json { get; private set; }
+        public JsonElement GenerationJson { get; private set; }
+        public JsonElement ReviewJson { get; private set; }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
         {
             Calls++;
             Path = request.RequestUri!.AbsolutePath;
             Key = request.Headers.Authorization!.Parameter;
-            if (request.Content is not MultipartFormDataContent)
+            request.RequestUri.Host.ShouldBe("api.openai.com");
+            using var json = JsonDocument.Parse(await request.Content!.ReadAsStringAsync(ct));
+            bool generation = json.RootElement.TryGetProperty("tools", out _);
+            if (generation) GenerationJson = json.RootElement.Clone();
+            else ReviewJson = json.RootElement.Clone();
+            var response = new HttpResponseMessage(status)
             {
-                using var json = JsonDocument.Parse(await request.Content!.ReadAsStringAsync(ct));
-                Json = json.RootElement.Clone();
-            }
-            var response = new HttpResponseMessage(status) { Content = new StringContent(body) };
+                Content = generation ? new StringContent(body) : JsonContent.Create(new
+                {
+                    id = "resp_review_test",
+                    status = "completed",
+                    output = new[]
+                    {
+                        new { type = "message", content = new[]
+                        {
+                            new { type = "output_text",
+                                text = JsonSerializer.Serialize(new { approved = rejection is null, reason = rejection ?? "" }) }
+                        } }
+                    }
+                })
+            };
             response.Headers.Add("x-request-id", "req_test");
             return response;
         }

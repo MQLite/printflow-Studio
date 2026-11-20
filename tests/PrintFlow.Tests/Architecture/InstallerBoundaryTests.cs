@@ -174,7 +174,7 @@ public sealed class InstallerBoundaryTests
 
         foreach (string allowed in new[]
                  {
-                     "PrintFlow.App.exe", "PrintFlow.App.dll", "PrintFlow.Infrastructure.dll",
+                     "PrintFlow.App.exe", "PrintFlow.App.dll", "PrintFlow.Infrastructure.dll", "PrintFlow.Design.dll",
                      "PrintFlow.App.deps.json", "PrintFlow.App.runtimeconfig.json",
                      "appsettings.json", "System.Private.CoreLib.dll", "PresentationCore.dll",
                      "e_sqlite3.dll", "zh-Hans/PresentationCore.resources.dll",
@@ -187,7 +187,7 @@ public sealed class InstallerBoundaryTests
         foreach (string required in new[]
                  {
                      "PrintFlow.App.exe", "PrintFlow.App.dll", "PrintFlow.Domain.dll",
-                     "PrintFlow.Workflow.dll", "PrintFlow.Infrastructure.dll",
+                     "PrintFlow.Workflow.dll", "PrintFlow.Infrastructure.dll", "PrintFlow.Design.dll",
                      "PrintFlow.App.deps.json", "PrintFlow.App.runtimeconfig.json",
                      "appsettings.json",
                  })
@@ -302,8 +302,8 @@ public sealed class InstallerBoundaryTests
     /// Scoped to what an updater would actually need — an HTTP client, a download call, a
     /// scheduled task, a Run key, a package manager, or a custom action that could run any of
     /// them — rather than a general sweep for the word "update", which appears legitimately all
-    /// over a codebase that updates rows and view models. Only the consent-gated OpenAI Images
-    /// adapter may use the HTTP primitives it needs to post an edit.
+    /// over a codebase that updates rows and view models. The image processing and design
+    /// transports use HTTP to submit design requests and retrieve their results.
     /// </remarks>
     [Fact]
     public void Nothing_in_the_product_or_the_packaging_can_fetch_a_new_version()
@@ -315,6 +315,14 @@ public sealed class InstallerBoundaryTests
             "schtasks", "ScheduledTask", "Register-ScheduledTask",
             @"CurrentVersion\Run", "winget", "choco install",
         ];
+        string[] imageApiTransports =
+        [
+            @"src\PrintFlow.Infrastructure\Adapters\OpenAI\OpenAiImageBackend.cs",
+            @"src\PrintFlow.Infrastructure\AiDesign\OpenAiDesignGeneration.cs",
+            @"src\PrintFlow.Infrastructure\AiDesign\OpenAiDesignCloudClient.cs",
+            @"src\PrintFlow.Design\DesignResponses.cs",
+            @"src\PrintFlow.DesignCloud\Program.cs",
+        ];
 
         List<string> offenders = [];
 
@@ -324,7 +332,7 @@ public sealed class InstallerBoundaryTests
             string relative = RepositoryRelative(file);
             foreach (string api in updaterApis)
             {
-                if (relative == @"src\PrintFlow.Infrastructure\Adapters\OpenAI\OpenAiImageBackend.cs" &&
+                if (imageApiTransports.Contains(relative, StringComparer.OrdinalIgnoreCase) &&
                     api is "HttpClient" or "HttpRequestMessage" or "System.Net.Http")
                     continue;
 

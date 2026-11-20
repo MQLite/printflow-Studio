@@ -7,6 +7,7 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using ImageMagick;
+using PrintFlow.Design;
 using PrintFlow.DesignCloud;
 using PrintFlow.Domain.AiDesign;
 

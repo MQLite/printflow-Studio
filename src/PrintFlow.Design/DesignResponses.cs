@@ -1,9 +1,10 @@
 using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using System.Text.Json;
 
 using PrintFlow.Domain.AiDesign;
 
-namespace PrintFlow.DesignCloud;
+namespace PrintFlow.Design;
 
 public sealed class DesignResponses(HttpClient http, string apiKey, string imageModel)
 {
@@ -46,7 +47,7 @@ public sealed class DesignResponses(HttpClient http, string apiKey, string image
                 }
             },
             input = new[] { new { role = "user", content } }
-        }, ct);
+        }, ct).ConfigureAwait(false);
         var images = OutputOf(response.Document, "image_generation_call").ToArray();
         if (images.Length != 1 || StringProperty(images[0], "status") != "completed" ||
             !images[0].TryGetProperty("result", out var encoded) || encoded.ValueKind != JsonValueKind.String ||
@@ -85,7 +86,7 @@ public sealed class DesignResponses(HttpClient http, string apiKey, string image
                     }
                 }
             }
-        }, ct);
+        }, ct).ConfigureAwait(false);
         var messages = OutputOf(response.Document, "message").ToArray();
         if (messages.Length != 1 || !messages[0].TryGetProperty("content", out var parts) ||
             parts.ValueKind != JsonValueKind.Array || parts.GetArrayLength() != 1 ||
@@ -128,10 +129,11 @@ public sealed class DesignResponses(HttpClient http, string apiKey, string image
             Content = JsonContent.Create(body)
         };
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
-        using var response = await http.SendAsync(request, ct);
+        using var response = await http.SendAsync(request, ct).ConfigureAwait(false);
         response.EnsureSuccessStatusCode();
         var serverId = response.Headers.TryGetValues("x-request-id", out var ids) ? ValidId(ids.FirstOrDefault(), "req_") : null;
-        return new(await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync(ct), cancellationToken: ct), serverId);
+        await using var stream = await response.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
+        return new(await JsonDocument.ParseAsync(stream, cancellationToken: ct).ConfigureAwait(false), serverId);
     }
 
     private static IEnumerable<JsonElement> OutputOf(JsonDocument document, string type)

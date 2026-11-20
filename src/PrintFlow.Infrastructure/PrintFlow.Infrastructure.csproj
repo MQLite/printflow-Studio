@@ -37,6 +37,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\PrintFlow.Design\PrintFlow.Design.csproj" />
     <ProjectReference Include="..\PrintFlow.Domain\PrintFlow.Domain.csproj" />
     <ProjectReference Include="..\PrintFlow.Workflow\PrintFlow.Workflow.csproj" />
   </ItemGroup>

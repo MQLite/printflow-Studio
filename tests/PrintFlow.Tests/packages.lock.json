@@ -204,11 +204,17 @@
           "WPF-UI": "[4.3.0, )"
         }
       },
-      "printflow.designcloud": {
+      "printflow.design": {
         "type": "Project",
         "dependencies": {
           "Magick.NET-Q16-x64": "[15.1.0, )",
           "PrintFlow.Domain": "[0.1.5, )"
+        }
+      },
+      "printflow.designcloud": {
+        "type": "Project",
+        "dependencies": {
+          "PrintFlow.Design": "[0.1.5, )"
         }
       },
       "printflow.domain": {
@@ -221,6 +227,7 @@
           "Magick.NET-Q16-x64": "[15.1.0, )",
           "Microsoft.Data.Sqlite": "[10.0.11, )",
           "Microsoft.ML.OnnxRuntime": "[1.32.0, )",
+          "PrintFlow.Design": "[0.1.5, )",
           "PrintFlow.Domain": "[0.1.5, )",
           "PrintFlow.Workflow": "[0.1.5, )"
         }

@@ -4,8 +4,7 @@
     <RuntimeIdentifiers>linux-x64;win-x64</RuntimeIdentifiers>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\PrintFlow.Domain\PrintFlow.Domain.csproj" />
-    <PackageReference Include="Magick.NET-Q16-x64" />
+    <ProjectReference Include="..\PrintFlow.Design\PrintFlow.Design.csproj" />
     <InternalsVisibleTo Include="PrintFlow.Tests" />
   </ItemGroup>
 </Project>

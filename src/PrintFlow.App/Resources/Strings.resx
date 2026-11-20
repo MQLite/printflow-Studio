@@ -1890,16 +1890,16 @@
   <data name="WorkTask_FollowUpSubmit" xml:space="preserve"><value>Generate again</value></data>
   <data name="WorkTask_FollowUpBridgeUnavailable" xml:space="preserve"><value>Update the Work bridge to send revisions in the original conversation.</value></data>
   <data name="WorkTask_FollowUpTooLong" xml:space="preserve"><value>Shorten your revision instructions and try again.</value></data>
-  <data name="AiPrompt_CloudConsent" xml:space="preserve"><value>Send the prompt and references to the cloud service and OpenAI for generation and visual review? The service may regenerate once if the review fails. OpenAI retains responses according to your project's data settings. Generation and review may incur charges.</value></data>
-  <data name="AiPrompt_CloudWorking" xml:space="preserve"><value>Generating and reviewing in the cloud. If needed, the service will try once more.</value></data>
-  <data name="AiPrompt_CloudProvider" xml:space="preserve"><value>OpenAI API · Cloud review</value></data>
+  <data name="AiPrompt_CloudConsent" xml:space="preserve"><value>Send the prompt and references for OpenAI generation and visual review? PrintFlow may request one revision if the review fails. OpenAI retains responses according to your project's data settings. Generation and review may incur charges.</value></data>
+  <data name="AiPrompt_CloudWorking" xml:space="preserve"><value>OpenAI is generating and reviewing the design. If needed, PrintFlow will request one revision.</value></data>
+  <data name="AiPrompt_CloudProvider" xml:space="preserve"><value>OpenAI API · Visual review</value></data>
   <data name="AiPrompt_CloudSetup" xml:space="preserve"><value>Configure the HTTPS design service address and access token before using cloud review.</value></data>
   <data name="AiPrompt_CloudUnavailable" xml:space="preserve"><value>The cloud design service could not complete the job. Try again later.</value></data>
   <data name="AiPrompt_CloudBusy" xml:space="preserve"><value>The cloud design service is busy. Try again shortly.</value></data>
   <data name="AiPrompt_CloudAccessDenied" xml:space="preserve"><value>The cloud design service rejected the access token.</value></data>
   <data name="AiPrompt_CloudReferenceLimit" xml:space="preserve"><value>Use up to eight PNG, JPEG or WebP references. Keep the combined reference size below 35 MB.</value></data>
   <data name="AiPrompt_CloudRejected" xml:space="preserve"><value>The design still did not pass after one retry. Review finding — {0}</value></data>
-  <data name="AiPrompt_CloudReviewPassed" xml:space="preserve"><value>Cloud review passed on attempt {0}.</value></data>
+  <data name="AiPrompt_CloudReviewPassed" xml:space="preserve"><value>OpenAI review passed on attempt {0}.</value></data>
   <data name="AiPrompt_SaveCloudPdf" xml:space="preserve"><value>Save PDF…</value></data>
   <data name="AiPrompt_CloudPdfSaved" xml:space="preserve"><value>The approved PDF was saved.</value></data>
   <data name="AiPrompt_CloudPdfSaveFailed" xml:space="preserve"><value>Could not save the approved PDF. Choose a new file name or an available folder.</value></data>

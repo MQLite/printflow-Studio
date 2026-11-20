@@ -1,4 +1,8 @@
-# PrintFlow 云端设计服务
+# PrintFlow AI 设计和独立设计服务
+
+PrintFlow 主程序内置设计流程。在设置中保存 OpenAI API 密钥后，在「AI 设计提示词」选择「OpenAI API · 视觉审核」即可生成。生图和视觉审核通过 OpenAI Responses API 处理，主程序负责安排重做和保存过审 PNG 与 PDF。本机模式直接连接 OpenAI，使用 Windows 中已保存的密钥。
+
+需要让独立主机执行流程时，可部署本项目的设计服务并配置桌面端连接。
 
 配置服务后，桌面端的「OpenAI API」选项提交一个云端任务。服务用 Responses API 生图，用视觉模型对照原提示词及参考图审核。审核不通过时，服务按具体原因修正一次，然后复审。只有过审的 PNG 和 PDF 会回传。PDF 是同一张 PNG 的单页封装，保存时不会再次调用模型。
 
@@ -35,6 +39,6 @@ dotnet PrintFlow.DesignCloud.dll --urls http://0.0.0.0:8080
 
 给桌面程序的进程环境设置与云端一致的 `PRINTFLOW_DESIGN_CLOUD_TOKEN`，然后重启桌面程序。密钥和令牌通过各自的环境注入。
 
-在「AI 设计提示词」中选择「OpenAI API · 云端审核」。确认生成后，结果卡会显示审核通过轮次，提供 PNG 预览、继续处理、保存 PDF 和复制生图 Response ID。复审仍未通过时，结果卡会显示具体原因。参考图支持最多八张 PNG、JPEG 或 WebP，单张最大 20 MiB，总计最大 35 MiB。
+在「AI 设计提示词」中选择「OpenAI API · 视觉审核」。确认生成后，结果卡会显示审核通过轮次，提供 PNG 预览、继续处理、保存 PDF 和复制生图 Response ID。复审仍未通过时，结果卡会显示具体原因。参考图支持最多八张 PNG、JPEG 或 WebP，单张最大 20 MiB。主程序直连支持总计 80 MiB，独立设计服务支持总计 35 MiB。
 
 同一任务的每轮生成和审核都启用 Responses 记录。在过审任务的 `request.json` 中，`cloudReceipt.attempts` 保存每轮 Response ID、基础模型用量和可用的生图工具用量。云端日志按任务 ID 记录各轮响应，方便核对未通过任务。Platform Logs 的记录遵循所用项目的数据保留设置。

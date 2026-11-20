@@ -2,7 +2,7 @@ using System.Buffers.Binary;
 using ImageMagick;
 using PrintFlow.Domain.AiDesign;
 
-namespace PrintFlow.DesignCloud;
+namespace PrintFlow.Design;
 
 public sealed class DesignReviewPipeline(DesignResponses responses)
 {
@@ -16,10 +16,10 @@ public sealed class DesignReviewPipeline(DesignResponses responses)
         for (int i = 0; i < 2; i++)
         {
             ct.ThrowIfCancellationRequested();
-            var (png, generation) = await responses.GenerateAsync(input, previousResponseId, reason, ct);
+            var (png, generation) = await responses.GenerateAsync(input, previousResponseId, reason, ct).ConfigureAwait(false);
             ValidatePngHeader(png);
             report?.Invoke(CloudDesignStage.Reviewing);
-            var (approved, finding, review) = await responses.ReviewAsync(input, png, ct);
+            var (approved, finding, review) = await responses.ReviewAsync(input, png, ct).ConfigureAwait(false);
             attempts.Add(new(generation, review, approved ? null : finding));
             ct.ThrowIfCancellationRequested();
             if (approved)

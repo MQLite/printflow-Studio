@@ -54,12 +54,8 @@ internal static class OpenAiDesignCloudClient
                     await Task.Delay(TimeSpan.FromSeconds(2), deadline.Token).ConfigureAwait(false);
                     continue;
                 }
-                if (job?.Stage == CloudDesignStage.Approved && ValidResult(job)) return OperationResult.Ok(job);
-                if (job?.Stage == CloudDesignStage.Rejected && job.Reason is { Length: > 0 and <= CloudDesignLimits.MaxReasonLength })
-                    return OperationResult.Fail<CloudDesignJob>(OperationFailure.Create(FailureCode.OutputValidationFailed,
-                        "Cloud design review did not pass.", context: new Dictionary<string, string> { [CloudDesignLimits.ReviewReasonKey] = job.Reason },
-                        messageKey: "AiPrompt_CloudRejected"));
-                return Fail(job?.Stage == CloudDesignStage.Approved ? "AiPrompt_OpenAiInvalidResult" : "AiPrompt_CloudUnavailable");
+                return job?.Stage is CloudDesignStage.Approved or CloudDesignStage.Rejected
+                    ? OperationResult.Ok(job) : Fail("AiPrompt_CloudUnavailable");
             }
         }
         finally
@@ -74,24 +70,13 @@ internal static class OpenAiDesignCloudClient
                     using var stopped = await http.SendAsync(release, HttpCompletionOption.ResponseHeadersRead, cleanup.Token)
                         .ConfigureAwait(false);
                 }
-                catch (Exception error) when (error is HttpRequestException or OperationCanceledException)
+                catch (Exception error) when (error is HttpRequestException or OperationCanceledException or ObjectDisposedException)
                 {
                     // The service also expires jobs and artifacts independently.
                 }
             }
         }
     }
-
-    private static bool ValidResult(CloudDesignJob job) =>
-        job.Attempts is { Length: 1 or 2 } &&
-        job.Attempts.All(a => a is { Generation: { }, Review: { } } &&
-            IsResponseId(a.Generation.ResponseId) && IsResponseId(a.Review.ResponseId)) &&
-        job.Png is { Length: > 0 and <= CloudDesignLimits.MaxArtifactBytes } &&
-        job.Pdf is { Length: > 5 and <= CloudDesignLimits.MaxArtifactBytes } && job.Pdf.AsSpan().StartsWith("%PDF-"u8);
-
-    private static bool IsResponseId(string? value) =>
-        value is { Length: > 5 and <= 128 } && value.StartsWith("resp_", StringComparison.Ordinal) &&
-        value.All(c => char.IsAsciiLetterOrDigit(c) || c is '_' or '-');
 
     private static HttpRequestMessage Request(HttpMethod method, Uri uri, string token)
     {

@@ -98,6 +98,13 @@
         "resolved": "4.3.0",
         "contentHash": "7Kj9DmCCo4SOCd1jAiw4+EcMFP2nR8rLLvitAYzVtzbWToTsodkbie24+8x9C4LDLxkopWEUGX62szqqNy7oeg=="
       },
+      "printflow.design": {
+        "type": "Project",
+        "dependencies": {
+          "Magick.NET-Q16-x64": "[15.1.0, )",
+          "PrintFlow.Domain": "[0.1.5, )"
+        }
+      },
       "printflow.domain": {
         "type": "Project"
       },
@@ -108,6 +115,7 @@
           "Magick.NET-Q16-x64": "[15.1.0, )",
           "Microsoft.Data.Sqlite": "[10.0.11, )",
           "Microsoft.ML.OnnxRuntime": "[1.32.0, )",
+          "PrintFlow.Design": "[0.1.5, )",
           "PrintFlow.Domain": "[0.1.5, )",
           "PrintFlow.Workflow": "[0.1.5, )"
         }

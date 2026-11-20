@@ -24,11 +24,12 @@ public sealed record CloudDesignReference(string Name, string MediaType, byte[] 
 
 public sealed record CloudDesignInput(string Prompt, CloudDesignReference[] References)
 {
-    public bool IsValid() => !string.IsNullOrWhiteSpace(Prompt) && Prompt.Length <= CloudDesignLimits.MaxPromptLength &&
+    public bool IsValid(long maxCombinedReferenceBytes = CloudDesignLimits.MaxCombinedReferenceBytes) =>
+        !string.IsNullOrWhiteSpace(Prompt) && Prompt.Length <= CloudDesignLimits.MaxPromptLength &&
         References is { Length: <= CloudDesignLimits.MaxReferences } &&
         References.All(r => r is { Name: { Length: > 0 and <= 255 }, Data.Length: > 0 and <= CloudDesignLimits.MaxReferenceBytes }
             && r.MediaType is "image/png" or "image/jpeg" or "image/webp") &&
-        References.Sum(r => (long)r.Data.Length) <= CloudDesignLimits.MaxCombinedReferenceBytes;
+        References.Sum(r => (long)r.Data.Length) <= maxCombinedReferenceBytes;
 }
 
 public enum CloudDesignStage { Generating, Reviewing, Redoing, Approved, Rejected, Unavailable, Cancelled }
