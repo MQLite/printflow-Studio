@@ -1,7 +1,6 @@
 using System.IO;
 using System.Net;
 using System.Net.Http;
-using System.Text.Json;
 using ImageMagick;
 using ImageMagick.Drawing;
 using Microsoft.Extensions.DependencyInjection;
@@ -36,7 +35,8 @@ public sealed class CombinedImageProcessingTests
     public async Task Paired_processing_confirms_one_upload_and_reviews_one_candidate_before_trim(WorkflowType workflow)
     {
         using var scenario = new Scenario();
-        var enhancement = await scenario.SelectCombinedAsync(workflow);
+        var enhancement = await scenario.SelectCombinedAsync(workflow, SyntheticImages.Png(448, 512, alpha: false));
+        scenario.Http.Respond = () => Task.FromResult(scenario.Http.Reply(geometry: (896, 1024)));
         var screen = new SessionViewModel(scenario.Service, scenario.Harness.Previews, scenario.Harness.TiffReviews,
             new RecordingNavigation(), openAiUploadPrompt: scenario.Prompt);
         screen.Open(enhancement);
@@ -71,6 +71,7 @@ public sealed class CombinedImageProcessingTests
         scenario.Http.Calls.ShouldBe(1);
         scenario.Http.Background.ShouldBe("transparent");
         scenario.Http.Format.ShouldBe("png");
+        scenario.Http.Size.ShouldBe("896x1024");
         scenario.Http.Image!.ShouldBe(scenario.InputBytes);
         review.CurrentStep!.State.ShouldBe(StepState.ReviewRequired);
         review.CurrentStep.Step.ShouldBe(StepKind.BackgroundRemoval);
@@ -197,7 +198,10 @@ public sealed class CombinedImageProcessingTests
         var input = separate.CurrentArtefact!;
         var consent = enhancementRequests == 0 ? null :
             new ImageUploadConfirmation(enhancementMethod, input.RevisionId, input.Sha256);
+        if (enhancementMethod == ImageProcessingMethod.OpenAiRestore)
+            scenario.Http.Respond = () => Task.FromResult(scenario.Http.Reply(scenario.InputBytes));
         var review = (await scenario.Execute(new WorkflowCommand.StartStep(StepKind.Enhancement, consent))).Value;
+        scenario.Http.Respond = null;
         review.CurrentStep!.State.ShouldBe(StepState.ReviewRequired);
         scenario.Http.Calls.ShouldBe(enhancementRequests);
         (await scenario.Execute(new WorkflowCommand.StartStep(StepKind.BackgroundRemoval))).IsFailure.ShouldBeTrue();
@@ -338,9 +342,11 @@ public sealed class CombinedImageProcessingTests
             (await Harness.Repository.LoadAsync(_id, default)).Value!.Attempts
                 .Where(attempt => attempt.Step is StepKind.Enhancement or StepKind.BackgroundRemoval).ToArray();
 
-        public async Task<SessionView> SelectCombinedAsync(WorkflowType workflow)
+        public async Task<SessionView> SelectCombinedAsync(WorkflowType workflow, byte[]? source = null)
         {
             string path = Harness.WriteSourcePng("render.png");
+            if (source is not null)
+                await File.WriteAllBytesAsync(path, source);
             InputBytes = await File.ReadAllBytesAsync(path);
             _id = (await Service.ImportAsync(workflow, path, null, "qa", default)).Value.Id;
             (await Execute(new WorkflowCommand.ConfirmOriginal())).IsSuccess.ShouldBeTrue();
@@ -387,31 +393,30 @@ public sealed class CombinedImageProcessingTests
         public int Calls { get; private set; }
         public string? Background { get; private set; }
         public string? Format { get; private set; }
+        public string? Size { get; private set; }
         public byte[]? Image { get; private set; }
         public Func<Task<HttpResponseMessage>>? Respond { get; set; }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             Calls++;
-            var parts = ((MultipartFormDataContent)request.Content!).ToDictionary(
-                part => part.Headers.ContentDisposition!.Name!.Trim('"'));
-            Background = await parts["background"].ReadAsStringAsync(cancellationToken);
-            Format = await parts["output_format"].ReadAsStringAsync(cancellationToken);
-            Image = await parts["image"].ReadAsByteArrayAsync(cancellationToken);
+            var submitted = await ResponsesImageFixture.ReadAsync(request, cancellationToken);
+            Background = submitted.Background;
+            Format = submitted.Format;
+            Size = submitted.Size;
+            Image = submitted.Image;
             return Respond is { } respond ? await respond() : Reply();
         }
 
-        public HttpResponseMessage Reply(bool transparent = true)
+        public HttpResponseMessage Reply(bool transparent = true, (uint Width, uint Height)? geometry = null)
         {
-            using var image = new MagickImage(transparent ? MagickColors.Transparent : MagickColors.White, 24, 24);
-            new Drawables().FillColor(MagickColors.Red).Rectangle(2, 2, 20, 20).Draw(image);
-            return new(HttpStatusCode.OK)
-            {
-                Content = new StringContent(JsonSerializer.Serialize(new
-                {
-                    data = new[] { new { b64_json = Convert.ToBase64String(image.ToByteArray(MagickFormat.Png)) } },
-                })),
-            };
+            using var source = new MagickImage(Image.ShouldNotBeNull());
+            var (width, height) = geometry ?? (source.Width, source.Height);
+            using var image = new MagickImage(transparent ? MagickColors.Transparent : MagickColors.White, width, height);
+            new Drawables().FillColor(MagickColors.Red).Rectangle(1, 1, width - 2, height - 2).Draw(image);
+            return Reply(image.ToByteArray(MagickFormat.Png));
         }
+
+        public HttpResponseMessage Reply(byte[] png) => ResponsesImageFixture.Reply(png);
     }
 }

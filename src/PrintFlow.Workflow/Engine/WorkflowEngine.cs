@@ -69,6 +69,7 @@ public sealed class WorkflowEngine : IWorkflowEngine
             WorkflowCommand.AddAnotherSize => AddAnotherSize(state, context),
             WorkflowCommand.AbandonSession c => AbandonSession(state, c, context),
             WorkflowCommand.System.AttemptSucceeded c => AttemptSucceeded(state, c, context),
+            WorkflowCommand.System.ApplyPhotoshopBackgroundEdit c => ApplyPhotoshopBackgroundEdit(state, c, context),
             WorkflowCommand.System.AttemptFailed c => AttemptFailed(state, c, context),
             WorkflowCommand.System.AttemptInterrupted c => AttemptInterrupted(state, c, context),
             WorkflowCommand.System.AttemptCancelled c => AttemptCancelled(state, c, context),
@@ -1723,6 +1724,19 @@ public sealed class WorkflowEngine : IWorkflowEngine
     // ---------------------------------------------------------------------------------
     // System commands
     // ---------------------------------------------------------------------------------
+
+    private static WorkflowTransition ApplyPhotoshopBackgroundEdit(
+        WorkflowSnapshot state, WorkflowCommand.System.ApplyPhotoshopBackgroundEdit command, CommandContext context)
+    {
+        if (Services.PhotoshopBackgroundEditTarget.From(state) != command.Target)
+            return WorkflowTransition.Rejected(RejectionCode.PreconditionNotMet,
+                "The Photoshop edit no longer matches the current background-removal position.");
+
+        SessionStep step = state.CurrentStep!;
+        var processing = state.WithStep(step with { State = StepState.Processing, AttemptCount = step.AttemptCount + 1 });
+        return AttemptSucceeded(processing, new WorkflowCommand.System.AttemptSucceeded(
+            command.AttemptId, step.Step, command.OutputRevision, command.OutputHash), context);
+    }
 
     private static WorkflowTransition AttemptSucceeded(
         WorkflowSnapshot state, WorkflowCommand.System.AttemptSucceeded command, CommandContext context)

@@ -1744,6 +1744,18 @@
                         <TextBlock Text="{Binding CurrentImageProcessingUnavailable}" TextWrapping="Wrap"
                                    Foreground="{DynamicResource PF.Brush.Muted}"
                                    AutomationProperties.LiveSetting="Polite" />
+                        <StackPanel Margin="0,6,0,0"
+                                    Visibility="{Binding ShowsCombinedImageProcessingChoice, Converter={StaticResource BoolToVisibility}}">
+                            <local:SessionActionButton Style="{StaticResource PF.Button.Secondary}"
+                                                       Content="{Binding CombinedImageProcessingChoiceLabel}"
+                                                       Command="{Binding SwitchCombinedImageProcessingCommand}"
+                                                       HorizontalAlignment="Left"
+                                                       AutomationProperties.AutomationId="Session.ImageProcessing.CombinedChoice"
+                                                       AutomationProperties.Name="{Binding CombinedImageProcessingChoiceLabel}" />
+                            <TextBlock Text="{Binding CombinedImageProcessingUnavailable}" TextWrapping="Wrap"
+                                       Foreground="{DynamicResource PF.Brush.Muted}"
+                                       AutomationProperties.LiveSetting="Polite" />
+                        </StackPanel>
                         <local:SessionExpander Header="{Binding ChangeImageProcessingMethodLabel}"
                                                Style="{StaticResource PF.Disclosure}"
                                                IsExpanded="{Binding IsChangingImageProcessingMethod, Mode=TwoWay}"
@@ -2827,6 +2839,37 @@
                         AutomationProperties.AutomationId="Session.Approve"
                         AutomationProperties.Name="{Binding ApproveLabel}"
                         Visibility="{Binding CanApprove, Converter={StaticResource BoolToVisibility}}" />
+<local:SessionActionButton Content="{Binding ManualPhotoshopEditLabel}"
+                        Command="{Binding BeginPhotoshopEditCommand}"
+                        AutomationProperties.AutomationId="Session.PhotoshopEdit.Manual"
+                        AutomationProperties.Name="{Binding ManualPhotoshopEditLabel}"
+                        Visibility="{Binding CanBeginPhotoshopEdit, Converter={StaticResource BoolToVisibility}}" />
+<local:SessionActionButton Content="{Binding OpenPhotoshopEditLabel}"
+                        Command="{Binding OpenPhotoshopEditCommand}"
+                        AutomationProperties.AutomationId="Session.PhotoshopEdit.Open"
+                        AutomationProperties.Name="{Binding OpenPhotoshopEditLabel}"
+                        Visibility="{Binding IsChoosingPhotoshopEdit, Converter={StaticResource BoolToVisibility}}" />
+<local:SessionActionButton Content="{Binding CancelPhotoshopEditLabel}"
+                        Command="{Binding StopPhotoshopEditCommand}"
+                        AutomationProperties.Name="{Binding CancelPhotoshopEditLabel}"
+                        AutomationProperties.AutomationId="Session.PhotoshopEdit.Cancel">
+    <local:SessionActionButton.Style>
+        <Style TargetType="{x:Type local:SessionActionButton}" BasedOn="{StaticResource RecommendedAction}">
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsChoosingPhotoshopEdit}" Value="True">
+                    <Setter Property="Visibility" Value="Visible" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsWaitingForPhotoshop}" Value="True">
+                    <Setter Property="Visibility" Value="Visible" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                    <Setter Property="IsEnabled" Value="False" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </local:SessionActionButton.Style>
+</local:SessionActionButton>
 <local:ReviewApprovalButton Content="{Binding RejectLabel}"
                         Style="{StaticResource {x:Type Button}}"
                         IsGestureGuarded="{Binding IsRejectGestureGuarded}"

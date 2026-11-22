@@ -16,6 +16,18 @@ internal static class PsdCompositeProbe
         try
         {
             using FileStream file = File.OpenRead(path);
+            return Inspect(file);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            return Refuse(FailureCode.PsdUnreadable, "PSD structure is unreadable: " + ex.Message);
+        }
+    }
+
+    internal static OperationResult<bool> Inspect(Stream file)
+    {
+        try
+        {
             Span<byte> header = stackalloc byte[26];
             file.ReadExactly(header);
             if (!header[..4].SequenceEqual("8BPS"u8) || BinaryPrimitives.ReadUInt16BigEndian(header[4..]) != 1)

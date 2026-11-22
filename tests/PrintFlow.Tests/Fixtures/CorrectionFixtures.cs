@@ -59,17 +59,20 @@ internal static class CorrectionFixtures
         string source = opaqueSource
             ? h.Workspace.CreateSourceFile(name, SyntheticImages.OpaqueRgbPng(6, 5, (x, y) => ((byte)(x * 30), (byte)(y * 40), 90)))
             : h.WriteSourcePng(name);
-        var imported = await service.ImportAsync(WorkflowType.PrepareAsset, source, "logo", "qa", default);
-        imported.IsSuccess.ShouldBeTrue(imported.IsFailure ? imported.Failure.ToString() : "");
-        SessionId id = imported.Value.Id;
-        await MustAsync(service.ExecuteAsync(id, new WorkflowCommand.ConfirmOriginal(), "qa", default));
-        await MustAsync(service.ExecuteAsync(id, new WorkflowCommand.Skip(StepKind.Enhancement), "qa", default));
+        SessionId id = (await AtBackgroundRemovalWaitingAsync(service, source)).Id;
         await SessionServiceHarness.AuthoriseBackgroundRemovalAsync(service, id);
         h.FakeMeitu.SetScenario(PrintFlow.Infrastructure.Adapters.Fake.FakeAdapterScenario.Succeed);
         SessionView review = await MustAsync(service.ExecuteAsync(id, new WorkflowCommand.StartStep(StepKind.BackgroundRemoval), "qa", default));
         review.CurrentStep!.State.ShouldBe(StepState.ReviewRequired);
         review.CurrentArtefact!.IsCurrentStepResult.ShouldBeTrue();
         return review;
+    }
+
+    public static async Task<SessionView> AtBackgroundRemovalWaitingAsync(ISessionService service, string source)
+    {
+        SessionView imported = await MustAsync(service.ImportAsync(WorkflowType.PrepareAsset, source, "logo", "qa", default));
+        await MustAsync(service.ExecuteAsync(imported.Id, new WorkflowCommand.ConfirmOriginal(), "qa", default));
+        return await MustAsync(service.ExecuteAsync(imported.Id, new WorkflowCommand.Skip(StepKind.Enhancement), "qa", default));
     }
 
     /// <summary>Asks for correction of the result on screen with a fresh request id.</summary>

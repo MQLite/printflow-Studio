@@ -3,17 +3,19 @@ using System.Security.Cryptography;
 using ImageMagick;
 using Microsoft.ML.OnnxRuntime;
 using PrintFlow.Domain.Results;
+using PrintFlow.Domain.Settings;
 
 namespace PrintFlow.Infrastructure.Imaging;
 
 internal sealed class RealEsrganUpscaler
 {
-    internal const string AlgorithmVersion = "realesrgan-x2plus-7115ba92-ort-1.32.0-cpu-v1";
+    internal const string AlgorithmVersion = "realesrgan-x2plus-7115ba92-ort-1.32.0-cpu-tiled-v2";
     private const string ModelSha256 = "7115BA92E8A1BFA63D68558EF006EF3D91273A068D321B1439F8BB1C9179002C";
     private const int ModelBytes = 67_073_434;
     internal const ulong MinimumAvailableMemory = 1536 * 1024 * 1024UL;
-    private const int MaximumInputEdge = 1024;
-    private const int MaximumInputPixels = 512 * 512;
+    // Both are even so every tile has the same pixel-unshuffle phase as the full image.
+    private const int TileEdge = 256;
+    private const int Context = 128;
 
     private readonly string _modelPath;
     private readonly Func<ulong> _availableMemory;
@@ -26,9 +28,6 @@ internal sealed class RealEsrganUpscaler
         _modelPath = modelPath;
         _availableMemory = availableMemory ?? LocalInferenceRuntime.AvailablePhysicalMemory;
     }
-
-    public static bool Fits(uint width, uint height) =>
-        LocalImageFiles.Fits(width, height, MaximumInputEdge, MaximumInputPixels);
 
     public OperationFailure? GetUnavailable() => CheckModel() ?? LocalInferenceRuntime.CpuRuntimeFailure;
 
@@ -102,25 +101,54 @@ internal sealed class RealEsrganUpscaler
         int width = (int)source.Width;
         int height = (int)source.Height;
         bool hasAlpha = source.HasAlpha;
-        int channels = hasAlpha ? 4 : 3;
         using var pixels = source.GetPixels();
         byte[] colours = (hasAlpha ? pixels.ToByteArray(PixelMapping.RGBA) : pixels.ToByteArray(PixelMapping.RGB))
             ?? throw new InvalidDataException("Could not export the image pixels for inference.");
         byte[]? alpha = hasAlpha ? ExtendColourIntoTransparentPixels(colours, width, height) : null;
 
-        // The x2plus network uses pixel-unshuffle. Reflect-pad odd edges once, then
-        // discard the extra output rows/columns to obtain precisely twice the input.
-        int modelWidth = width + width % 2;
-        int modelHeight = height + height % 2;
+        var resultPixels = new byte[width * 2 * height * 2 * (hasAlpha ? 4 : 3)];
+        int top = 0;
+        while (top < height)
+        {
+            int bottom = TileEnd(top, height);
+            int left = 0;
+            while (left < width)
+            {
+                token.ThrowIfCancellationRequested();
+                int right = TileEnd(left, width);
+                InferTile(session, colours, alpha, width, height, left, top, right, bottom, resultPixels, token);
+                left = right;
+            }
+            top = bottom;
+        }
+        return CreateResult(source, profile, resultPixels, width * 2, height * 2, hasAlpha);
+    }
+
+    // Keep a short axis whole. If the context already reaches the far edge,
+    // keep that output too, avoiding a separate inference for a narrow strip.
+    private static int TileEnd(int start, int length) =>
+        length <= TileEdge + 2 * Context || length - start <= TileEdge + Context ? length : start + TileEdge;
+
+    private static void InferTile(InferenceSession session, byte[] colours, byte[]? alpha, int width,
+        int height, int left, int top, int right, int bottom, byte[] resultPixels, CancellationToken token)
+    {
+        int channels = alpha is null ? 3 : 4;
+        int originX = Math.Max(0, left - Context);
+        int originY = Math.Max(0, top - Context);
+        int modelWidth = Math.Min(width, right + Context) - originX;
+        int modelHeight = Math.Min(height, bottom + Context) - originY;
+        // Only the physical right and bottom edges can be odd. Reflect in image coordinates.
+        modelWidth += modelWidth % 2;
+        modelHeight += modelHeight % 2;
         int planeSize = modelWidth * modelHeight;
         var input = new float[3 * planeSize];
         for (int y = 0; y < modelHeight; y++)
         {
             token.ThrowIfCancellationRequested();
-            int sy = y < height ? y : Math.Max(0, height - 2);
+            int sy = originY + y < height ? originY + y : Math.Max(0, height - 2);
             for (int x = 0; x < modelWidth; x++)
             {
-                int sx = x < width ? x : Math.Max(0, width - 2);
+                int sx = originX + x < width ? originX + x : Math.Max(0, width - 2);
                 int sourceIndex = (sy * width + sx) * channels;
                 int planeIndex = y * modelWidth + x;
                 for (int channel = 0; channel < 3; channel++)
@@ -139,19 +167,18 @@ internal sealed class RealEsrganUpscaler
         if (!output.GetTensorTypeAndShape().Shape.AsSpan().SequenceEqual([1L, 3L, modelHeight * 2L, stride]))
             throw new InvalidDataException("The Real-ESRGAN tensor does not match its established 2× RGB contract.");
 
-        int outputWidth = width * 2;
-        int outputHeight = height * 2;
         ReadOnlySpan<float> values = output.GetTensorDataAsSpan<float>();
-        byte[] resultPixels = new byte[outputWidth * outputHeight * channels];
-        for (int y = 0; y < outputHeight; y++)
+        // Discard the context on each side and write each output pixel exactly once.
+        for (int y = top * 2; y < bottom * 2; y++)
         {
             token.ThrowIfCancellationRequested();
-            for (int x = 0; x < outputWidth; x++)
+            for (int x = left * 2; x < right * 2; x++)
             {
-                int pixel = (y * outputWidth + x) * channels;
+                int pixel = (y * width * 2 + x) * channels;
+                int sample = (y - originY * 2) * stride + x - originX * 2;
                 for (int channel = 0; channel < 3; channel++)
                 {
-                    float value = values[channel * outputPlaneSize + y * stride + x];
+                    float value = values[channel * outputPlaneSize + sample];
                     if (!float.IsFinite(value))
                         throw new InvalidDataException("The Real-ESRGAN tensor contains invalid sample values.");
                     resultPixels[pixel + channel] = (byte)MathF.Round(Math.Clamp(value, 0f, 1f) * 255f);
@@ -160,8 +187,6 @@ internal sealed class RealEsrganUpscaler
                     resultPixels[pixel + 3] = InterpolateAlpha(alpha, width, height, x, y);
             }
         }
-
-        return CreateResult(source, profile, resultPixels, outputWidth, outputHeight, hasAlpha);
     }
 
     private static MagickImage CreateResult(MagickImage source, IColorProfile? originalProfile,

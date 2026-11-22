@@ -1782,12 +1782,13 @@
   <data name="ImageProcessing_Method_LightSharpen" xml:space="preserve"><value>本地轻度锐化</value></data>
   <data name="ImageProcessing_Method_AiUpscale" xml:space="preserve"><value>本地 AI 超分（2×）</value></data>
   <data name="ImageProcessing_SharpenHint" xml:space="preserve"><value>增强边缘清晰度，保留图像尺寸和透明度。</value></data>
-  <data name="ImageProcessing_UpscaleHint" xml:space="preserve"><value>在 CPU 上将宽高像素各放大 2 倍。请在审核时检查五官和文字有无变化。</value></data>
+  <data name="ImageProcessing_UpscaleHint" xml:space="preserve"><value>在本机将宽高各放大 2 倍，较大图片自动分块。原图超过 1,048,576 像素时建议跳过清晰化。请在审核时检查五官和文字。</value></data>
+  <data name="ImageProcessing_UpscaleSizeAdvice" xml:space="preserve"><value>原图为 {0} × {1}，已超过 1,048,576 像素。建议跳过清晰化，保留现有细节。如仍需放大，可继续运行本地 2× 超分。</value></data>
   <data name="ImageProcessing_UpscaleModelMissing" xml:space="preserve"><value>缺少本地 2× 模型。请选择轻度锐化或跳过清晰化。</value></data>
   <data name="ImageProcessing_UpscaleModelInvalid" xml:space="preserve"><value>无法验证本地 2× 模型。请选择轻度锐化或跳过清晰化。</value></data>
   <data name="ImageProcessing_UpscaleLowMemory" xml:space="preserve"><value>2× 超分至少需要 1.5 GiB 可用系统内存。请释放内存、改用轻度锐化或跳过清晰化。</value></data>
   <data name="ImageProcessing_UpscaleRunFailed" xml:space="preserve"><value>本地 2× 模型无法处理此图像。请重试、改用轻度锐化或跳过清晰化。</value></data>
-  <data name="ImageProcessing_UpscaleTooLarge" xml:space="preserve"><value>2× 超分要求每边不超过 1,024 像素，总像素不超过 262,144。请选择轻度锐化或跳过清晰化。</value></data>
+  <data name="ImageProcessing_UpscaleTooLarge" xml:space="preserve"><value>本地 2× 超分支持单边最多 4,096 像素、总计最多 4,194,304 像素，文件最大 128 MiB。请选择跳过清晰化或轻度锐化。</value></data>
   <data name="ImageProcessing_SharpenTooLarge" xml:space="preserve"><value>轻度锐化要求每边不超过 8,192 像素，总像素不超过 2,400 万，文件不超过 128 MiB。可跳过清晰化以保留原图。</value></data>
   <data name="ImageProcessing_UpscaleBitDepth" xml:space="preserve"><value>2× 超分支持每通道最多 8 位的图像。请选择轻度锐化或跳过清晰化以保留原有位深。</value></data>
   <data name="ImageProcessing_LocalImageUnsupported" xml:space="preserve"><value>本地清晰化支持 RGB 或灰度 PNG、JPEG。请更换方式或跳过清晰化。</value></data>
@@ -1796,7 +1797,7 @@
   <data name="ImageProcessing_Method_OpenAiRestore" xml:space="preserve"><value>OpenAI 照片修复</value></data>
   <data name="ImageProcessing_Method_SkipEnhancement" xml:space="preserve"><value>跳过清晰化</value></data>
   <data name="ImageProcessing_Method_BiRefNet" xml:space="preserve"><value>本地 BiRefNet 抠图</value></data>
-  <data name="ImageProcessing_Method_OpenAiCutout" xml:space="preserve"><value>OpenAI 生成式去背景</value></data>
+  <data name="ImageProcessing_Method_OpenAiCutout" xml:space="preserve"><value>OpenAI 去背景</value></data>
   <data name="ImageProcessing_Method_KeepBackground" xml:space="preserve"><value>保留背景</value></data>
   <data name="ImageProcessing_Method_AlphaTrim" xml:space="preserve"><value>Alpha 自动裁切</value></data>
   <data name="ImageProcessing_Method_ManualCrop" xml:space="preserve"><value>手动框选</value></data>
@@ -1804,6 +1805,8 @@
   <data name="WorkTask_RepairImageProcessingSettings" xml:space="preserve"><value>请打开「设置 → 图像处理」，恢复默认并保存，重启 PrintFlow Studio 后继续接收此结果。</value></data>
   <data name="ImageProcessing_CurrentMethod" xml:space="preserve"><value>本次方式：{0}</value></data>
   <data name="ImageProcessing_ChangeTaskMethod" xml:space="preserve"><value>更改本任务的方式</value></data>
+  <data name="ImageProcessing_ChooseCombined" xml:space="preserve"><value>用 OpenAI 提高清晰度并去除背景</value></data>
+  <data name="ImageProcessing_ChooseSeparate" xml:space="preserve"><value>改为分步处理</value></data>
   <data name="ImageProcessing_ApplyTaskMethod" xml:space="preserve"><value>应用方式</value></data>
   <data name="ImageProcessing_MethodUnavailable" xml:space="preserve"><value>当前版本尚未提供此方式。</value></data>
   <data name="ImageProcessing_DependencyUnavailable" xml:space="preserve"><value>所需的组件或模型不可用。</value></data>
@@ -1812,7 +1815,7 @@
   <data name="ImageProcessing_AlphaHint" xml:space="preserve"><value>根据透明画布上的有效内容确定裁切边界。</value></data>
   <data name="ImageProcessing_SkipHint" xml:space="preserve"><value>在任务中确认后沿用当前图像。</value></data>
   <data name="ImageProcessing_Ready" xml:space="preserve"><value>本工作站可用。</value></data>
-  <data name="ImageProcessing_Method_OpenAiCombined" xml:space="preserve"><value>OpenAI 合并处理</value></data>
+  <data name="ImageProcessing_Method_OpenAiCombined" xml:space="preserve"><value>OpenAI 提高清晰度并去除背景</value></data>
   <data name="ImageProcessing_Method_ManualResult" xml:space="preserve"><value>手动导入结果</value></data>
   <data name="ImageProcessing_ManualCropHint" xml:space="preserve"><value>在任务中手动框选裁切范围。</value></data>
   <data name="ImageProcessing_KeepCanvasHint" xml:space="preserve"><value>保留当前画布尺寸。</value></data>
@@ -1826,7 +1829,7 @@
   <data name="ImageProcessing_BiRefNetUnsupported" xml:space="preserve"><value>本地 BiRefNet 支持每通道最多 16 位的 RGB 或灰度 PNG、JPEG。请选择其他方式或转为手工处理。</value></data>
   <data name="ImageProcessing_BiRefNetImageError" xml:space="preserve"><value>BiRefNet 无法读取图像或保留颜色配置和像素。请选择其他方式或转为手工处理。</value></data>
   <data name="ImageProcessing_BiRefNetInvalidMatte" xml:space="preserve"><value>BiRefNet 生成了无效蒙版，或未能分离前景和背景。请选择其他方式或转为手工处理。</value></data>
-  <data name="ImageProcessing_CloudHint" xml:space="preserve"><value>将图像上传至 OpenAI，按使用量计费。</value></data>
+  <data name="ImageProcessing_CloudHint" xml:space="preserve"><value>提高清晰度，并可在服务限制内等比例放大至 2 倍。保留原有背景和透明区域。图片会上传至 OpenAI，并按使用量计费。</value></data>
   <data name="ImageProcessing_ConfirmBackgroundHint" xml:space="preserve"><value>运行前，请为当前图像确认去背景方式。</value></data>
   <data name="ImageProcessing_AuthoriseBackgroundMethod" xml:space="preserve"><value>对此图像使用当前方式</value></data>
   <data name="ImageProcessing_ConfirmBackgroundQuestion" xml:space="preserve"><value>对此图像使用{0}？请复核结果后再批准。</value></data>
@@ -1841,16 +1844,18 @@
   <data name="ImageProcessing_OpenAiUploadTitle" xml:space="preserve"><value>确认上传到 OpenAI</value></data>
   <data name="ImageProcessing_OpenAiUploadQuestion" xml:space="preserve"><value>「{0}」会把任务中显示的图片上传到 OpenAI。即使请求超时，仍可能产生费用。是否继续本次上传？</value></data>
   <data name="ImageProcessing_OpenAiConfirmationRequired" xml:space="preserve"><value>运行 OpenAI 方式时，请确认上传当前图片。</value></data>
-  <data name="ImageProcessing_OpenAiUnauthorised" xml:space="preserve"><value>OpenAI 未接受当前凭据。请更新 API 密钥或选择其他方式。</value></data>
+  <data name="ImageProcessing_OpenAiUnauthorised" xml:space="preserve"><value>OpenAI 拒绝了请求。请检查 API 密钥，以及项目对 Responses API 和两个配置模型的访问权限。</value></data>
   <data name="ImageProcessing_OpenAiRateOrQuota" xml:space="preserve"><value>OpenAI 返回了限流或额度错误。重试前请检查用量和余额。</value></data>
   <data name="ImageProcessing_OpenAiNetwork" xml:space="preserve"><value>OpenAI 请求未完成。重试前请检查网络和用量。</value></data>
   <data name="ImageProcessing_OpenAiTimeout" xml:space="preserve"><value>OpenAI 未及时返回结果。发起新请求前请检查用量。</value></data>
   <data name="ImageProcessing_OpenAiRejected" xml:space="preserve"><value>OpenAI 拒绝了图像编辑。请检查服务或选择其他方式。</value></data>
   <data name="ImageProcessing_OpenAiUnsupportedInput" xml:space="preserve"><value>请选择有可见像素的 PNG 或 JPEG，文件不超过 20 MiB，每边不超过 8192 像素，总像素不超过 2400 万。</value></data>
   <data name="ImageProcessing_OpenAiInvalidOutput" xml:space="preserve"><value>返回图片的 PNG 格式、尺寸或透明度无效，无法进入审核。请选择其他方式或重试。</value></data>
+  <data name="ImageProcessing_OpenAiCutoutCanvasChanged" xml:space="preserve"><value>OpenAI 返回的去背景结果改变了像素尺寸。请重试或换一种去背景方式，以保留输入图的尺寸。</value></data>
+  <data name="ImageProcessing_OpenAiCutoutCanvasUnsupported" xml:space="preserve"><value>当前画布超出了 OpenAI 去背景的尺寸上限（单边 3840 像素，总计 8294400 像素）。请改用其他方式以保留原尺寸。</value></data>
   <data name="ImageProcessing_OpenAiWorkspace" xml:space="preserve"><value>无法读取或写入 OpenAI 图像工作文件。请检查工作区后重试。</value></data>
   <data name="ImageProcessing_CombinedToggle" xml:space="preserve"><value>一次完成清晰化＋去背景</value></data>
-  <data name="ImageProcessing_CombinedHint" xml:space="preserve"><value>将已审核的图片上传到 OpenAI，可能产生费用。结果可能改变五官、文字或边缘。</value></data>
+  <data name="ImageProcessing_CombinedHint" xml:space="preserve"><value>去除背景，并在 OpenAI 支持的尺寸内按原比例最多放大 2×。上传可能产生费用，结果可能改变五官、文字或边缘。</value></data>
   <data name="ImageProcessing_ContinueCombined" xml:space="preserve"><value>继续到合并处理</value></data>
   <data name="ImageProcessing_RunCombined" xml:space="preserve"><value>运行合并处理</value></data>
   <data name="ImageProcessing_KeepReviewedInput" xml:space="preserve"><value>保留已审核输入并继续裁切</value></data>
@@ -1859,7 +1864,17 @@
   <data name="ImageProcessing_CombinedReviewDetails" xml:space="preserve"><value>对比输入图和结果的五官、文字与细节，检查主体是否被改变。</value></data>
   <data name="ImageProcessing_CombinedReviewEdges" xml:space="preserve"><value>检查轮廓、发丝和浅色边缘，确认需要保留的主体完整可见。</value></data>
   <data name="ImageProcessing_CombinedReviewReject" xml:space="preserve"><value>拒绝会丢弃本次结果。之后可重新确认上传并重试、保留已审核输入，或返回分步处理。</value></data>
-  <data name="ImageProcessing_OpenAiCutoutHint" xml:space="preserve"><value>会把图片上传到 OpenAI，可能产生用量费用。生成式去背景可能重绘部分主体。</value></data>
+  <data name="ImageProcessing_OpenAiCutoutHint" xml:space="preserve"><value>会把图片上传到 OpenAI 以获得完整透明 PNG，可能产生用量费用。OpenAI 可能重绘部分主体，批准前请与输入图对照。</value></data>
+  <data name="Session_PhotoshopEditManual" xml:space="preserve"><value>手动操作</value></data>
+  <data name="Session_PhotoshopEditOpen" xml:space="preserve"><value>在 Photoshop 中打开</value></data>
+  <data name="Session_PhotoshopEditCancel" xml:space="preserve"><value>取消</value></data>
+  <data name="Session_PhotoshopEditStop" xml:space="preserve"><value>停止等待 Photoshop</value></data>
+  <data name="Session_PhotoshopEditQuestion" xml:space="preserve"><value>在 Photoshop 中打开当前图片的副本？</value></data>
+  <data name="Session_PhotoshopEditPreparing" xml:space="preserve"><value>正在准备 Photoshop 工作副本…</value></data>
+  <data name="Session_PhotoshopEditWaiting" xml:space="preserve"><value>在 Photoshop 中编辑 {0}，按 Ctrl+S 后预览会自动更新。如果出现提示，请选择「最大化兼容性」。</value></data>
+  <data name="Session_PhotoshopEditOpenFailed" xml:space="preserve"><value>无法在 Photoshop 中打开工作副本。请检查 Photoshop 安装和工作站配置后重试。</value></data>
+  <data name="Session_PhotoshopEditSaveFailed" xml:space="preserve"><value>无法读取保存的 PSD。请启用「最大化兼容性」后重新保存同一文件。</value></data>
+  <data name="Session_PhotoshopEditReviewChanged" xml:space="preserve"><value>开始 Photoshop 编辑后，去背景步骤已发生变化。请刷新任务查看当前状态。</value></data>
   <data name="AiPrompt_FieldOptions" xml:space="preserve"><value>可编辑选项</value></data>
   <data name="AiPrompt_Lifespan" xml:space="preserve"><value>生卒年</value></data>
   <data name="AiPrompt_ShortName" xml:space="preserve"><value>姓名</value></data>

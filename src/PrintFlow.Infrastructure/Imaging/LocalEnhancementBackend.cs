@@ -96,7 +96,7 @@ public sealed class LocalEnhancementBackend : IImageProcessingBackend
             var settings = new MagickReadSettings { Format = format };
             stream.Position = 0;
             var info = new MagickImageInfo(stream, settings);
-            if (upscale ? !RealEsrganUpscaler.Fits(info.Width, info.Height) :
+            if (upscale ? !LocalUpscaleLimits.Fits(info.Width, info.Height) :
                 !LocalImageFiles.Fits(info.Width, info.Height, SharpenMaximumEdge, SharpenMaximumPixels))
             {
                 return TooLarge(upscale);

@@ -710,6 +710,8 @@ public sealed record SessionView(
     /// </summary>
     public bool CanAskColleague { get; init; }
 
+    public PhotoshopBackgroundEditTarget? PhotoshopBackgroundEdit { get; init; }
+
     /// <summary>The imported correction now under review, or null.</summary>
     public CorrectionReturnView? CorrectionReturn { get; init; }
 

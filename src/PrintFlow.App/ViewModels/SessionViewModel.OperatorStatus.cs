@@ -37,6 +37,7 @@ public partial class SessionViewModel
             if (IsConfirmingDraftLeave) return DraftLeaveNotice;
             if (IsConfirmingReturn) return ReturnImpact;
             if (IsViewingHistory) return HistoryNotice;
+            if (HasPhotoshopEdit) return PhotoshopEditInstructions;
             // A job waiting for a colleague says so, and names the one way back (SCRUM-11148).
             if (IsHandedOff && ShowsCorrectionPanel)
                 return CorrectionActivity == CorrectionActivity.Checking ? CorrectionActivityText
@@ -67,6 +68,8 @@ public partial class SessionViewModel
             if (ShowsGuidedDimensions) return Strings.Session_NextDimensions;
             if (ShowsGuidedWhiteInk) return Strings.Session_NextWhiteInk;
             if (ShowsGuidedEnlargement) return FormatNext(Strings.Session_NextAction, ContinueWithSizeLabel);
+            if (ExceedsLocalUpscaleLimit) return Strings.Resolve("ImageProcessing_UpscaleTooLarge");
+            if (CanRunStep && LocalUpscaleSizeAdvice is { } advice) return advice;
             if (CanRunStep) return FormatNext(Strings.Session_NextAction, RunStepLabel);
             if (UsesCurrentImageWithoutProcessing && CanSkip) return FormatNext(Strings.Session_NextAction, SkipLabel);
             if (CanChangeImageProcessingMethod && CurrentImageProcessingUnavailable is not null)
@@ -92,6 +95,7 @@ public partial class SessionViewModel
             if (IsConfirmingDraftLeave) return KeepDraftCommand;
             if (IsConfirmingReturn) return ConfirmReturnCommand;
             if (IsViewingHistory) return CloseHistoryCommand;
+            if (HasPhotoshopEdit) return IsChoosingPhotoshopEdit ? OpenPhotoshopEditCommand : null;
             if (IsHandedOff && ShowsCorrectionPanel) return CanImportCorrectedImage ? ImportCorrectedImageCommand : null;
             if (IsHandedOff) return CanReenterAutomation ? ReenterAutomationCommand : null;
             if (_session?.State == SessionState.Completed) return FinalSaveRecommendation;
@@ -112,6 +116,7 @@ public partial class SessionViewModel
             if (ShowsGuidedAutomaticConfirmation) return ConfirmAutomaticSelectionCommand;
             if (ShowsGuidedAutomaticBegin) return BeginAutomaticSelectionCommand;
             if (CanConfirmOriginal) return ConfirmOriginalCommand;
+            if (CanSkip && (ExceedsLocalUpscaleLimit || (CanRunStep && LocalUpscaleSizeAdvice is not null))) return SkipCommand;
             if (CanRunStep) return RunStepCommand;
             if (UsesCurrentImageWithoutProcessing && CanSkip) return SkipCommand;
             if (_session?.CurrentStep is null && FinalSaveRecommendation is { } save) return save;

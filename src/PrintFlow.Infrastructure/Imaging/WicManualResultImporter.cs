@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
 using System.Windows;
@@ -62,18 +63,42 @@ public sealed class WicManualResultImporter(IWorkspace workspace, IFileInspector
                 if (ancestor.Exists && (ancestor.Attributes & FileAttributes.ReparsePoint) != 0)
                     return Fail(FailureCode.WorkspaceError, "The managed destination contains a redirected directory.");
             Directory.CreateDirectory(directory);
-            await using (FileStream output = new(destination, FileMode.CreateNew, FileAccess.Write,
-                FileShare.None, 1 << 20, useAsync: true))
-                await input.CopyToAsync(output, cancellationToken);
+            string staging = Path.Combine(directory, $".{Guid.NewGuid():N}.partial");
+            bool ownsStaging = false;
+            try
+            {
+                await using (FileStream output = new(staging, FileMode.CreateNew, FileAccess.Write,
+                    FileShare.None, 1 << 20, useAsync: true))
+                {
+                    ownsStaging = true;
+                    await input.CopyToAsync(output, cancellationToken);
+                }
 
-            // Independent inspection and full pixel decode operate only on the managed copy.
-            using FileStream heldCopy = new(destination, FileMode.Open, FileAccess.Read, FileShare.Read);
-            OperationResult<FileFacts> validated = await ValidateHeldAsync(
-                heldCopy, destination, step, upstream, selectedHash, input.Length, extension, cancellationToken);
-            if (validated.IsFailure)
-                return OperationResult.Fail<ManualResult>(validated.Failure);
-            File.SetAttributes(destination, FileAttributes.ReadOnly);
-            return OperationResult.Ok(new ManualResult(target, validated.Value));
+                OperationResult<FileFacts> validated;
+                using (FileStream heldCopy = new(staging, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    validated = await ValidateHeldAsync(
+                        heldCopy, staging, step, upstream, selectedHash, input.Length, extension, cancellationToken);
+                if (validated.IsFailure)
+                    return OperationResult.Fail<ManualResult>(validated.Failure);
+
+                cancellationToken.ThrowIfCancellationRequested();
+                File.SetAttributes(staging, FileAttributes.ReadOnly);
+                File.Move(staging, destination, overwrite: false);
+                ownsStaging = false;
+                return OperationResult.Ok(new ManualResult(target, validated.Value));
+            }
+            finally
+            {
+                if (ownsStaging)
+                {
+                    try
+                    {
+                        File.SetAttributes(staging, FileAttributes.Normal);
+                        File.Delete(staging);
+                    }
+                    catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { Trace.TraceWarning(ex.Message); }
+                }
+            }
         }
         catch (OperationCanceledException)
         {

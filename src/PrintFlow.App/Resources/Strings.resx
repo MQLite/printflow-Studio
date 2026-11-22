@@ -1792,12 +1792,13 @@
   <data name="ImageProcessing_Method_LightSharpen" xml:space="preserve"><value>Local light sharpening</value></data>
   <data name="ImageProcessing_Method_AiUpscale" xml:space="preserve"><value>Local AI upscaling (2×)</value></data>
   <data name="ImageProcessing_SharpenHint" xml:space="preserve"><value>Sharpens edges while keeping the image size and transparency.</value></data>
-  <data name="ImageProcessing_UpscaleHint" xml:space="preserve"><value>Doubles both pixel dimensions on the CPU. Review faces and lettering for changes.</value></data>
+  <data name="ImageProcessing_UpscaleHint" xml:space="preserve"><value>Doubles both dimensions locally, using tiles for larger images. Above 1,048,576 input pixels, consider skipping enhancement. Review faces and lettering for changes.</value></data>
+  <data name="ImageProcessing_UpscaleSizeAdvice" xml:space="preserve"><value>The {0} × {1} source exceeds 1,048,576 pixels. Consider skipping enhancement to preserve existing detail. You can still run local 2× upscaling if needed.</value></data>
   <data name="ImageProcessing_UpscaleModelMissing" xml:space="preserve"><value>The local 2× model is missing. Choose light sharpening or skip enhancement.</value></data>
   <data name="ImageProcessing_UpscaleModelInvalid" xml:space="preserve"><value>The local 2× model could not be verified. Choose light sharpening or skip enhancement.</value></data>
   <data name="ImageProcessing_UpscaleLowMemory" xml:space="preserve"><value>2× upscaling needs at least 1.5 GiB of free system memory. Free memory, choose light sharpening, or skip enhancement.</value></data>
   <data name="ImageProcessing_UpscaleRunFailed" xml:space="preserve"><value>The local 2× model could not process this image. Retry, choose light sharpening, or skip enhancement.</value></data>
-  <data name="ImageProcessing_UpscaleTooLarge" xml:space="preserve"><value>2× upscaling supports images up to 1,024 pixels on either edge and 262,144 pixels total. Choose light sharpening or skip enhancement.</value></data>
+  <data name="ImageProcessing_UpscaleTooLarge" xml:space="preserve"><value>Local 2× upscaling supports up to 4,096 pixels on either edge, 4,194,304 pixels total and files up to 128 MiB. Skip enhancement or choose light sharpening.</value></data>
   <data name="ImageProcessing_SharpenTooLarge" xml:space="preserve"><value>Light sharpening supports images up to 8,192 pixels on either edge, 24 megapixels total, and 128 MiB. Skip enhancement to keep the original.</value></data>
   <data name="ImageProcessing_UpscaleBitDepth" xml:space="preserve"><value>2× upscaling supports images up to 8 bits per channel. Choose light sharpening or skip enhancement to preserve the original bit depth.</value></data>
   <data name="ImageProcessing_LocalImageUnsupported" xml:space="preserve"><value>Local enhancement supports RGB and grayscale PNG or JPEG files. Change the enhancement method or skip it.</value></data>
@@ -1814,6 +1815,8 @@
   <data name="WorkTask_RepairImageProcessingSettings" xml:space="preserve"><value>Open Settings → Image processing, restore defaults and save, then restart PrintFlow Studio to resume receiving this result.</value></data>
   <data name="ImageProcessing_CurrentMethod" xml:space="preserve"><value>Current method: {0}</value></data>
   <data name="ImageProcessing_ChangeTaskMethod" xml:space="preserve"><value>Change method for this task</value></data>
+  <data name="ImageProcessing_ChooseCombined" xml:space="preserve"><value>Use OpenAI for clarity and background removal</value></data>
+  <data name="ImageProcessing_ChooseSeparate" xml:space="preserve"><value>Use separate steps</value></data>
   <data name="ImageProcessing_ApplyTaskMethod" xml:space="preserve"><value>Apply method</value></data>
   <data name="ImageProcessing_MethodUnavailable" xml:space="preserve"><value>This method is not available in this version.</value></data>
   <data name="ImageProcessing_DependencyUnavailable" xml:space="preserve"><value>A required component or model is unavailable.</value></data>
@@ -1822,7 +1825,7 @@
   <data name="ImageProcessing_AlphaHint" xml:space="preserve"><value>Finds the edges of the content on a transparent canvas.</value></data>
   <data name="ImageProcessing_SkipHint" xml:space="preserve"><value>Continue with the current image after confirming in the task.</value></data>
   <data name="ImageProcessing_Ready" xml:space="preserve"><value>Available on this workstation.</value></data>
-  <data name="ImageProcessing_Method_OpenAiCombined" xml:space="preserve"><value>OpenAI combined processing</value></data>
+  <data name="ImageProcessing_Method_OpenAiCombined" xml:space="preserve"><value>OpenAI clarity and background removal</value></data>
   <data name="ImageProcessing_Method_ManualResult" xml:space="preserve"><value>Manually imported result</value></data>
   <data name="ImageProcessing_ManualCropHint" xml:space="preserve"><value>Draw a crop box in the task.</value></data>
   <data name="ImageProcessing_KeepCanvasHint" xml:space="preserve"><value>Keep the current canvas dimensions.</value></data>
@@ -1836,7 +1839,7 @@
   <data name="ImageProcessing_BiRefNetUnsupported" xml:space="preserve"><value>Local BiRefNet supports RGB and grayscale PNG or JPEG files up to 16 bits per channel. Choose another method or hand off for manual processing.</value></data>
   <data name="ImageProcessing_BiRefNetImageError" xml:space="preserve"><value>BiRefNet could not read the image or preserve its colour profile or pixels. Choose another method or hand off for manual processing.</value></data>
   <data name="ImageProcessing_BiRefNetInvalidMatte" xml:space="preserve"><value>BiRefNet produced an invalid mask or could not separate foreground from background. Choose another method or hand off for manual processing.</value></data>
-  <data name="ImageProcessing_CloudHint" xml:space="preserve"><value>Uploads the image to OpenAI and incurs usage charges.</value></data>
+  <data name="ImageProcessing_CloudHint" xml:space="preserve"><value>Improves clarity and can enlarge proportionally up to 2× within service limits. Keeps the original background and transparency. Uploads the image to OpenAI and incurs usage charges.</value></data>
   <data name="ImageProcessing_ConfirmBackgroundHint" xml:space="preserve"><value>Confirm the background removal method for this image before running it.</value></data>
   <data name="ImageProcessing_AuthoriseBackgroundMethod" xml:space="preserve"><value>Use this method for this image</value></data>
   <data name="ImageProcessing_ConfirmBackgroundQuestion" xml:space="preserve"><value>Use {0} on this image? Check the result before approving it.</value></data>
@@ -1851,16 +1854,18 @@
   <data name="ImageProcessing_OpenAiUploadTitle" xml:space="preserve"><value>Confirm upload to OpenAI</value></data>
   <data name="ImageProcessing_OpenAiUploadQuestion" xml:space="preserve"><value>{0} will send the image shown in this task to OpenAI. Usage charges may apply even if the request times out. Continue with this upload?</value></data>
   <data name="ImageProcessing_OpenAiConfirmationRequired" xml:space="preserve"><value>Confirm the upload of the current image when you run the OpenAI method.</value></data>
-  <data name="ImageProcessing_OpenAiUnauthorised" xml:space="preserve"><value>OpenAI rejected the credentials. Update the API key or choose another method.</value></data>
+  <data name="ImageProcessing_OpenAiUnauthorised" xml:space="preserve"><value>OpenAI denied access. Check the API key and project permissions for the Responses API and both configured models.</value></data>
   <data name="ImageProcessing_OpenAiRateOrQuota" xml:space="preserve"><value>OpenAI returned a rate or quota limit. Check your usage and balance before retrying.</value></data>
   <data name="ImageProcessing_OpenAiNetwork" xml:space="preserve"><value>The OpenAI request did not complete. Check the network and usage before retrying.</value></data>
   <data name="ImageProcessing_OpenAiTimeout" xml:space="preserve"><value>OpenAI did not respond in time. Check your usage before starting a new request.</value></data>
   <data name="ImageProcessing_OpenAiRejected" xml:space="preserve"><value>OpenAI rejected the image edit. Check the service or choose another method.</value></data>
   <data name="ImageProcessing_OpenAiUnsupportedInput" xml:space="preserve"><value>Choose a readable PNG or JPEG with visible pixels, up to 20 MiB, 8192 pixels per edge and 24 megapixels.</value></data>
   <data name="ImageProcessing_OpenAiInvalidOutput" xml:space="preserve"><value>The returned image could not be reviewed because its PNG, dimensions or transparency were invalid. Choose another method or retry.</value></data>
+  <data name="ImageProcessing_OpenAiCutoutCanvasChanged" xml:space="preserve"><value>OpenAI returned a cutout with different pixel dimensions. Retry or select another background removal method to keep the input dimensions.</value></data>
+  <data name="ImageProcessing_OpenAiCutoutCanvasUnsupported" xml:space="preserve"><value>This canvas exceeds the OpenAI background removal limits of 3,840 pixels per edge and 8,294,400 pixels total. Select another method to keep the original dimensions.</value></data>
   <data name="ImageProcessing_OpenAiWorkspace" xml:space="preserve"><value>The OpenAI image working files could not be read or written. Check the workspace before retrying.</value></data>
   <data name="ImageProcessing_CombinedToggle" xml:space="preserve"><value>Restore and remove the background in one OpenAI request</value></data>
-  <data name="ImageProcessing_CombinedHint" xml:space="preserve"><value>Uploads the reviewed image to OpenAI and may incur usage charges. The result may change faces, text, or edges.</value></data>
+  <data name="ImageProcessing_CombinedHint" xml:space="preserve"><value>Removes the background and enlarges the image proportionally by up to 2× within OpenAI's size limits. Uploads may incur usage charges. The result may change faces, text, or edges.</value></data>
   <data name="ImageProcessing_ContinueCombined" xml:space="preserve"><value>Continue to combined processing</value></data>
   <data name="ImageProcessing_RunCombined" xml:space="preserve"><value>Run combined processing</value></data>
   <data name="ImageProcessing_KeepReviewedInput" xml:space="preserve"><value>Keep reviewed input and continue to crop</value></data>
@@ -1869,7 +1874,17 @@
   <data name="ImageProcessing_CombinedReviewDetails" xml:space="preserve"><value>Compare the face, text and fine details with the input. Check for changes to the subject.</value></data>
   <data name="ImageProcessing_CombinedReviewEdges" xml:space="preserve"><value>Check the outline, hair and light edges. Confirm that the intended foreground is visible.</value></data>
   <data name="ImageProcessing_CombinedReviewReject" xml:space="preserve"><value>Reject to discard this result. You can retry with a new upload confirmation, keep the reviewed input, or return to separate methods.</value></data>
-  <data name="ImageProcessing_OpenAiCutoutHint" xml:space="preserve"><value>Sends the image to OpenAI and may incur usage charges. Generative background removal can redraw parts of the subject.</value></data>
+  <data name="ImageProcessing_OpenAiCutoutHint" xml:space="preserve"><value>Sends the image to OpenAI for a transparent PNG and may incur usage charges. OpenAI may redraw parts of the subject. Compare the result with the input before approving it.</value></data>
+  <data name="Session_PhotoshopEditManual" xml:space="preserve"><value>Manual edit</value></data>
+  <data name="Session_PhotoshopEditOpen" xml:space="preserve"><value>Open in Photoshop</value></data>
+  <data name="Session_PhotoshopEditCancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Session_PhotoshopEditStop" xml:space="preserve"><value>Stop waiting for Photoshop</value></data>
+  <data name="Session_PhotoshopEditQuestion" xml:space="preserve"><value>Open a copy of the current image in Photoshop?</value></data>
+  <data name="Session_PhotoshopEditPreparing" xml:space="preserve"><value>Preparing the Photoshop working copy…</value></data>
+  <data name="Session_PhotoshopEditWaiting" xml:space="preserve"><value>Edit {0} in Photoshop and press Ctrl+S to update the preview. Select Maximize Compatibility if Photoshop asks.</value></data>
+  <data name="Session_PhotoshopEditOpenFailed" xml:space="preserve"><value>Could not open the working copy in Photoshop. Check the Photoshop installation and workstation configuration, then try again.</value></data>
+  <data name="Session_PhotoshopEditSaveFailed" xml:space="preserve"><value>Could not read the saved PSD. Save the same file again with Maximize Compatibility enabled.</value></data>
+  <data name="Session_PhotoshopEditReviewChanged" xml:space="preserve"><value>The background removal step has changed since this Photoshop edit started. Refresh the task to see its current state.</value></data>
   <data name="AiPrompt_FieldOptions" xml:space="preserve"><value>Editable options</value></data>
   <data name="AiPrompt_Lifespan" xml:space="preserve"><value>Life dates</value></data>
   <data name="AiPrompt_ShortName" xml:space="preserve"><value>Name</value></data>

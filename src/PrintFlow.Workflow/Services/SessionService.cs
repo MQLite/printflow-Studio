@@ -1388,6 +1388,8 @@ public sealed partial class SessionService : ISessionService
             CanAskColleague = _correctionPackages is not null &&
                 view.AvailableCommands.Contains(CommandKind.RequestColleagueCorrection) &&
                 CorrectionRequestEligibility.RequestCandidate(state, revisions, outputs) is not null,
+            PhotoshopBackgroundEdit = _manualResults is not null
+                ? PhotoshopBackgroundCandidate(state, revisions)?.Target : null,
         };
 
         return OperationResult.Ok(view);

@@ -184,6 +184,8 @@ public sealed partial class SessionViewModel
 
     private void NotifyNavigation()
     {
+        if (!CanInteractWithLivePage) CancelPhotoshopEdit();
+        NotifyPhotoshopEdit();
         NotifyUtilities();
         OnPropertyChanged(nameof(ShowsLiveWorkspace));
         OnPropertyChanged(nameof(IsLiveInteractionAllowed));

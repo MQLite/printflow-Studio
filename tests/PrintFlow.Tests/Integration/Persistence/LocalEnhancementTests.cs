@@ -105,7 +105,7 @@ public sealed class LocalEnhancementTests
         using TempWorkspace temp = new();
         var backend = new LocalEnhancementBackend(new FileWorkspace(temp.Root), Path.Combine(temp.Root, "model.onnx"));
         var large = Request(ImageProcessingMethod.AiUpscale, "large");
-        using (var input = new MagickImage(MagickColors.Orange, 513, 512))
+        using (var input = new MagickImage(MagickColors.Orange, 2049, 2048))
             input.Write(Absolute(temp, large.Input), MagickFormat.Png);
         var depth = Request(ImageProcessingMethod.AiUpscale, "depth");
         WriteSample(Absolute(temp, depth.Input), 0);
@@ -115,6 +115,15 @@ public sealed class LocalEnhancementTests
         File.Exists(Absolute(temp, large.ExpectedOutput)).ShouldBeFalse();
         File.Exists(Absolute(temp, depth.ExpectedOutput)).ShouldBeFalse();
     }
+
+    [Theory]
+    [InlineData(513, 512, true)]
+    [InlineData(4096, 1024, true)]
+    [InlineData(2048, 2048, true)]
+    [InlineData(2049, 2048, false)]
+    [InlineData(1, 4097, false)]
+    public void Upscale_bounds_total_pixels_and_panorama_edges(int width, int height, bool allowed) =>
+        LocalUpscaleLimits.Fits(width, height).ShouldBe(allowed);
 
     [Fact]
     public async Task Cancelled_work_never_creates_a_candidate()

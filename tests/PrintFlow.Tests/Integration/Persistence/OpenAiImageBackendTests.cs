@@ -21,6 +21,7 @@ using PrintFlow.Tests.Fixtures;
 using PrintFlow.Workflow.Commands;
 using PrintFlow.Workflow.Ports;
 using PrintFlow.Workflow.Services;
+using static PrintFlow.Tests.Fixtures.ResponsesImageFixture;
 using UnitResult = PrintFlow.Domain.Results.Unit;
 
 namespace PrintFlow.Tests.Integration.Persistence;
@@ -38,19 +39,20 @@ public sealed class OpenAiImageBackendTests
         byte[] png = Image("alpha");
         using var http = new ImageHttp(async (request, token) =>
         {
-            request.RequestUri.ShouldBe(new Uri("https://api.openai.com/v1/images/edits"));
-            request.Method.ShouldBe(HttpMethod.Post);
             request.Headers.Authorization!.Scheme.ShouldBe("Bearer");
             request.Headers.Authorization.Parameter.ShouldBe(TestKey);
-            var parts = ((MultipartFormDataContent)request.Content!).ToDictionary(
-                part => part.Headers.ContentDisposition!.Name!.Trim('"'));
-            (await parts["model"].ReadAsStringAsync(token)).ShouldBe(Model);
-            (await parts["output_format"].ReadAsStringAsync(token)).ShouldBe("png");
-            (await parts["background"].ReadAsStringAsync(token)).ShouldBe("transparent");
-            (await parts["n"].ReadAsStringAsync(token)).ShouldBe("1");
-            (await parts["prompt"].ReadAsStringAsync(token)).ShouldContain("Restore");
-            parts["image"].Headers.ContentDisposition!.FileName!.Trim('"').ShouldBe("input.png");
-            (await parts["image"].ReadAsByteArrayAsync(token)).ShouldBe(png);
+            var submitted = await ReadAsync(request, token);
+            submitted.Format.ShouldBe("png");
+            submitted.Background.ShouldBe("transparent");
+            submitted.Size.ShouldBe("auto");
+            string prompt = submitted.Prompt;
+            prompt.ShouldContain("Improve only the clarity and sharpness");
+            prompt.ShouldContain("Preserve the entire original background");
+            prompt.ShouldContain("Keep all existing transparent areas");
+            prompt.ShouldContain("cut out or isolate the subject");
+            prompt.ShouldContain("Do not add objects, retouch faces");
+            prompt.ShouldContain("Keep the source canvas at 24 × 24 pixels");
+            submitted.Image.ShouldBe(png);
             return Reply(png);
         });
         var (service, session) = await Ready(h, http, png);
@@ -79,11 +81,111 @@ public sealed class OpenAiImageBackendTests
         attempt.ImageProcessingDetails.UploadConfirmedAtUtc.ShouldBe(h.Clock.GetUtcNow());
         attempt.AdapterNotes.ShouldNotBeNull();
         attempt.AdapterNotes.ShouldContain("req_test42");
+        attempt.AdapterNotes.ShouldContain("resp_test42");
+        attempt.AdapterNotes.ShouldContain("ig_test0");
         attempt.AdapterNotes.ShouldContain("total_tokens=12");
         attempt.AdapterNotes.ShouldNotContain(TestKey);
         attempt.AdapterNotes.ShouldNotContain("https://");
+        attempt.AdapterNotes.ShouldNotContain("Private text recovered from an image");
         consent.TryReserve(ImageProcessingMethod.OpenAiRestore, source.RevisionId, source.Sha256).ShouldBeFalse();
         http.Calls.ShouldBe(1);
+    }
+
+    [Theory]
+    [InlineData(1122, 1402, 2240, 2800)]
+    [InlineData(2000, 2000, 2880, 2880)]
+    [InlineData(2200, 800, 3840, 1392)]
+    public async Task Restore_requests_a_proportional_size_up_to_twice_the_input(
+        int width, int height, int expectedWidth, int expectedHeight)
+    {
+        using var h = new SessionServiceHarness();
+        using var http = new ImageHttp(async (request, token) =>
+        {
+            var submitted = await ReadAsync(request, token);
+            submitted.Size.ShouldBe($"{expectedWidth}x{expectedHeight}");
+            submitted.Background.ShouldBe("opaque");
+            return Reply(Image("opaque", (uint)expectedWidth, (uint)expectedHeight));
+        });
+        var (service, session) = await Ready(h, http, Image("opaque", (uint)width, (uint)height));
+        var source = session.CurrentArtefact.ShouldNotBeNull();
+        var confirmation = new ImageUploadConfirmation(ImageProcessingMethod.OpenAiRestore, source.RevisionId, source.Sha256);
+        var result = await service.ExecuteAsync(session.Id, new WorkflowCommand.StartStep(StepKind.Enhancement, confirmation), "qa", default);
+
+        result.IsSuccess.ShouldBeTrue(result.IsFailure ? result.Failure.TechnicalDetail : null);
+        result.Value.CurrentStep!.State.ShouldBe(StepState.ReviewRequired);
+        http.Calls.ShouldBe(1);
+    }
+
+    [Theory]
+    [InlineData(448, 512, "opaque", 24, 24)]
+    [InlineData(448, 512, "alpha", 896, 1024)]
+    [InlineData(24, 24, "opaque", 48, 48)]
+    public async Task Restore_rejects_responses_that_ignore_requested_size_or_add_transparency(
+        int inputWidth, int inputHeight, string shape, int width, int height)
+    {
+        using var h = new SessionServiceHarness();
+        using var http = new ImageHttp((_, _) => Task.FromResult(Reply(Image(shape, (uint)width, (uint)height))));
+        var (service, session) = await Ready(h, http, Image("opaque", (uint)inputWidth, (uint)inputHeight));
+        var source = session.CurrentArtefact.ShouldNotBeNull();
+        var confirmation = new ImageUploadConfirmation(ImageProcessingMethod.OpenAiRestore, source.RevisionId, source.Sha256);
+        var result = await service.ExecuteAsync(session.Id, new WorkflowCommand.StartStep(StepKind.Enhancement, confirmation), "qa", default);
+
+        result.IsFailure.ShouldBeTrue();
+        result.Failure.MessageKey.ShouldBe("ImageProcessing_OpenAiInvalidOutput");
+        http.Calls.ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task Restore_preserves_the_scaled_original_alpha_where_the_model_moved_it()
+    {
+        using var h = new SessionServiceHarness();
+        byte[] input = Image("alpha", 448, 512);
+        using var http = new ImageHttp((_, _) => Task.FromResult(Reply(Image("alpha", 896, 1024))));
+        var (service, session) = await Ready(h, http, input);
+        var source = session.CurrentArtefact.ShouldNotBeNull();
+        var confirmation = new ImageUploadConfirmation(ImageProcessingMethod.OpenAiRestore, source.RevisionId, source.Sha256);
+        var result = await service.ExecuteAsync(session.Id, new WorkflowCommand.StartStep(StepKind.Enhancement, confirmation), "qa", default);
+
+        result.IsSuccess.ShouldBeTrue(result.IsFailure ? result.Failure.TechnicalDetail : null);
+        var aggregate = (await h.Repository.LoadAsync(session.Id, default)).Value!;
+        var attempt = aggregate.Attempts.Single(a => a.Step == StepKind.Enhancement);
+        var candidate = aggregate.Revisions.Single(revision => revision.Id == attempt.OutputRevisionId);
+        using var rendered = new MagickImage(new FileWorkspace(h.Workspace.Root).ResolveAbsolute(candidate.File));
+        using var pixels = rendered.GetPixels();
+        pixels.ToByteArray(2, 2, 1, 1, "A").ShouldBe([0]);
+        pixels.ToByteArray(35, 35, 1, 1, "RGBA").ShouldBe([255, 0, 0, 255]);
+    }
+
+    [Theory]
+    [InlineData(4000, 2016, "auto", 4000, 2016, true)]
+    [InlineData(3200, 3000, "auto", 3200, 3000, true)]
+    [InlineData(3840, 2160, "3840x2160", 3840, 2160, true)]
+    [InlineData(2000, 2000, "2880x2880", 2000, 2000, true)]
+    [InlineData(4000, 2016, "auto", 3808, 1920, false)]
+    public async Task Restore_accepts_the_exact_original_dimensions_when_the_source_is_too_large_for_two_times_enlargement(
+        uint inputWidth, uint inputHeight, string requestedSize, uint outputWidth, uint outputHeight, bool accepted)
+    {
+        using var h = new SessionServiceHarness();
+        using var http = new ImageHttp(async (request, token) =>
+        {
+            var submitted = await ReadAsync(request, token);
+            submitted.Size.ShouldBe(requestedSize);
+            submitted.Prompt.ShouldContain(requestedSize is "auto" or "3840x2160" ?
+                "Keep the source canvas" : "Scale the full frame");
+            return Reply(Image("opaque", outputWidth, outputHeight));
+        });
+        var (service, session) = await Ready(h, http, Image("opaque", inputWidth, inputHeight));
+        var source = session.CurrentArtefact.ShouldNotBeNull();
+        var confirmation = new ImageUploadConfirmation(ImageProcessingMethod.OpenAiRestore, source.RevisionId, source.Sha256);
+
+        var result = await service.ExecuteAsync(session.Id, new WorkflowCommand.StartStep(StepKind.Enhancement, confirmation), "qa", default);
+
+        http.Calls.ShouldBe(1);
+        result.IsSuccess.ShouldBe(accepted, result.IsFailure ? result.Failure.TechnicalDetail : null);
+        if (accepted)
+            result.Value.CurrentStep!.State.ShouldBe(StepState.ReviewRequired);
+        else
+            result.Failure.MessageKey.ShouldBe("ImageProcessing_OpenAiInvalidOutput");
     }
 
     [Theory]
@@ -96,6 +198,9 @@ public sealed class OpenAiImageBackendTests
     [InlineData("jpeg", "ImageProcessing_OpenAiInvalidOutput")]
     [InlineData("oversize", "ImageProcessing_OpenAiInvalidOutput")]
     [InlineData("url", "ImageProcessing_OpenAiInvalidOutput")]
+    [InlineData("incomplete_response", "ImageProcessing_OpenAiInvalidOutput")]
+    [InlineData("incomplete_image", "ImageProcessing_OpenAiInvalidOutput")]
+    [InlineData("multiple_images", "ImageProcessing_OpenAiInvalidOutput")]
     public async Task Failed_or_invalid_response_cannot_create_a_revision_or_be_replayed(string scenario, string key)
     {
         using var h = new SessionServiceHarness();
@@ -106,6 +211,9 @@ public sealed class OpenAiImageBackendTests
             "offline" => throw new HttpRequestException(TestKey),
             "timeout" => throw new TaskCanceledException(TestKey),
             "url" => Task.FromResult(Reply(null)),
+            "incomplete_response" => Task.FromResult(Reply(Image("alpha"), status: "incomplete")),
+            "incomplete_image" => Task.FromResult(Reply(Image("alpha"), imageStatus: "in_progress")),
+            "multiple_images" => Task.FromResult(Reply(Image("alpha"), imageCount: 2)),
             _ => Task.FromResult(Reply(Image(scenario))),
         });
         var (service, session) = await Ready(h, http, Image("alpha"));
@@ -192,9 +300,70 @@ public sealed class OpenAiImageBackendTests
     }
 
     [Theory]
-    [InlineData(ImageProcessingMethod.OpenAiCutout, "Remove")]
-    [InlineData(ImageProcessingMethod.OpenAiCombined, "Restore")]
-    public async Task Cutout_and_combined_share_the_transparent_png_request(ImageProcessingMethod method, string prompt)
+    [InlineData(2496)]
+    [InlineData(1254)]
+    public async Task Separate_cutout_preserves_the_approved_enhancement_canvas(int returnedEdge)
+    {
+        using var h = new SessionServiceHarness();
+        byte[] enhanced = Image("opaque", 2496, 2496);
+        string? cutoutRequestSize = null;
+        using var http = new ImageHttp(async (request, token) =>
+        {
+            var submitted = await ReadAsync(request, token);
+            if (submitted.Background == "opaque")
+                return Reply(enhanced);
+            cutoutRequestSize = submitted.Size;
+            submitted.Image.ShouldBe(enhanced);
+            return Reply(Image("alpha", (uint)returnedEdge, (uint)returnedEdge));
+        });
+        var (service, ready) = await Ready(h, http, Image("opaque", 1254, 1254));
+        var original = ready.CurrentArtefact.ShouldNotBeNull();
+        var enhancement = await service.ExecuteAsync(ready.Id, new WorkflowCommand.StartStep(StepKind.Enhancement,
+            new ImageUploadConfirmation(ImageProcessingMethod.OpenAiRestore, original.RevisionId, original.Sha256)), "qa", default);
+        var approvedInput = enhancement.Value.CurrentArtefact.ShouldNotBeNull();
+        (approvedInput.Facts.PixelWidth, approvedInput.Facts.PixelHeight).ShouldBe((2496, 2496));
+        var approved = await service.ExecuteAsync(ready.Id,
+            new WorkflowCommand.Approve(StepKind.Enhancement, approvedInput.Sha256), "qa", default);
+        var selected = await service.ExecuteAsync(ready.Id, new WorkflowCommand.SetImageProcessingSelection(
+            StepKind.BackgroundRemoval, approved.Value.ImageProcessingSelection! with
+            { BackgroundRemoval = ImageProcessingMethod.OpenAiCutout }), "qa", default);
+        var input = selected.Value.CurrentArtefact.ShouldNotBeNull();
+        var authorised = await service.ExecuteAsync(ready.Id, new WorkflowCommand.SetBackgroundRemovalDecision(
+            BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent, input.RevisionId, input.Sha256,
+            Method: ImageProcessingMethod.OpenAiCutout), "qa", default);
+        authorised.IsSuccess.ShouldBeTrue();
+        var cutout = await service.ExecuteAsync(ready.Id, new WorkflowCommand.StartStep(StepKind.BackgroundRemoval,
+            new ImageUploadConfirmation(ImageProcessingMethod.OpenAiCutout, input.RevisionId, input.Sha256)), "qa", default);
+
+        var current = (await service.LoadAsync(ready.Id, default)).Value;
+        if (returnedEdge == 2496)
+        {
+            cutout.IsSuccess.ShouldBeTrue();
+            current.CurrentStep!.State.ShouldBe(StepState.ReviewRequired);
+            var result = current.CurrentArtefact.ShouldNotBeNull();
+            (result.Facts.PixelWidth, result.Facts.PixelHeight).ShouldBe((2496, 2496));
+        }
+        else
+        {
+            cutout.IsFailure.ShouldBeTrue("the provider returned a smaller canvas than the approved enhancement");
+            cutout.Failure.MessageKey.ShouldBe("ImageProcessing_OpenAiCutoutCanvasChanged");
+            current.CurrentStep!.State.ShouldBe(StepState.Failed);
+            current.CurrentArtefact!.RevisionId.ShouldBe(approvedInput.RevisionId);
+        }
+        cutoutRequestSize.ShouldBe("2496x2496");
+        http.Calls.ShouldBe(2);
+    }
+
+    [Theory]
+    [InlineData(ImageProcessingMethod.OpenAiCutout, 1122, 1402, "auto", 1122, 1402, true, 1)]
+    [InlineData(ImageProcessingMethod.OpenAiCutout, 4000, 2016, "auto", 4000, 2016, false, 0)]
+    [InlineData(ImageProcessingMethod.OpenAiCombined, 1122, 1402, "2240x2800", 2240, 2800, true, 1)]
+    [InlineData(ImageProcessingMethod.OpenAiCombined, 1122, 1402, "2240x2800", 1122, 1402, false, 1)]
+    [InlineData(ImageProcessingMethod.OpenAiCombined, 4000, 2016, "auto", 4000, 2016, true, 1)]
+    [InlineData(ImageProcessingMethod.OpenAiCombined, 2000, 2000, "2880x2880", 2000, 2000, true, 1)]
+    public async Task Cutout_and_combined_request_transparency_with_their_respective_size_policy(
+        ImageProcessingMethod method, uint inputWidth, uint inputHeight, string requestedSize,
+        uint responseWidth, uint responseHeight, bool accepted, int expectedCalls)
     {
         using var h = new SessionServiceHarness();
         var workspace = new FileWorkspace(h.Workspace.Root);
@@ -202,7 +371,7 @@ public sealed class OpenAiImageBackendTests
         var expected = WorkspaceFileRef.Create("test/openai/result.png", WorkspaceArea.Working);
         string sourcePath = workspace.ResolveAbsolute(prepared);
         Directory.CreateDirectory(Path.GetDirectoryName(sourcePath)!);
-        byte[] source = Image("opaque");
+        byte[] source = Image("opaque", inputWidth, inputHeight);
         File.WriteAllBytes(sourcePath, source);
         var revision = RevisionId.From(Guid.NewGuid());
         var sha = Sha256.FromBytes(System.Security.Cryptography.SHA256.HashData(source));
@@ -216,18 +385,25 @@ public sealed class OpenAiImageBackendTests
 
         using var http = new ImageHttp(async (message, token) =>
         {
-            var parts = ((MultipartFormDataContent)message.Content!).ToDictionary(
-                part => part.Headers.ContentDisposition!.Name!.Trim('"'));
-            (await parts["background"].ReadAsStringAsync(token)).ShouldBe("transparent");
-            (await parts["prompt"].ReadAsStringAsync(token)).ShouldContain(prompt);
-            return Reply(Image("alpha"));
+            var submitted = await ReadAsync(message, token);
+            submitted.Background.ShouldBe("transparent");
+            submitted.Size.ShouldBe(requestedSize);
+            string prompt = submitted.Prompt;
+            prompt.ShouldContain("remove only the background");
+            prompt.ShouldContain("Do not add objects, retouch faces");
+            if (method == ImageProcessingMethod.OpenAiCombined)
+                prompt.ShouldContain(requestedSize == "auto" ? "Keep the source canvas" : "Scale the full frame");
+            return Reply(Image("alpha", responseWidth, responseHeight));
         });
         using var backend = new OpenAiImageBackend(workspace, new Credentials(), Model, http);
         var result = await backend.ProcessAsync(request, default);
-        result.IsSuccess.ShouldBeTrue(result.IsFailure ? result.Failure.TechnicalDetail : null);
-        File.Exists(workspace.ResolveAbsolute(expected)).ShouldBeTrue();
+        result.IsSuccess.ShouldBe(accepted, result.IsFailure ? result.Failure.TechnicalDetail : null);
+        if (!accepted)
+            result.Failure.MessageKey.ShouldBe(expectedCalls == 0
+                ? "ImageProcessing_OpenAiCutoutCanvasUnsupported" : "ImageProcessing_OpenAiInvalidOutput");
+        File.Exists(workspace.ResolveAbsolute(expected)).ShouldBe(accepted);
         (await backend.ProcessAsync(request, default)).IsFailure.ShouldBeTrue();
-        http.Calls.ShouldBe(1);
+        http.Calls.ShouldBe(expectedCalls);
     }
 
     [Fact]
@@ -237,7 +413,8 @@ public sealed class OpenAiImageBackendTests
         using var http = new ImageHttp((_, _) => Task.FromResult(Reply(Image("alpha"))));
         using var backend = new OpenAiImageBackend(new FileWorkspace(h.Workspace.Root), new Credentials(), Model, http);
         var service = h.CreateService(imageProcessingBackends: [backend]);
-        var imported = (await service.ImportAsync(WorkflowType.PrepareAsset, h.WriteSourcePng("cutout.png"), null, "qa", default)).Value;
+        string inputPath = h.Workspace.CreateSourceFile("cutout.png", Image("opaque"));
+        var imported = (await service.ImportAsync(WorkflowType.PrepareAsset, inputPath, null, "qa", default)).Value;
         (await service.ExecuteAsync(imported.Id, new WorkflowCommand.ConfirmOriginal(), "qa", default)).IsSuccess.ShouldBeTrue();
         (await service.ExecuteAsync(imported.Id, new WorkflowCommand.Skip(StepKind.Enhancement), "qa", default)).IsSuccess.ShouldBeTrue();
         var selected = (await service.ExecuteAsync(imported.Id, new WorkflowCommand.SetImageProcessingSelection(
@@ -260,6 +437,48 @@ public sealed class OpenAiImageBackendTests
         await screen.RunStepCommand.ExecuteAsync(null);
         http.Calls.ShouldBe(1);
         (await service.LoadAsync(imported.Id, default)).Value.CurrentStep!.State.ShouldBe(StepState.ReviewRequired);
+    }
+
+    [Fact]
+    public async Task Separate_cutout_preserves_the_complete_returned_png()
+    {
+        using var h = new SessionServiceHarness();
+        byte[] source = SyntheticImages.PngWithAlpha(6, 5, (x, _) => x switch
+        {
+            0 => 0, 2 => 128, _ => 255,
+        }, colour: (128, 64, 32));
+        byte[] generated = SyntheticImages.PngWithAlpha(6, 5, (x, _) => x switch
+        {
+            0 => 0, 2 => 128, 3 => 0, _ => 255,
+        }, colour: (250, 5, 220));
+        using var http = new ImageHttp(async (request, token) =>
+        {
+            string wording = (await ReadAsync(request, token)).Prompt;
+            wording.ShouldContain("Do not add objects");
+            wording.ShouldContain("retouch faces");
+            wording.ShouldContain("exact pixel alignment");
+            return Reply(generated);
+        });
+        var workspace = new FileWorkspace(h.Workspace.Root);
+        using var backend = new OpenAiImageBackend(workspace, new Credentials(), Model, http);
+        var service = h.CreateService(imageProcessingBackends: [backend]);
+        var waiting = await CorrectionFixtures.AtBackgroundRemovalWaitingAsync(
+            service, h.Workspace.CreateSourceFile("cutout-source.png", source));
+        var selected = await service.ExecuteAsync(waiting.Id, new WorkflowCommand.SetImageProcessingSelection(
+            StepKind.BackgroundRemoval, SessionImageProcessingSelection.Compatible with
+            { BackgroundRemoval = ImageProcessingMethod.OpenAiCutout }), "qa", default);
+        var input = selected.Value.CurrentArtefact.ShouldNotBeNull();
+        var authorised = await service.ExecuteAsync(waiting.Id, new WorkflowCommand.SetBackgroundRemovalDecision(
+            BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent, input.RevisionId, input.Sha256,
+            Method: ImageProcessingMethod.OpenAiCutout), "qa", default);
+        authorised.IsSuccess.ShouldBeTrue();
+        var result = await service.ExecuteAsync(waiting.Id, new WorkflowCommand.StartStep(StepKind.BackgroundRemoval,
+            new ImageUploadConfirmation(ImageProcessingMethod.OpenAiCutout, input.RevisionId, input.Sha256)), "qa", default);
+
+        var review = result.Value.CurrentArtefact.ShouldNotBeNull();
+        var aggregate = (await h.Repository.LoadAsync(waiting.Id, default)).Value!;
+        var saved = aggregate.Revisions.Single(r => r.Id == review.RevisionId).File;
+        File.ReadAllBytes(workspace.ResolveAbsolute(saved)).ShouldBe(generated);
     }
 
     [Fact]
@@ -337,24 +556,11 @@ public sealed class OpenAiImageBackendTests
         return (service, selected.Value);
     }
 
-    private static HttpResponseMessage Reply(byte[]? png)
+    private static byte[] Image(string shape, uint width = 24, uint height = 24)
     {
-        var response = new HttpResponseMessage(HttpStatusCode.OK)
-        {
-            Content = new StringContent(JsonSerializer.Serialize(new
-            {
-                data = new[] { new { b64_json = png is null ? null : Convert.ToBase64String(png), url = "https://example.test/private" } },
-                usage = new { total_tokens = 12, input_tokens = 7, output_tokens = 5 },
-            })),
-        };
-        response.Headers.Add("x-request-id", "req_test42");
-        return response;
-    }
-
-    private static byte[] Image(string shape)
-    {
-        uint width = shape == "oversize" ? 5000u : 24u;
-        using var image = new MagickImage(shape is "opaque" or "jpeg" ? MagickColors.White : MagickColors.Transparent, width, 24);
+        if (shape == "oversize")
+            width = 5000;
+        using var image = new MagickImage(shape is "opaque" or "jpeg" ? MagickColors.White : MagickColors.Transparent, width, height);
         if (shape is "alpha" or "oversize")
             new Drawables().FillColor(MagickColors.Red).Rectangle(2, 2, 20, 20).Draw(image);
         return image.ToByteArray(shape == "jpeg" ? MagickFormat.Jpeg : MagickFormat.Png);

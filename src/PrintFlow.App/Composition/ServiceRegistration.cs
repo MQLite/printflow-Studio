@@ -445,6 +445,10 @@ public static class ServiceRegistration
                 services.AddSingleton<ILocalProductionTiffProcessor>(provider => new MagickProductionTiffProcessor(
                     provider.GetRequiredService<IWorkspace>(),
                     presetManifestPath, expectedPresetHash));
+                services.AddSingleton<IPhotoshopBackgroundEditor>(provider => new PhotoshopBackgroundEditor(
+                    provider.GetRequiredService<IWorkspace>(),
+                    provider.GetRequiredService<IWorkstationAutomationLeaseManager>(),
+                    presetManifestPath, expectedPresetHash));
                 break;
 
             default:

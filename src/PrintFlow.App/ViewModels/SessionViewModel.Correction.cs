@@ -104,7 +104,7 @@ public sealed partial class SessionViewModel
 
     /// <summary>"Ask a colleague to correct this image" beside Approve and Reject.</summary>
     public bool CanAskColleague => CanInteractWithLivePage && _session?.CanAskColleague == true && !IsBusy && !IsAdjustingTrim &&
-        !IsAskingColleague && !IsCropping && _finalSaveOperation is null;
+        !IsAskingColleague && !IsCropping && !HasPhotoshopEdit && _finalSaveOperation is null;
 
     public bool CanPrepareCorrection => CanInteractWithLivePage && IsAskingColleague && !IsBusy && _session?.CanAskColleague == true;
 

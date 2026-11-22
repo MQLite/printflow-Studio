@@ -371,6 +371,9 @@ public abstract record WorkflowCommand
         {
         }
 
+        internal sealed record ApplyPhotoshopBackgroundEdit(Services.PhotoshopBackgroundEditTarget Target,
+            AttemptId AttemptId, RevisionId OutputRevision, Sha256 OutputHash) : System;
+
         /// <summary>An attempt produced a validated Revision.</summary>
         public sealed record AttemptSucceeded : System
         {

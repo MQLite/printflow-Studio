@@ -98,6 +98,49 @@ public sealed class LocalEnhancementModelSmoke
     }
 
     [ProvisionedModelFact]
+    public async Task Tiled_upscale_keeps_a_periodic_pattern_aligned_across_both_seams_and_the_last_pixel()
+    {
+        using TempWorkspace temp = new();
+        var backend = new LocalEnhancementBackend(new FileWorkspace(temp.Root), Model);
+        var request = LocalEnhancementTests.Request(ImageProcessingMethod.AiUpscale, "tiled");
+        const int size = 513;
+        var rgba = new byte[size * size * 4];
+        for (int y = 0; y < size; y++)
+        for (int x = 0; x < size; x++)
+        {
+            int i = (y * size + x) * 4;
+            rgba[i] = (byte)(40 + x % 8 * 20);
+            rgba[i + 1] = (byte)(40 + y % 8 * 20);
+            rgba[i + 2] = 90;
+            rgba[i + 3] = (byte)(x == size - 1 && y == size - 1 ? 0 : 255);
+        }
+        using (var input = new MagickImage())
+        {
+            input.ReadPixels(rgba, new PixelReadSettings(size, size, StorageType.Char, PixelMapping.RGBA));
+            input.Write(LocalEnhancementTests.Absolute(temp, request.Input), MagickFormat.Png32);
+        }
+
+        var result = await backend.ProcessAsync(request, default);
+        result.IsSuccess.ShouldBeTrue(result.IsFailure ? result.Failure.ToString() : null);
+        using var output = new MagickImage(LocalEnhancementTests.Absolute(temp, request.ExpectedOutput));
+        (output.Width, output.Height).ShouldBe((1026u, 1026u));
+        using var pixels = output.GetPixels();
+        var samples = pixels.ToByteArray(PixelMapping.RGBA)!;
+        samples[^1].ShouldBe((byte)0);
+        int maxDifference = 0;
+        for (int y = 504; y < 520; y++)
+        for (int x = 504; x < 520; x++)
+        for (int c = 0; c < 3; c++)
+        {
+            int seam = (y * 1026 + x) * 4 + c;
+            int interior = ((y - 256) * 1026 + x - 256) * 4 + c;
+            maxDifference = Math.Max(maxDifference, Math.Abs(samples[seam] - samples[interior]));
+        }
+        maxDifference.ShouldBeLessThanOrEqualTo(6);
+        Console.WriteLine($"513 × 513 tiled inference and PNG output: {result.Value.Elapsed}, maximum seam difference: {maxDifference}/255.");
+    }
+
+    [ProvisionedModelFact]
     public async Task Low_system_memory_refuses_this_run_and_allows_retry_after_memory_recovers()
     {
         using TempWorkspace temp = new();
@@ -122,7 +165,7 @@ public sealed class LocalEnhancementModelSmoke
         var backend = new LocalEnhancementBackend(harness.FileWorkspace, Model);
         var service = harness.CreateService(imageProcessingBackends: [backend]);
         string source = Path.Combine(harness.Workspace.Root, "oversized.png");
-        LocalEnhancementTests.WriteSample(source, 0, 8, 513, 512);
+        LocalEnhancementTests.WriteSample(source, 0, 8, 4097, 9);
         var id = (await service.ImportAsync(WorkflowType.PrepareAsset, source, null, "qa", default)).Value.Id;
         (await service.ExecuteAsync(id, new WorkflowCommand.ConfirmOriginal(), "qa", default)).IsSuccess.ShouldBeTrue();
         var command = new WorkflowCommand.StartStep(StepKind.Enhancement);

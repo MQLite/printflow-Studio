@@ -62,6 +62,17 @@ public interface ISessionService
     /// <summary>Loads a session's current view without changing anything.</summary>
     Task<OperationResult<SessionView>> LoadAsync(SessionId id, CancellationToken cancellationToken);
 
+    Task<OperationResult<PhotoshopBackgroundEditSource>> GetPhotoshopBackgroundEditSourceAsync(
+        SessionId id, PhotoshopBackgroundEditTarget target, CancellationToken cancellationToken) =>
+        Task.FromResult(OperationResult.Fail<PhotoshopBackgroundEditSource>(
+            FailureCode.AdapterUnavailable, "Photoshop background editing is unavailable."));
+
+    Task<OperationResult<SessionView>> ImportPhotoshopBackgroundEditAsync(
+        SessionId id, PhotoshopBackgroundEditTarget target, PhotoshopBackgroundSave save, string? operatorName,
+        CancellationToken cancellationToken) =>
+        Task.FromResult(OperationResult.Fail<SessionView>(
+            FailureCode.AdapterUnavailable, "Photoshop background editing is unavailable."));
+
     /// <summary>
     /// Applies the ordinary lawful Approve only when <paramref name="step"/>'s current result is
     /// still exactly <paramref name="revision"/> with <paramref name="reviewedHash"/> (SCRUM-11145).

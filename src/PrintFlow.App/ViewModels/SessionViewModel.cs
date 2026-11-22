@@ -699,7 +699,8 @@ public sealed partial class SessionViewModel : ObservableObject
         PrintFlow.Workflow.Ports.ICorrectionFolderShell? correctionShell = null,
         ManualHandoffCopyService? manualHandoffCopy = null,
         IManualHandoffCopyPicker? manualHandoffCopyPicker = null,
-        IOpenAiUploadPrompt? openAiUploadPrompt = null)
+        IOpenAiUploadPrompt? openAiUploadPrompt = null,
+        IPhotoshopBackgroundEditor? photoshopBackgroundEditor = null)
     {
         ArgumentNullException.ThrowIfNull(sessions);
         ArgumentNullException.ThrowIfNull(previews);
@@ -718,6 +719,7 @@ public sealed partial class SessionViewModel : ObservableObject
         _manualHandoffCopy = manualHandoffCopy;
         _manualHandoffCopyPicker = manualHandoffCopyPicker;
         _openAiUploadPrompt = openAiUploadPrompt;
+        _photoshopBackgroundEditor = photoshopBackgroundEditor;
         if (localisation is not null)
             System.Windows.WeakEventManager<PrintFlow.App.Localisation.ILocalisationService, EventArgs>.AddHandler(
                 localisation, nameof(PrintFlow.App.Localisation.ILocalisationService.LanguageChanged), OnOperatorLanguageChanged);
@@ -1258,7 +1260,8 @@ public sealed partial class SessionViewModel : ObservableObject
     /// only steps the real <c>ReturnToStep</c> accepts, so an offered control and an accepted
     /// command cannot disagree (§4, §8).
     /// </remarks>
-    public bool CanReturnToStep => _session?.CanReturnToStep == true && !IsAdjustingTrim && !IsAskingColleague;
+    public bool CanReturnToStep => _session?.CanReturnToStep == true && !IsAdjustingTrim &&
+        !IsAskingColleague && !HasPhotoshopEdit;
 
     /// <summary>True once a destination has been picked, so the confirmation can be opened.</summary>
     public bool CanBeginReturn => CanReturnToStep && SelectedReturnTarget is not null && !IsBusy;
@@ -1440,7 +1443,7 @@ public sealed partial class SessionViewModel : ObservableObject
     /// This screen restates none of it: not the step, not the step state, not the session state.
     /// </remarks>
     public bool CanAuthoriseAutomaticSelection =>
-        CanRunSelectedImageMethod && _session?.CanSetBackgroundRemovalDecision == true;
+        !HasPhotoshopEdit && CanRunSelectedImageMethod && _session?.CanSetBackgroundRemovalDecision == true;
 
     /// <summary>True once the confirmation may be opened: the offer is real and nothing is in flight.</summary>
     public bool CanBeginAutomaticSelection =>
@@ -2988,6 +2991,7 @@ public sealed partial class SessionViewModel : ObservableObject
 
     private async Task LeaveHomeAsync(CancellationToken cancellationToken)
     {
+        CancelPhotoshopEdit();
         ClearPreviews();
         await _navigation.GoHomeAsync(cancellationToken).ConfigureAwait(true);
     }
@@ -3029,7 +3033,8 @@ public sealed partial class SessionViewModel : ObservableObject
     /// trim adjustment is open (SCRUM-11147): an Approve pressed then would approve the old
     /// result while the operator believes they are confirming the new boundary.
     /// </summary>
-    private bool Allows(CommandKind kind) => CanInteractWithLivePage && !IsAdjustingTrim && !IsAskingColleague && Offers(kind);
+    private bool Allows(CommandKind kind) => CanInteractWithLivePage && !IsAdjustingTrim &&
+        !IsAskingColleague && !HasPhotoshopEdit && Offers(kind);
 
     /// <summary>What the workflow layer offers, regardless of what this screen is showing.</summary>
     private bool Offers(CommandKind kind) => _session?.AvailableCommands.Contains(kind) == true;
@@ -3230,6 +3235,7 @@ public sealed partial class SessionViewModel : ObservableObject
 
     partial void OnIsBusyChanged(bool value)
     {
+        NotifyPhotoshopEdit();
         NotifyTrimAdjustState();
         NotifyCorrectionState();
         NotifyOperatorStatusChanged();
@@ -3458,7 +3464,7 @@ public sealed partial class SessionViewModel : ObservableObject
     private async Task RunServiceAsync(
         Func<SessionId, Task<OperationResult<SessionView>>> call, CancellationToken cancellationToken, Action<SessionView>? onApplied = null)
     {
-        if (_session is null || IsBusy || !CanInteractWithLivePage)
+        if (_session is null || IsBusy || !CanInteractWithLivePage || HasPhotoshopEdit)
         {
             return;
         }
@@ -3626,6 +3632,8 @@ public sealed partial class SessionViewModel : ObservableObject
         bool lostTrimAdjustment = IsAdjustingTrim && !keepTrimDraft &&
             session.CurrentStep?.CurrentRevisionId == _trimAdjustTarget?.ResultRevisionId;
         _session = session;
+        if (!MatchesPhotoshopPosition()) CancelPhotoshopEdit();
+        NotifyPhotoshopEdit();
         ShowImageProcessingMethod();
         ShowBackgroundRemovalMode();
         ShowCommittedPreflight(session);
