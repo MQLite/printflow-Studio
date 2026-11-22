@@ -75,6 +75,82 @@ public sealed class FinalSaveUiTests
         (await FinalSaveFixtures.LoadAsync(h, review.Id)).Reviews.ShouldBeEmpty();
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Overwrite_saves_the_reviewed_result_to_the_imported_file(bool reopenAfterCancellation)
+    {
+        using CultureScope culture = new("zh-CN");
+        using SessionServiceHarness h = new();
+        ISessionService workflow = h.CreateService();
+        string folder = FinalSaveFixtures.NewFolder("overwrite-original");
+        try
+        {
+            string original = Path.Combine(folder, "bordered.png");
+            File.Copy(h.WriteBorderedSourcePng(), original);
+            byte[] originalBytes = File.ReadAllBytes(original);
+            SessionId id = (await workflow.ImportAsync(WorkflowType.PrepareAsset, original,
+                "trimmed", "tester", CancellationToken.None)).Value.Id;
+            foreach (WorkflowCommand command in new WorkflowCommand[]
+                     {
+                         new WorkflowCommand.ConfirmOriginal(), new WorkflowCommand.Skip(StepKind.Enhancement),
+                         new WorkflowCommand.Skip(StepKind.BackgroundRemoval)
+                     })
+                (await workflow.ExecuteAsync(id, command, "tester", CancellationToken.None)).IsSuccess.ShouldBeTrue();
+            SessionView review = (await workflow.ExecuteAsync(id, new WorkflowCommand.StartStep(StepKind.Trim),
+                "tester", CancellationToken.None)).Value;
+            var picker = new StubFolderPicker { Next = folder };
+            var delivery = FinalSaveFixtures.Delivery(h);
+            SessionViewModel screen = await OpenAsync(h, workflow, delivery, picker, new RecordingDeliveredFileShell(), review);
+            screen.ChangeLocationCommand.Execute(null);
+            screen.SaveFileNameText = "bordered.png";
+            screen.ConfirmAndSaveLabel.ShouldContain("覆盖原文件");
+            File.ReadAllBytes(original).ShouldBe(originalBytes);
+
+            if (reopenAfterCancellation)
+            {
+                using CancellationTokenSource cancellation = new();
+                var request = FinalSaveFixtures.Confirm(review, folder, "bordered.png") with { OverwriteOriginal = true };
+                var coordinator = new FinalSaveCoordinator(workflow, delivery);
+                FinalSaveResult cancelled = await coordinator.ConfirmAndSaveAsync(request,
+                    new CancelWhenCopyStarts(cancellation), cancellation.Token);
+                cancelled.Delivery!.Code.ShouldBe(DeliveryCode.Cancelled);
+                File.ReadAllBytes(original).ShouldBe(originalBytes);
+
+                SessionView reopened = (await workflow.LoadAsync(id, CancellationToken.None)).Value;
+                screen = await OpenAsync(h, workflow, delivery, picker, new RecordingDeliveredFileShell(), reopened);
+                screen.CanRetryRecordedSave.ShouldBeFalse();
+                screen.SaveApprovedLabel.ShouldBe("覆盖原文件");
+                await screen.SaveApprovedCommand.ExecuteAsync(null);
+            }
+            else
+            {
+                await screen.ConfirmAndSaveCommand.ExecuteAsync(null);
+            }
+            await screen.FinalSaveFactsLoaded;
+
+            screen.FinalSaveSavedPath.ShouldBe(original);
+            var aggregate = await FinalSaveFixtures.LoadAsync(h, id);
+            var imported = aggregate.Revisions.Single(revision => revision.IsRoot);
+            var approved = aggregate.Revisions.Single(revision => revision.Operation == OperationKind.PromoteApproved);
+            File.ReadAllBytes(h.FileWorkspace.ResolveAbsolute(imported.File)).ShouldBe(originalBytes);
+            File.ReadAllBytes(original).ShouldBe(File.ReadAllBytes(h.FileWorkspace.ResolveAbsolute(approved.File)));
+            Directory.GetFiles(folder).ShouldBe([original]);
+            var deliveryRecord = (await delivery.GetDeliveryStateAsync(id, null, CancellationToken.None)).Value.Single();
+            (await FinalSaveFixtures.Delivery(h).CheckDeliveredFileAsync(deliveryRecord.DeliveryId, CancellationToken.None))
+                .Availability.ShouldBe(DeliveryAvailability.VerifiedNow);
+        }
+        finally { FinalSaveFixtures.Remove(folder); }
+    }
+
+    private sealed class CancelWhenCopyStarts(CancellationTokenSource cancellation) : IProgress<FinalSaveObservation>
+    {
+        public void Report(FinalSaveObservation value)
+        {
+            if (value.Delivery?.Phase == DeliveryPhase.Copying) cancellation.Cancel();
+        }
+    }
+
     [Fact]
     public async Task Picker_dismissal_changes_nothing_then_confirm_saves_and_opens_only_the_delivered_file()
     {

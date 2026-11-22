@@ -3110,6 +3110,14 @@ public sealed partial class SessionViewModel : ObservableObject
 
         if (current.Facts.Format == ImageFormat.Psd) return;
 
+        // Load the production TIFF before publishing generic panes so WIC's flattened
+        // image never flashes on screen while the ink separations are being decoded.
+        await LoadTiffReviewAsync(session, generation, cancellationToken).ConfigureAwait(true);
+        if (generation != _previewGeneration)
+        {
+            return;
+        }
+
         List<ArtefactPreviewPane> loaded = [];
 
         if (session.UpstreamArtefact is { } upstream && upstream.Facts.Format != ImageFormat.Psd)
@@ -3148,12 +3156,6 @@ public sealed partial class SessionViewModel : ObservableObject
 
         // A trim adjustment kept across a refresh draws again on the newly published source.
         NotifyTrimAdjustPanes();
-
-        // The specialist surface last, and only for a validated production output. It is a
-        // second, narrower request rather than part of the loop above: the generic panes are
-        // about comparing artefacts, and a TIFF's Colour/White ink/Overlay modes are about
-        // inspecting one production file (SCRUM-11104 §14).
-        await LoadTiffReviewAsync(session, generation, cancellationToken).ConfigureAwait(true);
     }
 
     private async Task<ArtefactPreviewPane> BuildPaneAsync(

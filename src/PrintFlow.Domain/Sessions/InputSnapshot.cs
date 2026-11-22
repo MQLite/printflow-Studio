@@ -12,9 +12,8 @@ namespace PrintFlow.Domain.Sessions;
 /// derivation tree, and a validity state. This record adds only the facts about where the
 /// file came from.
 ///
-/// <see cref="OriginalSourcePath"/> is informational. PrintFlow never opens it for writing
-/// and never deletes it (MVP design invariant 1). Actual copying belongs to Epic 11100
-/// Task 11106; nothing here touches the file system.
+/// <see cref="OriginalSourcePath"/> records the external path. An operator can explicitly
+/// replace the original during final delivery without changing the managed import bytes.
 /// </remarks>
 public sealed record InputSnapshot(
     SnapshotId Id,

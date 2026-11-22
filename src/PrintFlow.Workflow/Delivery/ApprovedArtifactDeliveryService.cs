@@ -143,9 +143,14 @@ public sealed partial class ApprovedArtifactDeliveryService : IApprovedArtifactD
             return Outcome(request, DeliveryCode.NeedsReconciliation, byRequest.Value.Delivery.DeliveryId);
         string folder = byRequest.Value?.Delivery.RequestedFolder ?? request.Folder;
         string finalLeaf = byRequest.Value?.Delivery.RequestedFileName ?? request.FileName;
+        InputSnapshot? snapshot = loaded.Value.Snapshot;
+        bool originalDestination = DeliveryDraftText.MatchesOriginal(snapshot?.OriginalSourcePath, folder, finalLeaf);
+        FileFacts? importedFacts = originalDestination ? ImportedFacts(loaded.Value) : null;
+        bool allowOriginal = originalDestination &&
+            (request.OverwriteOriginal && importedFacts is not null || byRequest.Value is not null);
         DeliveryFileResult<IDeliveryFileGuard> opened = _files.Open(sourcePath, artifact.ApprovedSha256,
             artifact.ApprovedLength, folder, finalLeaf, request.Artifact.Kind,
-            _protectedRoots, loaded.Value.Snapshot?.OriginalSourcePath);
+            _protectedRoots, allowOriginal ? null : snapshot?.OriginalSourcePath);
         if (!opened.IsSuccess)
             return Outcome(request, opened.Code, byRequest.Value?.Delivery.DeliveryId, detail: opened.Detail);
         using IDeliveryFileGuard guard = opened.Value!;
@@ -172,13 +177,14 @@ public sealed partial class ApprovedArtifactDeliveryService : IApprovedArtifactD
             entry = inserted.Value;
             freshIntent = entry.Attempt?.AttemptId == attemptId;
         }
-        return await ContinueUnderGateAsync(request, entry, artifact, guard, progress, cancellationToken, freshIntent);
+        return await ContinueUnderGateAsync(request, entry, artifact, guard, progress, cancellationToken, freshIntent,
+            importedFacts);
     }
 
     private async Task<DeliveryOutcome> ContinueUnderGateAsync(DeliveryRequest invocation,
         DeliveryJournalEntry entry, ApprovedArtifact artifact, IDeliveryFileGuard guard,
         IProgress<DeliveryProgress>? progress, CancellationToken cancellationToken,
-        bool freshIntent = false)
+        bool freshIntent = false, FileFacts? importedFacts = null)
     {
         DeliveryRecord delivery = entry.Delivery;
         if (delivery.Artifact != artifact.Key || delivery.ReviewId != artifact.ReviewId ||
@@ -198,8 +204,10 @@ public sealed partial class ApprovedArtifactDeliveryService : IApprovedArtifactD
         {
             Report(invocation, progress, DeliveryPhase.Reconciling);
             DeliveryOutcome reconciled = await ReconcileAttemptUnderGateAsync(invocation, entry, artifact,
-                guard, progress, cancellationToken);
-            if (reconciled.Code is not DeliveryCode.NotDelivered) return reconciled;
+                guard, progress, cancellationToken, importedFacts);
+            if (reconciled.Code is not DeliveryCode.NotDelivered ||
+                importedFacts is not null && !invocation.OverwriteOriginal)
+                return reconciled;
             OperationResult<DeliveryAttemptRecord> next = await _deliveries.BeginNextAttemptAsync(
                 delivery.DeliveryId, guard.DirectoryId, guard.DestinationKey, cancellationToken);
             if (next.IsFailure)
@@ -219,12 +227,25 @@ public sealed partial class ApprovedArtifactDeliveryService : IApprovedArtifactD
         DeliveryFinalCheck existingFinal = guard.CheckFinal();
         if (existingFinal.Presence == DeliveryFilePresence.Unavailable)
             return Outcome(invocation, DeliveryCode.DestinationUnavailable, delivery.DeliveryId, detail: existingFinal.Detail);
-        if (existingFinal.Presence == DeliveryFilePresence.Present)
+        DeliveryFileIdentity? replaceOriginal = invocation.OverwriteOriginal && IsImportedOriginal(existingFinal, importedFacts)
+            ? existingFinal.Identity : null;
+        if (existingFinal.Presence == DeliveryFilePresence.Present && replaceOriginal is null)
+        {
+            if (importedFacts is not null)
+                await _deliveries.EndAttemptAsync(attempted.AttemptId, DeliveryAttemptState.Failed, "Collision",
+                    CancellationToken.None);
             return Collision(invocation, delivery.DeliveryId, guard);
-        DeliveryFileResult<DeliveryFileIdentity> staged = guard.CreateStaging(attempted.StagingLeaf);
+        }
+        DeliveryFileResult<DeliveryFileIdentity> staged = replaceOriginal is null
+            ? guard.CreateStaging(attempted.StagingLeaf)
+            : guard.CreateStaging(attempted.StagingLeaf, replaceOriginal.CreatedAtUtc);
         if (!staged.IsSuccess)
             return Outcome(invocation, staged.Code, delivery.DeliveryId, detail: staged.Detail);
         DeliveryFileIdentity stageIdentity = staged.Value!;
+        if (replaceOriginal is not null && stageIdentity.CreatedAtUtc != replaceOriginal.CreatedAtUtc)
+            return await FailBeforePublication(invocation, attempted.AttemptId, delivery.DeliveryId,
+                stageIdentity, guard, DeliveryCode.VerificationFailed, "Staging creation time differs from the original.",
+                CancellationToken.None);
         OperationResult<DeliveryAttemptRecord> markedStage = await _deliveries.MarkStagingAsync(
             attempted.AttemptId, stageIdentity.FileId, stageIdentity.CreatedAtUtc, cancellationToken);
         if (markedStage.IsFailure)
@@ -247,15 +268,18 @@ public sealed partial class ApprovedArtifactDeliveryService : IApprovedArtifactD
             return await FailBeforePublication(invocation, attempted.AttemptId, delivery.DeliveryId,
                 stageIdentity, guard, DeliveryCode.SourceChanged, "Exact approval changed before publication.",
                 CancellationToken.None);
-        OperationResult<DeliveryAttemptRecord> ready = await _deliveries.MarkReadyAsync(
-            attempted.AttemptId, _time.GetUtcNow(), CancellationToken.None);
+        OperationResult<DeliveryAttemptRecord> ready = replaceOriginal is null
+            ? await _deliveries.MarkReadyAsync(attempted.AttemptId, _time.GetUtcNow(), CancellationToken.None)
+            : await _deliveries.MarkReadyAsync(attempted.AttemptId, _time.GetUtcNow(), replaceOriginal.FileId,
+                CancellationToken.None);
         if (ready.IsFailure)
         {
             // An unknown SQLite acknowledgement is resolved by readback. Without a durable
             // Ready checkpoint, publication is forbidden.
             OperationResult<DeliveryJournalEntry?> readback = await _deliveries.FindByIdAsync(delivery.DeliveryId, CancellationToken.None);
             if (readback.IsFailure || readback.Value?.Attempt?.AttemptId != attempted.AttemptId ||
-                readback.Value.Attempt.State != DeliveryAttemptState.ReadyToPublish)
+                readback.Value.Attempt.State != DeliveryAttemptState.ReadyToPublish ||
+                readback.Value.Attempt.OriginalFileId != replaceOriginal?.FileId)
                 return Outcome(invocation, DeliveryCode.PersistenceFailed, delivery.DeliveryId,
                     detail: "Ready checkpoint could not be established by durable readback.");
         }
@@ -263,7 +287,9 @@ public sealed partial class ApprovedArtifactDeliveryService : IApprovedArtifactD
             return await FailBeforePublication(invocation, attempted.AttemptId, delivery.DeliveryId,
                 stageIdentity, guard, DeliveryCode.Cancelled, "Cancelled before publication.", CancellationToken.None);
         Report(invocation, progress, DeliveryPhase.Publishing);
-        DeliveryFileResult<bool> published = guard.PublishNoReplace(attempted.StagingLeaf, stageIdentity);
+        DeliveryFileResult<bool> published = replaceOriginal is null
+            ? guard.PublishNoReplace(attempted.StagingLeaf, stageIdentity)
+            : guard.PublishReplacingOriginal(attempted.StagingLeaf, stageIdentity, replaceOriginal, importedFacts!);
         if (!published.IsSuccess)
         {
             if (published.Code == DeliveryCode.Collision)
@@ -320,20 +346,52 @@ public sealed partial class ApprovedArtifactDeliveryService : IApprovedArtifactD
         seed = reread.Value.Delivery;
         OperationResult<SessionAggregate?> loaded = await _sessions.LoadAsync(seed.Artifact.SessionId, cancellationToken);
         if (loaded.IsFailure || loaded.Value is null)
-            return Outcome(invocation, DeliveryCode.PersistenceFailed, deliveryId);
+            return RestoreOriginalOrReport(invocation, reread.Value, DeliveryCode.PersistenceFailed);
         ArtifactResolution resolved = ApprovedArtifactResolver.Resolve(loaded.Value, seed.Artifact);
-        if (!resolved.IsEligible) return Outcome(invocation, RefusalCode(resolved.Refusal), deliveryId);
+        if (!resolved.IsEligible)
+            return RestoreOriginalOrReport(invocation, reread.Value, RefusalCode(resolved.Refusal));
         ApprovedArtifact artifact = resolved.Artifact!;
         DeliveryFileResult<IDeliveryFileGuard> opened = _files.Open(_workspace.ResolveAbsolute(artifact.File),
             artifact.ApprovedSha256, artifact.ApprovedLength, seed.RequestedFolder, seed.RequestedFileName,
-            seed.Artifact.Kind, _protectedRoots, loaded.Value.Snapshot?.OriginalSourcePath);
-        if (!opened.IsSuccess) return Outcome(invocation, opened.Code, deliveryId, detail: opened.Detail);
+            seed.Artifact.Kind, _protectedRoots, ProtectedOriginalForRecord(loaded.Value, seed));
+        if (!opened.IsSuccess)
+            return RestoreOriginalOrReport(invocation, reread.Value, opened.Code, opened.Detail);
         using IDeliveryFileGuard guard = opened.Value!;
         if (guard.DestinationKey != seed.DestinationKey || guard.DirectoryId != seed.DirectoryId ||
             guard.VolumeId != seed.VolumeId)
             return Outcome(invocation, DeliveryCode.NeedsReconciliation, deliveryId,
                 detail: "Recorded destination identity changed.");
-        return await ContinueUnderGateAsync(invocation, reread.Value, artifact, guard, progress, cancellationToken);
+        FileFacts? importedFacts = DeliveryDraftText.MatchesOriginal(loaded.Value.Snapshot?.OriginalSourcePath,
+            seed.RequestedFolder, seed.RequestedFileName) ? ImportedFacts(loaded.Value) : null;
+        return await ContinueUnderGateAsync(invocation, reread.Value, artifact, guard, progress, cancellationToken,
+            importedFacts: importedFacts);
+    }
+
+    private DeliveryOutcome RestoreOriginalOrReport(DeliveryRequest request, DeliveryJournalEntry entry,
+        DeliveryCode failure, string? detail = null)
+    {
+        DeliveryRecord record = entry.Delivery;
+        DeliveryOutcome Result(DeliveryCode code, string? explanation) =>
+            Outcome(request, code, record.DeliveryId, detail: explanation);
+
+        if (entry.Attempt is not { State: DeliveryAttemptState.ReadyToPublish or DeliveryAttemptState.NeedsReconciliation } attempt ||
+            OriginalIdentity(record, attempt) is not { } original)
+            return Result(failure, detail);
+
+        DeliveryFileResult<IDeliveryDestinationGuard> opened = _files.OpenForRenameRecovery(
+            record.RequestedFolder, record.RequestedFileName, record.Artifact.Kind, _protectedRoots);
+        if (!opened.IsSuccess) return Result(DeliveryCode.NeedsReconciliation, opened.Detail);
+        using IDeliveryDestinationGuard guard = opened.Value!;
+        if (guard.DestinationKey != record.DestinationKey)
+            return Result(DeliveryCode.NeedsReconciliation, "Recorded destination identity changed.");
+        DeliveryFinalCheck final = guard.CheckFinal();
+        if (final.Presence == DeliveryFilePresence.Unavailable)
+            return Result(DeliveryCode.NeedsReconciliation, final.Detail);
+        if (final.Presence == DeliveryFilePresence.Present)
+            return Result(failure, detail);
+        DeliveryFileResult<bool> recovered = guard.RecoverOriginalBackup(attempt.StagingLeaf, original, restore: true);
+        if (!recovered.IsSuccess) return Result(DeliveryCode.NeedsReconciliation, recovered.Detail);
+        return Result(failure, recovered.Value ? "Original file restored to its imported path." : detail);
     }
 
     public async Task<DeliveryFileObservation> CheckDeliveredFileAsync(Guid deliveryId, CancellationToken cancellationToken)
@@ -365,7 +423,7 @@ public sealed partial class ApprovedArtifactDeliveryService : IApprovedArtifactD
         ApprovedArtifact artifact = resolved.Artifact!;
         DeliveryFileResult<IDeliveryFileGuard> opened = _files.Open(_workspace.ResolveAbsolute(artifact.File),
             artifact.ApprovedSha256, artifact.ApprovedLength, seed.RequestedFolder, seed.RequestedFileName,
-            seed.Artifact.Kind, _protectedRoots, loaded.Value!.Snapshot?.OriginalSourcePath);
+            seed.Artifact.Kind, _protectedRoots, ProtectedOriginalForRecord(loaded.Value!, seed));
         if (!opened.IsSuccess)
             return Observe(seed, DeliveryAvailability.Unavailable, opened.Detail);
         using IDeliveryFileGuard guard = opened.Value!;
@@ -427,7 +485,7 @@ public sealed partial class ApprovedArtifactDeliveryService : IApprovedArtifactD
                 detail: "Approval changed since the original delivery.");
         DeliveryFileResult<IDeliveryFileGuard> opened = _files.Open(_workspace.ResolveAbsolute(artifact.File),
             artifact.ApprovedSha256, artifact.ApprovedLength, prior.RequestedFolder, prior.RequestedFileName,
-            prior.Artifact.Kind, _protectedRoots, loaded.Value.Snapshot?.OriginalSourcePath);
+            prior.Artifact.Kind, _protectedRoots, ProtectedOriginalForRecord(loaded.Value, prior));
         if (!opened.IsSuccess) return Outcome(invocation, opened.Code, prior.DeliveryId, detail: opened.Detail);
         using IDeliveryFileGuard guard = opened.Value!;
         if (guard.DestinationKey != prior.DestinationKey || guard.DirectoryId != prior.DirectoryId ||
@@ -469,7 +527,7 @@ public sealed partial class ApprovedArtifactDeliveryService : IApprovedArtifactD
         ApprovedArtifact artifact = resolved.Artifact!;
         DeliveryFileResult<IDeliveryFileGuard> opened = _files.Open(_workspace.ResolveAbsolute(artifact.File),
             artifact.ApprovedSha256, artifact.ApprovedLength, seed.RequestedFolder, seed.RequestedFileName,
-            seed.Artifact.Kind, _protectedRoots, loaded.Value!.Snapshot?.OriginalSourcePath);
+            seed.Artifact.Kind, _protectedRoots, ProtectedOriginalForRecord(loaded.Value!, seed));
         if (!opened.IsSuccess) return new(DeliveryAvailability.Unavailable, null, opened.Detail);
         IDeliveryFileGuard guard = opened.Value!;
         if (guard.DestinationKey != seed.DestinationKey || guard.DirectoryId != seed.DirectoryId ||
@@ -483,7 +541,7 @@ public sealed partial class ApprovedArtifactDeliveryService : IApprovedArtifactD
 
     private async Task<DeliveryOutcome> ReconcileAttemptUnderGateAsync(DeliveryRequest invocation,
         DeliveryJournalEntry entry, ApprovedArtifact artifact, IDeliveryFileGuard guard,
-        IProgress<DeliveryProgress>? progress, CancellationToken cancellationToken)
+        IProgress<DeliveryProgress>? progress, CancellationToken cancellationToken, FileFacts? importedFacts)
     {
         DeliveryAttemptRecord attempt = entry.Attempt!;
         DeliveryRecord delivery = entry.Delivery;
@@ -497,7 +555,7 @@ public sealed partial class ApprovedArtifactDeliveryService : IApprovedArtifactD
             if (beforeRetry.Presence == DeliveryFilePresence.Unavailable)
                 return Outcome(invocation, DeliveryCode.DestinationUnavailable, delivery.DeliveryId,
                     detail: beforeRetry.Detail);
-            if (beforeRetry.Presence == DeliveryFilePresence.Present)
+            if (beforeRetry.Presence == DeliveryFilePresence.Present && !IsImportedOriginal(beforeRetry, importedFacts))
                 return Outcome(invocation, DeliveryCode.NeedsReconciliation, delivery.DeliveryId,
                     detail: "Final name exists during an interrupted prepublication attempt.");
             if (attempt.State == DeliveryAttemptState.Intent)
@@ -534,24 +592,50 @@ public sealed partial class ApprovedArtifactDeliveryService : IApprovedArtifactD
             return Outcome(invocation, DeliveryCode.NeedsReconciliation, delivery.DeliveryId,
                 detail: "Ready checkpoint lacks staged ownership metadata.");
         DeliveryFileIdentity expected = new(delivery.VolumeId, attempt.StagingFileId, attempt.StagingCreationUtc.Value);
+        DeliveryFileIdentity? original = OriginalIdentity(delivery, attempt);
         DeliveryFinalCheck final = guard.CheckFinal(expected);
         if (final.Presence == DeliveryFilePresence.Present)
         {
+            if (original is not null && final.Identity == original && IsImportedOriginal(final, importedFacts))
+                return await EndUnpublishedReplacementAsync(invocation, attempt, expected, guard, cancellationToken);
             // No staged handle survives process restart. If NTFS tunneling changed creation
             // time before a crash, the stage-to-final lineage is ambiguous: fail closed.
             if (final.Identity != expected || final.Hash != artifact.ApprovedSha256 ||
                 final.Length != artifact.ApprovedLength)
+            {
+                string detail = "Final path does not match the ready checkpoint.";
+                if (original is not null)
+                {
+                    string backup = Path.Combine(guard.ResolvedFolder, Path.ChangeExtension(attempt.StagingLeaf, ".original"));
+                    detail += $" The original may be retained at '{backup}'.";
+                }
                 return Outcome(invocation, DeliveryCode.NeedsReconciliation, delivery.DeliveryId,
-                    detail: "Final path does not match the ready checkpoint.");
+                    detail: detail);
+            }
             DeliveryFileResult<DeliveryFileIdentity> oldStage = guard.OpenOwnedStaging(attempt.StagingLeaf, expected);
             if (oldStage.IsSuccess || oldStage.Code != DeliveryCode.SourceMissing)
                 return Outcome(invocation, oldStage.Code == DeliveryCode.Unavailable
                     ? DeliveryCode.DestinationUnavailable : DeliveryCode.NeedsReconciliation,
                     delivery.DeliveryId, detail: "Final and recorded staging name cannot prove final-only ownership: " + oldStage.Detail);
+            if (original is not null)
+            {
+                DeliveryFileResult<bool> cleaned = guard.RecoverOriginalBackup(attempt.StagingLeaf, original,
+                    restore: false, importedFacts);
+                if (!cleaned.IsSuccess)
+                    return Outcome(invocation, DeliveryCode.NeedsReconciliation, delivery.DeliveryId, detail: cleaned.Detail);
+            }
             return await CompleteVerifiedFinalAsync(invocation, delivery, attempt, final.Identity!, guard, cancellationToken);
         }
         if (final.Presence == DeliveryFilePresence.Unavailable)
             return Outcome(invocation, DeliveryCode.DestinationUnavailable, delivery.DeliveryId, detail: final.Detail);
+        if (original is not null)
+        {
+            DeliveryFileResult<bool> restored = guard.RecoverOriginalBackup(attempt.StagingLeaf, original, restore: true);
+            if (!restored.IsSuccess)
+                return Outcome(invocation, DeliveryCode.NeedsReconciliation, delivery.DeliveryId, detail: restored.Detail);
+            if (restored.Value)
+                return await EndUnpublishedReplacementAsync(invocation, attempt, expected, guard, cancellationToken);
+        }
         DeliveryFileResult<DeliveryFileIdentity> staged = guard.OpenOwnedStaging(attempt.StagingLeaf, expected);
         if (!staged.IsSuccess)
             return Outcome(invocation, DeliveryCode.NeedsReconciliation, delivery.DeliveryId,
@@ -574,6 +658,23 @@ public sealed partial class ApprovedArtifactDeliveryService : IApprovedArtifactD
             final.Hash != artifact.ApprovedSha256 || final.Length != artifact.ApprovedLength)
             return Outcome(invocation, DeliveryCode.NeedsReconciliation, delivery.DeliveryId);
         return await CompleteVerifiedFinalAsync(invocation, delivery, attempt, final.Identity!, guard, cancellationToken);
+    }
+
+    private async Task<DeliveryOutcome> EndUnpublishedReplacementAsync(DeliveryRequest invocation,
+        DeliveryAttemptRecord attempt, DeliveryFileIdentity stage, IDeliveryFileGuard guard, CancellationToken cancellationToken)
+    {
+        DeliveryFileResult<DeliveryFileIdentity> staged = guard.OpenOwnedStaging(attempt.StagingLeaf, stage);
+        const string detail = "Original remains at its imported path.";
+        if (staged.IsSuccess)
+            return await FailBeforePublication(invocation, attempt.AttemptId, attempt.DeliveryId,
+                stage, guard, DeliveryCode.NotDelivered, detail, cancellationToken);
+        if (staged.Code != DeliveryCode.SourceMissing)
+            return Outcome(invocation, DeliveryCode.NeedsReconciliation, attempt.DeliveryId, detail: staged.Detail);
+        OperationResult<DeliveryAttemptRecord> ended = await _deliveries.EndAttemptAsync(attempt.AttemptId,
+            DeliveryAttemptState.Failed, "InterruptedReplacement", CancellationToken.None);
+        return ended.IsSuccess
+            ? Outcome(invocation, DeliveryCode.NotDelivered, attempt.DeliveryId, detail: detail)
+            : Outcome(invocation, DeliveryCode.PersistenceFailed, attempt.DeliveryId, detail: ended.Failure.TechnicalDetail);
     }
 
     private async Task<DeliveryOutcome> CompleteVerifiedFinalAsync(DeliveryRequest invocation,
@@ -652,11 +753,30 @@ public sealed partial class ApprovedArtifactDeliveryService : IApprovedArtifactD
     private static DeliveryFileIdentity FinalIdentity(DeliveryRecord delivery) =>
         new(delivery.VolumeId, delivery.FinalFileId!, delivery.FinalCreationUtc!.Value);
 
+    private static DeliveryFileIdentity? OriginalIdentity(DeliveryRecord delivery, DeliveryAttemptRecord attempt) =>
+        attempt is { OriginalFileId: { } id, StagingCreationUtc: { } created }
+            ? new(delivery.VolumeId, id, created) : null;
+
     // NTFS file-system tunneling can preserve a recently removed final name's creation time
     // when a held staged object is renamed into that name. Volume + FileId identify the object;
     // record the final handle's actual creation time separately from the staging checkpoint.
     private static bool SameFileObject(DeliveryFileIdentity? actual, DeliveryFileIdentity expected) =>
         actual is not null && actual.VolumeId == expected.VolumeId && actual.FileId == expected.FileId;
+
+    private static FileFacts? ImportedFacts(SessionAggregate session) =>
+        session.Snapshot is { } snapshot
+            ? session.Revisions.SingleOrDefault(revision => revision.Id == snapshot.RootRevisionId && revision.IsRoot)?.Facts
+            : null;
+
+    private static bool IsImportedOriginal(DeliveryFinalCheck destination, FileFacts? imported) =>
+        imported is not null && destination.Presence == DeliveryFilePresence.Present &&
+        destination.Hash == imported.Sha256 && destination.Length == imported.ByteLength;
+
+    private static string? ProtectedOriginalForRecord(SessionAggregate session, DeliveryRecord record)
+    {
+        string? path = session.Snapshot?.OriginalSourcePath;
+        return DeliveryDraftText.MatchesOriginal(path, record.RequestedFolder, record.RequestedFileName) ? null : path;
+    }
 
     private static DeliveryRequest RequestFor(DeliveryRecord delivery) =>
         new(delivery.RequestId, delivery.Artifact, delivery.ApprovedSha256, delivery.ReviewId,

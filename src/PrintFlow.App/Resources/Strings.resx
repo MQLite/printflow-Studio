@@ -504,6 +504,7 @@
   <data name="Session_PreviewBefore" xml:space="preserve"><value>Before</value></data>
   <data name="Session_PreviewAfter" xml:space="preserve"><value>After</value></data>
   <data name="Session_PreviewPixels" xml:space="preserve"><value>{0} × {1} px</value></data>
+  <data name="Session_PreviewPrintEquivalent" xml:space="preserve"><value>{0:0.##} × {1:0.##} mm at {2} PPI</value></data>
   <data name="Session_PreviewReduced" xml:space="preserve">
     <value>Reduced for display; the file itself is unchanged.</value>
   </data>
@@ -883,15 +884,23 @@
   <data name="Session_ManualCropApplied" xml:space="preserve"><value>Applied crop bounds</value></data>
   <data name="Session_ManualCropMarginInvalid" xml:space="preserve"><value>Enter whole numbers of zero or more pixels.</value></data>
   <data name="Session_TiffModeHeading" xml:space="preserve"><value>Preview mode</value></data>
+  <data name="Session_TiffModeComposite" xml:space="preserve"><value>Composite</value></data>
+  <data name="Session_TiffModeCompare" xml:space="preserve"><value>Side by side</value></data>
+  <data name="Session_TiffModeCompareShort" xml:space="preserve"><value>Compare</value></data>
   <data name="Session_TiffModeColour" xml:space="preserve"><value>Colour</value></data>
   <data name="Session_TiffModeWhiteInk" xml:space="preserve"><value>White ink</value></data>
   <data name="Session_TiffModeOverlay" xml:space="preserve"><value>Colour + white overlay</value></data>
+  <data name="Session_TiffModeOverlayShort" xml:space="preserve"><value>Overlay</value></data>
+  <data name="Session_TiffCompositePreviewName" xml:space="preserve"><value>CMYK + white ink composite preview</value></data>
+  <data name="Session_TiffComparePreviewName" xml:space="preserve"><value>Side-by-side CMYK and white ink previews</value></data>
   <data name="Session_TiffColourPreviewName" xml:space="preserve"><value>Colour preview</value></data>
   <data name="Session_TiffWhiteInkPreviewName" xml:space="preserve"><value>White ink preview</value></data>
   <data name="Session_TiffOverlayPreviewName" xml:space="preserve"><value>Colour and white ink overlay</value></data>
-  <data name="Session_TiffColourLegend" xml:space="preserve"><value>An uncalibrated screen approximation of the CMYK content. It is not proof of printed colour.</value></data>
-  <data name="Session_TiffWhiteInkLegend" xml:space="preserve"><value>Bright = white ink present · Black = no white ink.</value></data>
-  <data name="Session_TiffOverlayLegend" xml:space="preserve"><value>White overlay = white ink coverage. Not how the print will look.</value></data>
+  <data name="Session_TiffCompositeLegend" xml:space="preserve"><value>Screen approximation of CMYK over white ink. Checkerboard shows areas with no ink.</value></data>
+  <data name="Session_TiffCompareLegend" xml:space="preserve"><value>CMYK on the left, W1 white ink on the right. Checkerboard shows areas with no ink in each view.</value></data>
+  <data name="Session_TiffColourLegend" xml:space="preserve"><value>This CMYK screen preview does not predict printed colour. The checkerboard shows areas with no colour ink.</value></data>
+  <data name="Session_TiffWhiteInkLegend" xml:space="preserve"><value>White opacity follows W1 coverage. Checkerboard shows areas with no white ink.</value></data>
+  <data name="Session_TiffOverlayLegend" xml:space="preserve"><value>The tint marks white ink coverage. Checkerboard shows areas with no ink.</value></data>
   <data name="Session_TiffProductionHeading" xml:space="preserve"><value>Production details</value></data>
   <data name="Session_TiffLabelOutputFile" xml:space="preserve"><value>Output file</value></data>
   <data name="Session_TiffLabelOutputPath" xml:space="preserve"><value>Output path</value></data>
@@ -1152,6 +1161,9 @@
   <data name="FinalSave_Uncertain" xml:space="preserve"><value>A file may have been saved to {0}, but completion is not verified. Check this save again.</value></data>
   <data name="FinalSave_Collision" xml:space="preserve"><value>{0} already exists in this folder and will not be overwritten. Use {1} or choose another folder.</value></data>
   <data name="FinalSave_CollisionNoSuggestion" xml:space="preserve"><value>{0} already exists in this folder and will not be overwritten. Enter another name or choose another folder.</value></data>
+  <data name="FinalSave_ConfirmAndOverwriteOriginal" xml:space="preserve"><value>Approve and overwrite original</value></data>
+  <data name="FinalSave_OverwriteOriginal" xml:space="preserve"><value>Overwrite original file</value></data>
+  <data name="FinalSave_OriginalOverwriteNotice" xml:space="preserve"><value>This location and name match the imported file. Overwriting it replaces it with the approved result.</value></data>
   <data name="FinalSave_Missing" xml:space="preserve"><value>Saved previously, but the file is now missing: {0}</value></data>
   <data name="FinalSave_Changed" xml:space="preserve"><value>Saved previously, but the file at {0} has changed. It will not be overwritten; choose another name or folder to save again.</value></data>
   <data name="FinalSave_Unavailable" xml:space="preserve"><value>Saved previously, but {0} cannot be reached now. Reconnect the drive, then check again.</value></data>

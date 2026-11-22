@@ -46,7 +46,9 @@ public sealed partial class ApprovedArtifactDeliveryService
             artifact.ApprovedLength, delivery.RequestedFolder, leaf, artifact.Key.Kind, _protectedRoots,
             loaded.Value.Snapshot?.OriginalSourcePath);
         DeliveryFileIdentity identity = FinalIdentity(delivery);
-        DeliveryFileResult<IDeliveryFileGuard> original = Open(delivery.RequestedFileName);
+        DeliveryFileResult<IDeliveryFileGuard> original = _files.Open(source, artifact.ApprovedSha256,
+            artifact.ApprovedLength, delivery.RequestedFolder, delivery.RequestedFileName, artifact.Key.Kind,
+            _protectedRoots, ProtectedOriginalForRecord(loaded.Value, delivery));
         if (!original.IsSuccess) return Result(original.Code, detail: original.Detail);
         using IDeliveryFileGuard oldGuard = original.Value!;
         if (!SameRenameFolder(delivery, oldGuard) || oldGuard.DestinationKey != delivery.DestinationKey)

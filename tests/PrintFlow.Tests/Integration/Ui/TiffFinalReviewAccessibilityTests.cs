@@ -6,6 +6,7 @@ using System.Windows.Automation.Provider;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using PrintFlow.App.ViewModels;
 using PrintFlow.App.Views;
 using PrintFlow.Domain.Ids;
@@ -39,6 +40,8 @@ public sealed class TiffFinalReviewAccessibilityTests
     /// <summary>The mode controls a driver must be able to find without reading text (§29).</summary>
     private static readonly string[] ModeIds =
     [
+        "Session.TiffReviewComposite",
+        "Session.TiffReviewCompare",
         "Session.TiffReviewColour",
         "Session.TiffReviewWhiteInk",
         "Session.TiffReviewOverlay",
@@ -49,7 +52,7 @@ public sealed class TiffFinalReviewAccessibilityTests
     // -----------------------------------------------------------------------------------
 
     [Fact]
-    public async Task The_three_modes_render_with_stable_ids_and_no_binding_errors()
+    public async Task Preview_modes_render_with_stable_ids_and_no_binding_errors()
     {
         using HomeScreenHarness harness = TiffFinalReviewFixture.Harness(out _);
         SessionId id = (await TiffFinalReviewFixture.ReviewRequiredAsync(harness, "a11y-modes.png")).Id;
@@ -78,7 +81,7 @@ public sealed class TiffFinalReviewAccessibilityTests
         IReadOnlyList<Labelled> chinese = await InCultureAsync("zh-CN", harness, id);
 
         english.Select(m => m.Id).ShouldBe(chinese.Select(m => m.Id));
-        english.Select(m => m.Name).ShouldBe(["Colour", "White ink", "Colour + white overlay"]);
+        english.Select(m => m.Name).ShouldBe(["Composite", "Side by side", "Colour", "White ink", "Colour + white overlay"]);
 
         chinese.ShouldAllBe(m => m.Name.Length > 0);
         chinese.Select(m => m.Name).ShouldNotBe(english.Select(m => m.Name));
@@ -90,6 +93,8 @@ public sealed class TiffFinalReviewAccessibilityTests
     /// The image announces what is being shown, not the class showing it (§31).
     /// </summary>
     [Theory]
+    [InlineData(TiffReviewMode.Composite, "CMYK + white ink composite preview")]
+    [InlineData(TiffReviewMode.Compare, "Side-by-side CMYK and white ink previews")]
     [InlineData(TiffReviewMode.Colour, "Colour preview")]
     [InlineData(TiffReviewMode.WhiteInk, "White ink preview")]
     [InlineData(TiffReviewMode.Overlay, "Colour and white ink overlay")]
@@ -153,7 +158,6 @@ public sealed class TiffFinalReviewAccessibilityTests
 
         rendered.BindingErrors.ShouldBeEmpty();
 
-        // All three modes are real, focusable, enabled controls.
         foreach (string modeId in ModeIds)
         {
             rendered.Facts.FocusableModes.ShouldContain(modeId);
@@ -249,6 +253,154 @@ public sealed class TiffFinalReviewAccessibilityTests
         SessionAggregate persisted = (await harness.Inner.Repository.LoadAsync(id, CancellationToken.None)).Value!;
         persisted.Outputs.ShouldHaveSingleItem().ReviewState.ShouldBe(ReviewState.NotReviewed);
         persisted.Reviews.ShouldNotContain(r => r.Step == StepKind.PhotoshopOutput);
+    }
+
+    [Fact]
+    public async Task Side_by_side_keeps_both_ink_views_at_the_same_scale_and_position_in_a_narrow_pane()
+    {
+        using OperatorCultureScope culture = new("en-US");
+        using HomeScreenHarness harness = TiffFinalReviewFixture.Harness(out _);
+        SessionViewModel screen = (await TiffFinalReviewFixture.ReviewRequiredAsync(harness, "compare-ui.png")).Screen;
+
+        WpfRendering.RenderExpectingNoBindingErrors(
+            () => new TiffReviewSurface { DataContext = screen }, new Size(420, 460), tree =>
+            {
+                RadioButton composite = tree.OfType<RadioButton>()
+                    .Single(button => AutomationProperties.GetAutomationId(button) == "Session.TiffReviewComposite");
+                composite.IsChecked.ShouldBe(true);
+
+                RadioButton compare = tree.OfType<RadioButton>()
+                    .Single(button => AutomationProperties.GetAutomationId(button) == "Session.TiffReviewCompare");
+                AutomationPeer peer = UIElementAutomationPeer.CreatePeerForElement(compare);
+                ((ISelectionItemProvider)peer.GetPattern(PatternInterface.SelectionItem)!).Select();
+                SharedReviewSurfaceTests.Settle(tree.Root);
+
+                ScrollViewer colour = PreviewScroll(tree, "Session.TiffReviewImage");
+                ScrollViewer whiteInk = PreviewScroll(tree, "Session.TiffReviewCompareWhiteInk");
+                Image left = PreviewImage(colour);
+                Image right = PreviewImage(whiteInk);
+                AutomationProperties.GetName(left).ShouldBe("Colour preview");
+                AutomationProperties.GetName(right).ShouldBe("White ink preview");
+                left.Source.ShouldNotBeNull();
+                ImageSource whiteInkSource = right.Source.ShouldNotBeNull();
+                left.Source.ShouldNotBeSameAs(whiteInkSource);
+                double leftEnd = colour.TranslatePoint(new Point(colour.ActualWidth, 0), tree.Root).X;
+                double rightStart = whiteInk.TranslatePoint(new Point(0, 0), tree.Root).X;
+                double rightEnd = whiteInk.TranslatePoint(new Point(whiteInk.ActualWidth, 0), tree.Root).X;
+                rightStart.ShouldBeGreaterThan(leftEnd);
+                rightEnd.ShouldBeLessThanOrEqualTo(420);
+                colour.ActualWidth.ShouldBeGreaterThan(100);
+                whiteInk.ActualWidth.ShouldBeGreaterThan(100);
+                ((Grid)colour.Content).ActualWidth.ShouldBe(((Grid)whiteInk.Content).ActualWidth, 0.01);
+                foreach (ScrollViewer pane in new[] { colour, whiteInk })
+                {
+                    pane.ScrollableWidth.ShouldBe(0, 0.01);
+                    pane.ScrollableHeight.ShouldBe(0, 0.01);
+                }
+
+                for (int i = 0; i < 5; i++) screen.ZoomInCommand.Execute(null);
+                SharedReviewSurfaceTests.Settle(tree.Root);
+                ((Grid)colour.Content).ActualWidth.ShouldBe(((Grid)whiteInk.Content).ActualWidth, 0.01);
+                foreach (ScrollViewer pane in new[] { colour, whiteInk })
+                {
+                    pane.ScrollableWidth.ShouldBeGreaterThan(0);
+                    pane.ScrollableHeight.ShouldBeGreaterThan(0);
+                }
+
+                whiteInk.ScrollToHorizontalOffset(0.7 * whiteInk.ScrollableWidth);
+                whiteInk.ScrollToVerticalOffset(0.3 * whiteInk.ScrollableHeight);
+                SharedReviewSurfaceTests.Settle(tree.Root);
+                (colour.HorizontalOffset / colour.ScrollableWidth).ShouldBe(0.7, 0.01);
+                (colour.VerticalOffset / colour.ScrollableHeight).ShouldBe(0.3, 0.01);
+
+                colour.ScrollToHorizontalOffset(0.2 * colour.ScrollableWidth);
+                colour.ScrollToVerticalOffset(0.8 * colour.ScrollableHeight);
+                SharedReviewSurfaceTests.Settle(tree.Root);
+                (whiteInk.HorizontalOffset / whiteInk.ScrollableWidth).ShouldBe(0.2, 0.01);
+                (whiteInk.VerticalOffset / whiteInk.ScrollableHeight).ShouldBe(0.8, 0.01);
+
+                double zoomedWidth = ((Grid)whiteInk.Content).ActualWidth;
+                screen.TiffReviewMode = TiffReviewMode.WhiteInk;
+                SharedReviewSurfaceTests.Settle(tree.Root);
+                left.Source.ShouldBeSameAs(whiteInkSource);
+                ((Grid)colour.Content).ActualWidth.ShouldBe(zoomedWidth, 0.01);
+                screen.ReviewViewport.HorizontalPosition.ShouldBe(0.2, 0.01);
+                screen.ReviewViewport.VerticalPosition.ShouldBe(0.8, 0.01);
+
+                ((ISelectionItemProvider)peer.GetPattern(PatternInterface.SelectionItem)!).Select();
+                SharedReviewSurfaceTests.Settle(tree.Root);
+                (colour.HorizontalOffset / colour.ScrollableWidth).ShouldBe(0.2, 0.01);
+                (colour.VerticalOffset / colour.ScrollableHeight).ShouldBe(0.8, 0.01);
+                return 0;
+            });
+    }
+
+    [Fact]
+    public async Task White_ink_preview_shows_checkerboard_under_no_coverage_and_solid_white_at_full_coverage()
+    {
+        using HomeScreenHarness harness = TiffFinalReviewFixture.Harness(out _);
+        SessionViewModel screen = (await TiffFinalReviewFixture.ReviewRequiredAsync(harness, "checkerboard-ui.png")).Screen;
+        screen.TiffReviewMode = TiffReviewMode.WhiteInk;
+
+        WpfRendering.RenderExpectingNoBindingErrors(
+            () => new TiffReviewSurface { DataContext = screen }, new Size(420, 460), tree =>
+            {
+                SharedReviewSurfaceTests.Settle(tree.Root);
+                Grid canvas = (Grid)PreviewScroll(tree, "Session.TiffReviewImage").Content;
+                int width = (int)canvas.ActualWidth;
+                RenderTargetBitmap bitmap = new((int)tree.Root.ActualWidth, (int)tree.Root.ActualHeight, 96, 96, PixelFormats.Pbgra32);
+                bitmap.Render(tree.Root);
+
+                Color firstTile = Pixel(20);
+                Color secondTile = Pixel(28);
+                firstTile.ShouldNotBe(secondTile);
+                foreach (Color tile in new[] { firstTile, secondTile })
+                {
+                    tile.A.ShouldBe((byte)255);
+                    tile.R.ShouldBe(tile.G);
+                    tile.R.ShouldBe(tile.B);
+                    tile.R.ShouldBeInRange((byte)64, (byte)192);
+                }
+                Pixel(width * 5 / 6).ShouldBe(Colors.White);
+                return 0;
+
+                Color Pixel(int x)
+                {
+                    Point location = canvas.TranslatePoint(new Point(x, 20), tree.Root);
+                    byte[] pixel = new byte[4];
+                    bitmap.CopyPixels(new Int32Rect((int)location.X, (int)location.Y, 1, 1), pixel, pixel.Length, 0);
+                    return Color.FromArgb(pixel[3], pixel[2], pixel[1], pixel[0]);
+                }
+            });
+    }
+
+    [Theory]
+    [InlineData("en-US", "Preview mode", "White ink")]
+    [InlineData("zh-CN", "预览模式", "白墨")]
+    public async Task The_narrow_save_toolbar_exposes_localized_preview_modes_in_one_picker(
+        string cultureName, string modeLabel, string whiteInkLabel)
+    {
+        using OperatorCultureScope culture = new(cultureName);
+        using HomeScreenHarness harness = TiffFinalReviewFixture.Harness(out _);
+        SessionViewModel screen = (await TiffFinalReviewFixture.ReviewRequiredAsync(harness, "compact-ui.png")).Screen;
+        await screen.ApproveCommand.ExecuteAsync(null);
+        await screen.PreviewsLoaded;
+        screen.GuidedPage.ShouldBe(GuidedSessionPage.Save);
+
+        WpfRendering.RenderExpectingNoBindingErrors(
+            () => new TiffReviewSurface { DataContext = screen }, new Size(360, 315), tree =>
+            {
+                ComboBox selector = tree.OfType<ComboBox>().Single(IsOnScreen);
+                AutomationProperties.GetName(selector).ShouldBe(modeLabel);
+                selector.Focusable.ShouldBeTrue();
+                selector.IsTabStop.ShouldBeTrue();
+                tree.OfType<RadioButton>().Any(IsOnScreen).ShouldBeFalse();
+                PreviewImage(PreviewScroll(tree, "Session.TiffReviewImage")).ActualHeight.ShouldBeGreaterThanOrEqualTo(180);
+
+                selector.SelectedItem = selector.Items.OfType<ComboBoxItem>().Single(item => Equals(item.Content, whiteInkLabel));
+                screen.TiffReviewMode.ShouldBe(TiffReviewMode.WhiteInk);
+                return 0;
+            });
     }
 
     // -----------------------------------------------------------------------------------
@@ -355,6 +507,11 @@ public sealed class TiffFinalReviewAccessibilityTests
 
     private static string Describe(FrameworkElement element) =>
         AutomationProperties.GetAutomationId(element) is { Length: > 0 } id ? id : element.GetType().Name;
+
+    private static ScrollViewer PreviewScroll(RenderedTree tree, string id) => tree.OfType<ScrollViewer>()
+        .Single(scroll => AutomationProperties.GetAutomationId(scroll) == id);
+
+    private static Image PreviewImage(ScrollViewer scroll) => ((Grid)scroll.Content).Children.OfType<Image>().Single();
 
     /// <summary>Whether an element is one the operator can actually see and use.</summary>
     /// <remarks>

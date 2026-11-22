@@ -40,4 +40,11 @@ public static class DeliveryDraftText
 
     public static bool SamePath(string? left, string? right) =>
         left is not null && right is not null && string.Equals(left, right, StringComparison.OrdinalIgnoreCase);
+
+    public static bool MatchesOriginal(string? originalPath, string folder, string fileName)
+    {
+        if (originalPath is null || !Path.IsPathFullyQualified(folder)) return false;
+        try { return SamePath(Path.GetFullPath(originalPath), Path.GetFullPath(Path.Combine(folder, fileName))); }
+        catch (ArgumentException) { return false; }
+    }
 }

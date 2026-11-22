@@ -47,6 +47,8 @@ public sealed record WorkflowSnapshot(
     public bool RequiresPsdPreparation { get; init; }
     public bool RequiresPdfPreparation { get; init; }
 
+    internal string? OriginalSourcePath { get; init; }
+
     public ProductionTiffBackend ProductionTiffBackend { get; init; } = ProductionTiffBackend.Photoshop;
 
     public WorkflowDefinition Definition => WorkflowCatalog.For(WorkflowType, RequiresPsdPreparation, RequiresPdfPreparation);

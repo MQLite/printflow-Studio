@@ -31,6 +31,7 @@ public sealed partial class SessionViewModel
     {
         GuidedSessionPage.Review => new(280),
         GuidedSessionPage.Dimensions or GuidedSessionPage.WhiteInk or GuidedSessionPage.Preflight => new(340),
+        GuidedSessionPage.Save or GuidedSessionPage.Completed when HasTiffReview => new(2, System.Windows.GridUnitType.Star),
         GuidedSessionPage.Save or GuidedSessionPage.Completed or GuidedSessionPage.Correction or
             GuidedSessionPage.Recovery or GuidedSessionPage.Failure => new(4, System.Windows.GridUnitType.Star),
         _ => new(2, System.Windows.GridUnitType.Star),

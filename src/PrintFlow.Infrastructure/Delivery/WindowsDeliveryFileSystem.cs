@@ -369,7 +369,13 @@ public sealed class WindowsDeliveryFileSystem : IDeliveryFileSystem
             { return DeliveryFileResult<DeliveryFileIdentity>.Fail(DeliveryCode.Unavailable, ex.Message); }
         }
 
-        public DeliveryFileResult<DeliveryFileIdentity> CreateStaging(string stagingLeaf)
+        public DeliveryFileResult<DeliveryFileIdentity> CreateStaging(string stagingLeaf) =>
+            CreateStagingCore(stagingLeaf, null);
+
+        public DeliveryFileResult<DeliveryFileIdentity> CreateStaging(string stagingLeaf, DateTimeOffset originalCreationTime) =>
+            CreateStagingCore(stagingLeaf, originalCreationTime);
+
+        private DeliveryFileResult<DeliveryFileIdentity> CreateStagingCore(string stagingLeaf, DateTimeOffset? originalCreationTime)
         {
             if (!ValidStagingLeaf(stagingLeaf) || _stage is not null || _disposed)
                 return DeliveryFileResult<DeliveryFileIdentity>.Fail(DeliveryCode.InvalidName, "Invalid staging ownership name.");
@@ -377,6 +383,18 @@ public sealed class WindowsDeliveryFileSystem : IDeliveryFileSystem
             {
                 SafeFileHandle handle = WindowsDeliveryNative.OpenStage(Path.Combine(ResolvedFolder, stagingLeaf), true);
                 _stage = new FileStream(handle, FileAccess.ReadWrite);
+                // NTFS may carry the original name's creation time across the rename.
+                // Record the same time on the stage so restart can still verify its identity.
+                if (originalCreationTime is { } creation)
+                {
+                    try { File.SetCreationTimeUtc(handle, creation.UtcDateTime); }
+                    catch
+                    {
+                        try { WindowsDeliveryNative.DeleteHeldFile(handle); }
+                        finally { _stage.Dispose(); _stage = null; }
+                        throw;
+                    }
+                }
                 return DeliveryFileResult<DeliveryFileIdentity>.Ok(WindowsDeliveryNative.Identity(_stage.SafeFileHandle));
             }
             catch (Win32Exception ex) when (ex.NativeErrorCode is 80 or 183)
@@ -450,11 +468,12 @@ public sealed class WindowsDeliveryFileSystem : IDeliveryFileSystem
 
         public DeliveryFileResult<bool> PublishNoReplace(string stagingLeaf, DeliveryFileIdentity expectedIdentity)
         {
-            if (_stage is null || _disposed || _published || !ValidStagingLeaf(stagingLeaf) ||
-                WindowsDeliveryNative.Identity(_stage.SafeFileHandle) != expectedIdentity)
+            if (_stage is null || _disposed || _published || !ValidStagingLeaf(stagingLeaf))
                 return DeliveryFileResult<bool>.Fail(DeliveryCode.NeedsReconciliation, "Staging ownership is not verified.");
             try
             {
+                if (WindowsDeliveryNative.Identity(_stage.SafeFileHandle) != expectedIdentity)
+                    return DeliveryFileResult<bool>.Fail(DeliveryCode.NeedsReconciliation, "Staging identity changed.");
                 if (VerifySource().IsSuccess == false)
                     return DeliveryFileResult<bool>.Fail(DeliveryCode.SourceChanged, "Approved source changed before publication.");
                 // Once the native operation starts, uncertain completion must never allow
@@ -476,6 +495,60 @@ public sealed class WindowsDeliveryFileSystem : IDeliveryFileSystem
             { return DeliveryFileResult<bool>.Fail(DeliveryCode.NeedsReconciliation, ex.Message); }
         }
 
+        public DeliveryFileResult<bool> PublishReplacingOriginal(string stagingLeaf, DeliveryFileIdentity stage,
+            DeliveryFileIdentity original, FileFacts importedFacts)
+        {
+            if (_stage is null || _disposed || !ValidStagingLeaf(stagingLeaf))
+                return DeliveryFileResult<bool>.Fail(DeliveryCode.NeedsReconciliation, "No held staging file.");
+
+            string finalLeaf = Path.GetFileName(FinalPath);
+            string backupLeaf = Path.ChangeExtension(stagingLeaf, ".original");
+            _final?.Dispose();
+            _final = null;
+            try
+            {
+                using var heldOriginal = new FileStream(
+                    WindowsDeliveryNative.OpenFinal(FinalPath, false, forRename: true), FileAccess.Read);
+                SafeFileHandle handle = heldOriginal.SafeFileHandle;
+                if (WindowsDeliveryNative.Identity(handle) != original ||
+                    !DeliveryDraftText.SamePath(WindowsDeliveryNative.ResolvedPath(handle), FinalPath) ||
+                    heldOriginal.Length != importedFacts.ByteLength || Hash(heldOriginal) != importedFacts.Sha256)
+                    return DeliveryFileResult<bool>.Fail(DeliveryCode.Collision, "Original file changed before replacement.");
+
+                // Move the exact held original aside. Both moves use no-replace, so a
+                // concurrent file at either name is preserved. Keep the original until
+                // the verified staged file has reached the destination.
+                WindowsDeliveryNative.RenameNoReplace(handle, _directory, backupLeaf);
+                DeliveryFileResult<bool> published = PublishNoReplace(stagingLeaf, stage);
+                if (!published.IsSuccess)
+                {
+                    try { WindowsDeliveryNative.RenameNoReplace(handle, _directory, finalLeaf); }
+                    catch (Win32Exception ex)
+                    {
+                        return DeliveryFileResult<bool>.Fail(DeliveryCode.NeedsReconciliation,
+                            $"Original retained at '{Path.Combine(ResolvedFolder, backupLeaf)}'. {ex.Message}");
+                    }
+                    return published;
+                }
+
+                try { WindowsDeliveryNative.DeleteHeldFile(handle); }
+                catch (Win32Exception ex)
+                {
+                    return DeliveryFileResult<bool>.Fail(DeliveryCode.NeedsReconciliation,
+                        $"Original retained at '{Path.Combine(ResolvedFolder, backupLeaf)}'. {ex.Message}");
+                }
+                return published;
+            }
+            catch (Win32Exception ex) when (ex.NativeErrorCode is 2 or 3 or 80 or 183)
+            {
+                return DeliveryFileResult<bool>.Fail(DeliveryCode.Collision, ex.Message);
+            }
+            catch (Exception ex) when (ex is Win32Exception or IOException or UnauthorizedAccessException or NotSupportedException)
+            {
+                return DeliveryFileResult<bool>.Fail(DeliveryCode.NeedsReconciliation, ex.Message);
+            }
+        }
+
         public DeliveryFileResult<bool> DeleteHeldStaging(DeliveryFileIdentity expectedIdentity)
         {
             if (_published || _stage is null || _disposed)
@@ -490,6 +563,43 @@ public sealed class WindowsDeliveryFileSystem : IDeliveryFileSystem
             }
             catch (Exception ex) when (ex is Win32Exception or IOException or UnauthorizedAccessException)
             { return DeliveryFileResult<bool>.Fail(DeliveryCode.NeedsReconciliation, ex.Message); }
+        }
+
+        public DeliveryFileResult<bool> RecoverOriginalBackup(string stagingLeaf, DeliveryFileIdentity original,
+            bool restore, FileFacts? importedFacts = null)
+        {
+            if (_disposed || !ValidStagingLeaf(stagingLeaf))
+                return DeliveryFileResult<bool>.Fail(DeliveryCode.NeedsReconciliation, "Invalid original backup name.");
+
+            string backupPath = Path.Combine(ResolvedFolder, Path.ChangeExtension(stagingLeaf, ".original"));
+            try
+            {
+                SafeFileHandle handle;
+                try { handle = WindowsDeliveryNative.OpenFinal(backupPath, false, forRename: true); }
+                catch (Win32Exception ex) when (ex.NativeErrorCode is 2 or 3)
+                { return DeliveryFileResult<bool>.Ok(false); }
+                using (var backup = new FileStream(handle, FileAccess.Read))
+                {
+                    if (WindowsDeliveryNative.Identity(handle) != original ||
+                        !DeliveryDraftText.SamePath(WindowsDeliveryNative.ResolvedPath(handle), backupPath))
+                        return DeliveryFileResult<bool>.Fail(DeliveryCode.NeedsReconciliation,
+                            $"Backup identity does not match the recorded original at '{backupPath}'.");
+                    if (restore)
+                        WindowsDeliveryNative.RenameNoReplace(handle, _directory, Path.GetFileName(FinalPath));
+                    else if (importedFacts is not null && backup.Length == importedFacts.ByteLength &&
+                             Hash(backup) == importedFacts.Sha256)
+                        WindowsDeliveryNative.DeleteHeldFile(handle);
+                    else
+                        return DeliveryFileResult<bool>.Fail(DeliveryCode.NeedsReconciliation,
+                            $"Backup bytes could not be verified at '{backupPath}'.");
+                }
+                return DeliveryFileResult<bool>.Ok(true);
+            }
+            catch (Exception ex) when (ex is Win32Exception or IOException or UnauthorizedAccessException or NotSupportedException)
+            {
+                return DeliveryFileResult<bool>.Fail(DeliveryCode.NeedsReconciliation,
+                    $"Original backup recovery at '{backupPath}' failed. {ex.Message}");
+            }
         }
 
         public SelectionLeaseResult AcquireSelection(Guid deliveryId, DeliveryFileIdentity expectedIdentity,

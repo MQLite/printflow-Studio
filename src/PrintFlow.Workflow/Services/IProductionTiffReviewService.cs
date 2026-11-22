@@ -130,6 +130,9 @@ public sealed record TiffReviewPayload(
     ReadOnlyMemory<byte> WhiteInkPayload,
     ReadOnlyMemory<byte> OverlayPayload)
 {
+    /// <summary>Process colour on top of white ink, with transparency where no ink is present.</summary>
+    public ReadOnlyMemory<byte> CompositePayload { get; init; }
+
     /// <summary>True when the payloads are reduced for display rather than every pixel.</summary>
     public bool IsDownsampledForDisplay =>
         PreviewPixelWidth < PixelWidth || PreviewPixelHeight < PixelHeight;

@@ -21,6 +21,10 @@ public interface IDeliveryRepository
         Guid attemptId, string stagedFileId, DateTimeOffset stagedCreationUtc, CancellationToken cancellationToken);
     Task<OperationResult<DeliveryAttemptRecord>> MarkReadyAsync(
         Guid attemptId, DateTimeOffset verifiedAtUtc, CancellationToken cancellationToken);
+    Task<OperationResult<DeliveryAttemptRecord>> MarkReadyAsync(Guid attemptId, DateTimeOffset verifiedAtUtc,
+        string originalFileId, CancellationToken cancellationToken) =>
+        Task.FromResult(OperationResult.Fail<DeliveryAttemptRecord>(FailureCode.PersistenceError,
+            "Original replacement journal is unavailable."));
     Task<OperationResult<DeliveryAttemptRecord>> EndAttemptAsync(
         Guid attemptId, DeliveryAttemptState state, string? failureCode, CancellationToken cancellationToken);
     Task<OperationResult<DeliveryJournalEntry>> MarkDeliveredAsync(

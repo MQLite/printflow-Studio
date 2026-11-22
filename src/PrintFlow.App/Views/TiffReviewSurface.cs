@@ -11,78 +11,49 @@ using PrintFlow.App.ViewModels;
 namespace PrintFlow.App.Views;
 
 /// <summary>
-/// The specialist production-TIFF inspection surface: Colour, White ink, and Colour + white
-/// overlay over one canvas (SCRUM-11104 §5, §14, §33, §34).
+/// Inspects a production TIFF as a composite, individual separations, a tinted overlay, or
+/// two synchronized separations side by side.
 /// </summary>
 /// <remarks>
-/// A separate control from <see cref="SharedReviewSurface"/> and deliberately so. That one solves
-/// general Before/After artefact comparison and knows nothing about ink; teaching it to represent
-/// a spot channel would make every ordinary review carry machinery it never uses, and forcing a
-/// spot channel through a comparison abstraction would mean representing white ink as something
-/// it is not (§14).
-/// <para>
-/// <b>One image element, three sources.</b> All three payloads are decoded once when the model
-/// hands them over and a mode switch only re-points <see cref="Image.Source"/>. Because the three
-/// share a canvas and therefore a size, the <see cref="ScrollViewer"/>'s extent does not change
-/// and its offsets survive the switch untouched — which is how §34's "inspect the same physical
-/// region across modes" is held by construction rather than by restoring a remembered position.
-/// </para>
-/// <para>
-/// Zoom is the screen's existing zoom, not a second one. The buttons in the header bind to the
-/// same commands the general surface uses, and this control reads
-/// <see cref="SessionViewModel.ZoomScale"/> and <see cref="SessionViewModel.IsFitToViewport"/>
-/// exactly as that one does, so an operator who zoomed in before switching to White ink stays
-/// zoomed in (§33).
-/// </para>
-/// <para>
-/// There is no inspection-background switcher here. A production TIFF is opaque by contract — the
-/// fifth sample is ink, not alpha — so a checkerboard would suggest a transparency the file
-/// cannot express and would be the one place this surface actively misled (§13).
-/// </para>
+/// The screen's existing zoom and viewport position apply in every mode. The checkerboard
+/// shows gaps in the selected ink coverage through the preview PNGs' display alpha.
 /// </remarks>
 public sealed class TiffReviewSurface : UserControl
 {
+    private static readonly Brush Checkerboard = CreateCheckerboard();
     private readonly DockPanel _root = new();
-    private readonly StackPanel _toolbar = new() { Margin = new Thickness(0, 0, 0, 8) };
+    private readonly StackPanel _toolbar = new() { Margin = new Thickness(0, 0, 0, 2) };
     private readonly WrapPanel _zoomTools = new();
     private readonly WrapPanel _modeTools = new();
+    private readonly TextBlock _zoomStatus = new() { VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 6, 2) };
+    private readonly SessionComboBox _modeSelector = new()
+    {
+        Visibility = Visibility.Collapsed,
+        MinHeight = 34,
+        Padding = new Thickness(7, 3, 7, 3),
+        Margin = new Thickness(0, 0, 6, 2),
+        SelectedValuePath = nameof(FrameworkElement.Tag),
+    };
     private readonly List<(RadioButton Button, TiffReviewMode Mode)> _modes = [];
-    private readonly Image _image = new()
-    {
-        Stretch = Stretch.Uniform,
-        HorizontalAlignment = HorizontalAlignment.Left,
-        VerticalAlignment = VerticalAlignment.Top,
-        Focusable = false,
-    };
+    private readonly Grid _previews = new() { Visibility = Visibility.Collapsed };
+    private readonly ColumnDefinition _compareGap = new() { Width = new GridLength(0) };
+    private readonly ColumnDefinition _compareColumn = new() { Width = new GridLength(0) };
+    private readonly PreviewPane _primary = new("Session.TiffReviewImage", "CMYK");
+    private readonly PreviewPane _comparison = new("Session.TiffReviewCompareWhiteInk", $"W1 · {Strings.Session_TiffModeWhiteInk}");
+    private readonly ScaleTransform _zoomTransform = new();
 
-    private readonly Grid _canvas = new()
+    private readonly TextBlock _legend = new() { TextWrapping = TextWrapping.Wrap, Opacity = 0.7, FontSize = 14 };
+    private readonly TextBlock _detail = new()
     {
-        HorizontalAlignment = HorizontalAlignment.Center,
+        Opacity = 0.7,
+        FontSize = 14,
+        TextWrapping = TextWrapping.Wrap,
         VerticalAlignment = VerticalAlignment.Center,
-        Background = Brushes.White,
+        Margin = new Thickness(0, 2, 0, 2),
     };
-
-    /// <summary>
-    /// The viewport, and a tab stop of its own (§30, §34).
-    /// </summary>
-    /// <remarks>
-    /// A <see cref="ScrollViewer"/> is not focusable by default, which would leave a keyboard-only
-    /// operator able to change modes but not to move around the image inside them. Making it a
-    /// tab stop is what turns the arrow keys and Page Up/Down into panning, so "inspect the same
-    /// physical region across modes" is something an operator can actually do without a mouse.
-    /// </remarks>
-    private readonly ScrollViewer _scroll = new()
-    {
-        HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
-        VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
-        Focusable = true,
-        IsTabStop = true,
-    };
-
-    private readonly TextBlock _legend = new() { TextWrapping = TextWrapping.Wrap, Opacity = 0.7 };
-    private readonly TextBlock _detail = new() { Opacity = 0.6, TextWrapping = TextWrapping.Wrap };
     private readonly TextBlock _unavailable = new() { TextWrapping = TextWrapping.Wrap, Visibility = Visibility.Collapsed };
 
+    private ImageSource? _composite;
     private ImageSource? _colour;
     private ImageSource? _whiteInk;
     private ImageSource? _overlay;
@@ -101,24 +72,34 @@ public sealed class TiffReviewSurface : UserControl
         AutomationProperties.SetName(this, Strings.Session_TiffModeHeading);
 
         AutomationProperties.SetAutomationId(_toolbar, "Session.TiffReviewTools");
-        TextBlock status = new() { VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 8, 4) };
-        status.SetBinding(TextBlock.TextProperty, new Binding(nameof(SessionViewModel.ZoomLabel)));
-        AutomationProperties.SetAutomationId(status, "Session.TiffReviewZoomStatus");
-        _zoomTools.Children.Add(status);
-        AddZoom("TiffReviewZoomOut", "ZoomOutLabel", "ZoomOutCommand", "CanZoomOut");
-        AddZoom("TiffReviewZoomIn", "ZoomInLabel", "ZoomInCommand", "CanZoomIn");
-        AddZoom("TiffReviewResetZoom", "ResetZoomLabel", "ResetZoomCommand", null);
+        _modeSelector.SetResourceReference(StyleProperty, "PF.Input.ComboBox");
+        AutomationProperties.SetAutomationId(_modeSelector, "Session.TiffReviewModeSelector");
+        AutomationProperties.SetName(_modeSelector, Strings.Session_TiffModeHeading);
+        _zoomTools.Children.Add(_modeSelector);
+        _zoomStatus.SetBinding(TextBlock.TextProperty, new Binding(nameof(SessionViewModel.ZoomLabel)));
+        AutomationProperties.SetAutomationId(_zoomStatus, "Session.TiffReviewZoomStatus");
+        _zoomTools.Children.Add(_zoomStatus);
+        AddZoom("TiffReviewZoomOut", "−", nameof(SessionViewModel.ZoomOutLabel), nameof(SessionViewModel.ZoomOutCommand), nameof(SessionViewModel.CanZoomOut));
+        AddZoom("TiffReviewZoomIn", "+", nameof(SessionViewModel.ZoomInLabel), nameof(SessionViewModel.ZoomInCommand), nameof(SessionViewModel.CanZoomIn));
+        AddZoom("TiffReviewResetZoom", Strings.Session_ZoomFit, nameof(SessionViewModel.ResetZoomLabel), nameof(SessionViewModel.ResetZoomCommand), null);
         _toolbar.Children.Add(_zoomTools);
         _toolbar.Children.Add(_modeTools);
-        AddMode(TiffReviewMode.Colour, "TiffReviewColour", Strings.Session_TiffModeColour);
-        AddMode(TiffReviewMode.WhiteInk, "TiffReviewWhiteInk", Strings.Session_TiffModeWhiteInk);
-        AddMode(TiffReviewMode.Overlay, "TiffReviewOverlay", Strings.Session_TiffModeOverlay);
-        _detail.Margin = new Thickness(0, 2, 8, 2);
+        AddMode(TiffReviewMode.Composite, "TiffReviewComposite", Strings.Session_TiffModeComposite, Strings.Session_TiffModeComposite);
+        AddMode(TiffReviewMode.Compare, "TiffReviewCompare", Strings.Session_TiffModeCompare, Strings.Session_TiffModeCompareShort);
+        AddMode(TiffReviewMode.Colour, "TiffReviewColour", Strings.Session_TiffModeColour, "CMYK");
+        AddMode(TiffReviewMode.WhiteInk, "TiffReviewWhiteInk", Strings.Session_TiffModeWhiteInk, "W1");
+        AddMode(TiffReviewMode.Overlay, "TiffReviewOverlay", Strings.Session_TiffModeOverlay, Strings.Session_TiffModeOverlayShort);
+        _modeSelector.SetBinding(ComboBox.SelectedValueProperty, new Binding(nameof(SessionViewModel.TiffReviewMode)) { Mode = BindingMode.TwoWay });
+        _modeSelector.SetBinding(IsEnabledProperty, new Binding(nameof(SessionViewModel.HasTiffReview)));
         _zoomTools.Children.Add(_detail);
 
-        _canvas.Children.Add(_image);
-        _scroll.Content = _canvas;
-        AutomationProperties.SetAutomationId(_scroll, "Session.TiffReviewImage");
+        _previews.ColumnDefinitions.Add(new ColumnDefinition());
+        _previews.ColumnDefinitions.Add(_compareGap);
+        _previews.ColumnDefinitions.Add(_compareColumn);
+        _previews.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        _previews.RowDefinitions.Add(new RowDefinition());
+        AddPreviewPane(_primary, 0);
+        AddPreviewPane(_comparison, 2);
 
         AutomationProperties.SetAutomationId(_legend, "Session.TiffReviewLegend");
         AutomationProperties.SetAutomationId(_detail, "Session.TiffReviewDetail");
@@ -130,25 +111,56 @@ public sealed class TiffReviewSurface : UserControl
         _root.Children.Add(_toolbar);
         _root.Children.Add(_unavailable);
         _root.Children.Add(_legend);
-        _root.Children.Add(_scroll);
+        _root.Children.Add(_previews);
         Content = _root;
 
-        _scroll.ScrollChanged += Scrolled;
-        _scroll.SizeChanged += (_, _) => UpdateSize();
         DataContextChanged += (_, _) => Attach(DataContext as SessionViewModel);
         Unloaded += (_, _) => Attach(null);
         Loaded += (_, _) => Attach(DataContext as SessionViewModel);
     }
 
-    private void AddZoom(string id, string label, string command, string? enabled)
+    private void AddPreviewPane(PreviewPane pane, int column)
     {
-        Button button = new SessionActionButton { Margin = new Thickness(0, 0, 6, 4) };
+        pane.Image.LayoutTransform = _zoomTransform;
+        Grid.SetColumn(pane.Heading, column);
+        _previews.Children.Add(pane.Heading);
+        Grid.SetRow(pane.Scroll, 1);
+        Grid.SetColumn(pane.Scroll, column);
+        _previews.Children.Add(pane.Scroll);
+        pane.Scroll.SizeChanged += (_, _) => UpdateSize();
+        pane.Scroll.ScrollChanged += (sender, e) => Scrolled(pane, sender, e);
+    }
+
+    private static Brush CreateCheckerboard()
+    {
+        SolidColorBrush light = new(Color.FromRgb(148, 148, 148));
+        SolidColorBrush dark = new(Color.FromRgb(116, 116, 116));
+        DrawingGroup drawing = new();
+        drawing.Children.Add(new GeometryDrawing(light, null, new RectangleGeometry(new Rect(0, 0, 16, 16))));
+        drawing.Children.Add(new GeometryDrawing(dark, null, new RectangleGeometry(new Rect(0, 0, 8, 8))));
+        drawing.Children.Add(new GeometryDrawing(dark, null, new RectangleGeometry(new Rect(8, 8, 8, 8))));
+        DrawingBrush brush = new(drawing)
+        {
+            TileMode = TileMode.Tile,
+            ViewportUnits = BrushMappingMode.Absolute,
+            Viewport = new Rect(0, 0, 16, 16),
+            Stretch = Stretch.None,
+        };
+        brush.Freeze();
+        return brush;
+    }
+
+    private void AddZoom(string id, string content, string label, string command, string? enabled)
+    {
+        Button button = new SessionActionButton
+        {
+            Content = content,
+            Margin = new Thickness(0, 0, 4, 2),
+            MinWidth = 30,
+            MinHeight = 34,
+            Padding = new Thickness(7, 3, 7, 3),
+        };
         button.SetResourceReference(StyleProperty, "PF.Button.Secondary");
-        // Short visible zoom symbols leave room for the channel names on small windows.
-        // The full localized action remains the accessible name and tooltip.
-        if (id == "TiffReviewZoomOut") button.Content = "−";
-        else if (id == "TiffReviewZoomIn") button.Content = "+";
-        else button.SetBinding(ContentControl.ContentProperty, new Binding(label));
         button.SetBinding(ToolTipProperty, new Binding(label));
         button.SetBinding(AutomationProperties.NameProperty, new Binding(label));
         button.SetBinding(Button.CommandProperty, new Binding(command));
@@ -166,13 +178,15 @@ public sealed class TiffReviewSurface : UserControl
     /// in their own language. Those are two different jobs and a control that used one string for
     /// both would break a zh-CN test the moment the workstation language changed.
     /// </remarks>
-    private void AddMode(TiffReviewMode mode, string id, string label)
+    private void AddMode(TiffReviewMode mode, string id, string label, string visibleLabel)
     {
         RadioButton button = new()
         {
-            Content = new TextBlock { Text = label, TextWrapping = TextWrapping.Wrap, MaxWidth = 140 },
+            Content = visibleLabel,
+            ToolTip = label,
             GroupName = "TiffReviewMode" + GetHashCode().ToString(CultureInfo.InvariantCulture),
-            Margin = new Thickness(0, 2, 6, 2),
+            Margin = new Thickness(0, 0, 4, 0),
+            Padding = new Thickness(2, 0, 2, 0),
             MinHeight = 42,
             VerticalAlignment = VerticalAlignment.Center,
         };
@@ -190,6 +204,7 @@ public sealed class TiffReviewSurface : UserControl
 
         _modeTools.Children.Add(button);
         _modes.Add((button, mode));
+        _modeSelector.Items.Add(new ComboBoxItem { Content = label, Tag = mode });
     }
 
     private void Attach(SessionViewModel? model)
@@ -220,15 +235,22 @@ public sealed class TiffReviewSurface : UserControl
     {
         switch (e.PropertyName)
         {
-            case nameof(SessionViewModel.TiffColourPayload):
             case nameof(SessionViewModel.HasTiffReview):
                 ReloadImages();
                 break;
             case nameof(SessionViewModel.TiffReviewMode):
                 UpdatePresentation();
+                UpdateSize();
+                break;
+            case nameof(SessionViewModel.IsTiffReviewUnavailable):
+                UpdatePresentation();
+                break;
+            case nameof(SessionViewModel.GuidedPage):
+                UpdateToolbar();
                 break;
             case nameof(SessionViewModel.ZoomScale):
             case nameof(SessionViewModel.IsFitToViewport):
+                UpdateToolbar();
                 UpdateSize();
                 break;
             default:
@@ -248,10 +270,11 @@ public sealed class TiffReviewSurface : UserControl
         }
     }
 
-    /// <summary>Decodes the three payloads once, when they change. Never on a mode switch (§15).</summary>
+    /// <summary>Decodes the payloads when the model supplies a new review.</summary>
     private void ReloadImages()
     {
         PreviewPayloadConverter converter = new();
+        _composite = Convert(converter, _model?.TiffCompositePayload ?? ReadOnlyMemory<byte>.Empty);
         _colour = Convert(converter, _model?.TiffColourPayload ?? ReadOnlyMemory<byte>.Empty);
         _whiteInk = Convert(converter, _model?.TiffWhiteInkPayload ?? ReadOnlyMemory<byte>.Empty);
         _overlay = Convert(converter, _model?.TiffOverlayPayload ?? ReadOnlyMemory<byte>.Empty);
@@ -269,10 +292,14 @@ public sealed class TiffReviewSurface : UserControl
     {
         if (_model is null)
         {
+            _primary.Image.Source = null;
+            _comparison.Image.Source = null;
+            _previews.Visibility = Visibility.Collapsed;
             return;
         }
 
         _updating = true;
+        UpdateToolbar();
 
         foreach ((RadioButton button, TiffReviewMode mode) in _modes)
         {
@@ -280,31 +307,48 @@ public sealed class TiffReviewSurface : UserControl
             button.IsEnabled = _model.HasTiffReview;
         }
 
-        _image.Source = _model.TiffReviewMode switch
+        bool compare = _model.TiffReviewMode == TiffReviewMode.Compare;
+        _primary.Image.Source = _model.TiffReviewMode switch
         {
+            TiffReviewMode.Colour or TiffReviewMode.Compare => _colour,
             TiffReviewMode.WhiteInk => _whiteInk,
             TiffReviewMode.Overlay => _overlay,
-            _ => _colour,
+            _ => _composite,
         };
+        _comparison.Image.Source = compare ? _whiteInk : null;
+        Visibility compareVisibility = compare ? Visibility.Visible : Visibility.Collapsed;
+        _primary.Heading.Visibility = compareVisibility;
+        _comparison.Heading.Visibility = compareVisibility;
+        _comparison.Scroll.Visibility = compareVisibility;
+        _compareColumn.Width = compare ? new GridLength(1, GridUnitType.Star) : new GridLength(0);
+        _compareGap.Width = new GridLength(compare ? 8 : 0);
 
-        // The name follows the mode, so a screen reader announces what is actually being shown
-        // rather than the name of a control class (§31).
-        AutomationProperties.SetName(_image, _model.TiffPreviewAccessibleName);
-        AutomationProperties.SetName(_scroll, _model.TiffPreviewAccessibleName);
+        AutomationProperties.SetName(_primary.Scroll, _model.TiffPreviewAccessibleName);
+        AutomationProperties.SetName(_primary.Image, compare ? Strings.Session_TiffColourPreviewName : _model.TiffPreviewAccessibleName);
+        AutomationProperties.SetName(_comparison.Scroll, Strings.Session_TiffWhiteInkPreviewName);
+        AutomationProperties.SetName(_comparison.Image, Strings.Session_TiffWhiteInkPreviewName);
 
         _legend.Text = _model.TiffPreviewLegend;
         _detail.Text = _model.TiffPreviewDetail;
 
         _unavailable.Text = _model.TiffReviewUnavailable ?? string.Empty;
         _unavailable.Visibility = _model.IsTiffReviewUnavailable ? Visibility.Visible : Visibility.Collapsed;
-        _scroll.Visibility = _model.HasTiffReview ? Visibility.Visible : Visibility.Collapsed;
+        _previews.Visibility = _model.HasTiffReview ? Visibility.Visible : Visibility.Collapsed;
 
         _updating = false;
     }
 
+    private void UpdateToolbar()
+    {
+        bool compact = _model?.GuidedPage is GuidedSessionPage.Save or GuidedSessionPage.Completed;
+        _modeTools.Visibility = compact ? Visibility.Collapsed : Visibility.Visible;
+        _modeSelector.Visibility = compact ? Visibility.Visible : Visibility.Collapsed;
+        _zoomStatus.Visibility = compact && _model?.IsFitToViewport == true ? Visibility.Collapsed : Visibility.Visible;
+    }
+
     private void UpdateSize()
     {
-        if (_model is null || !_model.HasTiffReview || _image.Source is null)
+        if (_model is null || !_model.HasTiffReview || _primary.Image.Source is null)
         {
             return;
         }
@@ -313,32 +357,38 @@ public sealed class TiffReviewSurface : UserControl
         double height = Math.Max(1, _model.TiffPreviewPixelHeight);
         // The actual viewport already excludes the wrapping tool rows and legends.
         // Reserving a fixed header height can crop the fitted image on narrow layouts.
-        double available = Math.Max(1, _scroll.ViewportWidth > 0 ? _scroll.ViewportWidth : _scroll.ActualWidth);
-        double vertical = Math.Max(1, _scroll.ViewportHeight > 0 ? _scroll.ViewportHeight : _scroll.ActualHeight);
+        Size available = ViewportSize(_primary.Scroll);
+        if (_model.TiffReviewMode == TiffReviewMode.Compare)
+        {
+            Size other = ViewportSize(_comparison.Scroll);
+            available = new Size(Math.Min(available.Width, other.Width), Math.Min(available.Height, other.Height));
+        }
 
-        double scale = _model.IsFitToViewport
-            ? Math.Max(0.001, Math.Min(available / width, vertical / height))
+        bool fit = _model.IsFitToViewport;
+        double scale = fit
+            ? Math.Min(available.Width / width, available.Height / height)
             : _model.ZoomScale;
 
-        _image.LayoutTransform = new ScaleTransform(
-            _model.IsFitToViewport ? 1 : scale, _model.IsFitToViewport ? 1 : scale);
-        _image.Width = width * (_model.IsFitToViewport ? scale : 1);
-        _image.Height = height * (_model.IsFitToViewport ? scale : 1);
-        _canvas.Width = width * scale;
-        _canvas.Height = height * scale;
+        _zoomTransform.ScaleX = _zoomTransform.ScaleY = fit ? 1 : scale;
+        _primary.Resize(width, height, scale, fit);
+        _comparison.Resize(width, height, scale, fit);
 
         ApplyPosition();
     }
 
-    // The same arrangement SharedReviewSurface uses, and for the same reason: ScrollChanged is
-    // queued by layout, so an echo of a programmatic scroll must not be read back as a pan.
-    private void Scrolled(object sender, ScrollChangedEventArgs e)
+    private static Size ViewportSize(ScrollViewer scroll) => new(
+        Math.Max(1, scroll.ViewportWidth > 0 ? scroll.ViewportWidth : scroll.ActualWidth),
+        Math.Max(1, scroll.ViewportHeight > 0 ? scroll.ViewportHeight : scroll.ActualHeight));
+
+    private void Scrolled(PreviewPane pane, object sender, ScrollChangedEventArgs e)
     {
-        if (_updating || _model is null || !ReferenceEquals(e.OriginalSource, sender))
+        if (_updating || _model?.HasTiffReview != true || !ReferenceEquals(e.OriginalSource, sender) ||
+            pane.Scroll.Visibility != Visibility.Visible)
         {
             return;
         }
 
+        ScrollViewer scroll = pane.Scroll;
         if (e.ExtentWidthChange != 0 || e.ExtentHeightChange != 0 ||
             e.ViewportWidthChange != 0 || e.ViewportHeightChange != 0)
         {
@@ -347,38 +397,104 @@ public sealed class TiffReviewSurface : UserControl
             return;
         }
 
+        // ScrollChanged is queued by layout. An echo of our synchronized scroll must not update
+        // the shared position as if the operator had moved the other pane.
+        Point? pending = pane.PendingOffset;
+        pane.PendingOffset = null;
+        if (pending is { } target && IsAtOffset(scroll, target)) return;
+
         _updating = true;
-        if (e.HorizontalChange != 0 && _scroll.ScrollableWidth > 0)
+        if (e.HorizontalChange != 0 && scroll.ScrollableWidth > 0)
         {
             _model.ReviewViewport.HorizontalPosition =
-                Math.Clamp(_scroll.HorizontalOffset / _scroll.ScrollableWidth, 0, 1);
+                Math.Clamp(scroll.HorizontalOffset / scroll.ScrollableWidth, 0, 1);
         }
-        if (e.VerticalChange != 0 && _scroll.ScrollableHeight > 0)
+        if (e.VerticalChange != 0 && scroll.ScrollableHeight > 0)
         {
             _model.ReviewViewport.VerticalPosition =
-                Math.Clamp(_scroll.VerticalOffset / _scroll.ScrollableHeight, 0, 1);
+                Math.Clamp(scroll.VerticalOffset / scroll.ScrollableHeight, 0, 1);
         }
         _updating = false;
+        ApplyPosition();
     }
 
     private void ApplyPosition()
     {
-        if (_model is null)
+        if (_model is null) return;
+
+        Apply(_primary, _model.ReviewViewport);
+        if (_comparison.Scroll.Visibility == Visibility.Visible)
         {
-            return;
+            Apply(_comparison, _model.ReviewViewport);
         }
 
-        double x = Math.Clamp(_model.ReviewViewport.HorizontalPosition, 0, 1) * _scroll.ScrollableWidth;
-        double y = Math.Clamp(_model.ReviewViewport.VerticalPosition, 0, 1) * _scroll.ScrollableHeight;
-
-        if (Math.Abs(_scroll.HorizontalOffset - x) >= 0.01)
+        static void Apply(PreviewPane pane, ReviewViewportState viewport)
         {
-            _scroll.ScrollToHorizontalOffset(x);
+            ScrollViewer scroll = pane.Scroll;
+            Point target = new(
+                Math.Clamp(viewport.HorizontalPosition, 0, 1) * scroll.ScrollableWidth,
+                Math.Clamp(viewport.VerticalPosition, 0, 1) * scroll.ScrollableHeight);
+            if (IsAtOffset(scroll, target)) return;
+
+            pane.PendingOffset = target;
+            scroll.ScrollToHorizontalOffset(target.X);
+            scroll.ScrollToVerticalOffset(target.Y);
+        }
+    }
+
+    private static bool IsAtOffset(ScrollViewer scroll, Point offset) =>
+        Math.Abs(scroll.HorizontalOffset - offset.X) < 0.01 && Math.Abs(scroll.VerticalOffset - offset.Y) < 0.01;
+
+    private sealed class PreviewPane
+    {
+        public PreviewPane(string automationId, string heading)
+        {
+            Heading.Text = heading;
+            Canvas.Children.Add(Image);
+            Scroll.Content = Canvas;
+            AutomationProperties.SetAutomationId(Scroll, automationId);
         }
 
-        if (Math.Abs(_scroll.VerticalOffset - y) >= 0.01)
+        public TextBlock Heading { get; } = new()
         {
-            _scroll.ScrollToVerticalOffset(y);
+            Margin = new Thickness(0, 0, 0, 4),
+            TextTrimming = TextTrimming.CharacterEllipsis,
+            FontWeight = FontWeights.SemiBold,
+            Visibility = Visibility.Collapsed,
+        };
+
+        public Image Image { get; } = new()
+        {
+            Stretch = Stretch.Uniform,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Top,
+            Focusable = false,
+        };
+
+        public Grid Canvas { get; } = new()
+        {
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
+            Background = Checkerboard,
+        };
+
+        // A tab stop lets keyboard operators pan with arrows and Page Up/Down.
+        public ScrollViewer Scroll { get; } = new()
+        {
+            HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
+            VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+            Focusable = true,
+            IsTabStop = true,
+        };
+
+        public Point? PendingOffset { get; set; }
+
+        public void Resize(double width, double height, double scale, bool fit)
+        {
+            Image.Width = width * (fit ? scale : 1);
+            Image.Height = height * (fit ? scale : 1);
+            Canvas.Width = width * scale;
+            Canvas.Height = height * scale;
         }
     }
 }

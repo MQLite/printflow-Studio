@@ -335,12 +335,20 @@ internal static string Session_PdfPrepared => Get(nameof(Session_PdfPrepared));
     // --- Production TIFF final review (SCRUM-11104) ---------------------------------------
 
     internal static string Session_TiffModeHeading => Get(nameof(Session_TiffModeHeading));
+    internal static string Session_TiffModeComposite => Get(nameof(Session_TiffModeComposite));
+    internal static string Session_TiffModeCompare => Get(nameof(Session_TiffModeCompare));
+    internal static string Session_TiffModeCompareShort => Get(nameof(Session_TiffModeCompareShort));
     internal static string Session_TiffModeColour => Get(nameof(Session_TiffModeColour));
     internal static string Session_TiffModeWhiteInk => Get(nameof(Session_TiffModeWhiteInk));
     internal static string Session_TiffModeOverlay => Get(nameof(Session_TiffModeOverlay));
+    internal static string Session_TiffModeOverlayShort => Get(nameof(Session_TiffModeOverlayShort));
+    internal static string Session_TiffCompositePreviewName => Get(nameof(Session_TiffCompositePreviewName));
+    internal static string Session_TiffComparePreviewName => Get(nameof(Session_TiffComparePreviewName));
     internal static string Session_TiffColourPreviewName => Get(nameof(Session_TiffColourPreviewName));
     internal static string Session_TiffWhiteInkPreviewName => Get(nameof(Session_TiffWhiteInkPreviewName));
     internal static string Session_TiffOverlayPreviewName => Get(nameof(Session_TiffOverlayPreviewName));
+    internal static string Session_TiffCompositeLegend => Get(nameof(Session_TiffCompositeLegend));
+    internal static string Session_TiffCompareLegend => Get(nameof(Session_TiffCompareLegend));
     internal static string Session_TiffColourLegend => Get(nameof(Session_TiffColourLegend));
     internal static string Session_TiffWhiteInkLegend => Get(nameof(Session_TiffWhiteInkLegend));
     internal static string Session_TiffOverlayLegend => Get(nameof(Session_TiffOverlayLegend));
@@ -975,6 +983,9 @@ internal static string Session_PdfPrepared => Get(nameof(Session_PdfPrepared));
 
     /// <summary>Composite format: pixel width, pixel height.</summary>
     internal static string Session_PreviewPixels => Get(nameof(Session_PreviewPixels));
+
+    /// <summary>Composite format for the print-equivalent width, height and PPI.</summary>
+    internal static string Session_PreviewPrintEquivalent => Get(nameof(Session_PreviewPrintEquivalent));
 
     /// <summary>Says the preview is a reduced stand-in rather than every pixel.</summary>
     internal static string Session_PreviewReduced => Get(nameof(Session_PreviewReduced));

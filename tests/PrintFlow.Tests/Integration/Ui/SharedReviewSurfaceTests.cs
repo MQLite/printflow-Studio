@@ -127,6 +127,50 @@ public sealed class SharedReviewSurfaceTests
     }
 
     [Theory]
+    [InlineData(ReviewComparisonMode.SideBySide, "en-US", "px", "mm")]
+    [InlineData(ReviewComparisonMode.Slider, "en-US", "px", "mm")]
+    [InlineData(ReviewComparisonMode.SideBySide, "zh-CN", "像素", "毫米")]
+    [InlineData(ReviewComparisonMode.Slider, "zh-CN", "像素", "毫米")]
+    public void Both_comparison_panes_show_full_raster_and_print_dimensions_at_narrow_width(
+        ReviewComparisonMode mode, string culture, string pixelUnit, string millimetreUnit)
+    {
+        WithSurface((model, view) =>
+        {
+            model.PreviewPanes.Clear();
+            foreach (var (heading, width, height) in new[] { (model.BeforeLabel, 1800, 1200), (model.AfterLabel, 1000, 800) })
+            {
+                model.PreviewPanes.Add(ArtefactPreviewPane.From(heading, new string('a', 100) + ".png",
+                    new ImagePreview(new RevisionId(Guid.NewGuid()), width / 10, height / 10, width, height, true,
+                        SyntheticImages.PngWithAlpha(width / 10, height / 10, (_, _) => 128, dpi: 96))));
+            }
+            model.ReviewViewport.Mode = mode;
+            Arrange(view, 390, 460);
+            TextBlock[] labels = Descendants<TextBlock>(view).Where(text => text.ActualHeight > 0).ToArray();
+
+            AssertDimensions(model.BeforeLabel, "1800 × 1200", "152.4 × 101.6");
+            AssertDimensions(model.AfterLabel, "1000 × 800", "84.67 × 67.73");
+
+            void AssertDimensions(string pane, string pixels, string printSize)
+            {
+                TextBlock title = labels.Single(t => t.Text == pane);
+                TextBlock raster = labels.Single(t => t.Text.StartsWith($"{pixels} {pixelUnit}", StringComparison.Ordinal));
+                TextBlock print = labels.Single(t => t.Text.Contains($"{printSize} {millimetreUnit}", StringComparison.Ordinal));
+                print.Text.ShouldContain("300 PPI");
+                foreach (TextBlock fact in new[] { raster, print })
+                {
+                    fact.Parent.ShouldBeSameAs(title.Parent);
+                    fact.TextTrimming.ShouldBe(TextTrimming.None);
+                    fact.TextWrapping.ShouldNotBe(TextWrapping.NoWrap);
+                    Rect bounds = fact.TransformToAncestor(view).TransformBounds(new Rect(fact.RenderSize));
+                    bounds.Left.ShouldBeGreaterThanOrEqualTo(0);
+                    bounds.Right.ShouldBeLessThanOrEqualTo(view.ActualWidth);
+                    bounds.Bottom.ShouldBeLessThan(view.ActualHeight);
+                }
+            }
+        }, culture);
+    }
+
+    [Theory]
     [InlineData(0)]
     [InlineData(25)]
     [InlineData(50)]
@@ -193,7 +237,7 @@ public sealed class SharedReviewSurfaceTests
     }
 
     // SCRUM-11154 F-V3: Before is left of the divider and After is right of it, matching the
-    // "Before / After" heading and the side-by-side order. 0 shows only After, 100 only Before.
+    // headings and the side-by-side order. 0 shows only After, 100 only Before.
     [Theory]
     [InlineData(0, true, true)]
     [InlineData(50, false, true)]
@@ -247,7 +291,10 @@ public sealed class SharedReviewSurfaceTests
             AutomationProperties.GetName(images[1]).ShouldBe(panes[1].Heading);
             ((Grid)images[1].Parent).Clip.ShouldBeOfType<RectangleGeometry>("only the After overlay is clipped");
             ((Grid)images[0].Parent).Clip.ShouldBeNull();
-            Descendants<TextBlock>(view).ShouldContain(t => t.Text == model.BeforeLabel + " / " + model.AfterLabel);
+            TextBlock[] headings = Descendants<TextBlock>(view)
+                .Where(t => t.Text == model.BeforeLabel || t.Text == model.AfterLabel).ToArray();
+            headings.Select(t => t.Text).ShouldBe(new[] { model.BeforeLabel, model.AfterLabel });
+            headings[0].TranslatePoint(new Point(), view).X.ShouldBeLessThan(headings[1].TranslatePoint(new Point(), view).X);
         }, "zh-CN");
     }
 

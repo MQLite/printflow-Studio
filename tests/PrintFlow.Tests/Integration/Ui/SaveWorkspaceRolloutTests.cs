@@ -66,9 +66,7 @@ public sealed class SaveWorkspaceRolloutTests
                     tree.OfType<TextBox>().Where(GuidedSessionProjectionTests.Shown)
                         .ShouldNotContain(t => AutomationProperties.GetAutomationId(t) == "Session.FinalSave.FileName",
                             "the completed page first presents its outcome, with optional saving in a disclosure");
-                    var preview = tree.OfType<SharedReviewSurface>().Single();
-                    preview.ResultOnly.ShouldBeTrue();
-                    var image = GuidedCompletionSaveTests.Descendants(preview).OfType<Image>().Single();
+                    var image = VisibleTiffImage(tree);
                     image.Source.ShouldNotBeNull(); image.ActualHeight.ShouldBeGreaterThanOrEqualTo(180);
                     Inside(image, tree.Root);
                     Find<Button>(tree, "Session.AddAnotherSize").Command.ShouldBeSameAs(model.AddAnotherSizeCommand);
@@ -87,6 +85,88 @@ public sealed class SaveWorkspaceRolloutTests
             }
             finally { FinalSaveFixtures.Remove(folder); }
         }
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Final_png_artwork_opens_on_checkerboard_after_white_inspection(bool completed)
+    {
+        using SessionServiceHarness h = new();
+        var workflow = h.CreateService();
+        var review = await FinalSaveFixtures.PngAtFinalReviewAsync(h, workflow);
+        var model = await GuidedCompletionSaveTests.Open(h, workflow, FinalSaveFixtures.Delivery(h),
+            new GuidedCompletionSaveTests.Picker(null), review);
+        model.ReviewViewport.Background = ReviewInspectionBackground.White;
+        await model.ApproveCommand.ExecuteAsync(null);
+        await model.RunStepCommand.ExecuteAsync(null);
+        await model.PreviewsLoaded;
+        await model.FinalSaveFactsLoaded;
+        if (completed)
+        {
+            await model.CompleteCommand.ExecuteAsync(null);
+            await model.PreviewsLoaded;
+            await model.FinalSaveFactsLoaded;
+        }
+        model.GuidedPage.ShouldBe(completed ? GuidedSessionPage.Completed : GuidedSessionPage.Save);
+
+        WpfRendering.RenderExpectingNoBindingErrors(() => new SessionScreenView { DataContext = model }, new Size(1000, 700), tree =>
+        {
+            var surface = tree.OfType<SharedReviewSurface>().Single();
+            var canvas = (Grid)SharedReviewSurfaceTests.Descendants<Image>(surface).Single().Parent;
+            canvas.Background.ShouldBeOfType<DrawingBrush>();
+            surface.Background.ShouldNotBe(Brushes.White);
+
+            Find<Button>(tree, "Session.Save.ReviewResult").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            Find<Button>(tree, "Session.ReviewToolsToggle").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            ProcessingWorkspaceRolloutTests.Settle(tree.Root);
+            RadioButton checkerboard = Find<RadioButton>(tree, "Session.ReviewBackgroundCheckerboard");
+            checkerboard.IsChecked.ShouldBe(true);
+
+            Find<RadioButton>(tree, "Session.ReviewBackgroundBlack").IsChecked = true;
+            SharedReviewSurfaceTests.Descendants<Image>(surface)
+                .ShouldAllBe(image => ((Grid)image.Parent).Background == Brushes.Black);
+            model.ReviewViewport.Background.ShouldBe(ReviewInspectionBackground.White);
+            return true;
+        });
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Final_tiff_uses_the_approved_separated_preview_in_save_and_reopened_completion(bool completed)
+    {
+        using SessionServiceHarness h = new();
+        var workflow = FinalSaveFixtures.TiffService(h);
+        var review = await FinalSaveFixtures.TiffAtFinalReviewAsync(h, workflow);
+        var delivery = FinalSaveFixtures.Delivery(h);
+        var picker = new GuidedCompletionSaveTests.Picker(null);
+        var model = await GuidedCompletionSaveTests.Open(h, workflow, delivery, picker, review);
+        await model.ApproveCommand.ExecuteAsync(null);
+        await model.PreviewsLoaded;
+        await model.FinalSaveFactsLoaded;
+        if (completed)
+        {
+            await model.CompleteCommand.ExecuteAsync(null);
+            model = await GuidedCompletionSaveTests.Open(h, workflow, delivery, picker,
+                (await workflow.LoadAsync(review.Id, default)).Value);
+        }
+
+        model.GuidedPage.ShouldBe(completed ? GuidedSessionPage.Completed : GuidedSessionPage.Save);
+        model.IsProductionTiffReview.ShouldBeFalse();
+        model.HasTiffReview.ShouldBeTrue();
+        model.TiffReviewSha256.ShouldBe(review.CurrentArtefact!.Sha256.Value);
+        model.TiffReviewMode.ShouldBe(TiffReviewMode.Composite);
+        model.TiffPreviewDetail.ShouldContain(model.TiffMetadata.Single(row => row.Key == "Physical").Value);
+
+        WpfRendering.RenderExpectingNoBindingErrors(() => new SessionScreenView { DataContext = model }, new Size(1000, 700), tree =>
+        {
+            Image image = VisibleTiffImage(tree);
+            image.Source.ShouldNotBeNull();
+            ((Grid)image.Parent).Background.ShouldBeOfType<DrawingBrush>();
+            GuidedSessionProjectionTests.Shown(tree.OfType<SharedReviewSurface>().Single()).ShouldBeFalse();
+            return true;
+        });
     }
 
     // A read-only comparison disclosure must not change approval identity, viewport or durable facts.
@@ -123,7 +203,7 @@ public sealed class SaveWorkspaceRolloutTests
             GuidedCompletionSaveTests.Descendants(surface).OfType<Image>().Max(image => image.ActualWidth * image.ActualHeight)
                 .ShouldBeGreaterThanOrEqualTo(10_000, "opening comparison must leave a usable picture area while preserving the reviewed image's aspect ratio");
             GuidedCompletionSaveTests.Descendants(surface).OfType<TextBlock>()
-                .ShouldContain(t => t.Text.StartsWith(review.UpstreamArtefact!.FileName + " · "),
+                .ShouldContain(t => t.Text == review.UpstreamArtefact!.FileName,
                     "the PNG promotion must compare the actual pre-trim input, not two copies of the trimmed result");
             toggle.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
             ProcessingWorkspaceRolloutTests.Settle(tree.Root);
@@ -194,9 +274,7 @@ public sealed class SaveWorkspaceRolloutTests
                         check.TargetIdentity.ShouldBe(model.RecordedActionIdentity); Inside(check, tree.Root);
                         model.CanOpenContainingFolder.ShouldBeFalse();
                     }
-                    var surface = tree.OfType<SharedReviewSurface>().Single();
-                    surface.ResultOnly.ShouldBeTrue();
-                    GuidedCompletionSaveTests.Descendants(surface).OfType<Image>().Single().ActualHeight.ShouldBeGreaterThanOrEqualTo(180);
+                    VisibleTiffImage(tree).ActualHeight.ShouldBeGreaterThanOrEqualTo(180);
                     return true;
                 });
                 Capture(model, new(width, height), "save-" + state);
@@ -236,7 +314,7 @@ public sealed class SaveWorkspaceRolloutTests
             model.FinalSaveTargets.Count.ShouldBe(3);
             WpfRendering.RenderExpectingNoBindingErrors(() => new SessionScreenView { DataContext = model }, new(width, height), tree =>
             {
-                var preview = tree.OfType<SharedReviewSurface>().Single();
+                var preview = tree.OfType<TiffReviewSurface>().Single();
                 double heightBefore = preview.ActualHeight;
                 var rows = tree.OfType<TextBlock>().Where(t => AutomationProperties.GetAutomationId(t) == "Session.OutputState").ToArray();
                 rows.Length.ShouldBeGreaterThanOrEqualTo(3);
@@ -246,7 +324,7 @@ public sealed class SaveWorkspaceRolloutTests
                     row.BringIntoView(); ProcessingWorkspaceRolloutTests.Settle(tree.Root); Inside(row, tree.Root);
                 }
                 preview.ActualHeight.ShouldBe(heightBefore);
-                GuidedCompletionSaveTests.Descendants(preview).OfType<Image>().Single().ActualHeight.ShouldBeGreaterThanOrEqualTo(180);
+                VisibleTiffImage(tree).ActualHeight.ShouldBeGreaterThanOrEqualTo(180);
                 return true;
             });
             Capture(model, new(width, height), "three-sizes");
@@ -284,6 +362,10 @@ public sealed class SaveWorkspaceRolloutTests
         });
         Capture(model, new(1000, 700), abandoned ? "abandoned-no-save-target" : "completed-no-coordinator");
     }
+
+    private static Image VisibleTiffImage(RenderedTree tree) =>
+        GuidedCompletionSaveTests.Descendants(tree.OfType<TiffReviewSurface>().Single())
+            .OfType<Image>().Single(GuidedSessionProjectionTests.Shown);
 
     private static T Find<T>(RenderedTree tree, string id) where T : FrameworkElement =>
         tree.OfType<T>().Single(e => AutomationProperties.GetAutomationId(e) == id);

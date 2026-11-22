@@ -29,7 +29,10 @@ public sealed record FinalSaveObservation(Guid OperationId, Guid RequestId, Fina
 public sealed record FinalSaveRequest(
     Guid OperationId, Guid RequestId, SessionId SessionId, ArtifactKind Kind,
     ReviewedResultIdentity? PendingReview, ArtifactKey? ApprovedArtifact, Sha256? ExpectedSha256,
-    string Folder, string FileName, long DraftGeneration);
+    string Folder, string FileName, long DraftGeneration)
+{
+    public bool OverwriteOriginal { get; init; }
+}
 
 /// <summary>Approval, PNG preparation and delivery stay separately observable.</summary>
 public sealed record FinalSaveResult(
@@ -277,7 +280,8 @@ public sealed class FinalSaveCoordinator
                 : new InlineProgress<DeliveryProgress>(p => progress.Report(
                     new(request.OperationId, request.RequestId, FinalSaveStage.Saving, p)));
             DeliveryOutcome outcome = await _delivery.DeliverAsync(new DeliveryRequest(request.RequestId, key,
-                artifact.ApprovedSha256, artifact.ReviewId, request.Folder, request.FileName, offer.OfferVersion),
+                artifact.ApprovedSha256, artifact.ReviewId, request.Folder, request.FileName, offer.OfferVersion)
+                { OverwriteOriginal = request.OverwriteOriginal },
                 relay, cancellationToken);
             return Result(request, approval, png, key, session: session, delivery: outcome);
         }

@@ -1019,16 +1019,34 @@
                     </Style>
                 </DockPanel.Style>
 
-                                <local:SharedReviewSurface CurrentOnly="{Binding ShowsGuidedSourceDetails}"><local:SharedReviewSurface.Style><Style TargetType="local:SharedReviewSurface"><Style.Triggers><DataTrigger Binding="{Binding GuidedPage}" Value="Save"><Setter Property="ResultOnly" Value="True" /><Setter Property="Background" Value="White" /><Setter Property="Padding" Value="12" /><Setter Property="BorderBrush" Value="{DynamicResource PF.Brush.Border}" /><Setter Property="BorderThickness" Value="1" /></DataTrigger><DataTrigger Binding="{Binding GuidedPage}" Value="Completed"><Setter Property="ResultOnly" Value="True" /><Setter Property="Background" Value="White" /><Setter Property="Padding" Value="12" /><Setter Property="BorderBrush" Value="{DynamicResource PF.Brush.Border}" /><Setter Property="BorderThickness" Value="1" /></DataTrigger></Style.Triggers></Style></local:SharedReviewSurface.Style></local:SharedReviewSurface>
+                <local:SharedReviewSurface CurrentOnly="{Binding ShowsGuidedSourceDetails}">
+                    <local:SharedReviewSurface.Style>
+                        <Style TargetType="local:SharedReviewSurface">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding GuidedPage}" Value="Save">
+                                    <Setter Property="ResultOnly" Value="True" />
+                                    <Setter Property="Padding" Value="12" />
+                                    <Setter Property="BorderBrush" Value="{DynamicResource PF.Brush.Border}" />
+                                    <Setter Property="BorderThickness" Value="1" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding GuidedPage}" Value="Completed">
+                                    <Setter Property="ResultOnly" Value="True" />
+                                    <Setter Property="Padding" Value="12" />
+                                    <Setter Property="BorderBrush" Value="{DynamicResource PF.Brush.Border}" />
+                                    <Setter Property="BorderThickness" Value="1" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </local:SharedReviewSurface.Style>
+                </local:SharedReviewSurface>
             </DockPanel>
 
             <!--
                 The production TIFF inspection surface (SCRUM-11104 §5, §14, §33).
 
                 Same row as the general review panes and shown instead of them, exactly as the
-                crop surface is: one artefact, one picture of it. The zoom controls are the
-                screen's own, so switching between the two surfaces — or between Colour, White ink
-                and Colour + white — never means learning a second zoom.
+                crop surface is. All TIFF modes inspect the same artefact and share the screen's
+                zoom and pan controls.
             -->
             <DockPanel Grid.Row="1" Margin="0,14,0,0">
                 <DockPanel.Style>

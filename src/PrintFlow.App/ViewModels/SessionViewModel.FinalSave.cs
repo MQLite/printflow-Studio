@@ -258,8 +258,10 @@ public partial class SessionViewModel
     public string SaveFileNameLabel => Strings.FinalSave_FileNameLabel;
     public string SaveFolderLabel => Strings.FinalSave_FolderLabel;
     public string ChangeLocationLabel => Strings.FinalSave_ChangeLocation;
-    public string ConfirmAndSaveLabel => Strings.FinalSave_ConfirmAndSave;
-    public string SaveApprovedLabel => SaveDisplay.IsRetry ? Strings.FinalSave_RetrySave :
+    public string ConfirmAndSaveLabel => IsOriginalSaveDraft ? Strings.Resolve("FinalSave_ConfirmAndOverwriteOriginal") :
+        Strings.FinalSave_ConfirmAndSave;
+    public string SaveApprovedLabel => IsOriginalSaveDraft ? Strings.Resolve("FinalSave_OverwriteOriginal") :
+        SaveDisplay.IsRetry ? Strings.FinalSave_RetrySave :
         SelectedSave?.CopyDraft == true ? Strings.FinalSave_SaveAnotherCopy : Strings.FinalSave_SaveApproved;
     public string RetryRecordedLabel => Strings.FinalSave_RetrySave;
     public string CheckAgainLabel => Strings.FinalSave_CheckAgain;
@@ -627,7 +629,8 @@ public partial class SessionViewModel
         if (_finalSave is null || _session is null || SelectedSave is not { PendingReview: { } review } target ||
             !CanConfirmAndSave || EffectiveName(target.FileName, target.Kind).Effective is not { } name) return;
         var request = new FinalSaveRequest(Guid.NewGuid(), Guid.NewGuid(), _session.Id, target.Kind, review, null,
-            review.DisplayedHash, target.Folder, name, target.Generation);
+            review.DisplayedHash, target.Folder, name, target.Generation)
+        { OverwriteOriginal = IsOriginalDestination(target, name) };
         target.Captured = (request.RequestId, request.Folder, request.FileName, request.DraftGeneration);
         await RunFinalSaveAsync(target, request.OperationId, request.Folder,
             (progress, token) => _finalSave.ConfirmAndSaveAsync(request, progress, token)).ConfigureAwait(true);
@@ -643,7 +646,8 @@ public partial class SessionViewModel
                          captured.Folder == target.Folder && captured.FileName == name
             ? captured.RequestId : Guid.NewGuid();
         var request = new FinalSaveRequest(Guid.NewGuid(), requestId, _session.Id, target.Kind, null, artifact,
-            offer.Artifact.ApprovedSha256, target.Folder, name, target.Generation);
+            offer.Artifact.ApprovedSha256, target.Folder, name, target.Generation)
+        { OverwriteOriginal = IsOriginalDestination(target, name) };
         target.Captured = (request.RequestId, request.Folder, request.FileName, request.DraftGeneration);
         await RunFinalSaveAsync(target, request.OperationId, request.Folder,
             (progress, token) => _finalSave.SaveApprovedAsync(request, progress, token)).ConfigureAwait(true);
@@ -988,7 +992,7 @@ public partial class SessionViewModel
             return new()
             {
                 Kind = FinalSaveKind.Pending,
-                Status = Format(Strings.FinalSave_AwaitingConfirmation, Strings.FinalSave_ConfirmAndSave),
+                Status = Format(Strings.FinalSave_AwaitingConfirmation, ConfirmAndSaveLabel),
                 Alert = JoinLines(target.Fact is ApprovalFact approval ? ApprovalAlert(approval) : null, ActionIncomplete(target)),
                 Secondary = Format(Strings.FinalSave_ApproveOnlyHint, ApproveLabel),
                 Details = target.Fact is ApprovalFact detailed ? ApprovalDetails(detailed) : null,
@@ -1024,13 +1028,14 @@ public partial class SessionViewModel
         string? recordedPath = display.SavedPath ?? RecordedPath(target, display.DeliveryId);
         bool sameAsRecorded = draftPath is not null && recordedPath is not null &&
                               string.Equals(draftPath, recordedPath, StringComparison.OrdinalIgnoreCase);
+        bool retryOriginal = record is not null && IsOriginalDestination(record.RequestedFolder, record.RequestedFileName);
         bool unchangedIntent = target.Captured is { } captured && captured.Generation == target.Generation &&
                                captured.FileName == effective && captured.Folder == target.Folder;
         bool offerSave = display.Kind switch
         {
             FinalSaveKind.Failed => true,
             FinalSaveKind.Collision => !unchangedIntent,
-            FinalSaveKind.ApprovedNotSaved => !(sameAsRecorded && display.CanRetryRecorded),
+            FinalSaveKind.ApprovedNotSaved => !(sameAsRecorded && display.CanRetryRecorded && !retryOriginal),
             _ => !sameAsRecorded,
         };
         List<string> secondary = [];
@@ -1047,7 +1052,7 @@ public partial class SessionViewModel
             IsEditable = idle && !lockedSaved,
             IsRetry = display.Kind == FinalSaveKind.Failed && unchangedIntent,
             CanSaveApproved = canSave && offerSave && !lockedSaved,
-            CanRetryRecorded = idle && display.CanRetryRecorded,
+            CanRetryRecorded = idle && display.CanRetryRecorded && !retryOriginal,
             CanCheckAgain = idle && display.CanCheckAgain,
             CanCheckSaved = idle && display.CanCheckSaved,
             CanOpen = idle && display.CanOpen,
@@ -1335,15 +1340,25 @@ public partial class SessionViewModel
         List<string> lines = [];
         if (problem is not null) lines.Add(problem);
         else if (notice is not null) lines.Add(notice);
+        if (effective is not null && IsOriginalDestination(target, effective))
+            lines.Add(Strings.Resolve("FinalSave_OriginalOverwriteNotice"));
         if (target.Folder.Length == 0)
             lines.Add(_preferenceFailed ? Strings.FinalSave_PreferenceUnavailable : Strings.FinalSave_NoFolder);
         else if (target.FolderDefault is { } folderDefault && !target.FolderEdited)
             lines.Add(folderDefault.IsConfigured
                 ? Strings.Resolve("WorkflowSaveFolder_FromSettings")
                 : Strings.FinalSave_RememberedFolder);
-        _ = effective;
         return string.Join(Environment.NewLine, lines);
     }
+
+    private bool IsOriginalSaveDraft => SelectedSave is { } target &&
+        EffectiveName(target.FileName, target.Kind).Effective is { } name && IsOriginalDestination(target, name);
+
+    private bool IsOriginalDestination(FinalSaveTarget target, string name) =>
+        IsOriginalDestination(target.Folder, name);
+
+    private bool IsOriginalDestination(string folder, string name) =>
+        DeliveryDraftText.MatchesOriginal(_finalSaveSession?.OriginalSourcePath, folder, name);
 
     /// <summary>
     /// The complete effective name shown before confirmation. A missing extension is added
@@ -1384,7 +1399,7 @@ public partial class SessionViewModel
         nameof(HasFinalSaveSecondary), nameof(FinalSaveSavedPath), nameof(HasFinalSaveSavedPath), nameof(FinalSaveDetails),
         nameof(HasFinalSaveDetails), nameof(FinalSaveOpenNotice), nameof(HasFinalSaveOpenNotice), nameof(IsSaveDraftEditable),
         nameof(IsFinalSaveWorking), nameof(FinalSaveProgress), nameof(HasFinalSaveProgress), nameof(CanConfirmAndSave),
-        nameof(CanSaveApproved), nameof(SaveApprovedLabel), nameof(CanRetryRecordedSave), nameof(CanCheckSaveAgain),
+        nameof(CanSaveApproved), nameof(ConfirmAndSaveLabel), nameof(SaveApprovedLabel), nameof(CanRetryRecordedSave), nameof(CanCheckSaveAgain),
         nameof(CanCheckSavedFile), nameof(CanOpenContainingFolder), nameof(CanSaveAnotherCopy), nameof(CanUseSuggestedName),
         nameof(UseSuggestionLabel), nameof(CanCancelSave), nameof(CanChangeLocation), nameof(ConfirmAndSaveIdentity),
         nameof(SaveApprovedIdentity), nameof(RecordedActionIdentity), nameof(HasFinalSaveRecords), nameof(SelectedFinalSaveRecord),

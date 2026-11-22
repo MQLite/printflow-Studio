@@ -100,13 +100,13 @@ public sealed class TiffReviewBoundaryTests
     /// <remarks>
     /// <c>DependencyRuleTests</c> already proves the Workflow assembly references no WPF at all,
     /// so an <c>ImageSource</c> here could not compile. What this adds is the positive shape: the
-    /// three representations are carried as encoded bytes, which is what lets the same payload be
+    /// representations are carried as encoded bytes, which is what lets the same payload be
     /// produced off the UI thread, compared in a test, and turned into a bitmap only by the view.
     /// </remarks>
     [Fact]
     public void The_review_payload_carries_encoded_bytes_rather_than_images()
     {
-        foreach (string name in new[] { "ColourPayload", "WhiteInkPayload", "OverlayPayload" })
+        foreach (string name in new[] { "ColourPayload", "WhiteInkPayload", "OverlayPayload", "CompositePayload" })
         {
             typeof(TiffReviewPayload).GetProperty(name)!.PropertyType
                 .ShouldBe(typeof(ReadOnlyMemory<byte>), name);

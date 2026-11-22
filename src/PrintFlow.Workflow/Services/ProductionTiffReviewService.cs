@@ -150,7 +150,10 @@ public sealed class ProductionTiffReviewService : IProductionTiffReviewService
             EffectiveResolution(preparation, widthMm, heightMm),
             decoded.Value.ColourPayload,
             decoded.Value.WhiteInkPayload,
-            decoded.Value.OverlayPayload));
+            decoded.Value.OverlayPayload)
+        {
+            CompositePayload = decoded.Value.CompositePayload,
+        });
     }
 
     /// <summary>

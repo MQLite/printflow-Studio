@@ -4,23 +4,23 @@ using PrintFlow.Domain.Results;
 namespace PrintFlow.Workflow.Ports;
 
 /// <summary>
-/// One production TIFF decoded into the three display representations final review needs
+/// One production TIFF decoded into the display representations final review needs
 /// (SCRUM-11104 §6, §8, §11, §15).
 /// </summary>
 /// <remarks>
 /// Everything here is about <i>showing</i> a validated file and nothing about deciding anything.
-/// The three payloads are freshly encoded PNGs at 96 dpi — the same convention
+/// The payloads are freshly encoded PNGs at 96 dpi — the same convention
 /// <see cref="DecodedPreview.Payload"/> follows and for the same reason: at 96 dpi a WPF
 /// <c>Image</c> renders one payload pixel per device-independent pixel, so "100%" means 100%
 /// for a 300-ppi production artefact. Nothing is written to disk, nothing is hashed, and the
 /// TIFF's own bytes remain the only thing an approval is bound to.
 /// <para>
-/// One decode produces all three, which is what lets a mode switch be a change of which frozen
+/// One decode produces all previews, which is what lets a mode switch be a change of which frozen
 /// bitmap is on screen rather than a second pass over 74 MB of interleaved samples (§15).
 /// </para>
 /// <para>
 /// <see cref="PreviewPixelWidth"/>/<see cref="PreviewPixelHeight"/> describe the payloads and
-/// are identical for all three; <see cref="PixelWidth"/>/<see cref="PixelHeight"/> describe the
+/// are identical for all previews; <see cref="PixelWidth"/>/<see cref="PixelHeight"/> describe the
 /// TIFF canvas. They differ only when the canvas was larger than
 /// <see cref="ITiffReviewDecoder.MaximumDisplayEdge"/> and every payload was reduced by the same
 /// factor — reported rather than hidden, so a screen can say so instead of implying it is
@@ -28,12 +28,12 @@ namespace PrintFlow.Workflow.Ports;
 /// </para>
 /// </remarks>
 /// <param name="ColourPayload">
-/// The CMYK content converted for screen. An uncalibrated approximation for visual inspection,
-/// never a colour proof — see <see cref="ColourConversion"/>.
+/// The CMYK content converted for screen with transparency where no process inks are present.
+/// The conversion is for visual inspection; see <see cref="ColourConversion"/>.
 /// </param>
 /// <param name="WhiteInkPayload">
 /// The validated white-ink spot channel, decoded from the TIFF's own fifth sample and from
-/// nothing else. Bright means ink; see <see cref="WhiteInkPolarity"/>.
+/// nothing else. Its opacity represents white-ink coverage; see <see cref="WhiteInkPolarity"/>.
 /// </param>
 /// <param name="OverlayPayload">
 /// The colour content with white-ink coverage marked over it. Display-only composition; the
@@ -75,6 +75,9 @@ public sealed record DecodedTiffReview(
     ReadOnlyMemory<byte> WhiteInkPayload,
     ReadOnlyMemory<byte> OverlayPayload)
 {
+    /// <summary>Process colour on top of white ink, with transparency where no ink is present.</summary>
+    public ReadOnlyMemory<byte> CompositePayload { get; init; }
+
     /// <summary>True when the payloads are a reduced-size stand-in rather than every pixel.</summary>
     public bool IsDownsampledForDisplay =>
         PreviewPixelWidth < PixelWidth || PreviewPixelHeight < PixelHeight;

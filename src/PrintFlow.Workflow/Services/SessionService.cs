@@ -314,6 +314,7 @@ public sealed partial class SessionService : ISessionService
         WorkflowSnapshot initialSnapshot = WorkflowSnapshot.Create(id, workflowType, name, context.NowUtc)
             with
             {
+                OriginalSourcePath = sourceAbsolutePath,
                 TrimMargin = session.TrimMargin,
                 IgnoreSmallTrimNoise = session.IgnoreSmallTrimNoise,
                 ImageProcessingSelection = session.ImageProcessingSelection,

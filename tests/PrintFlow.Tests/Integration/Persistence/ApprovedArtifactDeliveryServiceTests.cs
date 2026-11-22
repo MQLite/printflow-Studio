@@ -124,24 +124,29 @@ public sealed class ApprovedArtifactDeliveryServiceTests
         finally { Directory.Delete(root, recursive: true); }
     }
 
-    [Fact]
-    public async Task Unknown_publication_ack_reconciles_owned_final_before_any_recopy()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Unknown_publication_ack_reconciles_owned_final_before_any_recopy(bool overwriteOriginal)
     {
         using SessionServiceHarness h = new();
-        ArtifactKey key = await ReviewedPngAsync(h);
-        var delivery = new ApprovedArtifactDeliveryService(h.Repository,
-            new SqliteDeliveryRepository(h.Database.Factory), h.FileWorkspace,
-            new UnknownPublicationAckFileSystem(), [h.Workspace.Root], h.Clock, h.TiffReviewDecoder);
-        DeliveryOffer offer = (await delivery.GetOfferAsync(key, CancellationToken.None)).Offer!;
         string folder = Path.Combine(Path.GetTempPath(), "pf-delivery-uncertain-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(folder);
         try
         {
+            const string leaf = "uncertain.png";
+            string final = Path.Combine(folder, leaf);
+            if (overwriteOriginal) File.Copy(h.WriteBorderedSourcePng(), final);
+            ArtifactKey key = await ReviewedPngAsync(h, overwriteOriginal ? final : null);
+            var delivery = new ApprovedArtifactDeliveryService(h.Repository,
+                new SqliteDeliveryRepository(h.Database.Factory), h.FileWorkspace,
+                new UnknownPublicationAckFileSystem(), [h.Workspace.Root], h.Clock, h.TiffReviewDecoder);
+            DeliveryOffer offer = (await delivery.GetOfferAsync(key, CancellationToken.None)).Offer!;
             var request = new DeliveryRequest(Guid.NewGuid(), key, offer.Artifact.ApprovedSha256,
-                offer.Artifact.ReviewId, folder, "uncertain.png", offer.OfferVersion);
+                offer.Artifact.ReviewId, folder, leaf, offer.OfferVersion) { OverwriteOriginal = overwriteOriginal };
             DeliveryOutcome uncertain = await delivery.DeliverAsync(request, null, CancellationToken.None);
-            uncertain.Code.ShouldBe(DeliveryCode.NeedsReconciliation);
-            File.Exists(Path.Combine(folder, "uncertain.png")).ShouldBeTrue();
+            uncertain.Code.ShouldBe(DeliveryCode.NeedsReconciliation, uncertain.Detail);
+            File.ReadAllBytes(final).ShouldBe(File.ReadAllBytes(h.FileWorkspace.ResolveAbsolute(offer.Artifact.File)));
             (await new SqliteDeliveryRepository(h.Database.Factory).FindByIdAsync(
                 uncertain.DeliveryId!.Value, CancellationToken.None)).Value!.Delivery.Status.ShouldBe("Pending");
             DeliveryOutcome recovered = await NewDelivery(h).ReconcileAsync(
@@ -151,6 +156,76 @@ public sealed class ApprovedArtifactDeliveryServiceTests
             Directory.EnumerateFiles(folder, "*.partial").ShouldBeEmpty();
         }
         finally { Directory.Delete(folder, recursive: true); }
+    }
+
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    public async Task Restart_reconciles_an_interrupted_replacement_using_the_recorded_original(
+        bool removeStage, bool published)
+    {
+        using SessionServiceHarness h = new();
+        string folder = FinalSaveFixtures.NewFolder("overwrite-interrupted");
+        try
+        {
+            const string leaf = "original.png";
+            string original = Path.Combine(folder, leaf);
+            File.Copy(h.WriteBorderedSourcePng(), original);
+            byte[] imported = File.ReadAllBytes(original);
+            ArtifactKey key = await ReviewedPngAsync(h, original);
+            var delivery = NewDelivery(h);
+            DeliveryOffer offer = (await delivery.GetOfferAsync(key, CancellationToken.None)).Offer!;
+            ApprovedArtifact approved = offer.Artifact;
+            var repository = new SqliteDeliveryRepository(h.Database.Factory);
+            Guid deliveryId = Guid.NewGuid();
+            Guid requestId = Guid.NewGuid();
+            Guid attemptId = Guid.NewGuid();
+            string stagingLeaf = $".printflow-{attemptId:N}.partial";
+            string stagingPath = Path.Combine(folder, stagingLeaf);
+            var opened = new WindowsDeliveryFileSystem().Open(h.FileWorkspace.ResolveAbsolute(approved.File),
+                approved.ApprovedSha256, approved.ApprovedLength, folder, leaf, key.Kind,
+                FinalSaveFixtures.ProtectedRoots(h), null);
+            opened.IsSuccess.ShouldBeTrue(opened.Detail);
+            using (IDeliveryFileGuard guard = opened.Value!)
+            {
+                DeliveryFileIdentity originalIdentity = guard.CheckFinal().Identity!;
+                var record = new DeliveryRecord(deliveryId, requestId, 0, key, approved.ReviewId,
+                    approved.ApprovalSubjectKind.ToString(), approved.ApprovalSubjectId,
+                    approved.SourceRevisionId, approved.ApprovedSha256, approved.ApprovedLength,
+                    folder, leaf, guard.ResolvedFolder, guard.FinalPath, guard.VolumeId,
+                    guard.DirectoryId, guard.DestinationKey, null, "Pending", h.Clock.GetUtcNow());
+                var attempt = new DeliveryAttemptRecord(attemptId, deliveryId, 1, guard.DestinationKey,
+                    DeliveryAttemptState.Intent, stagingLeaf, guard.DirectoryId, null, null,
+                    approved.ApprovedSha256, approved.ApprovedLength, null, null, h.Clock.GetUtcNow(), null);
+                (await repository.CreateOrCoalesceAsync(record, attempt, CancellationToken.None)).IsSuccess.ShouldBeTrue();
+                DeliveryFileIdentity stage = guard.CreateStaging(stagingLeaf, originalIdentity.CreatedAtUtc).Value!;
+                (await repository.MarkStagingAsync(attemptId, stage.FileId, stage.CreatedAtUtc, CancellationToken.None))
+                    .IsSuccess.ShouldBeTrue();
+                (await guard.CopyAndVerifyStageAsync(approved.ApprovedSha256, approved.ApprovedLength,
+                    null, CancellationToken.None)).IsSuccess.ShouldBeTrue();
+                (await repository.MarkReadyAsync(attemptId, h.Clock.GetUtcNow(), originalIdentity.FileId,
+                    CancellationToken.None)).IsSuccess.ShouldBeTrue();
+            }
+
+            File.Move(original, Path.ChangeExtension(stagingPath, ".original"));
+            if (removeStage) File.Delete(stagingPath);
+            if (published) File.Move(stagingPath, original);
+
+            DeliveryOutcome recovered = await delivery.ReconcileAsync(deliveryId, null, CancellationToken.None);
+            byte[] approvedBytes = File.ReadAllBytes(h.FileWorkspace.ResolveAbsolute(approved.File));
+            recovered.Code.ShouldBe(published ? DeliveryCode.Delivered : DeliveryCode.NotDelivered, recovered.Detail);
+            File.ReadAllBytes(original).ShouldBe(published ? approvedBytes : imported);
+            Directory.GetFiles(folder).ShouldBe([original]);
+
+            var retry = new DeliveryRequest(requestId, key, approved.ApprovedSha256, approved.ReviewId,
+                folder, leaf, offer.OfferVersion) { OverwriteOriginal = true };
+            DeliveryOutcome saved = await delivery.DeliverAsync(retry, null, CancellationToken.None);
+            saved.Code.ShouldBe(published ? DeliveryCode.AlreadyDelivered : DeliveryCode.Delivered, saved.Detail);
+            File.ReadAllBytes(original).ShouldBe(approvedBytes);
+            Directory.GetFiles(folder).ShouldBe([original]);
+        }
+        finally { FinalSaveFixtures.Remove(folder); }
     }
 
     [Fact]
@@ -363,7 +438,7 @@ public sealed class ApprovedArtifactDeliveryServiceTests
             string final = Path.Combine(folder, "foreign.png");
             File.WriteAllBytes(final, bytes);
             var request = new DeliveryRequest(Guid.NewGuid(), artifact, offer.Artifact.ApprovedSha256,
-                offer.Artifact.ReviewId, folder, "foreign.png", offer.OfferVersion);
+                offer.Artifact.ReviewId, folder, "foreign.png", offer.OfferVersion) { OverwriteOriginal = true };
             DeliveryOutcome collision = await delivery.DeliverAsync(request, null, CancellationToken.None);
             collision.Code.ShouldBe(DeliveryCode.Collision);
             collision.SuggestedFileName.ShouldNotBeNullOrWhiteSpace();
@@ -379,10 +454,54 @@ public sealed class ApprovedArtifactDeliveryServiceTests
         finally { Directory.Delete(folder, recursive: true); }
     }
 
-    private static async Task<ArtifactKey> ReviewedPngAsync(SessionServiceHarness h)
+    [Fact]
+    public async Task Original_overwrite_requires_consent_and_preserves_a_changed_original_and_a_cancelled_original()
+    {
+        using SessionServiceHarness h = new();
+        string folder = FinalSaveFixtures.NewFolder("overwrite-refusal");
+        try
+        {
+            const string leaf = "original.png";
+            string original = Path.Combine(folder, leaf);
+            File.Copy(h.WriteBorderedSourcePng(), original);
+            byte[] imported = File.ReadAllBytes(original);
+            ArtifactKey key = await ReviewedPngAsync(h, original);
+            var delivery = NewDelivery(h);
+            DeliveryOffer offer = (await delivery.GetOfferAsync(key, CancellationToken.None)).Offer!;
+            var request = new DeliveryRequest(Guid.NewGuid(), key, offer.Artifact.ApprovedSha256,
+                offer.Artifact.ReviewId, folder, leaf, offer.OfferVersion);
+
+            (await delivery.DeliverAsync(request, null, CancellationToken.None)).Code.ShouldBe(DeliveryCode.ProtectedDestination);
+            File.ReadAllBytes(original).ShouldBe(imported);
+
+            var overwrite = request with { OverwriteOriginal = true };
+            using CancellationTokenSource cancellation = new();
+            (await delivery.DeliverAsync(overwrite, new CancelBeforePublication(cancellation), cancellation.Token))
+                .Code.ShouldBe(DeliveryCode.Cancelled);
+            File.ReadAllBytes(original).ShouldBe(imported);
+
+            byte[] replacement = File.ReadAllBytes(h.WriteSourcePng());
+            File.WriteAllBytes(original, replacement);
+            (await delivery.DeliverAsync(overwrite, null, CancellationToken.None)).Code.ShouldBe(DeliveryCode.Collision);
+            File.ReadAllBytes(original).ShouldBe(replacement);
+            Directory.GetFiles(folder).ShouldBe([original]);
+        }
+        finally { FinalSaveFixtures.Remove(folder); }
+    }
+
+    private sealed class CancelBeforePublication(CancellationTokenSource cancellation) : IProgress<DeliveryProgress>
+    {
+        public void Report(DeliveryProgress value)
+        {
+            if (value.Phase == DeliveryPhase.Copying) cancellation.Cancel();
+        }
+    }
+
+    private static async Task<ArtifactKey> ReviewedPngAsync(SessionServiceHarness h, string? originalPath = null)
     {
         var workflow = h.CreateService();
-        SessionId id = await KeepOriginalExtentPersistenceTests.AtTrim(h, workflow, WorkflowType.PrepareAsset);
+        SessionId id = await KeepOriginalExtentPersistenceTests.AtTrim(h, workflow, WorkflowType.PrepareAsset,
+            sourcePath: originalPath);
         var trim = await workflow.ExecuteAsync(id, new WorkflowCommand.StartStep(StepKind.Trim),
             "tester", CancellationToken.None);
         trim.IsSuccess.ShouldBeTrue();
@@ -722,18 +841,22 @@ public sealed class ApprovedArtifactDeliveryServiceTests
         public DeliveryFileResult<bool> VerifySource() => inner.VerifySource();
         public DeliveryFinalCheck CheckFinal(DeliveryFileIdentity? expected = null) => inner.CheckFinal(expected);
         public DeliveryFileResult<DeliveryFileIdentity> CreateStaging(string leaf) => inner.CreateStaging(leaf);
+        public DeliveryFileResult<DeliveryFileIdentity> CreateStaging(string leaf, DateTimeOffset originalCreationTime) =>
+            inner.CreateStaging(leaf, originalCreationTime);
         public DeliveryFileResult<DeliveryFileIdentity> OpenOwnedStaging(string leaf, DeliveryFileIdentity id) =>
             inner.OpenOwnedStaging(leaf, id);
         public Task<DeliveryFileResult<bool>> CopyAndVerifyStageAsync(Sha256 hash, long length,
             IProgress<long>? copied, CancellationToken ct) => inner.CopyAndVerifyStageAsync(hash, length, copied, ct);
         public DeliveryFileResult<bool> VerifyStage(Sha256 hash, long length) => inner.VerifyStage(hash, length);
-        public DeliveryFileResult<bool> PublishNoReplace(string leaf, DeliveryFileIdentity id)
-        {
-            DeliveryFileResult<bool> actual = inner.PublishNoReplace(leaf, id);
-            return actual.IsSuccess
+        public DeliveryFileResult<bool> PublishNoReplace(string leaf, DeliveryFileIdentity id) =>
+            LoseAcknowledgement(inner.PublishNoReplace(leaf, id));
+        public DeliveryFileResult<bool> PublishReplacingOriginal(string leaf, DeliveryFileIdentity stage,
+            DeliveryFileIdentity original, FileFacts importedFacts) =>
+            LoseAcknowledgement(inner.PublishReplacingOriginal(leaf, stage, original, importedFacts));
+        private static DeliveryFileResult<bool> LoseAcknowledgement(DeliveryFileResult<bool> actual) =>
+            actual.IsSuccess
                 ? DeliveryFileResult<bool>.Fail(DeliveryCode.NeedsReconciliation,
-                    "Synthetic native acknowledgement lost after real no-replace rename.") : actual;
-        }
+                    "Synthetic native acknowledgement lost after publication.") : actual;
         public DeliveryFileResult<bool> DeleteHeldStaging(DeliveryFileIdentity id) => inner.DeleteHeldStaging(id);
         public SelectionLeaseResult AcquireSelection(Guid id, DeliveryFileIdentity expected,
             Sha256 hash, long length) => inner.AcquireSelection(id, expected, hash, length);

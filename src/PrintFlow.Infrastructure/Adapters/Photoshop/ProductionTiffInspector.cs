@@ -34,7 +34,11 @@ internal sealed record ProductionTiffRaster(
     int SamplesPerPixel,
     uint RowsPerStrip,
     ImmutableArray<uint> StripOffsets,
-    ImmutableArray<uint> StripByteCounts);
+    ImmutableArray<uint> StripByteCounts,
+    (long Offset, int Length)? EmbeddedIccProfile,
+    ImmutableArray<PhotoshopArtworkChannel> ArtworkChannels);
+
+internal readonly record struct PhotoshopArtworkChannel(long Offset, uint Length);
 
 /// <summary>One validated production TIFF: what it is, and where its samples are.</summary>
 internal sealed record ProductionTiffInspection(
@@ -54,6 +58,8 @@ internal sealed class ProductionTiffInspector : IProductionTiffInspector
     private const ushort TypeLong = 4;
     private const ushort TypeRational = 5;
     private const ushort TypeUndefined = 7;
+    private const ushort IccProfileTag = 34675;
+    private const int MaximumPreviewProfileBytes = 16 * 1024 * 1024;
 
     public OperationResult<ProductionTiffFacts> Inspect(string absolutePath)
     {
@@ -183,7 +189,7 @@ internal sealed class ProductionTiffInspector : IProductionTiffInspector
 
             TiffEntry imageSourceData = Required(firstIfd, 37724);
             PhotoshopLayerFacts layers = ReadPhotoshopLayerFacts(
-                reader, imageSourceData, littleEndian);
+                reader, imageSourceData, littleEndian, width, height);
             if (layers.LayerCount < 1 || !layers.AllChannelsRle)
             {
                 return Invalid("Photoshop layer data is absent or is not wholly RLE-compressed.");
@@ -230,7 +236,9 @@ internal sealed class ProductionTiffInspector : IProductionTiffInspector
                     samples,
                     rowsPerStrip,
                     [.. stripOffsets],
-                    [.. stripByteCounts])));
+                    [.. stripByteCounts],
+                    EmbeddedProfileLocation(firstIfd, stream.Length),
+                    layers.ArtworkChannels)));
         }
         catch (TiffValidationException ex)
         {
@@ -244,6 +252,21 @@ internal sealed class ProductionTiffInspector : IProductionTiffInspector
                 $"The production TIFF could not be read completely: {ex.Message}",
                 isRetryable: false));
         }
+    }
+
+    private static (long Offset, int Length)? EmbeddedProfileLocation(
+        Dictionary<ushort, TiffEntry> entries, long fileLength)
+    {
+        // The profile is optional display metadata. A missing or unusable tag has no effect on
+        // structural validation, and its declared length must be safe for the preview to load.
+        if (entries.TryGetValue(IccProfileTag, out TiffEntry? entry) &&
+            entry.Type == TypeUndefined && entry.Count is >= 132 and <= MaximumPreviewProfileBytes &&
+            entry.ValueOffset <= fileLength - entry.Count)
+        {
+            return (entry.ValueOffset, (int)entry.Count);
+        }
+
+        return null;
     }
 
     private static List<Dictionary<ushort, TiffEntry>> ReadIfds(
@@ -511,7 +534,7 @@ internal sealed class ProductionTiffInspector : IProductionTiffInspector
     }
 
     private static PhotoshopLayerFacts ReadPhotoshopLayerFacts(
-        BinaryReader reader, TiffEntry entry, bool littleEndian)
+        BinaryReader reader, TiffEntry entry, bool littleEndian, uint canvasWidth, uint canvasHeight)
     {
         if (entry.Type is not (TypeByte or TypeUndefined) || entry.Count <= 36)
         {
@@ -548,18 +571,25 @@ internal sealed class ProductionTiffInspector : IProductionTiffInspector
         }
 
         List<uint[]> channelLengthsByLayer = new(layerCount);
+        short[]? artworkIds = null;
         for (int layer = 0; layer < layerCount; layer++)
         {
-            Skip(reader, 16, layerBlockEnd);
+            uint top = ReadUInt32(reader, littleEndian);
+            uint left = ReadUInt32(reader, littleEndian);
+            uint bottom = ReadUInt32(reader, littleEndian);
+            uint right = ReadUInt32(reader, littleEndian);
             ushort channelCount = ReadUInt16(reader, littleEndian);
             if (channelCount == 0 || channelCount > 64)
             {
                 throw new TiffValidationException("A Photoshop layer channel count is unsupported.");
             }
+            short[]? ids = layerCount == 1 && channelCount == 5 && top == 0 && left == 0 &&
+                right == canvasWidth && bottom == canvasHeight ? new short[channelCount] : null;
             uint[] channelLengths = new uint[channelCount];
             for (int channel = 0; channel < channelCount; channel++)
             {
-                Skip(reader, 2, layerBlockEnd);
+                short id = unchecked((short)ReadUInt16(reader, littleEndian));
+                if (ids is not null) ids[channel] = id;
                 channelLengths[channel] = ReadUInt32(reader, littleEndian);
                 if (channelLengths[channel] < 2)
                 {
@@ -570,21 +600,39 @@ internal sealed class ProductionTiffInspector : IProductionTiffInspector
             {
                 throw new TiffValidationException("A Photoshop layer blend signature is invalid.");
             }
-            _ = ReadPhotoshopIdentifier(reader, littleEndian);
-            Skip(reader, 4, layerBlockEnd);
+            string blend = ReadPhotoshopIdentifier(reader, littleEndian);
+            byte opacity = reader.ReadByte();
+            byte clipping = reader.ReadByte();
+            byte flags = reader.ReadByte();
+            _ = reader.ReadByte();
             uint extraLength = ReadUInt32(reader, littleEndian);
+            if (ids is not null && blend == "norm" && opacity == byte.MaxValue && clipping == 0 &&
+                (flags & 0x12) == 0 && extraLength >= 4 && reader.BaseStream.Position <= layerBlockEnd - extraLength)
+            {
+                uint maskLength = ReadUInt32(reader, littleEndian);
+                reader.BaseStream.Position -= sizeof(uint);
+                if (maskLength == 0 && ids.Order().SequenceEqual(new short[] { -1, 0, 1, 2, 3 }))
+                    artworkIds = ids;
+            }
             Skip(reader, extraLength, layerBlockEnd);
             channelLengthsByLayer.Add(channelLengths);
         }
 
         bool allRle = true;
+        var artworkChannels = artworkIds is null ? null : new PhotoshopArtworkChannel[5];
         foreach (uint[] lengths in channelLengthsByLayer)
         {
-            foreach (uint length in lengths)
+            for (int channel = 0; channel < lengths.Length; channel++)
             {
+                uint length = lengths[channel];
                 if (reader.BaseStream.Position > layerBlockEnd - length)
                 {
                     throw new TiffValidationException("Photoshop layer channel pixels overrun the Layr block.");
+                }
+                if (artworkIds is not null && artworkChannels is not null)
+                {
+                    int ink = artworkIds[channel] == -1 ? 4 : artworkIds[channel];
+                    artworkChannels[ink] = new PhotoshopArtworkChannel(reader.BaseStream.Position, length);
                 }
                 ushort compression = ReadUInt16(reader, littleEndian);
                 allRle &= compression == 1;
@@ -595,7 +643,8 @@ internal sealed class ProductionTiffInspector : IProductionTiffInspector
         {
             throw new TiffValidationException("Photoshop layer data overruns its declared block.");
         }
-        return new PhotoshopLayerFacts(layerCount, allRle);
+        return new PhotoshopLayerFacts(layerCount, allRle,
+            allRle && artworkChannels is not null ? [.. artworkChannels] : []);
     }
 
     private static long CountNonWhiteFifthSamples(
@@ -721,7 +770,8 @@ internal sealed class ProductionTiffInspector : IProductionTiffInspector
         ImmutableArray<string> UnicodeNames,
         ImmutableArray<byte> ChannelKinds);
 
-    private readonly record struct PhotoshopLayerFacts(int LayerCount, bool AllChannelsRle);
+    private readonly record struct PhotoshopLayerFacts(
+        int LayerCount, bool AllChannelsRle, ImmutableArray<PhotoshopArtworkChannel> ArtworkChannels);
 
     private sealed class TiffValidationException(string message) : Exception(message);
 }

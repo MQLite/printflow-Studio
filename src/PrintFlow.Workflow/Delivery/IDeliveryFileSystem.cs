@@ -25,6 +25,9 @@ public interface IDeliveryDestinationGuard : IDisposable
     string DestinationKey { get; }
     DeliveryFinalCheck CheckFinal(DeliveryFileIdentity? expectedIdentity = null);
     string? ReadHeldFileName() => null;
+    DeliveryFileResult<bool> RecoverOriginalBackup(string stagingLeaf, DeliveryFileIdentity original,
+        bool restore, FileFacts? importedFacts = null) =>
+        DeliveryFileResult<bool>.Fail(DeliveryCode.UnsupportedDestination, "Original replacement recovery is unavailable.");
 }
 
 /// <summary>Windows handle authority over an exact source, folder and final leaf.</summary>
@@ -33,12 +36,17 @@ public interface IDeliveryFileGuard : IDeliveryDestinationGuard
     DeliveryFileIdentity SourceIdentity { get; }
     DeliveryFileResult<bool> VerifySource();
     DeliveryFileResult<DeliveryFileIdentity> CreateStaging(string stagingLeaf);
+    DeliveryFileResult<DeliveryFileIdentity> CreateStaging(string stagingLeaf, DateTimeOffset originalCreationTime) =>
+        DeliveryFileResult<DeliveryFileIdentity>.Fail(DeliveryCode.UnsupportedDestination, "Original replacement is unavailable.");
     DeliveryFileResult<DeliveryFileIdentity> OpenOwnedStaging(
         string stagingLeaf, DeliveryFileIdentity expectedIdentity);
     Task<DeliveryFileResult<bool>> CopyAndVerifyStageAsync(
         Sha256 expectedHash, long expectedLength, IProgress<long>? copied, CancellationToken cancellationToken);
     DeliveryFileResult<bool> VerifyStage(Sha256 expectedHash, long expectedLength);
     DeliveryFileResult<bool> PublishNoReplace(string stagingLeaf, DeliveryFileIdentity expectedIdentity);
+    DeliveryFileResult<bool> PublishReplacingOriginal(string stagingLeaf, DeliveryFileIdentity stage,
+        DeliveryFileIdentity original, FileFacts importedFacts) =>
+        DeliveryFileResult<bool>.Fail(DeliveryCode.UnsupportedDestination, "Original replacement is unavailable.");
     DeliveryFileResult<bool> DeleteHeldStaging(DeliveryFileIdentity expectedIdentity);
     SelectionLeaseResult AcquireSelection(Guid deliveryId, DeliveryFileIdentity expectedIdentity,
         Sha256 expectedHash, long expectedLength);

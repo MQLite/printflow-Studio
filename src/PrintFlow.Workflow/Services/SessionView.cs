@@ -719,6 +719,7 @@ public sealed record SessionView(
     public bool OriginalExtentRetained => Steps.Any(step => step.Step == StepKind.Trim && step.State == StepState.Skipped);
 
     public ImageFormat? OriginalSourceFormat { get; init; }
+    public string? OriginalSourcePath { get; init; }
     public PdfInspection? PdfInspection { get; init; }
 
     /// <summary>
@@ -1003,6 +1004,7 @@ public sealed record SessionView(
                 ? TrimAdjustmentEligibility.Resolve(snapshot, revisions, attempts, outputs)
                 : null,
             OriginalSourceFormat = revisions.FirstOrDefault(r => r.IsRoot)?.Facts.Format,
+            OriginalSourcePath = snapshot.OriginalSourcePath,
             ProductionTiffBackend = snapshot.ProductionTiffBackend,
 
             // The same root Revision the format is read from, so the file name, the format and

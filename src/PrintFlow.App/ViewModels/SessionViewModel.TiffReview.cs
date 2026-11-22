@@ -2,12 +2,13 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using PrintFlow.App.Resources;
+using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Results;
 using PrintFlow.Workflow.Services;
 
 namespace PrintFlow.App.ViewModels;
 
-/// <summary>Which of the three production-TIFF representations is on screen (SCRUM-11104 §5).</summary>
+/// <summary>Which production-TIFF preview is on screen (SCRUM-11104 §5).</summary>
 /// <remarks>
 /// Ephemeral presentation state, exactly like <see cref="ReviewComparisonMode"/>. Nothing about
 /// which mode an operator was looking at is persisted, and nothing about it reaches a review
@@ -23,6 +24,12 @@ public enum TiffReviewMode
 
     /// <summary>The colour content with white-ink coverage marked over it.</summary>
     Overlay,
+
+    /// <summary>The CMYK and white inks shown together on transparency.</summary>
+    Composite,
+
+    /// <summary>The CMYK and white inks shown side by side.</summary>
+    Compare,
 }
 
 /// <summary>
@@ -45,11 +52,11 @@ public sealed partial class SessionViewModel
     /// </summary>
     /// <remarks>
     /// Deliberately not reset when the mode changes and deliberately not persisted. It <i>is</i>
-    /// reset to Colour when a new payload arrives, because a new payload is a different output
+    /// reset to Composite when a new payload arrives, because a new payload is a different output
     /// and starting a fresh review in the mode the previous one ended in would be a surprising
     /// place to begin.
     /// </remarks>
-    [ObservableProperty] private TiffReviewMode _tiffReviewMode;
+    [ObservableProperty] private TiffReviewMode _tiffReviewMode = TiffReviewMode.Composite;
 
     /// <summary>The production facts an operator reads beside the decision (§25).</summary>
     public ObservableCollection<TiffMetadataRow> TiffMetadata { get; } = [];
@@ -68,16 +75,13 @@ public sealed partial class SessionViewModel
 
     public bool IsTiffReviewUnavailable => TiffReviewUnavailable is not null;
 
-    // --- The three representations -------------------------------------------------------
-    //
-    // All three are held at once. A mode switch changes which of the already-decoded bitmaps is
-    // bound, never which file is read: one decode, three payloads (§15).
-
     public ReadOnlyMemory<byte> TiffColourPayload => _tiffReview?.ColourPayload ?? ReadOnlyMemory<byte>.Empty;
 
     public ReadOnlyMemory<byte> TiffWhiteInkPayload => _tiffReview?.WhiteInkPayload ?? ReadOnlyMemory<byte>.Empty;
 
     public ReadOnlyMemory<byte> TiffOverlayPayload => _tiffReview?.OverlayPayload ?? ReadOnlyMemory<byte>.Empty;
+
+    public ReadOnlyMemory<byte> TiffCompositePayload => _tiffReview?.CompositePayload ?? ReadOnlyMemory<byte>.Empty;
 
     /// <summary>The payload dimensions every mode shares, so the surface lays out once (§35).</summary>
     public int TiffPreviewPixelWidth => _tiffReview?.PreviewPixelWidth ?? 0;
@@ -117,6 +121,8 @@ public sealed partial class SessionViewModel
     {
         TiffReviewMode.WhiteInk => Strings.Session_TiffWhiteInkPreviewName,
         TiffReviewMode.Overlay => Strings.Session_TiffOverlayPreviewName,
+        TiffReviewMode.Composite => Strings.Session_TiffCompositePreviewName,
+        TiffReviewMode.Compare => Strings.Session_TiffComparePreviewName,
         _ => Strings.Session_TiffColourPreviewName,
     };
 
@@ -125,14 +131,14 @@ public sealed partial class SessionViewModel
     /// </summary>
     /// <remarks>
     /// It changes with the mode because each mode makes a different, and differently limited,
-    /// claim. The colour legend is the one that matters most: an uncalibrated screen conversion
-    /// of separated CMYK must never be read as evidence of printed colour, and the only reliable
-    /// place to say so is beside the picture.
+    /// claim. The legends describe what is being displayed and the limits of a screen preview.
     /// </remarks>
     public string TiffPreviewLegend => TiffReviewMode switch
     {
         TiffReviewMode.WhiteInk => Strings.Session_TiffWhiteInkLegend,
         TiffReviewMode.Overlay => Strings.Session_TiffOverlayLegend,
+        TiffReviewMode.Composite => Strings.Session_TiffCompositeLegend,
+        TiffReviewMode.Compare => Strings.Session_TiffCompareLegend,
         _ => Strings.Session_TiffColourLegend,
     };
 
@@ -140,7 +146,7 @@ public sealed partial class SessionViewModel
 
     public string TiffOutputPathLabel => Strings.Session_TiffLabelOutputPath;
 
-    /// <summary>Pixel figures, plus a note when the payloads were reduced to fit the screen.</summary>
+    /// <summary>Output dimensions and a note when the preview has been reduced.</summary>
     public string TiffPreviewDetail
     {
         get
@@ -155,10 +161,16 @@ public sealed partial class SessionViewModel
                 Strings.Session_PreviewPixels,
                 review.PixelWidth,
                 review.PixelHeight);
+            string physical = string.Format(
+                CultureInfo.CurrentCulture,
+                Strings.Session_TiffValuePhysical,
+                review.PhysicalWidthMm,
+                review.PhysicalHeightMm);
+            string dimensions = $"{pixels} · {physical}";
 
             return review.IsDownsampledForDisplay
-                ? $"{pixels} · {Strings.Session_PreviewReduced}"
-                : pixels;
+                ? $"{dimensions} · {Strings.Session_PreviewReduced}"
+                : dimensions;
         }
     }
 
@@ -198,7 +210,7 @@ public sealed partial class SessionViewModel
     }
 
     /// <summary>
-    /// Asks the specialist seam for the output under review, once per state change (§15, §38).
+    /// Loads the production TIFF preview during review, saving and completion (§15, §38).
     /// </summary>
     /// <remarks>
     /// Keyed on nothing: it simply requests the payload for the Revision the screen is showing,
@@ -217,7 +229,10 @@ public sealed partial class SessionViewModel
     private async Task LoadTiffReviewAsync(
         Workflow.Services.SessionView session, int generation, CancellationToken cancellationToken)
     {
-        if (!IsProductionTiffReview || session.CurrentArtefact is not { } current)
+        if (session.CurrentArtefact is not { } current ||
+            (!IsProductionTiffReview &&
+             (current.Facts.Format != ImageFormat.Tiff ||
+              GuidedPage is not (GuidedSessionPage.Save or GuidedSessionPage.Completed))))
         {
             return;
         }
@@ -241,7 +256,7 @@ public sealed partial class SessionViewModel
 
         _tiffReview = loaded.Value;
         TiffReviewUnavailable = null;
-        TiffReviewMode = TiffReviewMode.Colour;
+        TiffReviewMode = TiffReviewMode.Composite;
         BuildTiffMetadata(loaded.Value);
         NotifyTiffReviewChanged();
     }
@@ -265,11 +280,13 @@ public sealed partial class SessionViewModel
         // The pending final TIFF shows its output-bound physical size once this payload arrives.
         NotifyFinalSaveChanged();
         OnPropertyChanged(nameof(HasTiffReview));
+        OnPropertyChanged(nameof(GuidedDetailsWidth));
         OnPropertyChanged(nameof(TiffReviewUnavailable));
         OnPropertyChanged(nameof(IsTiffReviewUnavailable));
         OnPropertyChanged(nameof(TiffColourPayload));
         OnPropertyChanged(nameof(TiffWhiteInkPayload));
         OnPropertyChanged(nameof(TiffOverlayPayload));
+        OnPropertyChanged(nameof(TiffCompositePayload));
         OnPropertyChanged(nameof(TiffPreviewPixelWidth));
         OnPropertyChanged(nameof(TiffPreviewPixelHeight));
         OnPropertyChanged(nameof(TiffPreviewDetail));

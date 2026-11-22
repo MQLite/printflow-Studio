@@ -20,7 +20,10 @@ public enum DeliveryAttemptState { Intent, Staging, ReadyToPublish, Delivered, F
 
 public sealed record DeliveryRequest(
     Guid RequestId, ArtifactKey Artifact, Sha256 ExpectedSha256, ReviewId ExpectedReviewId,
-    string Folder, string FileName, Guid SelectionVersion);
+    string Folder, string FileName, Guid SelectionVersion)
+{
+    public bool OverwriteOriginal { get; init; }
+}
 
 public sealed record MissingDeliveryReplacementRequest(
     Guid RequestId, Guid PriorDeliveryId, DeliveryFileObservation MissingObservation,
@@ -128,7 +131,10 @@ public sealed record DeliveryAttemptRecord(
     string? StagingFileId, DateTimeOffset? StagingCreationUtc,
     Sha256 ExpectedSha256, long ExpectedLength,
     DateTimeOffset? StageVerifiedAtUtc, string? FailureCode,
-    DateTimeOffset StartedAtUtc, DateTimeOffset? FinishedAtUtc);
+    DateTimeOffset StartedAtUtc, DateTimeOffset? FinishedAtUtc)
+{
+    public string? OriginalFileId { get; init; }
+}
 
 public sealed record DeliveryRequestBinding(string RequestedFolder, string RequestedFileName);
 public sealed record DeliveryRename(Guid Id, Guid DeliveryId, string FileName, string FinalPath, string DestinationKey);

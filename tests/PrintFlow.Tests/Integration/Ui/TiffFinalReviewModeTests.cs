@@ -17,7 +17,7 @@ using static PrintFlow.Tests.Fixtures.TiffFinalReviewFixture;
 namespace PrintFlow.Tests.Integration.Ui;
 
 /// <summary>
-/// The production-TIFF final review an operator actually meets: three modes over one validated
+/// The production-TIFF final review an operator actually meets: several views of one validated
 /// file, the production facts beside them, and a decision that is still bound to the exact bytes
 /// (SCRUM-11104 §5–§12, §18–§28, §35–§40, §46–§49).
 /// </summary>
@@ -40,15 +40,14 @@ public sealed class TiffFinalReviewModeTests
     private const double MillimetresPerInch = 25.4;
 
     // -----------------------------------------------------------------------------------
-    // §5–§12, §35 — three modes over one canvas
+    // §5–§12, §35 — the preview modes share the TIFF canvas
     // -----------------------------------------------------------------------------------
 
     /// <summary>
-    /// The specialist surface offers Colour, White ink and Colour + white over the reviewed file,
-    /// and all three describe the same canvas (§5, §6, §8, §11, §35).
+    /// The composite and the individual ink views describe the same canvas (§5, §6, §8, §11, §35).
     /// </summary>
     [Fact]
-    public async Task Final_review_offers_three_distinct_modes_over_the_one_TIFF_canvas()
+    public async Task Final_review_defaults_to_a_transparent_composite_of_the_TIFF_canvas()
     {
         using HomeScreenHarness harness = Harness(out SyntheticProductionTiffProcessor photoshop);
         Review review = await ReviewRequiredAsync(harness, "three-modes.png");
@@ -57,26 +56,29 @@ public sealed class TiffFinalReviewModeTests
         screen.IsProductionTiffReview.ShouldBeTrue();
         screen.HasTiffReview.ShouldBeTrue();
         screen.IsTiffReviewUnavailable.ShouldBeFalse();
-        screen.TiffReviewMode.ShouldBe(TiffReviewMode.Colour);
+        screen.TiffReviewMode.ShouldBe(TiffReviewMode.Composite);
 
         byte[] colour = screen.TiffColourPayload.ToArray();
         byte[] white = screen.TiffWhiteInkPayload.ToArray();
         byte[] overlay = screen.TiffOverlayPayload.ToArray();
+        byte[] composite = screen.TiffCompositePayload.ToArray();
 
         colour.ShouldNotBeEmpty();
         white.ShouldNotBeEmpty();
         overlay.ShouldNotBeEmpty();
+        composite.ShouldNotBeEmpty();
+        composite.ShouldNotBe(overlay);
         colour.ShouldNotBe(white, "the white-ink mode must not be the colour image again");
         colour.ShouldNotBe(overlay, "the overlay must mark something the colour mode does not");
         white.ShouldNotBe(overlay);
 
-        // One canvas: three payloads, one geometry, and the geometry is the TIFF's (§35).
+        // All preview payloads share the TIFF's geometry (§35).
         SessionAggregate persisted = await review.ReloadAsync();
         PrintOutput output = persisted.Outputs.ShouldHaveSingleItem();
         Revision tiff = persisted.Revisions.Last(r => r.Operation == OperationKind.PhotoshopOutput);
 
         foreach (ReadOnlyMemory<byte> payload in new[]
-                 { screen.TiffColourPayload, screen.TiffWhiteInkPayload, screen.TiffOverlayPayload })
+                 { screen.TiffColourPayload, screen.TiffWhiteInkPayload, screen.TiffOverlayPayload, screen.TiffCompositePayload })
         {
             SyntheticImages.DecodePayloadBgra(payload, out int width, out int height);
             (width, height).ShouldBe((screen.TiffPreviewPixelWidth, screen.TiffPreviewPixelHeight));
@@ -97,8 +99,7 @@ public sealed class TiffFinalReviewModeTests
     /// </summary>
     /// <remarks>
     /// The synthetic design writes three vertical bands of stored W1 — 255, 128, 0 — so the
-    /// preview must run black, mid grey, white across the canvas. Nothing about the colour
-    /// content could produce that, and neither could the alpha byte: there isn't one.
+    /// white preview must be transparent, partially opaque and opaque across the canvas.
     /// </remarks>
     [Fact]
     public async Task The_white_ink_mode_shows_the_TIFFs_own_fifth_sample()
@@ -110,9 +111,9 @@ public sealed class TiffFinalReviewModeTests
             review.Screen.TiffWhiteInkPayload, out int width, out int height);
 
         int y = height / 2;
-        Grey(white, width, width / 6, y).ShouldBeLessThan((byte)8, "no stored ink must read as black");
-        Grey(white, width, width / 2, y).ShouldBeInRange((byte)118, (byte)137, "half ink reads as mid grey");
-        Grey(white, width, width * 5 / 6, y).ShouldBeGreaterThan((byte)247, "full ink reads as white");
+        Alpha(white, width, width / 6, y).ShouldBe((byte)0);
+        Alpha(white, width, width / 2, y).ShouldBe((byte)127);
+        Alpha(white, width, width * 5 / 6, y).ShouldBe((byte)255);
 
         // The same count the inspector established from the same sample.
         TiffMetadataRow row = review.Screen.TiffMetadata.Single(r => r.Key == "WhiteInk");
@@ -143,8 +144,7 @@ public sealed class TiffFinalReviewModeTests
         byte[] bytes = await File.ReadAllBytesAsync(path);
         int runs = photoshop.GenerateCount;
 
-        foreach (TiffReviewMode mode in new[]
-                 { TiffReviewMode.WhiteInk, TiffReviewMode.Overlay, TiffReviewMode.Colour })
+        foreach (TiffReviewMode mode in Enum.GetValues<TiffReviewMode>())
         {
             screen.TiffReviewMode = mode;
 
@@ -624,10 +624,10 @@ public sealed class TiffFinalReviewModeTests
     private static string Value(SessionViewModel screen, string key) =>
         screen.TiffMetadata.Single(row => row.Key == key).Value;
 
-    private static byte Grey(byte[] bgra, int width, int x, int y)
+    private static byte Alpha(byte[] bgra, int width, int x, int y)
     {
         int index = ((y * width) + x) * 4;
-        return bgra[index + 2];
+        return bgra[index + 3];
     }
 
     private static string HashOf(string path)

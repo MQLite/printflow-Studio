@@ -76,6 +76,7 @@ public sealed record SessionAggregate(
             Session.WhiteUnderbaseBranch,
             approvedOutputCount)
         {
+            OriginalSourcePath = Snapshot?.OriginalSourcePath,
             RequiresPsdPreparation = Revisions.Any(r => r.IsRoot && r.Facts.Format == ImageFormat.Psd),
             RequiresPdfPreparation = Revisions.Any(r => r.IsRoot && r.Facts.Format == ImageFormat.Pdf),
             ProductionTiffBackend = Session.ProductionTiffBackend,

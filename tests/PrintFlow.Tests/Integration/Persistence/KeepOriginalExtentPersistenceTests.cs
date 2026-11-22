@@ -225,10 +225,12 @@ public sealed class KeepOriginalExtentPersistenceTests
         after.Revisions.Single(r => r.Operation == OperationKind.Trim).SourceRevisionId.ShouldBe(enhanced.CurrentArtefact.RevisionId);
     }
 
-    internal static async Task<SessionId> AtTrim(SessionServiceHarness h, ISessionService service, WorkflowType type, bool opaque = false)
+    internal static async Task<SessionId> AtTrim(SessionServiceHarness h, ISessionService service, WorkflowType type,
+        bool opaque = false, string? sourcePath = null)
     {
         SessionView imported = await Must(service.ImportAsync(type,
-            opaque ? h.WriteOpaqueSourcePng() : h.WriteBorderedSourcePng(), "keep-extent", "tester", CancellationToken.None));
+            sourcePath ?? (opaque ? h.WriteOpaqueSourcePng() : h.WriteBorderedSourcePng()),
+            "keep-extent", "tester", CancellationToken.None));
         await Execute(service, imported.Id, new WorkflowCommand.ConfirmOriginal());
         await Execute(service, imported.Id, new WorkflowCommand.Skip(StepKind.Enhancement));
         await Execute(service, imported.Id, new WorkflowCommand.Skip(StepKind.BackgroundRemoval));

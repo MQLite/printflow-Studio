@@ -2,8 +2,10 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using ImageMagick;
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Results;
+using PrintFlow.Infrastructure.Adapters.Magick;
 using PrintFlow.Infrastructure.Adapters.Photoshop;
 using PrintFlow.Infrastructure.Workspace;
 using PrintFlow.Tests.Fixtures;
@@ -30,9 +32,8 @@ public sealed class ProductionTiffReviewDecoderTests : IDisposable
     /// Three bands of deliberately distinguishable stored W1: none, half, full (§10).
     /// </summary>
     /// <remarks>
-    /// 255 is the accepted "no white ink" value and 0 is 100% coverage, so the expected preview
-    /// runs the other way — black, mid grey, white — which is what makes a decoder that forgot to
-    /// invert fail rather than merely look different.
+    /// 255 is the stored value for no white ink and 0 is full coverage. The preview shows actual
+    /// white with opacity proportional to the coverage.
     /// </remarks>
     private static readonly byte[] Bands = [255, 128, 0];
 
@@ -51,9 +52,10 @@ public sealed class ProductionTiffReviewDecoderTests : IDisposable
         byte[] white = decoded.Bgra(decoded.Review.WhiteInkPayload, out int width, out int height);
         (width, height).ShouldBe((9, 3));
 
-        // Displayed intensity = 255 - stored, so no ink is black and full ink is white.
-        Grey(white, width, x: 1, y: 1).ShouldBe((byte)0);
-        Grey(white, width, x: 4, y: 1).ShouldBe((byte)127);
+        Alpha(white, width, x: 1, y: 1).ShouldBe((byte)0);
+        Alpha(white, width, x: 4, y: 1).ShouldBe((byte)127);
+        Alpha(white, width, x: 7, y: 1).ShouldBe((byte)255);
+        Grey(white, width, x: 4, y: 1).ShouldBe((byte)255);
         Grey(white, width, x: 7, y: 1).ShouldBe((byte)255);
 
         decoded.Review.WhiteInkPolarity.ShouldBe(ProductionTiffReviewDecoder.WhiteInkPolarityIdentifier);
@@ -122,6 +124,88 @@ public sealed class ProductionTiffReviewDecoderTests : IDisposable
         static byte Expected(int ink, int black) => (byte)((255 - ink) * (255 - black) / 255);
     }
 
+    [Fact]
+    public async Task The_review_modes_show_only_their_respective_ink()
+    {
+        byte[] samples =
+        [
+            0, 0, 0, 0, 255, // Blank
+            255, 0, 0, 0, 255, // CMYK only
+            0, 0, 0, 0, 128, // White ink only
+            255, 0, 0, 0, 0, // Both inks
+        ];
+        Decoded decoded = await DecodeSamplesAsync(width: 4, height: 1, samples, UnusableProfile());
+        byte[] colour = decoded.Bgra(decoded.Review.ColourPayload, out int width, out _);
+        byte[] white = decoded.Bgra(decoded.Review.WhiteInkPayload, out _, out _);
+        byte[] composite = decoded.Bgra(decoded.Review.CompositePayload, out _, out _);
+        byte[] overlay = decoded.Bgra(decoded.Review.OverlayPayload, out _, out _);
+
+        Alphas(colour).ShouldBe(new byte[] { 0, 255, 0, 255 });
+        Alphas(white).ShouldBe(new byte[] { 0, 0, 127, 255 });
+        Alphas(composite).ShouldBe(new byte[] { 0, 255, 127, 255 });
+        Alphas(overlay).ShouldBe(new byte[] { 0, 255, 127, 255 });
+        Pixel(composite, width, x: 1, y: 0).ShouldBe(Pixel(colour, width, x: 1, y: 0));
+        Pixel(composite, width, x: 2, y: 0).ShouldBe(((byte)255, (byte)255, (byte)255));
+        Pixel(composite, width, x: 3, y: 0).ShouldBe(Pixel(colour, width, x: 3, y: 0));
+        Pixel(overlay, width, x: 1, y: 0).ShouldBe(Pixel(colour, width, x: 1, y: 0));
+        Pixel(overlay, width, x: 2, y: 0).ShouldNotBe(Pixel(composite, width, x: 2, y: 0));
+        Pixel(overlay, width, x: 3, y: 0).ShouldNotBe(Pixel(composite, width, x: 3, y: 0));
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task The_TIFF_preview_preserves_straight_colour_and_partial_artwork_coverage(bool embeddedProfile)
+    {
+        byte[] merged = [255, 0, 0, 0, 255, 128, 0, 0, 0, 223, 0, 0, 0, 0, 64];
+        byte[] layer = [255, 0, 0, 0, 255, 0, 0, 0, 0, 0, 0, 0];
+        Decoded decoded = await DecodeSamplesAsync(3, 1, merged,
+            embeddedProfile ? ColorProfiles.CoatedFOGRA39.ToByteArray() : UnusableProfile(), layer, [255, 128, 0]);
+
+        byte[] colour = decoded.Bgra(decoded.Review.ColourPayload, out int width, out _);
+        byte[] composite = decoded.Bgra(decoded.Review.CompositePayload, out _, out _);
+        byte[] white = decoded.Bgra(decoded.Review.WhiteInkPayload, out _, out _);
+
+        Alphas(colour).ShouldBe(new byte[] { 255, 128, 0 });
+        Alphas(composite).ShouldBe(new byte[] { 255, 128, 191 });
+        Alphas(white).ShouldBe(new byte[] { 0, 32, 191 });
+        Pixel(colour, width, 1, 0).ShouldBe(Pixel(colour, width, 0, 0));
+        Pixel(composite, width, 1, 0).ShouldBe(Pixel(colour, width, 0, 0));
+    }
+
+    [Fact]
+    public async Task An_editable_layer_with_different_ink_still_shows_the_merged_production_colour()
+    {
+        byte[] merged = [128, 0, 0, 0, 223, 0, 255, 0, 0, 255];
+        byte[] layer = [255, 0, 0, 0, 0, 0, 255, 0];
+        Decoded decoded = await DecodeSamplesAsync(2, 1, merged, UnusableProfile(), layer, [128, 255]);
+
+        byte[] colour = decoded.Bgra(decoded.Review.ColourPayload, out int width, out _);
+        Alphas(colour).ShouldBe(new byte[] { 255, 255 });
+        Pixel(colour, width, 0, 0).ShouldBe(((byte)255, (byte)255, (byte)127));
+        Pixel(colour, width, 1, 0).ShouldBe(((byte)255, (byte)0, (byte)255));
+    }
+
+    [Fact]
+    public async Task An_embedded_CMYK_profile_is_used_when_it_can_transform_the_samples()
+    {
+        byte[] samples = [255, 0, 0, 0, 0];
+        Decoded fallback = await DecodeSamplesAsync(1, 1, samples, UnusableProfile());
+        Decoded embedded = await DecodeSamplesAsync(1, 1, samples, ColorProfiles.CoatedFOGRA39.ToByteArray());
+
+        fallback.Review.ColourConversion.ShouldBe(ProductionTiffReviewDecoder.ColourConversionIdentifier);
+        embedded.Review.ColourConversion.ShouldNotBe(fallback.Review.ColourConversion);
+        byte[] fallbackColour = fallback.Bgra(fallback.Review.ColourPayload, out _, out _);
+        byte[] embeddedColour = embedded.Bgra(embedded.Review.ColourPayload, out _, out _);
+        Pixel(fallbackColour, 1, x: 0, y: 0).ShouldBe(((byte)255, (byte)255, (byte)0));
+        (byte blue, byte green, byte red) = Pixel(embeddedColour, 1, x: 0, y: 0);
+        // Coated FOGRA39 process cyan maps to a less saturated blue-cyan on an sRGB screen.
+        red.ShouldBeLessThan((byte)40);
+        green.ShouldBeInRange((byte)110, (byte)190);
+        blue.ShouldBeInRange((byte)180, (byte)245);
+        Alpha(embeddedColour, 1, x: 0, y: 0).ShouldBe((byte)255);
+    }
+
     /// <summary>
     /// The direct decode agrees with an independent codec on which way the ink runs (§6, §7).
     /// </summary>
@@ -174,25 +258,25 @@ public sealed class ProductionTiffReviewDecoderTests : IDisposable
         // No ink: the overlay is the colour image exactly.
         Pixel(overlay, width, x: 1, y: 1).ShouldBe(Pixel(colour, width, x: 1, y: 1));
 
-        // Full ink: lighter than the colour underneath, and not pure white — an overlay that
-        // painted the artwork out would be a picture of the underbase, not of both.
+        // Full ink applies a coloured registration marker while keeping the artwork visible.
         (byte b, byte g, byte r) = Pixel(overlay, width, x: 7, y: 1);
-        (byte cb, byte cg, byte cr) = Pixel(colour, width, x: 7, y: 1);
+        byte cr = Pixel(colour, width, x: 7, y: 1).Red;
         r.ShouldBeGreaterThan(cr);
-        g.ShouldBeGreaterThan(cg);
-        b.ShouldBeGreaterThan(cb);
-        (r == 255 && g == 255 && b == 255).ShouldBeFalse("the artwork must remain visible under the marker");
+        g.ShouldBeLessThan(r);
+        g.ShouldBeLessThan(b);
 
         // Half ink sits between the two.
-        Pixel(overlay, width, x: 4, y: 1).Red.ShouldBeInRange(cr, r);
+        byte halfRed = Pixel(overlay, width, x: 4, y: 1).Red;
+        halfRed.ShouldBeGreaterThan(cr);
+        halfRed.ShouldBeLessThan(r);
     }
 
     // -----------------------------------------------------------------------------------
-    // §35 — one canvas, three payloads, one geometry
+    // §35 — one canvas, four payloads, one geometry
     // -----------------------------------------------------------------------------------
 
     [Fact]
-    public async Task All_three_payloads_share_the_TIFF_geometry()
+    public async Task All_four_payloads_share_the_TIFF_geometry()
     {
         Decoded decoded = await DecodeAsync(new ProductionTiffFixtureOptions(
             PixelWidth: 9, PixelHeight: 3, W1VerticalBands: Bands));
@@ -204,7 +288,8 @@ public sealed class ProductionTiffReviewDecoderTests : IDisposable
         decoded.Review.IsDownsampledForDisplay.ShouldBeFalse();
 
         foreach (ReadOnlyMemory<byte> payload in
-                 new[] { decoded.Review.ColourPayload, decoded.Review.WhiteInkPayload, decoded.Review.OverlayPayload })
+                 new[] { decoded.Review.ColourPayload, decoded.Review.WhiteInkPayload,
+                     decoded.Review.CompositePayload, decoded.Review.OverlayPayload })
         {
             decoded.Bgra(payload, out int width, out int height);
             (width, height).ShouldBe((9, 3));
@@ -225,7 +310,8 @@ public sealed class ProductionTiffReviewDecoderTests : IDisposable
 
         (int width, int height)[] sizes =
         [
-            .. new[] { decoded.Review.ColourPayload, decoded.Review.WhiteInkPayload, decoded.Review.OverlayPayload }
+            .. new[] { decoded.Review.ColourPayload, decoded.Review.WhiteInkPayload,
+                     decoded.Review.CompositePayload, decoded.Review.OverlayPayload }
                 .Select(payload =>
                 {
                     decoded.Bgra(payload, out int w, out int h);
@@ -239,6 +325,33 @@ public sealed class ProductionTiffReviewDecoderTests : IDisposable
 
         // The count is over the source canvas, not the reduced grid.
         decoded.Review.WhiteInkSampleCount.ShouldBe(4200L / 3 * 2 * 60);
+    }
+
+    [Fact]
+    public async Task Downsampling_keeps_the_colour_of_ink_at_a_transparent_edge()
+    {
+        const int sourceWidth = 2051;
+        byte[] samples = new byte[sourceWidth * 5];
+        for (int x = 0; x < sourceWidth; x++)
+            samples[x * 5 + 4] = 255;
+
+        samples[0] = 255; // Opaque cyan beside a fully blank pixel.
+        samples[2 * 5 + 4] = 128; // Partial W1 beside a fully blank pixel.
+        samples[2050 * 5] = 255; // The last, one-pixel-wide cell stays opaque.
+        Decoded decoded = await DecodeSamplesAsync(sourceWidth, height: 1, samples, UnusableProfile());
+
+        byte[] colour = decoded.Bgra(decoded.Review.ColourPayload, out int width, out _);
+        byte[] composite = decoded.Bgra(decoded.Review.CompositePayload, out _, out _);
+        byte[] white = decoded.Bgra(decoded.Review.WhiteInkPayload, out _, out _);
+        width.ShouldBe(1026);
+
+        Pixel(colour, width, x: 0, y: 0).ShouldBe(((byte)255, (byte)255, (byte)0));
+        Alpha(colour, width, x: 0, y: 0).ShouldBe((byte)128);
+        Pixel(composite, width, x: 0, y: 0).ShouldBe(Pixel(colour, width, x: 0, y: 0));
+        Alpha(composite, width, x: 0, y: 0).ShouldBe((byte)128);
+        Grey(white, width, x: 1, y: 0).ShouldBe((byte)255);
+        Alpha(white, width, x: 1, y: 0).ShouldBe((byte)64);
+        Alpha(colour, width, x: width - 1, y: 0).ShouldBe((byte)255);
     }
 
     // -----------------------------------------------------------------------------------
@@ -318,18 +431,17 @@ public sealed class ProductionTiffReviewDecoderTests : IDisposable
     // -----------------------------------------------------------------------------------
 
     /// <summary>
-    /// The accepted baseline TIFF decodes into all three modes, and its white ink agrees with the
+    /// The accepted baseline TIFF decodes into the review modes, and its white ink agrees with the
     /// independent inspector count (§51, §60).
     /// </summary>
     /// <remarks>
     /// This is the one file in the repository that a real production Photoshop run actually
     /// produced, which makes it the only place the polarity claim can be checked against
     /// something nobody in this slice wrote. Its background carries C=M=Y=K=0 with W1=255 and its
-    /// artwork carries ink with W1=0 — so a preview that inverted the wrong way would draw a white
-    /// design on a black field, and the corner assertions below would fail.
+    /// artwork carries ink with W1=0. The corner and centre alpha assertions check that polarity.
     /// </remarks>
     [Fact]
-    public async Task The_accepted_baseline_production_TIFF_decodes_into_all_three_modes()
+    public async Task The_accepted_baseline_production_TIFF_preview_matches_its_ink_coverage()
     {
         File.Exists(Baseline).ShouldBeTrue();
 
@@ -358,12 +470,12 @@ public sealed class ProductionTiffReviewDecoderTests : IDisposable
 
         (width, height).ShouldBe((decoded.Value.PreviewPixelWidth, decoded.Value.PreviewPixelHeight));
 
-        // Top-left corner: no artwork, no white ink. Black in the white-ink mode, paper in colour.
-        Grey(white, width, x: 0, y: 0).ShouldBeLessThan((byte)16);
-        Pixel(colour, width, x: 0, y: 0).Red.ShouldBeGreaterThan((byte)239);
+        // The top-left corner has no artwork or white ink.
+        Alpha(white, width, x: 0, y: 0).ShouldBe((byte)0);
+        Alpha(colour, width, x: 0, y: 0).ShouldBe((byte)0);
 
         // And somewhere in the middle of the design there is ink to see.
-        Grey(white, width, x: width / 2, y: height / 2).ShouldBeGreaterThan((byte)200);
+        Alpha(white, width, x: width / 2, y: height / 2).ShouldBeGreaterThan((byte)200);
     }
 
     // -----------------------------------------------------------------------------------
@@ -387,6 +499,33 @@ public sealed class ProductionTiffReviewDecoderTests : IDisposable
 
         decoded.IsSuccess.ShouldBeTrue(decoded.IsFailure ? decoded.Failure.ToString() : string.Empty);
         return new Decoded(path, decoded.Value);
+    }
+
+    private async Task<Decoded> DecodeSamplesAsync(
+        int width, int height, byte[] samples, byte[] profile, byte[]? layer = null, byte[]? alpha = null)
+    {
+        string name = Guid.NewGuid().ToString("N") + ".tif";
+        string path = Path.Combine(_workspace.Root, name);
+        using (FileStream output = File.Create(path))
+        {
+            ProductionTiffWriter.Write(output, width, height, samples,
+                layer ?? new byte[width * height * 4], alpha ?? new byte[width * height], profile, CancellationToken.None);
+        }
+
+        OperationResult<DecodedTiffReview> decoded = await Decoder()
+            .DecodeAsync(Reference(name), HashOf(path), CancellationToken.None);
+        decoded.IsSuccess.ShouldBeTrue(decoded.IsFailure ? decoded.Failure.ToString() : string.Empty);
+        return new Decoded(path, decoded.Value);
+    }
+
+    private static byte[] UnusableProfile()
+    {
+        // A CMYK ICC header with no profile tags, sufficient to exercise transformer fallback.
+        byte[] header = new byte[132];
+        header[3] = 132;
+        "CMYK"u8.CopyTo(header.AsSpan(16));
+        "acsp"u8.CopyTo(header.AsSpan(36));
+        return header;
     }
 
     private ProductionTiffReviewDecoder Decoder() => new(new FileWorkspace(_workspace.Root));
@@ -415,6 +554,10 @@ public sealed class ProductionTiffReviewDecoderTests : IDisposable
         green.ShouldBe(red);
         return red;
     }
+
+    private static byte Alpha(byte[] bgra, int width, int x, int y) => bgra[((y * width) + x) * 4 + 3];
+
+    private static byte[] Alphas(byte[] bgra) => [.. bgra.Where((_, index) => index % 4 == 3)];
 
     public void Dispose()
     {

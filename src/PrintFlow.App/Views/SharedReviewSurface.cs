@@ -9,6 +9,7 @@ using System.Windows.Data;
 using System.Windows.Media;
 using PrintFlow.App.Resources;
 using PrintFlow.App.ViewModels;
+using PrintFlow.Domain.Outputs;
 
 namespace PrintFlow.App.Views;
 
@@ -59,11 +60,14 @@ public sealed class SharedReviewSurface : UserControl
     private readonly List<(RadioButton Button, ReviewComparisonMode Mode)> _modes = [];
     private readonly List<(RadioButton Button, ReviewInspectionBackground Background)> _backgrounds = [];
     private readonly List<Image> _images = [];
+    private readonly List<FrameworkElement> _headings = [];
     private readonly List<ScrollViewer> _scrolls = [];
     private readonly List<Grid> _canvases = [];
     private readonly Dictionary<ScrollViewer, Point> _pending = [];
     private readonly Brush _checkerboard;
     private SessionViewModel? _model;
+    private GuidedSessionPage? _guidedPage;
+    private ReviewInspectionBackground _resultBackground = ReviewInspectionBackground.Checkerboard;
     private Grid? _overlay;
     private Border? _divider;
     private bool _updating;
@@ -176,7 +180,16 @@ public sealed class SharedReviewSurface : UserControl
     {
         RadioButton button = Choice(id, label, "Background" + GetHashCode());
         _backgrounds.Add((button, background));
-        button.Checked += (_, _) => { if (!_updating && _model is not null) _model.ReviewViewport.Background = background; };
+        button.Checked += (_, _) =>
+        {
+            if (_updating || _model is null) return;
+            if (ResultOnly)
+            {
+                _resultBackground = background;
+                UpdatePresentation();
+            }
+            else _model.ReviewViewport.Background = background;
+        };
     }
 
     private void Attach(SessionViewModel? model)
@@ -189,6 +202,8 @@ public sealed class SharedReviewSurface : UserControl
             _model.PreviewPanes.CollectionChanged -= PanesChanged;
         }
         _model = model;
+        _guidedPage = model?.GuidedPage;
+        _resultBackground = ReviewInspectionBackground.Checkerboard;
         _reviewComparisonExpanded = false;
         if (model is not null)
         {
@@ -205,6 +220,12 @@ public sealed class SharedReviewSurface : UserControl
         if (e.PropertyName == nameof(SessionViewModel.SaveReviewPanes) && ResultOnly) ReloadImages();
         if (e.PropertyName == nameof(SessionViewModel.GuidedPage))
         {
+            if (_guidedPage != _model?.GuidedPage)
+            {
+                _guidedPage = _model?.GuidedPage;
+                _resultBackground = ReviewInspectionBackground.Checkerboard;
+                _inspectionExpanded = false;
+            }
             _reviewComparisonExpanded = false;
             ReloadImages();
         }
@@ -251,6 +272,7 @@ public sealed class SharedReviewSurface : UserControl
         foreach (Image image in _images)
             if (image.Parent is Panel parent) parent.Children.Remove(image);
         foreach (ScrollViewer scroll in _scrolls) scroll.ScrollChanged -= Scrolled;
+        _headings.Clear();
         _scrolls.Clear();
         _pending.Clear();
         _canvases.Clear();
@@ -277,19 +299,18 @@ public sealed class SharedReviewSurface : UserControl
             _host.ColumnDefinitions.Add(new ColumnDefinition());
             DockPanel panel = new() { Margin = new Thickness(0, 0, 10, 0) };
             Grid.SetColumn(panel, i);
-            StackPanel heading = new();
-            if (CurrentOnly)
+            bool isComparison = _panes.Count == 2;
+            FrameworkElement heading = CreateHeading(pane, isComparison);
+            if (IsSlider)
             {
-                string detail = pane.FileName + " · " + pane.Detail;
-                heading.Children.Add(new TextBlock { Text = detail, ToolTip = detail,
-                    TextTrimming = TextTrimming.CharacterEllipsis });
+                heading.Margin = new Thickness(0, 0, 10, 0);
+                UniformGrid pair = new() { Rows = 1 };
+                pair.Children.Add(heading);
+                pair.Children.Add(CreateHeading(_panes[1], isComparison));
+                heading = pair;
             }
-            else
-            {
-                heading.Children.Add(new TextBlock { Text = ShowsResultOnly ? Strings.Resolve("Session_SaveCurrentResult") : IsSlider ? _model.BeforeLabel + " / " + _model.AfterLabel : pane.Heading, FontWeight = FontWeights.SemiBold });
-                string detail = pane.FileName + " · " + pane.Detail;
-                heading.Children.Add(new TextBlock { Text = detail, ToolTip = detail, TextTrimming = TextTrimming.CharacterEllipsis });
-            }
+            _headings.Add(heading);
+            heading.SizeChanged += (_, _) => UpdateSizes();
             DockPanel.SetDock(heading, Dock.Top);
             panel.Children.Add(heading);
             ScrollViewer scroll = new() { HorizontalScrollBarVisibility = ScrollBarVisibility.Auto, VerticalScrollBarVisibility = ScrollBarVisibility.Auto, Content = canvas };
@@ -303,6 +324,34 @@ public sealed class SharedReviewSurface : UserControl
         }
         UpdatePresentation();
         UpdateSizes();
+    }
+
+    private StackPanel CreateHeading(ArtefactPreviewPane pane, bool isComparison)
+    {
+        StackPanel heading = new();
+        if (!CurrentOnly)
+        {
+            heading.Children.Add(new TextBlock
+            {
+                Text = ShowsResultOnly ? Strings.Resolve("Session_SaveCurrentResult") : pane.Heading,
+                FontWeight = FontWeights.SemiBold
+            });
+        }
+
+        string file = isComparison || !pane.HasImage ? pane.FileName : $"{pane.FileName} · {pane.Detail}";
+        heading.Children.Add(new TextBlock { Text = file, ToolTip = file, TextTrimming = TextTrimming.CharacterEllipsis });
+        if (isComparison && pane.HasImage)
+        {
+            heading.Children.Add(new TextBlock { Text = pane.Detail, TextWrapping = TextWrapping.Wrap });
+            if (pane.SourcePixelWidth > 0 && pane.SourcePixelHeight > 0)
+            {
+                string printSize = string.Format(CultureInfo.CurrentCulture, Strings.Session_PreviewPrintEquivalent,
+                    PrintDimensions.MillimetresFromPixels(pane.SourcePixelWidth),
+                    PrintDimensions.MillimetresFromPixels(pane.SourcePixelHeight), PrintDimensions.ProductionDpi);
+                heading.Children.Add(new TextBlock { Text = printSize, TextWrapping = TextWrapping.Wrap });
+            }
+        }
+        return heading;
     }
 
     private void UpdatePresentation()
@@ -329,15 +378,16 @@ public sealed class SharedReviewSurface : UserControl
         }
         _inspectionTools.Visibility = compact && !_inspectionExpanded ? Visibility.Collapsed : Visibility.Visible;
         _inspectionToggle.Visibility = compact && hasImage ? Visibility.Visible : Visibility.Collapsed;
-        foreach (var (button, background) in _backgrounds)
+        var background = ResultOnly ? _resultBackground : _model.ReviewViewport.Background;
+        foreach (var (button, choice) in _backgrounds)
         {
-            button.IsChecked = _model.ReviewViewport.Background == background;
+            button.IsChecked = background == choice;
             button.Visibility = hasImage ? Visibility.Visible : Visibility.Collapsed;
         }
         _actualSize.Visibility = hasImage && (!compact || _inspectionExpanded) ? Visibility.Visible : Visibility.Collapsed;
         _slider.Visibility = IsSlider ? Visibility.Visible : Visibility.Collapsed;
         _slider.Value = _model.ReviewViewport.SliderPosition;
-        Brush brush = _model.ReviewViewport.Background switch { ReviewInspectionBackground.White => Brushes.White, ReviewInspectionBackground.Black => Brushes.Black, _ => TryFindResource("TransparencyCheckerboard") as Brush ?? _checkerboard };
+        Brush brush = background switch { ReviewInspectionBackground.White => Brushes.White, ReviewInspectionBackground.Black => Brushes.Black, _ => TryFindResource("TransparencyCheckerboard") as Brush ?? _checkerboard };
         foreach (Grid canvas in _canvases) canvas.Background = brush;
         UpdateClip();
         _updating = false;
@@ -354,8 +404,9 @@ public sealed class SharedReviewSurface : UserControl
         double width = _panes.Max(p => (double)Math.Max(1, p.PayloadPixelWidth));
         double height = _panes.Max(p => (double)Math.Max(1, p.PayloadPixelHeight));
         bool fit = ShowsResultOnly || _model.IsFitToViewport || !_model.ShowsGuidedPreviewTools;
+        double headingSpace = Math.Max(CurrentOnly ? 28 : 76, _headings.Max(heading => heading.ActualHeight) + 8);
         double scale = fit
-            ? Math.Max(0.001, Math.Min(Math.Max(1, _host.ActualWidth / (IsSlider ? 1 : _images.Count) - 28) / width, Math.Max(1, _host.ActualHeight - (CurrentOnly ? 28 : 76)) / height))
+            ? Math.Max(0.001, Math.Min(Math.Max(1, _host.ActualWidth / (IsSlider ? 1 : _images.Count) - 28) / width, Math.Max(1, _host.ActualHeight - headingSpace) / height))
             : _model.ZoomScale;
         for (int i = 0; i < _images.Count; i++)
         {
@@ -375,7 +426,7 @@ public sealed class SharedReviewSurface : UserControl
         if (_overlay is not null && _model is not null)
         {
             // Before (the base) shows left of the divider and After (the overlay) right of it, as
-            // the "Before / After" heading and the side-by-side order read (SCRUM-11154 F-V3).
+            // the headings and the side-by-side order read (SCRUM-11154 F-V3).
             double width = double.IsNaN(_overlay.Width) ? 0 : _overlay.Width;
             double fraction = Math.Clamp(_model.ReviewViewport.SliderPosition, 0, 100) / 100;
             _overlay.Clip = new RectangleGeometry(new Rect(width * fraction, 0, width * (1 - fraction), double.IsNaN(_overlay.Height) ? 0 : _overlay.Height));

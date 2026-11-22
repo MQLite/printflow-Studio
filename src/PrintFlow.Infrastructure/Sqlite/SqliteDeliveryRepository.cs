@@ -214,6 +214,11 @@ public sealed class SqliteDeliveryRepository(SqliteConnectionFactory factory) : 
         Transition(attemptId, "UPDATE DeliveryAttempt SET State='ReadyToPublish', StageVerifiedAtUtc=$at " +
             "WHERE AttemptId=$id AND State='Staging';", null, verifiedAtUtc);
 
+    public Task<OperationResult<DeliveryAttemptRecord>> MarkReadyAsync(Guid attemptId, DateTimeOffset verifiedAtUtc,
+        string originalFileId, CancellationToken cancellationToken) =>
+        Transition(attemptId, "UPDATE DeliveryAttempt SET State='ReadyToPublish', StageVerifiedAtUtc=$at, OriginalFileId=$file " +
+            "WHERE AttemptId=$id AND State='Staging';", originalFileId, verifiedAtUtc);
+
     public Task<OperationResult<DeliveryAttemptRecord>> EndAttemptAsync(
         Guid attemptId, DeliveryAttemptState state, string? failureCode, CancellationToken cancellationToken) => Run(() =>
     {
@@ -549,7 +554,8 @@ public sealed class SqliteDeliveryRepository(SqliteConnectionFactory factory) : 
             S(r, "StagingLeaf"), S(r, "DirectoryId"), NS(r, "StagingFileId"),
             Date(r, "StagingCreationUtc"), Sha256.Parse(S(r, "ExpectedSha256")), L(r, "ExpectedLength"),
             Date(r, "StageVerifiedAtUtc"), NS(r, "FailureCode"),
-            DateTimeOffset.Parse(S(r, "StartedAtUtc"), CultureInfo.InvariantCulture), Date(r, "FinishedAtUtc"));
+            DateTimeOffset.Parse(S(r, "StartedAtUtc"), CultureInfo.InvariantCulture), Date(r, "FinishedAtUtc"))
+        { OriginalFileId = NS(r, "OriginalFileId") };
     }
 
     private static SqliteCommand Command(SqliteConnection c, SqliteTransaction? tx, string sql) =>
