@@ -57,6 +57,26 @@ public sealed class FileWorkspace : IWorkspace
 
     private const string SessionsFolder = "Sessions";
 
+    internal static string PhotoshopPreviewPath(IWorkspace workspace, WorkspaceDirRef session, Guid editId, Guid previewId)
+    {
+        string editFolder = workspace.ResolveAbsoluteDirectory(WorkspaceDirRef.Create($"{session.RelativePath}/PhotoshopEdits/{editId:N}"));
+        return Path.Combine(editFolder, $"Preview-{previewId:N}.png");
+    }
+
+    internal static void DiscardPhotoshopPreview(IWorkspace workspace, WorkspaceDirRef session, Guid editId, Guid previewId)
+    {
+        string path = PhotoshopPreviewPath(workspace, session, editId, previewId);
+        try
+        {
+            ReparsePointGuard.RefuseAncestry(path);
+            File.Delete(path);
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+        {
+            System.Diagnostics.Trace.TraceWarning(error.Message);
+        }
+    }
+
     private readonly string _rootAbsolute;
 
     public FileWorkspace(string workspaceRootAbsolute)

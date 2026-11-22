@@ -55,8 +55,8 @@ public sealed partial class SessionService
         if (imported.IsFailure) return OperationResult.Fail<SessionView>(imported.Failure);
 
         ManualResult result = imported.Value;
-        Revision next = Revision.Create(RevisionId.From(_idGenerator.NewId()), id, input.Id,
-            OperationKind.ManualResultImport, result.File, result.Facts, _timeProvider.GetUtcNow());
+        Revision next = CreateStepRevision(id, input.Id, OperationKind.ManualResultImport,
+            result.File, result.Facts, _timeProvider.GetUtcNow());
         var finished = _engine.Apply(snapshot, new WorkflowCommand.System.ApplyPhotoshopBackgroundEdit(
             target, context.NewAttemptId, next.Id, next.Sha256), context.At(next.CreatedAtUtc));
         if (finished.IsRejected)

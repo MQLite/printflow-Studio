@@ -34,6 +34,10 @@ namespace PrintFlow.Workflow.Services;
 /// </remarks>
 public sealed partial class SessionService : ISessionService
 {
+    private Revision CreateStepRevision(SessionId session, RevisionId? input, OperationKind operation,
+        WorkspaceFileRef output, FileFacts facts, DateTimeOffset createdAt) =>
+        Revision.Create(RevisionId.From(_idGenerator.NewId()), session, input, operation, output, facts, createdAt);
+
     /// <summary>How many sessions "Recent Processing" shows at most (MVP design §10).</summary>
     public const int RecentSessionLimit = 100;
 
@@ -2553,10 +2557,9 @@ public sealed partial class SessionService : ISessionService
         // The Revision hangs off the Revision this attempt actually consumed. For a manual crop
         // that is the file the operator drew on, which is what makes ManualImport lineage
         // truthful rather than positional (Part C2 §16).
-        RevisionId revisionId = RevisionId.From(_idGenerator.NewId());
-        Revision newRevision = Revision.Create(
-            revisionId, aggregate.Session.Id, work.InputRevision, work.Operation,
+        Revision newRevision = CreateStepRevision(aggregate.Session.Id, work.InputRevision, work.Operation,
             produced.Output, produced.Facts, context.NowUtc);
+        RevisionId revisionId = newRevision.Id;
 
         WorkflowCommand.System.AttemptSucceeded succeeded = new(
             context.NewAttemptId, work.Step, revisionId, produced.Facts.Sha256);

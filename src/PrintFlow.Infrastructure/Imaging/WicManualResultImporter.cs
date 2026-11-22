@@ -91,12 +91,8 @@ public sealed class WicManualResultImporter(IWorkspace workspace, IFileInspector
             {
                 if (ownsStaging)
                 {
-                    try
-                    {
-                        File.SetAttributes(staging, FileAttributes.Normal);
-                        File.Delete(staging);
-                    }
-                    catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { Trace.TraceWarning(ex.Message); }
+                    var quarantined = workspace.Quarantine(staging, "Manual import did not publish this staging copy.");
+                    if (quarantined.IsFailure) Trace.TraceWarning(quarantined.Failure.ToString());
                 }
             }
         }

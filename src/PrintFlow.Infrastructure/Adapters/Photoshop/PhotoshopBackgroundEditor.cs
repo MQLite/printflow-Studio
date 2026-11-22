@@ -73,7 +73,9 @@ public sealed class PhotoshopBackgroundEditor : IPhotoshopBackgroundEditor
                     continue;
                 }
 
-                if (!TryReadSave(path, stamp.Value, baselineHash, source.Facts, cancellationToken, out var saved))
+                Guid previewId = Guid.NewGuid();
+                string previewPath = FileWorkspace.PhotoshopPreviewPath(_workspace, source.SessionWorkspace, source.EditId, previewId);
+                if (!TryReadSave(path, stamp.Value, baselineHash, source.Facts, previewPath, cancellationToken, out var saved))
                     continue;
                 examined = stamp.Value;
                 if (saved is not { } save) continue;
@@ -83,7 +85,8 @@ public sealed class PhotoshopBackgroundEditor : IPhotoshopBackgroundEditor
                 }
                 finally
                 {
-                    if (save.IsSuccess) DeletePreviewCopy(save.Value.PreviewPath);
+                    if (save.IsSuccess)
+                        FileWorkspace.DiscardPhotoshopPreview(_workspace, source.SessionWorkspace, source.EditId, previewId);
                 }
             }
         }
@@ -177,7 +180,7 @@ public sealed class PhotoshopBackgroundEditor : IPhotoshopBackgroundEditor
     }
 
     private static bool TryReadSave(string path, SaveStamp stamp, Sha256 baselineHash, FileFacts expected,
-        CancellationToken token, out OperationResult<PhotoshopBackgroundSave>? save)
+        string previewPath, CancellationToken token, out OperationResult<PhotoshopBackgroundSave>? save)
     {
         save = null;
         try
@@ -194,8 +197,7 @@ public sealed class PhotoshopBackgroundEditor : IPhotoshopBackgroundEditor
             if (hash == baselineHash) return true;
             input.Position = 0;
 
-            string output = Path.Combine(Path.GetDirectoryName(path)!, $"Preview-{Guid.NewGuid():N}.png");
-            var preview = ExtractSavedPreview(input, output, expected, token);
+            var preview = ExtractSavedPreview(input, previewPath, expected, token);
             save = preview.IsSuccess ? OperationResult.Ok(new PhotoshopBackgroundSave(path, hash, preview.Value))
                 : OperationResult.Fail<PhotoshopBackgroundSave>(preview.Failure);
             return true;
@@ -250,12 +252,6 @@ public sealed class PhotoshopBackgroundEditor : IPhotoshopBackgroundEditor
     {
         var file = new FileInfo(path);
         return file.Exists ? new SaveStamp(file.Length, file.LastWriteTimeUtc, file.CreationTimeUtc) : null;
-    }
-
-    private static void DeletePreviewCopy(string path)
-    {
-        try { File.Delete(path); }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { Trace.TraceWarning(ex.Message); }
     }
 
     private static OperationResult<(string Path, SaveStamp Stamp, Sha256 Hash)> OpenFailed(string detail) =>
