@@ -456,8 +456,8 @@
   </data>
   <data name="ProductionTiff_BackendHeading" xml:space="preserve"><value>TIFF generation method</value></data>
   <data name="ProductionTiff_MagickUnavailable" xml:space="preserve"><value>Magick.NET is unavailable on this workstation.</value></data>
-  <data name="ProductionTiff_MagickUnsupportedInput" xml:space="preserve"><value>Magick.NET requires a supported PNG or JPEG within its image size limits.</value></data>
-  <data name="ProductionTiff_MagickDimensionsLimit" xml:space="preserve"><value>Magick.NET output is limited to 8,192 pixels per side and 24 million pixels. Reduce the target size or select Photoshop.</value></data>
+  <data name="ProductionTiff_MagickUnsupportedInput" xml:space="preserve"><value>Choose a supported PNG or JPEG up to 128 MiB, with at most 8,192 pixels per side and 41,219,058 pixels total.</value></data>
+  <data name="ProductionTiff_MagickDimensionsLimit" xml:space="preserve"><value>Magick.NET output is limited to 8,192 pixels per side and 41,219,058 pixels total. Reduce the target size or select Photoshop.</value></data>
   <data name="ProductionTiff_MagickPresetMismatch" xml:space="preserve"><value>Magick.NET requires a verified production preset that specifies sRGB IEC61966-2.1 and Coated FOGRA39.</value></data>
   <data name="ProductionTiff_MagickOutputInvalid" xml:space="preserve"><value>Magick.NET could not create a verified CMYK TIFF with a W1 channel. Check the source artwork and white ink choice, or select Photoshop.</value></data>
   <data name="Session_DimensionReviewRequired" xml:space="preserve">

@@ -20,7 +20,8 @@ public sealed class MagickProductionTiffProcessor(IWorkspace workspace, string p
     : ILocalProductionTiffProcessor
 {
     private const int MaximumEdge = 8192;
-    private const long MaximumPixels = 24_000_000;
+    // 570 × 360 mm at 360 DPI, rounded to the nearest pixel on each axis.
+    private const long MaximumPixels = 8_079L * 5_102;
     private const long MaximumInputBytes = 128L * 1024 * 1024;
     private const string WorkingRgb = "sRGB IEC61966-2.1";
     private const string WorkingCmyk = "Coated FOGRA39 (ISO 12647-2:2004)";
@@ -269,11 +270,11 @@ public sealed class MagickProductionTiffProcessor(IWorkspace workspace, string p
     }
 
     private static OperationFailure UnsupportedRaster() => OperationFailure.Create(FailureCode.SourceFormatUnsupported,
-        "Local TIFF requires a supported PNG or JPEG up to 8192 pixels per edge, 24 megapixels and 128 MiB.",
+        $"Local TIFF requires a supported PNG or JPEG up to {MaximumEdge} pixels per edge, {MaximumPixels} pixels total and 128 MiB.",
         messageKey: "ProductionTiff_MagickUnsupportedInput");
 
     private static OperationFailure OutputDimensionsLimit() => OperationFailure.Create(FailureCode.PreconditionNotMet,
-        "The projected TIFF exceeds 8192 pixels per edge or 24 megapixels. Reduce its size or choose Photoshop.",
+        $"The projected TIFF exceeds {MaximumEdge} pixels per edge or {MaximumPixels} pixels total. Reduce its size or choose Photoshop.",
         messageKey: "ProductionTiff_MagickDimensionsLimit");
 
     private static OperationFailure PresetMismatch() => OperationFailure.Create(FailureCode.EnvironmentNotVerified,

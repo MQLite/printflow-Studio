@@ -457,8 +457,8 @@
   </data>
   <data name="ProductionTiff_BackendHeading" xml:space="preserve"><value>TIFF 生成方式</value></data>
   <data name="ProductionTiff_MagickUnavailable" xml:space="preserve"><value>此工作站无法使用 Magick.NET。</value></data>
-  <data name="ProductionTiff_MagickUnsupportedInput" xml:space="preserve"><value>Magick.NET 需要受支持且尺寸在允许范围内的 PNG 或 JPEG 图片。</value></data>
-  <data name="ProductionTiff_MagickDimensionsLimit" xml:space="preserve"><value>本地 TIFF 的输出尺寸最多 8192 像素/边、2400 万像素。请缩小目标尺寸或切换到 Photoshop。</value></data>
+  <data name="ProductionTiff_MagickUnsupportedInput" xml:space="preserve"><value>请选择受支持的 PNG 或 JPEG 图片，文件不超过 128 MiB，每边不超过 8,192 像素，总计不超过 41,219,058 像素。</value></data>
+  <data name="ProductionTiff_MagickDimensionsLimit" xml:space="preserve"><value>本地 TIFF 输出每边不超过 8,192 像素，总计不超过 41,219,058 像素。请缩小目标尺寸或切换到 Photoshop。</value></data>
   <data name="ProductionTiff_MagickPresetMismatch" xml:space="preserve"><value>Magick.NET 需要指定 sRGB IEC61966-2.1 和 Coated FOGRA39 的已验证生产预设。</value></data>
   <data name="ProductionTiff_MagickOutputInvalid" xml:space="preserve"><value>Magick.NET 无法生成通过验证的带 W1 通道的 CMYK TIFF。请检查源图和白墨选项，或选择 Photoshop。</value></data>
   <data name="Session_DimensionReviewRequired" xml:space="preserve">
