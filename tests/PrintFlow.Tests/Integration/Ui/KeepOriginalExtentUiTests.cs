@@ -13,6 +13,7 @@ using PrintFlow.App.Views;
 using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Sessions;
+using PrintFlow.Domain.Settings;
 using PrintFlow.Tests.Fixtures;
 using PrintFlow.Tests.Integration.Persistence;
 using PrintFlow.Workflow.Commands;
@@ -49,13 +50,16 @@ public sealed class KeepOriginalExtentUiTests(ITestOutputHelper output)
             SharedReviewSurfaceTests.Settle(view);
             try
             {
-                Button button = Button(view);
+                bool waiting = phase == "waiting";
+                if (waiting) model.DraftImageProcessingMethod = ImageProcessingMethod.KeepCanvas;
+                string automationId = waiting ? "Session.RunStep" : "Session.KeepOriginalExtent";
+                Button button = Button(view, automationId);
                 button.Visibility.ShouldBe(Visibility.Visible);
                 button.IsEnabled.ShouldBeTrue();
                 button.Focusable.ShouldBeTrue();
                 KeyboardNavigation.GetIsTabStop(button).ShouldBeTrue();
                 ButtonAutomationPeer peer = new(button);
-                peer.GetAutomationId().ShouldBe("Session.KeepOriginalExtent");
+                peer.GetAutomationId().ShouldBe(automationId);
                 peer.GetName().ShouldBe(label);
                 ((IInvokeProvider)peer.GetPattern(PatternInterface.Invoke)!).Invoke();
                 PumpUntil(() => model.Steps.Single(s => s.Name == stateStepName()).State == retained);
@@ -142,11 +146,14 @@ public sealed class KeepOriginalExtentUiTests(ITestOutputHelper output)
                 }
                 offered = await Load(h.Inner, id);
                 offeredFiles = Directory.GetFiles(h.Inner.Workspace.Root, "*", SearchOption.AllDirectories).Order().ToArray();
-                AutomationElement keep = Element("KeepOriginalExtent");
+                if (phase == "waiting-keyboard")
+                    dispatcher.Invoke(() => model.DraftImageProcessingMethod = ImageProcessingMethod.KeepCanvas);
+                string actionId = phase == "waiting-keyboard" ? "RunStep" : "KeepOriginalExtent";
+                AutomationElement keep = Element(actionId);
                 keep.Current.Name.ShouldBe("Keep original extent");
                 dispatcher.Invoke(() =>
                 {
-                    Button button = Button(view);
+                    Button button = Button(view, "Session." + actionId);
                     var start = SharedReviewSurfaceTests.Descendants<Button>(view).First(b => b.IsVisible && b.IsEnabled && b != button);
                     start.Focus().ShouldBeTrue();
                     for (int i = 0; i < 100 && !button.IsKeyboardFocused; i++)
@@ -195,8 +202,9 @@ public sealed class KeepOriginalExtentUiTests(ITestOutputHelper output)
         foreach (string line in transcript) output.WriteLine(line);
     }
 
-    private static Button Button(DependencyObject view) => SharedReviewSurfaceTests.Descendants<Button>(view)
-        .Single(button => AutomationProperties.GetAutomationId(button) == "Session.KeepOriginalExtent");
+    private static Button Button(DependencyObject view, string automationId = "Session.KeepOriginalExtent") =>
+        SharedReviewSurfaceTests.Descendants<Button>(view)
+            .Single(button => AutomationProperties.GetAutomationId(button) == automationId);
 
     private static void PumpUntil(Func<bool> predicate)
     {

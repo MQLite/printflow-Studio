@@ -401,7 +401,7 @@
   <data name="Session_TargetSizeMm" xml:space="preserve"><value>Target size (mm)</value></data>
   <data name="Session_TargetSizeInvalid" xml:space="preserve"><value>Choose Width, Height or Long edge and enter a positive size in millimetres.</value></data>
   <data name="Session_TargetSizeUnavailable" xml:space="preserve"><value>Could not preview this size. Check the entry and job details, then try again.</value></data>
-  <data name="Session_ConfirmCustomSize" xml:space="preserve"><value>Confirm custom size</value></data>
+  <data name="Session_ConfirmCustomSize" xml:space="preserve"><value>Use and continue</value></data>
   <data name="TargetEdge_Width" xml:space="preserve"><value>Width</value></data>
   <data name="TargetEdge_Height" xml:space="preserve"><value>Height</value></data>
   <data name="TargetEdge_LongEdge" xml:space="preserve"><value>Long edge</value></data>
@@ -1375,7 +1375,7 @@
   <data name="Home_DiagnosticRetentionWarning" xml:space="preserve">
     <value>Automatic cleanup of diagnostic records did not finish; it will be retried at the next startup. This notice does not mean the workstation passed its checks.</value>
   </data>
-<data name="Session_GuidedTechnicalDetails" xml:space="preserve"><value>Technical details</value></data><data name="Session_GuidedPreflight" xml:space="preserve"><value>Confirm before generation</value></data><data name="Session_GuidedCurrent" xml:space="preserve"><value>Current step</value></data><data name="Session_GuidedFuture" xml:space="preserve"><value>Continue after the current step</value></data><data name="Session_GuidedChangeWhiteInk" xml:space="preserve"><value>Change white ink choice</value></data><data name="Session_GuidedHistoryAvailable" xml:space="preserve"><value>History available</value></data>  <data name="Session_HistoryHeading" xml:space="preserve"><value>Step history</value></data>
+<data name="Session_GuidedTechnicalDetails" xml:space="preserve"><value>Technical details</value></data><data name="Session_GuidedPreflight" xml:space="preserve"><value>Confirm before generation</value></data><data name="Session_GuidedCurrent" xml:space="preserve"><value>Current step</value></data><data name="Session_GuidedFuture" xml:space="preserve"><value>Continue after the current step</value></data><data name="Session_GuidedHistoryAvailable" xml:space="preserve"><value>History available</value></data>  <data name="Session_HistoryHeading" xml:space="preserve"><value>Step history</value></data>
   <data name="Session_HistoryNotice" xml:space="preserve"><value>Read only. Historical results cannot be approved or used as the current result.</value></data>
   <data name="Session_HistoryOpen" xml:space="preserve"><value>View history</value></data>
   <data name="Session_HistoryClose" xml:space="preserve"><value>Back to current step</value></data>
@@ -1419,6 +1419,9 @@
   <data name="Session_GuidedPrintWhiteInk" xml:space="preserve"><value>White ink: {0}</value></data>
   <data name="Session_GuidedWhiteInkReasonHint" xml:space="preserve"><value>Your selection also records the stated artwork classification as the reason. Choose it for this finished design.</value></data>
   <data name="Session_GuidedWhiteInkSourceHint" xml:space="preserve"><value>Source PSD/PDF spot or white-ink channels are not reused. This choice generates the production W1 channel.</value></data>
+  <data name="Session_GuidedWhiteInkSaving" xml:space="preserve"><value>Saving the white ink choice…</value></data>
+  <data name="Session_GuidedWhiteInkPending" xml:space="preserve"><value>Retry the white ink change or select the current choice before generating.</value></data>
+  <data name="Session_GuidedWhiteInkRetry" xml:space="preserve"><value>Retry white ink change</value></data>
   <data name="Session_CompletionSaveHeading" xml:space="preserve"><value>Save the approved result</value></data>
   <data name="Session_CompletionFinishedHeading" xml:space="preserve"><value>Task completed · delivery record</value></data>
   <data name="Session_CompletionNotice" xml:space="preserve"><value>Approval, saving to your folder and completing the task are separate. An internal approved file is not a delivered file.</value></data>
@@ -1814,6 +1817,8 @@
   <data name="ImageProcessing_Method_KeepCanvas" xml:space="preserve"><value>Keep original canvas</value></data>
   <data name="WorkTask_RepairImageProcessingSettings" xml:space="preserve"><value>Open Settings → Image processing, restore defaults and save, then restart PrintFlow Studio to resume receiving this result.</value></data>
   <data name="ImageProcessing_CurrentMethod" xml:space="preserve"><value>Current method: {0}</value></data>
+  <data name="ImageProcessing_TaskMethods" xml:space="preserve"><value>Processing methods</value></data>
+  <data name="ImageProcessing_Continue" xml:space="preserve"><value>Continue with {0}</value></data>
   <data name="ImageProcessing_ChangeTaskMethod" xml:space="preserve"><value>Change method for this task</value></data>
   <data name="ImageProcessing_ChooseCombined" xml:space="preserve"><value>Use OpenAI for clarity and background removal</value></data>
   <data name="ImageProcessing_ChooseSeparate" xml:space="preserve"><value>Use separate steps</value></data>
@@ -1842,6 +1847,7 @@
   <data name="ImageProcessing_CloudHint" xml:space="preserve"><value>Improves clarity and can enlarge proportionally up to 2× within service limits. Keeps the original background and transparency. Uploads the image to OpenAI and incurs usage charges.</value></data>
   <data name="ImageProcessing_ConfirmBackgroundHint" xml:space="preserve"><value>Confirm the background removal method for this image before running it.</value></data>
   <data name="ImageProcessing_AuthoriseBackgroundMethod" xml:space="preserve"><value>Use this method for this image</value></data>
+  <data name="ImageProcessing_AuthorityImageIdentity" xml:space="preserve"><value>{0} · Revision {1}</value></data>
   <data name="ImageProcessing_ConfirmBackgroundQuestion" xml:space="preserve"><value>Use {0} on this image? Check the result before approving it.</value></data>
   <data name="ImageProcessing_OpenAiCredentialHeading" xml:space="preserve"><value>OpenAI API key</value></data>
   <data name="ImageProcessing_OpenAiCredentialSave" xml:space="preserve"><value>Save API key</value></data>

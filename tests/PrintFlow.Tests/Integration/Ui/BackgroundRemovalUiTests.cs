@@ -7,6 +7,7 @@ using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Sessions;
+using PrintFlow.Domain.Settings;
 using PrintFlow.Infrastructure.Adapters.Meitu;
 using PrintFlow.Infrastructure.Imaging;
 using PrintFlow.Tests.Fixtures;
@@ -80,9 +81,7 @@ public sealed class BackgroundRemovalUiTests
         SetRecognitionMode(screen, "Products");
         screen.CanRunStep.ShouldBeFalse();
         screen.CanRunBackgroundRemoval.ShouldBeFalse();
-        screen.ShowsGuidedAutomaticBegin.ShouldBeTrue();
-        screen.RecommendedCommand.ShouldBe(screen.BeginAutomaticSelectionCommand);
-        screen.BeginAutomaticSelectionCommand.Execute(null);
+        screen.ShowsGuidedAutomaticConfirmation.ShouldBeTrue();
         screen.RecommendedCommand.ShouldBe(screen.ConfirmAutomaticSelectionCommand);
         int calls = harness.Meitu.CallCount;
         await screen.RunStepCommand.ExecuteAsync(null);
@@ -196,7 +195,7 @@ public sealed class BackgroundRemovalUiTests
         SessionViewModel screen = open.Screen;
 
         screen.CanAuthoriseAutomaticSelection.ShouldBeTrue();
-        screen.CanBeginAutomaticSelection.ShouldBeTrue();
+        screen.CanConfirmAutomaticSelection.ShouldBeTrue();
         screen.IsAutomaticSelectionPending.ShouldBeTrue();
         screen.IsAutomaticSelectionAuthorised.ShouldBeFalse();
         screen.AutomaticSelectionAuthorisedNotice.ShouldBeEmpty();
@@ -204,9 +203,8 @@ public sealed class BackgroundRemovalUiTests
         screen.CanRunBackgroundRemoval.ShouldBeFalse();
         screen.CanRunStep.ShouldBeFalse();
 
-        // Merely opening the confirmation still records nothing.
-        screen.BeginAutomaticSelectionCommand.Execute(null);
-        screen.IsConfirmingAutomaticSelection.ShouldBeTrue();
+        screen.ShowsGuidedAutomaticConfirmation.ShouldBeTrue();
+        screen.RecommendedCommand.ShouldBe(screen.ConfirmAutomaticSelectionCommand);
 
         SessionAggregate persisted = await open.ReloadAsync();
         persisted.Session.BackgroundRemovalAuthority.ShouldBeNull();
@@ -214,27 +212,46 @@ public sealed class BackgroundRemovalUiTests
         harness.Meitu.CallCount.ShouldBe(1, "only the Enhancement run reached the adapter.");
     }
 
-    /// <summary>
-    /// Cancelling the confirmation leaves nothing behind (§4, §10).
-    /// </summary>
-    /// <remarks>
-    /// The structural half of "this is not a checkbox": Cancel reaches no service, so there is
-    /// nothing for it to leave a trace with, and the screen returns to where it was.
-    /// </remarks>
     [Fact]
-    public async Task Cancelling_the_confirmation_records_no_authority()
+    public async Task Choosing_to_keep_the_background_withdraws_the_authority_offer()
     {
         using HomeScreenHarness harness = new();
         AtBackgroundRemoval open = await AtBackgroundRemovalAsync(harness, "br-cancel.png");
         SessionViewModel screen = open.Screen;
 
-        screen.BeginAutomaticSelectionCommand.Execute(null);
-        screen.CancelAutomaticSelectionCommand.Execute(null);
+        screen.DraftImageProcessingMethod = ImageProcessingMethod.KeepBackground;
 
-        screen.IsConfirmingAutomaticSelection.ShouldBeFalse();
-        screen.IsAutomaticSelectionPending.ShouldBeTrue();
+        screen.ShowsGuidedAutomaticConfirmation.ShouldBeFalse();
         screen.CanRunBackgroundRemoval.ShouldBeFalse();
         (await open.ReloadAsync()).Session.BackgroundRemovalAuthority.ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task Authorising_a_new_method_records_the_selected_recogniser_for_the_displayed_image()
+    {
+        using HomeScreenHarness harness = new();
+        AtBackgroundRemoval open = await AtBackgroundRemovalAsync(harness, "br-new-method.png");
+        SessionView before = (await harness.Sessions.LoadAsync(open.Id, CancellationToken.None)).Value;
+        var kept = await harness.Sessions.ExecuteAsync(open.Id,
+            new WorkflowCommand.SetImageProcessingSelection(StepKind.BackgroundRemoval,
+                before.ImageProcessingSelection! with { BackgroundRemoval = ImageProcessingMethod.KeepBackground }),
+            "tester", CancellationToken.None);
+        kept.IsSuccess.ShouldBeTrue();
+        SessionViewModel screen = open.Screen;
+        screen.Open(kept.Value);
+        screen.DraftImageProcessingMethod = ImageProcessingMethod.MeituBackgroundRemoval;
+        screen.SelectedBackgroundRemovalMode = BackgroundRemovalMode.Products;
+
+        screen.ShowsGuidedAutomaticConfirmation.ShouldBeTrue();
+        await screen.ConfirmAutomaticSelectionCommand.ExecuteAsync(null);
+
+        SessionAggregate after = await open.ReloadAsync();
+        after.Session.ImageProcessingSelection!.BackgroundRemoval.ShouldBe(ImageProcessingMethod.MeituBackgroundRemoval);
+        BackgroundRemovalAuthority authority = after.Session.BackgroundRemovalAuthority.ShouldNotBeNull();
+        authority.ReviewedRevisionId.ShouldBe(open.Displayed.RevisionId);
+        authority.ReviewedSha256.ShouldBe(open.Displayed.Sha256);
+        authority.Mode.ShouldBe(BackgroundRemovalMode.Products);
+        after.Attempts.ShouldNotContain(attempt => attempt.Step == StepKind.BackgroundRemoval);
     }
 
     /// <summary>
@@ -287,7 +304,6 @@ public sealed class BackgroundRemovalUiTests
         screen.ArtefactRevision.ShouldBe(ShortRevision(displayed.RevisionId));
         screen.ArtefactHash.ShouldBe(displayed.Sha256.ShortForm);
 
-        screen.BeginAutomaticSelectionCommand.Execute(null);
         await screen.ConfirmAutomaticSelectionCommand.ExecuteAsync(null);
 
         screen.Notice.ShouldBeNull();
@@ -296,7 +312,7 @@ public sealed class BackgroundRemovalUiTests
         screen.AutomaticSelectionAuthorisedNotice.ShouldContain(ShortRevision(displayed.RevisionId));
 
         // The confirmation is put away by the refresh, so it cannot be confirmed twice.
-        screen.IsConfirmingAutomaticSelection.ShouldBeFalse();
+        screen.ShowsGuidedAutomaticConfirmation.ShouldBeFalse();
 
         // Readiness comes from the read model, and the ordinary Run control agrees with it.
         screen.CanRunBackgroundRemoval.ShouldBeTrue();
@@ -338,7 +354,7 @@ public sealed class BackgroundRemovalUiTests
         SessionViewModel screen = open.Screen;
 
         RevisionId displayedA = open.Displayed.RevisionId;
-        screen.BeginAutomaticSelectionCommand.Execute(null);
+        screen.ShowsGuidedAutomaticConfirmation.ShouldBeTrue();
 
         // Someone — another window, a resumed session — moves the workflow on underneath.
         await ReplaceUpstreamAsync(harness, open.Id);
@@ -390,7 +406,6 @@ public sealed class BackgroundRemovalUiTests
             harness.ResolveInWorkspace(reviewed.File.RelativePath),
             SyntheticImages.Png(9, 7, alpha: true));
 
-        screen.BeginAutomaticSelectionCommand.Execute(null);
         await screen.ConfirmAutomaticSelectionCommand.ExecuteAsync(null);
 
         screen.Notice.ShouldNotBeNullOrWhiteSpace();
@@ -685,8 +700,7 @@ public sealed class BackgroundRemovalUiTests
         screen.CanRunStep.ShouldBeFalse();
 
         // ...and authorises automatic selection for it, explicitly.
-        screen.BeginAutomaticSelectionCommand.Execute(null);
-        screen.IsConfirmingAutomaticSelection.ShouldBeTrue();
+        screen.ShowsGuidedAutomaticConfirmation.ShouldBeTrue();
         await screen.ConfirmAutomaticSelectionCommand.ExecuteAsync(null);
         await screen.PreviewsLoaded;
 
@@ -768,10 +782,9 @@ public sealed class BackgroundRemovalUiTests
         return new AtBackgroundRemoval(harness, screen, imported.Id, displayed);
     }
 
-    /// <summary>Drives the screen's own authorisation path: open the confirmation, confirm it.</summary>
+    /// <summary>Confirms the authorisation shown with the current image.</summary>
     private static async Task AuthoriseAsync(SessionViewModel screen)
     {
-        screen.BeginAutomaticSelectionCommand.Execute(null);
         await screen.ConfirmAutomaticSelectionCommand.ExecuteAsync(null);
         await screen.PreviewsLoaded;
         screen.Notice.ShouldBeNull();

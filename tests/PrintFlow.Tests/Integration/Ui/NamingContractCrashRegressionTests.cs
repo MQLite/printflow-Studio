@@ -44,7 +44,6 @@ public sealed class NamingContractCrashRegressionTests
 
         screen.IsFakeProcessing.ShouldBeTrue("this regression must never touch a real Meitu.");
 
-        screen.BeginAutomaticSelectionCommand.Execute(null);
         await screen.ConfirmAutomaticSelectionCommand.ExecuteAsync(null);
         await screen.PreviewsLoaded;
         screen.IsAutomaticSelectionAuthorised.ShouldBeTrue();
@@ -106,7 +105,6 @@ public sealed class NamingContractCrashRegressionTests
         using HomeScreenHarness harness = new(StubNamingPresetProvider.WithUnrenderableCutoutPattern());
         (SessionViewModel screen, SessionId id) = await AtBackgroundRemovalAsync(harness, "r2-broken.png");
 
-        screen.BeginAutomaticSelectionCommand.Execute(null);
         await screen.ConfirmAutomaticSelectionCommand.ExecuteAsync(null);
         await screen.PreviewsLoaded;
 

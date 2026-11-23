@@ -159,25 +159,29 @@ public sealed partial class SessionViewModel
     {
         var width = WidthMmText; var height = HeightMmText; var custom = CustomMillimetresText;
         var edge = SelectedTargetEdgeChoice; var preset = _customPresetContext; var pending = _pendingPreset;
-        var choosing = IsChoosingCustomSize; var white = SelectedWhiteUnderbaseChoice; var whiteEditing = _isChoosingGuidedWhiteInk;
+        var choosing = IsChoosingCustomSize; var white = SelectedWhiteUnderbaseChoice; var pendingWhite = _pendingGuidedWhiteInk;
         var mode = SelectedTrimMode; var uniform = UniformMarginText; var top = TopMarginText;
         var ignoreSmallNoise = IgnoreSmallTrimNoise;
         var right = RightMarginText; var bottom = BottomMarginText; var left = LeftMarginText;
         var reason = SelectedRejectionReason; var notes = RejectionNotes; var correction = CorrectionNote;
         var recognitionMode = SelectedBackgroundRemovalMode;
+        var savedMethod = _session?.ImageProcessingExecution?.Method;
+        var pendingMethod = DraftImageProcessingMethod != savedMethod ? DraftImageProcessingMethod : null;
         return (string.Join("\u001f", width, height, custom, edge?.Edge.ToString(), preset?.Preset.ToString(),
-            pending.ToString(), choosing.ToString(), white?.Branch.ToString(), whiteEditing.ToString(), mode?.Mode.ToString(),
+            pending.ToString(), choosing.ToString(), white?.Branch.ToString(), pendingWhite?.Branch.ToString(), mode?.Mode.ToString(),
             uniform, top, right, bottom, left, reason?.Reason.ToString(), notes, correction,
-            recognitionMode.ToString(), ignoreSmallNoise.ToString()), () =>
+            recognitionMode.ToString(), ignoreSmallNoise.ToString(), pendingMethod?.ToString()), () =>
         {
             WidthMmText = width; HeightMmText = height; CustomMillimetresText = custom;
             SelectedTargetEdgeChoice = edge; _customPresetContext = preset; _pendingPreset = pending;
-            IsChoosingCustomSize = choosing; SelectedWhiteUnderbaseChoice = white; _isChoosingGuidedWhiteInk = whiteEditing;
+            IsChoosingCustomSize = choosing; SelectedWhiteUnderbaseChoice = white; _pendingGuidedWhiteInk = pendingWhite;
             SelectedTrimMode = mode!; UniformMarginText = uniform; TopMarginText = top;
             IgnoreSmallTrimNoise = ignoreSmallNoise;
             RightMarginText = right; BottomMarginText = bottom; LeftMarginText = left;
             SelectedRejectionReason = reason!; RejectionNotes = notes; CorrectionNote = correction;
             SelectedBackgroundRemovalMode = recognitionMode;
+            var currentMethod = _session?.ImageProcessingExecution?.Method;
+            DraftImageProcessingMethod = currentMethod == savedMethod ? pendingMethod ?? currentMethod : currentMethod;
             NotifyCustomSizeStateChanged(); NotifyGuidedPresentation();
         });
     }

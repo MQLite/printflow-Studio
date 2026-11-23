@@ -10,6 +10,7 @@ using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Reviews;
 using PrintFlow.Domain.Sessions;
+using PrintFlow.Domain.Settings;
 using PrintFlow.Domain.Trimming;
 using PrintFlow.Workflow.Commands;
 using PrintFlow.Workflow.Engine;
@@ -644,6 +645,9 @@ public sealed partial class SessionViewModel : ObservableObject
     [ObservableProperty]
     private bool _ignoreSmallTrimNoise = true;
 
+    [ObservableProperty]
+    private bool _hasTrimParameterError;
+
     /// <summary>Unconfirmed operator input for <see cref="TrimMode.UniformMargin"/>.</summary>
     [ObservableProperty]
     private string? _uniformMarginText;
@@ -666,24 +670,6 @@ public sealed partial class SessionViewModel : ObservableObject
 
     // --- Background removal authority (Epic 11300 Part C2B2 §4, §10) ----------------------
     //
-    // One piece of state, and it is the confirmation panel being open. Opening it changes
-    // nothing about the session, and only Confirm issues a command — the same shape the return
-    // confirmation and the crop surface have, and what makes §10's "opening the screen must not
-    // authorise" structural rather than promised.
-
-    /// <summary>
-    /// Whether the authorisation confirmation is on screen, waiting to be confirmed or
-    /// cancelled (§4, §11).
-    /// </summary>
-    /// <remarks>
-    /// Screen state, never persisted. Having looked at what automatic selection will do is not
-    /// a fact about the session, and this deliberately is not a checkbox whose ticked-ness
-    /// outlives the artefact it was ticked for (§4).
-    /// </remarks>
-    [ObservableProperty]
-    private bool _isConfirmingAutomaticSelection;
-
-
     private SessionView? _session;
 
     public SessionViewModel(
@@ -1282,16 +1268,12 @@ public sealed partial class SessionViewModel : ObservableObject
 
     public string TrimLeftLabel => Strings.Session_TrimLeftLabel;
 
-    public string ApplyTrimMarginLabel => Strings.Session_TrimApply;
+    public string TrimParameterError => Strings.Session_TrimMarginInvalid;
 
     public string IgnoreSmallTrimNoiseLabel => Strings.Session_TrimIgnoreNoise;
     public string TrimNoiseHint => Strings.Session_TrimNoiseHint;
-    public string PendingTrimNoiseSummary => _session?.IgnoreSmallTrimNoise == true
-        ? Strings.Session_TrimNoiseIgnored : Strings.Session_TrimNoisePreserved;
     public string CurrentTrimNoiseSummary => _session?.CurrentTrimIgnoresSmallNoise == true
         ? Strings.Session_TrimNoiseIgnored : Strings.Session_TrimNoisePreserved;
-
-    public string TrimCurrentLabel => Strings.Session_TrimCurrentLabel;
 
     /// <summary>
     /// Whether the margin controls are shown (§9, §17).
@@ -1311,17 +1293,6 @@ public sealed partial class SessionViewModel : ObservableObject
 
     /// <summary>Whether the four per-edge boxes are the relevant input (§12).</summary>
     public bool IsEdgeSpecificMargin => SelectedTrimMode.Mode == TrimMode.EdgeSpecificMargin;
-
-    /// <summary>
-    /// The margin the next Trim run will use, as one line (§18).
-    /// </summary>
-    /// <remarks>
-    /// Read from <see cref="SessionView.TrimMargin"/> — the persisted decision — rather than
-    /// from the boxes above it, so it says what would actually happen rather than what has been
-    /// typed but not applied.
-    /// </remarks>
-    public string PendingTrimSummary =>
-        _session is { } session ? DisplayNames.TrimMargin(session.TrimMargin) : string.Empty;
 
     /// <summary>
     /// How the deterministic trim on screen was parameterised (§18).
@@ -1423,9 +1394,10 @@ public sealed partial class SessionViewModel : ObservableObject
             : Strings.Resolve("ImageProcessing_ConfirmBackgroundQuestion"),
         BackgroundRemovalAuthorityLabel);
 
-    public string ConfirmAutomaticSelectionLabel => Strings.Session_BackgroundRemovalConfirm;
-
-    public string CancelAutomaticSelectionLabel => Strings.Session_BackgroundRemovalCancel;
+    public string AutomaticSelectionImageIdentity => _session?.CurrentArtefact is { } displayed
+        ? string.Format(CultureInfo.CurrentCulture, Strings.Resolve("ImageProcessing_AuthorityImageIdentity"),
+            displayed.FileName, ShortRevision(displayed.RevisionId))
+        : string.Empty;
 
     /// <summary>What is shown while nothing authorises a run (§8, §9).</summary>
     public string AutomaticSelectionNotAuthorisedNotice => ShowsMeituRecognitionModes
@@ -1438,16 +1410,20 @@ public sealed partial class SessionViewModel : ObservableObject
     /// Whether the authorisation control is offered at all (§7).
     /// </summary>
     /// <remarks>
-    /// Read straight off <see cref="SessionView.CanSetBackgroundRemovalDecision"/>, which is the
-    /// engine's own answer to "would <c>SetBackgroundRemovalDecision</c> be accepted right now".
-    /// This screen restates none of it: not the step, not the step state, not the session state.
+    /// Use the workflow's authorisation offer for the current method. A provisional selection
+    /// can show the decision when the workflow permits changing to that available method.
     /// </remarks>
     public bool CanAuthoriseAutomaticSelection =>
-        !HasPhotoshopEdit && CanRunSelectedImageMethod && _session?.CanSetBackgroundRemovalDecision == true;
+        !HasPhotoshopEdit && SelectedImageProcessingMethod is not
+            (ImageProcessingMethod.KeepBackground or ImageProcessingMethod.OpenAiCombined) &&
+        (HasUnconfirmedBackgroundRemovalMethod
+            ? Offers(CommandKind.SetImageProcessingSelection) && SelectedImageProcessingOption is { IsAvailable: true }
+            : CanRunSelectedImageMethod && _session?.CanSetBackgroundRemovalDecision == true);
 
-    /// <summary>True once the confirmation may be opened: the offer is real and nothing is in flight.</summary>
-    public bool CanBeginAutomaticSelection =>
-        CanAuthoriseAutomaticSelection && _session?.CurrentArtefact is not null && !IsBusy;
+    public bool CanConfirmAutomaticSelection =>
+        ShowsGuidedAutomaticConfirmation && CanInteractWithLivePage && !IsBusy && !IsAdvancingImageProcessing;
+
+    public bool CanChangeRecognitionMode => CanAuthoriseAutomaticSelection && CanInteractWithLivePage && !IsBusy;
 
     /// <summary>
     /// Whether the selected recogniser is authorised for the artefact on screen (§9).
@@ -1461,7 +1437,8 @@ public sealed partial class SessionViewModel : ObservableObject
     /// the engine that decides whether the run starts (§2, §6).
     /// </remarks>
     public bool IsAutomaticSelectionAuthorised =>
-        HasRecordedBackgroundRemovalAuthorisation && !HasUnconfirmedBackgroundRemovalMode;
+        HasRecordedBackgroundRemovalAuthorisation &&
+        !HasUnconfirmedBackgroundRemovalMethod && !HasUnconfirmedBackgroundRemovalMode;
 
     /// <summary>
     /// Whether the screen is in the unauthorised state (§9).
@@ -1479,7 +1456,8 @@ public sealed partial class SessionViewModel : ObservableObject
         _session?.BackgroundRemovalDecisionRevisionId is { } revision
             ? string.Format(
                 CultureInfo.CurrentCulture, Strings.Session_BackgroundRemovalAuthorised, ShortRevision(revision),
-                BackgroundRemovalModeLabel(_session.BackgroundRemovalMode))
+                _session.ImageProcessingExecution?.Method is { } method and not ImageProcessingMethod.MeituBackgroundRemoval
+                    ? ImageProcessingMethodOption.Name(method) : BackgroundRemovalModeLabel(_session.BackgroundRemovalMode))
             : string.Empty;
 
     /// <summary>
@@ -1493,7 +1471,8 @@ public sealed partial class SessionViewModel : ObservableObject
     /// command would be refused (§8). A provisional recogniser change additionally blocks the
     /// old persisted mode until the operator confirms the new choice.
     /// </remarks>
-    public bool CanRunBackgroundRemoval => _session?.CanRunBackgroundRemoval == true && !HasUnconfirmedBackgroundRemovalMode;
+    public bool CanRunBackgroundRemoval => _session?.CanRunBackgroundRemoval == true &&
+        !HasUnconfirmedBackgroundRemovalMethod && !HasUnconfirmedBackgroundRemovalMode;
 
     /// <summary>
     /// The authority the cutout under review was produced under (§14, §15).
@@ -1633,7 +1612,8 @@ public sealed partial class SessionViewModel : ObservableObject
 
     public bool CanConfirmOriginal => Allows(CommandKind.ConfirmOriginal);
 
-    public bool CanRunStep => Allows(CommandKind.StartStep) && CanRunSelectedImageMethod && !HasUnconfirmedBackgroundRemovalMode;
+    public bool CanRunStep => Allows(CommandKind.StartStep) && CanRunSelectedImageMethod &&
+        !HasUnconfirmedBackgroundRemovalMethod && !HasUnconfirmedBackgroundRemovalMode && !HasPendingGuidedWhiteInk;
 
     public bool CanApprove => Allows(CommandKind.Approve);
 
@@ -1713,7 +1693,7 @@ public sealed partial class SessionViewModel : ObservableObject
     /// Only about this screen's own input being complete — whether a branch has been picked at
     /// all. Legality remains <see cref="CanSelectWhiteUnderbase"/>'s answer.
     /// </remarks>
-    public bool CanConfirmWhiteUnderbase => CanSelectWhiteUnderbase && SelectedWhiteUnderbaseChoice is not null;
+    public bool CanConfirmWhiteUnderbase => CanSelectWhiteUnderbase && !IsBusy && SelectedWhiteUnderbaseChoice is not null;
 
     /// <summary>
     /// The maximum bounds that are currently in force, or a plain "not set"
@@ -1935,6 +1915,7 @@ public sealed partial class SessionViewModel : ObservableObject
     /// <inheritdoc cref="RunReadinessNotice" />
     public bool HasRunReadinessNotice =>
         _session?.CurrentStep is { Step: StepKind.PhotoshopOutput } &&
+        !HasPendingGuidedWhiteInk &&
         !(UsesMagickNetTiff && HasMagickNetTiffUnavailable);
 
     /// <summary>
@@ -2209,9 +2190,23 @@ public sealed partial class SessionViewModel : ObservableObject
     [RelayCommand]
     private Task RunStepAsync(CancellationToken cancellationToken)
     {
-        if (!CanRunSelectedImageMethod || HasUnconfirmedBackgroundRemovalMode ||
+        if (!CanRunSelectedImageMethod || HasUnconfirmedBackgroundRemovalMethod ||
+            HasUnconfirmedBackgroundRemovalMode || HasPendingGuidedWhiteInk ||
             _session is not { CurrentStep: { } current } view)
             return Task.CompletedTask;
+
+        if (current.Step == StepKind.Trim && CanSetTrimParameters)
+        {
+            if (IsBusy || !CanInteractWithLivePage || DisplayedImageProcessingInput(view) is not { } expectedInput ||
+                !ValidateAutomaticTrimParameters(out TrimMargin margin))
+                return Task.CompletedTask;
+
+            return RunAsync(new WorkflowCommand.StartStep(StepKind.Trim)
+            {
+                ImageInput = expectedInput,
+                TrimInput = new(margin, IgnoreSmallTrimNoise),
+            }, cancellationToken);
+        }
 
         ImageUploadConfirmation? confirmation = null;
         if (view.ImageProcessingExecution is { } execution && ImageUploadConfirmation.IsOpenAiMethod(execution.Method))
@@ -2225,7 +2220,10 @@ public sealed partial class SessionViewModel : ObservableObject
                 current.CombinedUploadPositionId);
         }
 
-        return RunAsync(new WorkflowCommand.StartStep(current.Step, confirmation), cancellationToken);
+        return RunAsync(new WorkflowCommand.StartStep(current.Step, confirmation)
+        {
+            ImageInput = DisplayedImageProcessingInput(view),
+        }, cancellationToken);
     }
 
     /// <summary>
@@ -2513,7 +2511,10 @@ public sealed partial class SessionViewModel : ObservableObject
         }
 
         await RunAsync(
-            step => new WorkflowCommand.SubmitManualCrop(step, crop, margin), cancellationToken).ConfigureAwait(true);
+            step => new WorkflowCommand.SubmitManualCrop(step, crop, margin)
+            {
+                ImageInput = DisplayedImageProcessingInput(_session),
+            }, cancellationToken).ConfigureAwait(true);
     }
 
     /// <summary>
@@ -2620,37 +2621,6 @@ public sealed partial class SessionViewModel : ObservableObject
     // --- Background removal authority (Part C2B2 §5, §6, §10, §11) ------------------------
 
     /// <summary>
-    /// Opens the confirmation. Changes nothing about the session (§10).
-    /// </summary>
-    /// <remarks>
-    /// No command, no attempt, no authority: this is the operator being told what automatic
-    /// selection will do, before anything records that they accepted it. The offer itself still
-    /// comes from the workflow layer — pressing this when
-    /// <see cref="CanAuthoriseAutomaticSelection"/> is false does nothing.
-    /// </remarks>
-    [RelayCommand]
-    private void BeginAutomaticSelection()
-    {
-        if (!CanBeginAutomaticSelection)
-        {
-            return;
-        }
-
-        IsConfirmingAutomaticSelection = true;
-    }
-
-    /// <summary>
-    /// Closes the confirmation, discarding it (§10).
-    /// </summary>
-    /// <remarks>
-    /// The same structural guarantee <see cref="CancelReturn"/> has: this method cannot leave a
-    /// trace because it has nothing to leave one with. It touches no file, issues no command and
-    /// reaches no service.
-    /// </remarks>
-    [RelayCommand]
-    private void CancelAutomaticSelection() => IsConfirmingAutomaticSelection = false;
-
-    /// <summary>
     /// Authorises automatic selection for the artefact this screen displayed (§5, §6).
     /// </summary>
     /// <remarks>
@@ -2670,52 +2640,24 @@ public sealed partial class SessionViewModel : ObservableObject
     [RelayCommand]
     private async Task ConfirmAutomaticSelectionAsync(CancellationToken cancellationToken)
     {
-        if (_session?.CurrentArtefact is not { } displayed)
-        {
+        if (!CanConfirmAutomaticSelection || _session?.CurrentArtefact is not { } displayed)
             return;
-        }
 
+        ImageProcessingMethod method = SelectedImageProcessingMethod ?? ImageProcessingMethod.MeituBackgroundRemoval;
+        BackgroundRemovalMode mode = method == ImageProcessingMethod.MeituBackgroundRemoval
+            ? SelectedBackgroundRemovalMode : BackgroundRemovalMode.Automatic;
+        var decision = new WorkflowCommand.SetBackgroundRemovalDecision(
+            BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent,
+            displayed.RevisionId, displayed.Sha256, mode, method);
+        if (HasUnconfirmedBackgroundRemovalMethod &&
+            !await ChooseImageProcessingMethodAsync(method, cancellationToken).ConfigureAwait(true))
+            return;
+
+        if (cancellationToken.IsCancellationRequested)
+            return;
         var submittedDraft = CapturePageDraft();
-        await RunAsync(
-            new WorkflowCommand.SetBackgroundRemovalDecision(
-                BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent,
-                displayed.RevisionId,
-                displayed.Sha256,
-                SelectedBackgroundRemovalMode,
-                _session?.ImageProcessingExecution?.Method ?? PrintFlow.Domain.Settings.ImageProcessingMethod.MeituBackgroundRemoval),
-            cancellationToken,
+        await RunAsync(decision, cancellationToken,
             _ => _cleanDraft = submittedDraft).ConfigureAwait(true);
-    }
-
-    // --- Trim margin (Part C3 §9–§13) -----------------------------------------------------
-
-
-    /// <summary>
-    /// Records the chosen trim margin through the ordinary command path (§13).
-    /// </summary>
-    /// <remarks>
-    /// The only thing this does with the text is turn it into a number. Whether that number is
-    /// a usable margin is <see cref="TrimMargin"/>'s answer through its own factories, which
-    /// refuse a negative value outright — nothing here clamps, rounds or reinterprets one, and
-    /// a negative margin is emphatically not read as "crop further in" (§11).
-    /// <para>
-    /// The margin then reaches <c>ITrimProcessor</c> only by being persisted and read back when
-    /// Run Step starts the attempt. This view model has no reference to the processor and no way
-    /// to acquire one (§13).
-    /// </para>
-    /// </remarks>
-    [RelayCommand]
-    private Task ApplyTrimMarginAsync(CancellationToken cancellationToken)
-    {
-        if (!TryReadTypedMargin(out TrimMargin margin))
-        {
-            Notice = Strings.Session_TrimMarginInvalid;
-            return Task.CompletedTask;
-        }
-
-        var submittedDraft = CapturePageDraft();
-        return RunAsync(new WorkflowCommand.SetTrimParameters(margin, IgnoreSmallTrimNoise), cancellationToken,
-            _ => _cleanDraft = submittedDraft);
     }
 
     /// <summary>
@@ -2928,17 +2870,19 @@ public sealed partial class SessionViewModel : ObservableObject
     [RelayCommand]
     private Task SelectWhiteUnderbaseAsync(CancellationToken cancellationToken) =>
         SelectedWhiteUnderbaseChoice is { } choice
-            ? RunAsync(
-                new WorkflowCommand.SelectWhiteUnderbaseBranch(choice.Branch, JustificationFor(choice.Branch)),
-                cancellationToken, applied =>
-                {
-                    _isChoosingGuidedWhiteInk = false;
-                    SelectedWhiteUnderbaseChoice = WhiteUnderbaseChoices.FirstOrDefault(c => c.Branch == applied.WhiteUnderbaseBranch);
-                    _cleanDraft = CapturePageDraft();
-                    NotifyGuidedPresentation();
-                    NotifyOperatorStatusChanged();
-                })
+            ? ApplyWhiteUnderbaseChoiceAsync(choice, cancellationToken)
             : Task.CompletedTask;
+
+    private Task ApplyWhiteUnderbaseChoiceAsync(WhiteUnderbaseChoice choice, CancellationToken cancellationToken) =>
+        RunAsync(new WorkflowCommand.SelectWhiteUnderbaseBranch(choice.Branch, JustificationFor(choice.Branch)),
+            cancellationToken, applied =>
+            {
+                _pendingGuidedWhiteInk = null;
+                SelectedWhiteUnderbaseChoice = WhiteUnderbaseChoices.FirstOrDefault(c => c.Branch == applied.WhiteUnderbaseBranch);
+                _cleanDraft = CapturePageDraft();
+                NotifyGuidedPresentation();
+                NotifyOperatorStatusChanged();
+            });
 
     /// <summary>
     /// Finishes the session (§12).
@@ -3244,10 +3188,12 @@ public sealed partial class SessionViewModel : ObservableObject
         KeepOriginalExtentCommand.NotifyCanExecuteChanged();
         OnPropertyChanged(nameof(CanApplyManualCrop));
         OnPropertyChanged(nameof(CanBeginReturn));
-        OnPropertyChanged(nameof(CanBeginAutomaticSelection));
+        OnPropertyChanged(nameof(CanConfirmAutomaticSelection));
+        OnPropertyChanged(nameof(CanChangeRecognitionMode));
         OnPropertyChanged(nameof(CanReviewMaximumBounds));
         OnPropertyChanged(nameof(CanAdjustSelectedPreset));
         OnPropertyChanged(nameof(CanAuthoriseEnlargement));
+        OnPropertyChanged(nameof(CanConfirmWhiteUnderbase));
         NotifyFinalSaveChanged();
     }
 
@@ -3269,9 +3215,16 @@ public sealed partial class SessionViewModel : ObservableObject
 
     partial void OnSelectedTrimModeChanged(TrimModeChoice value)
     {
+        HasTrimParameterError = false;
         OnPropertyChanged(nameof(IsUniformMargin));
         OnPropertyChanged(nameof(IsEdgeSpecificMargin));
     }
+
+    partial void OnUniformMarginTextChanged(string? value) => HasTrimParameterError = false;
+    partial void OnTopMarginTextChanged(string? value) => HasTrimParameterError = false;
+    partial void OnRightMarginTextChanged(string? value) => HasTrimParameterError = false;
+    partial void OnBottomMarginTextChanged(string? value) => HasTrimParameterError = false;
+    partial void OnLeftMarginTextChanged(string? value) => HasTrimParameterError = false;
 
     private static string? Trimmed(string? value) =>
         string.IsNullOrWhiteSpace(value) ? null : value.Trim();
@@ -3343,6 +3296,15 @@ public sealed partial class SessionViewModel : ObservableObject
     /// there is nothing to type and nothing to get wrong.
     /// </para>
     /// </remarks>
+    private bool ValidateAutomaticTrimParameters() => ValidateAutomaticTrimParameters(out _);
+
+    private bool ValidateAutomaticTrimParameters(out TrimMargin margin)
+    {
+        bool valid = TryReadTypedMargin(out margin);
+        HasTrimParameterError = !valid;
+        return valid;
+    }
+
     private bool TryReadTypedMargin(out TrimMargin margin)
     {
         margin = TrimMargin.Tight;
@@ -3424,8 +3386,11 @@ public sealed partial class SessionViewModel : ObservableObject
         RequestDraftPreflight();
     }
 
-    partial void OnSelectedWhiteUnderbaseChoiceChanged(WhiteUnderbaseChoice? value) =>
+    partial void OnSelectedWhiteUnderbaseChoiceChanged(WhiteUnderbaseChoice? value)
+    {
         OnPropertyChanged(nameof(CanConfirmWhiteUnderbase));
+        OnPropertyChanged(nameof(GuidedWhiteInkSelection));
+    }
 
     /// <summary>
     /// Builds the command for the current step, executes it, and shows whatever came back.
@@ -3618,7 +3583,7 @@ public sealed partial class SessionViewModel : ObservableObject
         KeepDraft();
         if (!sameNavigationContext)
         {
-            _isChoosingGuidedWhiteInk = false;
+            _pendingGuidedWhiteInk = null;
             CloseHistory();
             ClearPendingDecisions();
         }
@@ -3670,11 +3635,7 @@ public sealed partial class SessionViewModel : ObservableObject
         // warning about a step the operator is no longer looking at (§24).
         ClearReturnState();
 
-        // And the same again for the authorisation confirmation. It was opened about one
-        // specific artefact; leaving it standing across a state change would put a Confirm
-        // button in front of an operator for an image that is no longer the one on screen
-        // (Part C2B2 §6, §12).
-        IsConfirmingAutomaticSelection = false;
+        HasTrimParameterError = false;
 
         // The run this screen was showing has finished by the time a new view arrives, so the
         // takeover confirmation goes with it — offering to take over a run that has ended would
@@ -3693,10 +3654,8 @@ public sealed partial class SessionViewModel : ObservableObject
         ClearPreviews();
         PreviewsLoaded = LoadPreviewsAsync(session, _previewGeneration, CancellationToken.None);
 
-        // The margin boxes are re-seeded from the persisted decision rather than left holding
-        // what was typed, so what the operator sees is what the next run would actually use.
-        // Applying a margin and then looking at the boxes must not show a different number from
-        // the summary beside them (§13, §18).
+        // Seed trim controls from the recorded parameters. A draft for the same source and
+        // task is restored below.
         ShowTrimMargin(session.TrimMargin);
         IgnoreSmallTrimNoise = session.IgnoreSmallTrimNoise;
 
@@ -3808,9 +3767,7 @@ public sealed partial class SessionViewModel : ObservableObject
         OnPropertyChanged(nameof(CanReturnToSeparateProcessing));
         OnPropertyChanged(nameof(CanBeginReturn));
         OnPropertyChanged(nameof(CanSetTrimParameters));
-        OnPropertyChanged(nameof(PendingTrimSummary));
         OnPropertyChanged(nameof(TrimParametersSummary));
-        OnPropertyChanged(nameof(PendingTrimNoiseSummary));
         OnPropertyChanged(nameof(CurrentTrimNoiseSummary));
         OnPropertyChanged(nameof(HasManualCropGeometry));
         OnPropertyChanged(nameof(ManualCropReviewSelected));
@@ -3827,7 +3784,9 @@ public sealed partial class SessionViewModel : ObservableObject
         OnPropertyChanged(nameof(TrimAppliedBoundsSize));
 
         OnPropertyChanged(nameof(CanAuthoriseAutomaticSelection));
-        OnPropertyChanged(nameof(CanBeginAutomaticSelection));
+        OnPropertyChanged(nameof(CanConfirmAutomaticSelection));
+        OnPropertyChanged(nameof(CanChangeRecognitionMode));
+        OnPropertyChanged(nameof(AutomaticSelectionImageIdentity));
         OnPropertyChanged(nameof(IsAutomaticSelectionAuthorised));
         OnPropertyChanged(nameof(IsAutomaticSelectionPending));
         OnPropertyChanged(nameof(AutomaticSelectionAuthorisedNotice));
@@ -3884,6 +3843,9 @@ public sealed partial class SessionViewModel : ObservableObject
 
     private void OnOperatorLanguageChanged(object? sender, EventArgs e)
     {
+        var selectedMethod = DraftImageProcessingMethod;
+        RefreshTaskImageProcessingMethods();
+        DraftImageProcessingMethod = selectedMethod;
         OnPropertyChanged(string.Empty);
         RefreshPreflightLanguage();
         RefreshActionFailureLanguage();

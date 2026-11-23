@@ -3080,11 +3080,8 @@ public sealed partial class SessionService : ISessionService
                         : inspectedCrop;
                 }
 
-                // The operator's recorded decision, not a constant. It arrives here from
-                // WorkflowSnapshot.TrimMargin, which SetTrimParameters is the only way to
-                // change — so nothing between the screen and the processor can substitute a
-                // margin, and the same value is what the attempt row recorded before this ran
-                // (Epic 11200 Part C3 §13, §14).
+                // The processor and attempt record use the same trim settings from the
+                // opening transition, including settings submitted with StartStep.
                 string trimFileName = workingCopy.Value.FileName.Equals(TrimOutputFileName, StringComparison.OrdinalIgnoreCase)
                     ? "trimmed-result.png" : TrimOutputFileName;
                 WorkspaceFileRef trimOutput = SiblingOf(workingCopy.Value, trimFileName);

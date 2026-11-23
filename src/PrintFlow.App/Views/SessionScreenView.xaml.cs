@@ -6,7 +6,9 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Shapes;
 using PrintFlow.App.ViewModels;
+using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Trimming;
+using PrintFlow.Workflow.Services;
 
 namespace PrintFlow.App.Views;
 
@@ -37,6 +39,7 @@ public partial class SessionScreenView : UserControl
     private string? _interactionContext;
     private DependencyObject? _interactionFocusScope;
     private bool _interactionActive = true;
+    private (SessionId Session, PrintDimensionsPreflight? Preflight)? _whiteInkFocus;
 
     public SessionScreenView()
     {
@@ -389,6 +392,7 @@ public partial class SessionScreenView : UserControl
     {
         _reviewTarget = null;
         _interactionContext = null;
+        _whiteInkFocus = null;
         SessionActionScope.SetActive(this, _interactionActive);
         ObserveModel();
         FocusNewContext();
@@ -438,6 +442,7 @@ public partial class SessionScreenView : UserControl
     private void OnUnloaded(object sender, RoutedEventArgs e)
     {
         _interactionActive = false;
+        _whiteInkFocus = null;
         SessionActionScope.SetActive(this, false);
         if (_observed is not null)
         {
@@ -467,6 +472,11 @@ public partial class SessionScreenView : UserControl
         }
         if (e.PropertyName is nameof(SessionViewModel.GuidedInteractionIdentity) or "" or null)
             FocusNewContext();
+        if (e.PropertyName == nameof(SessionViewModel.HasPendingGuidedWhiteInk) &&
+            Model is { HasPendingGuidedWhiteInk: true, IsBusy: false } whiteInk && WhiteInkOptions.IsKeyboardFocusWithin)
+            _whiteInkFocus = (whiteInk.Id, whiteInk.Preflight);
+        if (e.PropertyName == nameof(SessionViewModel.IsBusy) && Model is { IsBusy: false })
+            RestoreWhiteInkFocus();
         if (e.PropertyName == nameof(SessionViewModel.NoticeErrorCode) && Model?.HasNoticeErrorCode == true)
         {
             // A failure from a lower control must still be visible. Only move this scrolling
@@ -531,8 +541,37 @@ public partial class SessionScreenView : UserControl
         if (Model is null || !_interactionActive) return;
         _dragOrigin = null;
         CancelTrimGesture();
+        if (Model is { GuidedPage: GuidedSessionPage.Preflight, IsBusy: true, CanInteractWithLivePage: true } whiteInk &&
+            _whiteInkFocus == (whiteInk.Id, whiteInk.Preflight))
+            return;
         PlaceFocus(Model.IsConfirmingDraftLeave ? DraftLeaveHeadingText :
             Model.IsViewingHistory ? HistoryHeadingText : Model.IsConfirmingReturn ? ReturnHeadingText : OperatorStatusPanel);
+        if (Model is { GuidedPage: GuidedSessionPage.Ready, ShowsImageProcessingMethodSelection: true, CanInteractWithLivePage: true })
+            SessionDetailsScroll.ScrollToTop();
+    }
+
+    private void RestoreWhiteInkFocus()
+    {
+        var requested = _whiteInkFocus;
+        _whiteInkFocus = null;
+        if (Model is not { GuidedPage: GuidedSessionPage.Preflight, CanEditGuidedWhiteInk: true } model ||
+            requested != (model.Id, model.Preflight) || !_interactionActive)
+            return;
+
+        // WPF drops keyboard focus when the options are disabled. The ordinary context
+        // change still invalidates old input providers when a different branch is saved.
+        var scope = SessionActionScope.State(this);
+        Dispatcher.BeginInvoke(() =>
+        {
+            if (!ReferenceEquals(scope, SessionActionScope.State(this)) || !SessionActionScope.CanInteract(WhiteInkOptions) ||
+                Keyboard.FocusedElement is FrameworkElement { IsEnabled: true } focused &&
+                focused != OperatorStatusPanel && focused != SessionDetailsScroll && !WhiteInkOptions.IsKeyboardFocusWithin)
+                return;
+
+            var selected = WhiteInkOptions.SelectedItem is { } choice
+                ? WhiteInkOptions.ItemContainerGenerator.ContainerFromItem(choice) as FrameworkElement : null;
+            PlaceFocus(selected ?? WhiteInkOptions);
+        }, System.Windows.Threading.DispatcherPriority.Loaded);
     }
 
     private void RedrawSelection()

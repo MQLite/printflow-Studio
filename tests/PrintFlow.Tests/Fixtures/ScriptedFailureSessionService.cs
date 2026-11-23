@@ -3,6 +3,7 @@ using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Sessions;
+using PrintFlow.Domain.Settings;
 using PrintFlow.Workflow.Commands;
 using PrintFlow.Workflow.Ports;
 using PrintFlow.Workflow.Services;
@@ -19,6 +20,9 @@ namespace PrintFlow.Tests.Fixtures;
 /// </remarks>
 internal sealed class ScriptedFailureSessionService(ISessionService inner) : ISessionService
 {
+    public OperationFailure? GetImageProcessingUnavailable(ImageProcessingMethod method) =>
+        inner.GetImageProcessingUnavailable(method);
+
     public OperationFailure? NextExecuteFailure { get; set; }
     public OperationFailure? NextRepairFailure { get; set; }
     public OperationFailure? NextRecoveryFailure { get; set; }

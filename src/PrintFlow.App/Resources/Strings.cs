@@ -157,7 +157,6 @@ internal static class Strings
     internal static string Session_GuidedPreflight => Get(nameof(Session_GuidedPreflight));
     internal static string Session_GuidedCurrent => Get(nameof(Session_GuidedCurrent));
     internal static string Session_GuidedFuture => Get(nameof(Session_GuidedFuture));
-    internal static string Session_GuidedChangeWhiteInk => Get(nameof(Session_GuidedChangeWhiteInk));
     internal static string Session_GuidedHistoryAvailable => Get(nameof(Session_GuidedHistoryAvailable));
     internal static string Session_GuidedTechnicalDetails => Get(nameof(Session_GuidedTechnicalDetails));
     internal static string Session_NextCrop => Get(nameof(Session_NextCrop));

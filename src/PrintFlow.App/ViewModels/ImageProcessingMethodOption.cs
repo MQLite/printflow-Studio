@@ -23,14 +23,16 @@ public sealed record ImageProcessingMethodOption(ImageProcessingMethod Method, s
         if (includeCombined && step == StepKind.Enhancement)
             methods = [.. methods, ImageProcessingMethod.OpenAiCombined];
 
-        return methods.Select(method =>
-        {
-            OperationFailure? unavailable = sessions.GetImageProcessingUnavailable(method);
-            string description = AvailabilityHint(method);
-            return new ImageProcessingMethodOption(method, Name(method),
-                unavailable is null ? description : $"{description} {UnavailableHint(unavailable)}",
-                unavailable is null);
-        }).ToArray();
+        return methods.Select(method => Create(method, sessions)).ToArray();
+    }
+
+    internal static ImageProcessingMethodOption Create(ImageProcessingMethod method, ISessionService sessions)
+    {
+        OperationFailure? unavailable = sessions.GetImageProcessingUnavailable(method);
+        string description = AvailabilityHint(method);
+        return new ImageProcessingMethodOption(method, Name(method),
+            unavailable is null ? description : $"{description} {UnavailableHint(unavailable)}",
+            unavailable is null);
     }
 
     internal static string Name(ImageProcessingMethod method) => Strings.Resolve("ImageProcessing_Method_" + (method switch

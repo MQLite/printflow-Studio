@@ -15,8 +15,6 @@ public sealed partial class SessionViewModel
         set
         {
             if (!Enum.IsDefined(value) || !SetProperty(ref _selectedBackgroundRemovalMode, value)) return;
-            // Confirmation is about a recogniser as well as the displayed image.
-            IsConfirmingAutomaticSelection = false;
             NotifyBackgroundRemovalMode();
         }
     }
@@ -27,8 +25,8 @@ public sealed partial class SessionViewModel
     public string BackgroundRemovalModeHeading => Strings.Resolve("Session_BackgroundRemovalModeHeading");
     public string SelectedBackgroundRemovalModeLabel => BackgroundRemovalModeLabel(SelectedBackgroundRemovalMode);
     private string BackgroundRemovalAuthorityLabel =>
-        !ShowsMeituRecognitionModes && _session?.ImageProcessingExecution is { } execution
-            ? ImageProcessingMethodOption.Name(execution.Method) : SelectedBackgroundRemovalModeLabel;
+        !ShowsMeituRecognitionModes && SelectedImageProcessingMethod is { } method
+            ? ImageProcessingMethodOption.Name(method) : SelectedBackgroundRemovalModeLabel;
     public bool HasRecordedBackgroundRemovalAuthorisation =>
         _session?.BackgroundRemovalDecision == BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent;
 
@@ -37,6 +35,10 @@ public sealed partial class SessionViewModel
     private bool HasUnconfirmedBackgroundRemovalMode =>
         ShowsMeituRecognitionModes && _session?.CurrentStep?.Step == StepKind.BackgroundRemoval &&
         SelectedBackgroundRemovalMode != _session.BackgroundRemovalMode;
+
+    private bool HasUnconfirmedBackgroundRemovalMethod =>
+        _session?.CurrentStep?.Step == StepKind.BackgroundRemoval &&
+        SelectedImageProcessingMethod != _session.ImageProcessingExecution?.Method;
 
     private static string BackgroundRemovalModeLabel(BackgroundRemovalMode mode) =>
         Strings.Resolve($"Session_BackgroundRemovalMode_{mode}");

@@ -43,7 +43,19 @@ public abstract record WorkflowCommand
     public sealed record ConfirmOriginal(string? Notes = null) : WorkflowCommand;
 
     /// <summary>Begin an attempt for the given step.</summary>
-    public sealed record StartStep(StepKind Step, ImageUploadConfirmation? UploadConfirmation = null) : WorkflowCommand;
+    public sealed record StartStep(StepKind Step, ImageUploadConfirmation? UploadConfirmation = null) : WorkflowCommand
+    {
+        public ImageProcessingInput? ImageInput { get; init; }
+
+        /// <summary>The parameters submitted with a run from the automatic trim controls.</summary>
+        public AutomaticTrimInput? TrimInput { get; init; }
+    }
+
+    /// <summary>The displayed method and source on which an image processing action was based.</summary>
+    public sealed record ImageProcessingInput(ImageProcessingMethod Method, RevisionId RevisionId, Sha256 Sha256);
+
+    /// <summary>The parameters to record when the automatic trim attempt starts.</summary>
+    public sealed record AutomaticTrimInput(TrimMargin Margin, bool IgnoreSmallNoise);
 
     /// <summary>Sets the processor for this task's next production TIFF attempt.</summary>
     public sealed record SetProductionTiffBackend(ProductionTiffBackend Backend) : WorkflowCommand;
@@ -59,7 +71,13 @@ public abstract record WorkflowCommand
         string? Notes = null) : WorkflowCommand;
 
     /// <summary>Return a rejected, failed or interrupted step to a state where a new attempt is legal.</summary>
-    public sealed record Retry(StepKind Step) : WorkflowCommand;
+    public sealed record Retry(StepKind Step) : WorkflowCommand
+    {
+        public ImageProcessingRetryTarget? ExpectedImageTarget { get; init; }
+    }
+
+    /// <summary>The failed attempt position retained while adopting a different method.</summary>
+    public sealed record ImageProcessingRetryTarget(ImageProcessingInput Input, int AttemptCount);
 
     /// <summary>
     /// Crop <paramref name="Crop"/> out of the step's upstream Revision, because automatic
@@ -78,7 +96,10 @@ public abstract record WorkflowCommand
     /// its answer reaches a command (Part C2 §6, §7).
     /// </para>
     /// </remarks>
-    public sealed record SubmitManualCrop(StepKind Step, TrimBounds Crop, ManualCropMargin Margin = default) : WorkflowCommand;
+    public sealed record SubmitManualCrop(StepKind Step, TrimBounds Crop, ManualCropMargin Margin = default) : WorkflowCommand
+    {
+        public ImageProcessingInput? ImageInput { get; init; }
+    }
 
     /// <summary>
     /// Replaces the trim result under review with a new crop of its own pre-trim source
@@ -100,6 +121,8 @@ public abstract record WorkflowCommand
     /// <summary>Decline Trim and continue with its approved upstream artwork, without producing a result.</summary>
     public sealed record KeepOriginalExtent : WorkflowCommand
     {
+        public ImageProcessingInput? ImageInput { get; init; }
+
         /// <summary>Stable persisted operator intent; display wording is localized separately.</summary>
         public const string Reason = "Operator chose to keep original extent";
     }
@@ -107,6 +130,8 @@ public abstract record WorkflowCommand
     /// <summary>Skip a skippable step. Creates no Revision.</summary>
     public sealed record Skip(StepKind Step, string? Reason = null) : WorkflowCommand
     {
+        public ImageProcessingInput? ImageInput { get; init; }
+
         /// <summary>The default reason recorded when the operator gives none (MVP design §7.2).</summary>
         public const string DefaultReason = "File already satisfies this step";
 
@@ -313,7 +338,10 @@ public abstract record WorkflowCommand
     public sealed record SetTrimParameters(TrimMargin Margin, bool IgnoreSmallNoise = true) : WorkflowCommand;
 
     public sealed record SetImageProcessingSelection(
-        StepKind Step, SessionImageProcessingSelection Selection) : WorkflowCommand;
+        StepKind Step, SessionImageProcessingSelection Selection) : WorkflowCommand
+    {
+        public ImageProcessingInput? ImageInput { get; init; }
+    }
 
     /// <summary>
     /// Record the operator's explicit authority for Meitu's automatic selection over the

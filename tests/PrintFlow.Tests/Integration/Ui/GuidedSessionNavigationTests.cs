@@ -6,6 +6,7 @@ using PrintFlow.App.ViewModels;
 using PrintFlow.App.Views;
 using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Sessions;
+using PrintFlow.Domain.Settings;
 using PrintFlow.Tests.Fixtures;
 using PrintFlow.Tests.Integration.Persistence;
 using PrintFlow.Workflow.Services;
@@ -16,6 +17,30 @@ namespace PrintFlow.Tests.Integration.Ui;
 [Collection(SqliteCollection.Name)]
 public sealed class GuidedSessionNavigationTests
 {
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Pending_method_survives_reload_and_can_be_kept_or_discarded(bool discard)
+    {
+        using HomeScreenHarness h = new();
+        var imported = (await h.Sessions.ImportAsync(WorkflowType.PrepareAsset,
+            h.Inner.WriteBorderedSourcePng("method-draft.png"), "method", "tester", default)).Value;
+        var nav = new RecordingNavigation();
+        var screen = h.Session(nav);
+        screen.Open(imported);
+        await screen.ConfirmOriginalCommand.ExecuteAsync(null);
+        var persisted = (await h.Sessions.LoadAsync(screen.Id, default)).Value;
+        screen.DraftImageProcessingMethod = ImageProcessingMethod.SkipEnhancement;
+        screen.Open(persisted);
+        screen.DraftImageProcessingMethod.ShouldBe(ImageProcessingMethod.SkipEnhancement);
+
+        await Leave(screen, nav, discard);
+
+        var savedMethod = persisted.ImageProcessingExecution!.Method;
+        screen.DraftImageProcessingMethod.ShouldBe(discard ? savedMethod : ImageProcessingMethod.SkipEnhancement);
+        (await h.Sessions.LoadAsync(screen.Id, default)).Value.ImageProcessingExecution!.Method.ShouldBe(savedMethod);
+    }
+
     [Fact]
     public async Task Return_confirmation_cannot_be_retargeted_or_reused()
     {

@@ -53,7 +53,7 @@ public sealed class WorkflowEngine : IWorkflowEngine
             WorkflowCommand.SubmitManualCrop c => SubmitManualCrop(state, c, context),
             WorkflowCommand.AdjustTrimFromReview c => AdjustTrimFromReview(state, c, context),
             WorkflowCommand.Skip c => Skip(state, c, context),
-            WorkflowCommand.KeepOriginalExtent => KeepOriginalExtent(state, context),
+            WorkflowCommand.KeepOriginalExtent c => KeepOriginalExtent(state, c, context),
             WorkflowCommand.HandOff c => HandOff(state, c, context),
             WorkflowCommand.SetPrintDimensions c => SetPrintDimensions(state, c, context),
             WorkflowCommand.SetPresetFitSize c => SetPresetFitSize(state, c, context),
@@ -303,6 +303,9 @@ public sealed class WorkflowEngine : IWorkflowEngine
             return WorkflowTransition.Rejected(RejectionCode.PreconditionNotMet,
                 "Select a valid method for the current image processing step between attempts.");
 
+        if (RejectChangedImageProcessingInput(state, command.Step, command.ImageInput) is { } stale)
+            return stale;
+
         SessionImageProcessingSelection recorded = state.ImageProcessingSelection ?? SessionImageProcessingSelection.Compatible;
         SessionImageProcessingSelection updated = command.Selection;
         bool pairChanged = recorded.UseOpenAiCombined != updated.UseOpenAiCombined;
@@ -326,6 +329,18 @@ public sealed class WorkflowEngine : IWorkflowEngine
             BackgroundRemovalAuthority = recorded != updated && command.Step != StepKind.Trim
                 ? null : state.BackgroundRemovalAuthority,
         });
+    }
+
+    private static WorkflowTransition? RejectChangedImageProcessingInput(
+        WorkflowSnapshot state, StepKind step, WorkflowCommand.ImageProcessingInput? expected)
+    {
+        if (expected is null)
+            return null;
+        if (state.ProcessingMethodFor(step) == expected.Method && state.UpstreamResultOf(step) is { } source &&
+            source.Id == expected.RevisionId && source.Sha256 == expected.Sha256)
+            return null;
+        return WorkflowTransition.Rejected(RejectionCode.PreconditionNotMet,
+            "The image processing method or source changed. Review the current method and image before continuing.");
     }
 
     private static WorkflowTransition SetTrimParameters(
@@ -774,6 +789,9 @@ public sealed class WorkflowEngine : IWorkflowEngine
             return WorkflowTransition.Rejected(resolved.Rejection);
         }
 
+        if (RejectChangedImageProcessingInput(state, command.Step, command.ImageInput) is { } stale)
+            return stale;
+
         SessionStep step = resolved.Step!;
         StepDefinition definition = resolved.Definition!;
 
@@ -888,6 +906,21 @@ public sealed class WorkflowEngine : IWorkflowEngine
         }
 
         List<WorkflowEffect> effects = [];
+
+        if (command.TrimInput is { } trim)
+        {
+            if (command.Step != StepKind.Trim || command.ImageInput is null)
+                return WorkflowTransition.Rejected(RejectionCode.PreconditionNotMet,
+                    "Automatic trim parameters require the displayed method and image.");
+
+            WorkflowTransition parameters = SetTrimParameters(
+                state, new WorkflowCommand.SetTrimParameters(trim.Margin, trim.IgnoreSmallNoise));
+            if (parameters.IsRejected)
+                return parameters;
+
+            state = parameters.State;
+            effects.AddRange(parameters.Effects);
+        }
 
         // Every attempt, first or retry, works on a fresh copy (MVP design invariant 8).
         if (input is RevisionId source)
@@ -1043,6 +1076,15 @@ public sealed class WorkflowEngine : IWorkflowEngine
         }
 
         SessionStep step = resolved.Step!;
+        if (command.ExpectedImageTarget is { } expected)
+        {
+            if (RejectChangedImageProcessingInput(state, command.Step, expected.Input) is { } stale)
+                return stale;
+            if (step.AttemptCount != expected.AttemptCount)
+                return WorkflowTransition.Rejected(RejectionCode.PreconditionNotMet,
+                    "The image processing attempt changed. Review the current attempt before retrying.");
+        }
+
         SessionStep retryable = step with
         {
             State = StepState.Waiting,
@@ -1083,6 +1125,9 @@ public sealed class WorkflowEngine : IWorkflowEngine
         {
             return WorkflowTransition.Rejected(resolved.Rejection);
         }
+
+        if (RejectChangedImageProcessingInput(state, command.Step, command.ImageInput) is { } stale)
+            return stale;
 
         // Trim is the only step an operator-drawn rectangle means anything for. Enhancement and
         // BackgroundRemoval fail for reasons a crop cannot fix, and PhotoshopOutput produces a
@@ -1204,13 +1249,17 @@ public sealed class WorkflowEngine : IWorkflowEngine
         return WorkflowTransition.Accepted(newState, effects);
     }
 
-    private static WorkflowTransition KeepOriginalExtent(WorkflowSnapshot state, CommandContext context)
+    private static WorkflowTransition KeepOriginalExtent(
+        WorkflowSnapshot state, WorkflowCommand.KeepOriginalExtent command, CommandContext context)
     {
         StepResolution resolved = Resolve(state, StepKind.Trim, CommandKind.KeepOriginalExtent);
         if (resolved.Rejection is not null)
         {
             return WorkflowTransition.Rejected(resolved.Rejection);
         }
+
+        if (RejectChangedImageProcessingInput(state, StepKind.Trim, command.ImageInput) is { } stale)
+            return stale;
 
         if (state.UpstreamResultOf(StepKind.Trim) is not { } upstream ||
             !state.Steps.Any(step => step.State == StepState.Approved && step.CurrentRevisionId == upstream.Id))
@@ -1243,6 +1292,9 @@ public sealed class WorkflowEngine : IWorkflowEngine
         {
             return WorkflowTransition.Rejected(resolved.Rejection);
         }
+
+        if (RejectChangedImageProcessingInput(state, command.Step, command.ImageInput) is { } stale)
+            return stale;
 
         StepDefinition definition = resolved.Definition!;
         if (!definition.IsSkippable)

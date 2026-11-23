@@ -83,18 +83,18 @@ public sealed class OperatorWave1Tests
             SessionViewModel screen = harness.Session(new RecordingNavigation());
             screen.Open(state);
             await screen.PreviewsLoaded;
-            // Exact original toolbar inventory and predicates from baseline eea6019.
-            // AvailableCommands is the service/engine answer, not the new recommendation.
+            bool hasProcessingAdvance = state.CurrentStep is { Step: StepKind.Enhancement, State: StepState.Waiting };
             var original = new (string Id, ICommand Command, bool Visible)[]
             {
                 ("ConfirmOriginal", screen.ConfirmOriginalCommand, Allows(CommandKind.ConfirmOriginal)),
-                ("RunStep", screen.RunStepCommand, Allows(CommandKind.StartStep)),
+                ("RunStep", hasProcessingAdvance ? screen.AdvanceImageProcessingCommand : screen.RunStepCommand,
+                    hasProcessingAdvance || Allows(CommandKind.StartStep)),
                 ("Approve", screen.ApproveCommand, Allows(CommandKind.Approve)),
                 ("Reject", screen.RejectCommand, Allows(CommandKind.Reject)),
                 ("Retry", screen.RetryCommand, Allows(CommandKind.Retry) && state.CurrentStepFailure is not
                     (FailureCode.PdfMultiplePages or FailureCode.PdfUnreadable or FailureCode.PdfEncrypted)),
                 ("ErrorDetails", screen.OpenErrorDetailsCommand, state.CurrentFailureAttemptId is not null),
-                ("Skip", screen.SkipCommand, Allows(CommandKind.Skip)),
+                ("Skip", screen.SkipCommand, !hasProcessingAdvance && Allows(CommandKind.Skip)),
                 ("KeepOriginalExtent", screen.KeepOriginalExtentCommand, Allows(CommandKind.KeepOriginalExtent)),
                 ("SubmitManualResult", screen.SubmitManualResultCommand, Allows(CommandKind.SubmitManualResult)),
                 ("HandOff", screen.HandOffCommand, Allows(CommandKind.HandOff)),

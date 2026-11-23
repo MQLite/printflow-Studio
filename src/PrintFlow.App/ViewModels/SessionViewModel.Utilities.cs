@@ -30,7 +30,6 @@ public sealed partial class SessionViewModel
         _openGeneration++;
         KeepDraft();
         ClearReturnState();
-        IsConfirmingAutomaticSelection = false;
         IsConfirmingTakeOver = false;
         NotifyNavigation();
     }

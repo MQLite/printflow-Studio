@@ -29,8 +29,8 @@ public sealed class GuidedProcessingCropTests
         model.Open((await service.LoadAsync(id, default)).Value);
 
         model.ShowsGuidedTrimParameters.ShouldBeTrue();
-        model.RecommendedCommand.ShouldBeSameAs(model.RunStepCommand);
-        await model.RunStepCommand.ExecuteAsync(null);
+        model.RecommendedCommand.ShouldBeSameAs(model.AdvanceImageProcessingCommand);
+        await model.AdvanceImageProcessingCommand.ExecuteAsync(null);
 
         var review = (await service.LoadAsync(id, default)).Value;
         review.CurrentStep!.State.ShouldBe(StepState.ReviewRequired);
@@ -42,9 +42,9 @@ public sealed class GuidedProcessingCropTests
     }
 
     [Theory]
-    [InlineData(ImageProcessingMethod.ManualCrop, "Session.BeginManualCrop")]
-    [InlineData(ImageProcessingMethod.KeepCanvas, "Session.KeepOriginalExtent")]
-    public async Task Selecting_a_crop_method_at_waiting_offers_its_action(ImageProcessingMethod method, string actionId)
+    [InlineData(ImageProcessingMethod.ManualCrop)]
+    [InlineData(ImageProcessingMethod.KeepCanvas)]
+    public async Task Advancing_uses_the_selected_crop_method(ImageProcessingMethod method)
     {
         using SessionServiceHarness h = new();
         var service = h.CreateService();
@@ -53,26 +53,21 @@ public sealed class GuidedProcessingCropTests
         model.Open((await service.LoadAsync(id, default)).Value);
         await model.PreviewsLoaded;
         model.DraftImageProcessingMethod = method;
-        model.ApplyImageProcessingMethodCommand.CanExecute(null).ShouldBeTrue();
-        await model.ApplyImageProcessingMethodCommand.ExecuteAsync(null);
-        await model.PreviewsLoaded;
-
         model.GuidedPage.ShouldBe(GuidedSessionPage.Ready);
-        model.CurrentImageProcessingUnavailable.ShouldBeNull();
-        model.ShowsGuidedRunStep.ShouldBeFalse();
+        model.ShowsGuidedRunStep.ShouldBeTrue();
         model.ShowsGuidedTrimParameters.ShouldBeFalse();
         WpfRendering.RenderExpectingNoBindingErrors(() => new SessionScreenView { DataContext = model },
             WpfRendering.ReviewViewport, tree =>
             {
-                var action = GuidedSessionShellTests.Find<Button>(tree, actionId);
+                var action = GuidedSessionShellTests.Find<Button>(tree, "Session.RunStep");
                 GuidedSessionProjectionTests.Shown(action).ShouldBeTrue();
                 action.IsEnabled.ShouldBeTrue();
                 action.Command.ShouldBeSameAs(model.RecommendedCommand);
                 Task completed = action.Dispatcher.InvokeAsync(async () =>
                 {
+                    await model.AdvanceImageProcessingCommand.ExecuteAsync(null);
                     if (method == ImageProcessingMethod.ManualCrop)
                     {
-                        action.Command.Execute(null);
                         model.GuidedPage.ShouldBe(GuidedSessionPage.Crop);
                         model.CropPane!.SourcePixelWidth.ShouldBe(12);
                         model.CanApplyManualCrop.ShouldBeFalse();
@@ -84,7 +79,6 @@ public sealed class GuidedProcessingCropTests
                     }
                     else
                     {
-                        await model.KeepOriginalExtentCommand.ExecuteAsync(null);
                         model.GuidedPage.ShouldBe(GuidedSessionPage.Save);
                     }
                 }).Task.Unwrap().WaitAsync(TimeSpan.FromSeconds(20));

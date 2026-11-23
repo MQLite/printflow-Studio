@@ -115,7 +115,7 @@ public sealed class PhotoshopBackgroundEditUiTests
         screen.BeginPhotoshopEditCommand.Execute(null);
         screen.CanRunStep.ShouldBeFalse();
         screen.CanRetry.ShouldBeFalse();
-        screen.CanBeginAutomaticSelection.ShouldBeFalse();
+        screen.CanConfirmAutomaticSelection.ShouldBeFalse();
         var editing = screen.OpenPhotoshopEditCommand.ExecuteAsync(null);
         var first = await Task.WhenAny(editor.Opened.Task, editing).WaitAsync(TimeSpan.FromSeconds(5));
         first.ShouldBeSameAs(editor.Opened.Task, screen.Notice);

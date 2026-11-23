@@ -574,10 +574,8 @@ public sealed class ViewRenderingTests
         session.RightMarginText = "2";
         session.BottomMarginText = "1";
         session.LeftMarginText = "2";
-        await session.ApplyTrimMarginCommand.ExecuteAsync(null);
+        await session.AdvanceImageProcessingCommand.ExecuteAsync(null);
         session.Notice.ShouldBeNull();
-
-        await session.RunStepCommand.ExecuteAsync(null);
         await session.PreviewsLoaded;
 
         session.IsReviewRequired.ShouldBeTrue();
@@ -674,9 +672,7 @@ public sealed class ViewRenderingTests
 
             driver.SelectedTrimMode = driver.TrimModes.Single(m => m.Mode == TrimMode.UniformMargin);
             driver.UniformMarginText = "2";
-            await driver.ApplyTrimMarginCommand.ExecuteAsync(null);
-
-            await driver.RunStepCommand.ExecuteAsync(null);
+            await driver.AdvanceImageProcessingCommand.ExecuteAsync(null);
             await driver.PreviewsLoaded;
 
             driver.HasTrimBounds.ShouldBeTrue();
@@ -746,15 +742,13 @@ public sealed class ViewRenderingTests
         SessionViewModel driver = await PrepareAssetAtBackgroundRemovalAsync(harness);
         SessionId id = harness.Navigation.WorkflowSelectionFor!.Id;
 
-        // 1. Undecided: the authorisation panel is offered, with the confirmation open so its
-        //    bindings are resolved too, and there is no run.
+        // The current image's authorisation is visible before processing can run.
         driver.CanAuthoriseAutomaticSelection.ShouldBeTrue();
         driver.IsAutomaticSelectionPending.ShouldBeTrue();
         driver.CanRunBackgroundRemoval.ShouldBeFalse();
         await RenderStateAsync(harness, id, confirming: true);
 
         // 2. Authorised: the status line replaces the action, and the run becomes available.
-        driver.BeginAutomaticSelectionCommand.Execute(null);
         await driver.ConfirmAutomaticSelectionCommand.ExecuteAsync(null);
         await driver.PreviewsLoaded;
         driver.IsAutomaticSelectionAuthorised.ShouldBeTrue();
@@ -784,7 +778,7 @@ public sealed class ViewRenderingTests
         driver.IsAutomaticSelectionAuthorised.ShouldBeFalse();
         driver.CanAuthoriseAutomaticSelection.ShouldBeTrue();
         driver.CanRunBackgroundRemoval.ShouldBeFalse();
-        await RenderStateAsync(harness, id, confirming: false);
+        await RenderStateAsync(harness, id, confirming: true);
     }
 
     /// <summary>
@@ -821,7 +815,6 @@ public sealed class ViewRenderingTests
 
             await RenderStateAsync(harness, id, confirming: true);
 
-            driver.BeginAutomaticSelectionCommand.Execute(null);
             await driver.ConfirmAutomaticSelectionCommand.ExecuteAsync(null);
             await driver.PreviewsLoaded;
             driver.AutomaticSelectionAuthorisedNotice.ShouldNotStartWith("Session_");
@@ -853,11 +846,7 @@ public sealed class ViewRenderingTests
         screen.Open((await harness.Sessions.LoadAsync(id, CancellationToken.None)).Value);
         await screen.PreviewsLoaded;
 
-        if (confirming)
-        {
-            screen.BeginAutomaticSelectionCommand.Execute(null);
-            screen.IsConfirmingAutomaticSelection.ShouldBeTrue();
-        }
+        screen.ShowsGuidedAutomaticConfirmation.ShouldBe(confirming);
 
         RenderResult<int> rendered = WpfRendering.RenderExpectingNoBindingErrors(
             () => new SessionScreenView { DataContext = screen }, WpfRendering.ReviewViewport, _ => 0);

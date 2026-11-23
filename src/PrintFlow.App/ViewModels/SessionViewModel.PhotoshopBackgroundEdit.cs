@@ -43,7 +43,6 @@ public sealed partial class SessionViewModel
     {
         if (!CanBeginPhotoshopEdit || _session is not { PhotoshopBackgroundEdit: { } position } session) return;
         _photoshopEdit = new(session.Id, position);
-        CancelAutomaticSelection();
         Notice = null;
         NotifyPhotoshopEdit();
     }
@@ -159,12 +158,12 @@ public sealed partial class SessionViewModel
         OnPropertyChanged(nameof(CanRunStep));
         OnPropertyChanged(nameof(ShowsGuidedRunStep));
         OnPropertyChanged(nameof(CanAuthoriseAutomaticSelection));
-        OnPropertyChanged(nameof(CanBeginAutomaticSelection));
+        OnPropertyChanged(nameof(CanConfirmAutomaticSelection));
+        OnPropertyChanged(nameof(CanChangeRecognitionMode));
         OnPropertyChanged(nameof(ShowsGuidedBackgroundDecision));
-        OnPropertyChanged(nameof(ShowsGuidedAutomaticBegin));
         OnPropertyChanged(nameof(ShowsGuidedAutomaticConfirmation));
         OnPropertyChanged(nameof(CanChangeImageProcessingMethod));
-        OnPropertyChanged(nameof(ShowsCombinedImageProcessingChoice));
+        NotifyImageProcessingAdvance();
         NotifyOperatorStatusChanged();
     }
 }

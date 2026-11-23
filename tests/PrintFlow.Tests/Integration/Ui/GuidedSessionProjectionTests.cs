@@ -159,7 +159,7 @@ public sealed class GuidedSessionProjectionTests
     }
 
     [Fact]
-    public async Task Current_white_ink_submission_is_recommended_and_reediting_does_not_expose_run()
+    public async Task Initial_white_ink_submission_is_recommended_and_reopened_preflight_keeps_the_saved_selection()
     {
         using HomeScreenHarness h = new();
         var model = await Open(h, WorkflowType.GeneratePrintTiff);
@@ -170,15 +170,17 @@ public sealed class GuidedSessionProjectionTests
         model.RecommendedCommand.ShouldBeSameAs(model.SelectWhiteUnderbaseCommand);
         model.SelectedWhiteUnderbaseChoice = model.WhiteUnderbaseChoices[0];
         await model.SelectWhiteUnderbaseCommand.ExecuteAsync(null);
-        // The new secondary page control must not itself change the persisted branch.
+        var saved = (await h.Sessions.LoadAsync(model.Id, default)).Value;
+        model = h.Session(new RecordingNavigation());
+        model.Open(saved);
+        await model.PreviewsLoaded;
         WpfRendering.RenderExpectingNoBindingErrors(() => new SessionScreenView { DataContext = model }, new Size(1000, 700), tree =>
         {
-            var change = GuidedSessionShellTests.Find<Button>(tree, "Session.WhiteUnderbase.Change");
-            change.Command!.Execute(null);
-            tree.Root.UpdateLayout();
-            Page(model).ShouldBe("WhiteInk");
-            Shown(GuidedSessionShellTests.Find<Button>(tree, "Session.RunStep")).ShouldBeFalse();
-            model.SelectedWhiteUnderbaseChoice.ShouldBeNull();
+            var choices = GuidedSessionShellTests.Find<ListBox>(tree, "Session.WhiteUnderbaseChoices");
+            Shown(choices).ShouldBeTrue();
+            choices.SelectedItem.ShouldBeSameAs(model.WhiteUnderbaseChoices[0]);
+            model.GuidedPage.ShouldBe(GuidedSessionPage.Preflight);
+            GuidedSessionShellTests.Find<Button>(tree, "Session.RunStep").IsEnabled.ShouldBeTrue();
             return true;
         });
         (await h.Sessions.LoadAsync(model.Id, default)).Value.WhiteUnderbaseBranch.ShouldBe(WhiteUnderbaseBranch.W1_0px);
@@ -191,12 +193,17 @@ public sealed class GuidedSessionProjectionTests
         var model = await Open(h, WorkflowType.PrepareAsset);
         await model.ConfirmOriginalCommand.ExecuteAsync(null);
         await model.SkipCommand.ExecuteAsync(null);
-        model.BeginAutomaticSelectionCommand.Execute(null);
-        model.IsConfirmingAutomaticSelection.ShouldBeTrue();
+        model.ShowsGuidedAutomaticConfirmation.ShouldBeTrue();
         WpfRendering.RenderExpectingNoBindingErrors(() => new SessionScreenView { DataContext = model }, new Size(1000, 700), tree =>
         {
             var confirm = tree.OfType<Button>().Single(b => ReferenceEquals(b.Command, model.ConfirmAutomaticSelectionCommand));
             GuidedSessionShellTests.Ancestors(confirm).ShouldContain(GuidedSessionShellTests.Find<FrameworkElement>(tree, "Session.ActionBar"));
+            Shown(confirm).ShouldBeTrue();
+            var image = GuidedSessionShellTests.Find<TextBlock>(tree, "Session.BackgroundRemoval.Image");
+            image.Text.ShouldContain(model.ArtefactFileName);
+            image.Text.ShouldContain(model.ArtefactRevision);
+            GuidedSessionShellTests.Find<TextBlock>(tree, "Session.BackgroundRemoval.Authorisation").Text
+                .ShouldContain(model.SelectedBackgroundRemovalModeLabel);
             model.RecommendedCommand.ShouldBeSameAs(model.ConfirmAutomaticSelectionCommand);
             return true;
         });

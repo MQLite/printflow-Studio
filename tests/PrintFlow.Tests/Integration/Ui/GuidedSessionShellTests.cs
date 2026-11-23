@@ -14,7 +14,7 @@ namespace PrintFlow.Tests.Integration.Ui;
 public sealed class GuidedSessionShellTests
 {
     [Fact]
-    public async Task Choosing_custom_dimensions_exposes_and_recommends_the_fixed_submit_without_reopening_the_view()
+    public async Task Custom_size_is_with_presets_and_opens_adjacent_fields_with_one_submit()
     {
         using HomeScreenHarness harness = new();
         string source = harness.Inner.WriteBorderedSourcePng("guided-print.png");
@@ -28,11 +28,19 @@ public sealed class GuidedSessionShellTests
             Button confirm = Find<Button>(tree, "Session.PrintDimensions.ConfirmSize");
             confirm.Visibility.ShouldBe(Visibility.Collapsed);
             Button entry = Find<Button>(tree, "Session.PrintDimensions.CustomSize");
-            Ancestors(entry).ShouldContain(Find<FrameworkElement>(tree, "Session.ActionBar"));
-            model.ChooseCustomSizeCommand.Execute(null);
+            var presets = Find<Expander>(tree, "Session.PrintDimensions.Presets");
+            Ancestors(entry).ShouldContain(Find<FrameworkElement>(tree, "Session.PrintDimensions.Entry"));
+            presets.IsExpanded = false;
+            tree.Root.UpdateLayout();
+            GuidedSessionProjectionTests.Shown(entry).ShouldBeTrue();
+            entry.Command.Execute(null);
             tree.Root.UpdateLayout();
             confirm.Visibility.ShouldBe(Visibility.Visible);
-            entry.Visibility.ShouldBe(Visibility.Collapsed);
+            var edge = Find<ComboBox>(tree, "Session.PrintDimensions.TargetEdge");
+            var millimetres = Find<TextBox>(tree, "Session.PrintDimensions.TargetMillimetres");
+            Bounds(edge, tree.Root).Right.ShouldBeLessThanOrEqualTo(Bounds(millimetres, tree.Root).Left);
+            Bounds(edge, tree.Root).Top.ShouldBe(Bounds(millimetres, tree.Root).Top, 1);
+            tree.OfType<Button>().Count(b => ReferenceEquals(b.Command, model.ConfirmCustomSizeCommand)).ShouldBe(1);
             model.RecommendedCommand.ShouldBeSameAs(model.ConfirmCustomSizeCommand);
             Ancestors(confirm).ShouldContain(Find<FrameworkElement>(tree, "Session.ActionBar"));
             return true;
@@ -80,10 +88,14 @@ public sealed class GuidedSessionShellTests
         WpfRendering.RenderExpectingNoBindingErrors(() => new SessionScreenView { DataContext = model }, new Size(1000, 700), tree =>
         {
             FrameworkElement bar = Find<FrameworkElement>(tree, "Session.ActionBar");
-            Button margin = tree.OfType<Button>().Single(b => ReferenceEquals(b.Command, model.ApplyTrimMarginCommand));
-            Ancestors(margin).ShouldContain(bar);
             Button run = Find<Button>(tree, "Session.RunStep");
             Ancestors(run).ShouldContain(bar);
+            GuidedSessionProjectionTests.Shown(run).ShouldBeTrue();
+            run.Command.ShouldBeSameAs(model.AdvanceImageProcessingCommand);
+            Rect bounds = Bounds(run, tree.Root);
+            bounds.Width.ShouldBeGreaterThan(0);
+            bounds.Right.ShouldBeLessThanOrEqualTo(1000);
+            bounds.Bottom.ShouldBeLessThanOrEqualTo(700);
             return true;
         });
     }

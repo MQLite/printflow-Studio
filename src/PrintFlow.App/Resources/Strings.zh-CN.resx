@@ -401,7 +401,7 @@
   <data name="Session_TargetSizeMm" xml:space="preserve"><value>尺寸（毫米）</value></data>
   <data name="Session_TargetSizeInvalid" xml:space="preserve"><value>请选择宽度、高度或长边，再输入大于零的数值，单位为毫米。</value></data>
   <data name="Session_TargetSizeUnavailable" xml:space="preserve"><value>暂时无法预览此尺寸。请核对尺寸输入和任务详情，再重试。</value></data>
-  <data name="Session_ConfirmCustomSize" xml:space="preserve"><value>确认自定义尺寸</value></data>
+  <data name="Session_ConfirmCustomSize" xml:space="preserve"><value>使用并继续</value></data>
   <data name="TargetEdge_Width" xml:space="preserve"><value>宽度</value></data>
   <data name="TargetEdge_Height" xml:space="preserve"><value>高度</value></data>
   <data name="TargetEdge_LongEdge" xml:space="preserve"><value>长边</value></data>
@@ -1365,7 +1365,7 @@
   <data name="Home_DiagnosticRetentionWarning" xml:space="preserve">
     <value>诊断记录清理未完成，下次启动时会重试。此提示不表示工作站已通过检查。</value>
   </data>
-<data name="Session_GuidedTechnicalDetails" xml:space="preserve"><value>技术详情</value></data><data name="Session_GuidedPreflight" xml:space="preserve"><value>生成前确认</value></data><data name="Session_GuidedCurrent" xml:space="preserve"><value>当前步骤</value></data><data name="Session_GuidedFuture" xml:space="preserve"><value>完成当前步骤后继续</value></data><data name="Session_GuidedChangeWhiteInk" xml:space="preserve"><value>修改白墨选择</value></data><data name="Session_GuidedHistoryAvailable" xml:space="preserve"><value>可查看历史</value></data>  <data name="Session_HistoryHeading" xml:space="preserve"><value>步骤历史</value></data>
+<data name="Session_GuidedTechnicalDetails" xml:space="preserve"><value>技术详情</value></data><data name="Session_GuidedPreflight" xml:space="preserve"><value>生成前确认</value></data><data name="Session_GuidedCurrent" xml:space="preserve"><value>当前步骤</value></data><data name="Session_GuidedFuture" xml:space="preserve"><value>完成当前步骤后继续</value></data><data name="Session_GuidedHistoryAvailable" xml:space="preserve"><value>可查看历史</value></data>  <data name="Session_HistoryHeading" xml:space="preserve"><value>步骤历史</value></data>
   <data name="Session_HistoryNotice" xml:space="preserve"><value>只读浏览。历史结果不能在此确认，也不会替换当前结果。</value></data>
   <data name="Session_HistoryOpen" xml:space="preserve"><value>查看历史</value></data>
   <data name="Session_HistoryClose" xml:space="preserve"><value>回到当前步骤</value></data>
@@ -1409,6 +1409,9 @@
   <data name="Session_GuidedPrintWhiteInk" xml:space="preserve"><value>白墨方案：{0}</value></data>
   <data name="Session_GuidedWhiteInkReasonHint" xml:space="preserve"><value>请按完整成品设计选择图案类别：精细细节对应 0 像素，普通图案对应 1 像素，实色或整块矩形对应 2 像素。选择时会记录对应的分类理由；0 像素仍有白墨，只是不内缩。</value></data>
   <data name="Session_GuidedWhiteInkSourceHint" xml:space="preserve"><value>不会沿用原 PSD/PDF 文件里的专色或白墨通道。本次选择用于生成打印所需的 W1 白墨通道。</value></data>
+  <data name="Session_GuidedWhiteInkSaving" xml:space="preserve"><value>正在保存白墨方案…</value></data>
+  <data name="Session_GuidedWhiteInkPending" xml:space="preserve"><value>请重试修改白墨方案，或重新选中当前方案，再生成 TIFF。</value></data>
+  <data name="Session_GuidedWhiteInkRetry" xml:space="preserve"><value>重试修改白墨方案</value></data>
   <data name="Session_CompletionSaveHeading" xml:space="preserve"><value>保存已审核的结果</value></data>
   <data name="Session_CompletionFinishedHeading" xml:space="preserve"><value>任务完成 · 保存记录</value></data>
   <data name="Session_CompletionNotice" xml:space="preserve"><value>通过审核、保存文件、完成任务是三件事。PrintFlow 内部的已审核文件，不代表已保存到你选的文件夹。</value></data>
@@ -1804,6 +1807,8 @@
   <data name="ImageProcessing_Method_KeepCanvas" xml:space="preserve"><value>保留原画布</value></data>
   <data name="WorkTask_RepairImageProcessingSettings" xml:space="preserve"><value>请打开「设置 → 图像处理」，恢复默认并保存，重启 PrintFlow Studio 后继续接收此结果。</value></data>
   <data name="ImageProcessing_CurrentMethod" xml:space="preserve"><value>本次方式：{0}</value></data>
+  <data name="ImageProcessing_TaskMethods" xml:space="preserve"><value>处理方式</value></data>
+  <data name="ImageProcessing_Continue" xml:space="preserve"><value>使用{0}继续</value></data>
   <data name="ImageProcessing_ChangeTaskMethod" xml:space="preserve"><value>更改本任务的方式</value></data>
   <data name="ImageProcessing_ChooseCombined" xml:space="preserve"><value>用 OpenAI 提高清晰度并去除背景</value></data>
   <data name="ImageProcessing_ChooseSeparate" xml:space="preserve"><value>改为分步处理</value></data>
@@ -1832,6 +1837,7 @@
   <data name="ImageProcessing_CloudHint" xml:space="preserve"><value>提高清晰度，并可在服务限制内等比例放大至 2 倍。保留原有背景和透明区域。图片会上传至 OpenAI，并按使用量计费。</value></data>
   <data name="ImageProcessing_ConfirmBackgroundHint" xml:space="preserve"><value>运行前，请为当前图像确认去背景方式。</value></data>
   <data name="ImageProcessing_AuthoriseBackgroundMethod" xml:space="preserve"><value>对此图像使用当前方式</value></data>
+  <data name="ImageProcessing_AuthorityImageIdentity" xml:space="preserve"><value>{0} · 修订版 {1}</value></data>
   <data name="ImageProcessing_ConfirmBackgroundQuestion" xml:space="preserve"><value>对此图像使用{0}？请复核结果后再批准。</value></data>
   <data name="ImageProcessing_OpenAiCredentialHeading" xml:space="preserve"><value>OpenAI API 密钥</value></data>
   <data name="ImageProcessing_OpenAiCredentialSave" xml:space="preserve"><value>保存 API 密钥</value></data>

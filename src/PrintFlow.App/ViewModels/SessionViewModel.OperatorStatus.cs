@@ -60,20 +60,23 @@ public partial class SessionViewModel
                 return CanConfirmAndSave ? FormatNext(Strings.Session_NextFinalReview, ConfirmAndSaveLabel, ApproveLabel)
                     : FormatNext(Strings.Session_NextFinalReviewNeedsDraft, ApproveLabel);
             if (IsReviewRequired) return FormatNext(Strings.Session_NextReview, ApproveLabel, RejectLabel);
-            if (CanConfirmSelectedKeepCanvas) return FormatNext(Strings.Session_NextAction, KeepOriginalExtentLabel);
-            if (CanManualCrop) return FormatNext(Strings.Session_NextAction, BeginManualCropLabel);
-            if (CanRetry) return FormatNext(Strings.Session_NextRetry, RetryLabel);
-            if (IsStoppedStep) return Strings.Session_NextStopped;
+            if (ShowsSeparateKeepOriginalExtent && CanConfirmSelectedKeepCanvas)
+                return FormatNext(Strings.Session_NextAction, KeepOriginalExtentLabel);
+            if (ShowsManualCropEntry) return FormatNext(Strings.Session_NextAction, BeginManualCropLabel);
+            if (ShowsSeparateRetry) return FormatNext(Strings.Session_NextRetry, RetryLabel);
+            if (IsStoppedStep && !ShowsImageProcessingAdvance) return Strings.Session_NextStopped;
             if (CanConfirmOriginal) return FormatNext(Strings.Session_NextOriginal, ConfirmOriginalLabel);
             if (ShowsGuidedDimensions) return Strings.Session_NextDimensions;
             if (ShowsGuidedWhiteInk) return Strings.Session_NextWhiteInk;
+            if (HasPendingGuidedWhiteInk) return GuidedWhiteInkPendingInstruction;
             if (ShowsGuidedEnlargement) return FormatNext(Strings.Session_NextAction, ContinueWithSizeLabel);
             if (ExceedsLocalUpscaleLimit) return Strings.Resolve("ImageProcessing_UpscaleTooLarge");
             if (CanRunStep && LocalUpscaleSizeAdvice is { } advice) return advice;
+            if (ShowsGuidedAutomaticConfirmation) return FormatNext(Strings.Session_NextAction, AuthoriseAutomaticSelectionLabel);
+            if (ShowsImageProcessingAdvance) return SelectedImageProcessingUnavailable ??
+                FormatNext(Strings.Session_NextAction, GuidedRunLabel);
             if (CanRunStep) return FormatNext(Strings.Session_NextAction, RunStepLabel);
             if (UsesCurrentImageWithoutProcessing && CanSkip) return FormatNext(Strings.Session_NextAction, SkipLabel);
-            if (CanChangeImageProcessingMethod && CurrentImageProcessingUnavailable is not null)
-                return FormatNext(Strings.Session_NextAction, ChangeImageProcessingMethodLabel);
             if (ShowsTiffBackendSelector && UsesMagickNetTiff && MagickNetTiffUnavailableText is { } tiffUnavailable)
                 return tiffUnavailable;
             // The status panel repeats what the save section says, so the two never disagree.
@@ -105,18 +108,18 @@ public partial class SessionViewModel
             if (IsAskingColleague) return CanPrepareCorrection ? PrepareCorrectionFilesCommand : null;
             if (CanConfirmAndSave) return ConfirmAndSaveCommand;
             if (CanApprove) return ApproveCommand;
-            if (CanConfirmSelectedKeepCanvas) return KeepOriginalExtentCommand;
-            if (CanManualCrop) return BeginManualCropCommand;
-            if (CanRetry) return RetryCommand;
-            if (IsStoppedStep) return null;
+            if (ShowsSeparateKeepOriginalExtent && CanConfirmSelectedKeepCanvas) return KeepOriginalExtentCommand;
+            if (ShowsManualCropEntry) return BeginManualCropCommand;
+            if (ShowsSeparateRetry) return RetryCommand;
+            if (IsStoppedStep && !ShowsImageProcessingAdvance) return null;
             if (ShowsGuidedCustomSizeAction) return ConfirmCustomSizeCommand;
             if (ShowsGuidedDimensions) return ChooseCustomSizeCommand;
             if (ShowsGuidedWhiteInk) return SelectWhiteUnderbaseCommand;
+            if (CanApplyGuidedWhiteInk) return ApplyGuidedWhiteInkCommand;
             if (ShowsGuidedEnlargement) return ContinueWithSizeCommand;
             if (ShowsGuidedAutomaticConfirmation) return ConfirmAutomaticSelectionCommand;
-            if (ShowsGuidedAutomaticBegin) return BeginAutomaticSelectionCommand;
             if (CanConfirmOriginal) return ConfirmOriginalCommand;
-            if (CanSkip && (ExceedsLocalUpscaleLimit || (CanRunStep && LocalUpscaleSizeAdvice is not null))) return SkipCommand;
+            if (ShowsImageProcessingAdvance) return AdvanceImageProcessingCommand;
             if (CanRunStep) return RunStepCommand;
             if (UsesCurrentImageWithoutProcessing && CanSkip) return SkipCommand;
             if (_session?.CurrentStep is null && FinalSaveRecommendation is { } save) return save;

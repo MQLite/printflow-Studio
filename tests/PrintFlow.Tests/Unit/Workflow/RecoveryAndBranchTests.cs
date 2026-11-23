@@ -4,6 +4,7 @@ using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Reviews;
 using PrintFlow.Domain.Sessions;
+using PrintFlow.Domain.Settings;
 using PrintFlow.Tests.Fixtures;
 using PrintFlow.Workflow.Commands;
 using PrintFlow.Workflow.Effects;
@@ -113,6 +114,40 @@ public sealed class RecoveryAndBranchTests
         // A retry never resumes from the rejected artefact: it starts again from upstream.
         scenario.Effect<WorkflowEffect.CreateWorkingCopy>().SourceRevision.ShouldBe(root);
         scenario.Effect<WorkflowEffect.RecordAttemptStarted>().RetrySequence.ShouldBe(1);
+    }
+
+    [Fact]
+    public void A_method_change_retry_cannot_reset_a_newer_failed_attempt()
+    {
+        WorkflowScenario scenario = WorkflowScenario.For(WorkflowType.PrepareAsset);
+        RevisionId root = scenario.CompleteImport();
+        scenario.Must(new WorkflowCommand.ConfirmOriginal());
+        FailEnhancement();
+        WorkflowCommand.Retry stale = new(StepKind.Enhancement)
+        {
+            ExpectedImageTarget = new(
+                new(ImageProcessingMethod.MeituEnhancement, root, WorkflowScenario.HashOf(root)),
+                scenario.State.Step(StepKind.Enhancement)!.AttemptCount),
+        };
+        scenario.Must(new WorkflowCommand.Retry(StepKind.Enhancement));
+        FailEnhancement();
+
+        scenario.Apply(stale).Rejection!.Code.ShouldBe(RejectionCode.PreconditionNotMet);
+        scenario.StateOf(StepKind.Enhancement).ShouldBe(StepState.Failed);
+        scenario.Must(stale with
+        {
+            ExpectedImageTarget = stale.ExpectedImageTarget! with
+            {
+                AttemptCount = scenario.State.Step(StepKind.Enhancement)!.AttemptCount,
+            },
+        });
+        scenario.StateOf(StepKind.Enhancement).ShouldBe(StepState.Waiting);
+
+        void FailEnhancement()
+        {
+            scenario.Must(new WorkflowCommand.StartStep(StepKind.Enhancement));
+            scenario.Must(SystemCommands.Failed(scenario.NextAttempt(), StepKind.Enhancement, FailureCode.UnknownDialog));
+        }
     }
 
     [Fact]

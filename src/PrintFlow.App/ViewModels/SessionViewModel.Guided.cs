@@ -4,6 +4,8 @@ using PrintFlow.App.Controls;
 using PrintFlow.App.Resources;
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Sessions;
+using PrintFlow.Domain.Settings;
+using PrintFlow.Workflow.Commands;
 using PrintFlow.Workflow.Definitions;
 using PrintFlow.Workflow.Engine;
 using PrintFlow.Workflow.Ports;
@@ -75,7 +77,7 @@ public sealed partial class SessionViewModel
         if (!CanChangeRoute || _session is not { } session) return;
         RequestLeave(() => { ClearPreviews(); _navigation.GoToWorkflowSelection(session); });
     }
-    private bool _isChoosingGuidedWhiteInk;
+    private WhiteUnderbaseChoice? _pendingGuidedWhiteInk;
     public ObservableCollection<GuidedStepItem> GuidedSteps { get; } = [];
     public GuidedSessionPage GuidedPage => _session switch
     {
@@ -94,7 +96,6 @@ public sealed partial class SessionViewModel
         { CurrentStep.Step: StepKind.OriginalConfirmation } => GuidedSessionPage.Source,
         { CurrentStep.Step: StepKind.PrintDimensions } => GuidedSessionPage.Dimensions,
         { CurrentStep.Step: StepKind.PhotoshopOutput, WhiteUnderbaseBranch: null } => GuidedSessionPage.WhiteInk,
-        { CurrentStep.Step: StepKind.PhotoshopOutput } when _isChoosingGuidedWhiteInk => GuidedSessionPage.WhiteInk,
         { CurrentStep.Step: StepKind.PhotoshopOutput } => GuidedSessionPage.Preflight,
         _ => GuidedSessionPage.Ready,
     };
@@ -109,39 +110,67 @@ public sealed partial class SessionViewModel
         _ => CurrentStep.Length > 0 ? CurrentStep : StatusHeading,
     };
     public string GuidedCurrentStatus => StatusHeading;
-    public string GuidedInteractionIdentity => $"{NavigationContext(_session)}|{GuidedPage}|{IsViewingHistory}|{SelectedHistory?.Step}|{IsConfirmingDraftLeave}|{IsConfirmingReturn}|{IsConfirmingAutomaticSelection}|{IsChoosingCustomSize}|{IsComparingTrim}|{SelectedSave?.Key}";
+    public string GuidedInteractionIdentity => $"{NavigationContext(_session)}|{GuidedPage}|{IsViewingHistory}|{SelectedHistory?.Step}|{IsConfirmingDraftLeave}|{IsConfirmingReturn}|{IsChoosingCustomSize}|{IsComparingTrim}|{SelectedSave?.Key}";
     public string CropDetailsLabel => Strings.Resolve("Session_CropDetailsLabel");
-    public bool ShowsManualCropEntry => CanManualCrop && !IsCropping;
+    public bool ShowsManualCropEntry => CanManualCrop && !IsCropping && !UsesImageProcessingAdvance;
     public bool ShowsManualCropEntryNotice => IsManualCropRequired && !IsCropping;
     public string GuidedTechnicalDetailsLabel => Strings.Session_GuidedTechnicalDetails;
     public bool ShowsGuidedDimensions => GuidedPage == GuidedSessionPage.Dimensions && CanChooseFlexibleSize;
     public bool ShowsGuidedCustomSizeAction => ShowsGuidedDimensions && IsChoosingCustomSize;
     public bool ShowsGuidedCustomSizeEntry => ShowsGuidedDimensions && !IsChoosingCustomSize;
     public bool ShowsGuidedWhiteInk => GuidedPage == GuidedSessionPage.WhiteInk && CanSelectWhiteUnderbase;
+    public bool ShowsGuidedWhiteInkOptions => ShowsGuidedWhiteInk || GuidedPage == GuidedSessionPage.Preflight;
     public bool ShowsGuidedPreparation => HasPreparationPlan && GuidedPage is
         GuidedSessionPage.Dimensions or GuidedSessionPage.Preflight;
     public bool ShowsGuidedPreflight => HasPrintDimensionsPreflight && GuidedPage is
         GuidedSessionPage.Dimensions or GuidedSessionPage.Preflight;
     public bool ShowsGuidedBackgroundDecision => _session?.CurrentStep?.Step == StepKind.BackgroundRemoval &&
-        GuidedPage == GuidedSessionPage.Ready && CanAuthoriseAutomaticSelection;
+        _session.CurrentArtefact is not null && GuidedPage == GuidedSessionPage.Ready && CanAuthoriseAutomaticSelection;
     public bool ShowsGuidedTrimParameters => _session?.CurrentStep?.Step == StepKind.Trim &&
-        GuidedPage == GuidedSessionPage.Ready && CanSetTrimParameters;
-    public bool ShowsGuidedRunStep => CanRunStep && GuidedPage != GuidedSessionPage.WhiteInk;
-    public bool ShowsGuidedAutomaticBegin => ShowsGuidedBackgroundDecision && IsAutomaticSelectionPending && !IsConfirmingAutomaticSelection;
-    public bool ShowsGuidedAutomaticConfirmation => ShowsGuidedBackgroundDecision && IsConfirmingAutomaticSelection;
+        GuidedPage == GuidedSessionPage.Ready &&
+        (SelectedImageProcessingMethod is null or ImageProcessingMethod.AlphaTrim) &&
+        (CanSetTrimParameters || _session.ImageProcessingExecution?.Method != ImageProcessingMethod.AlphaTrim &&
+            Offers(CommandKind.SetImageProcessingSelection));
+    public bool ShowsGuidedRunStep => ShowsImageProcessingAdvance ||
+        !UsesImageProcessingAdvance && GuidedPage != GuidedSessionPage.WhiteInk &&
+        (CanRunStep || HasPendingGuidedWhiteInk && Allows(CommandKind.StartStep));
+    public bool CanRunGuidedStep => ShowsImageProcessingAdvance
+        ? CanAdvanceImageProcessing() : !IsBusy && CanRunStep;
+    public bool ShowsGuidedAutomaticConfirmation => ShowsGuidedBackgroundDecision && IsAutomaticSelectionPending;
     public bool ShowsGuidedEnlargement => ShowsGuidedPreparation && NeedsEnlargementAuthority;
-    public bool CanChangeGuidedWhiteInk => GuidedPage == GuidedSessionPage.Preflight && CanSelectWhiteUnderbase && !IsBusy;
-    public string ChangeGuidedWhiteInkLabel => Strings.Session_GuidedChangeWhiteInk;
+    public bool CanEditGuidedWhiteInk => ShowsGuidedWhiteInkOptions && CanSelectWhiteUnderbase && !IsBusy;
+    public bool HasPendingGuidedWhiteInk => GuidedPage == GuidedSessionPage.Preflight && _pendingGuidedWhiteInk is not null;
+    public bool CanApplyGuidedWhiteInk => HasPendingGuidedWhiteInk && CanEditGuidedWhiteInk;
+    public string ApplyGuidedWhiteInkLabel => Strings.Resolve("Session_GuidedWhiteInkRetry");
+    private string GuidedWhiteInkPendingInstruction => Strings.Resolve(IsBusy
+        ? "Session_GuidedWhiteInkSaving" : "Session_GuidedWhiteInkPending");
 
-    [RelayCommand(CanExecute = nameof(CanChangeGuidedWhiteInk))]
-    private void ChangeGuidedWhiteInk()
+    public WhiteUnderbaseChoice? GuidedWhiteInkSelection
     {
-        if (!CanChangeGuidedWhiteInk) return;
-        _isChoosingGuidedWhiteInk = true;
-        SelectedWhiteUnderbaseChoice = null;
-        NotifyGuidedPresentation();
-        NotifyOperatorStatusChanged();
+        get => GuidedPage == GuidedSessionPage.Preflight
+            ? _pendingGuidedWhiteInk ?? WhiteUnderbaseChoices.FirstOrDefault(c => c.Branch == _session?.WhiteUnderbaseBranch)
+            : SelectedWhiteUnderbaseChoice;
+        set
+        {
+            if (!CanEditGuidedWhiteInk) return;
+            if (GuidedPage == GuidedSessionPage.WhiteInk)
+            {
+                SelectedWhiteUnderbaseChoice = value;
+                return;
+            }
+            if (value is null || value.Branch == GuidedWhiteInkSelection?.Branch) return;
+
+            _pendingGuidedWhiteInk = value.Branch == _session?.WhiteUnderbaseBranch ? null : value;
+            NotifyOperatorStatusChanged();
+            if (HasPendingGuidedWhiteInk) ApplyGuidedWhiteInkCommand.Execute(null);
+        }
     }
+
+    [RelayCommand(CanExecute = nameof(CanApplyGuidedWhiteInk))]
+    private Task ApplyGuidedWhiteInkAsync(CancellationToken cancellationToken) =>
+        CanApplyGuidedWhiteInk && _pendingGuidedWhiteInk is { } choice
+            ? ApplyWhiteUnderbaseChoiceAsync(choice, cancellationToken)
+            : Task.CompletedTask;
 
     private void RefreshGuidedPresentation()
     {
@@ -215,26 +244,29 @@ public sealed partial class SessionViewModel
         OnPropertyChanged(nameof(ShowsGuidedCustomSizeEntry));
         OnPropertyChanged(nameof(ShowsGuidedDimensions));
         OnPropertyChanged(nameof(ShowsGuidedWhiteInk));
+        OnPropertyChanged(nameof(ShowsGuidedWhiteInkOptions));
+        OnPropertyChanged(nameof(GuidedWhiteInkSelection));
         OnPropertyChanged(nameof(ShowsGuidedPreparation));
         OnPropertyChanged(nameof(ShowsGuidedPreflight));
         NotifyTiffBackendSelection();
         OnPropertyChanged(nameof(ShowsGuidedBackgroundDecision));
         OnPropertyChanged(nameof(ShowsGuidedTrimParameters));
         OnPropertyChanged(nameof(ShowsGuidedRunStep));
+        OnPropertyChanged(nameof(CanRunGuidedStep));
+        OnPropertyChanged(nameof(CanRunStep));
+        OnPropertyChanged(nameof(HasRunReadinessNotice));
         OnPropertyChanged(nameof(CanChangeImageProcessingMethod));
-        OnPropertyChanged(nameof(ShowsCombinedImageProcessingChoice));
-        OnPropertyChanged(nameof(CombinedImageProcessingChoiceLabel));
-        OnPropertyChanged(nameof(CombinedImageProcessingUnavailable));
+        NotifyImageProcessingAdvance();
         OnPropertyChanged(nameof(CanReturnToSeparateProcessing));
-        SwitchCombinedImageProcessingCommand.NotifyCanExecuteChanged();
-        ApplyImageProcessingMethodCommand.NotifyCanExecuteChanged();
-        OnPropertyChanged(nameof(ShowsGuidedAutomaticBegin));
         OnPropertyChanged(nameof(ShowsGuidedAutomaticConfirmation));
+        OnPropertyChanged(nameof(CanConfirmAutomaticSelection));
+        OnPropertyChanged(nameof(CanChangeRecognitionMode));
         OnPropertyChanged(nameof(ShowsGuidedEnlargement));
-        OnPropertyChanged(nameof(CanChangeGuidedWhiteInk));
-        ChangeGuidedWhiteInkCommand.NotifyCanExecuteChanged();
+        OnPropertyChanged(nameof(CanEditGuidedWhiteInk));
+        OnPropertyChanged(nameof(HasPendingGuidedWhiteInk));
+        OnPropertyChanged(nameof(CanApplyGuidedWhiteInk));
+        ApplyGuidedWhiteInkCommand.NotifyCanExecuteChanged();
     }
 
-    partial void OnIsConfirmingAutomaticSelectionChanged(bool value) => NotifyOperatorStatusChanged();
     partial void OnIsConfirmingReturnChanged(bool value) => NotifyNavigation();
 }

@@ -41,6 +41,14 @@ public sealed class GuidedProcessingPrintTests
         model.SelectedWhiteUnderbaseChoice = model.WhiteUnderbaseChoices[branch];
         await model.SelectWhiteUnderbaseCommand.ExecuteAsync(null);
         model.GuidedPage.ShouldBe(GuidedSessionPage.Preflight);
+        WpfRendering.RenderExpectingNoBindingErrors(() => new SessionScreenView { DataContext = model }, new Size(984, 661), tree =>
+        {
+            var options = GuidedSessionShellTests.Find<ListBox>(tree, "Session.WhiteUnderbaseChoices");
+            GuidedSessionProjectionTests.Shown(options).ShouldBeTrue();
+            options.Items.Count.ShouldBe(3);
+            options.SelectedItem.ShouldBeSameAs(model.WhiteUnderbaseChoices[branch]);
+            return true;
+        });
         var result = Summary(model);
         result.GetValueOrDefault("Session.PrintSummary.Requested").ShouldNotBeNullOrWhiteSpace();
         result.GetValueOrDefault("Session.PrintSummary.Actual")!.ShouldContain("毫米");

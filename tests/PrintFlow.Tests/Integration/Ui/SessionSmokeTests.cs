@@ -659,10 +659,8 @@ public sealed class SessionSmokeTests
         session.CanSetTrimParameters.ShouldBeTrue();
         session.SelectedTrimMode = session.TrimModes.Single(m => m.Mode == TrimMode.UniformMargin);
         session.UniformMarginText = "2";
-        await session.ApplyTrimMarginCommand.ExecuteAsync(null);
+        await session.AdvanceImageProcessingCommand.ExecuteAsync(null);
         session.Notice.ShouldBeNull();
-
-        await session.RunStepCommand.ExecuteAsync(null);
         await session.PreviewsLoaded;
 
         session.IsReviewRequired.ShouldBeTrue();
@@ -700,10 +698,8 @@ public sealed class SessionSmokeTests
         session.RightMarginText = "3";
         session.BottomMarginText = "2";
         session.LeftMarginText = "3";
-        await session.ApplyTrimMarginCommand.ExecuteAsync(null);
+        await session.AdvanceImageProcessingCommand.ExecuteAsync(null);
         session.Notice.ShouldBeNull();
-
-        await session.RunStepCommand.ExecuteAsync(null);
         await session.PreviewsLoaded;
 
         session.IsReviewRequired.ShouldBeTrue();

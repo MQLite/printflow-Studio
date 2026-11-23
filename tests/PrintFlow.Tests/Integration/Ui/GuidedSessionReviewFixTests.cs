@@ -1,7 +1,11 @@
 using System.Reflection;
 using System.Text.Json;
 using System.Windows;
+using System.Windows.Automation;
+using System.Windows.Automation.Peers;
+using System.Windows.Automation.Provider;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Threading;
 using PrintFlow.App.ViewModels;
 using PrintFlow.App.Views;
@@ -63,8 +67,8 @@ public sealed class GuidedSessionReviewFixTests
     [Theory]
     [InlineData(false, false)]
     [InlineData(true, false)]
-    [InlineData(false, true)]
-    public async Task Reconfirming_white_ink_finishes_only_a_successful_edit(bool changeBranch, bool refuse)
+    [InlineData(true, true)]
+    public async Task Preflight_white_ink_changes_in_place_and_blocks_generation_until_saved(bool changeBranch, bool refuse)
     {
         using HomeScreenHarness h = new();
         var (m, fault) = await Open(h, WorkflowType.GeneratePrintTiff);
@@ -74,20 +78,156 @@ public sealed class GuidedSessionReviewFixTests
         m.SelectedWhiteUnderbaseChoice = m.WhiteUnderbaseChoices.Single(c => c.Branch == WhiteUnderbaseBranch.W1_1px);
         await m.SelectWhiteUnderbaseCommand.ExecuteAsync(null);
         m.GuidedPage.ShouldBe(GuidedSessionPage.Preflight);
-        m.ChangeGuidedWhiteInkCommand.Execute(null);
-        var branch = changeBranch ? WhiteUnderbaseBranch.W1_2px : WhiteUnderbaseBranch.W1_1px;
-        m.SelectedWhiteUnderbaseChoice = m.WhiteUnderbaseChoices.Single(c => c.Branch == branch);
+        var preflight = m.Preflight;
+        var current = m.WhiteUnderbaseChoices.Single(c => c.Branch == WhiteUnderbaseBranch.W1_1px);
+        var requested = m.WhiteUnderbaseChoices.Single(c => c.Branch == WhiteUnderbaseBranch.W1_2px);
+        int initialCalls = fault.ExecuteCalls;
+        TaskCompletionSource release = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        fault.ExecuteGate = release.Task;
         fault.Refuse = refuse;
         string before = JsonSerializer.Serialize((await h.Inner.Repository.LoadAsync(m.Id, default)).Value);
-        await m.SelectWhiteUnderbaseCommand.ExecuteAsync(null);
-        m.GuidedPage.ShouldBe(refuse ? GuidedSessionPage.WhiteInk : GuidedSessionPage.Preflight);
-        m.ShowsGuidedRunStep.ShouldBe(!refuse);
-        if (refuse)
+        WpfRendering.RenderExpectingNoBindingErrors(() => new SessionScreenView { DataContext = m }, new Size(984, 661), tree =>
         {
-            m.SelectedWhiteUnderbaseChoice!.Branch.ShouldBe(branch);
+            var choices = GuidedSessionShellTests.Find<ListBox>(tree, "Session.WhiteUnderbaseChoices");
+            var run = GuidedSessionShellTests.Find<Button>(tree, "Session.RunStep");
+            var summary = GuidedSessionShellTests.Find<TextBlock>(tree, "Session.PrintSummary.WhiteInk");
+            choices.SelectedItem.ShouldBeSameAs(current);
+            if (!changeBranch)
+            {
+                choices.SetCurrentValue(ListBox.SelectedItemProperty, current);
+                fault.ExecuteCalls.ShouldBe(initialCalls);
+                return true;
+            }
+
+            var previousContext = SynchronizationContext.Current;
+            try
+            {
+                SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext());
+                choices.SetCurrentValue(ListBox.SelectedItemProperty, requested);
+            }
+            finally
+            {
+                SynchronizationContext.SetSynchronizationContext(previousContext);
+            }
+            Dispatcher.CurrentDispatcher.Invoke(() => { }, DispatcherPriority.SystemIdle);
+            m.GuidedPage.ShouldBe(GuidedSessionPage.Preflight);
+            m.IsBusy.ShouldBeTrue();
+            choices.IsEnabled.ShouldBeFalse();
+            GuidedSessionProjectionTests.Shown(run).ShouldBeTrue();
+            run.IsEnabled.ShouldBeFalse();
+            summary.Text.ShouldContain(current.Label);
+
+            var finished = m.ApplyGuidedWhiteInkCommand.ExecutionTask!.WaitAsync(TimeSpan.FromSeconds(10));
+            DispatcherFrame frame = new();
+            _ = finished.ContinueWith(_ => frame.Continue = false, TaskScheduler.Default);
+            release.SetResult();
+            Dispatcher.PushFrame(frame);
+            finished.GetAwaiter().GetResult();
+            Dispatcher.CurrentDispatcher.Invoke(() => { }, DispatcherPriority.SystemIdle);
+            m.GuidedPage.ShouldBe(GuidedSessionPage.Preflight);
+            choices.SelectedItem.ShouldBeSameAs(requested);
+            choices.IsEnabled.ShouldBeTrue();
+            run.IsEnabled.ShouldBe(!refuse);
+            summary.Text.ShouldContain(refuse ? current.Label : requested.Label);
+            fault.ExecuteCalls.ShouldBe(initialCalls + 1);
+            if (refuse)
+            {
+                m.RunStepCommand.ExecuteAsync(null).IsCompletedSuccessfully.ShouldBeTrue();
+                fault.ExecuteCalls.ShouldBe(initialCalls + 1);
+                GuidedSessionProjectionTests.Shown(GuidedSessionShellTests.Find<Button>(tree, "Session.WhiteUnderbase.Retry")).ShouldBeTrue();
+                choices.SetCurrentValue(ListBox.SelectedItemProperty, current);
+                run.IsEnabled.ShouldBeTrue();
+                fault.ExecuteCalls.ShouldBe(initialCalls + 1);
+            }
+            return true;
+        });
+
+        if (refuse || !changeBranch)
             JsonSerializer.Serialize((await h.Inner.Repository.LoadAsync(m.Id, default)).Value).ShouldBe(before);
+        else
+        {
+            m.Preflight.ShouldBe(preflight);
+            m.Preflight.ShouldNotBeSameAs(preflight);
+            (await h.Sessions.LoadAsync(m.Id, default)).Value.WhiteUnderbaseBranch.ShouldBe(requested.Branch);
+            var resumed = h.Session(new RecordingNavigation());
+            resumed.Open((await h.Sessions.LoadAsync(m.Id, default)).Value);
+            await resumed.RunStepCommand.ExecuteAsync(null);
+            resumed.GuidedPage.ShouldBe(GuidedSessionPage.Review);
+            (await h.Inner.Repository.LoadAsync(m.Id, default)).Value!.Outputs.Single().Branch.ShouldBe(requested.Branch);
         }
-        else (await h.Sessions.LoadAsync(m.Id, default)).Value.WhiteUnderbaseBranch.ShouldBe(branch);
+    }
+
+    [Fact]
+    public async Task White_ink_arrow_navigation_keeps_focus_after_saving_and_retires_the_old_selection_provider()
+    {
+        using HomeScreenHarness h = new();
+        var (model, fault) = await Open(h, WorkflowType.GeneratePrintTiff);
+        await model.ConfirmOriginalCommand.ExecuteAsync(null);
+        model.WidthMmText = "200";
+        model.HeightMmText = "150";
+        await model.SetMaximumBoundsCommand.ExecuteAsync(null);
+        model.SelectedWhiteUnderbaseChoice = model.WhiteUnderbaseChoices[1];
+        await model.SelectWhiteUnderbaseCommand.ExecuteAsync(null);
+        int callsBeforeChange = fault.ExecuteCalls;
+
+        WpfRendering.RenderExpectingNoBindingErrors(() => new SessionScreenView { DataContext = model }, new Size(984, 661), tree =>
+        {
+            Window window = new() { Content = tree.Root, Width = 984, Height = 661 };
+            try
+            {
+                bool contentRendered = false;
+                window.ContentRendered += (_, _) => contentRendered = true;
+                window.Show();
+                tree.Root.UpdateLayout();
+                // Let Window finish its initial focus landing before simulating operator input.
+                Dispatcher.CurrentDispatcher.Invoke(() => { }, DispatcherPriority.SystemIdle);
+                contentRendered.ShouldBeTrue();
+                var choices = GuidedSessionShellTests.Find<ListBox>(tree, "Session.WhiteUnderbaseChoices");
+                var starting = (ListBoxItem)choices.ItemContainerGenerator.ContainerFromIndex(1);
+                starting.BringIntoView();
+                starting.Focus().ShouldBeTrue();
+                var peer = UIElementAutomationPeer.CreatePeerForElement(choices)!;
+                var itemPeer = (AutomationPeer)peer.GetType().GetMethod("CreateItemAutomationPeer", BindingFlags.Instance | BindingFlags.NonPublic)!
+                    .Invoke(peer, [model.WhiteUnderbaseChoices[1]])!;
+                var retired = (ISelectionItemProvider)itemPeer.GetPattern(PatternInterface.SelectionItem)!;
+
+                var previousContext = SynchronizationContext.Current;
+                try
+                {
+                    SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext());
+                    var key = new KeyEventArgs(Keyboard.PrimaryDevice, PresentationSource.FromVisual(starting), Environment.TickCount, Key.Down)
+                    {
+                        RoutedEvent = Keyboard.PreviewKeyDownEvent,
+                    };
+                    starting.RaiseEvent(key);
+                    key.RoutedEvent = Keyboard.KeyDownEvent;
+                    starting.RaiseEvent(key);
+                }
+                finally
+                {
+                    SynchronizationContext.SetSynchronizationContext(previousContext);
+                }
+                var finished = model.ApplyGuidedWhiteInkCommand.ExecutionTask.ShouldNotBeNull().WaitAsync(TimeSpan.FromSeconds(10));
+                DispatcherFrame frame = new();
+                _ = finished.ContinueWith(_ => frame.Continue = false, TaskScheduler.Default);
+                Dispatcher.PushFrame(frame);
+                finished.GetAwaiter().GetResult();
+                Dispatcher.CurrentDispatcher.Invoke(() => { }, DispatcherPriority.SystemIdle);
+
+                choices.SelectedIndex.ShouldBe(2);
+                ((ListBoxItem)choices.ItemContainerGenerator.ContainerFromIndex(2)).IsKeyboardFocusWithin.ShouldBeTrue(
+                    $"keyboard focus is on {(Keyboard.FocusedElement as FrameworkElement)?.Name}");
+                retired.Select();
+                fault.ExecuteCalls.ShouldBe(callsBeforeChange + 1);
+                choices.SelectedIndex.ShouldBe(2);
+                return true;
+            }
+            finally
+            {
+                window.Content = null;
+                window.Close();
+            }
+        });
     }
 
     [Theory]
@@ -101,7 +241,7 @@ public sealed class GuidedSessionReviewFixTests
         await m.SkipCommand.ExecuteAsync(null); await m.SkipCommand.ExecuteAsync(null);
         m.SelectedTrimMode = m.TrimModes.Single(c => c.Mode == TrimMode.UniformMargin);
         m.UniformMarginText = "2";
-        await m.ApplyTrimMarginCommand.ExecuteAsync(null);
+        await m.RunStepCommand.ExecuteAsync(null);
         string saved = JsonSerializer.Serialize((await h.Inner.Repository.LoadAsync(m.Id, default)).Value);
         if (laterEdit)
         {
@@ -131,7 +271,7 @@ public sealed class GuidedSessionReviewFixTests
         m.SelectedTrimMode = m.TrimModes.Single(c => c.Mode == TrimMode.UniformMargin);
         m.UniformMarginText = "2";
         fault.Refuse = true;
-        await m.ApplyTrimMarginCommand.ExecuteAsync(null);
+        await m.RunStepCommand.ExecuteAsync(null);
         m.UniformMarginText.ShouldBe("2");
         m.ViewHistoryCommand.Execute(m.Steps.First());
         m.IsConfirmingDraftLeave.ShouldBeTrue();
@@ -156,9 +296,18 @@ public sealed class GuidedSessionReviewFixTests
     {
         public ISessionService Inner { get; set; } = null!;
         public bool Refuse { get; set; }
+        public Task ExecuteGate { get; set; } = Task.CompletedTask;
+        public int ExecuteCalls { get; private set; }
         protected override object? Invoke(MethodInfo? method, object?[]? args) =>
-            Refuse && method!.Name == nameof(ISessionService.ExecuteAsync)
-                ? Task.FromResult(OperationResult<SessionView>.Failed(FailureCode.EnvironmentNotVerified, "Controlled review regression refusal"))
-                : method!.Invoke(Inner, args);
+            method!.Name == nameof(ISessionService.ExecuteAsync) ? ExecuteAsync(method, args) : method.Invoke(Inner, args);
+
+        private async Task<OperationResult<SessionView>> ExecuteAsync(MethodInfo method, object?[]? args)
+        {
+            ExecuteCalls++;
+            await ExecuteGate.ConfigureAwait(false);
+            return Refuse
+                ? OperationResult<SessionView>.Failed(FailureCode.EnvironmentNotVerified, "Controlled review regression refusal")
+                : await ((Task<OperationResult<SessionView>>)method.Invoke(Inner, args)!).ConfigureAwait(false);
+        }
     }
 }

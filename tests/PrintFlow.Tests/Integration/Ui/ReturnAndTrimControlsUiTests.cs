@@ -7,10 +7,12 @@ using System.Windows.Controls;
 using PrintFlow.App.ViewModels;
 using PrintFlow.App.Views;
 using PrintFlow.Domain.Ids;
+using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Sessions;
 using PrintFlow.Domain.Trimming;
 using PrintFlow.Tests.Fixtures;
+using PrintFlow.Workflow.Commands;
 using PrintFlow.Workflow.Services;
 
 namespace PrintFlow.Tests.Integration.Ui;
@@ -65,7 +67,7 @@ public sealed class ReturnAndTrimControlsUiTests
         SessionViewModel session = await AtTrimAsync(harness, opaqueSource: false);
         session.IgnoreSmallTrimNoise.ShouldBeTrue();
         session.IgnoreSmallTrimNoise = false;
-        await session.ApplyTrimMarginCommand.ExecuteAsync(null);
+        await session.RunStepCommand.ExecuteAsync(null);
         session.Notice.ShouldBeNull();
 
         SessionId id = harness.Navigation.WorkflowSelectionFor!.Id;
@@ -75,8 +77,6 @@ public sealed class ReturnAndTrimControlsUiTests
         await reopened.PreviewsLoaded;
         reopened.IgnoreSmallTrimNoise.ShouldBeFalse();
 
-        await reopened.RunStepCommand.ExecuteAsync(null);
-        await reopened.PreviewsLoaded;
         (await LoadAsync(harness, id)).Attempts.Single(a => a.Step == StepKind.Trim).IgnoreSmallTrimNoise.ShouldBe(false);
     }
 
@@ -316,8 +316,6 @@ public sealed class ReturnAndTrimControlsUiTests
         session.SelectedTrimMode.Mode.ShouldBe(TrimMode.TightCrop);
         session.IsUniformMargin.ShouldBeFalse();
         session.IsEdgeSpecificMargin.ShouldBeFalse();
-        session.PendingTrimSummary.ShouldNotBeNullOrWhiteSpace();
-
         await session.RunStepCommand.ExecuteAsync(null);
         await session.PreviewsLoaded;
 
@@ -331,24 +329,22 @@ public sealed class ReturnAndTrimControlsUiTests
     {
         using HomeScreenHarness harness = new();
         SessionViewModel session = await AtTrimAsync(harness, opaqueSource: false);
+        SessionId id = harness.Navigation.WorkflowSelectionFor!.Id;
 
         session.SelectedTrimMode = session.TrimModes.Single(m => m.Mode == TrimMode.UniformMargin);
         session.IsUniformMargin.ShouldBeTrue();
         session.IsEdgeSpecificMargin.ShouldBeFalse();
 
         session.UniformMarginText = "2";
-        await session.ApplyTrimMarginCommand.ExecuteAsync(null);
-        session.Notice.ShouldBeNull();
+        session.IgnoreSmallTrimNoise = false;
 
-        // The boxes were re-seeded from what was persisted, so they agree with the summary.
-        session.SelectedTrimMode.Mode.ShouldBe(TrimMode.UniformMargin);
-        session.UniformMarginText.ShouldBe("2");
-
-        await session.RunStepCommand.ExecuteAsync(null);
+        await session.AdvanceImageProcessingCommand.ExecuteAsync(null);
         await session.PreviewsLoaded;
 
         session.Notice.ShouldBeNull();
         (await TrimmedSizeAsync(harness)).ShouldBe((9, 9));
+        (await LoadAsync(harness, id)).Attempts.Single(a => a.Step == StepKind.Trim)
+            .IgnoreSmallTrimNoise.ShouldBe(false);
     }
 
     /// <summary>Four per-edge margins typed on screen each reach their own edge (§12, §24).</summary>
@@ -366,9 +362,6 @@ public sealed class ReturnAndTrimControlsUiTests
         session.RightMarginText = "3";
         session.BottomMarginText = "2";
         session.LeftMarginText = "3";
-        await session.ApplyTrimMarginCommand.ExecuteAsync(null);
-        session.Notice.ShouldBeNull();
-
         await session.RunStepCommand.ExecuteAsync(null);
         await session.PreviewsLoaded;
 
@@ -401,9 +394,11 @@ public sealed class ReturnAndTrimControlsUiTests
         session.SelectedTrimMode = session.TrimModes.Single(m => m.Mode == TrimMode.UniformMargin);
         session.UniformMarginText = typed;
 
-        await session.ApplyTrimMarginCommand.ExecuteAsync(null);
+        await session.AdvanceImageProcessingCommand.ExecuteAsync(null);
 
-        session.Notice.ShouldNotBeNullOrWhiteSpace();
+        session.Notice.ShouldBeNull();
+        session.HasTrimParameterError.ShouldBeTrue();
+        session.IsReviewRequired.ShouldBeFalse();
 
         SessionAggregate after = await LoadAsync(harness, id);
         after.Session.TrimMargin.ShouldBe(TrimMargin.Tight);
@@ -427,10 +422,43 @@ public sealed class ReturnAndTrimControlsUiTests
             session.BottomMarginText = edge == "bottom" ? "-1" : "1";
             session.LeftMarginText = edge == "left" ? "-1" : "1";
 
-            await session.ApplyTrimMarginCommand.ExecuteAsync(null);
+            await session.RunStepCommand.ExecuteAsync(null);
 
-            session.Notice.ShouldNotBeNullOrWhiteSpace($"a negative {edge} margin must be refused");
+            session.HasTrimParameterError.ShouldBeTrue($"a negative {edge} margin must be refused");
             (await LoadAsync(harness, id)).Session.TrimMargin.ShouldBe(TrimMargin.Tight);
+        }
+    }
+
+    [Fact]
+    public async Task Trim_parameters_and_attempt_are_refused_for_a_replaced_source()
+    {
+        using HomeScreenHarness harness = new();
+        SessionViewModel stale = await AtTrimAsync(harness, opaqueSource: false);
+        SessionId id = stale.Id;
+        string originalDisplayedRevision = stale.ArtefactRevision;
+        stale.SelectedTrimMode = stale.TrimModes.Single(m => m.Mode == TrimMode.UniformMargin);
+        stale.UniformMarginText = "2";
+        stale.IgnoreSmallTrimNoise = false;
+
+        SessionView second = await Execute(new WorkflowCommand.ReturnToStep(StepKind.Enhancement));
+        second = await Execute(new WorkflowCommand.StartStep(StepKind.Enhancement));
+        await Execute(new WorkflowCommand.Approve(StepKind.Enhancement, second.CurrentArtefact!.Sha256));
+        await Execute(new WorkflowCommand.Skip(StepKind.BackgroundRemoval));
+
+        await stale.RunStepCommand.ExecuteAsync(null);
+
+        stale.ArtefactRevision.ShouldNotBe(originalDisplayedRevision);
+        stale.NoticeErrorCode.ShouldBe(nameof(FailureCode.PreconditionNotMet));
+        SessionAggregate recorded = await LoadAsync(harness, id);
+        recorded.Session.TrimMargin.ShouldBe(TrimMargin.Tight);
+        recorded.Session.IgnoreSmallTrimNoise.ShouldBeTrue();
+        recorded.Attempts.ShouldNotContain(a => a.Step == StepKind.Trim);
+
+        async Task<SessionView> Execute(WorkflowCommand command)
+        {
+            var result = await harness.Sessions.ExecuteAsync(id, command, "other operator", CancellationToken.None);
+            result.IsSuccess.ShouldBeTrue(result.IsFailure ? result.Failure.ToString() : string.Empty);
+            return result.Value;
         }
     }
 
@@ -497,8 +525,6 @@ public sealed class ReturnAndTrimControlsUiTests
 
         session.SelectedTrimMode = session.TrimModes.Single(m => m.Mode == TrimMode.UniformMargin);
         session.UniformMarginText = "1";
-        await session.ApplyTrimMarginCommand.ExecuteAsync(null);
-
         await session.RunStepCommand.ExecuteAsync(null);
         await session.PreviewsLoaded;
 
@@ -519,8 +545,6 @@ public sealed class ReturnAndTrimControlsUiTests
         session.RightMarginText = "2";
         session.BottomMarginText = "3";
         session.LeftMarginText = "0";
-        await session.ApplyTrimMarginCommand.ExecuteAsync(null);
-
         await session.RunStepCommand.ExecuteAsync(null);
         await session.PreviewsLoaded;
 
@@ -598,8 +622,6 @@ public sealed class ReturnAndTrimControlsUiTests
 
             session.SelectedTrimMode = session.TrimModes.Single(m => m.Mode == TrimMode.UniformMargin);
             session.UniformMarginText = "2";
-            await session.ApplyTrimMarginCommand.ExecuteAsync(null);
-
             await session.RunStepCommand.ExecuteAsync(null);
             await session.PreviewsLoaded;
 
@@ -759,8 +781,6 @@ public sealed class ReturnAndTrimControlsUiTests
 
             session.SelectedTrimMode = session.TrimModes.Single(m => m.Mode == TrimMode.UniformMargin);
             session.UniformMarginText = "1";
-            await session.ApplyTrimMarginCommand.ExecuteAsync(null);
-
             await session.RunStepCommand.ExecuteAsync(null);
             await session.PreviewsLoaded;
 
