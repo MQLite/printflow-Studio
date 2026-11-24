@@ -3,6 +3,8 @@ using PrintFlow.Tests.Fixtures;
 using PrintFlow.Workflow.AiDesign.Authoring;
 using PrintFlow.App.Views.AiDesign;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Threading;
 using static PrintFlow.Tests.Integration.AiDesign.Authoring.AuthoringPersistenceTests;
 
 namespace PrintFlow.Tests.Integration.Ui;
@@ -10,6 +12,62 @@ namespace PrintFlow.Tests.Integration.Ui;
 [Collection(SqliteCollection.Name)]
 public sealed class AiTemplateEditorTests
 {
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Repeated_saves_allow_closing_the_editor_and_removing_rendered_fields(bool removeField)
+    {
+        WpfRendering.OnStaThread(() =>
+        {
+            SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext());
+            using var f = new PromptWorkbenchFixture();
+            var view = new AiPromptWorkbenchView { DataContext = f.Vm };
+            var window = new Window { Content = view, Width = 1000, Height = 700,
+                Left = -3000, Top = -3000, ShowActivated = false, ShowInTaskbar = false };
+            window.Show();
+            try
+            {
+                Complete(f.Vm.OpenAsync(null, default));
+                Complete(f.Vm.EditTemplateCommand.ExecuteAsync(null));
+                var editor = f.Vm.TemplateEditor.ShouldNotBeNull();
+                view.UpdateLayout();
+                var form = SharedReviewSurfaceTests.Descendants<TemplateEditorView>(view).Single();
+                SharedReviewSurfaceTests.Descendants<Expander>(form).Single().IsExpanded = true;
+                ProcessingWorkspaceRolloutTests.Settle(form);
+                var required = editor.Fields.First(field => field.Required);
+                SharedReviewSurfaceTests.Descendants<CheckBox>(form).ShouldContain(box => box.DataContext == required);
+                for (int i = 0; i < 2; i++)
+                {
+                    editor.Body += "\nedit " + i;
+                    editor.PreviewConfirmed = true;
+                    Complete(editor.SaveCommand.ExecuteAsync(null));
+                    editor.SavedTemplate.ShouldNotBeNull().Reference.Revision.ShouldBe(i + 1);
+                }
+                if (removeField)
+                {
+                    editor.RemoveFieldCommand.Execute(required);
+                    editor.Fields.ShouldNotContain(required);
+                }
+                else
+                {
+                    f.Vm.CloseTemplateCommand.Execute(null);
+                    f.Vm.TemplateEditor.ShouldBeNull();
+                }
+                ProcessingWorkspaceRolloutTests.Settle(view);
+            }
+            finally { window.Close(); }
+        });
+    }
+
+    private static void Complete(Task task)
+    {
+        var bounded = task.WaitAsync(TimeSpan.FromSeconds(15));
+        var frame = new DispatcherFrame();
+        bounded.ContinueWith(_ => frame.Continue = false, TaskScheduler.Default);
+        Dispatcher.PushFrame(frame);
+        bounded.GetAwaiter().GetResult();
+    }
+
     [Fact]
     public async Task Saving_current_instance_preserves_manual_reusable_clause_and_restores_known_customer_variables()
     {

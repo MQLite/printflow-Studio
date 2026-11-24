@@ -29,7 +29,11 @@
           <StackPanel Width="150" Margin="0,0,8,8"><TextBlock Text="{x:Static r:AiPromptLabels.AiPrompt_Slot}"/><TextBox Text="{Binding SlotId, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="{x:Static r:AiPromptLabels.AiPrompt_Slot}"/></StackPanel>
           <StackPanel Width="150" Margin="0,0,8,8"><TextBlock Text="{x:Static r:AiPromptLabels.AiPrompt_DateLabel}"/><TextBox Text="{Binding DateLabel, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="{x:Static r:AiPromptLabels.AiPrompt_DateLabel}"/></StackPanel>
          </WrapPanel>
-         <WrapPanel><CheckBox Content="{x:Static r:AiPromptLabels.AiPrompt_Required}" IsChecked="{Binding Required}" VerticalAlignment="Center" Margin="0,0,16,0"/><Button Content="{x:Static r:AiPromptLabels.AiPrompt_RemoveField}" Command="{Binding DataContext.RemoveFieldCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Padding="8,5"/></WrapPanel>
+         <WrapPanel>
+          <!-- Removing a field row can detach the Fluent checkbox template while its checkmark animation is active. -->
+          <CheckBox Style="{x:Null}" Content="{x:Static r:AiPromptLabels.AiPrompt_Required}" IsChecked="{Binding Required}" VerticalAlignment="Center" Margin="0,0,16,0"/>
+          <Button Content="{x:Static r:AiPromptLabels.AiPrompt_RemoveField}" Command="{Binding DataContext.RemoveFieldCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Padding="8,5"/>
+         </WrapPanel>
         </StackPanel>
        </Border>
       </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
