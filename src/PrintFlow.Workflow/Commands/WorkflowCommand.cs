@@ -99,6 +99,7 @@ public abstract record WorkflowCommand
     public sealed record SubmitManualCrop(StepKind Step, TrimBounds Crop, ManualCropMargin Margin = default) : WorkflowCommand
     {
         public ImageProcessingInput? ImageInput { get; init; }
+        public (RevisionId Id, Sha256 Sha256)? DisplayedSource { get; init; }
     }
 
     /// <summary>
@@ -275,7 +276,10 @@ public abstract record WorkflowCommand
     public sealed record SetCustomTargetEdgeSize(
         TargetEdge Edge,
         decimal Millimetres,
-        SizePreset? OverriddenPreset = null) : WorkflowCommand;
+        SizePreset? OverriddenPreset = null) : WorkflowCommand
+    {
+        public (RevisionId Id, Sha256 Sha256)? PreserveSizeOf { get; init; }
+    }
 
     /// <summary>
     /// Record the operator's explicit permission to enlarge past what the source holds at the

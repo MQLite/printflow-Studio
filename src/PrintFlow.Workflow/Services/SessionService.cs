@@ -1668,7 +1668,7 @@ public sealed partial class SessionService : ISessionService
             // A trim adjustment is a decision about the exact pixels of the pre-trim source it
             // crops, so those bytes are re-verified before anything is committed (SCRUM-11147).
             WorkflowCommand.AdjustTrimFromReview => FindRevision(aggregate, snapshot.UpstreamRevisionOf(StepKind.Trim)),
-            WorkflowCommand.SubmitManualCrop crop => FindRevision(aggregate, snapshot.UpstreamRevisionOf(crop.Step)),
+            WorkflowCommand.SubmitManualCrop crop => FindRevision(aggregate, snapshot.ManualCropInput(crop.Step)?.Id),
             WorkflowCommand.SubmitManualResult manual => FindRevision(aggregate, snapshot.UpstreamRevisionOf(manual.Step)),
 
             // The same input a manual import is checked against: U's bytes are re-verified before
@@ -1718,9 +1718,16 @@ public sealed partial class SessionService : ISessionService
             return OperationResult.Ok();
         }
 
-        OperationResult<Sha256> verified = await _integrityGuard.VerifyAsync(subject, cancellationToken);
+        OperationResult<FileFacts> verified = await _integrityGuard.VerifyFactsAsync(subject, cancellationToken);
         if (verified.IsSuccess)
         {
+            // Older sessions can contain WIC's 96 DPI fallback for an untagged file.
+            if (command is WorkflowCommand.SetCustomTargetEdgeSize { PreserveSizeOf: not null } original &&
+                (original.Edge != TargetEdge.LongEdge || original.OverriddenPreset is not null ||
+                 EmbeddedPrintSize.From(verified.Value)?.LongEdgeMm != original.Millimetres))
+                return OperationResult.Fail<Unit>(OperationFailure.Create(FailureCode.PreconditionNotMet,
+                    "The verified file does not specify the requested physical size.",
+                    messageKey: "Session_OriginalPrintSizeUnavailable"));
             return OperationResult.Ok();
         }
 
@@ -2529,7 +2536,7 @@ public sealed partial class SessionService : ISessionService
                 : cancellationToken;
         return await FailAttemptAsync(
             afterStart, started.State, closing, work.Step, runningAttempt, produced.Failure, closingToken,
-            work.CorrectionRequestId, work.RequiresWriteGuard, work.HasLocalCancellation);
+            work.CorrectionRequestId, work.RequiresWriteGuard, work.HasLocalCancellation || work.ManualCrop is not null);
     }
 
     /// <summary>
@@ -2605,7 +2612,7 @@ public sealed partial class SessionService : ISessionService
             afterStart, sessionAfterFinish, finished.State, finished.Effects, context,
             newRevisions: [newRevision], upsertAttempts: [succeededAttempt], upsertOutputs: newOutputs);
 
-        if (work.ManualResultPath is not null || work.ImageProcessing?.Backend is not null)
+        if (work.ManualResultPath is not null || work.ManualCrop is not null || work.ImageProcessing?.Backend is not null)
             finishing = finishing with { LockChange = null };
         if (work.RequiresWriteGuard)
             finishing = finishing with
@@ -3044,7 +3051,8 @@ public sealed partial class SessionService : ISessionService
                 // Checked rather than assumed: AdapterKind.Internal means "deterministic
                 // in-process pixel work", and Trim is only the first such step. A future
                 // internal step routed here by accident would silently be trimmed.
-                if (definition.Kind != StepKind.Trim)
+                if (definition.Kind != StepKind.Trim &&
+                    !(definition.Kind == StepKind.OriginalConfirmation && work.ManualCrop is not null))
                 {
                     return OperationResult.Fail<StepWork>(
                         FailureCode.PreconditionNotMet,
@@ -3054,7 +3062,9 @@ public sealed partial class SessionService : ISessionService
                 // A manual attempt uses the operator's rectangle as its content bounds.
                 if (work.ManualCrop is { } crop)
                 {
-                    WorkspaceFileRef expectedOutput = SiblingOf(workingCopy.Value, ManualCropOutputFileName);
+                    string cropFileName = workingCopy.Value.FileName.Equals(ManualCropOutputFileName, StringComparison.OrdinalIgnoreCase)
+                        ? "manual-crop-result.png" : ManualCropOutputFileName;
+                    WorkspaceFileRef expectedOutput = SiblingOf(workingCopy.Value, cropFileName);
                     establishExpectedOutput(expectedOutput);
                     OperationResult<ManualCropResult> cropped = await _manualCrop.CropAsync(
                         new ManualCropRequest(

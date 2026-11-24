@@ -128,6 +128,8 @@ public sealed class ChromeWorkTextSubmission(string workspaceRoot, LoopbackWorkR
         bool returnEnabled = !string.IsNullOrWhiteSpace(resultConfig) && resultImport is not null;
         if (sourceRequestId is not null && !returnEnabled)
             return Unavailable("WorkReceiverUnavailable");
+        if (returnEnabled && await WorkRuntimeStartup.EnsureAsync(resultConfig!, workspaceRoot, ct) is { } startupFailure)
+            return Unavailable(startupFailure);
         string? preparationFailure = null;
         var channel = new FileAiDesignChannel(configuration, expectedLaunchNonce: launchNonce,
             prepareResult: returnEnabled ? async (request, token) =>

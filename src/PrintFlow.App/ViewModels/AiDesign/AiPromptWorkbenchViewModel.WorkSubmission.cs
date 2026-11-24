@@ -196,6 +196,8 @@ public sealed partial class AiPromptWorkbenchViewModel
             "WorkUploadFailed" or "WorkUploadReceiptInvalid" => "AiPrompt_WorkUploadFailed",
             "WorkRequestActive" => "AiPrompt_WorkActive",
             "WorkReceiverUnavailable" => "AiPrompt_WorkReceiverUnavailable",
+            "WorkTunnelUnavailable" => "AiPrompt_WorkTunnelUnavailable",
+            "WorkRuntimeStartupFailed" => "AiPrompt_WorkRuntimeStartupFailed",
             _ => "AiPrompt_WorkUnconfirmed"
         });
     }

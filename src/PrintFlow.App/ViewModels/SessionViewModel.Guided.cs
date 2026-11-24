@@ -61,7 +61,7 @@ public sealed partial class SessionViewModel
     });
     public string GuidedProcessingWait => Strings.Resolve("Session_GuidedProcessingWait");
     public bool ShowsGuidedSourceDetails => !IsViewingHistory && _session?.CurrentStep?.Step == StepKind.OriginalConfirmation;
-    public bool ShowsGuidedOriginalChecks => ShowsGuidedSourceDetails && (CanConfirmOriginal || IsReviewRequired);
+    public bool ShowsGuidedOriginalChecks => ShowsGuidedSourceDetails && (CanConfirmOriginal || IsReviewRequired || ShowsSourceCropEntry);
     public string GuidedOriginalChecksHeading => Strings.Resolve("Session_GuidedOriginalChecksHeading");
     public string GuidedOriginalChecks => Strings.Resolve("Session_GuidedOriginalChecks");
     public bool ShowsGuidedPdfSource => ShowsGuidedSourceDetails && HasPdfSource;
@@ -112,7 +112,9 @@ public sealed partial class SessionViewModel
     public string GuidedCurrentStatus => StatusHeading;
     public string GuidedInteractionIdentity => $"{NavigationContext(_session)}|{GuidedPage}|{IsViewingHistory}|{SelectedHistory?.Step}|{IsConfirmingDraftLeave}|{IsConfirmingReturn}|{IsChoosingCustomSize}|{IsComparingTrim}|{SelectedSave?.Key}";
     public string CropDetailsLabel => Strings.Resolve("Session_CropDetailsLabel");
-    public bool ShowsManualCropEntry => CanManualCrop && !IsCropping && !UsesImageProcessingAdvance;
+    public bool ShowsSourceCropEntry => ShowsGuidedSourceDetails && CanManualCrop && !IsCropping;
+    public string SourceCropLabel => Strings.Resolve("Session_SourceCrop");
+    public bool ShowsManualCropEntry => !ShowsGuidedSourceDetails && CanManualCrop && !IsCropping && !UsesImageProcessingAdvance;
     public bool ShowsManualCropEntryNotice => IsManualCropRequired && !IsCropping;
     public string GuidedTechnicalDetailsLabel => Strings.Session_GuidedTechnicalDetails;
     public bool ShowsGuidedDimensions => GuidedPage == GuidedSessionPage.Dimensions && CanChooseFlexibleSize;
@@ -214,6 +216,8 @@ public sealed partial class SessionViewModel
         OnPropertyChanged(nameof(CanSaveManualHandoffCopy));
         OnPropertyChanged(nameof(ShowsGuidedProcessing));
         OnPropertyChanged(nameof(ShowsManualCropEntry));
+        OnPropertyChanged(nameof(ShowsSourceCropEntry));
+        OnPropertyChanged(nameof(SourceCropLabel));
         OnPropertyChanged(nameof(ShowsManualCropEntryNotice));
         OnPropertyChanged(nameof(ShowsGuidedImageWorkspace));
         OnPropertyChanged(nameof(ShowsGuidedPreviewTools));

@@ -1129,14 +1129,16 @@ public sealed class WorkflowEngine : IWorkflowEngine
         if (RejectChangedImageProcessingInput(state, command.Step, command.ImageInput) is { } stale)
             return stale;
 
-        // Trim is the only step an operator-drawn rectangle means anything for. Enhancement and
-        // BackgroundRemoval fail for reasons a crop cannot fix, and PhotoshopOutput produces a
-        // production TIFF from confirmed dimensions rather than from a drag.
-        if (command.Step != StepKind.Trim)
+        if (state.ManualCropInput(command.Step) is not { } input)
         {
             return WorkflowTransition.Rejected(
                 RejectionCode.CommandNotApplicable,
-                $"Step {command.Step} has no manual crop; only Trim can be cropped by hand.");
+                $"Step {command.Step} has no input available for manual cropping.");
+        }
+        if (command.DisplayedSource is { } displayed && displayed != input)
+        {
+            return WorkflowTransition.Rejected(RejectionCode.PreconditionNotMet,
+                "The displayed crop source has changed.");
         }
 
         if (command.Crop.IsEmpty)
@@ -1145,14 +1147,7 @@ public sealed class WorkflowEngine : IWorkflowEngine
                 RejectionCode.InvalidPayload, "A manual crop rectangle contains at least one pixel.");
         }
 
-        RevisionId? input = state.UpstreamRevisionOf(command.Step);
-        if (input is not RevisionId source)
-        {
-            return WorkflowTransition.Rejected(
-                RejectionCode.PreconditionNotMet,
-                $"Step {command.Step} has no upstream Revision to crop.");
-        }
-
+        RevisionId source = input.Id;
         SessionStep step = resolved.Step!;
 
         List<WorkflowEffect> effects =
@@ -1659,6 +1654,9 @@ public sealed class WorkflowEngine : IWorkflowEngine
             return WorkflowTransition.Rejected(
                 RejectionCode.InvalidPayload, "A target edge must be positive millimetres.");
         }
+
+        if (command.PreserveSizeOf is { } displayed && state.UpstreamResultOf(StepKind.PhotoshopOutput) != displayed)
+            return WorkflowTransition.Rejected(RejectionCode.PreconditionNotMet, "The displayed print source has changed.");
 
         if (command.Edge is not (TargetEdge.Width or TargetEdge.Height or TargetEdge.LongEdge))
         {

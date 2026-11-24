@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using ImageMagick;
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Results;
 using PrintFlow.Workflow.Ports;
@@ -104,7 +105,7 @@ public sealed class WicFileInspector : IFileInspector
 
         ImageFormat format = FormatSniffer.Detect(header.AsSpan(0, headerLength));
         WicMetadata metadata = verifiedPng ?? (format is ImageFormat.Png or ImageFormat.Jpeg or ImageFormat.Tiff
-            ? TryDecodeWic(absolutePath)
+            ? TryDecodeWic(absolutePath, format)
             : WicMetadata.Unavailable);
 
         FileFacts facts = new(
@@ -144,7 +145,7 @@ public sealed class WicFileInspector : IFileInspector
         public static readonly WicMetadata Unavailable = new(null, null, null, null, ColourMode.Unknown, null);
     }
 
-    private static WicMetadata TryDecodeWic(string absolutePath)
+    private static WicMetadata TryDecodeWic(string absolutePath, ImageFormat format)
     {
         try
         {
@@ -160,7 +161,7 @@ public sealed class WicFileInspector : IFileInspector
             }
 
             BitmapFrame frame = decoder.Frames[0];
-            return MetadataOf(frame);
+            return MetadataOf(frame, stream, format);
         }
         catch (NotSupportedException)
         {
@@ -195,12 +196,38 @@ public sealed class WicFileInspector : IFileInspector
             }
             y += height;
         }
-        return MetadataOf(frame);
+        return MetadataOf(frame, stream, ImageFormat.Png);
     }
 
-    private static WicMetadata MetadataOf(BitmapFrame frame) => new(
-        frame.PixelWidth, frame.PixelHeight,
-        frame.DpiX > 0 ? frame.DpiX : null,
-        frame.DpiY > 0 ? frame.DpiY : null,
-        WicPixelFormats.ColourModeOf(frame.Format), WicPixelFormats.HasAlpha(frame.Format));
+    private static WicMetadata MetadataOf(BitmapFrame frame, Stream stream, ImageFormat format)
+    {
+        var facts = new WicMetadata(frame.PixelWidth, frame.PixelHeight,
+            frame.DpiX > 0 ? frame.DpiX : null, frame.DpiY > 0 ? frame.DpiY : null,
+            WicPixelFormats.ColourModeOf(frame.Format), WicPixelFormats.HasAlpha(frame.Format));
+        if (facts is not { DpiX: 96, DpiY: 96 }) return facts;
+
+        // WIC also returns exactly 96 DPI when the file carries no physical density.
+        // Distinguish that fallback from an explicit 96 DPI tag before recording the size.
+        stream.Position = 0;
+        var magickFormat = format switch
+        {
+            ImageFormat.Jpeg => MagickFormat.Jpeg,
+            ImageFormat.Tiff => MagickFormat.Tiff,
+            _ => MagickFormat.Png,
+        };
+        try
+        {
+            var density = new MagickImageInfo(stream, new MagickReadSettings { Format = magickFormat }).Density;
+            if (density?.Units is DensityUnit.PixelsPerInch or DensityUnit.PixelsPerCentimeter)
+            {
+                double factor = density.Units == DensityUnit.PixelsPerCentimeter ? 2.54 : 1;
+                return facts with { DpiX = density.X * factor, DpiY = density.Y * factor };
+            }
+        }
+        catch (MagickException)
+        {
+            // The WIC raster facts still apply when the embedded density cannot be established.
+        }
+        return facts with { DpiX = null, DpiY = null };
+    }
 }

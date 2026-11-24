@@ -156,7 +156,7 @@ public sealed class InstallerBoundaryTests
                      "PrintFlow.Tests.dll", "xunit.core.dll", "Program.cs", "printflow.db",
                      "appsettings.local.json", "signing.pfx", "customer.psd", "reference.tif",
                      "PrintFlow.App.pdb", "PrintFlow.App.csproj", "evidence/run.json",
-                     "a/b/c/deep.dll",
+                     "a/b/c/deep.dll", "WorkRuntime/other.ps1",
                  })
         {
             ShouldNotBeAllowed(policy, denied);
@@ -178,7 +178,7 @@ public sealed class InstallerBoundaryTests
                      "PrintFlow.App.deps.json", "PrintFlow.App.runtimeconfig.json",
                      "appsettings.json", "System.Private.CoreLib.dll", "PresentationCore.dll",
                      "e_sqlite3.dll", "zh-Hans/PresentationCore.resources.dll",
-                     "zh-CN/PrintFlow.App.resources.dll",
+                     "zh-CN/PrintFlow.App.resources.dll", "WorkRuntime/Ensure-PrintFlowWorkRuntime.ps1",
                  })
         {
             ShouldBeAllowed(policy, allowed);
@@ -189,7 +189,7 @@ public sealed class InstallerBoundaryTests
                      "PrintFlow.App.exe", "PrintFlow.App.dll", "PrintFlow.Domain.dll",
                      "PrintFlow.Workflow.dll", "PrintFlow.Infrastructure.dll", "PrintFlow.Design.dll",
                      "PrintFlow.App.deps.json", "PrintFlow.App.runtimeconfig.json",
-                     "appsettings.json",
+                     "appsettings.json", "WorkRuntime/Ensure-PrintFlowWorkRuntime.ps1",
                  })
         {
             policy.RequiredFiles.ShouldContain(required);
@@ -330,6 +330,14 @@ public sealed class InstallerBoundaryTests
         {
             string text = DeclarationsOf(file);
             string relative = RepositoryRelative(file);
+            if (relative.Equals(@"tools\work-runtime\Ensure-PrintFlowWorkRuntime.ps1", StringComparison.OrdinalIgnoreCase))
+            {
+                // The Work tunnel exposes its readiness probe on the local process's listening port.
+                text.ShouldContain("$request.AllowAutoRedirect = $false");
+                text.ShouldContain("$request.Proxy = $null");
+                text = text.Replace("""[Net.HttpWebRequest]::Create("http://127.0.0.1:$($port.LocalPort)/readyz")""",
+                    string.Empty, StringComparison.Ordinal);
+            }
             foreach (string api in updaterApis)
             {
                 if (imageApiTransports.Contains(relative, StringComparer.OrdinalIgnoreCase) &&

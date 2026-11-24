@@ -1351,6 +1351,10 @@
                             <TextBlock Text="{Binding GuidedOriginalChecksHeading}" FontSize="24" FontWeight="SemiBold" TextWrapping="Wrap" />
                             <TextBlock Text="{Binding GuidedOriginalChecks}" FontSize="16" TextWrapping="Wrap" Margin="0,10,0,0"
                                        AutomationProperties.AutomationId="Session.OriginalChecks.Text" />
+                            <local:SessionActionButton Content="{Binding SourceCropLabel}" Command="{Binding BeginManualCropCommand}"
+                                HorizontalAlignment="Left" Padding="12,7" Margin="0,10,0,0"
+                                AutomationProperties.AutomationId="Session.SourceCrop"
+                                Visibility="{Binding ShowsSourceCropEntry, Converter={StaticResource BoolToVisibility}}" />
                         </StackPanel>
                     </ui:Card>
 
@@ -1965,6 +1969,10 @@
 
                         <StackPanel>
                             <TextBlock Text="{Binding SizeHeading}" FontSize="24" FontWeight="SemiBold" TextWrapping="Wrap" />
+                            <local:SessionActionButton Content="{Binding OriginalPrintSizeLabel}" Command="{Binding UseOriginalPrintSizeCommand}"
+                                IsEnabled="{Binding CanUseOriginalPrintSize}" HorizontalAlignment="Left" Padding="12,7" Margin="0,8,0,0"
+                                AutomationProperties.AutomationId="Session.PrintDimensions.OriginalSize" />
+                            <TextBlock Text="{Binding OriginalPrintSizeHint}" TextWrapping="Wrap" Margin="0,4,0,0" />
                             <local:SessionExpander Header="{Binding PresetsLabel}" IsExpanded="{Binding ShowsGuidedCustomSizeEntry, Mode=OneWay}"
                                     Margin="0,8,0,0" AutomationProperties.AutomationId="Session.PrintDimensions.Presets">
                                 <StackPanel Visibility="{Binding ShowsGuidedDimensions, Converter={StaticResource BoolToVisibility}}">

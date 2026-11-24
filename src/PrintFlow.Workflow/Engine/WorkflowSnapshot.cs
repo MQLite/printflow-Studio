@@ -53,6 +53,24 @@ public sealed record WorkflowSnapshot(
 
     public WorkflowDefinition Definition => WorkflowCatalog.For(WorkflowType, RequiresPsdPreparation, RequiresPdfPreparation);
 
+    internal (RevisionId Id, Sha256 Sha256)? ManualCropInput(StepKind step)
+    {
+        if (step == StepKind.Trim && CurrentStep?.State != StepState.ReviewRequired)
+            return UpstreamResultOf(step);
+        if (step != StepKind.OriginalConfirmation || !Definition.Contains(StepKind.Enhancement) ||
+            CurrentStep is not { Step: StepKind.OriginalConfirmation } original)
+            return null;
+
+        // PSD and PDF are cropped only after their managed raster has been prepared.
+        if (RequiresPsdPreparation || RequiresPdfPreparation)
+            return original.State is StepState.ReviewRequired or StepState.Failed or StepState.Interrupted &&
+                original.CurrentRevisionId is { } id && original.CurrentRevisionSha256 is { } hash
+                    ? (id, hash) : null;
+
+        return original.State is StepState.Waiting or StepState.Failed or StepState.Interrupted
+            ? UpstreamResultOf(step) : null;
+    }
+
     /// <summary>
     /// The margin the next deterministic Trim attempt will run with
     /// (Epic 11200 Part C3 §10, §13).

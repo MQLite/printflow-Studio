@@ -12,6 +12,45 @@ namespace PrintFlow.Tests.Integration.Ui;
 public sealed class FlexibleSizeUiTests
 {
     [Fact]
+    public async Task Missing_density_does_not_offer_the_decoders_default_as_an_original_size()
+    {
+        using HomeScreenHarness harness = new();
+        byte[] png = SyntheticImages.Png();
+        int densityChunk = png.AsSpan().IndexOf("pHYs"u8);
+        densityChunk.ShouldBeGreaterThan(4);
+        // Remove the length, type, nine-byte pHYs payload and CRC.
+        byte[] untagged = [.. png[..(densityChunk - 4)], .. png[(densityChunk + 17)..]];
+        string path = harness.Inner.Workspace.CreateSourceFile("untagged.png", untagged);
+        var screen = await AtDimensionsAsync(harness, path);
+        screen.CanUseOriginalPrintSize.ShouldBeFalse();
+        screen.CanChooseFlexibleSize.ShouldBeTrue();
+    }
+
+    [Theory]
+    [InlineData(150, 600, 300)]
+    [InlineData(300, 300, 150)]
+    [InlineData(600, 150, 75)]
+    public async Task No_size_correction_preserves_physical_size_at_production_resolution(
+        int dpi, int expectedWidth, int expectedHeight)
+    {
+        using HomeScreenHarness harness = new();
+        string path = harness.Inner.Workspace.CreateSourceFile("physical-size.png",
+            SyntheticImages.Png(300, 150, dpi, alpha: true));
+        var screen = await AtDimensionsAsync(harness, path);
+        screen.CanUseOriginalPrintSize.ShouldBeTrue();
+        await screen.UseOriginalPrintSizeCommand.ExecuteAsync(null);
+        screen.Notice.ShouldBeNull();
+
+        var view = await LoadAsync(harness, screen);
+        var preflight = view.Preflight.ShouldNotBeNull();
+        preflight.ProductionOutputPpi.ShouldBe(300);
+        preflight.OutputPixelWidth.ShouldBe(expectedWidth);
+        preflight.OutputPixelHeight.ShouldBe(expectedHeight);
+        preflight.RequiresEnlargement.ShouldBe(dpi < 300);
+        preflight.EnlargementAuthorised.ShouldBeFalse();
+    }
+
+    [Fact]
     public async Task Preset_cards_use_the_configured_recommendations_and_the_preset_command()
     {
         using HomeScreenHarness harness = new();

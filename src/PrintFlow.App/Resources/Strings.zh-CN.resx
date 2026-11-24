@@ -392,6 +392,11 @@
   </data>
   <data name="Session_SizeHeading" xml:space="preserve"><value>印刷尺寸</value></data>
   <data name="Session_UsePreset" xml:space="preserve"><value>使用预设</value></data>
+  <data name="Session_OriginalPrintSize" xml:space="preserve"><value>不修正</value></data>
+  <data name="Session_OriginalPrintSizeHint" xml:space="preserve"><value>保留当前图片的印刷尺寸（{0:0.##} × {1:0.##} 毫米），按 300 PPI 输出。</value></data>
+  <data name="Session_OriginalPrintSizeUnavailable" xml:space="preserve"><value>无法按当前图片的分辨率确定等比例印刷尺寸。请选择预设或自定义尺寸。</value></data>
+  <data name="Session_SourceCrop" xml:space="preserve"><value>自由裁剪（可选）</value></data>
+  <data name="Session_SourceCropReview" xml:space="preserve"><value>请检查裁剪后的图片（{0} × {1} 像素），确认后继续。</value></data>
   <data name="Session_CustomSize" xml:space="preserve"><value>自定义尺寸</value></data>
   <data name="Session_AdjustSize" xml:space="preserve"><value>调整尺寸</value></data>
   <data name="Session_RecommendedMaximum" xml:space="preserve"><value>推荐最大尺寸：{0} × {1} mm</value></data>
@@ -1721,6 +1726,8 @@
   <data name="AiPrompt_WorkReceivingStopped" xml:space="preserve"><value>Studio 已停止接收这张图片。</value></data>
   <data name="AiPrompt_WorkAwaitingResult" xml:space="preserve"><value>已提交到 Work。回传图片核验通过后，刷新「最近任务」即可打开。</value></data>
   <data name="AiPrompt_WorkReceiverUnavailable" xml:space="preserve"><value>Studio 无法连接图片接收器。提示词已保存。</value></data>
+  <data name="AiPrompt_WorkTunnelUnavailable" xml:space="preserve"><value>Work 隧道未就绪。请检查网络连接、隧道配置和已保存的运行密钥，再重试。</value></data>
+  <data name="AiPrompt_WorkRuntimeStartupFailed" xml:space="preserve"><value>Work 回传服务启动失败。请检查本机启动配置，再重试。</value></data>
   <data name="AiPrompt_WorkSubmitted" xml:space="preserve"><value>已提交到 Chrome 的 Work 对话。请在该对话查看图片。</value></data>
   <data name="AiPrompt_WorkChromeFailed" xml:space="preserve"><value>Chrome 或本机桥接未能连接。请检查登记的 Chrome 配置后重试。</value></data>
   <data name="AiPrompt_WorkModeUnavailable" xml:space="preserve"><value>当前 Chrome 页面未进入 Work。请检查登录及 Work 模式。</value></data>

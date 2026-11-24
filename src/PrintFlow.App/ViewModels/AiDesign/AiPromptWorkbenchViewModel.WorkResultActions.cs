@@ -146,6 +146,8 @@ public sealed partial class AiPromptWorkbenchViewModel
             {
                 "WorkRequestActive" => "AiPrompt_WorkActive",
                 "WorkReceiverUnavailable" => "AiPrompt_WorkReceiverUnavailable",
+                "WorkTunnelUnavailable" => "AiPrompt_WorkTunnelUnavailable",
+                "WorkRuntimeStartupFailed" => "AiPrompt_WorkRuntimeStartupFailed",
                 "WorkFollowUpBridgeUnavailable" => "WorkTask_FollowUpBridgeUnavailable",
                 "WorkResultPromptTooLong" or "WorkPromptRejected" => "WorkTask_FollowUpTooLong",
                 _ => "WorkTask_RegenerateFailed"

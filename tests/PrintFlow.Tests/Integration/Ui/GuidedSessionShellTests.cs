@@ -28,6 +28,10 @@ public sealed class GuidedSessionShellTests
             Button confirm = Find<Button>(tree, "Session.PrintDimensions.ConfirmSize");
             confirm.Visibility.ShouldBe(Visibility.Collapsed);
             Button entry = Find<Button>(tree, "Session.PrintDimensions.CustomSize");
+            Button originalSize = Find<Button>(tree, "Session.PrintDimensions.OriginalSize");
+            GuidedSessionProjectionTests.Shown(originalSize).ShouldBeTrue();
+            originalSize.IsEnabled.ShouldBeTrue();
+            originalSize.Command.ShouldBeSameAs(model.UseOriginalPrintSizeCommand);
             var presets = Find<Expander>(tree, "Session.PrintDimensions.Presets");
             Ancestors(entry).ShouldContain(Find<FrameworkElement>(tree, "Session.PrintDimensions.Entry"));
             presets.IsExpanded = false;
@@ -63,6 +67,9 @@ public sealed class GuidedSessionShellTests
             FrameworkElement workspace = Find<FrameworkElement>(tree, "Session.CurrentWorkspace");
             FrameworkElement actions = Find<FrameworkElement>(tree, "Session.ActionBar");
             Button primary = Find<Button>(tree, "Session.ConfirmOriginal");
+            Button sourceCrop = Find<Button>(tree, "Session.SourceCrop");
+            GuidedSessionProjectionTests.Shown(sourceCrop).ShouldBeTrue();
+            sourceCrop.Command.ShouldBeSameAs(model.BeginManualCropCommand);
             Bounds(navigation, tree.Root).Right.ShouldBeLessThanOrEqualTo(Bounds(workspace, tree.Root).Left);
             Bounds(workspace, tree.Root).Bottom.ShouldBeLessThanOrEqualTo(Bounds(actions, tree.Root).Top);
             var bounds = Bounds(primary, tree.Root);

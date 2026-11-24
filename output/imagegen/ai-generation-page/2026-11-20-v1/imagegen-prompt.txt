@@ -1,0 +1,17 @@
+Use case: ui-mockup
+Asset type: One high-fidelity Simplified Chinese Windows desktop app mockup for PrintFlow Studio. Straight-on, edge-to-edge, wide 16:10 landscape. Everything is within a single realistic native WPF-style app window. Minimal title bar “PrintFlow Studio”, an off-white canvas, white surfaces, quiet gray hairlines, restrained pale mint selection fills, deep teal #007F6B accent. Use crisp Simplified Chinese UI type similar to Microsoft YaHei UI, generous type size especially in inputs and progress, comfortable desktop spacing, a consistent grid and modest 6px corners. No illustration, no browser chrome, no annotation arrows or callouts.
+
+Layout, from top to bottom:
+• A full-width top band. Large heading on left “AI 生成”. Compact outline utilities on the right “草稿” and “AI 任务”. Below, a full-width row labeled “可编辑选项” with three distinct toggle chips, “姓名” (selected, checkmark), “生卒年” (selected, checkmark), “补充要求” (unselected, plus icon). The chips belong to the active template. This top band and the three panes below are the four main regions.
+• Underneath, precisely three side-by-side aligned panes with width shares around 22% / 32% / 46%. Left pane heading “基础模板”. Three full-width stacked native buttons with these exact labels, “人物纪念 T 恤” (selected with pale mint fill and teal edge), “圆形纪念徽章”, “只改姓名日期”. Simple text buttons.
+• Center pane heading “编辑字段”. Exactly three compact form rows with text labels above editable single-line fields. “姓名” with value “陈明远”; “出生日期” with value “1948-06-12”; “离世日期” with value “2024-09-18”. These are the fields for the two selected chips. Leave the unused lower space uncluttered.
+• Right pane title “提示词”, with two low-emphasis actions “复制” and “保存草稿” aligned at the right side of the pane header. Show a single roomy, lightly bordered multiline EDITABLE text area with a live insertion caret at the end and this exact text on five separate lines:
+“为参考人物制作纪念 T 恤图案。”
+“姓名：陈明远”
+“出生日期：1948-06-12”
+“离世日期：2024-09-18”
+“保留人物与原装饰，图案外围透明。”
+Below the editor, a quiet attachment row with two small outlined buttons “人物参考” and “版式参考”. Use paperclip icons if desired. No other panels or instructions.
+• A slim full-width bottom action strip contains a solid deep teal button exactly labeled “生成”, aligned right. Immediately above the strip, show a full-width anchored light mint status card that has opened after clicking “生成”, with bold heading “生成进度”. Include a single horizontal stage tracker below it in this exact order: “已提交” (teal checkmark), “等待回传” (highlighted current outlined teal dot and semibold text), “核验” (gray hollow dot), “导入” (gray hollow dot). The stage tracker is clean and legible, its connecting rule stops at the last stage. No percentages or estimated time.
+
+Only the exact UI strings specified above; use readable authentic Chinese glyphs. One page, no tabs, no quick/detailed mode toggle, no regenerate prompt button, no decorative badges, no watermark. The mockup should read at a glance as a useful desktop production tool. Show all panes and the entire footer without cropping.

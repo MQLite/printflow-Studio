@@ -179,6 +179,7 @@ public static class TransitionTable
 
         [StepState.ReviewRequired] =
         [
+            CommandKind.SubmitManualCrop, // Prepared original raster before enhancement.
             CommandKind.Approve,
             CommandKind.KeepOriginalExtent,
             CommandKind.Reject,

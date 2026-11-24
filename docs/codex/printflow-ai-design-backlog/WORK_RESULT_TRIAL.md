@@ -2,6 +2,16 @@
 
 Run the independent receiver under the same Windows user as trial Studio. In the receiver's private configuration set `"studioPipe": "PrintFlow-WorkTrial"` and keep the approved file origins and the existing private tunnel for `/mcp`. Do not forward the control endpoints or the pipe.
 
+Studio can start the receiver and tunnel on demand for new Work requests and follow-ups. Place the private Studio configuration under `%LOCALAPPDATA%\PrintFlowStudio\Work`. Next to `studio-work-result.local.json`, create `studio-work-result.local.startup.json` with these five string properties, each containing an absolute local path:
+
+- `node` — installed node.exe
+- `receiverCli` — ai-design-result-mcp/src/cli.mjs in the receiver package with its dependencies installed
+- `receiverConfig` — private receiver JSON using the same pipe, control bearer and read bearer as Studio
+- `tunnelClient` — installed tunnel-client.exe
+- `tunnelProfile` — existing tunnel profile YAML for this receiver
+
+Set `PRINTFLOW_TUNNEL_RUNTIME_KEY` for the Windows user. Keep the startup file and referenced programs under trusted local ownership. Studio reuses the configured receiver pipe and checks the matching tunnel process's loopback `/readyz` response before submitting. Installations that manage the helpers independently can omit the startup file.
+
 Create a separate private `studio-work-result.local.json` outside the repository:
 
 ```json

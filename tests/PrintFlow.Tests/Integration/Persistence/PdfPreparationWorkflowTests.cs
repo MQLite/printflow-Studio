@@ -21,6 +21,30 @@ namespace PrintFlow.Tests.Integration.Persistence;
 public sealed class PdfPreparationWorkflowTests
 {
     [Fact]
+    public async Task Optional_source_crop_uses_the_prepared_raster_and_preserves_review()
+    {
+        using SessionServiceHarness h = new();
+        var service = Service(h, new WindowsPdfPreparationProcessor(h.FileWorkspace, h.FileInspector));
+        string path = h.Workspace.CreateSourceFile("single.pdf", PdfFixtures.Read("single"));
+        var imported = (await service.ImportAsync(WorkflowType.PrepareAsset, path, null, "qa", default)).Value;
+        imported.CanManualCrop.ShouldBeFalse();
+        var prepared = await RetentionCleanupTests.Command(service, imported.Id,
+            new WorkflowCommand.StartStep(StepKind.OriginalConfirmation));
+        prepared.CanManualCrop.ShouldBeTrue();
+        var crop = await RetentionCleanupTests.Command(service, imported.Id,
+            new WorkflowCommand.SubmitManualCrop(StepKind.OriginalConfirmation,
+                PrintFlow.Domain.Trimming.TrimBounds.FromEdges(5, 5, 25, 15)));
+        crop.CurrentArtefact!.SourceRevisionId.ShouldBe(prepared.CurrentArtefact!.RevisionId);
+        crop.CurrentStep!.State.ShouldBe(StepState.ReviewRequired);
+        crop.CanManualCrop.ShouldBeFalse();
+        var ready = await RetentionCleanupTests.Command(service, imported.Id,
+            new WorkflowCommand.Approve(StepKind.OriginalConfirmation, crop.CurrentArtefact.Sha256));
+        ready.CurrentStep!.Step.ShouldBe(StepKind.Enhancement);
+        ready.CurrentArtefact!.Facts.PixelWidth.ShouldBe(20);
+        ready.CurrentArtefact.Facts.PixelHeight.ShouldBe(10);
+    }
+
+    [Fact]
     public async Task Prepared_PDF_raster_and_page_provenance_survive_completion_retention()
     {
         using SessionServiceHarness h = new();

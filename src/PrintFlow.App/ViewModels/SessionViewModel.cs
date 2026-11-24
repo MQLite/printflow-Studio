@@ -817,6 +817,7 @@ public sealed partial class SessionViewModel : ObservableObject
 
     public bool HasPdfSource => _session?.OriginalSourceFormat == ImageFormat.Pdf;
     public string PdfSourceNotice => !HasPdfSource || _session?.CurrentStep?.Step != StepKind.OriginalConfirmation ? string.Empty
+        : _session.HasManualCropGeometry ? CroppedDocumentNotice
         : _session is { CurrentArtefact.Facts.Format: ImageFormat.Png, PdfInspection: { IsPreparedSinglePage: true } pdf }
             ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Session_PdfPrepared,
                 pdf.PageWidthMillimetres, pdf.PageHeightMillimetres, pdf.PixelWidth, pdf.PixelHeight)
@@ -824,8 +825,13 @@ public sealed partial class SessionViewModel : ObservableObject
 
     public bool HasPsdSource => _session?.OriginalSourceFormat == ImageFormat.Psd;
     public string PsdSourceNotice => HasPsdSource
-        ? (_session?.CurrentArtefact?.Facts.Format == ImageFormat.Psd ? Strings.Session_PsdPending : Strings.Session_PsdPrepared)
+        ? (_session?.HasManualCropGeometry == true && _session.CurrentStep?.Step == StepKind.OriginalConfirmation
+            ? CroppedDocumentNotice
+            : _session?.CurrentArtefact?.Facts.Format == ImageFormat.Psd ? Strings.Session_PsdPending : Strings.Session_PsdPrepared)
         : string.Empty;
+
+    private string CroppedDocumentNotice => string.Format(OperatorCulture.Current, Strings.Resolve("Session_SourceCropReview"),
+        _session?.CurrentArtefact?.Facts.PixelWidth, _session?.CurrentArtefact?.Facts.PixelHeight);
 
     /// <summary>
     /// Whether the artefact currently under review is the production TIFF
@@ -1610,14 +1616,14 @@ public sealed partial class SessionViewModel : ObservableObject
     // WorkflowEngine, and restating it here would create a second copy that could disagree
     // with the one that actually accepts the click (Part 3C3A §4).
 
-    public bool CanConfirmOriginal => Allows(CommandKind.ConfirmOriginal);
+    public bool CanConfirmOriginal => !IsCropping && Allows(CommandKind.ConfirmOriginal);
 
     public bool CanRunStep => Allows(CommandKind.StartStep) && CanRunSelectedImageMethod &&
         !HasUnconfirmedBackgroundRemovalMethod && !HasUnconfirmedBackgroundRemovalMode && !HasPendingGuidedWhiteInk;
 
-    public bool CanApprove => Allows(CommandKind.Approve);
+    public bool CanApprove => !IsCropping && Allows(CommandKind.Approve);
 
-    public bool CanReject => Allows(CommandKind.Reject);
+    public bool CanReject => !IsCropping && Allows(CommandKind.Reject);
 
     public bool CanRetry => Allows(CommandKind.Retry) && _session?.CurrentStepFailure is not
         (FailureCode.PdfMultiplePages or FailureCode.PdfUnreadable or FailureCode.PdfEncrypted);
@@ -2514,6 +2520,7 @@ public sealed partial class SessionViewModel : ObservableObject
             step => new WorkflowCommand.SubmitManualCrop(step, crop, margin)
             {
                 ImageInput = DisplayedImageProcessingInput(_session),
+                DisplayedSource = _session?.CurrentArtefact is { } source ? (source.RevisionId, source.Sha256) : null,
             }, cancellationToken).ConfigureAwait(true);
     }
 
@@ -3160,7 +3167,10 @@ public sealed partial class SessionViewModel : ObservableObject
 
     partial void OnIsCroppingChanged(bool value)
     {
-        NotifyReviewGuidanceChanged();
+        OnPropertyChanged(nameof(CanConfirmOriginal));
+        OnPropertyChanged(nameof(CanApprove));
+        OnPropertyChanged(nameof(CanReject));
+        NotifyOperatorStatusChanged();
         OnPropertyChanged(nameof(ShowsManualCropControls));
         OnPropertyChanged(nameof(ShowsCropSurface));
         OnPropertyChanged(nameof(CanAdjustTrim));

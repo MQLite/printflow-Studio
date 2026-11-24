@@ -43,6 +43,12 @@ public static class ManualCropEligibility
             return false;
         }
 
+        if (state.CurrentStep is { Step: StepKind.OriginalConfirmation } original)
+        {
+            return state.ManualCropInput(original.Step) is { } input &&
+                !attempts.Any(a => a.OutputRevisionId == input.Id && a.Operation == OperationKind.ManualImport);
+        }
+
         if (state.CurrentStep is not { Step: StepKind.Trim } trim ||
             TransitionTable.Lookup(trim.State, CommandKind.SubmitManualCrop) != TransitionOutcome.Allowed)
         {

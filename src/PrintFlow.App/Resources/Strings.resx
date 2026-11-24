@@ -392,6 +392,11 @@
   </data>
   <data name="Session_SizeHeading" xml:space="preserve"><value>Size</value></data>
   <data name="Session_UsePreset" xml:space="preserve"><value>Use preset</value></data>
+  <data name="Session_OriginalPrintSize" xml:space="preserve"><value>No size correction</value></data>
+  <data name="Session_OriginalPrintSizeHint" xml:space="preserve"><value>Keep the current image’s print size ({0:0.##} × {1:0.##} mm) and output at 300 PPI.</value></data>
+  <data name="Session_OriginalPrintSizeUnavailable" xml:space="preserve"><value>The image resolution does not yield a proportional print size. Choose a preset or a custom size.</value></data>
+  <data name="Session_SourceCrop" xml:space="preserve"><value>Free crop (optional)</value></data>
+  <data name="Session_SourceCropReview" xml:space="preserve"><value>Review the cropped image ({0} × {1} pixels) before continuing.</value></data>
   <data name="Session_CustomSize" xml:space="preserve"><value>Custom size</value></data>
   <data name="Session_AdjustSize" xml:space="preserve"><value>Adjust size</value></data>
   <data name="Session_RecommendedMaximum" xml:space="preserve"><value>Recommended maximum: {0} × {1} mm</value></data>
@@ -1731,6 +1736,8 @@
   <data name="AiPrompt_WorkReceivingStopped" xml:space="preserve"><value>Studio stopped receiving this image.</value></data>
   <data name="AiPrompt_WorkAwaitingResult" xml:space="preserve"><value>Submitted to Work. After the returned image is verified, refresh Recent Jobs to open it.</value></data>
   <data name="AiPrompt_WorkReceiverUnavailable" xml:space="preserve"><value>Studio could not connect to the image receiver. The prompt has been saved.</value></data>
+  <data name="AiPrompt_WorkTunnelUnavailable" xml:space="preserve"><value>The Work tunnel is not ready. Check the network connection, tunnel profile and saved runtime key, then retry.</value></data>
+  <data name="AiPrompt_WorkRuntimeStartupFailed" xml:space="preserve"><value>The Work return services could not start. Check the local startup configuration and retry.</value></data>
   <data name="AiPrompt_WorkSubmitted" xml:space="preserve"><value>Submitted to Work in Chrome. Open the conversation to see the image.</value></data>
   <data name="AiPrompt_WorkChromeFailed" xml:space="preserve"><value>Chrome or the local bridge could not connect. Check the registered Chrome profile.</value></data>
   <data name="AiPrompt_WorkModeUnavailable" xml:space="preserve"><value>The Chrome page is not in Work mode. Check that the profile is signed in and in Work mode.</value></data>

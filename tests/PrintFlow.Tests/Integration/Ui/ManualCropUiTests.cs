@@ -5,6 +5,7 @@ using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Reviews;
 using PrintFlow.Domain.Sessions;
+using PrintFlow.Domain.Settings;
 using PrintFlow.Domain.Trimming;
 using PrintFlow.Tests.Fixtures;
 using PrintFlow.Workflow.Commands;
@@ -29,6 +30,56 @@ namespace PrintFlow.Tests.Integration.Ui;
 [Collection(SqliteCollection.Name)]
 public sealed class ManualCropUiTests
 {
+    [Theory]
+    [InlineData(WorkflowType.PrepareAsset)]
+    [InlineData(WorkflowType.PrepareCustomerDesign)]
+    public async Task Optional_source_crop_feeds_both_image_processing_steps(WorkflowType workflow)
+    {
+        using HomeScreenHarness harness = new();
+        string path = harness.Inner.Workspace.CreateSourceFile("source.png", SyntheticImages.Png(12, 10, 150));
+        var imported = (await harness.Sessions.ImportAsync(workflow, path, "source-crop", "tester", default)).Value;
+        var session = harness.Session(new RecordingNavigation());
+        session.Open(imported);
+        await session.PreviewsLoaded;
+        session.ShowsSourceCropEntry.ShouldBeTrue();
+        session.BeginManualCropCommand.Execute(null);
+        session.CancelManualCropCommand.Execute(null);
+        session.CanConfirmOriginal.ShouldBeTrue();
+        session.BeginManualCropCommand.Execute(null);
+        session.TrySetCropSelection(Surface(session), 3, 2, 9, 7).ShouldBeTrue();
+        await session.ApplyManualCropCommand.ExecuteAsync(null);
+        session.Notice.ShouldBeNull();
+        var enhancedInput = (await harness.Sessions.LoadAsync(imported.Id, default)).Value;
+        enhancedInput.CurrentStep!.Step.ShouldBe(StepKind.Enhancement);
+        enhancedInput.CurrentArtefact!.Facts.PixelWidth.ShouldBe(6);
+        enhancedInput.CurrentArtefact.Facts.PixelHeight.ShouldBe(5);
+        enhancedInput.CurrentArtefact.SourceRevisionId.ShouldBe(imported.CurrentArtefact!.RevisionId);
+        await session.SkipCommand.ExecuteAsync(null);
+        var cutoutInput = (await harness.Sessions.LoadAsync(imported.Id, default)).Value;
+        cutoutInput.CurrentStep!.Step.ShouldBe(StepKind.BackgroundRemoval);
+        cutoutInput.CurrentArtefact!.RevisionId.ShouldBe(enhancedInput.CurrentArtefact.RevisionId);
+
+        if (workflow == WorkflowType.PrepareCustomerDesign)
+        {
+            await session.SkipCommand.ExecuteAsync(null);
+            var selection = cutoutInput.ImageProcessingSelection! with { Crop = ImageProcessingMethod.KeepCanvas };
+            await Retain(new WorkflowCommand.SetImageProcessingSelection(StepKind.Trim, selection));
+            session.Open(await Retain(new WorkflowCommand.KeepOriginalExtent()));
+            await session.UseOriginalPrintSizeCommand.ExecuteAsync(null);
+            var preflight = session.Preflight.ShouldNotBeNull();
+            preflight.SourceRevisionId.ShouldBe(enhancedInput.CurrentArtefact.RevisionId);
+            preflight.OutputPixelWidth.ShouldBe(12);
+            preflight.OutputPixelHeight.ShouldBe(10);
+        }
+
+        async Task<SessionView> Retain(WorkflowCommand command)
+        {
+            var result = await harness.Sessions.ExecuteAsync(imported.Id, command, "tester", default);
+            result.IsSuccess.ShouldBeTrue(result.IsFailure ? result.Failure.TechnicalDetail : null);
+            return result.Value;
+        }
+    }
+
     /// <summary>The synthetic no-alpha source these tests crop, and the drag applied to it.</summary>
     /// <remarks>
     /// The image is 12×10 and the preview is not reduced at that size, so a surface of 12×10

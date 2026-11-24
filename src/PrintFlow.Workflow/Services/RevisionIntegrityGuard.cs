@@ -37,13 +37,16 @@ public sealed class RevisionIntegrityGuard
     /// <see cref="FailureCode.RevisionIntegrityMismatch"/> — the caller is responsible for
     /// invalidating the revision in the same metadata transaction as the failure it reports.
     /// </summary>
-    public async Task<OperationResult<Sha256>> VerifyAsync(Revision revision, CancellationToken cancellationToken)
+    public async Task<OperationResult<Sha256>> VerifyAsync(Revision revision, CancellationToken cancellationToken) =>
+        (await VerifyFactsAsync(revision, cancellationToken).ConfigureAwait(false)).Map(facts => facts.Sha256);
+
+    internal async Task<OperationResult<FileFacts>> VerifyFactsAsync(Revision revision, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(revision);
 
         if (!revision.IsValid || revision.RetentionReleasedAtUtc is not null)
         {
-            return OperationResult.Fail<Sha256>(
+            return OperationResult.Fail<FileFacts>(
                 FailureCode.RevisionIntegrityMismatch,
                 $"Revision {revision.Id} is already invalid ({revision.InvalidationReason}); it cannot be consumed.");
         }
@@ -52,7 +55,7 @@ public sealed class RevisionIntegrityGuard
         OperationResult<FileFacts> inspected = await _fileInspector.InspectAsync(absolutePath, cancellationToken);
         if (inspected.IsFailure)
         {
-            return OperationResult.Fail<Sha256>(
+            return OperationResult.Fail<FileFacts>(
                 FailureCode.RevisionIntegrityMismatch,
                 $"Revision {revision.Id} could not be re-read from '{absolutePath}': {inspected.Failure.TechnicalDetail}");
         }
@@ -60,12 +63,12 @@ public sealed class RevisionIntegrityGuard
         Sha256 actual = inspected.Value.Sha256;
         if (!actual.Equals(revision.Sha256))
         {
-            return OperationResult.Fail<Sha256>(
+            return OperationResult.Fail<FileFacts>(
                 FailureCode.RevisionIntegrityMismatch,
                 $"Revision {revision.Id} hash mismatch: recorded {revision.Sha256}, found {actual}. " +
                 "The approved file was modified outside PrintFlow.");
         }
 
-        return OperationResult.Ok(actual);
+        return inspected;
     }
 }

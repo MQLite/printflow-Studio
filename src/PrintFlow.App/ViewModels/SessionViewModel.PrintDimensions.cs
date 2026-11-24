@@ -18,6 +18,26 @@ public sealed record PrintDimensionsPreflightRow(string Key, string Label, strin
 
 public sealed partial class SessionViewModel
 {
+    private EmbeddedPrintSize? OriginalPrintSize => EmbeddedPrintSize.From(_session?.CurrentArtefact?.Facts);
+    public string OriginalPrintSizeLabel => Strings.Resolve("Session_OriginalPrintSize");
+    public string OriginalPrintSizeHint => OriginalPrintSize is { } size
+        ? string.Format(OperatorCulture.Current, Strings.Resolve("Session_OriginalPrintSizeHint"), size.WidthMm, size.HeightMm)
+        : Strings.Resolve("Session_OriginalPrintSizeUnavailable");
+    public bool CanUseOriginalPrintSize => ShowsGuidedDimensions && CanInteractWithLivePage && !IsBusy &&
+        _session?.Sizing.CanSetCustomTargetEdgeSize == true && OriginalPrintSize is not null;
+
+    [RelayCommand]
+    private async Task UseOriginalPrintSizeAsync(CancellationToken cancellationToken)
+    {
+        if (!CanUseOriginalPrintSize || _session?.CurrentArtefact is not { } source || OriginalPrintSize is not { } size)
+            return;
+
+        await RunAsync(new WorkflowCommand.SetCustomTargetEdgeSize(TargetEdge.LongEdge, size.LongEdgeMm)
+        {
+            PreserveSizeOf = (source.RevisionId, source.Sha256),
+        }, cancellationToken).ConfigureAwait(true);
+    }
+
     public bool ShowsGuidedPrintSummary => Preflight is not null && GuidedPage is
         GuidedSessionPage.Dimensions or GuidedSessionPage.WhiteInk or GuidedSessionPage.Preflight;
     public bool ShowsGuidedPrintWhiteInk => ShowsGuidedPrintSummary && GuidedPage is GuidedSessionPage.WhiteInk or GuidedSessionPage.Preflight;
@@ -43,6 +63,9 @@ public sealed partial class SessionViewModel
 
     private void NotifyGuidedPrintSummary()
     {
+        OnPropertyChanged(nameof(OriginalPrintSizeLabel));
+        OnPropertyChanged(nameof(OriginalPrintSizeHint));
+        OnPropertyChanged(nameof(CanUseOriginalPrintSize));
         OnPropertyChanged(nameof(ShowsGuidedPrintSummary));
         OnPropertyChanged(nameof(ShowsGuidedPrintWhiteInk));
         OnPropertyChanged(nameof(CanConfirmGuidedCustomSize));
