@@ -120,25 +120,32 @@ public sealed class OpenAiImageBackend : IImageProcessingBackend, IDisposable
                 return UnsupportedInput();
 
             MagickFormat inputFormat = format == ImageFormat.Png ? MagickFormat.Png : MagickFormat.Jpeg;
-            if (Decode(input, inputFormat, 8192, 24_000_000)
+            if (Decode(input, inputFormat, (w, h) => LocalImageFiles.Fits(w, h, 8192, 24_000_000))
                 is not { HasVisiblePixels: true } source)
                 return UnsupportedInput();
 
             bool transparent = !restore || source.HasTransparentPixels;
             bool cutout = request.Method == ImageProcessingMethod.OpenAiCutout;
+            bool combined = request.Method == ImageProcessingMethod.OpenAiCombined;
             var sourceSize = (source.Width, source.Height);
             if (cutout && !LocalImageFiles.Fits(source.Width, source.Height, MaximumOutputEdge, MaximumOutputPixels))
                 return Reject(FailureCode.SourceFormatUnsupported,
                     $"The {source.Width}×{source.Height} input exceeds the supported OpenAI cutout canvas.",
                     "ImageProcessing_OpenAiCutoutCanvasUnsupported");
 
-            var size = cutout ? null : EnhancementSize(source);
-            if (size is null && SupportsCustomOutputSize(source.Width, source.Height))
+            var size = restore ? EnhancementSize(source) : null;
+            if (!combined && size is null && SupportsCustomOutputSize(source.Width, source.Height))
                 size = sourceSize;
-            (uint Width, uint Height)? expectedSize = cutout ? null : size ?? sourceSize;
-            (uint Width, uint Height)? fallbackSize = !cutout && size is { } requestedSize && requestedSize != sourceSize &&
-                !LocalImageFiles.Fits(source.Width * 2, source.Height * 2, MaximumOutputEdge, MaximumOutputPixels)
-                    ? sourceSize : null;
+            bool AllowsOutputSize(uint width, uint height)
+            {
+                if (combined)
+                    return true;
+                if (cutout)
+                    return LocalImageFiles.Fits(width, height, MaximumOutputEdge, MaximumOutputPixels);
+
+                return (width, height) == (size ?? sourceSize) || ((width, height) == sourceSize &&
+                    !LocalImageFiles.Fits(source.Width * 2, source.Height * 2, MaximumOutputEdge, MaximumOutputPixels));
+            }
             using var message = CreateRequest(request.Method, key.Value, input, format, transparent, sourceSize, size);
             cancellationToken.ThrowIfCancellationRequested();
             if (!confirmation.TryConsume(request.Method, request.InputRevision, request.InputSha256))
@@ -153,7 +160,7 @@ public sealed class OpenAiImageBackend : IImageProcessingBackend, IDisposable
             var png = response.Value.Png;
             cancellationToken.ThrowIfCancellationRequested();
             if (FormatSniffer.Detect(png) != ImageFormat.Png ||
-                Decode(png, MagickFormat.Png, MaximumOutputEdge, MaximumOutputPixels, expectedSize, fallbackSize)
+                Decode(png, MagickFormat.Png, AllowsOutputSize)
                     is not { HasVisiblePixels: true } decoded ||
                 decoded.HasTransparentPixels != transparent)
                 return OperationResult.Fail<AdapterOutput>(InvalidOutputFailure(evidence));
@@ -287,7 +294,7 @@ public sealed class OpenAiImageBackend : IImageProcessingBackend, IDisposable
             _ => $"""
                 Edit the supplied image once to remove only the background and gently improve the clarity and sharpness of existing foreground detail.
                 Make only clear background areas transparent. Keep existing transparent areas and natural partial transparency at fine edges.
-                {geometry} Do not crop, extend, rotate, or reposition anything.
+                Preserve the full frame, aspect ratio, and relative proportions. Do not crop, extend, rotate, or reposition anything.
                 Preserve the subject's identity, facial geometry, expression, skin texture, hair wisps, accessories, clothing, and text.
                 When a detail could belong to the foreground, retain it.
                 Do not add objects, retouch faces, or reconstruct missing or obscured content.
@@ -448,26 +455,19 @@ public sealed class OpenAiImageBackend : IImageProcessingBackend, IDisposable
             evidence.Add(name, id);
     }
 
-    private static ImageAlpha? Decode(byte[] imageBytes, MagickFormat format, int maximumEdge, long maximumPixels,
-        (uint Width, uint Height)? expectedSize = null, (uint Width, uint Height)? fallbackSize = null)
+    private static ImageAlpha? Decode(byte[] imageBytes, MagickFormat format, Func<uint, uint, bool> allowsSize)
     {
-        // An exact requested or original raster has already been bounded before the upload.
-        // Validate the header first so alternate rasters cannot use the original-size allowance.
-        bool MatchesDimensions(uint width, uint height) => expectedSize is { } expected
-            ? (width, height) == expected || (fallbackSize is { } fallback && (width, height) == fallback)
-            : LocalImageFiles.Fits(width, height, maximumEdge, maximumPixels);
-
         try
         {
             var settings = new MagickReadSettings { Format = format };
             using var stream = new MemoryStream(imageBytes, writable: false);
             var info = new MagickImageInfo(stream, settings);
-            if (!MatchesDimensions(info.Width, info.Height))
+            if (!allowsSize(info.Width, info.Height))
                 return null;
 
             stream.Position = 0;
             using var image = new MagickImage(stream, settings);
-            if (!MatchesDimensions(image.Width, image.Height))
+            if (image.Width != info.Width || image.Height != info.Height)
                 return null;
             if (!image.HasAlpha || image.IsOpaque)
                 return new ImageAlpha(image.Width, image.Height, true, false);

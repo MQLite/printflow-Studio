@@ -357,10 +357,10 @@ public sealed class OpenAiImageBackendTests
     [Theory]
     [InlineData(ImageProcessingMethod.OpenAiCutout, 1122, 1402, "auto", 1122, 1402, true, 1)]
     [InlineData(ImageProcessingMethod.OpenAiCutout, 4000, 2016, "auto", 4000, 2016, false, 0)]
-    [InlineData(ImageProcessingMethod.OpenAiCombined, 1122, 1402, "2240x2800", 2240, 2800, true, 1)]
-    [InlineData(ImageProcessingMethod.OpenAiCombined, 1122, 1402, "2240x2800", 1122, 1402, false, 1)]
+    [InlineData(ImageProcessingMethod.OpenAiCombined, 1122, 1402, "auto", 2240, 2800, true, 1)]
+    [InlineData(ImageProcessingMethod.OpenAiCombined, 1122, 1402, "auto", 1122, 1402, true, 1)]
     [InlineData(ImageProcessingMethod.OpenAiCombined, 4000, 2016, "auto", 4000, 2016, true, 1)]
-    [InlineData(ImageProcessingMethod.OpenAiCombined, 2000, 2000, "2880x2880", 2000, 2000, true, 1)]
+    [InlineData(ImageProcessingMethod.OpenAiCombined, 2000, 2000, "auto", 4096, 4096, true, 1)]
     public async Task Cutout_and_combined_request_transparency_with_their_respective_size_policy(
         ImageProcessingMethod method, uint inputWidth, uint inputHeight, string requestedSize,
         uint responseWidth, uint responseHeight, bool accepted, int expectedCalls)
@@ -391,8 +391,6 @@ public sealed class OpenAiImageBackendTests
             string prompt = submitted.Prompt;
             prompt.ShouldContain("remove only the background");
             prompt.ShouldContain("Do not add objects, retouch faces");
-            if (method == ImageProcessingMethod.OpenAiCombined)
-                prompt.ShouldContain(requestedSize == "auto" ? "Keep the source canvas" : "Scale the full frame");
             return Reply(Image("alpha", responseWidth, responseHeight));
         });
         using var backend = new OpenAiImageBackend(workspace, new Credentials(), Model, http);

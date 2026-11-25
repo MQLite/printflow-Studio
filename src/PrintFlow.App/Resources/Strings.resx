@@ -1878,7 +1878,7 @@
   <data name="ImageProcessing_OpenAiCutoutCanvasUnsupported" xml:space="preserve"><value>This canvas exceeds the OpenAI background removal limits of 3,840 pixels per edge and 8,294,400 pixels total. Select another method to keep the original dimensions.</value></data>
   <data name="ImageProcessing_OpenAiWorkspace" xml:space="preserve"><value>The OpenAI image working files could not be read or written. Check the workspace before retrying.</value></data>
   <data name="ImageProcessing_CombinedToggle" xml:space="preserve"><value>Restore and remove the background in one OpenAI request</value></data>
-  <data name="ImageProcessing_CombinedHint" xml:space="preserve"><value>Removes the background and enlarges the image proportionally by up to 2× within OpenAI's size limits. Uploads may incur usage charges. The result may change faces, text, or edges.</value></data>
+  <data name="ImageProcessing_CombinedHint" xml:space="preserve"><value>Removes the background and improves clarity. Review the image at the resolution OpenAI returns. Uploads may incur usage charges. The result may change faces, text, or edges.</value></data>
   <data name="ImageProcessing_ContinueCombined" xml:space="preserve"><value>Continue to combined processing</value></data>
   <data name="ImageProcessing_RunCombined" xml:space="preserve"><value>Run combined processing</value></data>
   <data name="ImageProcessing_KeepReviewedInput" xml:space="preserve"><value>Keep reviewed input and continue to crop</value></data>

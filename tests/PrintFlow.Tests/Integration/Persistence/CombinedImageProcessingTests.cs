@@ -35,8 +35,8 @@ public sealed class CombinedImageProcessingTests
     public async Task Paired_processing_confirms_one_upload_and_reviews_one_candidate_before_trim(WorkflowType workflow)
     {
         using var scenario = new Scenario();
-        var enhancement = await scenario.SelectCombinedAsync(workflow, SyntheticImages.Png(448, 512, alpha: false));
-        scenario.Http.Respond = () => Task.FromResult(scenario.Http.Reply(geometry: (896, 1024)));
+        var enhancement = await scenario.SelectCombinedAsync(workflow, SyntheticImages.Png(571, 809, alpha: false));
+        scenario.Http.Respond = () => Task.FromResult(scenario.Http.Reply(geometry: (1024, 1536)));
         var screen = new SessionViewModel(scenario.Service, scenario.Harness.Previews, scenario.Harness.TiffReviews,
             new RecordingNavigation(), openAiUploadPrompt: scenario.Prompt);
         screen.Open(enhancement);
@@ -71,12 +71,13 @@ public sealed class CombinedImageProcessingTests
         scenario.Http.Calls.ShouldBe(1);
         scenario.Http.Background.ShouldBe("transparent");
         scenario.Http.Format.ShouldBe("png");
-        scenario.Http.Size.ShouldBe("896x1024");
+        scenario.Http.Size.ShouldBe("auto");
         scenario.Http.Image!.ShouldBe(scenario.InputBytes);
         review.CurrentStep!.State.ShouldBe(StepState.ReviewRequired);
         review.CurrentStep.Step.ShouldBe(StepKind.BackgroundRemoval);
         review.UpstreamArtefact!.RevisionId.ShouldBe(ready.CurrentArtefact.RevisionId);
         review.CurrentArtefact!.RevisionId.ShouldNotBe(review.UpstreamArtefact.RevisionId);
+        (review.CurrentArtefact.Facts.PixelWidth, review.CurrentArtefact.Facts.PixelHeight).ShouldBe((1024, 1536));
         screen.ReviewGuidance.ShouldBe(ReviewGuidanceStep.CombinedImageProcessing);
         (await scenario.Execute(new WorkflowCommand.StartStep(StepKind.Trim))).IsFailure.ShouldBeTrue();
 

@@ -1868,7 +1868,7 @@
   <data name="ImageProcessing_OpenAiCutoutCanvasUnsupported" xml:space="preserve"><value>当前画布超出了 OpenAI 去背景的尺寸上限（单边 3840 像素，总计 8294400 像素）。请改用其他方式以保留原尺寸。</value></data>
   <data name="ImageProcessing_OpenAiWorkspace" xml:space="preserve"><value>无法读取或写入 OpenAI 图像工作文件。请检查工作区后重试。</value></data>
   <data name="ImageProcessing_CombinedToggle" xml:space="preserve"><value>一次完成清晰化＋去背景</value></data>
-  <data name="ImageProcessing_CombinedHint" xml:space="preserve"><value>去除背景，并在 OpenAI 支持的尺寸内按原比例最多放大 2×。上传可能产生费用，结果可能改变五官、文字或边缘。</value></data>
+  <data name="ImageProcessing_CombinedHint" xml:space="preserve"><value>去除背景并提高清晰度，按 OpenAI 返回的实际尺寸审核图片。上传可能产生费用，结果可能改变五官、文字或边缘。</value></data>
   <data name="ImageProcessing_ContinueCombined" xml:space="preserve"><value>继续到合并处理</value></data>
   <data name="ImageProcessing_RunCombined" xml:space="preserve"><value>运行合并处理</value></data>
   <data name="ImageProcessing_KeepReviewedInput" xml:space="preserve"><value>保留已审核输入并继续裁切</value></data>
