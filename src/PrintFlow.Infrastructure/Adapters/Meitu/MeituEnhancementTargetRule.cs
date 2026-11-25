@@ -138,9 +138,9 @@ public static class MeituEnhancementTargetRule
         ImmutableArray<string>.Builder reasons = ImmutableArray.CreateBuilder<string>();
         UiElementIdentity marker = candidate.Marker;
 
-        if (!string.Equals(marker.Name, markerName, StringComparison.Ordinal))
+        if (!MeituButtonLabel.Matches(marker.Name, markerName))
         {
-            reasons.Add($"marker name is '{marker.Name}', not exactly '{markerName}'");
+            reasons.Add($"marker name '{marker.Name}' does not match '{markerName}'");
         }
 
         if (!string.Equals(marker.ControlTypeName, shape.MarkerControlType, StringComparison.Ordinal))

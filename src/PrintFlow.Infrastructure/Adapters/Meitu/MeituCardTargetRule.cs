@@ -150,7 +150,7 @@ public static class MeituCardTargetRule
 
         // The marker itself first. An element that is not the signed marker cannot lend its
         // authority to whatever happens to be above it.
-        if (!string.Equals(marker.Name, markerName, StringComparison.Ordinal))
+        if (!MeituButtonLabel.Matches(marker.Name, markerName))
         {
             // Exact, never a prefix or a substring: the classifier's Part A defect was an
             // accepted prefix, and "图片编辑历史" is not "图片编辑".

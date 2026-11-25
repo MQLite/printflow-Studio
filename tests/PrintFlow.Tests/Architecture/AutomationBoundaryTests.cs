@@ -224,7 +224,7 @@ public sealed class AutomationBoundaryTests
         int start = source.IndexOf(
             "public async Task<OperationResult<MeituStateSnapshot>> ConfirmWorkingCopyIdentityAsync",
             StringComparison.Ordinal);
-        int end = source.IndexOf("private OperationResult<string> ReadIdentityValue", start, StringComparison.Ordinal);
+        int end = source.IndexOf("private async Task<OperationResult<string>> ReadIdentityValueAsync", start, StringComparison.Ordinal);
         string probe = source[start..end];
 
         probe.ShouldNotContain(nameof(IMeituUiDriver.SendVerifiedShortcutAsync));

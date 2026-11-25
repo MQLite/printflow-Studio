@@ -198,6 +198,35 @@ public sealed class GuardedMeituEnhancementTests
     // The whole sequence, once (§16, §22)
     // -----------------------------------------------------------------------------
 
+    [Theory]
+    [InlineData("\u200B")]
+    [InlineData("\u200B\u200B\u200B")]
+    public void MeituButtonLabel_enhancement_with_trailing_zero_width_spaces_resolves_to_its_owner(string suffix)
+    {
+        Scenario s = Build(enhancementPresent: false);
+        var owner = s.Elements.AddEnhancementAction(
+            s.Editor.Window.Handle, marker: MeituFakes.EnhancementMarker + suffix);
+
+        var result = s.Driver.FindKnownElement(s.Editor, KnownMeituElement.EditorEnhancementAction);
+
+        result.IsSuccess.ShouldBeTrue(result.IsFailure ? result.Failure.TechnicalDetail : string.Empty);
+        result.Value.Native.ShouldBeSameAs(owner);
+    }
+
+    [Fact]
+    public void Enhancement_markers_with_and_without_zero_width_space_are_ambiguous()
+    {
+        Scenario s = Build();
+        s.Elements.AddEnhancementAction(
+            s.Editor.Window.Handle, marker: MeituFakes.EnhancementMarker + "\u200B\u200B");
+
+        var result = s.Driver.FindKnownElement(s.Editor, KnownMeituElement.EditorEnhancementAction);
+
+        result.IsFailure.ShouldBeTrue();
+        result.Failure.Context["accepted"].ShouldBe("2");
+        s.Elements.Invocations.ShouldBeEmpty();
+    }
+
     [Fact]
     public async Task Expected_A_observed_A_runs_Enhancement_once_and_reports_every_observation()
     {

@@ -271,16 +271,20 @@ public sealed record MeituControlSignature(
 {
     // Meitu 7.9 changed the Save close icon from U+E0E6 to U+E0EA without changing
     // its widget path, class or behaviour. Limit compatibility to these two observed
-    // glyphs on the two Save close controls; ordinary named controls still match exactly.
+    // glyphs on the two Save close controls.
     internal bool HasVersionedSaveCloseIcon =>
         Name == "\uE0E6" && ControlTypeName == "Button" &&
         ClassName == "proui::IconFontButton" && RequiredPattern == UiPatternKind.Invoke &&
         AutomationIdContains is ".SaveMaskWidget.widgetRight.titleFrame.closeButton" or
             ".SaveResultMaskWidget.titleFrame.closeButton";
 
+    internal bool HasButtonLabel =>
+        ControlTypeName is "Button" or "CheckBox" && Name.Any(char.IsLetterOrDigit) &&
+        !ClassName.EndsWith("IconFontButton", StringComparison.Ordinal);
+
     internal bool MatchesName(string name) =>
-        string.Equals(name, Name, StringComparison.Ordinal) ||
-        (HasVersionedSaveCloseIcon && name == "\uE0EA");
+        HasButtonLabel ? MeituButtonLabel.Matches(name, Name) :
+        name == Name || (HasVersionedSaveCloseIcon && name == "\uE0EA");
 }
 
 /// <summary>

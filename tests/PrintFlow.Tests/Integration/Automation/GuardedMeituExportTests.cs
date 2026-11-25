@@ -420,6 +420,33 @@ public sealed class GuardedMeituExportTests
         s.Invocations(DestinationConfirmId).ShouldBe(1);
     }
 
+    [Fact]
+    public async Task Empty_foreground_during_Save_format_popup_and_destination_transfers_does_not_repeat_input()
+    {
+        Scenario s = Build(formatValue: "jpg", raiseFormatPopup: true);
+        var changeSurface = s.Elements.OnInvoke;
+        s.Elements.OnInvoke = invoked =>
+        {
+            changeSurface?.Invoke(invoked);
+            if (invoked is SaveId or SurfaceFormatId or SaveAsId)
+            {
+                s.Locator.ForegroundReader = () =>
+                {
+                    s.Locator.ForegroundReader = null;
+                    return new ForegroundIdentity(WindowHandle.None, 0, "(none)");
+                };
+            }
+        };
+
+        var result = await ExportAsync(s);
+
+        result.IsSuccess.ShouldBeTrue(result.IsFailure ? result.Failure.TechnicalDetail : string.Empty);
+        s.Invocations(SurfaceFormatId).ShouldBe(1);
+        s.Elements.Clicks.ShouldBe(["png"]);
+        s.Invocations(SaveAsId).ShouldBe(1);
+        s.Invocations(DestinationConfirmId).ShouldBe(1);
+    }
+
     /// <summary>
     /// Opening Meitu's editor from its signed start page can leave that start-page window visible
     /// beside the editor. It is a positively recognised sibling, not an unknown popup, and must

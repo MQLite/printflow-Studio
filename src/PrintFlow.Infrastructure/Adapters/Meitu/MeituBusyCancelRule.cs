@@ -190,7 +190,7 @@ public static class MeituBusyCancelRule
         UiElementIdentity control = candidate.Control;
         MeituControlSignature expected = signature.Control;
 
-        if (!string.Equals(control.Name, expected.Name, StringComparison.Ordinal))
+        if (!expected.MatchesName(control.Name))
         {
             reasons.Add($"name is '{control.Name}', not exactly '{expected.Name}'");
         }

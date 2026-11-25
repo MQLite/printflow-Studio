@@ -52,12 +52,14 @@ public sealed partial class GuardedMeituUiDriver
         "MainWindow.centralwidget.mainStackedWidget.editPage.subBackgroundWidget.titleWidget.stackedWidget.editorPage.";
     private const string RecognitionApplySuffix =
         ".MattingNewParameterWidget.widget.stackedMattingWidget.page1.scrollArea.qt_scrollarea_viewport.scrollAreaWidgetContents.resetWidget.applyIntelligentButton";
+    private static readonly ImmutableArray<string> RecognitionLabels =
+        ["关闭\n", "人像\n宠物", "商品\n货物", "图标\n印章"];
 
     private MeituObservation ObserveBackgroundRemovalResultControl(MeituTarget target, MeituObservation observation)
     {
         // Expanded Meitu 7.9 preview uses this label in place of 移除背景. Text alone does
         // not grant the alternative completion marker: the exact native button must agree.
-        if (!observation.VisibleTexts.Contains("应用到背景")) return observation;
+        if (!observation.VisibleTexts.Any(text => MeituButtonLabel.Matches(text, "应用到背景"))) return observation;
         var control = FindSignedControl(target, target.Window.Handle,
             new MeituControlSignature("应用到背景", RecognitionApplySuffix, "Button", "QPushButton", UiPatternKind.Invoke));
         bool observed = false;
@@ -80,8 +82,7 @@ public sealed partial class GuardedMeituUiDriver
 
     private OperationResult<UiElementRef> FindRecognizer(MeituTarget target, int index)
     {
-        string marker = index switch { 0 => "关闭\n", 1 => "人像\n宠物", 2 => "商品\n货物", 3 => "图标\n印章", _ => throw new ArgumentOutOfRangeException(nameof(index)) };
-        return FindBackgroundRemovalOwner(target, target.Window.Handle, marker,
+        return FindBackgroundRemovalOwner(target, target.Window.Handle, RecognitionLabels[index],
             new MeituOwnedControlShape("Text", "QLabel", ".widget.label", "CheckBox", "CMattingIconButton",
                 RecognitionModuleSuffix + ".centerWidget.item1.container1.btnSod" + index,
                 ".widget.label", 2, UiPatternKind.Invoke));
@@ -198,17 +199,15 @@ public sealed partial class GuardedMeituUiDriver
                 return OperationResult.Fail<MeituRecognizerRun>(desired.Failure);
             // A collapsed module has no visible option markers. Visible but rejected controls
             // are a structural failure, never permission to try a different input.
-            foreach (string name in new[] { "关闭\n", "人像\n宠物", "商品\n货物", "图标\n印章" })
+            var markers = _elements.FindAll(target.Window.Handle, new UiElementQuery(UiControlKind.Any));
+            if (markers.IsFailure) return OperationResult.Fail<MeituRecognizerRun>(markers.Failure);
+            foreach (var marker in markers.Value)
             {
-                var markers = _elements.FindAll(target.Window.Handle, new UiElementQuery(UiControlKind.Any, Name: name));
-                if (markers.IsFailure) return OperationResult.Fail<MeituRecognizerRun>(markers.Failure);
-                foreach (var marker in markers.Value)
-                {
-                    var description = _elements.Describe(marker);
-                    if (description.IsFailure) return OperationResult.Fail<MeituRecognizerRun>(description.Failure);
-                    if (!description.Value.IsOffscreen && !description.Value.Bounds.IsEmpty)
-                        return OperationResult.Fail<MeituRecognizerRun>(desired.Failure);
-                }
+                if (!RecognitionLabels.Any(label => MeituButtonLabel.Matches(marker.Name, label))) continue;
+                var description = _elements.Describe(marker);
+                if (description.IsFailure) return OperationResult.Fail<MeituRecognizerRun>(description.Failure);
+                if (!description.Value.IsOffscreen && !description.Value.Bounds.IsEmpty)
+                    return OperationResult.Fail<MeituRecognizerRun>(desired.Failure);
             }
             var expanded = await InvokeRecognizerControlAsync(target, module.Value, signature, fileName, identity, stop, cancellationToken).ConfigureAwait(false);
             if (expanded.IsFailure) return OperationResult.Fail<MeituRecognizerRun>(expanded.Failure);

@@ -522,7 +522,10 @@ internal sealed class FakeWindowLocator : IExternalAppWindowLocator
         return OperationResult.Ok();
     }
 
-    public OperationResult<ForegroundIdentity> ReadForeground() => OperationResult.Ok(Foreground);
+    public Func<ForegroundIdentity>? ForegroundReader { get; set; }
+
+    public OperationResult<ForegroundIdentity> ReadForeground() =>
+        OperationResult.Ok(ForegroundReader?.Invoke() ?? Foreground);
 }
 
 /// <summary>One element in the fake automation tree.</summary>
@@ -1045,7 +1048,7 @@ internal sealed class RecordingUiElementProvider : IUiElementProvider
     }
 
     public OperationResult<IReadOnlyList<string>> ReadMatchingTextSnapshot(
-        WindowHandle root, IReadOnlyCollection<string> exactNames)
+        WindowHandle root, IReadOnlyCollection<string> exactNames, bool allowTrailingZeroWidthSpaces = false)
     {
         OnReadTextSnapshot?.Invoke(root);
         ReadKinds.Add("matching");
@@ -1057,7 +1060,7 @@ internal sealed class RecordingUiElementProvider : IUiElementProvider
         HashSet<string> signed = new(exactNames, StringComparer.Ordinal);
         return OperationResult.Ok<IReadOnlyList<string>>(
             Texts.TryGetValue(root.Value, out List<string>? texts)
-                ? [.. texts.Where(signed.Contains)]
+                ? [.. texts.Where(text => signed.Contains(allowTrailingZeroWidthSpaces ? text.TrimEnd('\u200B') : text))]
                 : []);
     }
 
@@ -1099,6 +1102,7 @@ internal sealed class RecordingUiElementProvider : IUiElementProvider
                  string.Equals(e.Identity.ControlTypeName, query.Kind.ToString(), StringComparison.Ordinal)) &&
                 (string.IsNullOrEmpty(query.Name) ||
                  string.Equals(e.Identity.Name, query.Name, StringComparison.Ordinal)) &&
+                (string.IsNullOrEmpty(query.ClassName) || e.Identity.ClassName == query.ClassName) &&
                 (string.IsNullOrEmpty(query.AutomationId) ||
                  string.Equals(e.Identity.AutomationId, query.AutomationId, StringComparison.Ordinal))),
         ];

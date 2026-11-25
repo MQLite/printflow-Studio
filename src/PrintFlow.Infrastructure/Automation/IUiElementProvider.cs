@@ -24,13 +24,14 @@ public enum UiControlKind
 /// <param name="Kind">The control kind to match.</param>
 /// <param name="Name">Exact automation name, when the workstation baseline supplies one.</param>
 /// <param name="AutomationId">Exact automation id, when the control has a stable one.</param>
+/// <param name="ClassName">Exact framework class, when supplied by the control signature.</param>
 /// <remarks>
 /// There is deliberately no free-form condition tree, no XPath and no "search the desktop"
 /// root: a query is always evaluated beneath a specific window handle that
 /// <see cref="IExternalAppWindowLocator"/> has already attributed to the expected process
 /// (Epic 11300 Part A §8, §11).
 /// </remarks>
-public sealed record UiElementQuery(UiControlKind Kind, string? Name = null, string? AutomationId = null)
+public sealed record UiElementQuery(UiControlKind Kind, string? Name = null, string? AutomationId = null, string? ClassName = null)
 {
     public override string ToString() =>
         $"{Kind}(Name='{Name ?? "*"}', AutomationId='{AutomationId ?? "*"}')";
@@ -216,7 +217,8 @@ public interface IUiElementProvider
     OperationResult<Unit> SetValue(UiElementRef element, string value);
 
     /// <summary>
-    /// Reads only automation names that exactly match one of the supplied signed markers.
+    /// Reads automation names that match a signed marker, optionally ignoring trailing
+    /// U+200B on observed UI labels. Returns the original observed names.
     /// </summary>
     /// <remarks>
     /// This is the time-sensitive counterpart to <see cref="ReadTextSnapshot"/>. It lets a
@@ -225,7 +227,7 @@ public interface IUiElementProvider
     /// window, invokes nothing, and accepts no caller-selected action or control.
     /// </remarks>
     OperationResult<IReadOnlyList<string>> ReadMatchingTextSnapshot(
-        WindowHandle root, IReadOnlyCollection<string> exactNames);
+        WindowHandle root, IReadOnlyCollection<string> exactNames, bool allowTrailingZeroWidthSpaces = false);
 
     /// <summary>
     /// Reads up to <paramref name="maxItems"/> visible automation names beneath

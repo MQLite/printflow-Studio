@@ -95,13 +95,12 @@ public sealed class UiaElementProvider : IUiElementProvider
 
         try
         {
-            AutomationElementCollection found =
-                rootElement.Value.FindAll(TreeScope.Descendants, BuildCondition(query));
+            AutomationElementCollection found = FindAllWithNames(rootElement.Value, BuildCondition(query));
 
             List<UiElementRef> matches = new(found.Count);
             foreach (AutomationElement element in found)
             {
-                matches.Add(new UiElementRef(element, NameOf(element), root));
+                matches.Add(new UiElementRef(element, element.Cached.Name ?? string.Empty, root));
             }
 
             return OperationResult.Ok<IReadOnlyList<UiElementRef>>(matches);
@@ -130,7 +129,7 @@ public sealed class UiaElementProvider : IUiElementProvider
 
     /// <inheritdoc />
     public OperationResult<IReadOnlyList<string>> ReadMatchingTextSnapshot(
-        WindowHandle root, IReadOnlyCollection<string> exactNames)
+        WindowHandle root, IReadOnlyCollection<string> exactNames, bool allowTrailingZeroWidthSpaces = false)
     {
         ArgumentNullException.ThrowIfNull(exactNames);
         string[] names = [.. exactNames.Where(name => !string.IsNullOrEmpty(name)).Distinct(StringComparer.Ordinal)];
@@ -147,15 +146,19 @@ public sealed class UiaElementProvider : IUiElementProvider
 
         try
         {
-            Condition condition = names.Length == 1
+            Condition condition = allowTrailingZeroWidthSpaces
+                ? new NotCondition(new PropertyCondition(AutomationElement.NameProperty, string.Empty))
+                : names.Length == 1
                 ? new PropertyCondition(AutomationElement.NameProperty, names[0])
                 : new OrCondition(names
                     .Select(name => (Condition)new PropertyCondition(AutomationElement.NameProperty, name))
                     .ToArray());
-            AutomationElementCollection found =
-                rootElement.Value.FindAll(TreeScope.Descendants, condition);
+            AutomationElementCollection found = FindAllWithNames(rootElement.Value, condition);
+            HashSet<string> expected = new(names, StringComparer.Ordinal);
             return OperationResult.Ok<IReadOnlyList<string>>(
-                [.. found.Cast<AutomationElement>().Select(NameOf)]);
+                [.. found.Cast<AutomationElement>()
+                    .Select(element => element.Cached.Name ?? string.Empty)
+                    .Where(name => expected.Contains(allowTrailingZeroWidthSpaces ? name.TrimEnd('\u200B') : name))]);
         }
         catch (ElementNotAvailableException ex)
         {
@@ -659,6 +662,18 @@ public sealed class UiaElementProvider : IUiElementProvider
         }
     }
 
+    // Fetch names with the native search. Reading Current.Name separately for every Qt
+    // descendant would introduce a cross-process round trip per name on each phase poll.
+    private static AutomationElementCollection FindAllWithNames(AutomationElement root, Condition condition)
+    {
+        CacheRequest cache = new();
+        cache.Add(AutomationElement.NameProperty);
+        using (cache.Activate())
+        {
+            return root.FindAll(TreeScope.Descendants, condition);
+        }
+    }
+
     private static Condition BuildCondition(UiElementQuery query)
     {
         List<Condition> parts = [];
@@ -677,6 +692,11 @@ public sealed class UiaElementProvider : IUiElementProvider
         if (!string.IsNullOrEmpty(query.AutomationId))
         {
             parts.Add(new PropertyCondition(AutomationElement.AutomationIdProperty, query.AutomationId));
+        }
+
+        if (!string.IsNullOrEmpty(query.ClassName))
+        {
+            parts.Add(new PropertyCondition(AutomationElement.ClassNameProperty, query.ClassName));
         }
 
         return parts.Count switch

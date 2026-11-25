@@ -99,6 +99,89 @@ public sealed class GuardedMeituUiDriverTests
     // -----------------------------------------------------------------------------
 
     [Fact]
+    public async Task A_shortcut_waits_for_a_transient_empty_foreground_without_activating_or_resending()
+    {
+        Harness h = Build(meituInForeground: true);
+        ForegroundIdentity empty = new(WindowHandle.None, 0, "(none)");
+        int reads = 0;
+        h.Locator.ForegroundReader = () => ++reads == 1 ? empty : h.Locator.Foreground;
+
+        OperationResult<Unit> sent = await h.Driver.SendVerifiedShortcutAsync(
+            h.Target, KnownShortcut.OpenFile, CancellationToken.None);
+
+        sent.IsSuccess.ShouldBeTrue();
+        h.Input.Sends.ShouldHaveSingleItem();
+        h.Locator.ActivationRequests.ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task A_nonempty_wrong_foreground_ends_the_wait_even_if_the_editor_returns()
+    {
+        Harness h = Build(meituInForeground: true);
+        ForegroundIdentity empty = new(WindowHandle.None, 0, "(none)");
+        ForegroundIdentity other = new(new WindowHandle(0xBEEF), h.Target.Process.ProcessId, "XiuXiu");
+        int reads = 0;
+        h.Locator.ForegroundReader = () => ++reads switch { 1 => empty, 2 => other, _ => h.Locator.Foreground };
+
+        OperationResult<Unit> sent = await h.Driver.SendVerifiedShortcutAsync(
+            h.Target, KnownShortcut.OpenFile, CancellationToken.None);
+
+        sent.Failure.Context["actualWindow"].ShouldBe(other.Handle.ToString());
+        h.Input.Sends.ShouldBeEmpty();
+        h.Locator.ActivationRequests.ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task A_shortcut_rechecks_process_liveness_after_an_empty_foreground()
+    {
+        Harness h = Build(meituInForeground: true);
+        h.Locator.ForegroundReader = () =>
+        {
+            h.Locator.DeadProcessIds.Add(h.Target.Process.ProcessId);
+            h.Locator.ForegroundReader = null;
+            return new ForegroundIdentity(WindowHandle.None, 0, "(none)");
+        };
+
+        OperationResult<Unit> sent = await h.Driver.SendVerifiedShortcutAsync(
+            h.Target, KnownShortcut.OpenFile, CancellationToken.None);
+
+        sent.Failure.Context["targetLoss"].ShouldBe("process-exited");
+        h.Input.Sends.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task Cancellation_interrupts_the_empty_foreground_wait_before_input()
+    {
+        Harness h = Build(meituInForeground: true);
+        using CancellationTokenSource cancellation = new();
+        h.Locator.ForegroundReader = () =>
+        {
+            cancellation.Cancel();
+            return new ForegroundIdentity(WindowHandle.None, 0, "(none)");
+        };
+
+        await Should.ThrowAsync<OperationCanceledException>(() => h.Driver.SendVerifiedShortcutAsync(
+            h.Target, KnownShortcut.OpenFile, cancellation.Token));
+
+        h.Input.Sends.ShouldBeEmpty();
+        h.Locator.ActivationRequests.ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task A_foreground_that_stays_empty_stops_without_input()
+    {
+        Harness h = Build(meituInForeground: true);
+        h.Locator.Foreground = new ForegroundIdentity(WindowHandle.None, 0, "(none)");
+
+        OperationResult<Unit> sent = await h.Driver.SendVerifiedShortcutAsync(
+            h.Target, KnownShortcut.OpenFile, CancellationToken.None).WaitAsync(TimeSpan.FromSeconds(2));
+
+        sent.Failure.Code.ShouldBe(FailureCode.MeituTargetLost);
+        h.Input.Sends.ShouldBeEmpty();
+        h.Locator.ActivationRequests.ShouldBe(0);
+    }
+
+    [Fact]
     public async Task No_keystroke_is_sent_when_Explorer_holds_the_foreground()
     {
         Harness h = Build(meituInForeground: false);
@@ -709,6 +792,93 @@ public sealed class GuardedMeituUiDriverTests
     }
 
     [Fact]
+    public async Task Picker_waits_for_Open_button_before_writing_the_working_path()
+    {
+        Harness h = Build(meituInForeground: true);
+        ShowEmptyEditor(h);
+        ExternalWindowRef editor = h.Target.Window with { Title = MeituFakes.EditorTitle };
+        ExternalWindowRef dialog = MeituFakes.Window(handle: 0x2000, title: "打开", className: "#32770");
+        h.Locator.Replace(h.Target.Process, editor, dialog);
+        h.Elements.AddDialogControl(dialog.Handle, "1148", "Edit");
+        int fieldReads = 0;
+        h.Elements.OnDescribe = element =>
+        {
+            if (element.RootWindow == dialog.Handle && element.Name == "1148" && ++fieldReads == 2)
+            {
+                h.Elements.ValueWrites.ShouldBeEmpty();
+                h.Elements.AddDialogControl(dialog.Handle, "1", "Button");
+            }
+        };
+        h.Elements.OnInvoke = id =>
+        {
+            if (id == "1") h.Elements.SetTexts(editor.Handle, [.. MeituFakes.EditorMarkers]);
+        };
+
+        var opened = await h.Driver.OpenWorkingCopyAsync(h.Target, @"C:\Temp\working.png", CancellationToken.None);
+
+        opened.IsSuccess.ShouldBeTrue(opened.IsFailure ? opened.Failure.TechnicalDetail : string.Empty);
+        h.Elements.ValueWrites.ShouldHaveSingleItem();
+        h.Elements.Invocations.Count(id => id == "1").ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task Picker_rechecks_the_path_after_an_empty_foreground_before_confirming()
+    {
+        Harness h = Build(meituInForeground: true);
+        ShowEmptyEditor(h);
+        var editor = h.Target.Window with { Title = MeituFakes.EditorTitle };
+        var dialog = MeituFakes.Window(handle: 0x2000, title: "打开", className: "#32770");
+        h.Locator.Replace(h.Target.Process, editor, dialog);
+        h.Elements.AddDialogControl(dialog.Handle, "1148", "Edit");
+        h.Elements.AddDialogControl(dialog.Handle, "1", "Button");
+        bool switched = false;
+        h.Locator.ForegroundReader = () =>
+        {
+            if (!switched && h.Elements.ValueReads.Contains("1148"))
+            {
+                switched = true;
+                h.Elements.SetReadValue("1148", @"C:\Temp\other.png");
+                return new ForegroundIdentity(WindowHandle.None, 0, "(none)");
+            }
+            return h.Locator.Foreground;
+        };
+
+        var opened = await h.Driver.OpenWorkingCopyAsync(h.Target, @"C:\Temp\working.png", CancellationToken.None);
+
+        switched.ShouldBeTrue();
+        opened.IsFailure.ShouldBeTrue();
+        opened.Failure.TechnicalDetail.ShouldContain("other.png");
+        h.Elements.Invocations.ShouldNotContain("1");
+        h.Elements.ValueWrites.ShouldHaveSingleItem();
+    }
+
+    [Fact]
+    public async Task A_replacement_picker_is_not_used_while_waiting_for_controls()
+    {
+        Harness h = Build(meituInForeground: true);
+        ShowEmptyEditor(h);
+        var editor = h.Target.Window with { Title = MeituFakes.EditorTitle };
+        var first = MeituFakes.Window(handle: 0x2000, title: "打开", className: "#32770");
+        var replacement = first with { Handle = new WindowHandle(0x3000) };
+        h.Locator.Replace(h.Target.Process, editor, first);
+        h.Elements.AddDialogControl(first.Handle, "1148", "Edit");
+        h.Elements.AddDialogControl(replacement.Handle, "1148", "Edit");
+        h.Elements.AddDialogControl(replacement.Handle, "1", "Button");
+        h.Elements.OnDescribe = element =>
+        {
+            if (element.RootWindow == first.Handle)
+                h.Locator.Replace(h.Target.Process, editor, replacement);
+        };
+
+        var opened = await h.Driver.OpenWorkingCopyAsync(h.Target, @"C:\Temp\working.png", CancellationToken.None);
+
+        opened.IsFailure.ShouldBeTrue();
+        opened.Failure.Code.ShouldBe(FailureCode.MeituTargetLost);
+        h.Elements.ValueWrites.ShouldBeEmpty();
+        h.Elements.Invocations.ShouldNotContain("1");
+    }
+
+    [Fact]
     public async Task A_picker_with_no_Open_control_is_never_confirmed()
     {
         Harness h = Build(meituInForeground: true);
@@ -724,6 +894,7 @@ public sealed class GuardedMeituUiDriverTests
             h.Target, @"C:\Temp\printflow\working.png", CancellationToken.None);
 
         opened.IsFailure.ShouldBeTrue();
+        h.Elements.ValueWrites.ShouldBeEmpty();
         h.Elements.Invocations.ShouldNotContain("1");
     }
 
@@ -796,8 +967,10 @@ public sealed class GuardedMeituUiDriverTests
     /// this test pins that a second control of the <i>same</i> type would stop the sequence
     /// rather than have one picked.
     /// </remarks>
-    [Fact]
-    public async Task Two_picker_controls_with_the_signed_identity_stop_the_sequence()
+    [Theory]
+    [InlineData("1148", "Edit")]
+    [InlineData("1", "Button")]
+    public async Task Two_picker_controls_with_the_signed_identity_stop_the_sequence(string duplicateId, string type)
     {
         Harness h = Build(meituInForeground: true);
         ShowEmptyEditor(h);
@@ -807,8 +980,8 @@ public sealed class GuardedMeituUiDriverTests
             handle: 0x2000, owningProcessId: h.Target.Process.ProcessId, title: "打开", className: "#32770");
         h.Locator.Replace(h.Target.Process, editor, dialog);
         h.Elements.AddDialogControl(dialog.Handle, "1148", "Edit");
-        h.Elements.AddDialogControl(dialog.Handle, "1148", "Edit");
         h.Elements.AddDialogControl(dialog.Handle, "1", "Button");
+        h.Elements.AddDialogControl(dialog.Handle, duplicateId, type);
 
         OperationResult<MeituTarget> opened = await h.Driver.OpenWorkingCopyAsync(
             h.Target, @"C:\Temp\printflow\working.png", CancellationToken.None);

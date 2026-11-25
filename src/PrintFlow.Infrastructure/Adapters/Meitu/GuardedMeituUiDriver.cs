@@ -246,9 +246,8 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
     /// Finds the one element matching a signed control signature beneath a verified window.
     /// </summary>
     /// <remarks>
-    /// The search is by name and the decision is by the whole signature. Narrowing the query
-    /// first keeps the tree walk cheap; deciding on the full signature afterwards is what stops
-    /// a same-named control elsewhere on the screen from being accepted.
+    /// The framework class narrows the native search. The whole signature is rechecked on
+    /// the live element before selection, including its name and ownership.
     /// </remarks>
     private OperationResult<UiElementRef> FindSignedControl(
         MeituTarget target,
@@ -256,11 +255,10 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
         MeituControlSignature signature,
         IReadOnlyCollection<UiPatternKind>? additionalRequiredPatterns = null)
     {
-        OperationResult<IReadOnlyList<UiElementRef>> found = _elements.FindAll(
-            window,
-            new UiElementQuery(
-                UiControlKind.Any, Name: signature.Name.Length > 0 && !signature.HasVersionedSaveCloseIcon
-                    ? signature.Name : null));
+        OperationResult<IReadOnlyList<UiElementRef>> found = signature.HasButtonLabel
+            ? FindButtonLabels(window, signature.Name, signature.ClassName)
+            : _elements.FindAll(window, new UiElementQuery(UiControlKind.Any,
+                Name: signature.HasVersionedSaveCloseIcon ? null : signature.Name, ClassName: signature.ClassName));
         if (found.IsFailure)
         {
             return OperationResult.Fail<UiElementRef>(found.Failure);
@@ -340,8 +338,7 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
                 "clean-start evidence records, so PrintFlow will not look for it.");
         }
 
-        OperationResult<IReadOnlyList<UiElementRef>> markers =
-            _elements.FindAll(window, new UiElementQuery(UiControlKind.Any, Name: markerName));
+        OperationResult<IReadOnlyList<UiElementRef>> markers = FindButtonLabels(window, markerName, shape.LabelClassName);
         if (markers.IsFailure)
         {
             return OperationResult.Fail<UiElementRef>(markers.Failure);
@@ -386,8 +383,7 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
     private OperationResult<UiElementRef> FindStructuredOwner(
         MeituTarget target, WindowHandle window, string markerName, MeituCardShape shape)
     {
-        OperationResult<IReadOnlyList<UiElementRef>> markers = _elements.FindAll(
-            window, new UiElementQuery(UiControlKind.Any, Name: markerName));
+        OperationResult<IReadOnlyList<UiElementRef>> markers = FindButtonLabels(window, markerName, shape.LabelClassName);
         if (markers.IsFailure)
         {
             return OperationResult.Fail<UiElementRef>(markers.Failure);
@@ -487,8 +483,7 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
                 "Nothing was invoked.");
         }
 
-        OperationResult<IReadOnlyList<UiElementRef>> markers = _elements.FindAll(
-            window, new UiElementQuery(UiControlKind.Any, Name: markerName));
+        OperationResult<IReadOnlyList<UiElementRef>> markers = FindButtonLabels(window, markerName, shape.MarkerClassName);
         if (markers.IsFailure)
         {
             return OperationResult.Fail<UiElementRef>(markers.Failure);
@@ -562,8 +557,7 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
                 "which would make the text marker its own action target. Nothing was invoked.");
         }
 
-        OperationResult<IReadOnlyList<UiElementRef>> markers = _elements.FindAll(
-            window, new UiElementQuery(UiControlKind.Any, Name: markerName));
+        var markers = FindButtonLabels(window, markerName, shape.MarkerClassName);
         if (markers.IsFailure)
         {
             return OperationResult.Fail<UiElementRef>(markers.Failure);
@@ -612,6 +606,14 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
         return chosen.IsFailure
             ? OperationResult.Fail<UiElementRef>(chosen.Failure)
             : OperationResult.Ok(owners[chosen.Value]);
+    }
+
+    private OperationResult<IReadOnlyList<UiElementRef>> FindButtonLabels(
+        WindowHandle window, string label, string? className = null)
+    {
+        var found = _elements.FindAll(window, new UiElementQuery(UiControlKind.Any, ClassName: className));
+        return found.IsFailure ? found : OperationResult.Ok<IReadOnlyList<UiElementRef>>(
+            [.. found.Value.Where(element => MeituButtonLabel.Matches(element.Name, label))]);
     }
 
     /// <summary>The signed Enhancement route, or a refusal when the chain vouches for none.</summary>
@@ -680,12 +682,12 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
             return OperationResult.Fail<UiElementRef>(found.Failure);
         }
 
-        List<UiElementRef> matches = [];
+        List<(UiElementRef Element, UiElementIdentity Identity)> matches = [];
         foreach (UiElementRef candidate in found.Value)
         {
             OperationResult<UiElementIdentity> identity = _elements.Describe(candidate);
-            if (identity.IsFailure ||
-                !string.Equals(identity.Value.ControlTypeName, controlType, StringComparison.Ordinal))
+            if (identity.IsFailure) return OperationResult.Fail<UiElementRef>(identity.Failure);
+            if (!string.Equals(identity.Value.ControlTypeName, controlType, StringComparison.Ordinal))
             {
                 continue;
             }
@@ -698,15 +700,22 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
                     $"the verified Meitu process {target.Process.ProcessId}. Nothing was written or invoked.");
             }
 
-            matches.Add(candidate);
+            matches.Add((candidate, identity.Value));
         }
 
-        return matches.Count == 1
-            ? OperationResult.Ok(matches[0])
-            : OperationResult.Fail<UiElementRef>(
-                FailureCode.MeituOpenInputFailed,
-                $"The picker has {matches.Count} control(s) with automation id '{automationId}' of type " +
-                $"{controlType}, and the signed evidence describes exactly one. Nothing was written or invoked.");
+        if (matches.Count != 1)
+            return OperationResult.Fail<UiElementRef>(FailureCode.MeituOpenInputFailed,
+                $"The picker has {matches.Count} control(s) with automation id '{automationId}' of type {controlType}; exactly one is required.",
+                isRetryable: matches.Count == 0);
+
+        var (control, description) = matches[0];
+        bool canAct = element == KnownMeituElement.FileDialogFileName
+            ? description.Supports(UiPatternKind.Value)
+            : description.Supports(UiPatternKind.Invoke) || description.Supports(UiPatternKind.SelectionItem);
+        if (!description.IsEnabled || description.IsOffscreen || !canAct)
+            return OperationResult.Fail<UiElementRef>(FailureCode.MeituOpenInputFailed,
+                $"The picker control '{automationId}' is not ready for input.", isRetryable: true);
+        return OperationResult.Ok(control);
     }
 
     /// <summary>The signed picker signature, or a refusal when the chain vouches for none.</summary>
@@ -820,8 +829,8 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
             return OperationResult.Fail<MeituTarget>(dialog.Failure);
         }
 
-        OperationResult<Unit> filled = FillAndConfirmDialog(
-            editor.Value, dialog.Value, workingCopyAbsolutePath);
+        OperationResult<Unit> filled = await FillAndConfirmDialogAsync(
+            editor.Value, dialog.Value, workingCopyAbsolutePath, cancellationToken).ConfigureAwait(false);
 
         if (filled.IsFailure)
         {
@@ -1248,8 +1257,8 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
             return OperationResult.Fail<MeituStateSnapshot>(dialog.Failure);
         }
 
-        OperationResult<string> observed = ReadIdentityValue(
-            verified.Value, dialog.Value, signature.Value);
+        OperationResult<string> observed = await ReadIdentityValueAsync(
+            verified.Value, dialog.Value, signature.Value, cancellationToken).ConfigureAwait(false);
 
         // Cancel is the only dialog action in this route. It runs even when the value control
         // is absent or ambiguous, because the dialog itself and its cancel control are signed;
@@ -1375,12 +1384,14 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
         }
     }
 
-    private OperationResult<string> ReadIdentityValue(
+    private async Task<OperationResult<string>> ReadIdentityValueAsync(
         MeituTarget target,
         ExternalWindowRef dialog,
-        MeituDocumentIdentitySignature signature)
+        MeituDocumentIdentitySignature signature,
+        CancellationToken cancellationToken)
     {
-        OperationResult<ExternalWindowRef> verified = VerifyIdentityDialog(target, dialog.Handle, signature);
+        OperationResult<ExternalWindowRef> verified = await VerifyIdentityDialogAsync(
+            target, dialog.Handle, signature, cancellationToken).ConfigureAwait(false);
         if (verified.IsFailure)
         {
             return OperationResult.Fail<string>(verified.Failure);
@@ -1403,7 +1414,8 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        OperationResult<ExternalWindowRef> verified = VerifyIdentityDialog(target, dialog.Handle, signature);
+        OperationResult<ExternalWindowRef> verified = await VerifyIdentityDialogAsync(
+            target, dialog.Handle, signature, cancellationToken).ConfigureAwait(false);
         if (verified.IsFailure)
         {
             return OperationResult.Fail<Unit>(verified.Failure);
@@ -1417,7 +1429,8 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
         }
 
         // Re-check after the tree walk and immediately before the one permitted action.
-        verified = VerifyIdentityDialog(target, dialog.Handle, signature);
+        verified = await VerifyIdentityDialogAsync(
+            target, dialog.Handle, signature, cancellationToken).ConfigureAwait(false);
         if (verified.IsFailure)
         {
             return OperationResult.Fail<Unit>(verified.Failure);
@@ -1947,8 +1960,8 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
     private OperationResult<UiElementRef> FindBusyCancelControl(
         MeituTarget target, MeituBusyCancelSignature signature)
     {
-        OperationResult<IReadOnlyList<UiElementRef>> found = _elements.FindAll(
-            target.Window.Handle, new UiElementQuery(UiControlKind.Any, Name: signature.Control.Name));
+        OperationResult<IReadOnlyList<UiElementRef>> found = FindButtonLabels(
+            target.Window.Handle, signature.Control.Name, signature.Control.ClassName);
         if (found.IsFailure)
         {
             return OperationResult.Fail<UiElementRef>(found.Failure);
@@ -2031,30 +2044,40 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
     private async Task<OperationResult<MeituTarget>> VerifyTargetAsync(
         MeituTarget target, CancellationToken cancellationToken)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-
-        OperationResult<ExternalWindowRef> window = RefreshOwnedWindow(target);
-        if (window.IsFailure)
-        {
-            return OperationResult.Fail<MeituTarget>(window.Failure);
-        }
-
-        OperationResult<ForegroundIdentity> foreground = _locator.ReadForeground();
-        if (foreground.IsFailure)
-        {
-            return OperationResult.Fail<MeituTarget>(foreground.Failure);
-        }
-
-        if (foreground.Value.Handle != window.Value.Handle ||
-            foreground.Value.ProcessId != target.Process.ProcessId)
+        var observation = await ReadForegroundWithTargetAsync(
+            _ => RefreshOwnedWindow(target), cancellationToken).ConfigureAwait(false);
+        if (observation.IsFailure) return OperationResult.Fail<MeituTarget>(observation.Failure);
+        (ExternalWindowRef window, ForegroundIdentity foreground) = observation.Value;
+        if (foreground.Handle != window.Handle || foreground.ProcessId != target.Process.ProcessId)
         {
             return OperationResult.Fail<MeituTarget>(TargetLost(
-                window.Value.Handle, foreground.Value,
+                window.Handle, foreground,
                 "The verified Meitu window is not the foreground window; no input was sent."));
         }
 
-        await Task.CompletedTask.ConfigureAwait(false);
-        return OperationResult.Ok(target with { Window = window.Value });
+        return OperationResult.Ok(target with { Window = window });
+    }
+
+    // Windows can return NULL during a focus transfer. Each retry is read-only and proves the
+    // window again before sampling foreground. A real HWND, including an unexpected one,
+    // always goes directly to the caller's existing foreground check.
+    private async Task<OperationResult<(ExternalWindowRef Window, ForegroundIdentity Foreground)>> ReadForegroundWithTargetAsync(
+        Func<bool, OperationResult<ExternalWindowRef>> verifyWindow, CancellationToken cancellationToken)
+    {
+        const int maxRetries = 3;
+        for (int attempt = 0; ; attempt++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var window = verifyWindow(attempt > 0);
+            if (window.IsFailure) return window.Failure;
+            var foreground = _locator.ReadForeground();
+            if (foreground.IsFailure) return foreground.Failure;
+            cancellationToken.ThrowIfCancellationRequested();
+            if (!foreground.Value.Handle.IsNone || attempt == maxRetries)
+                return OperationResult.Ok((window.Value, foreground.Value));
+
+            await Task.Delay(TimeSpan.FromMilliseconds(50), _clock, cancellationToken).ConfigureAwait(false);
+        }
     }
 
     /// <summary>Re-reads the window and re-confirms it still belongs to the expected process.</summary>
@@ -2152,6 +2175,8 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
         }
 
         DateTimeOffset deadline = _clock.GetUtcNow() + _options.DialogTimeout;
+        WindowHandle picker = WindowHandle.None;
+        OperationFailure? pending = null;
 
         while (true)
         {
@@ -2164,21 +2189,33 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
                 return OperationResult.Fail<ExternalWindowRef>(windows.Failure);
             }
 
-            foreach (ExternalWindowRef candidate in windows.Value)
+            ExternalWindowRef[] matches = [.. windows.Value.Where(candidate =>
+                candidate.OwningProcessId == target.Process.ProcessId &&
+                candidate.ClassName == signature.Value.WindowClassName)];
+            if (matches.Length > 1)
+                return OperationResult.Fail<ExternalWindowRef>(FailureCode.MeituOpenInputFailed,
+                    "Multiple Meitu file dialogs are present; no picker was selected.");
+
+            if (!picker.IsNone && (matches.Length == 0 || matches[0].Handle != picker))
+                return OperationResult.Fail<ExternalWindowRef>(FailureCode.MeituTargetLost,
+                    "The Meitu picker disappeared or was replaced while its controls were loading.");
+
+            if (matches.Length == 1)
             {
-                // Both conditions, always: the picker must carry the signed window class *and*
-                // be owned by the exact Meitu process. A window that merely looks right, in some
-                // other process, is not touched (§17, §21).
-                if (candidate.OwningProcessId == target.Process.ProcessId &&
-                    string.Equals(
-                        candidate.ClassName, signature.Value.WindowClassName, StringComparison.Ordinal))
-                {
-                    return OperationResult.Ok(candidate);
-                }
+                picker = matches[0].Handle;
+                var verified = await VerifyDialogAsync(target, picker, cancellationToken).ConfigureAwait(false);
+                if (verified.IsFailure) return verified;
+                var field = FindDialogControl(target, picker, KnownMeituElement.FileDialogFileName);
+                var button = FindDialogControl(target, picker, KnownMeituElement.FileDialogOpenButton);
+                if (field.IsSuccess && button.IsSuccess) return verified;
+                if (field.IsFailure && !field.Failure.IsRetryable) return OperationResult.Fail<ExternalWindowRef>(field.Failure);
+                if (button.IsFailure && !button.Failure.IsRetryable) return OperationResult.Fail<ExternalWindowRef>(button.Failure);
+                pending = field.IsFailure ? field.Failure : button.Failure;
             }
 
             if (_clock.GetUtcNow() >= deadline)
             {
+                if (pending is not null) return OperationResult.Fail<ExternalWindowRef>(pending);
                 return OperationResult.Fail<ExternalWindowRef>(
                     FailureCode.MeituOpenInputFailed,
                     $"No '{signature.Value.WindowClassName}' picker owned by Meitu process " +
@@ -2218,42 +2255,39 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
                     return OperationResult.Fail<ExternalWindowRef>(FailureCode.MeituUnknownState,
                         "Another dialog is present beside Save; no dialog control was used.");
                 ExternalWindowRef surface = matches[0];
-                OperationResult<ExternalWindowRef> owned = VerifyIdentityDialogOwner(target, surface.Handle, signature);
-                if (owned.IsFailure) return owned;
-
-                OperationResult<ForegroundIdentity> foreground = _locator.ReadForeground();
-                if (foreground.IsFailure) return OperationResult.Fail<ExternalWindowRef>(foreground.Failure);
-                if (foreground.Value.Handle == surface.Handle && foreground.Value.ProcessId == target.Process.ProcessId)
-                    return VerifyIdentityDialog(target, surface.Handle, signature);
+                var observation = await ReadForegroundWithTargetAsync(
+                    retry => VerifyIdentityDialogOwner(target, surface.Handle, signature, retry), cancellationToken)
+                    .ConfigureAwait(false);
+                if (observation.IsFailure) return OperationResult.Fail<ExternalWindowRef>(observation.Failure);
+                ForegroundIdentity foreground = observation.Value.Foreground;
+                if (foreground.Handle == surface.Handle && foreground.ProcessId == target.Process.ProcessId)
+                    return OperationResult.Ok(observation.Value.Window);
 
                 // The observed Qt Save is a separate owned top-level dialog. Its editor can
                 // retain foreground during presentation. Do not weaken the dialog guard or
                 // activate through an unrelated foreground window, even in the same process.
-                if (foreground.Value.Handle != target.Window.Handle ||
-                    foreground.Value.ProcessId != target.Process.ProcessId)
-                    return OperationResult.Fail<ExternalWindowRef>(TargetLost(surface.Handle, foreground.Value,
+                if (foreground.Handle != target.Window.Handle ||
+                    foreground.ProcessId != target.Process.ProcessId)
+                    return OperationResult.Fail<ExternalWindowRef>(TargetLost(surface.Handle, foreground,
                         "The foreground left the exact editor while its Save dialog was appearing; no dialog control was used."));
 
-                OperationResult<UiElementRef> cancel = FindSignedControl(target, surface.Handle, signature.CancelControl);
-                if (cancel.IsFailure) return OperationResult.Fail<ExternalWindowRef>(cancel.Failure);
-                OperationResult<UiElementRef> fileName = FindSignedControl(target, surface.Handle, signature.FileNameControl);
-                if (fileName.IsFailure) return OperationResult.Fail<ExternalWindowRef>(fileName.Failure);
-                owned = VerifyIdentityDialogOwner(target, surface.Handle, signature);
-                if (owned.IsFailure) return owned;
-                foreground = _locator.ReadForeground();
-                if (foreground.IsFailure) return OperationResult.Fail<ExternalWindowRef>(foreground.Failure);
+                observation = await ReadForegroundWithTargetAsync(
+                    retry => VerifyIdentityDialogForActivation(target, surface.Handle, signature, retry), cancellationToken)
+                    .ConfigureAwait(false);
+                if (observation.IsFailure) return OperationResult.Fail<ExternalWindowRef>(observation.Failure);
+                foreground = observation.Value.Foreground;
                 // Qt can complete activation while the signed controls are being resolved.
                 // That is the desired transition; prove the dialog again instead of insisting
                 // that its editor still holds foreground just before requesting activation.
-                if (foreground.Value.Handle == surface.Handle && foreground.Value.ProcessId == target.Process.ProcessId)
-                    return VerifyIdentityDialog(target, surface.Handle, signature);
-                if (foreground.Value.Handle != target.Window.Handle || foreground.Value.ProcessId != target.Process.ProcessId)
-                    return OperationResult.Fail<ExternalWindowRef>(TargetLost(surface.Handle, foreground.Value,
+                if (foreground.Handle == surface.Handle && foreground.ProcessId == target.Process.ProcessId)
+                    return OperationResult.Ok(observation.Value.Window);
+                if (foreground.Handle != target.Window.Handle || foreground.ProcessId != target.Process.ProcessId)
+                    return OperationResult.Fail<ExternalWindowRef>(TargetLost(surface.Handle, foreground,
                         "The exact editor lost foreground during Save-dialog discovery; nothing was activated."));
                 if (_clock.GetUtcNow() >= deadline)
-                    return OperationResult.Fail<ExternalWindowRef>(TargetLost(surface.Handle, foreground.Value,
+                    return OperationResult.Fail<ExternalWindowRef>(TargetLost(surface.Handle, foreground,
                         "The owned Save dialog did not acquire exact foreground within the existing dialog timeout; no dialog control was used."));
-                OperationResult<Unit> activated = _locator.Activate(owned.Value);
+                OperationResult<Unit> activated = _locator.Activate(observation.Value.Window);
                 if (activated.IsFailure) return OperationResult.Fail<ExternalWindowRef>(activated.Failure);
                 // Re-enumerate after activation: Qt can replace its Save HWND. No old controls
                 // or handle authorize a successor; the next iteration proves it afresh.
@@ -2282,7 +2316,7 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
     }
 
     private OperationResult<ExternalWindowRef> VerifyIdentityDialogOwner(
-        MeituTarget target, WindowHandle dialog, MeituDocumentIdentitySignature signature)
+        MeituTarget target, WindowHandle dialog, MeituDocumentIdentitySignature signature, bool afterDelay)
     {
         if (!_locator.IsAlive(target.Process))
         {
@@ -2298,6 +2332,15 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
             !string.Equals(host.Value.ClassName, target.Window.ClassName, StringComparison.Ordinal))
             return OperationResult.Fail<ExternalWindowRef>(FailureCode.MeituTargetLost,
                 "The exact editor host changed while its Save dialog was open; no dialog control was used.");
+
+        if (afterDelay)
+        {
+            var dialogs = _locator.FindOwnedDialogs(target.Process, host.Value);
+            if (dialogs.IsFailure) return dialogs.Failure;
+            if (dialogs.Value.Any(other => other.Handle != dialog))
+                return OperationResult.Fail<ExternalWindowRef>(FailureCode.MeituUnknownState,
+                    "Another dialog is present beside Save; no dialog control was used.");
+        }
 
         OperationResult<ExternalWindowRef> refreshed = _locator.Refresh(dialog);
         if (refreshed.IsFailure ||
@@ -2316,22 +2359,28 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
         return refreshed;
     }
 
-    private OperationResult<ExternalWindowRef> VerifyIdentityDialog(
-        MeituTarget target, WindowHandle dialog, MeituDocumentIdentitySignature signature)
+    private OperationResult<ExternalWindowRef> VerifyIdentityDialogForActivation(
+        MeituTarget target, WindowHandle dialog, MeituDocumentIdentitySignature signature, bool afterDelay)
     {
-        OperationResult<ExternalWindowRef> refreshed = VerifyIdentityDialogOwner(target, dialog, signature);
-        if (refreshed.IsFailure) return refreshed;
+        OperationResult<UiElementRef> cancel = FindSignedControl(target, dialog, signature.CancelControl);
+        if (cancel.IsFailure) return OperationResult.Fail<ExternalWindowRef>(cancel.Failure);
+        OperationResult<UiElementRef> fileName = FindSignedControl(target, dialog, signature.FileNameControl);
+        if (fileName.IsFailure) return OperationResult.Fail<ExternalWindowRef>(fileName.Failure);
+        return VerifyIdentityDialogOwner(target, dialog, signature, afterDelay);
+    }
 
-        OperationResult<ForegroundIdentity> foreground = _locator.ReadForeground();
-        if (foreground.IsFailure)
-        {
-            return OperationResult.Fail<ExternalWindowRef>(foreground.Failure);
-        }
-
-        return foreground.Value.Handle == dialog && foreground.Value.ProcessId == target.Process.ProcessId
-            ? refreshed
+    private async Task<OperationResult<ExternalWindowRef>> VerifyIdentityDialogAsync(
+        MeituTarget target, WindowHandle dialog, MeituDocumentIdentitySignature signature,
+        CancellationToken cancellationToken)
+    {
+        var observation = await ReadForegroundWithTargetAsync(
+            retry => VerifyIdentityDialogOwner(target, dialog, signature, retry), cancellationToken).ConfigureAwait(false);
+        if (observation.IsFailure) return OperationResult.Fail<ExternalWindowRef>(observation.Failure);
+        (ExternalWindowRef window, ForegroundIdentity foreground) = observation.Value;
+        return foreground.Handle == dialog && foreground.ProcessId == target.Process.ProcessId
+            ? OperationResult.Ok(window)
             : OperationResult.Fail<ExternalWindowRef>(TargetLost(
-                dialog, foreground.Value,
+                dialog, foreground,
                 "The signed Save surface is not the exact foreground window; no dialog control was used."));
     }
 
@@ -2343,8 +2392,7 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
     /// being verified is different and has to be. While the picker is up it — not the editor —
     /// holds the foreground, so requiring the editor window to be foreground would refuse every
     /// legitimate open. What is required instead is that the picker still exists, still belongs
-    /// to the verified Meitu process, and that the foreground still belongs to that same
-    /// process.
+    /// to the verified Meitu process, and that the foreground is the picker or its editor.
     ///
     /// The process-level foreground check is not about where the input would land: a value
     /// written through a pattern to a named element inside an identified window cannot be
@@ -2352,8 +2400,44 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
     /// operator has moved on from. If Explorer comes to the front mid-sequence, PrintFlow stops
     /// rather than press Open in a dialog nobody is looking at (§12, §21, §25).
     /// </remarks>
-    private OperationResult<ExternalWindowRef> VerifyDialog(MeituTarget target, WindowHandle dialog)
+    private async Task<OperationResult<ExternalWindowRef>> VerifyDialogAsync(
+        MeituTarget target, WindowHandle dialog, CancellationToken cancellationToken,
+        Func<OperationResult<Unit>>? verifyContents = null)
     {
+        OperationResult<MeituFileDialogSignature> signature = FileDialogSignature();
+        if (signature.IsFailure) return OperationResult.Fail<ExternalWindowRef>(signature.Failure);
+        OperationResult<ExternalWindowRef> VerifyPicker(bool afterDelay)
+        {
+            var refreshed = RefreshPicker(target, dialog, signature.Value, afterDelay);
+            if (refreshed.IsFailure || verifyContents is null) return refreshed;
+            var contents = verifyContents();
+            return contents.IsFailure ? OperationResult.Fail<ExternalWindowRef>(contents.Failure) : refreshed;
+        }
+        var observation = await ReadForegroundWithTargetAsync(VerifyPicker, cancellationToken).ConfigureAwait(false);
+        if (observation.IsFailure) return OperationResult.Fail<ExternalWindowRef>(observation.Failure);
+        (ExternalWindowRef picker, ForegroundIdentity foreground) = observation.Value;
+        return foreground.ProcessId == target.Process.ProcessId &&
+               (foreground.Handle == dialog || foreground.Handle == target.Window.Handle)
+            ? OperationResult.Ok(picker)
+            : OperationResult.Fail<ExternalWindowRef>(TargetLost(
+                dialog, foreground, "The foreground left the verified Meitu picker and editor."));
+    }
+
+    private OperationResult<ExternalWindowRef> RefreshPicker(
+        MeituTarget target, WindowHandle dialog, MeituFileDialogSignature signature, bool afterDelay)
+    {
+        OperationResult<ExternalWindowRef> editor = RefreshOwnedWindow(target);
+        if (editor.IsFailure) return editor;
+        if (afterDelay)
+        {
+            var windows = _locator.FindTopLevelWindows(target.Process);
+            if (windows.IsFailure) return windows.Failure;
+            if (windows.Value.Any(other => other.Handle != dialog &&
+                    other.OwningProcessId == target.Process.ProcessId && other.ClassName == signature.WindowClassName))
+                return OperationResult.Fail<ExternalWindowRef>(FailureCode.MeituOpenInputFailed,
+                    "Multiple Meitu file dialogs are present; no picker was selected.");
+        }
+
         OperationResult<ExternalWindowRef> refreshed = _locator.Refresh(dialog);
         if (refreshed.IsFailure)
         {
@@ -2370,24 +2454,17 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
                 $"Meitu process {target.Process.ProcessId}; nothing was written or invoked.");
         }
 
-        OperationResult<ForegroundIdentity> foreground = _locator.ReadForeground();
-        if (foreground.IsFailure)
-        {
-            return OperationResult.Fail<ExternalWindowRef>(foreground.Failure);
-        }
-
-        return foreground.Value.ProcessId == target.Process.ProcessId
+        return string.Equals(refreshed.Value.ClassName, signature.WindowClassName, StringComparison.Ordinal)
             ? refreshed
-            : OperationResult.Fail<ExternalWindowRef>(TargetLost(
-                dialog, foreground.Value,
-                "The foreground left the verified Meitu process while its picker was being filled."));
+            : OperationResult.Fail<ExternalWindowRef>(
+                FailureCode.MeituTargetLost, "The picker no longer has its signed window class.");
     }
 
     /// <summary>Writes the path into the verified dialog's field and confirms it.</summary>
-    private OperationResult<Unit> FillAndConfirmDialog(
-        MeituTarget target, ExternalWindowRef dialog, string workingCopyAbsolutePath)
+    private async Task<OperationResult<Unit>> FillAndConfirmDialogAsync(
+        MeituTarget target, ExternalWindowRef dialog, string workingCopyAbsolutePath, CancellationToken cancellationToken)
     {
-        OperationResult<ExternalWindowRef> beforeWrite = VerifyDialog(target, dialog.Handle);
+        var beforeWrite = await VerifyDialogAsync(target, dialog.Handle, cancellationToken).ConfigureAwait(false);
         if (beforeWrite.IsFailure)
         {
             return OperationResult.Fail<Unit>(beforeWrite.Failure);
@@ -2399,6 +2476,9 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
         {
             return OperationResult.Fail<Unit>(field.Failure);
         }
+
+        var confirm = FindDialogControl(target, dialog.Handle, KnownMeituElement.FileDialogOpenButton);
+        if (confirm.IsFailure) return OperationResult.Fail<Unit>(confirm.Failure);
 
         // The value pattern, not keystrokes: the path is delivered to a control already shown to
         // live inside a dialog owned by the verified Meitu process, so a focus change part-way
@@ -2413,35 +2493,26 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
         // without the text landing is not hypothetical in shell dialogs, and Open acts on
         // whatever the dialog currently has selected — which, if the write was lost, is a file
         // the operator last touched rather than the one PrintFlow prepared (§12, §13).
-        OperationResult<string> readBack = _elements.GetValue(field.Value);
-        if (readBack.IsFailure)
+        OperationResult<Unit> VerifyContents()
         {
-            return OperationResult.Fail<Unit>(readBack.Failure);
+            confirm = FindDialogControl(target, dialog.Handle, KnownMeituElement.FileDialogOpenButton);
+            if (confirm.IsFailure) return OperationResult.Fail<Unit>(confirm.Failure);
+            var currentField = FindDialogControl(target, dialog.Handle, KnownMeituElement.FileDialogFileName);
+            if (currentField.IsFailure) return OperationResult.Fail<Unit>(currentField.Failure);
+            var readBack = _elements.GetValue(currentField.Value);
+            if (readBack.IsFailure) return OperationResult.Fail<Unit>(readBack.Failure);
+            return string.Equals(readBack.Value, workingCopyAbsolutePath, StringComparison.OrdinalIgnoreCase)
+                ? OperationResult.Ok()
+                : OperationResult.Fail<Unit>(FailureCode.MeituOpenInputFailed,
+                    $"The picker's file-name field reads '{readBack.Value}' after PrintFlow wrote " +
+                    $"'{workingCopyAbsolutePath}'. Open was not invoked, so no file was opened.");
         }
 
-        if (!string.Equals(readBack.Value, workingCopyAbsolutePath, StringComparison.OrdinalIgnoreCase))
-        {
-            return OperationResult.Fail<Unit>(
-                FailureCode.MeituOpenInputFailed,
-                $"The picker's file-name field reads '{readBack.Value}' after PrintFlow wrote " +
-                $"'{workingCopyAbsolutePath}'. Open was not invoked, so no file was opened.");
-        }
-
-        // Verified again before the irreversible half. Writing a value changes a field that
-        // nothing acts on; invoking Open is what makes Meitu load a file, so the check closest
-        // to it matters most — and a tree walk plus a value write takes long enough for the
-        // dialog to be closed or the operator to move away.
-        OperationResult<ExternalWindowRef> beforeOpen = VerifyDialog(target, dialog.Handle);
-        if (beforeOpen.IsFailure)
-        {
-            return OperationResult.Fail<Unit>(beforeOpen.Failure);
-        }
-
-        OperationResult<UiElementRef> confirm = FindDialogControl(
-            target, dialog.Handle, KnownMeituElement.FileDialogOpenButton);
-        return confirm.IsFailure
-            ? OperationResult.Fail<Unit>(confirm.Failure)
-            : _elements.Invoke(confirm.Value);
+        // A focus handoff can outlive the original controls and their values. Reread both
+        // on every observation leading to Open, without ever writing the path a second time.
+        var beforeOpen = await VerifyDialogAsync(target, dialog.Handle, cancellationToken, VerifyContents)
+            .ConfigureAwait(false);
+        return beforeOpen.IsFailure ? OperationResult.Fail<Unit>(beforeOpen.Failure) : _elements.Invoke(confirm.Value);
     }
 
     /// <inheritdoc />
@@ -3139,7 +3210,7 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
             "应用到背景",
         ];
         OperationResult<IReadOnlyList<string>> texts =
-            _elements.ReadMatchingTextSnapshot(window.Value.Handle, markers);
+            _elements.ReadMatchingTextSnapshot(window.Value.Handle, markers, allowTrailingZeroWidthSpaces: true);
         if (texts.IsFailure)
         {
             return OperationResult.Fail<MeituStateSnapshot>(texts.Failure);
@@ -3729,7 +3800,8 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
         IAutomationStopSignal stop,
         CancellationToken cancellationToken)
     {
-        OperationResult<ExternalWindowRef> verified = VerifyExportSurface(target, surface.Handle, signature);
+        OperationResult<ExternalWindowRef> verified = await VerifyExportSurfaceAsync(
+            target, surface.Handle, signature, cancellationToken).ConfigureAwait(false);
         if (verified.IsFailure)
         {
             return OperationResult.Fail<MeituExportEvidence>(verified.Failure);
@@ -3768,7 +3840,8 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
 
         // Re-verified after two tree walks and two writes, immediately before the control that
         // changes what is on screen.
-        verified = VerifyExportSurface(target, surface.Handle, signature);
+        verified = await VerifyExportSurfaceAsync(
+            target, surface.Handle, signature, cancellationToken).ConfigureAwait(false);
         if (verified.IsFailure)
         {
             return OperationResult.Fail<MeituExportEvidence>(verified.Failure);
@@ -3852,7 +3925,8 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
     {
         MeituExportDestinationSignature shape = signature.Destination;
 
-        OperationResult<ExternalWindowRef> verified = VerifyDestinationDialog(target, dialog.Handle, shape);
+        OperationResult<ExternalWindowRef> verified = await VerifyDestinationDialogAsync(
+            target, dialog.Handle, shape, cancellationToken).ConfigureAwait(false);
         if (verified.IsFailure)
         {
             return OperationResult.Fail<MeituExportEvidence>(verified.Failure);
@@ -3909,7 +3983,8 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
                 cancellationToken).ConfigureAwait(false);
         }
 
-        verified = VerifyDestinationDialog(target, dialog.Handle, shape);
+        verified = await VerifyDestinationDialogAsync(
+            target, dialog.Handle, shape, cancellationToken).ConfigureAwait(false);
         if (verified.IsFailure)
         {
             return OperationResult.Fail<MeituExportEvidence>(verified.Failure);
@@ -4137,8 +4212,8 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
         MeituExportFormatSelectionSignature selection,
         CancellationToken cancellationToken)
     {
-        OperationResult<ExternalWindowRef> verified = VerifyExportSurface(
-            target, surface.Handle, export);
+        OperationResult<ExternalWindowRef> verified = await VerifyExportSurfaceAsync(
+            target, surface.Handle, export, cancellationToken).ConfigureAwait(false);
         if (verified.IsFailure)
         {
             return OperationResult.Fail<string>(verified.Failure);
@@ -4178,7 +4253,8 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
             return OperationResult.Fail<string>(combo.Failure);
         }
 
-        verified = VerifyExportSurface(target, surface.Handle, export);
+        verified = await VerifyExportSurfaceAsync(
+            target, surface.Handle, export, cancellationToken).ConfigureAwait(false);
         if (verified.IsFailure)
         {
             return OperationResult.Fail<string>(verified.Failure);
@@ -4218,8 +4294,8 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
 
         // Re-check both windows and reacquire the item at the last possible point. The popup is
         // transient and its runtime element can be replaced without its old reference throwing.
-        OperationResult<Unit> fresh = VerifyFormatPopupBoundary(
-            target, surface, popup.Value, export, selection);
+        OperationResult<Unit> fresh = await VerifyFormatPopupBoundaryAsync(
+            target, surface, popup.Value, export, selection, cancellationToken).ConfigureAwait(false);
         if (fresh.IsFailure)
         {
             return OperationResult.Fail<string>(fresh.Failure);
@@ -4231,7 +4307,8 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
             return OperationResult.Fail<string>(item.Failure);
         }
 
-        fresh = VerifyFormatPopupBoundary(target, surface, popup.Value, export, selection);
+        fresh = await VerifyFormatPopupBoundaryAsync(
+            target, surface, popup.Value, export, selection, cancellationToken).ConfigureAwait(false);
         if (fresh.IsFailure)
         {
             return OperationResult.Fail<string>(fresh.Failure);
@@ -4395,7 +4472,28 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
                 "item(s) with the signed ancestry; exactly one is required. No item was clicked."));
     }
 
-    private OperationResult<Unit> VerifyFormatPopupBoundary(
+    private async Task<OperationResult<Unit>> VerifyFormatPopupBoundaryAsync(
+        MeituTarget target,
+        ExternalWindowRef surface,
+        ExternalWindowRef popup,
+        MeituExportSignature export,
+        MeituExportFormatSelectionSignature selection,
+        CancellationToken cancellationToken)
+    {
+        var observation = await ReadForegroundWithTargetAsync(
+            _ => RefreshFormatPopup(target, surface, popup, export, selection), cancellationToken)
+            .ConfigureAwait(false);
+        if (observation.IsFailure) return OperationResult.Fail<Unit>(observation.Failure);
+        ForegroundIdentity foreground = observation.Value.Foreground;
+        return selection.SaveSurfaceMustRemainForeground &&
+               foreground.Handle == surface.Handle && foreground.ProcessId == target.Process.ProcessId
+            ? OperationResult.Ok()
+            : OperationResult.Fail<Unit>(FormatSelectionFailure(
+                "The signed Save surface is no longer the exact same-process foreground window while " +
+                "the recognised non-activating format popup is open. No item was clicked."));
+    }
+
+    private OperationResult<ExternalWindowRef> RefreshFormatPopup(
         MeituTarget target,
         ExternalWindowRef surface,
         ExternalWindowRef popup,
@@ -4404,7 +4502,7 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
     {
         if (!_locator.IsAlive(target.Process))
         {
-            return OperationResult.Fail<Unit>(FormatSelectionFailure(
+            return OperationResult.Fail<ExternalWindowRef>(FormatSelectionFailure(
                 "The accepted Meitu process exited while the format popup was open."));
         }
 
@@ -4421,7 +4519,7 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
                 selection.FormatControl,
                 selection.FormatControlRequiredPatterns).IsFailure)
         {
-            return OperationResult.Fail<Unit>(FormatSelectionFailure(
+            return OperationResult.Fail<ExternalWindowRef>(FormatSelectionFailure(
                 "The signed Save surface or format control was replaced while the popup was open."));
         }
 
@@ -4429,23 +4527,11 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
         if (currentPopup.IsFailure || currentPopup.Value.Handle != popup.Handle ||
             !MatchesFormatPopup(target, currentPopup.Value, selection))
         {
-            return OperationResult.Fail<Unit>(FormatSelectionFailure(
+            return OperationResult.Fail<ExternalWindowRef>(FormatSelectionFailure(
                 "The recognised format popup disappeared or was replaced before input."));
         }
 
-        OperationResult<ForegroundIdentity> foreground = _locator.ReadForeground();
-        if (foreground.IsFailure)
-        {
-            return OperationResult.Fail<Unit>(foreground.Failure);
-        }
-
-        return selection.SaveSurfaceMustRemainForeground &&
-               foreground.Value.Handle == surface.Handle &&
-               foreground.Value.ProcessId == target.Process.ProcessId
-            ? OperationResult.Ok()
-            : OperationResult.Fail<Unit>(FormatSelectionFailure(
-                "The signed Save surface is no longer the exact same-process foreground window while " +
-                "the recognised non-activating format popup is open. No item was clicked."));
+        return currentPopup;
     }
 
     private async Task<OperationResult<string>> WaitForSelectedFormatAsync(
@@ -4500,8 +4586,8 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
             bool popupGone = currentPopup.Length == 0;
             if (!selection.PopupMustDisappear || popupGone)
             {
-                OperationResult<ExternalWindowRef> verified = VerifyExportSurface(
-                    target, surface.Handle, export);
+                OperationResult<ExternalWindowRef> verified = await VerifyExportSurfaceAsync(
+                    target, surface.Handle, export, cancellationToken).ConfigureAwait(false);
                 if (verified.IsSuccess)
                 {
                     OperationResult<UiElementRef> field = FindSignedControl(
@@ -4769,20 +4855,20 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
     }
 
     /// <summary>Re-establishes that the export surface is still Meitu's and still in front.</summary>
-    private OperationResult<ExternalWindowRef> VerifyExportSurface(
-        MeituTarget target, WindowHandle surface, MeituExportSignature signature) =>
-        VerifyOwnedSurface(
+    private Task<OperationResult<ExternalWindowRef>> VerifyExportSurfaceAsync(
+        MeituTarget target, WindowHandle surface, MeituExportSignature signature, CancellationToken cancellationToken) =>
+        VerifyOwnedSurfaceAsync(
             target, surface, signature.SurfaceClassName,
             title => string.Equals(title, signature.SurfaceTitle, StringComparison.Ordinal),
-            "Save surface");
+            "Save surface", cancellationToken);
 
     /// <summary>Re-establishes that the destination dialog is still Meitu's and still in front.</summary>
-    private OperationResult<ExternalWindowRef> VerifyDestinationDialog(
-        MeituTarget target, WindowHandle dialog, MeituExportDestinationSignature shape) =>
-        VerifyOwnedSurface(
+    private Task<OperationResult<ExternalWindowRef>> VerifyDestinationDialogAsync(
+        MeituTarget target, WindowHandle dialog, MeituExportDestinationSignature shape, CancellationToken cancellationToken) =>
+        VerifyOwnedSurfaceAsync(
             target, dialog, shape.WindowClassName,
             title => shape.AcceptedTitles.Contains(title, StringComparer.Ordinal),
-            "destination dialog");
+            "destination dialog", cancellationToken);
 
     /// <summary>
     /// The guard both export surfaces share: process alive, window still itself, still owned,
@@ -4795,7 +4881,28 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
     /// action of the whole slice, and requiring the dialog itself to be the foreground window
     /// means PrintFlow never presses it against a surface something else has covered.
     /// </remarks>
-    private OperationResult<ExternalWindowRef> VerifyOwnedSurface(
+    private async Task<OperationResult<ExternalWindowRef>> VerifyOwnedSurfaceAsync(
+        MeituTarget target,
+        WindowHandle surface,
+        string expectedClassName,
+        Func<string, bool> titleAccepted,
+        string description,
+        CancellationToken cancellationToken)
+    {
+        var observation = await ReadForegroundWithTargetAsync(
+            _ => RefreshExportSurface(target, surface, expectedClassName, titleAccepted, description),
+            cancellationToken).ConfigureAwait(false);
+        if (observation.IsFailure) return OperationResult.Fail<ExternalWindowRef>(observation.Failure);
+        (ExternalWindowRef window, ForegroundIdentity foreground) = observation.Value;
+        return foreground.Handle == surface && foreground.ProcessId == target.Process.ProcessId
+            ? OperationResult.Ok(window)
+            : OperationResult.Fail<ExternalWindowRef>(TargetLost(
+                surface, foreground,
+                $"The signed {description} is not the exact foreground window; nothing further was " +
+                "written or invoked."));
+    }
+
+    private OperationResult<ExternalWindowRef> RefreshExportSurface(
         MeituTarget target,
         WindowHandle surface,
         string expectedClassName,
@@ -4830,18 +4937,7 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
                 "nothing further was written or invoked.");
         }
 
-        OperationResult<ForegroundIdentity> foreground = _locator.ReadForeground();
-        if (foreground.IsFailure)
-        {
-            return OperationResult.Fail<ExternalWindowRef>(foreground.Failure);
-        }
-
-        return foreground.Value.Handle == surface && foreground.Value.ProcessId == target.Process.ProcessId
-            ? refreshed
-            : OperationResult.Fail<ExternalWindowRef>(TargetLost(
-                surface, foreground.Value,
-                $"The signed {description} is not the exact foreground window; nothing further was " +
-                "written or invoked."));
+        return refreshed;
     }
 
     /// <summary>

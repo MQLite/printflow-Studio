@@ -219,12 +219,22 @@ public sealed class GuardedMeituBackgroundRemovalTests
         result.Value.Mode.ShouldBe(BackgroundRemovalMode.Products);
     }
 
-    [Fact]
-    public async Task Expanded_preview_completion_requires_the_actual_owned_apply_button()
+    [Theory]
+    [InlineData("")]
+    [InlineData("\u200B\u200B")]
+    public async Task MeituButtonLabel_expanded_preview_requires_the_actual_owned_apply_button(string suffix)
     {
         Scenario s = Build(baseline: PreviewBaseline(), afterAction: [BackgroundBusyScreen(), BackgroundBusyScreen(), ExpandedPreviewScreen()]);
         ScriptRecognizers(s, initial: 3, final: 2, expandedPreview: true, neutralAfterUndo: true);
-        s.Elements.Add(s.Editor.Window.Handle, new UiElementIdentity("Button", ApplyId, "应用到背景", "QPushButton",
+        var read = s.Elements.OnReadTextSnapshot;
+        s.Elements.OnReadTextSnapshot = handle =>
+        {
+            read?.Invoke(handle);
+            if (!s.Elements.Texts.TryGetValue(handle.Value, out var texts)) return;
+            int index = texts.IndexOf("应用到背景");
+            if (index >= 0) texts[index] = "应用到背景" + suffix;
+        };
+        s.Elements.Add(s.Editor.Window.Handle, new UiElementIdentity("Button", ApplyId, "应用到背景" + suffix, "QPushButton",
             s.Editor.Process.ProcessId, [UiPatternKind.Invoke], new UiBounds(100, 500, 260, 32), true, false));
         var result = await s.Driver.RunBackgroundRemovalAsync(s.Editor, ExpectedFile,
             BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent,
@@ -438,7 +448,41 @@ public sealed class GuardedMeituBackgroundRemovalTests
     private const string RedoId = "MainWindow.centralwidget.mainStackedWidget.editPage.subBackgroundWidget.titleWidget.stackedWidget.editorPage.redoButton";
     private static string RecognizerId(int index) => RecognitionRoot + ".centerWidget.item1.container1.btnSod" + index;
 
-    private static void ScriptRecognizers(Scenario s, int initial, int final, bool undoRestores = true, bool reprocessBusy = true, bool expandedPreview = false, bool neutralAfterUndo = false, bool historyChanges = true)
+    [Theory]
+    [InlineData("")]
+    [InlineData("\r\n")]
+    public async Task MeituButtonLabel_recognizer_layout_variants_resolve_to_the_requested_owner(string lineBreak)
+    {
+        Scenario s = Build();
+        ScriptRecognizers(s, initial: 3, final: 2,
+            formatLabel: label => label.Replace("\n", lineBreak, StringComparison.Ordinal) + "\u200B\u200B");
+
+        var result = await s.Driver.RunBackgroundRemovalAsync(s.Editor, ExpectedFile,
+            BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent,
+            InertAutomationStopSignal.Instance, CancellationToken.None, BackgroundRemovalMode.Products);
+
+        result.IsSuccess.ShouldBeTrue(result.IsFailure ? result.Failure.TechnicalDetail : "");
+        s.Elements.Invocations.Count(id => id == RecognizerId(2)).ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task MeituButtonLabel_visible_rejected_compact_choice_blocks_module_expansion()
+    {
+        Scenario s = Build();
+        ScriptRecognizers(s, initial: 3, final: 2, formatLabel: label =>
+            label == "商品\n货物" ? "商品货物全部" : label.Replace("\n", "", StringComparison.Ordinal) + "\u200B");
+
+        var result = await s.Driver.RunBackgroundRemovalAsync(s.Editor, ExpectedFile,
+            BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent,
+            InertAutomationStopSignal.Instance, CancellationToken.None, BackgroundRemovalMode.Products);
+
+        result.IsFailure.ShouldBeTrue();
+        s.Elements.Invocations.ShouldNotContain(RecognitionRoot);
+        s.Elements.Invocations.ShouldNotContain(UndoId);
+        s.Elements.Invocations.ShouldNotContain(RecognizerId(2));
+    }
+
+    private static void ScriptRecognizers(Scenario s, int initial, int final, bool undoRestores = true, bool reprocessBusy = true, bool expandedPreview = false, bool neutralAfterUndo = false, bool historyChanges = true, Func<string, string>? formatLabel = null)
     {
         int pid = s.Editor.Process.ProcessId;
         var window = s.Editor.Window.Handle;
@@ -460,7 +504,7 @@ public sealed class GuardedMeituBackgroundRemovalTests
                 var group = s.Elements.Add(window, new UiElementIdentity("Group", id + ".widget", "", "QWidget", pid,
                     [UiPatternKind.Invoke], new UiBounds(102 + i * 60, 222, 47, 76), true, false), owner);
                 string label = i switch { 0 => "关闭\n", 1 => "人像\n宠物", 2 => "商品\n货物", _ => "图标\n印章" };
-                s.Elements.Add(window, new UiElementIdentity("Text", id + ".widget.label", label, "QLabel", pid,
+                s.Elements.Add(window, new UiElementIdentity("Text", id + ".widget.label", formatLabel?.Invoke(label) ?? label, "QLabel", pid,
                     [UiPatternKind.Invoke], new UiBounds(102 + i * 60, 260, 47, 32), true, false), group);
             }
         }

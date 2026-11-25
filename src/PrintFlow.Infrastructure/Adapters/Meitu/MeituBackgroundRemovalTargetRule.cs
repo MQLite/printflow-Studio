@@ -66,7 +66,7 @@ public static class MeituBackgroundRemovalTargetRule
         ImmutableArray<string>.Builder reasons = ImmutableArray.CreateBuilder<string>();
         UiElementIdentity marker = candidate.Marker;
 
-        if (!string.Equals(marker.Name, markerName, StringComparison.Ordinal))
+        if (!MeituButtonLabel.Matches(marker.Name, markerName))
             reasons.Add($"marker name is '{marker.Name}', not exactly '{markerName}'");
         if (!string.Equals(marker.ControlTypeName, shape.MarkerControlType, StringComparison.Ordinal))
             reasons.Add($"marker control type is {marker.ControlTypeName}, not {shape.MarkerControlType}");
