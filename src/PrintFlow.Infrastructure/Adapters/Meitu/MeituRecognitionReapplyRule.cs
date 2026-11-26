@@ -3,11 +3,23 @@ using PrintFlow.Infrastructure.Automation;
 
 namespace PrintFlow.Infrastructure.Adapters.Meitu;
 
+internal sealed record MeituHistoryButton(string AutomationId, string Glyph, string AlternateGlyph)
+{
+    private const string HistoryRoot = "MainWindow.centralwidget.mainStackedWidget.editPage.subBackgroundWidget.titleWidget.stackedWidget.editorPage.";
+    internal static readonly MeituHistoryButton Undo = new(HistoryRoot + "undoButton", "\uE2A3", "\uE2A7");
+    internal static readonly MeituHistoryButton Redo = new(HistoryRoot + "redoButton", "\uE2A4", "\uE2A8");
+
+    internal bool Matches(UiElementIdentity control, int processId) =>
+        control.ProcessId == processId && control.AutomationId == AutomationId &&
+        (control.Name == Glyph || control.Name == AlternateGlyph) &&
+        control.ControlTypeName == "Button" && control.ClassName == "proui::IconFontButton" &&
+        control.Supports(UiPatternKind.Invoke) && !control.IsOffscreen && !control.Bounds.IsEmpty;
+}
+
 /// <summary>Verifies native history and recognizer transitions for an instant cached result.</summary>
 public static class MeituRecognitionReapplyRule
 {
     private const string RecognizerSuffix = ".MattingNewParameterWidget.widget.stackedMattingWidget.page1.scrollArea.qt_scrollarea_viewport.scrollAreaWidgetContents.mattingnew.centerWidget.item1.container1.btnSod";
-    private const string HistoryRoot = "MainWindow.centralwidget.mainStackedWidget.editPage.subBackgroundWidget.titleWidget.stackedWidget.editorPage.";
 
     public static bool IsValid(MeituRecognitionReapplyEvidence evidence, int expectedProcessId,
         string observedIdentity, MeituBackgroundRemovalSignature signature)
@@ -57,14 +69,7 @@ public static class MeituRecognitionReapplyRule
                 return false;
         }
 
-        return HistoryMatches(controls, "undoButton", "\uE2A3", enabled: !undone) &&
-            HistoryMatches(controls, "redoButton", "\uE2A4", enabled: undone);
-    }
-
-    private static bool HistoryMatches(ImmutableArray<UiElementIdentity> controls, string id, string name, bool enabled)
-    {
-        UiElementIdentity[] matches = [.. controls.Where(control => control.AutomationId == HistoryRoot + id)];
-        return matches.Length == 1 && matches[0].ControlTypeName == "Button" &&
-            matches[0].Name == name && matches[0].ClassName == "proui::IconFontButton" && matches[0].IsEnabled == enabled;
+        return controls.Any(control => MeituHistoryButton.Undo.Matches(control, processId) && control.IsEnabled == !undone) &&
+            controls.Any(control => MeituHistoryButton.Redo.Matches(control, processId) && control.IsEnabled == undone);
     }
 }

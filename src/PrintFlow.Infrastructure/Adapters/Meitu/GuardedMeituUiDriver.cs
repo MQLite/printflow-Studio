@@ -483,7 +483,9 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
                 "Nothing was invoked.");
         }
 
-        OperationResult<IReadOnlyList<UiElementRef>> markers = FindButtonLabels(window, markerName, shape.MarkerClassName);
+        OperationResult<IReadOnlyList<UiElementRef>> markers = shape.AlternateMarkerClassName is null
+            ? FindButtonLabels(window, markerName, shape.MarkerClassName)
+            : FindButtonLabels(window, markerName, kind: UiControlKind.Text);
         if (markers.IsFailure)
         {
             return OperationResult.Fail<UiElementRef>(markers.Failure);
@@ -609,9 +611,9 @@ public sealed partial class GuardedMeituUiDriver : IMeituUiDriver
     }
 
     private OperationResult<IReadOnlyList<UiElementRef>> FindButtonLabels(
-        WindowHandle window, string label, string? className = null)
+        WindowHandle window, string label, string? className = null, UiControlKind kind = UiControlKind.Any)
     {
-        var found = _elements.FindAll(window, new UiElementQuery(UiControlKind.Any, ClassName: className));
+        var found = _elements.FindAll(window, new UiElementQuery(kind, ClassName: className));
         return found.IsFailure ? found : OperationResult.Ok<IReadOnlyList<UiElementRef>>(
             [.. found.Value.Where(element => MeituButtonLabel.Matches(element.Name, label))]);
     }

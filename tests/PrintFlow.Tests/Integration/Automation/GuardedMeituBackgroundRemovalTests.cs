@@ -202,21 +202,29 @@ public sealed class GuardedMeituBackgroundRemovalTests
         };
     }
 
-    [Fact]
-    public async Task Instant_cached_reapplication_uses_verified_history_evidence_without_inventing_Busy()
+    [Theory]
+    [InlineData("QLabel", "\uE2A3", "\uE2A4", BackgroundRemovalMode.Products, 2)]
+    [InlineData("WordWrapLabel", "\uE2A3", "\uE2A4", BackgroundRemovalMode.Automatic, 3)]
+    [InlineData("QLabel", "\uE2A7", "\uE2A8", BackgroundRemovalMode.Automatic, 3)]
+    [InlineData("WordWrapLabel", "\uE2A7", "\uE2A8", BackgroundRemovalMode.Automatic, 3)]
+    public async Task Instant_cached_reapplication_uses_verified_history_evidence_without_inventing_Busy(
+        string labelClass, string undoGlyph, string redoGlyph, BackgroundRemovalMode mode, int selected)
     {
         Scenario s = Build(baseline: PreviewBaseline(), afterAction: [ExpandedPreviewScreen()]);
-        ScriptRecognizers(s, initial: 3, final: 2, reprocessBusy: false, expandedPreview: true, neutralAfterUndo: true);
+        ScriptRecognizers(s, initial: 3, final: selected, reprocessBusy: false, expandedPreview: true,
+            neutralAfterUndo: true, labelClass: labelClass, undoGlyph: undoGlyph, redoGlyph: redoGlyph);
         s.Elements.Add(s.Editor.Window.Handle, new UiElementIdentity("Button", ApplyId, "应用到背景", "QPushButton",
             s.Editor.Process.ProcessId, [UiPatternKind.Invoke], new UiBounds(100, 500, 260, 32), true, false));
         var result = await s.Driver.RunBackgroundRemovalAsync(s.Editor, ExpectedFile,
             BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent,
-            InertAutomationStopSignal.Instance, CancellationToken.None, BackgroundRemovalMode.Products);
+            InertAutomationStopSignal.Instance, CancellationToken.None, mode);
 
         result.IsSuccess.ShouldBeTrue(result.IsFailure ? result.Failure.TechnicalDetail : "");
         result.Value.Busy.ShouldBeNull();
         result.Value.ReappliedRecognition.ShouldNotBeNull();
-        result.Value.Mode.ShouldBe(BackgroundRemovalMode.Products);
+        result.Value.Mode.ShouldBe(mode);
+        s.Elements.Invocations.Count(id => id == RecognizerId(selected)).ShouldBe(1);
+        s.ReturnCount.ShouldBe(1);
     }
 
     [Theory]
@@ -368,6 +376,7 @@ public sealed class GuardedMeituBackgroundRemovalTests
     [Theory]
     [InlineData("wrong-process")]
     [InlineData("duplicate")]
+    [InlineData("wrong-label-class")]
     [InlineData("unknown-selected-state")]
     public async Task Unverifiable_recognition_controls_prevent_undo_and_reprocessing(string problem)
     {
@@ -382,7 +391,8 @@ public sealed class GuardedMeituBackgroundRemovalTests
             { IsSelected = problem == "unknown-selected-state" ? null : false });
         var group = s.Elements.Add(s.Editor.Window.Handle, new UiElementIdentity("Group", id + ".widget", "", "QWidget", pid,
             [UiPatternKind.Invoke], new UiBounds(222, 222, 47, 76), true, false), owner);
-        s.Elements.Add(s.Editor.Window.Handle, new UiElementIdentity("Text", id + ".widget.label", "商品\n货物", "QLabel", pid,
+        string labelClass = problem == "wrong-label-class" ? "QWidget" : "WordWrapLabel";
+        s.Elements.Add(s.Editor.Window.Handle, new UiElementIdentity("Text", id + ".widget.label", "商品\n货物", labelClass, pid,
             [UiPatternKind.Invoke], new UiBounds(222, 260, 47, 32), true, false), group);
         var result = await s.Driver.RunBackgroundRemovalAsync(s.Editor, ExpectedFile,
             BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent,
@@ -482,7 +492,8 @@ public sealed class GuardedMeituBackgroundRemovalTests
         s.Elements.Invocations.ShouldNotContain(RecognizerId(2));
     }
 
-    private static void ScriptRecognizers(Scenario s, int initial, int final, bool undoRestores = true, bool reprocessBusy = true, bool expandedPreview = false, bool neutralAfterUndo = false, bool historyChanges = true, Func<string, string>? formatLabel = null)
+    private static void ScriptRecognizers(Scenario s, int initial, int final, bool undoRestores = true, bool reprocessBusy = true, bool expandedPreview = false, bool neutralAfterUndo = false, bool historyChanges = true, Func<string, string>? formatLabel = null,
+        string labelClass = "QLabel", string undoGlyph = "\uE2A3", string redoGlyph = "\uE2A4")
     {
         int pid = s.Editor.Process.ProcessId;
         var window = s.Editor.Window.Handle;
@@ -504,7 +515,7 @@ public sealed class GuardedMeituBackgroundRemovalTests
                 var group = s.Elements.Add(window, new UiElementIdentity("Group", id + ".widget", "", "QWidget", pid,
                     [UiPatternKind.Invoke], new UiBounds(102 + i * 60, 222, 47, 76), true, false), owner);
                 string label = i switch { 0 => "关闭\n", 1 => "人像\n宠物", 2 => "商品\n货物", _ => "图标\n印章" };
-                s.Elements.Add(window, new UiElementIdentity("Text", id + ".widget.label", formatLabel?.Invoke(label) ?? label, "QLabel", pid,
+                s.Elements.Add(window, new UiElementIdentity("Text", id + ".widget.label", formatLabel?.Invoke(label) ?? label, labelClass, pid,
                     [UiPatternKind.Invoke], new UiBounds(102 + i * 60, 260, 47, 32), true, false), group);
             }
         }
@@ -512,9 +523,9 @@ public sealed class GuardedMeituBackgroundRemovalTests
         {
             s.Elements.Remove(window, UndoId);
             s.Elements.Remove(window, RedoId);
-            s.Elements.Add(window, new UiElementIdentity("Button", UndoId, "\uE2A3", "proui::IconFontButton", pid,
+            s.Elements.Add(window, new UiElementIdentity("Button", UndoId, undoGlyph, "proui::IconFontButton", pid,
                 [UiPatternKind.Invoke], new UiBounds(1000, 50, 32, 32), undoEnabled, false));
-            s.Elements.Add(window, new UiElementIdentity("Button", RedoId, "\uE2A4", "proui::IconFontButton", pid,
+            s.Elements.Add(window, new UiElementIdentity("Button", RedoId, redoGlyph, "proui::IconFontButton", pid,
                 [UiPatternKind.Invoke], new UiBounds(1036, 50, 32, 32), redoEnabled, false));
         }
         Choices(initial);

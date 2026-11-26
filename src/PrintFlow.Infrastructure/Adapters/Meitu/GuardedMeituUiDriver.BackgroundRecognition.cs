@@ -48,8 +48,6 @@ public sealed partial class GuardedMeituUiDriver
     // The other two mattingnew modules have identical ids, so the exact marker is essential.
     private const string RecognitionModuleSuffix =
         ".MattingNewParameterWidget.widget.stackedMattingWidget.page1.scrollArea.qt_scrollarea_viewport.scrollAreaWidgetContents.mattingnew";
-    private const string RecognitionHistoryPrefix =
-        "MainWindow.centralwidget.mainStackedWidget.editPage.subBackgroundWidget.titleWidget.stackedWidget.editorPage.";
     private const string RecognitionApplySuffix =
         ".MattingNewParameterWidget.widget.stackedMattingWidget.page1.scrollArea.qt_scrollarea_viewport.scrollAreaWidgetContents.resetWidget.applyIntelligentButton";
     private static readonly ImmutableArray<string> RecognitionLabels =
@@ -85,7 +83,7 @@ public sealed partial class GuardedMeituUiDriver
         return FindBackgroundRemovalOwner(target, target.Window.Handle, RecognitionLabels[index],
             new MeituOwnedControlShape("Text", "QLabel", ".widget.label", "CheckBox", "CMattingIconButton",
                 RecognitionModuleSuffix + ".centerWidget.item1.container1.btnSod" + index,
-                ".widget.label", 2, UiPatternKind.Invoke));
+                ".widget.label", 2, UiPatternKind.Invoke) { AlternateMarkerClassName = "WordWrapLabel" });
     }
 
     private OperationResult<int> ReadSelectedRecognizer(MeituTarget target)
@@ -122,29 +120,33 @@ public sealed partial class GuardedMeituUiDriver
             controls.Add(described.Value);
         }
 
-        foreach (var history in new[] { (Name: "\uE2A3", Id: "undoButton"), (Name: "\uE2A4", Id: "redoButton") })
+        foreach (var history in new[] { MeituHistoryButton.Undo, MeituHistoryButton.Redo })
         {
             // Disabled is meaningful evidence here: Undo/Redo reverse their enabled states
             // between a positively restored original and a newly applied recognizer result.
-            var found = _elements.FindAll(target.Window.Handle, new UiElementQuery(UiControlKind.Button, Name: history.Name));
-            if (found.IsFailure) return OperationResult.Fail<ImmutableArray<UiElementIdentity>>(found.Failure);
-            List<UiElementIdentity> matches = [];
-            foreach (var control in found.Value)
-            {
-                var item = _elements.Describe(control);
-                if (item.IsSuccess && item.Value.ProcessId == target.Process.ProcessId &&
-                    item.Value.AutomationId == RecognitionHistoryPrefix + history.Id &&
-                    item.Value.Name == history.Name && item.Value.ClassName == "proui::IconFontButton" &&
-                    item.Value.ControlTypeName == "Button" && item.Value.Supports(UiPatternKind.Invoke) &&
-                    !item.Value.IsOffscreen && !item.Value.Bounds.IsEmpty)
-                    matches.Add(item.Value);
-            }
-            if (matches.Count != 1)
-                return OperationResult.Fail<ImmutableArray<UiElementIdentity>>(FailureCode.MeituUnknownState,
-                    "The recognizer's native Undo/Redo state is missing or ambiguous. No processing claim is available.");
-            controls.Add(matches[0]);
+            var button = ReadHistoryButton(target, history);
+            if (button.IsFailure) return OperationResult.Fail<ImmutableArray<UiElementIdentity>>(button.Failure);
+            controls.Add(button.Value.Identity);
         }
         return OperationResult.Ok(controls.MoveToImmutable());
+    }
+
+    private OperationResult<(UiElementRef Element, UiElementIdentity Identity)> ReadHistoryButton(
+        MeituTarget target, MeituHistoryButton history)
+    {
+        var found = _elements.FindAll(target.Window.Handle,
+            new UiElementQuery(UiControlKind.Button, AutomationId: history.AutomationId));
+        if (found.IsFailure) return OperationResult.Fail<(UiElementRef, UiElementIdentity)>(found.Failure);
+        if (found.Value.Count == 1)
+        {
+            var element = found.Value[0];
+            var item = _elements.Describe(element);
+            if (item.IsFailure) return OperationResult.Fail<(UiElementRef, UiElementIdentity)>(item.Failure);
+            if (history.Matches(item.Value, target.Process.ProcessId))
+                return OperationResult.Ok((element, item.Value));
+        }
+        return OperationResult.Fail<(UiElementRef, UiElementIdentity)>(FailureCode.MeituUnknownState,
+            $"The native history control '{history.AutomationId}' is missing, ambiguous or unrecognized.");
     }
 
     private async Task<OperationResult<Unit>> InvokeRecognizerControlAsync(
@@ -243,10 +245,11 @@ public sealed partial class GuardedMeituUiDriver
         bool entryResultUndone = selected.Value != 0;
         if (entryResultUndone)
         {
-            var undo = FindSignedControl(target, target.Window.Handle,
-                new MeituControlSignature("\uE2A3", RecognitionHistoryPrefix + "undoButton", "Button", "proui::IconFontButton", UiPatternKind.Invoke));
+            var undo = ReadHistoryButton(target, MeituHistoryButton.Undo);
             if (undo.IsFailure) return OperationResult.Fail<MeituRecognizerRun>(undo.Failure);
-            var undone = await InvokeRecognizerControlAsync(target, undo.Value, signature, fileName, identity, stop, cancellationToken).ConfigureAwait(false);
+            if (!undo.Value.Identity.IsEnabled)
+                return OperationResult.Fail<MeituRecognizerRun>(FailureCode.MeituUnknownState, "The recognizer's Undo button is disabled.");
+            var undone = await InvokeRecognizerControlAsync(target, undo.Value.Element, signature, fileName, identity, stop, cancellationToken).ConfigureAwait(false);
             if (undone.IsFailure) return OperationResult.Fail<MeituRecognizerRun>(undone.Failure);
             DateTimeOffset undoDeadline = _clock.GetUtcNow() + _options.DialogTimeout;
             while (true)
@@ -255,9 +258,8 @@ public sealed partial class GuardedMeituUiDriver
                 if (StopBeforeExport(stop) is { } stoppedAfterUndo)
                     return OperationResult.Fail<MeituRecognizerRun>(stoppedAfterUndo);
                 selected = ReadSelectedRecognizer(target);
-                var redo = FindSignedControl(target, target.Window.Handle,
-                    new MeituControlSignature("\uE2A4", RecognitionHistoryPrefix + "redoButton", "Button", "proui::IconFontButton", UiPatternKind.Invoke));
-                if (selected.IsSuccess && selected.Value == 0 && redo.IsSuccess) break;
+                var redo = ReadHistoryButton(target, MeituHistoryButton.Redo);
+                if (selected.IsSuccess && selected.Value == 0 && redo.IsSuccess && redo.Value.Identity.IsEnabled) break;
                 if (_clock.GetUtcNow() >= undoDeadline)
                     return OperationResult.Fail<MeituRecognizerRun>(FailureCode.MeituUnknownState,
                         "Meitu's entry auto-recognition was not positively undone. No recognizer was reapplied and no result may be exported.");

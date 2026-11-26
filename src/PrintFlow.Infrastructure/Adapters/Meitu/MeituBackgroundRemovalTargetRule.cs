@@ -70,8 +70,9 @@ public static class MeituBackgroundRemovalTargetRule
             reasons.Add($"marker name is '{marker.Name}', not exactly '{markerName}'");
         if (!string.Equals(marker.ControlTypeName, shape.MarkerControlType, StringComparison.Ordinal))
             reasons.Add($"marker control type is {marker.ControlTypeName}, not {shape.MarkerControlType}");
-        if (!string.Equals(marker.ClassName, shape.MarkerClassName, StringComparison.Ordinal))
-            reasons.Add($"marker class is '{marker.ClassName}', not '{shape.MarkerClassName}'");
+        if (marker.ClassName != shape.MarkerClassName &&
+            (shape.AlternateMarkerClassName is null || marker.ClassName != shape.AlternateMarkerClassName))
+            reasons.Add($"unexpected marker class '{marker.ClassName}'");
         if (!marker.AutomationId.EndsWith(shape.MarkerAutomationIdSuffix, StringComparison.Ordinal))
             reasons.Add($"marker id '{marker.AutomationId}' does not end with '{shape.MarkerAutomationIdSuffix}'");
         if (marker.ProcessId != expectedProcessId)

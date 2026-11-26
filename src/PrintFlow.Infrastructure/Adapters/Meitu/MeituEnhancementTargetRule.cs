@@ -52,7 +52,10 @@ public sealed record MeituOwnedControlShape(
     string OwnerAutomationIdSuffix,
     string MarkerRelativeAutomationIdSuffix,
     int OwnerAncestorDepth,
-    UiPatternKind RequiredOwnerPattern);
+    UiPatternKind RequiredOwnerPattern)
+{
+    internal string? AlternateMarkerClassName { get; init; }
+}
 
 /// <summary>
 /// Decides which — if any — marker/owner pair may be invoked for a signed action marker
