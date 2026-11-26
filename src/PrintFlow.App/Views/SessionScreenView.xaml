@@ -948,9 +948,19 @@
                         <TextBlock Text="{Binding CurrentStep}" FontSize="26" FontWeight="SemiBold" Margin="0,8,0,16" TextWrapping="Wrap" />
                         <TextBlock Text="{Binding GuidedProcessingState}" TextWrapping="Wrap" FontSize="18" FontWeight="SemiBold"
                                    AutomationProperties.AutomationId="Session.Processing.State" />
-                        <ProgressBar IsIndeterminate="True" Height="6" Margin="0,16,0,16"
+                        <ProgressBar IsIndeterminate="{Binding IsGuidedProgressIndeterminate}" Height="6" Margin="0,16,0,16"
                                      AutomationProperties.AutomationId="Session.Processing.Progress"
-                                     AutomationProperties.Name="{Binding GuidedProcessingState}" />
+                                     AutomationProperties.Name="{Binding GuidedProcessingState}">
+                            <ProgressBar.Style>
+                                <Style TargetType="ProgressBar">
+                                    <Style.Triggers>
+                                        <Trigger Property="IsIndeterminate" Value="False">
+                                            <Setter Property="Value" Value="{Binding GuidedProcessingPercent, Mode=OneWay}" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ProgressBar.Style>
+                        </ProgressBar>
                         <TextBlock Text="{Binding GuidedProcessingNotice}" TextWrapping="Wrap" />
                         <TextBlock Text="{Binding GuidedProcessingWait}" TextWrapping="Wrap" Margin="0,12,0,0"
                                    Foreground="{DynamicResource PF.Brush.Muted}" />

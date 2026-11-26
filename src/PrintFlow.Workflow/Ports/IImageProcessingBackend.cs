@@ -21,6 +21,8 @@ public sealed record ImageProcessingRequest(
     BackgroundRemovalAuthority? BackgroundRemovalAuthority)
 {
     public ImageUploadConfirmation? UploadConfirmation { get; init; }
+    /// <summary>Percentage of source pixels whose 2× inference has finished, before PNG writing and validation.</summary>
+    public IProgress<int>? UpscaleProgress { get; init; }
 }
 
 /// <summary>A provider for non-desktop image processing. Null capability means the method is not implemented.</summary>

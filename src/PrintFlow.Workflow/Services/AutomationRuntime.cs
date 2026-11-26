@@ -76,6 +76,7 @@ public sealed record AutomationRuntimeView(
     /// </remarks>
     public bool CanStopAutomation => State == AutomationRuntimeState.Running;
     public bool IsCancellableImageProcessing { get; init; }
+    public int? UpscalePercent { get; init; }
 
     /// <summary>
     /// Whether a Take Over control should be offered (§25).
@@ -256,13 +257,14 @@ public sealed class AutomationRunRegistry
         StepKind step,
         bool drivesExternalApplication,
         CancellationTokenSource? localCancellation,
-        Action<AutomationRuntimeView> notify) : IAutomationStopSignal
+        Action<AutomationRuntimeView> notify) : IAutomationStopSignal, IProgress<int>
     {
         private readonly object _gate = new();
         private AutomationStopMode? _mode;
         private ExternalOperationPhase _phase = ExternalOperationPhase.NotStarted;
         private bool _cancelInvoked;
         private bool _leftBusyAfterCancel;
+        private int? _upscalePercent;
 
         public SessionId SessionId { get; } = sessionId;
 
@@ -342,6 +344,19 @@ public sealed class AutomationRunRegistry
             notify(view);
         }
 
+        public void Report(int percent)
+        {
+            AutomationRuntimeView view;
+            lock (_gate)
+            {
+                if (_mode is not null || percent is < 0 or > 100 || percent <= _upscalePercent)
+                    return;
+                _upscalePercent = percent;
+                view = ToView();
+            }
+            notify(view);
+        }
+
         public void ReportOperationCancelOutcome(bool leftBusy)
         {
             lock (_gate)
@@ -355,10 +370,12 @@ public sealed class AutomationRunRegistry
         {
             AutomationStopMode? mode;
             ExternalOperationPhase phase;
+            int? percent;
             lock (_gate)
             {
                 mode = _mode;
                 phase = _phase;
+                percent = _upscalePercent;
             }
 
             AutomationRuntimeState state = mode switch
@@ -372,6 +389,7 @@ public sealed class AutomationRunRegistry
                 SessionId, AttemptId, step, state, phase, drivesExternalApplication)
             {
                 IsCancellableImageProcessing = HasLocalCancellation,
+                UpscalePercent = percent,
             };
         }
     }

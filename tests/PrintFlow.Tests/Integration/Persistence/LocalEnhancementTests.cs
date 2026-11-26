@@ -18,6 +18,35 @@ namespace PrintFlow.Tests.Integration.Persistence;
 [Collection(SqliteCollection.Name)]
 public sealed class LocalEnhancementTests
 {
+    [Theory]
+    [InlineData(1536, 512, 15)]
+    [InlineData(3455, 512, 15)]
+    [InlineData(3456, 768, 6)]
+    [InlineData(6143, 768, 6)]
+    [InlineData(6144, 1024, 2)]
+    public void Large_upscale_uses_fewer_tiles_within_the_available_memory_budget(int availableMiB, int edge, int tileCount)
+    {
+        RealEsrganUpscaler.ModelEdgeFor((ulong)availableMiB * 1024 * 1024).ShouldBe(edge);
+        (CountTiles(1536) * CountTiles(1024)).ShouldBe(tileCount);
+        CountTiles(edge).ShouldBe(1);
+        CountTiles(edge + 1).ShouldBe(2);
+
+        int CountTiles(int length)
+        {
+            int count = 0;
+            for (int start = 0; start < length; count++)
+            {
+                int end = RealEsrganUpscaler.TileEnd(start, length, edge);
+                end.ShouldBeInRange(start + 1, length);
+                int inputSize = Math.Min(length, end + 128) - Math.Max(0, start - 128);
+                (inputSize + inputSize % 2).ShouldBeLessThanOrEqualTo(edge);
+                if (end < length) (end % 2).ShouldBe(0);
+                start = end;
+            }
+            return count;
+        }
+    }
+
     [Fact]
     public async Task Sharpening_preserves_canvas_16_bit_alpha_and_rgb_profile_without_hidden_colour_bleed()
     {

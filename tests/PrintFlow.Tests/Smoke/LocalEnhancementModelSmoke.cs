@@ -101,7 +101,8 @@ public sealed class LocalEnhancementModelSmoke
     public async Task Tiled_upscale_keeps_a_periodic_pattern_aligned_across_both_seams_and_the_last_pixel()
     {
         using TempWorkspace temp = new();
-        var backend = new LocalEnhancementBackend(new FileWorkspace(temp.Root), Model);
+        var backend = new LocalEnhancementBackend(new FileWorkspace(temp.Root),
+            new RealEsrganUpscaler(Model, () => RealEsrganUpscaler.MinimumAvailableMemory));
         var request = LocalEnhancementTests.Request(ImageProcessingMethod.AiUpscale, "tiled");
         const int size = 513;
         var rgba = new byte[size * size * 4];
@@ -128,8 +129,9 @@ public sealed class LocalEnhancementModelSmoke
         var samples = pixels.ToByteArray(PixelMapping.RGBA)!;
         samples[^1].ShouldBe((byte)0);
         int maxDifference = 0;
-        for (int y = 504; y < 520; y++)
-        for (int x = 504; x < 520; x++)
+        int seamAt = RealEsrganUpscaler.TileEnd(0, size, 512) * 2;
+        for (int y = seamAt - 8; y < seamAt + 8; y++)
+        for (int x = seamAt - 8; x < seamAt + 8; x++)
         for (int c = 0; c < 3; c++)
         {
             int seam = (y * 1026 + x) * 4 + c;
@@ -138,6 +140,34 @@ public sealed class LocalEnhancementModelSmoke
         }
         maxDifference.ShouldBeLessThanOrEqualTo(6);
         Console.WriteLine($"513 × 513 tiled inference and PNG output: {result.Value.Elapsed}, maximum seam difference: {maxDifference}/255.");
+    }
+
+    [ProvisionedModelFact]
+    public async Task Tiled_upscale_reports_computed_pixels_to_the_running_session_before_review()
+    {
+        using SessionServiceHarness harness = new();
+        var backend = new LocalEnhancementBackend(harness.FileWorkspace,
+            new RealEsrganUpscaler(Model, () => RealEsrganUpscaler.MinimumAvailableMemory));
+        var service = harness.CreateService(imageProcessingBackends: [backend]);
+        string source = Path.Combine(harness.Workspace.Root, "wide.png");
+        LocalEnhancementTests.WriteSample(source, 0, 8, 513, 17);
+        var id = (await service.ImportAsync(WorkflowType.PrepareAsset, source, null, "qa", default)).Value.Id;
+        (await service.ExecuteAsync(id, new WorkflowCommand.ConfirmOriginal(), "qa", default)).IsSuccess.ShouldBeTrue();
+        var selection = SessionImageProcessingSelection.Compatible with { Enhancement = ImageProcessingMethod.AiUpscale };
+        (await service.ExecuteAsync(id, new WorkflowCommand.SetImageProcessingSelection(StepKind.Enhancement, selection),
+            "qa", default)).IsSuccess.ShouldBeTrue();
+
+        List<int> reported = [];
+        service.AutomationRuntimeChanged += (_, view) =>
+        {
+            if (view.SessionId == id && view.UpscalePercent is int percent) reported.Add(percent);
+        };
+        var result = await service.ExecuteAsync(id, new WorkflowCommand.StartStep(StepKind.Enhancement), "qa", default);
+
+        result.IsSuccess.ShouldBeTrue(result.IsFailure ? result.Failure.TechnicalDetail : null);
+        result.Value.CurrentStep!.State.ShouldBe(StepState.ReviewRequired);
+        reported.ShouldBe(new[] { 0, 384 * 100 / 513, 100 });
+        service.GetAutomationRuntime(id).UpscalePercent.ShouldBeNull();
     }
 
     [ProvisionedModelFact]

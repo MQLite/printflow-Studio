@@ -48,7 +48,16 @@ public sealed partial class SessionViewModel
         AutomationRuntimeState.TakeOverRequested => Strings.Resolve("Session_GuidedTakingOver"),
         _ => Strings.Session_StatusProcessing,
     };
-    public string GuidedProcessingNotice => StoppingNotice ?? (_runtime.Phase switch
+    public int GuidedProcessingPercent => _runtime.UpscalePercent ?? 0;
+    public bool IsGuidedProgressIndeterminate => _runtime.UpscalePercent is null;
+    public string GuidedProcessingNotice => StoppingNotice ?? (_runtime.UpscalePercent switch
+    {
+        100 => Strings.Resolve("ImageProcessing_UpscaleFinishing"),
+        int percent => string.Format(System.Globalization.CultureInfo.CurrentCulture,
+            Strings.Resolve("ImageProcessing_UpscaleProgress"), percent),
+        null => GuidedPhaseNotice,
+    });
+    private string GuidedPhaseNotice => _runtime.Phase switch
     {
         ExternalOperationPhase.OperationRequested => Strings.Resolve("Session_GuidedPhaseRequested"),
         ExternalOperationPhase.Busy => Strings.Resolve("Session_GuidedPhaseBusy"),
@@ -58,7 +67,7 @@ public sealed partial class SessionViewModel
         ExternalOperationPhase.OutputValidated => Strings.Resolve("Session_GuidedPhaseValidated"),
         ExternalOperationPhase.UnknownOrBlocked => Strings.Resolve("Session_GuidedPhaseUnknown"),
         _ => Strings.Resolve("Session_GuidedPhaseStarting"),
-    });
+    };
     public string GuidedProcessingWait => Strings.Resolve("Session_GuidedProcessingWait");
     public bool ShowsGuidedSourceDetails => !IsViewingHistory && _session?.CurrentStep?.Step == StepKind.OriginalConfirmation;
     public bool ShowsGuidedOriginalChecks => ShowsGuidedSourceDetails && (CanConfirmOriginal || IsReviewRequired || ShowsSourceCropEntry);
@@ -229,6 +238,8 @@ public sealed partial class SessionViewModel
         OnPropertyChanged(nameof(ExpandsGuidedFinalSave));
         OnPropertyChanged(nameof(GuidedProcessingApplication));
         OnPropertyChanged(nameof(GuidedProcessingState));
+        OnPropertyChanged(nameof(GuidedProcessingPercent));
+        OnPropertyChanged(nameof(IsGuidedProgressIndeterminate));
         OnPropertyChanged(nameof(GuidedProcessingNotice));
         OnPropertyChanged(nameof(GuidedProcessingWait));
         OnPropertyChanged(nameof(GuidedPage));

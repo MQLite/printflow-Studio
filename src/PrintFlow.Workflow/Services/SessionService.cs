@@ -2759,7 +2759,7 @@ public sealed partial class SessionService : ISessionService
                 return OperationResult.Fail<StepWork>(verified.Failure);
             if (plan.Backend is not null)
                 return await RunImageBackendAsync(plan, work, attempt, imageSource, workingCopy.Value,
-                    establishExpectedOutput, cancellationToken).ConfigureAwait(false);
+                    establishExpectedOutput, stop as IProgress<int>, cancellationToken).ConfigureAwait(false);
         }
 
         switch (work.Adapter)

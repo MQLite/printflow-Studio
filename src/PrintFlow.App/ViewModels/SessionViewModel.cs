@@ -3516,7 +3516,8 @@ public sealed partial class SessionViewModel : ObservableObject
         {
             if (generation != _openGeneration || _session is not { } session) return;
             if (runtime.SessionId is not null && runtime.SessionId != session.Id) return;
-            AutomationRuntimeView adopted = runtime.SessionId == session.Id
+            // A tile update can reach the dispatcher after Stop or after the attempt ended.
+            AutomationRuntimeView adopted = runtime.SessionId == session.Id && runtime.UpscalePercent is null
                 ? runtime : _sessions.GetAutomationRuntime(session.Id);
             _runtime = adopted;
 

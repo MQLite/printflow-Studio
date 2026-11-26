@@ -1409,6 +1409,8 @@
   <data name="Session_GuidedPhaseProcessed" xml:space="preserve"><value>Processing has finished; export has not started.</value></data>
   <data name="Session_GuidedPhaseRequested" xml:space="preserve"><value>The operation was requested. Waiting for the application to report its state.</value></data>
   <data name="Session_GuidedPhaseStarting" xml:space="preserve"><value>Preparing this step. No processing progress has been reported yet.</value></data>
+  <data name="ImageProcessing_UpscaleProgress" xml:space="preserve"><value>Local 2× upscaling has processed {0}% of the image.</value></data>
+  <data name="ImageProcessing_UpscaleFinishing" xml:space="preserve"><value>Upscaling finished. Preparing and checking the output PNG.</value></data>
   <data name="Session_GuidedPhaseUnknown" xml:space="preserve"><value>The application state is unknown or blocked. PrintFlow is waiting for a safe outcome.</value></data>
   <data name="Session_GuidedPhaseValidated" xml:space="preserve"><value>The output has been validated. Preparing the result for your review.</value></data>
   <data name="Session_GuidedPhaseWriting" xml:space="preserve"><value>Export was confirmed; the output may still be writing.</value></data>

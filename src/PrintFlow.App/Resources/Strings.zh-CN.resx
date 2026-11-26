@@ -1399,6 +1399,8 @@
   <data name="Session_GuidedPhaseProcessed" xml:space="preserve"><value>处理已结束，尚未开始导出。</value></data>
   <data name="Session_GuidedPhaseRequested" xml:space="preserve"><value>已发出处理请求，正在等待应用报告状态。</value></data>
   <data name="Session_GuidedPhaseStarting" xml:space="preserve"><value>正在准备此步骤，尚未收到处理进度。</value></data>
+  <data name="ImageProcessing_UpscaleProgress" xml:space="preserve"><value>正在本机进行 2× 超分，已处理图像的 {0}%。</value></data>
+  <data name="ImageProcessing_UpscaleFinishing" xml:space="preserve"><value>超分计算已完成，正在生成并校验 PNG。</value></data>
   <data name="Session_GuidedPhaseUnknown" xml:space="preserve"><value>应用状态未知或受到阻塞，PrintFlow 正在等待安全结果。</value></data>
   <data name="Session_GuidedPhaseValidated" xml:space="preserve"><value>输出校验已完成，正在准备结果供你审核。</value></data>
   <data name="Session_GuidedPhaseWriting" xml:space="preserve"><value>已确认导出，输出文件可能仍在写入。</value></data>

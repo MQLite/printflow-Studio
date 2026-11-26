@@ -409,6 +409,32 @@ public sealed class GuidedProcessingTests
     }
 
     [Fact]
+    public async Task Local_upscaling_displays_the_reported_percentage_in_the_processing_view()
+    {
+        using OperatorCultureScope culture = new("zh-CN");
+        using HomeScreenHarness harness = new();
+        var driver = await GuidedSessionProjectionTests.Open(harness, WorkflowType.PrepareAsset);
+        await driver.ConfirmOriginalCommand.ExecuteAsync(null);
+        var service = new ScriptedFailureSessionService(harness.Sessions)
+        {
+            Runtime = new AutomationRuntimeView(driver.Id, null, StepKind.Enhancement,
+                AutomationRuntimeState.Running, ExternalOperationPhase.NotStarted, false) { UpscalePercent = 37 },
+        };
+        var model = new SessionViewModel(service, harness.Previews, harness.TiffReviews, new RecordingNavigation());
+        model.Open((await service.LoadAsync(driver.Id, default)).Value);
+        await model.PreviewsLoaded;
+        model.GuidedProcessingNotice.ShouldContain("37%");
+        WpfRendering.RenderExpectingNoBindingErrors(() => new SessionScreenView { DataContext = model }, new Size(1000, 700), tree =>
+        {
+            var bar = GuidedSessionShellTests.Find<ProgressBar>(tree, "Session.Processing.Progress");
+            GuidedSessionProjectionTests.Shown(bar).ShouldBeTrue();
+            bar.IsIndeterminate.ShouldBeFalse();
+            bar.Value.ShouldBe(37);
+            return true;
+        });
+    }
+
+    [Fact]
     public async Task Successful_processing_enters_required_review_without_automatic_next_step()
     {
         using HomeScreenHarness h = new();

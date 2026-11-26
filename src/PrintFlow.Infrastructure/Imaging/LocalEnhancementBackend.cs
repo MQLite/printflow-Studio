@@ -118,7 +118,7 @@ public sealed class LocalEnhancementBackend : IImageProcessingBackend
             uint height = source.Height;
             if (upscale)
             {
-                var enhanced = _upscaler.Run(source, token);
+                var enhanced = _upscaler.Run(source, token, request.UpscaleProgress);
                 if (enhanced.IsFailure)
                     return OperationResult.Fail<AdapterOutput>(enhanced.Failure);
                 using var candidate = enhanced.Value;

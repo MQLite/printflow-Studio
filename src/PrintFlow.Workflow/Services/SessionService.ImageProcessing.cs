@@ -98,7 +98,7 @@ public sealed partial class SessionService
     private async Task<OperationResult<StepWork>> RunImageBackendAsync(
         ImageProcessingExecutionPlan plan, ProducingWork work, ProcessingAttempt attempt,
         Revision source, WorkspaceFileRef workingCopy, Action<WorkspaceFileRef> establishExpectedOutput,
-        CancellationToken cancellationToken)
+        IProgress<int>? progress, CancellationToken cancellationToken)
     {
         string outputName = workingCopy.FileName.Equals("processed.png", StringComparison.OrdinalIgnoreCase)
             ? "processed-result.png" : "processed.png";
@@ -108,6 +108,7 @@ public sealed partial class SessionService
             workingCopy, output, attempt.BackgroundRemovalAuthority)
         {
             UploadConfirmation = work.UploadConfirmation,
+            UpscaleProgress = plan.View.Method == ImageProcessingMethod.AiUpscale ? progress : null,
         };
         var result = await plan.Backend!.ProcessAsync(request, cancellationToken).ConfigureAwait(false);
         cancellationToken.ThrowIfCancellationRequested();

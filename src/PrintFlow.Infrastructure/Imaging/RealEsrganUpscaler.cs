@@ -9,12 +9,11 @@ namespace PrintFlow.Infrastructure.Imaging;
 
 internal sealed class RealEsrganUpscaler
 {
-    internal const string AlgorithmVersion = "realesrgan-x2plus-7115ba92-ort-1.32.0-cpu-tiled-v2";
+    internal const string AlgorithmVersion = "realesrgan-x2plus-7115ba92-ort-1.32.0-cpu-tiled-v3";
     private const string ModelSha256 = "7115BA92E8A1BFA63D68558EF006EF3D91273A068D321B1439F8BB1C9179002C";
     private const int ModelBytes = 67_073_434;
     internal const ulong MinimumAvailableMemory = 1536 * 1024 * 1024UL;
-    // Both are even so every tile has the same pixel-unshuffle phase as the full image.
-    private const int TileEdge = 256;
+    // Keep the tested overlap even so all tiles share the full image's pixel-unshuffle phase.
     private const int Context = 128;
 
     private readonly string _modelPath;
@@ -31,7 +30,7 @@ internal sealed class RealEsrganUpscaler
 
     public OperationFailure? GetUnavailable() => CheckModel() ?? LocalInferenceRuntime.CpuRuntimeFailure;
 
-    public OperationResult<MagickImage> Run(MagickImage source, CancellationToken token)
+    public OperationResult<MagickImage> Run(MagickImage source, CancellationToken token, IProgress<int>? progress = null)
     {
         _inferenceSlot.Wait(token);
         try
@@ -40,7 +39,8 @@ internal sealed class RealEsrganUpscaler
                 return OperationResult.Fail<MagickImage>(unavailable);
             // Available memory is transient. A cached session view must keep the same
             // method runnable after the operator frees memory.
-            if (_availableMemory() < MinimumAvailableMemory)
+            ulong availableMemory = _availableMemory();
+            if (availableMemory < MinimumAvailableMemory)
                 return OperationResult.Fail<MagickImage>(LowMemory());
 
             // Read and hash the same bytes ORT will load. The cached UI capability is only a hint.
@@ -61,7 +61,7 @@ internal sealed class RealEsrganUpscaler
                 EnableMemoryPattern = false,
             };
             using var session = new InferenceSession(model, options);
-            return OperationResult.Ok(Infer(session, source, token));
+            return OperationResult.Ok(Infer(session, source, ModelEdgeFor(availableMemory), token, progress));
         }
         catch (Exception error) when (error is IOException or UnauthorizedAccessException)
         {
@@ -85,7 +85,13 @@ internal sealed class RealEsrganUpscaler
         }
     }
 
-    private static MagickImage Infer(InferenceSession session, MagickImage source, CancellationToken token)
+    // Scale the established 512-square memory allowance with the area of one model input.
+    internal static int ModelEdgeFor(ulong availableMemory) =>
+        availableMemory >= 4 * MinimumAvailableMemory ? 1024 :
+        availableMemory >= 9 * MinimumAvailableMemory / 4 ? 768 : 512;
+
+    private static MagickImage Infer(InferenceSession session, MagickImage source, int modelEdge,
+        CancellationToken token, IProgress<int>? progress)
     {
         IColorProfile? profile = source.GetColorProfile();
         if (profile is not null)
@@ -107,16 +113,20 @@ internal sealed class RealEsrganUpscaler
         byte[]? alpha = hasAlpha ? ExtendColourIntoTransparentPixels(colours, width, height) : null;
 
         var resultPixels = new byte[width * 2 * height * 2 * (hasAlpha ? 4 : 3)];
+        long completedPixels = 0;
+        progress?.Report(0);
         int top = 0;
         while (top < height)
         {
-            int bottom = TileEnd(top, height);
+            int bottom = TileEnd(top, height, modelEdge);
             int left = 0;
             while (left < width)
             {
                 token.ThrowIfCancellationRequested();
-                int right = TileEnd(left, width);
+                int right = TileEnd(left, width, modelEdge);
                 InferTile(session, colours, alpha, width, height, left, top, right, bottom, resultPixels, token);
+                completedPixels += (right - left) * (bottom - top);
+                progress?.Report((int)(100 * completedPixels / ((long)width * height)));
                 left = right;
             }
             top = bottom;
@@ -124,10 +134,13 @@ internal sealed class RealEsrganUpscaler
         return CreateResult(source, profile, resultPixels, width * 2, height * 2, hasAlpha);
     }
 
-    // Keep a short axis whole. If the context already reaches the far edge,
-    // keep that output too, avoiding a separate inference for a narrow strip.
-    private static int TileEnd(int start, int length) =>
-        length <= TileEdge + 2 * Context || length - start <= TileEdge + Context ? length : start + TileEdge;
+    // At an image boundary no outside context is needed. Use that space for real output.
+    internal static int TileEnd(int start, int length, int modelEdge)
+    {
+        int inputStart = Math.Max(0, start - Context);
+        int inputEnd = inputStart + modelEdge;
+        return length <= inputEnd ? length : inputEnd - Context;
+    }
 
     private static void InferTile(InferenceSession session, byte[] colours, byte[]? alpha, int width,
         int height, int left, int top, int right, int bottom, byte[] resultPixels, CancellationToken token)
