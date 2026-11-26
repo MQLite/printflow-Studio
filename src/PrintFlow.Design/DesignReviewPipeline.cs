@@ -7,11 +7,15 @@ namespace PrintFlow.Design;
 public sealed class DesignReviewPipeline(DesignResponses responses)
 {
     public async Task<CloudDesignJob> RunAsync(CloudDesignInput input, CancellationToken ct,
-        Action<CloudDesignStage>? report = null)
+        Action<CloudDesignStage>? report = null, CancellationToken? callerCancellation = null)
     {
         List<CloudDesignAttempt> attempts = [];
         string? reason = null;
         string? previousResponseId = null;
+        var portrait = input.References.SingleOrDefault(reference => reference.PreserveFace);
+        // A service deadline bounds upstream work. After generation, keep locally available artwork
+        // for manual review on timeout; an explicit cancellation still stops the entire operation.
+        var localCancellation = portrait is null ? ct : callerCancellation ?? ct;
 
         for (int i = 0; i < 2; i++)
         {
@@ -19,19 +23,69 @@ public sealed class DesignReviewPipeline(DesignResponses responses)
             var (png, generation) = await responses.GenerateAsync(input, previousResponseId, reason, ct).ConfigureAwait(false);
             ValidatePngHeader(png);
             report?.Invoke(CloudDesignStage.Reviewing);
-            var (approved, finding, review) = await responses.ReviewAsync(input, png, ct).ConfigureAwait(false);
-            attempts.Add(new(generation, review, approved ? null : finding));
-            ct.ThrowIfCancellationRequested();
-            if (approved)
+            var pair = portrait is null || ct.IsCancellationRequested ? null : PortraitPair.TryCreate(portrait, png, localCancellation);
+            var review = await Review(png, pair, false).ConfigureAwait(false);
+            if (review is null)
+            {
+                attempts.Add(new(generation, null, ReviewUnavailable, "uncertain"));
+                return NeedsReview(png, ReviewUnavailable);
+            }
+            attempts.Add(new(generation, review.Receipt, review.Approved ? null : review.Reason, review.FaceStatus));
+            localCancellation.ThrowIfCancellationRequested();
+            if (review.Approved)
                 return new(CloudDesignStage.Approved, attempts.ToArray(), png, CreatePdf(png));
+            if (review.OtherDesignApproved)
+            {
+                if (review.FaceStatus != "changed" || pair is null) return NeedsReview(png, review.Reason);
 
-            reason = finding;
+                if (ct.IsCancellationRequested) return NeedsReview(png, ReviewUnavailable);
+                var restored = pair.Compose(localCancellation);
+                if (restored is null)
+                    return NeedsReview(png, "人脸无法可靠对齐 / Unable to align the original face reliably.");
+                if (ct.IsCancellationRequested) return NeedsReview(restored, ReviewUnavailable);
+                var restoredPair = PortraitPair.TryCreate(portrait!, restored, localCancellation);
+                if (restoredPair is null)
+                    return NeedsReview(png, "合成后无法可靠定位人脸 / Unable to verify the restored face.");
+
+                var second = await Review(restored, restoredPair, true).ConfigureAwait(false);
+                if (second is null) return NeedsReview(restored, ReviewUnavailable);
+                attempts[^1] = attempts[^1] with { CompositeReview = second.Receipt };
+                localCancellation.ThrowIfCancellationRequested();
+                if (!second.Approved)
+                    return NeedsReview(restored, second.Reason);
+                return new(CloudDesignStage.Approved, attempts.ToArray(), restored, CreatePdf(restored));
+            }
+
+            reason = review.Reason;
             previousResponseId = generation.ResponseId;
             if (i == 0) report?.Invoke(CloudDesignStage.Redoing);
         }
 
         return new(CloudDesignStage.Rejected, attempts.ToArray(), Reason: reason);
+
+        async Task<DesignResponses.ReviewResult?> Review(byte[] candidate, PortraitPair? pair, bool isComposite)
+        {
+            try
+            {
+                ct.ThrowIfCancellationRequested();
+                return await responses.ReviewAsync(input, candidate, pair, isComposite, ct).ConfigureAwait(false);
+            }
+            catch (Exception error) when (portrait is not null && !localCancellation.IsCancellationRequested &&
+                error is HttpRequestException or IOException or InvalidDataException or System.Text.Json.JsonException or OperationCanceledException)
+            {
+                // Keep the last submitted raster for manual confirmation when the upstream review cannot finish.
+                return null;
+            }
+        }
+
+        CloudDesignJob NeedsReview(byte[] candidate, string why)
+        {
+            localCancellation.ThrowIfCancellationRequested();
+            return new(CloudDesignStage.NeedsReview, attempts.ToArray(), candidate, Reason: why);
+        }
     }
+
+    private const string ReviewUnavailable = "API 人脸审稿未完成，请人工确认 / The portrait review could not complete. Check the candidate manually.";
 
     private static void ValidatePngHeader(byte[] bytes)
     {

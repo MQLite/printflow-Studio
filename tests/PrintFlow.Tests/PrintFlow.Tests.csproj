@@ -37,6 +37,7 @@
     <Using Include="Xunit" />
     <Using Include="Shouldly" />
     <EmbeddedResource Include="Fixtures\Pdf\*.pdf" />
+    <EmbeddedResource Include="Fixtures\Portrait\*.png" />
   </ItemGroup>
 
 </Project>

@@ -94,7 +94,8 @@
         "type": "Project",
         "dependencies": {
           "Magick.NET-Q16-x64": "[15.1.0, )",
-          "PrintFlow.Domain": "[0.1.5, )"
+          "Microsoft.ML.OnnxRuntime": "[1.32.0, )",
+          "PrintFlow.Domain": "[0.1.7, )"
         }
       },
       "printflow.domain": {
@@ -103,7 +104,7 @@
       "printflow.workflow": {
         "type": "Project",
         "dependencies": {
-          "PrintFlow.Domain": "[0.1.5, )"
+          "PrintFlow.Domain": "[0.1.7, )"
         }
       }
     },

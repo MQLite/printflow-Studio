@@ -4,11 +4,13 @@ PrintFlow 主程序内置设计流程。在设置中保存 OpenAI API 密钥后�
 
 需要让独立主机执行流程时，可部署本项目的设计服务并配置桌面端连接。
 
-配置服务后，桌面端的「OpenAI API」选项提交一个云端任务。服务用 Responses API 生图，用视觉模型对照原提示词及参考图审核。审核不通过时，服务按具体原因修正一次，然后复审。只有过审的 PNG 和 PDF 会回传。PDF 是同一张 PNG 的单页封装，保存时不会再次调用模型。
+配置服务后，桌面端的「OpenAI API」选项提交一个云端任务。服务用 Responses API 生图，用视觉模型对照原提示词及参考图审核。版面等设计要求不合格时，服务按审稿意见修正一次，再次审核。
+
+要求保留人物原貌时，服务从模板的「人物参考」取原照，定位单张人脸，将原照与候选图的人脸特写一起送审。原脸保留且其余设计合格时直接交付候选 PNG。如果只有脸部发生变化，服务尝试对齐并合成原脸，再将实际合成图送审。通过后从同一份 PNG 生成单页 PDF。无法可靠比对、合成或完成复审时，桌面端保留候选 PNG 和原因，可在「AI 任务」中打开并人工确认。只有通过审稿的结果才提供设计 PDF。
 
 ## 发布
 
-云端需要 x64 主机和 .NET 10 ASP.NET Core Runtime。项目包含 Linux 和 Windows 所需的 Magick.NET 本机库。从仓库根目录构建 Linux 发布目录。
+云端需要 x64 主机和 .NET 10 ASP.NET Core Runtime。项目随附 YuNet 人脸定位模型，以及 Linux 和 Windows 所需的 ONNX Runtime 和 Magick.NET 本机库。从仓库根目录构建 Linux 发布目录。
 
 ```sh
 dotnet restore src/PrintFlow.DesignCloud/PrintFlow.DesignCloud.csproj --locked-mode

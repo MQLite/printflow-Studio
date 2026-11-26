@@ -109,7 +109,7 @@ public sealed class OpenAiDesignGeneration : IAiDesignApiGeneration, IDisposable
             if (string.IsNullOrWhiteSpace(prompt.Text) || prompt.Text.Length > CloudDesignLimits.MaxPromptLength)
                 return Fail<Guid>(FailureCode.PreconditionNotMet, "AiPrompt_OpenAiPromptLength");
 
-            var image = await RequestImageAsync(draft.Id, prompt, key.Value, cancellationToken).ConfigureAwait(false);
+            var image = await RequestImageAsync(draft, prompt, key.Value, cancellationToken).ConfigureAwait(false);
             if (image.IsFailure) return OperationResult.Fail<Guid>(image.Failure);
 
             return await ImportAsync(draft, prompt.Text, image.Value, cancellationToken).ConfigureAwait(false);
@@ -144,13 +144,18 @@ public sealed class OpenAiDesignGeneration : IAiDesignApiGeneration, IDisposable
         }
     }
 
-    private async Task<OperationResult<DesignResponse>> RequestImageAsync(Guid draftId, AiPromptExport prompt, string key,
+    private async Task<OperationResult<DesignResponse>> RequestImageAsync(AiAuthoringDraft draft, AiPromptExport prompt, string key,
         CancellationToken ct)
     {
+        string? personSlot = draft.TemplateSnapshot.Fields.SingleOrDefault(f => f.Semantic == AiTemplateSemantic.PersonImage)?.SlotId;
+        Guid? portraitId = draft.FinalDocument.Parts.OfType<AiImagePart>().Any(part => part.SlotId == personSlot)
+            ? draft.Bindings.FirstOrDefault(binding => binding.SlotId == personSlot)?.AssetId : null;
+        if (draft.Preservation.Any(rule => rule.AssetId == portraitId && (!rule.KeepContent || rule.AllowRedraw)))
+            portraitId = null;
         List<CloudDesignReference> references = [];
         foreach (var attachment in prompt.RequiredAttachments)
         {
-            var opened = await _attachments.OpenAsync(draftId, attachment, ct).ConfigureAwait(false);
+            var opened = await _attachments.OpenAsync(draft.Id, attachment, ct).ConfigureAwait(false);
             if (opened.IsFailure)
             {
                 ct.ThrowIfCancellationRequested();
@@ -159,14 +164,15 @@ public sealed class OpenAiDesignGeneration : IAiDesignApiGeneration, IDisposable
             await using var verified = opened.Value;
             byte[] bytes = new byte[checked((int)attachment.ByteLength)];
             await verified.Stream.ReadExactlyAsync(bytes, ct).ConfigureAwait(false);
-            references.Add(new(attachment.UploadName, attachment.MediaType, bytes));
+            references.Add(new(attachment.UploadName, attachment.MediaType, bytes, attachment.Id == portraitId));
         }
 
         var input = new CloudDesignInput(prompt.Text, references.ToArray());
+        bool requiresFaceReview = references.Any(reference => reference.PreserveFace);
         if (_cloudEndpoint is not null)
         {
             var review = await OpenAiDesignCloudClient.RunAsync(_http, _cloudEndpoint, input, key, ct).ConfigureAwait(false);
-            return review.IsSuccess ? ToDesignResponse(review.Value) : OperationResult.Fail<DesignResponse>(review.Failure);
+            return review.IsSuccess ? ToDesignResponse(review.Value, requiresFaceReview) : OperationResult.Fail<DesignResponse>(review.Failure);
         }
 
         if (!input.IsValid(AiDesignAttachmentLimits.TotalBytes))
@@ -175,10 +181,10 @@ public sealed class OpenAiDesignGeneration : IAiDesignApiGeneration, IDisposable
         var design = new DesignReviewPipeline(new DesignResponses(_http, key, _model));
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(ct);
         deadline.CancelAfter(TimeSpan.FromMinutes(CloudDesignLimits.CloudTimeoutMinutes));
-        return ToDesignResponse(await design.RunAsync(input, deadline.Token).ConfigureAwait(false));
+        return ToDesignResponse(await design.RunAsync(input, deadline.Token, callerCancellation: ct).ConfigureAwait(false), requiresFaceReview);
     }
 
-    private static OperationResult<DesignResponse> ToDesignResponse(CloudDesignJob job)
+    private static OperationResult<DesignResponse> ToDesignResponse(CloudDesignJob job, bool requiresFaceReview)
     {
         if (job.Stage == CloudDesignStage.Rejected && job.Reason is { Length: > 0 and <= CloudDesignLimits.MaxReasonLength })
             return OperationResult.Fail<DesignResponse>(OperationFailure.Create(FailureCode.OutputValidationFailed,
@@ -186,20 +192,39 @@ public sealed class OpenAiDesignGeneration : IAiDesignApiGeneration, IDisposable
                 context: new Dictionary<string, string> { [CloudDesignLimits.ReviewReasonKey] = job.Reason },
                 messageKey: "AiPrompt_CloudRejected"));
 
-        if (job.Stage != CloudDesignStage.Approved || job.Attempts is not { Length: 1 or 2 } ||
-            !job.Attempts.All(a => a is { Generation: { }, Review: { } } &&
-                IsResponseId(a.Generation.ResponseId) && IsResponseId(a.Review.ResponseId)) ||
-            job.Png is not { Length: > 0 and <= CloudDesignLimits.MaxArtifactBytes } ||
-            job.Pdf is not { Length: > 5 and <= CloudDesignLimits.MaxArtifactBytes } ||
+        bool manual = job.Stage == CloudDesignStage.NeedsReview;
+        if ((manual ? !requiresFaceReview : job.Stage != CloudDesignStage.Approved) ||
+            !CloudDesignLimits.HasValidAttempts(job.Attempts, allowMissingFinalReview: manual) ||
+            job.Png is not { Length: > 0 and <= CloudDesignLimits.MaxArtifactBytes })
+            return Fail<DesignResponse>(FailureCode.OutputValidationFailed, "AiPrompt_OpenAiInvalidResult");
+
+        if (manual || requiresFaceReview && !HasPortraitApproval(job.Attempts))
+        {
+            string? reason = job.Reason is { Length: <= CloudDesignLimits.MaxReasonLength } && !string.IsNullOrWhiteSpace(job.Reason)
+                ? job.Reason : null;
+            return OperationResult.Ok(new DesignResponse(job.Png, job.Attempts, Pdf: null, reason));
+        }
+
+        if (job.Pdf is not { Length: > 5 and <= CloudDesignLimits.MaxArtifactBytes } ||
             !job.Pdf.AsSpan().StartsWith("%PDF-"u8))
             return Fail<DesignResponse>(FailureCode.OutputValidationFailed, "AiPrompt_OpenAiInvalidResult");
 
-        return OperationResult.Ok(new DesignResponse(job.Png, job.Attempts[^1].Generation, job.Pdf, job.Attempts));
+        return OperationResult.Ok(new DesignResponse(job.Png, job.Attempts, job.Pdf));
     }
 
-    private static bool IsResponseId(string? value) =>
-        value is { Length: > 5 and <= 128 } && value.StartsWith("resp_", StringComparison.Ordinal) &&
-        value.All(c => char.IsAsciiLetterOrDigit(c) || c is '_' or '-');
+    private static bool HasPortraitApproval(CloudDesignAttempt[] attempts)
+    {
+        var responseIds = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var attempt in attempts)
+        {
+            if (attempt.Review is null || !responseIds.Add(attempt.Generation.ResponseId) ||
+                !responseIds.Add(attempt.Review.ResponseId)) return false;
+            if (attempt.CompositeReview is { } composite &&
+                (!CloudDesignLimits.IsResponseId(composite.ResponseId) || !responseIds.Add(composite.ResponseId))) return false;
+        }
+        var last = attempts[^1];
+        return last.FaceStatus == "preserved" || last is { FaceStatus: "changed", CompositeReview: not null };
+    }
 
     private async Task<OperationResult<Guid>> ImportAsync(AiAuthoringDraft draft, string prompt, DesignResponse response,
         CancellationToken ct)
@@ -217,10 +242,15 @@ public sealed class OpenAiDesignGeneration : IAiDesignApiGeneration, IDisposable
             (long)image.PixelWidth!.Value * image.PixelHeight!.Value > CloudDesignLimits.MaxArtifactPixels)
             return Fail<Guid>(FailureCode.OutputValidationFailed, "AiPrompt_OpenAiInvalidResult");
 
-        using var stagedPdf = AiDesignOwnedStagingFiles.CreateOpenAiResult(_store.WorkspaceRoot, requestId, pdf: true);
-        await stagedPdf.Output.WriteAsync(response.Pdf, ct).ConfigureAwait(false);
-        await stagedPdf.MoveWithinBatchAsync(ct).ConfigureAwait(false);
-        CloudDesignReceipt cloudReceipt = new(response.Attempts, Sha256.FromBytes(SHA256.HashData(response.Pdf)));
+        using var stagedPdf = response.Pdf is null ? null :
+            AiDesignOwnedStagingFiles.CreateOpenAiResult(_store.WorkspaceRoot, requestId, pdf: true);
+        CloudDesignReceipt? cloudReceipt = null;
+        if (stagedPdf is not null && response.Pdf is { } pdf)
+        {
+            await stagedPdf.Output.WriteAsync(pdf, ct).ConfigureAwait(false);
+            await stagedPdf.MoveWithinBatchAsync(ct).ConfigureAwait(false);
+            cloudReceipt = new(response.Attempts, Sha256.FromBytes(SHA256.HashData(pdf)));
+        }
 
         string title = draft.TemplateSnapshot.Name;
         var session = await _sessions.ImportVerifiedWorkResultAsync(requestId, staged.Path, title, hash, ct).ConfigureAwait(false);
@@ -231,15 +261,15 @@ public sealed class OpenAiDesignGeneration : IAiDesignApiGeneration, IDisposable
         // The imported session owns a reference to this source path.
         staged.Release();
         var candidate = new AiDesignCandidate(new(requestId, Path.GetFileName(staged.Path)), image);
+        var manualReview = response.Pdf is null ? new CloudManualReview(response.Attempts, response.ReviewReason) : null;
         var recorded = await _store.RecordOpenAiResultAsync(new(draft.Id, title), prompt, candidate,
-            session.Value.Id, response.Receipt, CancellationToken.None, cloudReceipt).ConfigureAwait(false);
-        if (recorded.IsSuccess) stagedPdf.Release();
+            session.Value.Id, response.Attempts[^1].Generation, CancellationToken.None, cloudReceipt, manualReview).ConfigureAwait(false);
+        if (recorded.IsSuccess) stagedPdf?.Release();
         return recorded.IsSuccess ? OperationResult.Ok(requestId)
             : Fail<Guid>(FailureCode.PersistenceError, "AiPrompt_OpenAiHistoryFailed");
     }
 
-    private sealed record DesignResponse(byte[] Png, OpenAiDesignReceipt Receipt,
-        byte[] Pdf, CloudDesignAttempt[] Attempts);
+    private sealed record DesignResponse(byte[] Png, CloudDesignAttempt[] Attempts, byte[]? Pdf, string? ReviewReason = null);
 
     private static OperationResult<T> Fail<T>(FailureCode code, string messageKey) =>
         OperationResult.Fail<T>(OperationFailure.Create(code, messageKey, messageKey: messageKey));

@@ -95,6 +95,9 @@
               <Setter Property="Foreground" Value="#007362"/>
               <Style.Triggers><DataTrigger Binding="{Binding Snapshot.Stage}" Value="NeedsAttention">
                <Setter Property="Foreground" Value="{DynamicResource PF.Brush.WarningInk}"/>
+              </DataTrigger>
+              <DataTrigger Binding="{Binding Snapshot.Stage}" Value="PortraitReview">
+               <Setter Property="Foreground" Value="{DynamicResource PF.Brush.WarningInk}"/>
               </DataTrigger></Style.Triggers>
              </Style></TextBlock.Style>
             </TextBlock>

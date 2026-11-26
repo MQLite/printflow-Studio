@@ -71,9 +71,9 @@
           "CommunityToolkit.Mvvm": "[8.4.2, )",
           "Microsoft.Extensions.DependencyInjection": "[10.0.11, )",
           "Microsoft.Extensions.Logging.Abstractions": "[10.0.11, )",
-          "PrintFlow.Domain": "[0.1.5, )",
-          "PrintFlow.Infrastructure": "[0.1.5, )",
-          "PrintFlow.Workflow": "[0.1.5, )",
+          "PrintFlow.Domain": "[0.1.7, )",
+          "PrintFlow.Infrastructure": "[0.1.7, )",
+          "PrintFlow.Workflow": "[0.1.7, )",
           "WPF-UI": "[4.3.0, )"
         }
       },
@@ -81,7 +81,8 @@
         "type": "Project",
         "dependencies": {
           "Magick.NET-Q16-x64": "[15.1.0, )",
-          "PrintFlow.Domain": "[0.1.5, )"
+          "Microsoft.ML.OnnxRuntime": "[1.32.0, )",
+          "PrintFlow.Domain": "[0.1.7, )"
         }
       },
       "printflow.domain": {
@@ -94,15 +95,15 @@
           "Magick.NET-Q16-x64": "[15.1.0, )",
           "Microsoft.Data.Sqlite": "[10.0.11, )",
           "Microsoft.ML.OnnxRuntime": "[1.32.0, )",
-          "PrintFlow.Design": "[0.1.5, )",
-          "PrintFlow.Domain": "[0.1.5, )",
-          "PrintFlow.Workflow": "[0.1.5, )"
+          "PrintFlow.Design": "[0.1.7, )",
+          "PrintFlow.Domain": "[0.1.7, )",
+          "PrintFlow.Workflow": "[0.1.7, )"
         }
       },
       "printflow.workflow": {
         "type": "Project",
         "dependencies": {
-          "PrintFlow.Domain": "[0.1.5, )"
+          "PrintFlow.Domain": "[0.1.7, )"
         }
       },
       "CommunityToolkit.Mvvm": {

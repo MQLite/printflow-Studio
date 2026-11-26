@@ -36,7 +36,6 @@ internal sealed class DesignJobs : IDisposable
             if (_jobs.Count >= 8 || _running >= 2) return false;
 
             var cancellation = CancellationTokenSource.CreateLinkedTokenSource(_application.ApplicationStopping);
-            cancellation.CancelAfter(TimeSpan.FromMinutes(CloudDesignLimits.CloudTimeoutMinutes));
             var entry = new Entry(cancellation);
             _jobs.Add(id, entry);
             _running++;
@@ -66,17 +65,19 @@ internal sealed class DesignJobs : IDisposable
     private async Task ExecuteAsync(Guid id, Entry entry, CloudDesignInput input)
     {
         CloudDesignJob result;
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(entry.Cancellation.Token);
+        deadline.CancelAfter(TimeSpan.FromMinutes(CloudDesignLimits.CloudTimeoutMinutes));
         try
         {
-            result = await _pipeline.RunAsync(input, entry.Cancellation.Token, stage =>
+            result = await _pipeline.RunAsync(input, deadline.Token, stage =>
             {
                 lock (_gate) entry.Status = new(stage, []);
-            });
+            }, entry.Cancellation.Token);
             foreach (var attempt in result.Attempts)
-                _logger.LogInformation("Design job {JobId} generated {GenerationResponseId} and reviewed {ReviewResponseId}.",
-                    id, attempt.Generation.ResponseId, attempt.Review.ResponseId);
+                _logger.LogInformation("Design job {JobId} generation {GenerationResponseId}, review {ReviewResponseId}, composite review {CompositeReviewResponseId}.",
+                    id, attempt.Generation.ResponseId, attempt.Review?.ResponseId, attempt.CompositeReview?.ResponseId);
         }
-        catch (OperationCanceledException) when (entry.Cancellation.IsCancellationRequested)
+        catch (OperationCanceledException) when (deadline.IsCancellationRequested)
         {
             result = new(CloudDesignStage.Cancelled, []);
         }

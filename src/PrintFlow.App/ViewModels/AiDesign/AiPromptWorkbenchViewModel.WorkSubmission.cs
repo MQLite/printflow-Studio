@@ -39,6 +39,7 @@ public sealed partial class AiPromptWorkbenchViewModel
             {
                 WorkTaskStage.Submitting or WorkTaskStage.AwaitingFollowUp => 0,
                 WorkTaskStage.Imported => 4,
+                WorkTaskStage.PortraitReview => 2,
                 _ when isVerifying => 2,
                 WorkTaskStage.AwaitingReturn or WorkTaskStage.SubmittedOnly => 1,
                 _ => WorkCard?.CanViewWork == true || submittedWorkRequest is not null ? 1 : 0
@@ -59,7 +60,8 @@ public sealed partial class AiPromptWorkbenchViewModel
                 reached >= 4 ? "WorkTask_Imported" : "AiPrompt_GenerationImport"
             ];
             if (snapshot?.Provider == AiDesignProvider.OpenAiApi || snapshot is null && generationUsesOpenAi)
-                labels = ["AiPrompt_OpenAiGenerate", "AiPrompt_GenerationVerify", "AiPrompt_GenerationImport"];
+                labels = stage == WorkTaskStage.PortraitReview ? ["AiPrompt_OpenAiGenerate", "AiPrompt_GenerationImport"] :
+                    ["AiPrompt_OpenAiGenerate", "AiPrompt_GenerationVerify", "AiPrompt_GenerationImport"];
 
             return labels.Select((label, index) => new GenerationMilestone(Strings.Resolve(label), index < reached,
                 index == current, index > 0, index < labels.Length - 1)).ToArray();

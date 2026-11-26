@@ -55,7 +55,7 @@ public sealed class FileAiDesignRequestStore : IAiDesignRequestStore
 
     internal Task<OperationResult<AiDesignRequest>> RecordOpenAiResultAsync(WorkDraftReference draft, string prompt,
         AiDesignCandidate candidate, PrintFlow.Domain.Ids.SessionId sessionId, OpenAiDesignReceipt receipt,
-        CancellationToken ct, CloudDesignReceipt? cloudReceipt = null) => Guard(async () =>
+        CancellationToken ct, CloudDesignReceipt? cloudReceipt = null, CloudManualReview? manualReview = null) => Guard(async () =>
     {
         Guid id = candidate.File.RequestId;
         await using var gate = await LockAsync(id, ct);
@@ -70,6 +70,7 @@ public sealed class FileAiDesignRequestStore : IAiDesignRequestStore
             Provider = AiDesignProvider.OpenAiApi,
             OpenAiReceipt = receipt,
             CloudReceipt = cloudReceipt,
+            ManualReview = manualReview,
             Prompt = new(PromptTemplateService.WorkbenchTemplate, 1, new Dictionary<string, string>(), prompt, [], ""),
             WorkDraft = draft,
             Token = AiDesignTransitions.NewToken(),
@@ -241,10 +242,15 @@ public sealed class FileAiDesignRequestStore : IAiDesignRequestStore
     private static bool ValidShape(AiDesignRequest r)
     {
         if (!Enum.IsDefined(r.Provider)) return false;
-        if (r.CloudReceipt is { } cloud && (r.Provider != AiDesignProvider.OpenAiApi ||
-            r.State != AiDesignState.Imported || cloud.Attempts is not { Length: 1 or 2 } ||
-            cloud.Attempts.Any(attempt => attempt is not { Generation: { }, Review: { } }) ||
-            cloud.Attempts[^1].Generation != r.OpenAiReceipt || !Sha256.TryParse(cloud.PdfSha256.Value, out _))) return false;
+        if (r.CloudReceipt is { } cloud && (r.ManualReview is not null || !Sha256.TryParse(cloud.PdfSha256.Value, out _))) return false;
+        if (r.ManualReview?.Reason is { Length: > CloudDesignLimits.MaxReasonLength }) return false;
+        if (r.CloudReceipt is not null || r.ManualReview is not null)
+        {
+            var attempts = r.CloudReceipt?.Attempts ?? r.ManualReview?.Attempts;
+            if (r.Provider != AiDesignProvider.OpenAiApi || r.State != AiDesignState.Imported ||
+                !CloudDesignLimits.HasValidAttempts(attempts, allowMissingFinalReview: r.ManualReview is not null) ||
+                attempts[^1].Generation != r.OpenAiReceipt) return false;
+        }
         if (r.WorkDraft is { } work && (work.DraftId == Guid.Empty || string.IsNullOrWhiteSpace(work.Title))) return false;
         if (r.WorkFollowUp is { } prior && (prior.RequestId == Guid.Empty || prior.RequestId == r.RequestId ||
             prior.ConversationId == Guid.Empty || !Sha256.TryParse(prior.ResultSha256.Value, out _))) return false;

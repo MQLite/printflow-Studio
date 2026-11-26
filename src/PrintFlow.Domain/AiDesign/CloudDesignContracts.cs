@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using PrintFlow.Domain.Files;
 
 namespace PrintFlow.Domain.AiDesign;
@@ -18,9 +19,30 @@ public static class CloudDesignLimits
 
     public static bool IsValidAccessToken(string? token) =>
         token is { Length: >= 32 and <= 256 } && token.All(c => char.IsAsciiLetterOrDigit(c) || c is '_' or '-');
+
+    public static bool IsResponseId(string? value) =>
+        value is { Length: > 5 and <= 128 } && value.StartsWith("resp_", StringComparison.Ordinal) &&
+        value.All(c => char.IsAsciiLetterOrDigit(c) || c is '_' or '-');
+
+    public static bool HasValidAttempts([NotNullWhen(true)] CloudDesignAttempt[]? attempts, bool allowMissingFinalReview)
+    {
+        if (attempts is not { Length: 1 or 2 }) return false;
+        for (int i = 0; i < attempts.Length; i++)
+        {
+            var attempt = attempts[i];
+            if (attempt is null || !IsResponseId(attempt.Generation?.ResponseId)) return false;
+            if (attempt.Review is { } review)
+            {
+                if (!IsResponseId(review.ResponseId)) return false;
+            }
+            else if (!allowMissingFinalReview || i != attempts.Length - 1 || attempt.CompositeReview is not null)
+                return false;
+        }
+        return true;
+    }
 }
 
-public sealed record CloudDesignReference(string Name, string MediaType, byte[] Data);
+public sealed record CloudDesignReference(string Name, string MediaType, byte[] Data, bool PreserveFace = false);
 
 public sealed record CloudDesignInput(string Prompt, CloudDesignReference[] References)
 {
@@ -29,12 +51,14 @@ public sealed record CloudDesignInput(string Prompt, CloudDesignReference[] Refe
         References is { Length: <= CloudDesignLimits.MaxReferences } &&
         References.All(r => r is { Name: { Length: > 0 and <= 255 }, Data.Length: > 0 and <= CloudDesignLimits.MaxReferenceBytes }
             && r.MediaType is "image/png" or "image/jpeg" or "image/webp") &&
+        References.Count(r => r.PreserveFace) <= 1 &&
         References.Sum(r => (long)r.Data.Length) <= maxCombinedReferenceBytes;
 }
 
-public enum CloudDesignStage { Generating, Reviewing, Redoing, Approved, Rejected, Unavailable, Cancelled }
+public enum CloudDesignStage { Generating, Reviewing, Redoing, Approved, Rejected, Unavailable, Cancelled, NeedsReview }
 
-public sealed record CloudDesignAttempt(OpenAiDesignReceipt Generation, OpenAiDesignReceipt Review, string? Finding = null);
+public sealed record CloudDesignAttempt(OpenAiDesignReceipt Generation, OpenAiDesignReceipt? Review, string? Finding = null,
+    string? FaceStatus = null, OpenAiDesignReceipt? CompositeReview = null);
 
 public sealed record CloudDesignReceipt(CloudDesignAttempt[] Attempts, Sha256 PdfSha256);
 

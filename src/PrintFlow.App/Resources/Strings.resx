@@ -1754,6 +1754,8 @@
   <data name="WorkTask_AwaitingVerification" xml:space="preserve"><value>Result returned · awaiting verification</value></data>
   <data name="WorkTask_Validating" xml:space="preserve"><value>Checking the returned file</value></data>
   <data name="WorkTask_Imported" xml:space="preserve"><value>Result imported</value></data>
+  <data name="WorkTask_PortraitReview" xml:space="preserve"><value>Portrait candidate saved. Compare the face with the reference before confirming the original.</value></data>
+  <data name="WorkTask_MissingPortraitEvidence" xml:space="preserve"><value>The automated review could not confirm that the face matches the reference.</value></data>
   <data name="WorkTask_SubmittedOnly" xml:space="preserve"><value>Submitted · image return is not configured</value></data>
   <data name="WorkTask_Cancelled" xml:space="preserve"><value>Receiving stopped</value></data>
   <data name="WorkTask_NeedsAttention" xml:space="preserve"><value>Needs attention</value></data>
@@ -1930,8 +1932,8 @@
   <data name="WorkTask_FollowUpSubmit" xml:space="preserve"><value>Generate again</value></data>
   <data name="WorkTask_FollowUpBridgeUnavailable" xml:space="preserve"><value>Update the Work bridge to send revisions in the original conversation.</value></data>
   <data name="WorkTask_FollowUpTooLong" xml:space="preserve"><value>Shorten your revision instructions and try again.</value></data>
-  <data name="AiPrompt_CloudConsent" xml:space="preserve"><value>Send the prompt and references for OpenAI generation and visual review? PrintFlow may request one revision if the review fails. OpenAI retains responses according to your project's data settings. Generation and review may incur charges.</value></data>
-  <data name="AiPrompt_CloudWorking" xml:space="preserve"><value>OpenAI is generating and reviewing the design. If needed, PrintFlow will request one revision.</value></data>
+  <data name="AiPrompt_CloudConsent" xml:space="preserve"><value>Send the prompt and references to OpenAI for generation and visual review? PrintFlow may request one design revision. If a face has changed, PrintFlow may restore it from the reference and send the result for another review. OpenAI retains responses according to your project's data settings. Generation and review may incur charges.</value></data>
+  <data name="AiPrompt_CloudWorking" xml:space="preserve"><value>Generating the design and checking it against the brief and references…</value></data>
   <data name="AiPrompt_CloudProvider" xml:space="preserve"><value>OpenAI API · Visual review</value></data>
   <data name="AiPrompt_CloudSetup" xml:space="preserve"><value>Configure the HTTPS design service address and access token before using cloud review.</value></data>
   <data name="AiPrompt_CloudUnavailable" xml:space="preserve"><value>The cloud design service could not complete the job. Try again later.</value></data>

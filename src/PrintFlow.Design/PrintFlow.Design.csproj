@@ -6,5 +6,12 @@
   <ItemGroup>
     <ProjectReference Include="..\PrintFlow.Domain\PrintFlow.Domain.csproj" />
     <PackageReference Include="Magick.NET-Q16-x64" />
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" GeneratePathProperty="true" />
+    <!-- OpenCV Zoo 48b10fa505aeb51fbd127fc60a5c660040e823b7, models/face_detection_yunet.
+         Upstream Git LFS SHA-256: 8f2383e4dd3cfbb4553ea8718107fc0423210dc964f9f4280604804ed2552fa4. -->
+    <EmbeddedResource Include="Models/face_detection_yunet_2023mar.onnx" LogicalName="YuNet.onnx" />
+    <None Update="Models/YuNet-LICENSE.txt" TargetPath="Licenses/YuNet.txt" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="$(PkgMicrosoft_ML_OnnxRuntime)/LICENSE" Link="Licenses/ONNX-Runtime.txt" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="$(PkgMicrosoft_ML_OnnxRuntime)/ThirdPartyNotices.txt" Link="Licenses/ONNX-Runtime-ThirdPartyNotices.txt" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

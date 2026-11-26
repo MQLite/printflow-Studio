@@ -64,6 +64,28 @@ public sealed class CloudDesignReviewTests
         }
     }
 
+    [Fact]
+    public async Task Missing_face_localization_keeps_the_candidate_for_review_without_a_pdf()
+    {
+        using var image = new MagickImage(MagickColors.Blue, 80, 80);
+        byte[] png = image.ToByteArray(MagickFormat.Png);
+        var input = JsonSerializer.Deserialize<CloudDesignInput>(JsonSerializer.Serialize(new
+        {
+            Prompt = "Preserve the face.",
+            References = new[] { new { Name = "person.png", MediaType = "image/png", Data = png, PreserveFace = true } }
+        }))!;
+        using var transport = new ResponsesStub(png, png, true, true);
+        using var http = new HttpClient(transport);
+        var pipeline = new DesignReviewPipeline(new DesignResponses(http, "test-project-key", "test-image-model"));
+
+        var job = await pipeline.RunAsync(input, CancellationToken.None);
+
+        job.Stage.ToString().ShouldBe("NeedsReview");
+        job.Png.ShouldBe(png);
+        job.Pdf.ShouldBeNull();
+        job.Reason.ShouldNotBeNullOrWhiteSpace();
+    }
+
     private sealed class ResponsesStub(byte[] firstImage, byte[] correctedImage, bool firstPassed, bool secondPassed)
         : HttpMessageHandler
     {
@@ -77,12 +99,18 @@ public sealed class CloudDesignReviewTests
             Requests.Enqueue(body);
             int attempt = (Requests.Count + 1) / 2;
             bool generation = body.TryGetProperty("tools", out _);
+            bool approved = attempt == 1 ? firstPassed : secondPassed;
+            string reason = approved ? "" : "图形仍为红色";
+            bool portraitReview = !generation && body.GetProperty("text").GetProperty("format").GetProperty("schema")
+                .GetProperty("properties").TryGetProperty("faceStatus", out _);
+            string judgment = portraitReview
+                ? JsonSerializer.Serialize(new { otherDesignApproved = approved, faceStatus = "preserved", reason })
+                : JsonSerializer.Serialize(new { approved, reason });
             object[] output = generation
                 ? [new { type = "image_generation_call", status = "completed", id = $"ig_test{attempt}",
                     result = Convert.ToBase64String(attempt == 1 ? firstImage : correctedImage) }]
                 : [new { type = "message", role = "assistant", content = new[]
-                    { new { type = "output_text", text = JsonSerializer.Serialize(new
-                        { approved = attempt == 1 ? firstPassed : secondPassed, reason = "图形仍为红色" }) } } }];
+                    { new { type = "output_text", text = judgment } } }];
             return new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content = JsonContent.Create(new

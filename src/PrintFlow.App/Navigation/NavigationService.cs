@@ -173,7 +173,7 @@ public sealed class NavigationService : INavigationService, IUtilityTaskNavigati
             var task = await query.FindAsync(requestId, ct);
             if (ct.IsCancellationRequested || !IsCurrentSource()) return OperationResult.Ok();
             if (task.IsFailure) return OperationResult.Fail<Unit>(task.Failure);
-            if (task.Value is not { Stage: WorkTaskStage.Imported, ImportedSessionId: { } id })
+            if (task.Value is not { HasImportedResult: true, ImportedSessionId: { } id })
                 return OperationResult.Fail<Unit>(FailureCode.PreconditionNotMet, "There is no imported Work result.");
 
             var session = await _services.GetRequiredService<ISessionService>().LoadAsync(id, ct);

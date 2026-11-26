@@ -11,10 +11,32 @@
           "Magick.NET.Core": "15.1.0"
         }
       },
+      "Microsoft.ML.OnnxRuntime": {
+        "type": "Direct",
+        "requested": "[1.32.0, )",
+        "resolved": "1.32.0",
+        "contentHash": "3O3isLjl6ChjMvzZMt3in+uUymFxQK5+vd1UuSShmbUjHezHXgcze6KF5NquC/uPuL/++0CpI7qUBRrf+g1ezg==",
+        "dependencies": {
+          "Microsoft.ML.OnnxRuntime.Managed": "1.32.0"
+        }
+      },
       "Magick.NET.Core": {
         "type": "Transitive",
         "resolved": "15.1.0",
         "contentHash": "WIaemRN4tJvw5BNUfsO8/V3LojV5FOCojQ/sQ4ruXme1o2frRYfcvHPhKV5E6TbYoEdVEvtGX+8Wbut0F2lJHg=="
+      },
+      "Microsoft.ML.OnnxRuntime.Managed": {
+        "type": "Transitive",
+        "resolved": "1.32.0",
+        "contentHash": "ApCfJdeUnrO4v+9KWtxnm/Uk3UlzdbNqGb64uBXh85RToxYbW1COJM/avDj3INNTwfEE6LUIWaJIxov0YWNa1g==",
+        "dependencies": {
+          "System.Numerics.Tensors": "9.0.0"
+        }
+      },
+      "System.Numerics.Tensors": {
+        "type": "Transitive",
+        "resolved": "9.0.0",
+        "contentHash": "hyJB4UlpAi19Xr9AXzu2NuagKC4lPfHObNMEAA0HmqFz2rX7wKgzeYzO/jM/eBHDhnUGFFEjk5cOoJaxqg5J4A=="
       },
       "printflow.domain": {
         "type": "Project"
@@ -29,6 +51,15 @@
         "dependencies": {
           "Magick.NET.Core": "15.1.0"
         }
+      },
+      "Microsoft.ML.OnnxRuntime": {
+        "type": "Direct",
+        "requested": "[1.32.0, )",
+        "resolved": "1.32.0",
+        "contentHash": "3O3isLjl6ChjMvzZMt3in+uUymFxQK5+vd1UuSShmbUjHezHXgcze6KF5NquC/uPuL/++0CpI7qUBRrf+g1ezg==",
+        "dependencies": {
+          "Microsoft.ML.OnnxRuntime.Managed": "1.32.0"
+        }
       }
     },
     "net10.0/win-x64": {
@@ -39,6 +70,15 @@
         "contentHash": "JoLBZ5fp6zkjdVkQuLLNOeEd/ke+8/6srqyGL3hmAh4mKwp/CiAQ/K0MKOF6zDrRQrBqD2SoQoNMm80JjVAiRQ==",
         "dependencies": {
           "Magick.NET.Core": "15.1.0"
+        }
+      },
+      "Microsoft.ML.OnnxRuntime": {
+        "type": "Direct",
+        "requested": "[1.32.0, )",
+        "resolved": "1.32.0",
+        "contentHash": "3O3isLjl6ChjMvzZMt3in+uUymFxQK5+vd1UuSShmbUjHezHXgcze6KF5NquC/uPuL/++0CpI7qUBRrf+g1ezg==",
+        "dependencies": {
+          "Microsoft.ML.OnnxRuntime.Managed": "1.32.0"
         }
       }
     }

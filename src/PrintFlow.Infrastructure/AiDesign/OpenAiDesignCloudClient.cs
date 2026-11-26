@@ -54,7 +54,7 @@ internal static class OpenAiDesignCloudClient
                     await Task.Delay(TimeSpan.FromSeconds(2), deadline.Token).ConfigureAwait(false);
                     continue;
                 }
-                return job?.Stage is CloudDesignStage.Approved or CloudDesignStage.Rejected
+                return job?.Stage is CloudDesignStage.Approved or CloudDesignStage.Rejected or CloudDesignStage.NeedsReview
                     ? OperationResult.Ok(job) : Fail("AiPrompt_CloudUnavailable");
             }
         }

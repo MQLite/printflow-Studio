@@ -126,7 +126,7 @@ public sealed class AiWorkTasksViewModel : ObservableObject, IEntryScreenLifetim
         var rows = all.Where(row => Filter switch
         {
             WorkTaskFilter.Active => row.Snapshot.IsActive,
-            WorkTaskFilter.NeedsAttention => row.Snapshot.Stage == WorkTaskStage.NeedsAttention,
+            WorkTaskFilter.NeedsAttention => row.Snapshot.Stage is WorkTaskStage.NeedsAttention or WorkTaskStage.PortraitReview,
             _ => true
         }).ToArray();
         if (!Rows.SequenceEqual(rows))

@@ -15,11 +15,11 @@ public sealed class WorkTaskRow(WorkTaskSnapshot snapshot) : ObservableObject
     public string Provider => Snapshot.Provider == AiDesignProvider.OpenAiApi ? "OpenAI API" : "ChatGPT Work";
     public string Stage => Strings.Resolve(Snapshot.Failure == WorkTaskFailure.UploadFailed ? "WorkTask_UploadFailed" : "WorkTask_" + Snapshot.Stage);
     public string Updated => Snapshot.UpdatedAtUtc.ToLocalTime().ToString("g", CultureInfo.CurrentCulture);
-    public bool CanContinue => Snapshot.Stage == WorkTaskStage.Imported && Snapshot.ImportedSessionId is not null;
+    public bool CanContinue => Snapshot.HasImportedResult && Snapshot.ImportedSessionId is not null;
     public bool CanViewWork => Snapshot.WorkConversationId is { } id && id != Guid.Empty;
     public bool CanRegenerate => CanContinue && CanViewWork;
     public bool HasOpenAiReceipt => Snapshot.OpenAiReceipt is not null;
-    public bool HasCloudPdf => CanContinue && Snapshot.CloudDesignAttempts > 0;
+    public bool HasCloudPdf => CanContinue && Snapshot.Stage == WorkTaskStage.Imported && Snapshot.CloudDesignAttempts > 0;
     public string? CloudReviewDetails => HasCloudPdf
         ? string.Format(CultureInfo.CurrentCulture, Strings.Resolve("AiPrompt_CloudReviewPassed"), Snapshot.CloudDesignAttempts)
         : null;
@@ -32,7 +32,9 @@ public sealed class WorkTaskRow(WorkTaskSnapshot snapshot) : ObservableObject
     public string? ImageFacts => Snapshot.Format == ImageFormat.Pdf ? "PDF" :
         Snapshot.Format is { } format && Snapshot.PixelWidth is { } width && Snapshot.PixelHeight is { } height
             ? $"{format.ToString().ToUpperInvariant()} · {width} × {height}" : null;
-    public string? Problem => Snapshot.Failure is { } failure ? Strings.Resolve(failure switch
+    public string? Problem => Snapshot.Stage == WorkTaskStage.PortraitReview
+        ? Snapshot.PortraitReviewReason ?? Strings.Resolve("WorkTask_MissingPortraitEvidence")
+        : Snapshot.Failure is { } failure ? Strings.Resolve(failure switch
     {
         WorkTaskFailure.UploadFailed => "AiPrompt_WorkUploadFailed",
         WorkTaskFailure.Setup => "AiPrompt_WorkSetup",

@@ -67,6 +67,12 @@ public sealed class AiWorkTasksViewTests
         page.Rows.ShouldHaveSingleItem().Snapshot.ShouldBe(pending);
         page.Filter = WorkTaskFilter.NeedsAttention;
         page.Rows.ShouldHaveSingleItem().Snapshot.ShouldBe(failed);
+        var portrait = imported with { Stage = WorkTaskStage.PortraitReview, PortraitReviewReason = "Compare the smile." };
+        query.Items = [portrait, failed];
+        tracker.RequestChanged(portrait.RequestId);
+        await page.Refresh;
+        page.Rows.Select(row => row.Snapshot).ShouldBe(new[] { portrait, failed });
+        page.Rows[0].Problem.ShouldBe(portrait.PortraitReviewReason);
         query.Items = [];
         tracker.RequestChanged(pending.RequestId);
         await page.Refresh;
@@ -80,7 +86,7 @@ public sealed class AiWorkTasksViewTests
         query.Fail = false;
         await page.ReturnWorkbenchCommand.ExecuteAsync(null);
         nav.Current.ShouldBeOfType<AiPromptWorkbenchViewModel>().Draft!.Id.ShouldBe(draft);
-        query.Items = [imported];
+        query.Items = [portrait];
         await ai.GoToAiWorkTasksAsync(draft, default);
         page = nav.Current.ShouldBeOfType<AiWorkTasksViewModel>();
         await page.ContinueCommand.ExecuteAsync(page.Rows.ShouldHaveSingleItem());

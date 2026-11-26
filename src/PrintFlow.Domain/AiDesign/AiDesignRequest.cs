@@ -15,6 +15,7 @@ public sealed record AiDesignUploadReceipt(Guid AttachmentId, Guid AttemptId, st
 public sealed record AiDesignPrompt(string TemplateId, int TemplateVersion, IReadOnlyDictionary<string, string> Fields,
     string Text, IReadOnlyList<Guid> AttachmentReferences, string HandoffInstructions);
 public sealed record AiDesignCandidate(AiDesignFileRef File, FileFacts Facts);
+public sealed record CloudManualReview(CloudDesignAttempt[] Attempts, string? Reason);
 public sealed record AiDesignDownload(Guid RequestId, Guid AttemptId, string TabId, string ConversationId,
     string ResultId, long DownloadId, string AbsolutePath, bool IsComplete);
 public sealed record AiDesignFailure(string Code, AiDesignState Stage, IReadOnlyList<string> DetailArguments,
@@ -32,6 +33,7 @@ public sealed record AiDesignRequest
     public AiDesignProvider Provider { get; init; }
     public OpenAiDesignReceipt? OpenAiReceipt { get; init; }
     public CloudDesignReceipt? CloudReceipt { get; init; }
+    public CloudManualReview? ManualReview { get; init; }
     public IReadOnlyList<AiDesignAttachment> Attachments { get; init; } = [];
     public IReadOnlyList<AiDesignUploadReceipt> UploadReceipts { get; init; } = [];
     public int NextAttachmentOrder { get; init; } = 1;

@@ -1744,6 +1744,8 @@
   <data name="WorkTask_AwaitingVerification" xml:space="preserve"><value>已回传，待核验</value></data>
   <data name="WorkTask_Validating" xml:space="preserve"><value>核验中</value></data>
   <data name="WorkTask_Imported" xml:space="preserve"><value>已导入</value></data>
+  <data name="WorkTask_PortraitReview" xml:space="preserve"><value>已保存候选图。请对照参考照片核对面部，再确认原图。</value></data>
+  <data name="WorkTask_MissingPortraitEvidence" xml:space="preserve"><value>自动审核未能确认面部与参考照片一致。</value></data>
   <data name="WorkTask_SubmittedOnly" xml:space="preserve"><value>已提交，未配置回传</value></data>
   <data name="WorkTask_Cancelled" xml:space="preserve"><value>已停止接收</value></data>
   <data name="WorkTask_NeedsAttention" xml:space="preserve"><value>需处理</value></data>
@@ -1920,8 +1922,8 @@
   <data name="WorkTask_FollowUpSubmit" xml:space="preserve"><value>再次生成</value></data>
   <data name="WorkTask_FollowUpBridgeUnavailable" xml:space="preserve"><value>请更新 Work 桥接后，再发送修改要求。</value></data>
   <data name="WorkTask_FollowUpTooLong" xml:space="preserve"><value>请缩短修改要求后重试。</value></data>
-  <data name="AiPrompt_CloudConsent" xml:space="preserve"><value>是否发送提示词和参考图，由 OpenAI 生图并审核？审核未通过时，PrintFlow 会自动请求重做一次。OpenAI 按项目的数据设置保留响应。生图和审核可能产生费用。</value></data>
-  <data name="AiPrompt_CloudWorking" xml:space="preserve"><value>OpenAI 正在生图和审核。若未通过，PrintFlow 会自动请求重做一次。</value></data>
+  <data name="AiPrompt_CloudConsent" xml:space="preserve"><value>是否将提示词和参考图发送给 OpenAI 生图并审核？PrintFlow 可能请求重做一次。如果面部发生变化，PrintFlow 可能用参考照片还原面部，再发送合成图复核。OpenAI 按项目的数据设置保留响应。生图和审核可能产生费用。</value></data>
+  <data name="AiPrompt_CloudWorking" xml:space="preserve"><value>正在生成设计，并对照设计要求和参考图审核…</value></data>
   <data name="AiPrompt_CloudProvider" xml:space="preserve"><value>OpenAI API · 视觉审核</value></data>
   <data name="AiPrompt_CloudSetup" xml:space="preserve"><value>请先配置云端设计服务的 HTTPS 地址和访问令牌。</value></data>
   <data name="AiPrompt_CloudUnavailable" xml:space="preserve"><value>云端设计服务未能完成任务，请稍后重试。</value></data>

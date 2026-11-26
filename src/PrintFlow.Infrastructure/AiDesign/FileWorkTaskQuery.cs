@@ -1,5 +1,6 @@
 using PrintFlow.Domain.AiDesign;
 using PrintFlow.Domain.Results;
+using PrintFlow.Domain.Sessions;
 using PrintFlow.Workflow.AiDesign;
 using PrintFlow.Workflow.Services;
 
@@ -41,14 +42,19 @@ public sealed class FileWorkTaskQuery(FileAiDesignRequestStore store, ISessionSe
         if (request.State == AiDesignState.Cancelled) return task with { Stage = WorkTaskStage.Cancelled };
         if (request.State == AiDesignState.Imported)
         {
-            if (request.ImportedSessionId is not { } session || request.Candidate is not { } candidate ||
-                (await sessions.LoadAsync(session, ct).ConfigureAwait(false)).IsFailure)
+            if (request.ImportedSessionId is not { } session || request.Candidate is not { } candidate)
                 return task with { Failure = WorkTaskFailure.ResultUnavailable };
 
+            var loaded = await sessions.LoadAsync(session, ct).ConfigureAwait(false);
+            if (loaded.IsFailure) return task with { Failure = WorkTaskFailure.ResultUnavailable };
+            bool awaitingPortraitReview = request.ManualReview is not null &&
+                !loaded.Value.Steps.Any(s => s.Step == StepKind.OriginalConfirmation && s.State == StepState.Approved);
             var facts = candidate.Facts;
-            return task with { Stage = WorkTaskStage.Imported, ImportedSessionId = session,
+            return task with { Stage = awaitingPortraitReview ? WorkTaskStage.PortraitReview : WorkTaskStage.Imported,
+                ImportedSessionId = session,
                 Format = facts.Format, PixelWidth = facts.PixelWidth, PixelHeight = facts.PixelHeight,
-                OpenAiReceipt = request.OpenAiReceipt, CloudDesignAttempts = request.CloudReceipt?.Attempts.Length ?? 0 };
+                OpenAiReceipt = request.OpenAiReceipt, CloudDesignAttempts = request.CloudReceipt?.Attempts.Length ?? 0,
+                PortraitReviewReason = request.ManualReview?.Reason };
         }
         if (request.Failure?.Code == "TrialResultHandoffUnavailable" && conversation is not null && !ticket)
             return task with { Stage = WorkTaskStage.SubmittedOnly };
