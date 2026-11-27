@@ -445,6 +445,64 @@ public sealed class OpenAiImageBackendTests
         (await service.LoadAsync(imported.Id, default)).Value.CurrentStep!.State.ShouldBe(StepState.ReviewRequired);
     }
 
+    [Theory]
+    [InlineData(ImageProcessingMethod.OpenAiCutout, 1)]
+    [InlineData(ImageProcessingMethod.OpenAiCombined, 2)]
+    public async Task Printed_art_uses_original_strokes_and_one_scale_for_the_entire_layout(ImageProcessingMethod method, int scale)
+    {
+        using var h = new SessionServiceHarness();
+        var workspace = new FileWorkspace(h.Workspace.Root);
+        var input = WorkspaceFileRef.Create("print.png", WorkspaceArea.Working);
+        var output = WorkspaceFileRef.Create("extracted.png", WorkspaceArea.Working);
+        using var photo = new MagickImage(MagickColors.White, 120, 80);
+        new Drawables().FillColor(MagickColors.Maroon).Rectangle(24, 22, 27, 47)
+            .Rectangle(28, 22, 39, 25).Rectangle(36, 26, 39, 33).Rectangle(28, 33, 39, 36)
+            .FillColor(MagickColors.Navy).Rectangle(67, 51, 86, 62)
+            .FillColor(MagickColors.White).Rectangle(72, 54, 80, 58).Draw(photo);
+        byte[] bytes = photo.ToByteArray(MagickFormat.Png);
+        File.WriteAllBytes(workspace.ResolveAbsolute(input), bytes);
+        var revision = RevisionId.From(Guid.NewGuid());
+        var hash = Sha256.FromBytes(System.Security.Cryptography.SHA256.HashData(bytes));
+        var position = Guid.NewGuid();
+        var consent = new ImageUploadConfirmation(method, revision, hash, position);
+        consent.TryReserve(method, revision, hash, position).ShouldBeTrue();
+        var request = new ImageProcessingRequest(method, OperationKind.RemoveBackground, Model, revision, hash, input, output,
+            BackgroundRemovalAuthority.For(BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent, revision, hash))
+            { UploadConfirmation = consent };
+        using var http = new ImageHttp(async (message, token) =>
+        {
+            (await ReadAsync(message, token)).Image.ShouldBe(bytes);
+            return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(JsonSerializer.Serialize(new
+            {
+                status = "completed",
+                output = new[] { new { type = "function_call", name = "locate_printed_artwork", status = "completed",
+                    arguments = """{"regions":[{"left":120,"top":100,"right":830,"bottom":880}],"solid_graphics":[{"left":540,"top":610,"right":740,"bottom":820}]}""" } },
+            })) };
+        });
+        using var backend = new OpenAiImageBackend(workspace, new Credentials(), Model, http);
+        var result = await backend.ProcessAsync(request, default);
+        result.IsSuccess.ShouldBeTrue(result.IsFailure ? result.Failure.TechnicalDetail : null);
+        result.Value.ImageProcessingEvidence!["printExtraction"].ShouldBe("source-pixels");
+        using var extracted = new MagickImage(workspace.ResolveAbsolute(output));
+        extracted.Width.ShouldBe((uint)(120 * scale));
+        extracted.Height.ShouldBe((uint)(80 * scale));
+        using var pixels = extracted.GetPixels();
+        foreach (var (x, y, colour) in new[] { (25, 42, MagickColors.Maroon), (35, 23, MagickColors.Maroon),
+                     (32, 29, MagickColors.Transparent), (51, 45, MagickColors.Transparent),
+                     (76, 56, MagickColors.White), (69, 56, MagickColors.Navy) })
+        {
+            var actual = pixels.GetPixel(x * scale, y * scale).ToColor()!;
+            // Lanczos reconstruction of a narrow stroke can affect coverage a few pixels in.
+            Math.Abs(actual.A - colour.A).ShouldBeLessThanOrEqualTo(scale == 1 ? 0 : 2000);
+            if (colour.A != 0)
+            {
+                int tolerance = scale == 1 ? 0 : 3000;
+                Math.Abs(actual.R - colour.R).ShouldBeLessThanOrEqualTo(tolerance);
+                Math.Abs(actual.B - colour.B).ShouldBeLessThanOrEqualTo(tolerance);
+            }
+        }
+    }
+
     [Fact]
     public async Task Separate_cutout_preserves_the_complete_returned_png()
     {

@@ -18,9 +18,20 @@ internal static class ResponsesImageFixture
         root.GetProperty("model").GetString().ShouldBe("gpt-6.2-sol");
         root.GetProperty("store").GetBoolean().ShouldBeTrue();
         root.GetProperty("max_tool_calls").GetInt32().ShouldBe(1);
-        root.GetProperty("tool_choice").GetProperty("type").GetString().ShouldBe("image_generation");
-        var tool = root.GetProperty("tools").EnumerateArray().Single();
-        tool.GetProperty("type").GetString().ShouldBe("image_generation");
+        var tools = root.GetProperty("tools").EnumerateArray().ToArray();
+        var choice = root.GetProperty("tool_choice");
+        if (choice.ValueKind == JsonValueKind.String)
+        {
+            choice.GetString().ShouldBe("required");
+            tools.Single(item => item.GetProperty("type").GetString() == "function")
+                .GetProperty("name").GetString().ShouldBe("locate_printed_artwork");
+        }
+        else
+        {
+            choice.GetProperty("type").GetString().ShouldBe("image_generation");
+            tools.Length.ShouldBe(1);
+        }
+        var tool = tools.Single(item => item.GetProperty("type").GetString() == "image_generation");
         tool.GetProperty("model").GetString().ShouldBe("gpt-image-2.6-sunburst");
         tool.GetProperty("action").GetString().ShouldBe("edit");
 

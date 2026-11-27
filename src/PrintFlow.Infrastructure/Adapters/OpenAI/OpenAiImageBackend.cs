@@ -157,15 +157,20 @@ public sealed class OpenAiImageBackend : IImageProcessingBackend, IDisposable
                 return OperationResult.Fail<AdapterOutput>(response.Failure);
 
             evidence = response.Value.Evidence;
-            var png = response.Value.Png;
+            byte[]? png = response.Value.Png;
+            if (response.Value.PrintLayout is { } layout && !restore)
+            {
+                png = PrintedArtworkMatte.Extract(input, layout, combined, cancellationToken);
+            }
             cancellationToken.ThrowIfCancellationRequested();
-            if (FormatSniffer.Detect(png) != ImageFormat.Png ||
+            if (png is null || FormatSniffer.Detect(png) != ImageFormat.Png ||
                 Decode(png, MagickFormat.Png, AllowsOutputSize)
                     is not { HasVisiblePixels: true } decoded ||
                 decoded.HasTransparentPixels != transparent)
                 return OperationResult.Fail<AdapterOutput>(InvalidOutputFailure(evidence));
 
-            if (cutout && (decoded.Width, decoded.Height) != sourceSize)
+            // The local extraction retains the upright original canvas (EXIF may exchange its axes).
+            if (cutout && response.Value.PrintLayout is null && (decoded.Width, decoded.Height) != sourceSize)
                 return Reject(FailureCode.OutputValidationFailed,
                     $"OpenAI returned {decoded.Width}×{decoded.Height} for a {source.Width}×{source.Height} cutout.",
                     "ImageProcessing_OpenAiCutoutCanvasChanged", evidence);
@@ -310,29 +315,31 @@ public sealed class OpenAiImageBackend : IImageProcessingBackend, IDisposable
                 """,
         };
         string mime = format == ImageFormat.Png ? "image/png" : "image/jpeg";
+        bool locatePrint = method is ImageProcessingMethod.OpenAiCutout or ImageProcessingMethod.OpenAiCombined;
+        object imageTool = new
+        {
+            type = "image_generation",
+            model = _model,
+            action = "edit",
+            background = transparent ? "transparent" : "opaque",
+            output_format = "png",
+            size = size is { } requested
+                ? FormattableString.Invariant($"{requested.Width}x{requested.Height}") : "auto",
+        };
         var message = new HttpRequestMessage(HttpMethod.Post, ResponsesEndpoint)
         {
             Content = JsonContent.Create(new
             {
                 model = ResponsesModel,
-                instructions = "Edit the supplied image with the image generation tool once. " +
-                    "Carry every geometry, preservation, and output constraint from the edit instructions into the tool prompt.",
+                instructions = (locatePrint
+                    ? "If the image displays artwork or lettering printed on a T-shirt, call locate_printed_artwork. " +
+                      "The application extracts the original pixels; never use image generation for a T-shirt print. For other images, "
+                    : "") + "edit the supplied image with the image generation tool once. Carry every constraint into the tool prompt.",
                 store = true,
                 max_tool_calls = 1,
-                tool_choice = new { type = "image_generation" },
-                tools = new[]
-                {
-                    new
-                    {
-                        type = "image_generation",
-                        model = _model,
-                        action = "edit",
-                        background = transparent ? "transparent" : "opaque",
-                        output_format = "png",
-                        size = size is { } requested
-                            ? FormattableString.Invariant($"{requested.Width}x{requested.Height}") : "auto",
-                    },
-                },
+                parallel_tool_calls = false,
+                tool_choice = locatePrint ? (object)"required" : new { type = "image_generation" },
+                tools = locatePrint ? new[] { imageTool, PrintedArtworkMatte.LocationTool } : new[] { imageTool },
                 input = new[]
                 {
                     new
@@ -404,16 +411,25 @@ public sealed class OpenAiImageBackend : IImageProcessingBackend, IDisposable
             }
 
             RecordIdentifier(evidence, "responseId", StringProperty(root, "id"), "resp_", key);
-            if (StringProperty(root, "status") != "completed" ||
-                FindSingleImage(root) is not { } image ||
-                StringProperty(image, "status") != "completed" ||
-                !image.TryGetProperty("result", out var encoded) || encoded.ValueKind != JsonValueKind.String ||
+            if (StringProperty(root, "status") != "completed" || FindSingleToolCall(root) is not { } image ||
+                StringProperty(image, "status") != "completed")
+                return OperationResult.Fail<EditResponse>(InvalidOutputFailure(evidence));
+
+            if (StringProperty(image, "type") == "function_call")
+            {
+                if (StringProperty(image, "name") != PrintedArtworkMatte.ToolName ||
+                    PrintedArtworkMatte.ParseLayout(StringProperty(image, "arguments")) is not { } layout)
+                    return OperationResult.Fail<EditResponse>(InvalidOutputFailure(evidence));
+                evidence.Add("printExtraction", "source-pixels");
+                return OperationResult.Ok(new EditResponse(null, layout, evidence));
+            }
+            if (!image.TryGetProperty("result", out var encoded) || encoded.ValueKind != JsonValueKind.String ||
                 !encoded.TryGetBytesFromBase64(out byte[]? png))
                 return OperationResult.Fail<EditResponse>(InvalidOutputFailure(evidence));
 
             RecordIdentifier(evidence, "imageCallId", StringProperty(image, "id"), "ig_", key);
             token.ThrowIfCancellationRequested();
-            return OperationResult.Ok(new EditResponse(png, evidence));
+            return OperationResult.Ok(new EditResponse(png, null, evidence));
         }
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
         {
@@ -433,7 +449,7 @@ public sealed class OpenAiImageBackend : IImageProcessingBackend, IDisposable
         }
     }
 
-    private static JsonElement? FindSingleImage(JsonElement response)
+    private static JsonElement? FindSingleToolCall(JsonElement response)
     {
         if (!response.TryGetProperty("output", out var output) || output.ValueKind != JsonValueKind.Array)
             return null;
@@ -443,7 +459,7 @@ public sealed class OpenAiImageBackend : IImageProcessingBackend, IDisposable
         {
             if (item.ValueKind != JsonValueKind.Object)
                 return null;
-            if (StringProperty(item, "type") != "image_generation_call")
+            if (StringProperty(item, "type") is not ("image_generation_call" or "function_call"))
                 continue;
             if (image is not null)
                 return null;
@@ -512,5 +528,5 @@ public sealed class OpenAiImageBackend : IImageProcessingBackend, IDisposable
             messageKey: messageKey, context: evidence);
 
     private readonly record struct ImageAlpha(uint Width, uint Height, bool HasVisiblePixels, bool HasTransparentPixels);
-    private sealed record EditResponse(byte[] Png, IReadOnlyDictionary<string, string> Evidence);
+    private sealed record EditResponse(byte[]? Png, PrintedArtworkMatte.Layout? PrintLayout, IReadOnlyDictionary<string, string> Evidence);
 }
