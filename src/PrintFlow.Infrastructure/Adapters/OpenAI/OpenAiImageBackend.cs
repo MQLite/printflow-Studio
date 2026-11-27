@@ -271,6 +271,10 @@ public sealed class OpenAiImageBackend : IImageProcessingBackend, IDisposable
         string geometry = size is { } target && target != sourceSize
             ? FormattableString.Invariant($"Scale the full frame to {target.Width} × {target.Height} pixels, preserving framing and relative proportions.")
             : FormattableString.Invariant($"Keep the source canvas at {sourceSize.Width} × {sourceSize.Height} pixels.");
+        const string shirtMockupInstruction = """
+            If the artwork is displayed on a T-shirt mockup, make the entire shirt transparent, including its outline, fabric, folds, and shadows.
+            Keep the printed artwork and lettering, including any clothing depicted within the artwork. Make exposed shirt fabric between design elements transparent.
+            """;
         string prompt = method switch
         {
             ImageProcessingMethod.OpenAiRestore => $"""
@@ -284,8 +288,9 @@ public sealed class OpenAiImageBackend : IImageProcessingBackend, IDisposable
                 """,
             ImageProcessingMethod.OpenAiCutout => $"""
                 Edit the supplied image to remove only the background. Make only clear background areas transparent.
+                {shirtMockupInstruction}
                 {geometry} Keep the exact pixel alignment of the foreground. Do not crop, extend, rotate, or reposition anything.
-                Retain original facial features, expression, skin texture, hair wisps, eyewear, accessories, clothing, and text.
+                Retain the foreground subject's original facial features, expression, skin texture, hair wisps, eyewear, accessories, clothing, and text.
                 Keep natural partial transparency at fine edges and preserve existing transparent areas.
                 When a detail could belong to the foreground, retain it.
                 Do not add objects, retouch faces, sharpen the image, or reconstruct missing or obscured content.
@@ -294,8 +299,9 @@ public sealed class OpenAiImageBackend : IImageProcessingBackend, IDisposable
             _ => $"""
                 Edit the supplied image once to remove only the background and gently improve the clarity and sharpness of existing foreground detail.
                 Make only clear background areas transparent. Keep existing transparent areas and natural partial transparency at fine edges.
+                {shirtMockupInstruction}
                 Preserve the full frame, aspect ratio, and relative proportions. Do not crop, extend, rotate, or reposition anything.
-                Preserve the subject's identity, facial geometry, expression, skin texture, hair wisps, accessories, clothing, and text.
+                Preserve the foreground subject's identity, facial geometry, expression, skin texture, hair wisps, accessories, clothing, and text.
                 When a detail could belong to the foreground, retain it.
                 Do not add objects, retouch faces, or reconstruct missing or obscured content.
                 Return one complete transparent PNG.

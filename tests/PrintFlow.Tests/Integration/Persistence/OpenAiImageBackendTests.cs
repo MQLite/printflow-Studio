@@ -390,6 +390,9 @@ public sealed class OpenAiImageBackendTests
             submitted.Size.ShouldBe(requestedSize);
             string prompt = submitted.Prompt;
             prompt.ShouldContain("remove only the background");
+            prompt.ShouldContain("T-shirt mockup");
+            prompt.ShouldContain("make the entire shirt transparent");
+            prompt.ShouldContain("Keep the printed artwork and lettering");
             prompt.ShouldContain("Do not add objects, retouch faces");
             return Reply(Image("alpha", responseWidth, responseHeight));
         });
