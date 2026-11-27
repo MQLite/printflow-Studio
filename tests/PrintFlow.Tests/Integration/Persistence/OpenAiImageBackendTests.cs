@@ -393,6 +393,11 @@ public sealed class OpenAiImageBackendTests
             prompt.ShouldContain("T-shirt mockup");
             prompt.ShouldContain("make the entire shirt transparent");
             prompt.ShouldContain("Keep the printed artwork and lettering");
+            if (method == ImageProcessingMethod.OpenAiCombined)
+            {
+                prompt.ShouldContain("extract the print alone");
+                prompt.ShouldContain("improve clarity only within that cutout");
+            }
             prompt.ShouldContain("Do not add objects, retouch faces");
             return Reply(Image("alpha", responseWidth, responseHeight));
         });

@@ -297,12 +297,14 @@ public sealed class OpenAiImageBackend : IImageProcessingBackend, IDisposable
                 Return one complete transparent PNG.
                 """,
             _ => $"""
-                Edit the supplied image once to remove only the background and gently improve the clarity and sharpness of existing foreground detail.
-                Make only clear background areas transparent. Keep existing transparent areas and natural partial transparency at fine edges.
+                In one edit, first isolate the intended foreground, then gently improve clarity only within that cutout.
+                For artwork printed on a real or photographed T-shirt, extract the print alone as a transparent print-ready design.
+                The shirt itself is the background. A cutout of the whole garment is an incorrect result.
                 {shirtMockupInstruction}
-                Preserve the full frame, aspect ratio, and relative proportions. Do not crop, extend, rotate, or reposition anything.
-                Preserve the foreground subject's identity, facial geometry, expression, skin texture, hair wisps, accessories, clothing, and text.
-                When a detail could belong to the foreground, retain it.
+                Keep bare fabric fully transparent even inside letter counters. Preserve each printed stroke, symbol and letter as drawn.
+                For other subjects, remove only the background and preserve the subject's face, hair, accessories, clothing and text.
+                Keep existing transparency and natural soft edges. Preserve the foreground's position and size relative to the full canvas.
+                Do not crop, extend, rotate, reposition, retype text or redraw the artwork.
                 Do not add objects, retouch faces, or reconstruct missing or obscured content.
                 Return one complete transparent PNG.
                 """,
